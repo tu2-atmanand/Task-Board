@@ -48,7 +48,7 @@ import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { StatusType } from "src/interfaces/StatusConfiguration";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { isValid, parse } from "date-fns";
+import { isValid, parse, format, differenceInHours } from "date-fns";
 
 export class SettingsManager {
 	win: Window;
@@ -2540,6 +2540,14 @@ export class SettingsManager {
 				createFragmentWithHTML(
 					t("date-format-info") +
 						"<br/>" +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t("If you are using inline-tasks, then please note that, this plugin dont scan all kinds of format at present. For example, if there are spaces as a seperater (2026 01 01), then this plugin might fail to scan the value, even if its able to apply the date.") +
+						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+						"date-fns library formatting guide." +
+						"</a>" +
 						"<b>" +
 						t("note") +
 						" :</b> " +
@@ -2561,18 +2569,61 @@ export class SettingsManager {
 			.addButton((btn) => {
 				btn.setButtonText(t("verify"));
 				btn.onClick(() => {
-					const dateObj = new Date();
-					const parsed = parse(
-						dateObj.toDateString(),
-						this.globalSettings?.dateFormat,
-						dateObj,
-					);
-					if (!isValid(parsed)) {
-						new Notice(
-							"Entered date format is not valid. Please change it.",
+					try {
+						const testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
+						const userFormat = this.globalSettings?.dateFormat;
+
+						if (!userFormat || userFormat.trim().length === 0) {
+							new Notice("Please enter a date format.");
+							return;
+						}
+
+						// Format the test date using the user's format
+						const formattedDate = format(testDate, userFormat);
+
+						// Try to parse it back
+						const parsed = parse(
+							formattedDate,
+							userFormat,
+							testDate,
 						);
-					} else {
-						new Notice("The date format is valid.");
+
+						// (1) Check if parsing succeeded
+						if (!isValid(parsed)) {
+							new Notice(
+								"❌ Invalid date format. Parsing failed.",
+							);
+							return;
+						}
+
+						// (2) Check if the parsed date is reasonably close (within 48 hours)
+						// This catches common mistakes like swapped date parts
+						const hoursDiff = Math.abs(
+							differenceInHours(parsed, testDate),
+						);
+						if (hoursDiff > 48) {
+							new Notice(
+								"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+									parsed.toDateString() +
+									", expected: " +
+									testDate.toDateString() +
+									"). Please verify.",
+							);
+							return;
+						}
+
+						// All checks passed
+						new Notice(
+							"✅ Date format is valid! Example: " +
+								formattedDate,
+						);
+					} catch (error) {
+						new Notice(
+							"❌ Format validation error: " +
+								(error instanceof Error
+									? error.message
+									: String(error)),
+						);
 					}
 				});
 			});
@@ -2583,6 +2634,7 @@ export class SettingsManager {
 			.setDesc(
 				createFragmentWithHTML(
 					t("date-time-format-info") +
+						"<br/>" +
 						"<br/>" +
 						"<b>" +
 						t("note") +
@@ -2605,18 +2657,61 @@ export class SettingsManager {
 			.addButton((btn) => {
 				btn.setButtonText(t("verify"));
 				btn.onClick(() => {
-					const dateObj = new Date();
-					const parsed = parse(
-						dateObj.toDateString(),
-						this.globalSettings?.dateTimeFormat,
-						dateObj,
-					);
-					if (!isValid(parsed)) {
-						new Notice(
-							"Entered date-time format is not valid. Please change it.",
+					try {
+						const testDate = new Date(2026, 1, 18, 14, 30, 45); // Fixed reference date: Feb 18, 2026, 14:30:45
+						const userFormat = this.globalSettings?.dateTimeFormat;
+
+						if (!userFormat || userFormat.trim().length === 0) {
+							new Notice("Please enter a date-time format.");
+							return;
+						}
+
+						// Format the test date using the user's format
+						const formattedDateTime = format(testDate, userFormat);
+
+						// Try to parse it back
+						const parsed = parse(
+							formattedDateTime,
+							userFormat,
+							testDate,
 						);
-					} else {
-						new Notice("The date-time format is valid.");
+
+						// (1) Check if parsing succeeded
+						if (!isValid(parsed)) {
+							new Notice(
+								"❌ Invalid date-time format. Parsing failed.",
+							);
+							return;
+						}
+
+						// (2) Check if the parsed date is reasonably close (within 1 hour for time accuracy)
+						// This catches common mistakes like swapped date parts or time format issues
+						const hoursDiff = Math.abs(
+							differenceInHours(parsed, testDate),
+						);
+						if (hoursDiff > 48) {
+							new Notice(
+								"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+									parsed.toISOString() +
+									", expected: " +
+									testDate.toISOString() +
+									"). Please verify.",
+							);
+							return;
+						}
+
+						// All checks passed
+						new Notice(
+							"✅ Date-time format is valid! Example: " +
+								formattedDateTime,
+						);
+					} catch (error) {
+						new Notice(
+							"❌ Format validation error: " +
+								(error instanceof Error
+									? error.message
+									: String(error)),
+						);
 					}
 				});
 			});

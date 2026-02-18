@@ -20,4 +20,4 @@ export const DEFAULT_TASKS_FOLDER = "TaskNotes";
 
 export const DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 export const DEFAULT_TIME_FORMAT = "HH:mm:ss";
-export const DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+export const DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
