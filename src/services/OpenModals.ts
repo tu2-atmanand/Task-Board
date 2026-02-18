@@ -28,8 +28,8 @@ import { ScanVaultModal } from "src/modals/ScanVaultModal";
 import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { DatePickerModal } from "src/modals/date_picker";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
 import { scanFilters } from "src/interfaces/GlobalSettings";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -86,10 +86,7 @@ export const openAddNewTaskInCurrentFileModal = (
 	return true;
 };
 
-export const openAddNewTaskModal = (
-	plugin: TaskBoard,
-	activeFile?: TFile,
-) => {
+export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 	const preDefinedNoteFile = plugin.app.vault.getAbstractFileByPath(
 		plugin.settings.data.preDefinedNote,
 	);
@@ -190,7 +187,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								});
 							});
 					} else {
-						const newName = getCurrentLocalTimeString();
+						const newName = getCurrentLocalDateTimeString();
 						const parts = newTask.filePath.split("/");
 						const dirPath = parts.slice(0, -1).join("/").trim();
 						const newPath = normalizePath(

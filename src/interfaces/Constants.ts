@@ -17,3 +17,7 @@ export const DEFAULT_TASKS_CACHE_FILE = "task-board-data.json";
 export const DEFAULT_ARCHIVED_TASKS_FILE = "archived-tasks.json";
 export const DEFAULT_PREDEFINED_NOTE = "Task_board_note.md";
 export const DEFAULT_TASKS_FOLDER = "TaskNotes";
+
+export const DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+export const DEFAULT_TIME_FORMAT = "HH:mm:ss";
+export const DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";

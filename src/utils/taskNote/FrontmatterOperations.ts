@@ -9,8 +9,10 @@ import {
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 import { generateTaskId } from "../TaskItemUtils";
 import { statusTypeNames } from "src/interfaces/Enums";
-import { moment as _moment } from "obsidian";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { format } from "date-fns";
+import { DEFAULT_DATE_TIME_FORMAT } from "src/interfaces/Constants";
+import { getCurrentLocalDateTimeString } from "../DateTimeCalculations";
 
 /**
  * Extract frontmatter from file content
@@ -218,22 +220,15 @@ export function createFrontmatterFromTask(
 	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
 		task?.title || "";
 	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
-		getStatusNameFromStatusSymbol(
-			task?.status,
-			plugin.settings.data
-		) || "pending";
+		getStatusNameFromStatusSymbol(task?.status, plugin.settings.data) ||
+		"pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
-		plugin.settings.data.taskNoteIdentifierTag.replace(
-			"#",
-			"",
-		),
+		plugin.settings.data.taskNoteIdentifierTag.replace("#", ""),
 		...(task?.tags
 			?.filter(
 				(tag) =>
-					tag.includes(
-						plugin.settings.data
-							.taskNoteIdentifierTag,
-					) === false,
+					tag.includes(plugin.settings.data.taskNoteIdentifierTag) ===
+					false,
 			)
 			.map((tag: string) => tag.replace("#", "")) ?? []),
 	];
@@ -358,8 +353,7 @@ export function updateFrontmatterProperties(
 		.map((tag: string) => String(tag).replace("#", "").trim())
 		.filter(Boolean);
 
-	const identifierTag =
-		plugin.settings.data.taskNoteIdentifierTag;
+	const identifierTag = plugin.settings.data.taskNoteIdentifierTag;
 
 	// // Step 1: Add any new tags from task.tags that are not in existingTags
 	// let newTagsToAdd = taskTags.filter((t) => !existingTags.includes(t));
@@ -398,7 +392,7 @@ export function updateFrontmatterProperties(
 	if (task.status) {
 		const statusName = getStatusNameFromStatusSymbol(
 			task.status,
-			plugin.settings.data
+			plugin.settings.data,
 		);
 		tempUpdates[statusKey] = statusName ?? `"${task.status}"`;
 	}
@@ -456,10 +450,9 @@ export function updateFrontmatterProperties(
 		delete oldFrontmatter?.[dueKey];
 	}
 
-	const statusConfig =
-		plugin.settings.data.customStatuses.find(
-			(status) => status.symbol === task.status
-		);
+	const statusConfig = plugin.settings.data.customStatuses.find(
+		(status) => status.symbol === task.status,
+	);
 	const statusType = statusConfig ? statusConfig.type : undefined;
 
 	const cancelledDateKey = getCustomFrontmatterKey(
@@ -471,9 +464,8 @@ export function updateFrontmatterProperties(
 			tempUpdates[cancelledDateKey] = task.cancelledDate;
 		} else {
 			const globalSettings = plugin.settings.data;
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern,
+			const currentDateValue = getCurrentLocalDateTimeString(
+				globalSettings.dateTimeFormat,
 			);
 
 			tempUpdates[cancelledDateKey] = currentDateValue;
@@ -492,9 +484,8 @@ export function updateFrontmatterProperties(
 			tempUpdates[completionKey] = task.completion;
 		} else {
 			const globalSettings = plugin.settings.data;
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern,
+			const currentDateValue = getCurrentLocalDateTimeString(
+				globalSettings.dateTimeFormat,
 			);
 
 			tempUpdates[completionKey] = currentDateValue;

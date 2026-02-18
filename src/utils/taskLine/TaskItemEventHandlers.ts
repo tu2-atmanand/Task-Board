@@ -7,7 +7,6 @@ import {
 	isTaskRecurring,
 } from "./TaskLineUtils";
 import TaskBoard from "main";
-import { moment as _moment } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";

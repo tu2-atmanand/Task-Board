@@ -23,12 +23,13 @@ import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
+import { getUniversalDateFromTask } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { showTextInputModal } from 'src/modals/TextInputModal';
+import { parse, isValid, isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 
 export interface swimlaneDataProp {
 	property: string;
@@ -378,43 +379,96 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	// ========================================
 
 	const getColorIndicator = useCallback(() => {
-		const today = new Date();
-		const taskUniversalDate = parseUniversalDate(universalDate) || new Date(universalDate);
+		// Return grey if there's no universal date
+		if (!universalDate) {
+			return 'grey';
+		}
 
-		if (taskUniversalDate.toDateString() === today.toDateString()) {
-			if (task.time) {
-				const [startStr, endStr] = task.time.contains('-') ? task.time.split('-') : [task.time, task.time];
-				const [startHours, startMinutes] = startStr.contains(':') ? startStr.trim().split(':').map(Number) : [startStr, 0].map(Number);
-				const [endHours, endMinutes] = endStr.contains(':') ? endStr.trim().split(':').map(Number) : [endStr, 0].map(Number);
+		// Parse the universal date string using date-fns with multiple format attempts
+		const dateFormatToUse = plugin.settings.data.dateFormat || "yyyy-MM-dd";
+		const formatsToTry = [
+			dateFormatToUse,
+			"yyyy-MM-dd",
+			"YYYY-MM-DD",
+			"dd/MM/yyyy",
+			"DD/MM/YYYY",
+			"yyyy/MM/dd",
+		];
 
-				const startTime = new Date(today);
-				startTime.setHours(startHours, startMinutes, 0, 0);
+		let parsedTaskDate: Date | null = null;
 
-				const endTime = new Date(today);
-				endTime.setHours(endHours, endMinutes, 0, 0);
+		// Try parsing with different formats
+		for (const fmt of formatsToTry) {
+			const parsed = parse(universalDate, fmt, new Date());
+			if (isValid(parsed)) {
+				parsedTaskDate = parsed;
+				break;
+			}
+		}
 
-				const now = new Date();
+		// Fallback to native Date parsing if format-based parsing fails
+		if (!parsedTaskDate) {
+			const nativeDate = new Date(universalDate);
+			if (isValid(nativeDate)) {
+				parsedTaskDate = nativeDate;
+			} else {
+				return 'grey'; // Invalid date, return grey
+			}
+		}
 
-				if (now < startTime) {
-					// return 'var(--color-yellow)'; // Not started yet
-					return '#e8ce4aa8'; // Not started yet
-				} else if (now >= startTime && now <= endTime) {
-					return 'var(--color-blue)'; // In progress
-				} else if (now > endTime) {
-					return '#f23a3ab8'; // Past due
+		// Set to start of day for accurate date comparison
+		parsedTaskDate = startOfDay(parsedTaskDate);
+		const today = startOfDay(new Date());
+
+		// Check if the task date is today
+		if (isToday(parsedTaskDate)) {
+			// If there's a time component, use it for more detailed color indication
+			if (task.time && task.time.trim() !== "") {
+				try {
+					const [startStr, endStr] = task.time.includes('-') ? task.time.split('-') : [task.time, task.time];
+					const [startHours, startMinutes] = startStr.includes(':') ?
+						startStr.trim().split(':').map(Number) :
+						[parseInt(startStr.trim()), 0];
+					const [endHours, endMinutes] = endStr.includes(':') ?
+						endStr.trim().split(':').map(Number) :
+						[parseInt(endStr.trim()), 0];
+
+					const startTime = new Date(today);
+					startTime.setHours(startHours, startMinutes, 0, 0);
+
+					const endTime = new Date(today);
+					endTime.setHours(endHours, endMinutes, 0, 0);
+
+					const now = new Date();
+
+					if (compareAsc(now, startTime) < 0) {
+						// Not started yet
+						return '#e8ce4aa8';
+					} else if (compareAsc(now, startTime) >= 0 && compareAsc(now, endTime) <= 0) {
+						// In progress
+						return 'var(--color-blue)';
+					} else if (compareAsc(now, endTime) > 0) {
+						// Past due
+						return '#f23a3ab8';
+					}
+				} catch (error) {
+					// If time parsing fails, return yellow for "due today"
+					return 'var(--color-yellow)';
 				}
 			} else {
-				return 'var(--color-yellow)'; // Due today but no time info
+				// Due today but no time info
+				return 'var(--color-yellow)';
 			}
-		} else if (taskUniversalDate > today) {
-			return 'green'; // Due in future
-		} else if (taskUniversalDate < today) {
-			// return 'var(--color-red)'; // Past due
-			return '#f23a3ab8'; // Past due
+		} else if (isAfter(parsedTaskDate, today)) {
+			// Due in future
+			return 'green';
+		} else if (isBefore(parsedTaskDate, today)) {
+			// Past due
+			return '#f23a3ab8';
 		} else {
-			return 'grey'; // No due date
+			return 'grey'; // No due date or comparison failed
 		}
-	}, [universalDate, task.time]);
+	}, [universalDate, task.time, plugin.settings.data.dateFormat]);
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {

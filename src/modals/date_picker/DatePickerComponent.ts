@@ -2,6 +2,7 @@ import { Component, setIcon, App } from "obsidian";
 import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
 
 export interface DatePickerState {
 	selectedDate: string | null;
@@ -15,8 +16,8 @@ export class DatePickerComponent extends Component {
 	private dateName: string | undefined = "";
 	private state: DatePickerState;
 	private onDateChange?: (date: string) => void;
-	private currentViewDate: moment.Moment;
 	private moment: typeof _moment.default;
+	private currentViewDate: moment.Moment;
 
 	constructor(
 		hostEl: HTMLElement,
@@ -132,7 +133,9 @@ export class DatePickerComponent extends Component {
 				option.amount,
 				option.unit as moment.unitOfTime.DurationConstructor,
 			);
-			const formattedDate = date.format("YYYY-MM-DD");
+			const usersDateFormat =
+				this.plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+			const formattedDate = date.format(usersDateFormat);
 
 			optionEl.createSpan({
 				text: formattedDate,
@@ -199,7 +202,7 @@ export class DatePickerComponent extends Component {
 		// Month/Year display
 		const monthYear = header.createDiv({
 			cls: "calendar-month-year",
-			text: currentDate.format("MMMM YYYY"),
+			text: currentDate.format("MMMM yyyy"),
 		});
 
 		// Next month button
@@ -245,7 +248,9 @@ export class DatePickerComponent extends Component {
 				text: current.format("D"),
 			});
 
-			const dateStr = current.format("YYYY-MM-DD");
+			const usersDateFormat =
+				this.plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+			const dateStr = current.format(usersDateFormat);
 
 			// Store the full date string for easy comparison later
 			dayEl.setAttribute("data-date", dateStr);

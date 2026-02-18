@@ -21,13 +21,13 @@
         "values": []
       }
     },
-    "firstDayOfWeek": "Mon",
+    "firstDayOfWeek": "2",
     "showTaskWithoutMetadata": true,
     "ignoreFileNameDates": false,
     "taskPropertyFormat": "2",
-    "taskCompletionDateTimePattern": "YYYY-MM-DDTHH:mm",
+    "taskCompletionDateTimePattern": "yyyy-MM-ddTHH:mm",
     "dailyNotesPluginComp": false,
-    "universalDateFormat": "YYYY-MM-DD",
+    "universalDateFormat": "yyyy-MM-dd",
     "defaultStartTime": "",
     "taskCompletionInLocalTime": true,
     "taskCompletionShowUtcOffset": false,
@@ -141,7 +141,7 @@
       "reminderPlugin": false,
       "quickAddPlugin": false
     },
-    "taskNoteIdentifierTag": "taskNote",
+    "taskNoteIdentifierTag": "task",
     "preDefinedNote": "Meta/Task_Board/New_Tasks.md",
     "archivedTasksFilePath": "",
     "taskNoteDefaultLocation": "Meta/Task_Board/Task_Notes",
@@ -245,13 +245,13 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": false,
-    "uniqueIdCounter": 0,
+    "uniqueIdCounter": 608,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
-      "viewedType": "map",
-      "boardIndex": 2,
-      "settingTab": 5,
+      "viewedType": "kanban",
+      "boardIndex": 1,
+      "settingTab": 7,
       "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
@@ -280,6 +280,8 @@
         "filePath": "Meta/Task_Board/Boards/Status Based Workflow.taskboard"
       }
     ],
-    "searchQuery": ""
+    "searchQuery": "",
+    "dateFormat": "yyyy.MM.DD",
+    "dateTimeFormat": "yyyy-MM-dd HH:mm:ss"
   }
 }

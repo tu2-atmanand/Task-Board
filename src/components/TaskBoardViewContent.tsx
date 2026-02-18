@@ -14,9 +14,9 @@ import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { DEFAULT_DATE_FORMAT, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
+import { advancedFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
@@ -124,12 +124,13 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 		if (allTasks && allBoardsData[activeBoardIndex]) {
 			const currentBoard = allBoardsData[activeBoardIndex];
 			const boardFilter = currentBoard.boardFilter;
+			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: boardFilterer(allTasks.Pending, boardFilter),
-				Completed: boardFilterer(allTasks.Completed, boardFilter),
+				Pending: advancedFilterer(allTasks.Pending, boardFilter, dateFormat),
+				Completed: advancedFilterer(allTasks.Completed, boardFilter, dateFormat),
 			};
 
 			let newBoardData = currentBoard;

@@ -1,15 +1,17 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import { moment as _moment } from "obsidian";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
-import { boardFilterer } from "./BoardFilterer";
+import { advancedFilterer } from "./BoardFilterer";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
 import { getAllTaskTags } from "../TaskItemUtils";
+import { differenceInDays } from "date-fns";
+import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
+import { robustDateParser } from "../DateTimeCalculations";
 
 /**
  * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
@@ -108,7 +110,7 @@ export const columnSegregator = (
 				// //  ---------- METHOD 2 -------------
 				// const today = new Date();
 				// /**
-				//  * Formats a Date object into "DD/MM/YYYY" format.
+				//  * Formats a Date object into "dd/MM/yyyy" format.
 				//  */
 				// function formatDate(date: Date): string {
 				// 	const day = String(date.getDate()).padStart(2, "0");
@@ -135,14 +137,24 @@ export const columnSegregator = (
 				// const diffDays = daysBetween(formatDate(today), taskUniversalDate);
 
 				//  ---------- METHOD 3 -------------
+				// Parse the task's universal date using robust parser
+				const universalDateFormat =
+					settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+
+				let parsedTaskDate = robustDateParser(
+					taskUniversalDate,
+					universalDateFormat,
+				);
+
+				if (!parsedTaskDate) {
+					return false;
+				}
+
 				const today = new Date();
 				today.setHours(0, 0, 0, 0);
+				parsedTaskDate.setHours(0, 0, 0, 0);
 
-				const moment = _moment as unknown as typeof _moment.default;
-				const diffDays = moment(taskUniversalDate).diff(
-					moment(today),
-					"days",
-				);
+				const diffDays = differenceInDays(parsedTaskDate, today);
 
 				// console.log(
 				// 	"diffDays",
@@ -289,7 +301,12 @@ export const columnSegregator = (
 	 * -------------------------------------------------------------
 	 */
 	if (columnData?.filters && columnData.filters.filterGroups) {
-		tasksToDisplay = boardFilterer(tasksToDisplay, columnData.filters);
+		const dateFormat = settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+		tasksToDisplay = advancedFilterer(
+			tasksToDisplay,
+			columnData.filters,
+			dateFormat,
+		);
 	}
 
 	/**

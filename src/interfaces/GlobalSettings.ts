@@ -19,6 +19,7 @@ import {
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 import { DEFAULT_BOARDS } from "./BoardConfigs";
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants";
 
 export interface scanFilters {
 	files: {
@@ -79,9 +80,9 @@ export interface globalSettingsData {
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskPropertyFormat: string;
-	taskCompletionDateTimePattern: string;
 	dailyNotesPluginComp: boolean;
-	universalDateFormat: string;
+	dateFormat: string;
+	dateTimeFormat: string;
 	defaultStartTime: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
@@ -186,9 +187,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		showTaskWithoutMetadata: true,
 		ignoreFileNameDates: false,
 		taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
-		taskCompletionDateTimePattern: TaskRegularExpressions.dateTimeFormat,
 		dailyNotesPluginComp: false,
-		universalDateFormat: TaskRegularExpressions.dateFormat,
+		dateFormat: DEFAULT_DATE_FORMAT,
+		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
 		defaultStartTime: "",
 		taskCompletionInLocalTime: true,
 		taskCompletionShowUtcOffset: false,

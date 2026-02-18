@@ -39,7 +39,6 @@ import {
 } from "../utils/taskNote/FrontmatterOperations";
 import { t } from "../utils/lang/helper";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { getCurrentLocalTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { UniversalDateOptions } from "src/interfaces/Enums";
 import {
@@ -48,6 +47,7 @@ import {
 } from "src/utils/algorithms/ScanningFilterer";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import { bugReporterManagerInsatance } from "./BugReporter";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -67,7 +67,7 @@ export default class VaultScanner {
 		this.plugin = plugin;
 		this.tasksCache = {
 			VaultName: this.plugin.app?.vault.getName(),
-			Modified_at: getCurrentLocalTimeString(),
+			Modified_at: getCurrentLocalDateTimeString(),
 			Pending: {},
 			Completed: {},
 		}; // Reset task structure
@@ -87,7 +87,7 @@ export default class VaultScanner {
 			);
 			this.tasksCache = {
 				VaultName: this.plugin?.app.vault.getName(),
-				Modified_at: getCurrentLocalTimeString(),
+				Modified_at: getCurrentLocalDateTimeString(),
 				Pending: {},
 				Completed: {},
 			};
@@ -163,8 +163,7 @@ export default class VaultScanner {
 			if (
 				frontmatter &&
 				isTaskNotePresentInFrontmatter(
-					this.plugin.settings.data
-						.taskNoteIdentifierTag,
+					this.plugin.settings.data.taskNoteIdentifierTag,
 					frontmatter,
 				)
 			) {
@@ -334,22 +333,18 @@ export default class VaultScanner {
 							if (
 								this.plugin.settings.data
 									.dailyNotesPluginComp &&
-								((this.plugin.settings.data
-									.universalDate ===
+								((this.plugin.settings.data.universalDate ===
 									UniversalDateOptions.dueDate &&
 									dueDate === "") ||
-									(this.plugin.settings.data
-										.universalDate ===
+									(this.plugin.settings.data.universalDate ===
 										UniversalDateOptions.startDate &&
 										startDate === "") ||
-									(this.plugin.settings.data
-										.universalDate ===
+									(this.plugin.settings.data.universalDate ===
 										UniversalDateOptions.scheduledDate &&
 										scheduledDate === ""))
 							) {
 								const universalDateFormat =
-									this.plugin.settings.data
-										.universalDateFormat;
+									this.plugin.settings.data.dateFormat;
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
@@ -550,8 +545,7 @@ export default class VaultScanner {
 		}
 
 		try {
-			const scanFilters =
-				this.plugin.settings.data.scanFilters;
+			const scanFilters = this.plugin.settings.data.scanFilters;
 			let isFileScanned: string = "";
 			for (const file of files) {
 				if (
@@ -648,7 +642,7 @@ export default class VaultScanner {
 	async saveTasksToJsonCache() {
 		// if (!this.tasksDetectedOrUpdated) return;
 
-		this.tasksCache.Modified_at = getCurrentLocalTimeString();
+		this.tasksCache.Modified_at = getCurrentLocalDateTimeString();
 		const result = await writeJsonCacheDataToDisk(
 			this.plugin,
 			this.tasksCache,
@@ -682,13 +676,22 @@ export default class VaultScanner {
 		try {
 			const allFiles = this.app.vault.getAllLoadedFiles();
 			const taskboardFiles = allFiles
-				.filter((file) => file instanceof TFile && file.extension === "taskboard")
+				.filter(
+					(file) =>
+						file instanceof TFile && file.extension === "taskboard",
+				)
 				.map((file) => (file as TFile).path);
 
-			console.log(`VaultScanner: Discovered ${taskboardFiles.length} .taskboard files:`, taskboardFiles);
+			console.log(
+				`VaultScanner: Discovered ${taskboardFiles.length} .taskboard files:`,
+				taskboardFiles,
+			);
 			return taskboardFiles;
 		} catch (error) {
-			console.error("VaultScanner: Error discovering .taskboard files:", error);
+			console.error(
+				"VaultScanner: Error discovering .taskboard files:",
+				error,
+			);
 			return [];
 		}
 	}
