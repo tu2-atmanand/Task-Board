@@ -1,5 +1,6 @@
 /**
- * TaskBoardFileManager.ts
+ * @name TaskBoardFileManager.ts
+ * @path /src/managers/TaskBoardFileManager.ts
  * Manages loading and saving individual board configurations from/to .taskboard files
  * This replaces the previous approach of storing all board data in data.json
  */
@@ -7,7 +8,6 @@
 import { App, TFile, Notice, normalizePath } from "obsidian";
 import { Board } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
-import { taskBoardFilesRegistryItem } from "src/interfaces/GlobalSettings";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 /**
@@ -169,11 +169,11 @@ export default class TaskBoardFileManager {
 	 * @param filePath - The path to the .taskboard file
 	 * @returns The board configuration object, or null if file cannot be loaded
 	 */
-	async loadBoardUsingPath(filePath: string): Promise<Board | null> {
+	async loadBoardUsingPath(filePath: string): Promise<Board | undefined> {
 		try {
 			if (!filePath || filePath.trim() === "") {
 				console.error(`No board file path provided to load the board`);
-				return null;
+				return undefined;
 			}
 
 			// Check if board is already cached in memory by file path
@@ -200,10 +200,10 @@ export default class TaskBoardFileManager {
 				);
 			}
 
-			return null;
+			return undefined;
 		} catch (error) {
 			console.error(`Error loading board from file ${filePath}:`, error);
-			return null;
+			return undefined;
 		}
 	}
 
@@ -736,5 +736,54 @@ export default class TaskBoardFileManager {
 	clearCurrentBoardCache(): void {
 		this.recentBoardsData = {};
 		console.log("Cleared cached board data");
+	}
+
+	/**
+	 * Store the mapping between a leaf ID and file path in localStorage
+	 * This allows us to restore the correct board when a leaf tab is reopened
+	 * @param leafID - The ID of the Obsidian leaf (tab)
+	 * @param filePath - The path to the .taskboard file
+	 */
+	setFilepathToLeafID(leafID: string, filePath: string): void {
+		try {
+			if (!leafID || leafID.trim() === "") {
+				console.error("Cannot set filepath to leaf ID: leafID is empty");
+				return;
+			}
+			if (!filePath || filePath.trim() === "") {
+				console.error("Cannot set filepath to leaf ID: filePath is empty");
+				return;
+			}
+			const key = `taskboard-leaf-${leafID}`;
+			localStorage.setItem(key, filePath);
+			console.log(`Stored filepath mapping: leaf ${leafID} -> ${filePath}`);
+		} catch (error) {
+			console.error(`Error storing filepath mapping for leaf ${leafID}:`, error);
+		}
+	}
+
+	/**
+	 * Retrieve the file path associated with a leaf ID from localStorage
+	 * @param leafID - The ID of the Obsidian leaf (tab)
+	 * @returns The stored file path, or null if not found
+	 */
+	getFilepathFromLeafID(leafID: string): string | null {
+		try {
+			if (!leafID || leafID.trim() === "") {
+				console.error("Cannot get filepath from leaf ID: leafID is empty");
+				return null;
+			}
+			const key = `taskboard-leaf-${leafID}`;
+			const filePath = localStorage.getItem(key);
+			if (filePath) {
+				console.log(`Retrieved filepath mapping: leaf ${leafID} -> ${filePath}`);
+				return filePath;
+			}
+			console.warn(`No filepath mapping found for leaf ${leafID}`);
+			return null;
+		} catch (error) {
+			console.error(`Error retrieving filepath mapping for leaf ${leafID}:`, error);
+			return null;
+		}
 	}
 }

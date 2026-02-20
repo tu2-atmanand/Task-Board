@@ -34,11 +34,10 @@ import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
 	plugin: TaskBoard,
-	boards: Board[],
-	activeBoardIndex: number,
-	onSave: (updatedBoards: Board[], boardIndex: number) => void,
+	currentBoardData: Board,
+	onSave: (updatedBoard: Board) => void,
 ) => {
-	new BoardConfigureModal(plugin, boards, activeBoardIndex, onSave).open();
+	new BoardConfigureModal(plugin, currentBoardData, onSave).open();
 };
 
 // Function to open the BoardConfigModal

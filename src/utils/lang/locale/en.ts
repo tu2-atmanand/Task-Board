@@ -173,7 +173,7 @@ const en: Lang = {
 	"hide-description": "Hide description",
 	"show-description": "Show description",
 	"open-board-on-obsidian-startup": "Open board on Obsidian startup",
-	"open-board-on-obsidian-startup-info": "Enable this option if you want to see the task board to be visible, when you close and open Obsidian.",
+	"open-board-on-obsidian-startup-info": "Enable this option if you want to see the task board to be visible, when you close and open Obsidian. You last viewed board will be opened.",
 	"file": "File",
 	"discard": "Discard",
 	"go-back": "Go back and save",

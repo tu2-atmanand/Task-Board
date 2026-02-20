@@ -138,7 +138,8 @@ export default class TaskBoard extends Plugin {
 
 		await this.vaultScanner.initializeTasksCache();
 
-		await this.taskBoardFileManager.loadAllBoards();
+		if (this.settings.data.loadAllBoards)
+			await this.taskBoardFileManager.loadAllBoards();
 		// console.log(
 		// 	"TASK BOARD : Loaded following boards : ",
 		// 	this.taskBoardFileManager.getAllBoards(),

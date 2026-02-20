@@ -299,6 +299,7 @@ export class SettingsManager {
 		const {
 			scanFilters,
 			openOnStartup,
+			loadAllBoards,
 			scanMode,
 			tasksCacheFilePath,
 			showModifiedFilesNotice,
@@ -602,6 +603,17 @@ export class SettingsManager {
 		};
 
 		renderTasksCachePathSetting();
+
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl)
+			.setName(t("load-all-boards"))
+			.setDesc(t("load-all-boards-info"))
+			.addToggle((toggle) =>
+				toggle.setValue(loadAllBoards).onChange(async (value) => {
+					this.globalSettings!.loadAllBoards = value;
+					await this.saveSettings();
+				}),
+			);
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -2544,7 +2556,9 @@ export class SettingsManager {
 						"<b>" +
 						t("note") +
 						" :</b> " +
-						t("If you are using inline-tasks, then please note that, this plugin dont scan all kinds of format at present. For example, if there are spaces as a seperater (2026 01 01), then this plugin might fail to scan the value, even if its able to apply the date.") +
+						t(
+							"If you are using inline-tasks, then please note that, this plugin dont scan all kinds of format at present. For example, if there are spaces as a seperater (2026 01 01), then this plugin might fail to scan the value, even if its able to apply the date.",
+						) +
 						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
 						"date-fns library formatting guide." +
 						"</a>" +
