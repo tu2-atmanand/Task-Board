@@ -928,108 +928,129 @@ export function extractTime(text: string): string {
 		return match[1];
 	}
 
+	match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.durationRegex,
+	);
+	if (match) {
+		return match[1];
+	}
+
 	match = text.match(/@time\((.*?)\)/);
 	if (match) {
 		return match[1];
 	}
 
-	match = text.match(/⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);
-	if (match) {
-		return match[1];
-	}
-
 	// Check if time is at the start of the task
-	const timeAtStartMatch = text.match(
-		/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/,
-	);
+	const timeAtStartMatch = text
+		.trim()
+		.match(/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);
 
 	if (timeAtStartMatch) {
 		// If time is at the start, extract it
 		return timeAtStartMatch[1];
 	}
 
-	// Otherwise, look for time elsewhere in the line
-	const timeIntitleMatch = text.match(
-		/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/,
-	);
-	return timeIntitleMatch ? timeIntitleMatch[1] : "";
+	return "";
 }
 
 // Extract Created date from task title
 export function extractCreatedDate(text: string): string {
-	let match = text.match(/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.createdDateRegex,
-		);
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.createdDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@created\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.createdDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@created\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match[1].trim();
+	}
+
+	return "";
 }
 
 // Extract Start date from task title
 export function extractStartDate(text: string): string {
-	let match = text.match(/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.startDateRegex,
-		);
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.startDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@start\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.startDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@start\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match[1].trim();
+	}
+
+	return "";
 }
 
 // Extract Scheduled date from task title
 export function extractScheduledDate(text: string): string {
-	let match = text.match(/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.scheduledDateRegex,
-		);
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.scheduledDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@scheduled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+			.scheduledDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@scheduled\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match[1].trim();
+	}
+
+	return "";
 }
 
 // Extract Due date from task title
 export function extractDueDate(text: string): string {
-	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex,
-		);
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dueDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	if (!match) {
-		match = text.match(/\@due\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@due\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match[1].trim();
+	}
+
+	return "";
 }
 
 // Extract priority from task title using RegEx
@@ -1074,7 +1095,7 @@ export function extractPriority(text: string): number {
 
 // Extract tags from task title
 export function extractTags(text: string): string[] {
-	text = text.replace(/<(mark|font).*?>/g, "");
+	text = text.replace(/<(mark|font).*?>/g, ""); // TODO : this might not required, try removing this.
 	const matches = text.match(TaskRegularExpressions.hashTagsRegex);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
@@ -1157,30 +1178,26 @@ export function extractDependsOn(text: string): RegExpMatchArray | null {
 
 // Extract completion date-time value
 export function extractCompletionDate(text: string): string {
-	let match = text.match(/✅\s*.*?(?=\s|$)/);
-
-	// If not found, try to match the [completion:: 2024-09-28] format
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex,
-		);
-		if (match) {
-			return match
-				? match[0].replace("[completion::", "").replace("]", "").trim()
-				: "";
-		}
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.doneDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	if (!match) {
-		match = text.match(/\@completion\(\s*(.*?)\s*\)/);
-		if (match) {
-			return match
-				? match[0].replace("@completion(", "").replace(")", "").trim()
-				: "";
-		}
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
-	// Return the matched date or date-time, or an empty string if no match
-	return match ? match[0].replace("✅", "").trim() : "";
+
+	match = text.match(/\@completion\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match[1].trim();
+	}
+
+	return "";
 }
 
 export function extractCancelledDate(text: string): string {
@@ -1188,23 +1205,24 @@ export function extractCancelledDate(text: string): string {
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
 			.cancelledDateRegex,
 	);
-
-	// If not found, try to match the [cancelled:: 2024-09-28] format
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.cancelledDateRegex,
-		);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@cancelled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+			.cancelledDateRegex,
+	);
+	if (match && match[1]) {
+		return match[1].trim();
 	}
 
-	// Return the matched date or date-time, or an empty string if no match
-	return match ? match[1].trim() : "";
+	match = text.match(/\@cancelled\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match[1].trim();
+	}
+
+	return "";
 }
 
 /**
