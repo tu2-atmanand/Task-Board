@@ -100,7 +100,7 @@ const en: Lang = {
 	"day-planner-plugin-compatibility": "If you have installed 'day planner' plugin, enable this to see the time at the start of the task title, instead in the metadata. After enabling this feature, the time will be shown according to the day planner plugin inside Markdown files, but in the task card, the time will be shown in the footer as usual.",
 	"daily-notes-plugin-compatibility": "When enabled, if you add a task in a daily-note file, which has a file name in format like 'yyyy-MM-dd'. Then this date will be considered as the value for the universal date you have selected.",
 	"date-format": "Date format",
-	"date-format-info": "Enter the format of the date which you are using to name your daily-note files and other common operation so task board can detect them properly. Setting a single format here, will help to keep a consistent date-format throught your vault.",
+	"date-format-info": "Enter the format to be used for date related properties. This helps to keep all date values consistent throught your vault.",
 	"date-time-format": "Date-time format",
 	"date-time-format-info": "Enter the date-time format which will be used while adding a date-time value to the specific task property you have configured.",
 	"date-format-date-fns-note": "This plugin uses date formats as per date-fns library. So dont get confused with 'yyyy' (calender year) with 'YYYY' (week number). See the following wiki to learn more about all the valid formats : ",

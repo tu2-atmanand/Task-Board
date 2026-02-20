@@ -93,7 +93,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 
 					// Get index of the new board from the registry based on the board id.
 					const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(clickedFileBoard.id);;
-					setActiveBoardIndex(indexOfNewBoard ?? plugin.settings.data.taskBoardFilesRegistry?.length);
+					const registryLength = Object.keys(plugin.settings.data.taskBoardFilesRegistry || {}).length; setActiveBoardIndex(indexOfNewBoard ?? registryLength);
 				} else {
 					const data = await plugin.taskBoardFileManager.loadBoardUsingIndex(activeBoardIndex);
 					if (!data) throw "Board data not found.";
@@ -756,7 +756,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 					if (activeBoardIndex === boardIndex) {
 						setCurrentBoardData(updatedBoards[boardIndex]);
 					}
-					plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+					plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex]);
 				}
 				)
 			});
@@ -963,7 +963,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 								if (activeBoardIndex === boardIndex) {
 									setCurrentBoardData(updatedBoards[boardIndex]);
 								}
-								plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+								plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex]);
 							}
 							)
 						}
@@ -1062,7 +1062,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 												if (activeBoardIndex === boardIndex) {
 													setCurrentBoardData(updatedBoards[boardIndex]);
 												}
-												plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+												plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex]);
 											}
 											)
 										}

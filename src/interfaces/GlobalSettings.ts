@@ -69,8 +69,12 @@ export interface frontmatterFormatting {
 }
 
 export interface taskBoardFilesRegistryItem {
-	boardId: string;
-	filePath: string;
+	[boardId: string]: {
+		boardId: string;
+		filePath: string;
+		boardName: string;
+		boardDescription: string;
+	};
 }
 
 export interface globalSettingsData {
@@ -128,7 +132,7 @@ export interface globalSettingsData {
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
 	safeGuardFeature: boolean;
-	taskBoardFilesRegistry: taskBoardFilesRegistryItem[];
+	taskBoardFilesRegistry: taskBoardFilesRegistryItem;
 	lastViewHistory: {
 		viewedType: string;
 		boardIndex: number;
@@ -450,22 +454,26 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			renderVisibleNodes: false,
 			edgeType: mapViewEdgeType.bezier,
 		},
-		taskBoardFilesRegistry: [
-			{
+		taskBoardFilesRegistry: {
+			"3103563481": {
 				boardId: "3103563481",
-				filePath:
-					"Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+				filePath: "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+				boardName: "Time Based Workflow",
+				boardDescription: "",
 			},
-			{
+			"2957159294": {
 				boardId: "2957159294",
 				filePath: "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
+				boardName: "Tag Based Workflow",
+				boardDescription: "",
 			},
-			{
+			"4271106430": {
 				boardId: "4271106430",
-				filePath:
-					"Meta/Task_Board/Boards/Status Based Workflow.taskboard",
+				filePath: "Meta/Task_Board/Boards/Status Based Workflow.taskboard",
+				boardName: "Status Based Workflow",
+				boardDescription: "",
 			},
-		],
+		},
 	},
 };
 

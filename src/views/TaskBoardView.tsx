@@ -74,9 +74,9 @@ export class TaskBoardView extends ItemView {
 		if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
 			// User clicked on a specific .taskboard file - load just that file
 			clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
-			this.renderBoard(allBoardsData, clickedFileData);
+			this.renderBoard(Object.values(allBoardsData), clickedFileData);
 		} else {
-			this.renderBoard(allBoardsData);
+			this.renderBoard(Object.values(allBoardsData));
 		}
 	}
 
