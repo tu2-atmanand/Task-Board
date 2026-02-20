@@ -139,10 +139,10 @@ export default class TaskBoard extends Plugin {
 		await this.vaultScanner.initializeTasksCache();
 
 		await this.taskBoardFileManager.loadAllBoards();
-		console.log(
-			"TASK BOARD : Loaded following boards : ",
-			this.taskBoardFileManager.getAllBoards(),
-		);
+		// console.log(
+		// 	"TASK BOARD : Loaded following boards : ",
+		// 	this.taskBoardFileManager.getAllBoards(),
+		// );
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {

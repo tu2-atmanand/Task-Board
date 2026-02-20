@@ -60,9 +60,9 @@ export default class TaskBoardFileManager {
 			// Check if board with this ID already exists in registry
 			const taskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry || {};
-			const existingRegistryEntry = Object.entries(taskBoardFilesRegistry).find(
-				([, entry]) => entry.boardId === boardData.id,
-			);
+			const existingRegistryEntry = Object.entries(
+				taskBoardFilesRegistry,
+			).find(([, entry]) => entry.boardId === boardData.id);
 
 			if (existingRegistryEntry) {
 				const [, registryEntry] = existingRegistryEntry;
@@ -78,11 +78,19 @@ export default class TaskBoardFileManager {
 					console.log(
 						`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
 					);
-					await this.addNewBoardToRegistry(boardData.id, filePath, boardData);
+					await this.addNewBoardToRegistry(
+						boardData.id,
+						filePath,
+						boardData,
+					);
 				}
 			} else {
 				// Board ID doesn't exist in registry - add it
-				await this.addNewBoardToRegistry(boardData.id, filePath, boardData);
+				await this.addNewBoardToRegistry(
+					boardData.id,
+					filePath,
+					boardData,
+				);
 			}
 
 			return boardData;
@@ -647,8 +655,9 @@ export default class TaskBoardFileManager {
 	 * Returns all the boards data cached in memory
 	 * @returns Object of all board configurations keyed by file path
 	 */
-	async getAllBoards(): Promise<recentBoardsDataType> {
-		return this.recentBoardsData;
+	async getAllBoards(): Promise<Board[]> {
+		const allBoardsData = Object.values(this.recentBoardsData);
+		return allBoardsData;
 	}
 
 	/**
