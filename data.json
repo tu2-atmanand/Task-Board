@@ -250,8 +250,8 @@
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
-      "boardIndex": 1,
-      "settingTab": 7,
+      "boardIndex": 0,
+      "settingTab": 0,
       "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
@@ -281,7 +281,8 @@
       }
     ],
     "searchQuery": "",
-    "dateFormat": "yyyy.MM.DD",
-    "dateTimeFormat": "yyyy-MM-dd HH:mm:ss"
+    "dateFormat": "yyyy/MM/dd",
+    "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",
+    "loadAllBoards": false
   }
 }
