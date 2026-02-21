@@ -19,6 +19,7 @@ import {
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 import { DEFAULT_BOARDS } from "./BoardConfigs";
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants";
 
 export interface scanFilters {
 	files: {
@@ -67,9 +68,13 @@ export interface frontmatterFormatting {
 	taskItemKey: string;
 }
 
-export interface taskBoardFilesRegistryItem {
-	boardId: string;
-	filePath: string;
+export interface taskBoardFilesRegistryType {
+	[boardId: string]: {
+		boardId: string;
+		filePath: string;
+		boardName: string;
+		boardDescription: string;
+	};
 }
 
 export interface globalSettingsData {
@@ -79,9 +84,9 @@ export interface globalSettingsData {
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskPropertyFormat: string;
-	taskCompletionDateTimePattern: string;
 	dailyNotesPluginComp: boolean;
-	universalDateFormat: string;
+	dateFormat: string;
+	dateTimeFormat: string;
 	defaultStartTime: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
@@ -127,8 +132,9 @@ export interface globalSettingsData {
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
 	safeGuardFeature: boolean;
-	taskBoardFilesRegistry: taskBoardFilesRegistryItem[];
+	taskBoardFilesRegistry: taskBoardFilesRegistryType;
 	lastViewHistory: {
+		boardFilePath: string;
 		viewedType: string;
 		boardIndex: number;
 		settingTab: number;
@@ -146,6 +152,7 @@ export interface globalSettingsData {
 		renderVisibleNodes: boolean;
 		edgeType: mapViewEdgeType;
 	};
+	loadAllBoards: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -186,9 +193,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		showTaskWithoutMetadata: true,
 		ignoreFileNameDates: false,
 		taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
-		taskCompletionDateTimePattern: TaskRegularExpressions.dateTimeFormat,
 		dailyNotesPluginComp: false,
-		universalDateFormat: TaskRegularExpressions.dateFormat,
+		dateFormat: DEFAULT_DATE_FORMAT,
+		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
 		defaultStartTime: "",
 		taskCompletionInLocalTime: true,
 		taskCompletionShowUtcOffset: false,
@@ -433,6 +440,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		experimentalFeatures: false,
 		safeGuardFeature: true,
 		lastViewHistory: {
+			boardFilePath: "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
 			viewedType: "kanban",
 			boardIndex: 0,
 			settingTab: 0,
@@ -449,22 +457,29 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			renderVisibleNodes: false,
 			edgeType: mapViewEdgeType.bezier,
 		},
-		taskBoardFilesRegistry: [
-			{
+		taskBoardFilesRegistry: {
+			"3103563481": {
 				boardId: "3103563481",
 				filePath:
 					"Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+				boardName: "Time Based Workflow",
+				boardDescription: "This board contains dated type columns for managing time critical scheduled tasks.",
 			},
-			{
+			"2957159294": {
 				boardId: "2957159294",
 				filePath: "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
+				boardName: "Tag Based Workflow",
+				boardDescription: "This board contains tagged type columns for custom kanban workflow.",
 			},
-			{
+			"4271106430": {
 				boardId: "4271106430",
 				filePath:
 					"Meta/Task_Board/Boards/Status Based Workflow.taskboard",
+				boardName: "Status Based Workflow",
+				boardDescription: "This board contains status type columns for a cyclic workflow to move tasks from one stage to another using just the checkbox.",
 			},
-		],
+		},
+		loadAllBoards: false,
 	},
 };
 

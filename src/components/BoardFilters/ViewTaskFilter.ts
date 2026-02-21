@@ -53,6 +53,23 @@ export class TaskFilterComponent extends Component {
 	>();
 	public isMultiSuggestDropdownActive = false;
 	public isConfigModalOpen = false;
+	public conditionsRequiringValue = [
+		"equals",
+		"contains",
+		"doesNotContain",
+		"startsWith",
+		"endsWith",
+		"is",
+		"isNot",
+		">",
+		"<",
+		">=",
+		"<=",
+		"before",
+		"onOrBefore",
+		"after",
+		"onOrAfter",
+	];
 
 	constructor(
 		hostEl: HTMLElement,
@@ -624,21 +641,8 @@ export class TaskFilterComponent extends Component {
 			currentCond: string,
 			propertyType: string,
 		) => {
-			const conditionsRequiringValue = [
-				"equals",
-				"contains",
-				"doesNotContain",
-				"startsWith",
-				"endsWith",
-				"is",
-				"isNot",
-				">",
-				"<",
-				">=",
-				"<=",
-			];
 			let valueActuallyNeeded =
-				conditionsRequiringValue.includes(currentCond);
+				this.conditionsRequiringValue.includes(currentCond);
 
 			if (
 				propertyType === "completed" &&
@@ -791,11 +795,11 @@ export class TaskFilterComponent extends Component {
 
 		// let dropdownInput: DropdownComponent | null = null;
 		// filterItemEl.removeChild(dropdownInputContainer);
-		if (valueSelect) {
-			// dropdownInput.disabled = true;
-			// dropdownInput.type = "text";
-			// dropdownInput = null;
-		}
+		// if (valueSelect) {
+		// dropdownInput.disabled = true;
+		// dropdownInput.type = "text";
+		// dropdownInput = null;
+		// }
 
 		switch (property) {
 			case "content":
@@ -860,8 +864,7 @@ export class TaskFilterComponent extends Component {
 				// }
 				valueSelect.addOptions(
 					getCustomStatusOptionsForDropdown(
-						this.plugin.settings.data
-							.customStatuses
+						this.plugin.settings.data.customStatuses,
 					).reduce(
 						(
 							acc: Record<number | string, string>,
@@ -978,6 +981,14 @@ export class TaskFilterComponent extends Component {
 						text: t("is-not"),
 					},
 					{
+						value: ">",
+						text: ">",
+					},
+					{
+						value: "<",
+						text: "<",
+					},
+					{
 						value: ">=",
 						text: ">=",
 					},
@@ -1043,20 +1054,20 @@ export class TaskFilterComponent extends Component {
 						text: t("is-not"),
 					},
 					{
-						value: ">",
-						text: ">",
+						value: "before",
+						text: t("before"),
 					},
 					{
-						value: "<",
-						text: "<",
+						value: "onOrBefore",
+						text: t("on-or-before"),
 					},
 					{
-						value: ">=",
-						text: ">=",
+						value: "after",
+						text: t("after"),
 					},
 					{
-						value: "<=",
-						text: "<=",
+						value: "onOrAfter",
+						text: t("on-or-after"),
 					},
 					{
 						value: "isEmpty",
@@ -1077,20 +1088,20 @@ export class TaskFilterComponent extends Component {
 						text: t("is-not"),
 					},
 					{
-						value: ">",
-						text: ">",
+						value: "before",
+						text: t("before"),
 					},
 					{
-						value: "<",
-						text: "<",
+						value: "onOrBefore",
+						text: t("on-or-before"),
 					},
 					{
-						value: ">=",
-						text: ">=",
+						value: "after",
+						text: t("after"),
 					},
 					{
-						value: "<=",
-						text: "<=",
+						value: "onOrAfter",
+						text: t("on-or-after"),
 					},
 					{
 						value: "isEmpty",
@@ -1159,35 +1170,29 @@ export class TaskFilterComponent extends Component {
 		);
 
 		const currentSelectedCondition = filterData.condition;
-		let conditionChanged = false;
+		// let conditionChanged = false;
 		if (
 			conditionOptions.some(
 				(opt) => opt.value === currentSelectedCondition,
 			)
 		) {
 			conditionSelect.setValue(currentSelectedCondition);
+			// conditionChanged = true;
 		} else if (conditionOptions.length > 0) {
 			conditionSelect.setValue(conditionOptions[0].value);
 			filterData.condition = conditionOptions[0].value;
-			conditionChanged = true;
+			// conditionChanged = true;
 		}
 
 		const finalConditionVal = conditionSelect.getValue();
-		const conditionsRequiringValue = [
-			"equals",
-			"contains",
-			"doesNotContain",
-			"startsWith",
-			"endsWith",
-			"is",
-			"isNot",
-			">",
-			"<",
-			">=",
-			"<=",
-		];
 		let valueActuallyNeeded =
-			conditionsRequiringValue.includes(finalConditionVal);
+			this.conditionsRequiringValue.includes(finalConditionVal);
+		console.log(
+			"finalConditionVal : ",
+			finalConditionVal,
+			"\nvalueActuallyNeeded : ",
+			valueActuallyNeeded,
+		);
 		// if (
 		// 	property === "completed" &&
 		// 	(finalConditionVal === "isTrue" || finalConditionVal === "isFalse")
@@ -1243,9 +1248,9 @@ export class TaskFilterComponent extends Component {
 			}
 		}
 
-		if (conditionChanged || valueChanged) {
-			this.saveStateToLocalStorage();
-		}
+		// if (conditionChanged || valueChanged) {
+		// 	this.saveStateToLocalStorage();
+		// }
 
 		if (valueInput instanceof HTMLInputElement) {
 			// Setup MultiSuggest for appropriate properties
@@ -1260,16 +1265,15 @@ export class TaskFilterComponent extends Component {
 	): void {
 		// Only setup suggestions for specific properties
 		const propertiesWithSuggestions = ["tags", "filePath"];
+		if (!propertiesWithSuggestions.includes(property)) {
+			return;
+		}
 
 		// Clean up existing MultiSuggest instance if it exists
 		const existingInstance = this.multiSuggestInstances.get(valueInput);
 		if (existingInstance) {
 			existingInstance.close();
 			this.multiSuggestInstances.delete(valueInput);
-		}
-
-		if (!propertiesWithSuggestions.includes(property)) {
-			return;
 		}
 
 		let suggestions: string[] = [];
@@ -1479,15 +1483,14 @@ export class TaskFilterComponent extends Component {
 		this.render();
 	}
 
-	// --- Local Storage Management ---
+	/**
+	 * This feature is in disabled state, hence no need to store anything in localStorage.
+	 *
+	 * @todo See this if required sometime in future.
+	 */
 	private saveStateToLocalStorage(
 		triggerRealtimeUpdate: boolean = true,
 	): void {
-		/**
-		 * This feature is in disabled state, hence no need to store anything in localStorage.
-		 *
-		 * @todo See this if required sometime in future.
-		 */
 		// if (this.app) {
 		// 	this.app.saveLocalStorage(
 		// 		this.leafId

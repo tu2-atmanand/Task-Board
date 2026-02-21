@@ -1,11 +1,11 @@
 import { t } from "i18next";
 import TaskBoard from "main";
-import { Notice, } from "obsidian";
+import { Notice } from "obsidian";
 import { newReleaseVersion } from "src/interfaces/Constants";
 import { BugReporterModal } from "src/modals/BugReporterModal";
 import { fsPromises } from "src/services/FileSystem";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 /**
  * Interface for bug report entries
@@ -32,7 +32,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 20;
-	private readonly MAX_USED_ID = 181; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
+	private readonly MAX_USED_ID = 186; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -187,7 +187,9 @@ class BugReporterManager {
 
 			// Extract version (for backward compatibility, set to null if not found)
 			const versionMatch = entryText.match(/Version\s*:\s*(.+?)(?=\n|$)/);
-			entry.version = versionMatch ? versionMatch[1].trim() : "Older than 1.9.3";
+			entry.version = versionMatch
+				? versionMatch[1].trim()
+				: "Older than 1.9.3";
 
 			// Extract bug content from code block
 			const bugContentMatch = entryText.match(/```log\n([\s\S]*?)\n```/);
@@ -249,7 +251,7 @@ ${entry.bugContent}
 
 			// Create new bug report entry with current version
 			const newEntry: BugReportEntry = {
-				timestamp: getCurrentLocalTimeString(),
+				timestamp: getCurrentLocalDateTimeString(),
 				id,
 				message,
 				context,
@@ -349,11 +351,7 @@ ${entry.bugContent}
 	/**
 	 * Appends a new bug report at the end of the log file.
 	 */
-	addToLogs = (
-		id: number,
-		bugContent: string,
-		context: string,
-	) => {
+	addToLogs = (id: number, bugContent: string, context: string) => {
 		// STEP 1 - Check if this type of bug, based on the id, is already visible to the user or not
 		if (this.alreadyShownBugsIDs.includes(id)) {
 			// Bug already shown, don't show again

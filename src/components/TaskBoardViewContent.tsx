@@ -1,7 +1,7 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban, Save } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban, Save, LayoutGridIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
@@ -9,24 +9,23 @@ import { taskJsonMerged } from "src/interfaces/TaskItem";
 import { App, debounce, Platform, Menu } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
-import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
+import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal, openBoardsExplorerModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { DEFAULT_DATE_FORMAT, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
+import { advancedFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], clickedFileBoard?: Board | null }> = ({ plugin, allBoards, clickedFileBoard }) => {
+const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Board, allBoards?: Board[] }> = ({ plugin, currentBoardData, allBoards }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
-	const [currentBoardData, setCurrentBoardData] = useState<Board>();
-	const [allBoardsData, setAllBoardsData] = useState<Board[]>(allBoards);
+	const [boardData, setCurrentBoardData] = useState<Board>();
+	const [allBoardsData, setAllBoardsData] = useState<Board[] | undefined>(allBoards);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
 	const [viewType, setViewType] = useState<string>(plugin.settings.data.lastViewHistory.viewedType || viewTypeNames.kanban);
@@ -88,18 +87,18 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 		const fetchData = async () => {
 			console.log("TASK BOARD : Does this run while switching boards...");
 			try {
-				if (clickedFileBoard) {
-					setCurrentBoardData(clickedFileBoard);
+				// if (currentBoardData) {
+				setCurrentBoardData(currentBoardData);
 
-					// Get index of the new board from the registry based on the board id.
-					const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(clickedFileBoard.id);;
-					setActiveBoardIndex(indexOfNewBoard ?? plugin.settings.data.taskBoardFilesRegistry?.length);
-				} else {
-					const data = await plugin.taskBoardFileManager.loadBoardUsingIndex(activeBoardIndex);
-					if (!data) throw "Board data not found.";
+				// Get index of the new board from the registry based on the board id.
+				const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(currentBoardData.id);;
+				const registryLength = Object.keys(plugin.settings.data.taskBoardFilesRegistry || {}).length; setActiveBoardIndex(indexOfNewBoard ?? registryLength);
+				// } else {
+				// 	const data = await plugin.taskBoardFileManager.loadBoardUsingIndex(activeBoardIndex);
+				// 	if (!data) throw "Board data not found.";
 
-					setCurrentBoardData(data);
-				}
+				// 	setCurrentBoardData(data);
+				// }
 
 				const allTasks = await loadTasksAndMerge(plugin, true);
 				if (allTasks) {
@@ -121,15 +120,16 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
-		if (allTasks && allBoardsData[activeBoardIndex]) {
-			const currentBoard = allBoardsData[activeBoardIndex];
+		if (allTasks && boardData) {
+			const currentBoard = boardData;
 			const boardFilter = currentBoard.boardFilter;
+			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: boardFilterer(allTasks.Pending, boardFilter),
-				Completed: boardFilterer(allTasks.Completed, boardFilter),
+				Pending: advancedFilterer(allTasks.Pending, boardFilter, dateFormat),
+				Completed: advancedFilterer(allTasks.Completed, boardFilter, dateFormat),
 			};
 
 			let newBoardData = currentBoard;
@@ -150,7 +150,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 			return boardFilteredTasks;
 		}
 		return { Pending: [], Completed: [] };
-	}, [allTasks, activeBoardIndex, searchQuery]);
+	}, [allTasks, currentBoardData, searchQuery]);
 
 	useEffect(() => {
 		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
@@ -229,8 +229,8 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 	}
 
 	function handleOpenTaskBoardActionsModal() {
-		if (currentBoardData)
-			openTaskBoardActionsModal(plugin, currentBoardData);
+		if (boardData)
+			openTaskBoardActionsModal(plugin, boardData);
 	}
 
 	function handleSearchButtonClick() {
@@ -296,7 +296,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
 		try {
-			const currentBoardConfig = currentBoardData;
+			const currentBoardConfig = boardData;
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
 				const filterModal = new ViewTaskFilterModal(
@@ -318,12 +318,12 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				filterModal.filterCloseCallback = async (filterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedcurrentBoardData = currentBoardData;
+						const updatedcurrentBoardData = boardData;
 						updatedcurrentBoardData!.boardFilter = filterState;
 						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						currentBoardData!.boardFilter = filterState;
+						boardData!.boardFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -356,7 +356,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 					false, // forColumn = false since this is for board-level filter
 					undefined,
 					activeBoardIndex,
-					currentBoardData?.name || "Board",
+					boardData?.name || "Board",
 				);
 
 				// Load existing filter state if available
@@ -373,12 +373,12 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				popover.onClose = async (filterState?: RootFilterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedcurrentBoardData = currentBoardData;
+						const updatedcurrentBoardData = boardData;
 						updatedcurrentBoardData!.boardFilter = filterState;
 						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						currentBoardData!.boardFilter = filterState;
+						boardData!.boardFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -698,6 +698,11 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 	}
 
 	function toggleBoardSidebar() {
+		// Only allow opening sidebar if allBoardsData is available
+		if (!allBoardsData || allBoardsData.length === 0) {
+			return;
+		}
+
 		if (showBoardSidebar) {
 			closeBoardSidebar();
 		} else {
@@ -750,12 +755,10 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 			item.setTitle(t("open-board-configuration-modal"));
 			item.setIcon("settings");
 			item.onClick(async () => {
-				openBoardConfigModal(plugin, allBoardsData, activeBoardIndex, (updatedBoards, boardIndex) => {
+				openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
 					// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-					if (activeBoardIndex === boardIndex) {
-						setCurrentBoardData(updatedBoards[boardIndex]);
-					}
-					plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+					setCurrentBoardData(updatedBoard);
+					plugin.taskBoardFileManager.saveBoard(updatedBoard);
 				}
 				)
 			});
@@ -867,30 +870,44 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				{!showAllElements ? (
 					// Mobile view: Hamburger button + current board name
 					<div className="mobileBoardHeader">
-						<button
-							className="hamburgerMenuButton"
-							onClick={toggleBoardSidebar}
-							aria-label={t("toggle-board-drawer")}
-						>
-							<MenuICon size={20} />
-						</button>
+						{allBoardsData && allBoardsData.length > 0 ? (
+							<button
+								className="hamburgerMenuButton"
+								onClick={toggleBoardSidebar}
+								aria-label={t("toggle-board-drawer")}
+							>
+								<MenuICon size={20} />
+							</button>
+						) : (
+							<button
+								className="boardsExplorerModalButton"
+								onClick={() => openBoardsExplorerModal(plugin)}
+								aria-label={t("boards-explorer-modal")}
+							>
+								<LayoutGridIcon size={20} />
+							</button>
+						)}
 						{!showSearchInput && (
-							<span className="currentBoardName">{currentBoardData?.name}</span>
+							<span className="currentBoardName">{boardData?.name}</span>
 						)}
 					</div>
 				) : (
-					// Desktop view: Original board titles
-					<div className="boardTitles">
-						{allBoardsData && allBoardsData.map((board, index) => (
-							<button
-								key={index}
-								className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
-								onClick={() => handleBoardSelection(index)}
-							>
-								{board.name}
-							</button>
-						))}
-					</div>
+					// Desktop view: Original board titles (only render if allBoardsData is available)
+					allBoardsData && allBoardsData.length > 0 ? (
+						<div className="boardTitles">
+							{allBoardsData.map((board, index) => (
+								<button
+									key={index}
+									className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
+									onClick={() => handleBoardSelection(index)}
+								>
+									{board.name}
+								</button>
+							))}
+						</div>
+					) : (
+						<div className="boardTitles"></div>
+					)
 				)}
 				<div className="taskBoardHeaderBtns">
 					<div className="taskCountContainer">
@@ -957,15 +974,12 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 						className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("board-configure-button")}
 						onClick={() =>
-							openBoardConfigModal(plugin, allBoardsData, activeBoardIndex, (updatedBoards, boardIndex) => {
+							openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
 								// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-								if (activeBoardIndex === boardIndex) {
-									setCurrentBoardData(updatedBoards[boardIndex]);
-								}
-								plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+								setCurrentBoardData(updatedBoard);
+								plugin.taskBoardFileManager.saveBoard(updatedBoard);
 							}
-							)
-						}
+							)}
 					>
 						<Settings size={18} />
 					</button>
@@ -1011,9 +1025,9 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 				</div>
 			</div>
 
-			{/* Mobile board sidebar overlay */}
+			{/* Mobile board sidebar overlay (only render if allBoardsData is available) */}
 			{
-				!showAllElements && showBoardSidebar && (
+				allBoardsData && allBoardsData.length > 0 && !showAllElements && showBoardSidebar && (
 					<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
 						<div
 							className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
@@ -1024,7 +1038,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 							</div>
 							<div className="boardSidebarContent">
 								<div className="boardSidebarContentBtnContainer">
-									{allBoardsData && allBoardsData.map((board, index) => (
+									{allBoardsData.map((board, index) => (
 										<div
 											key={index}
 											className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
@@ -1056,12 +1070,10 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 									<button
 										className="boardConfigureBtn"
 										onClick={() =>
-											openBoardConfigModal(plugin, allBoardsData!, activeBoardIndex, (updatedBoards, boardIndex) => {
+											openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
 												// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-												if (activeBoardIndex === boardIndex) {
-													setCurrentBoardData(updatedBoards[boardIndex]);
-												}
-												plugin.taskBoardFileManager.saveBoard(updatedBoards[boardIndex], boardIndex);
+												setCurrentBoardData(updatedBoard);
+												plugin.taskBoardFileManager.saveBoard(updatedBoard);
 											}
 											)
 										}
@@ -1076,11 +1088,11 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 			}
 
 			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
-				{currentBoardData ? (
+				{boardData ? (
 					viewType === viewTypeNames.kanban ? (
 						<KanbanBoard
 							plugin={plugin}
-							currentBoardData={currentBoardData}
+							currentBoardData={boardData}
 							currentBoardIndex={activeBoardIndex}
 							filteredAndSearchedTasks={filteredAndSearchedTasks}
 							freshInstall={freshInstall}
@@ -1108,7 +1120,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, allBoards: Board[], cl
 						) : (
 							<MapView
 								plugin={plugin}
-								activeBoardData={currentBoardData}
+								activeBoardData={boardData}
 								activeBoardIndex={activeBoardIndex}
 								filteredTasks={filteredAndSearchedTasks}
 								focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}

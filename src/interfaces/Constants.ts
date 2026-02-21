@@ -11,9 +11,14 @@ export const NODE_POSITIONS_STORAGE_KEY = "taskboard_map_node_positions"; // now
 export const NODE_SIZE_STORAGE_KEY = "taskboard_map_node_sizes";
 export const VIEWPORT_STORAGE_KEY = "taskboard_map_viewport";
 export const OBSIDIAN_CLOSED_TIME_KEY = "OBSIDIAN_CLOSED_TIME";
+export const LEAFID_FILEPATH_MAPPING_KEY = "taskboard_leafid_filepath_map";
 
 // Default file names and paths
 export const DEFAULT_TASKS_CACHE_FILE = "task-board-data.json";
 export const DEFAULT_ARCHIVED_TASKS_FILE = "archived-tasks.json";
 export const DEFAULT_PREDEFINED_NOTE = "Task_board_note.md";
 export const DEFAULT_TASKS_FOLDER = "TaskNotes";
+
+export const DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+export const DEFAULT_TIME_FORMAT = "HH:mm:ss";
+export const DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";

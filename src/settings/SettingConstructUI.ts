@@ -1,12 +1,6 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import {
-	App,
-	Notice,
-	Setting,
-	normalizePath,
-	setIcon,
-} from "obsidian";
+import { App, Notice, Setting, normalizePath, setIcon } from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
@@ -54,6 +48,7 @@ import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { StatusType } from "src/interfaces/StatusConfiguration";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { isValid, parse, format, differenceInHours } from "date-fns";
 
 export class SettingsManager {
 	win: Window;
@@ -304,6 +299,7 @@ export class SettingsManager {
 		const {
 			scanFilters,
 			openOnStartup,
+			loadAllBoards,
 			scanMode,
 			tasksCacheFilePath,
 			showModifiedFilesNotice,
@@ -607,6 +603,17 @@ export class SettingsManager {
 		};
 
 		renderTasksCachePathSetting();
+
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl)
+			.setName(t("load-all-boards"))
+			.setDesc(t("load-all-boards-info"))
+			.addToggle((toggle) =>
+				toggle.setValue(loadAllBoards).onChange(async (value) => {
+					this.globalSettings!.loadAllBoards = value;
+					await this.saveSettings();
+				}),
+			);
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -1144,7 +1151,8 @@ export class SettingsManager {
 									this.plugin.settings.data.tagColors.map(
 										(tagColor) => ({
 											color:
-												this.plugin.settings.data.tagColors[
+												this.plugin.settings.data
+													.tagColors[
 													tagColor.priority - 1
 												]?.color || "#ff0000",
 										}),
@@ -2510,7 +2518,8 @@ export class SettingsManager {
 		// });
 
 		const {
-			universalDateFormat,
+			dateFormat,
+			dateTimeFormat,
 			defaultStartTime,
 			firstDayOfWeek,
 			taskCompletionInLocalTime,
@@ -2536,19 +2545,190 @@ export class SettingsManager {
 					}),
 			);
 
-		// Text input for the universalDateFormat
+		// Text input for the dateFormat
 		new Setting(contentEl)
-			.setName(t("universal-date-format"))
-			.setDesc(t("universal-date-format-info"))
+			.setName(t("date-format"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("date-format-info") +
+						"<br/>" +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t(
+							"If you are using inline-tasks, then please note that, this plugin dont scan all kinds of format at present. For example, if there are spaces as a seperater (2026 01 01), then this plugin might fail to scan the value, even if its able to apply the date.",
+						) +
+						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+						"date-fns library formatting guide." +
+						"</a>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t("date-format-date-fns-note") +
+						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+						"date-fns library formatting guide." +
+						"</a>",
+				),
+			)
 			.addText((text) =>
 				text
-					.setValue(universalDateFormat)
+					.setValue(dateFormat)
 					.onChange(async (value) => {
-						this.globalSettings!.universalDateFormat = value;
+						this.globalSettings!.dateFormat = value;
 						await this.saveSettings();
 					})
-					.setPlaceholder("YYYY-MM-DD"),
-			);
+					.setPlaceholder("yyyy-MM-dd"),
+			)
+			.addButton((btn) => {
+				btn.setButtonText(t("verify"));
+				btn.onClick(() => {
+					try {
+						const testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
+						const userFormat = this.globalSettings?.dateFormat;
+
+						if (!userFormat || userFormat.trim().length === 0) {
+							new Notice("Please enter a date format.");
+							return;
+						}
+
+						// Format the test date using the user's format
+						const formattedDate = format(testDate, userFormat);
+
+						// Try to parse it back
+						const parsed = parse(
+							formattedDate,
+							userFormat,
+							testDate,
+						);
+
+						// (1) Check if parsing succeeded
+						if (!isValid(parsed)) {
+							new Notice(
+								"❌ Invalid date format. Parsing failed.",
+							);
+							return;
+						}
+
+						// (2) Check if the parsed date is reasonably close (within 48 hours)
+						// This catches common mistakes like swapped date parts
+						const hoursDiff = Math.abs(
+							differenceInHours(parsed, testDate),
+						);
+						if (hoursDiff > 48) {
+							new Notice(
+								"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+									parsed.toDateString() +
+									", expected: " +
+									testDate.toDateString() +
+									"). Please verify.",
+							);
+							return;
+						}
+
+						// All checks passed
+						new Notice(
+							"✅ Date format is valid! Example: " +
+								formattedDate,
+						);
+					} catch (error) {
+						new Notice(
+							"❌ Format validation error: " +
+								(error instanceof Error
+									? error.message
+									: String(error)),
+						);
+					}
+				});
+			});
+
+		// Text input for the dateTimeFormat
+		new Setting(contentEl)
+			.setName(t("date-time-format"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("date-time-format-info") +
+						"<br/>" +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t("date-format-date-fns-note") +
+						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+						"date-fns library formatting guide." +
+						"</a>",
+				),
+			)
+			.addText((text) =>
+				text
+					.setValue(dateTimeFormat)
+					.onChange(async (value) => {
+						this.globalSettings!.dateTimeFormat = value;
+						await this.saveSettings();
+					})
+					.setPlaceholder("yyyy-MM-dd/HH:mm"),
+			)
+			.addButton((btn) => {
+				btn.setButtonText(t("verify"));
+				btn.onClick(() => {
+					try {
+						const testDate = new Date(2026, 1, 18, 14, 30, 45); // Fixed reference date: Feb 18, 2026, 14:30:45
+						const userFormat = this.globalSettings?.dateTimeFormat;
+
+						if (!userFormat || userFormat.trim().length === 0) {
+							new Notice("Please enter a date-time format.");
+							return;
+						}
+
+						// Format the test date using the user's format
+						const formattedDateTime = format(testDate, userFormat);
+
+						// Try to parse it back
+						const parsed = parse(
+							formattedDateTime,
+							userFormat,
+							testDate,
+						);
+
+						// (1) Check if parsing succeeded
+						if (!isValid(parsed)) {
+							new Notice(
+								"❌ Invalid date-time format. Parsing failed.",
+							);
+							return;
+						}
+
+						// (2) Check if the parsed date is reasonably close (within 1 hour for time accuracy)
+						// This catches common mistakes like swapped date parts or time format issues
+						const hoursDiff = Math.abs(
+							differenceInHours(parsed, testDate),
+						);
+						if (hoursDiff > 48) {
+							new Notice(
+								"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+									parsed.toISOString() +
+									", expected: " +
+									testDate.toISOString() +
+									"). Please verify.",
+							);
+							return;
+						}
+
+						// All checks passed
+						new Notice(
+							"✅ Date-time format is valid! Example: " +
+								formattedDateTime,
+						);
+					} catch (error) {
+						new Notice(
+							"❌ Format validation error: " +
+								(error instanceof Error
+									? error.message
+									: String(error)),
+						);
+					}
+				});
+			});
 
 		// Text input for the default startime
 		new Setting(contentEl)
@@ -2577,7 +2757,7 @@ export class SettingsManager {
 		// 				await this.saveSettings();
 		// 				updatePreview();
 		// 			})
-		// 			.setPlaceholder("YYYY-MM-DD/HH:mm")
+		// 			.setPlaceholder("yyyy-MM-dd/HH:mm")
 		// 	);
 
 		// Setting for firstDayOfWeek
@@ -2606,32 +2786,32 @@ export class SettingsManager {
 				});
 			});
 
-		// Setting for taskCompletionInLocalTime
-		new Setting(contentEl)
-			.setName(t("task-completion-in-local-time"))
-			.setDesc(t("task-completion-in-local-time-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(taskCompletionInLocalTime)
-					.onChange(async (value) => {
-						this.globalSettings!.taskCompletionInLocalTime = value;
-						await this.saveSettings();
-					}),
-			);
+		// // Setting for taskCompletionInLocalTime
+		// new Setting(contentEl)
+		// 	.setName(t("task-completion-in-local-time"))
+		// 	.setDesc(t("task-completion-in-local-time-info"))
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(taskCompletionInLocalTime)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.taskCompletionInLocalTime = value;
+		// 				await this.saveSettings();
+		// 			}),
+		// 	);
 
-		// Setting for taskCompletionShowUtcOffset
-		new Setting(contentEl)
-			.setName(t("show-utc-offset-for-task-completion"))
-			.setDesc(t("show-utc-offset-for-task-completion-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(taskCompletionShowUtcOffset)
-					.onChange(async (value) => {
-						this.globalSettings!.taskCompletionShowUtcOffset =
-							value;
-						await this.saveSettings();
-					}),
-			);
+		// // Setting for taskCompletionShowUtcOffset
+		// new Setting(contentEl)
+		// 	.setName(t("show-utc-offset-for-task-completion"))
+		// 	.setDesc(t("show-utc-offset-for-task-completion-info"))
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(taskCompletionShowUtcOffset)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.taskCompletionShowUtcOffset =
+		// 					value;
+		// 				await this.saveSettings();
+		// 			}),
+		// 	);
 	}
 }
 

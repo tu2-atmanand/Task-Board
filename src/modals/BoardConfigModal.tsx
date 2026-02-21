@@ -25,9 +25,9 @@ import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 interface ConfigModalProps {
 	plugin: TaskBoard;
 	settingManager: SettingsManager;
-	boards: Board[];
-	activeBoardIndex: number;
-	onSave: (updatedBoards: Board[], boardIndex: number) => void;
+	currentBoardData: Board;
+	allBoardsData?: Board[];
+	onSave: (updatedBoard: Board) => void;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
 }
@@ -35,22 +35,24 @@ interface ConfigModalProps {
 const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	plugin,
 	settingManager,
-	boards,
-	activeBoardIndex,
+	currentBoardData,
+	allBoardsData,
 	onSave,
 	onClose,
 	setIsEdited,
 }) => {
 	const [localBoards, setLocalBoards] = useState<Board[]>(() => {
 		try {
-			return boards ? JSON.parse(JSON.stringify(boards)) : [];
+			return allBoardsData ? JSON.parse(JSON.stringify(allBoardsData)) : [];
 		} catch (e) {
 			bugReporterManagerInsatance.showNotice(34, "Error parsing boards data", e as string, "BoardConfigModal.tsx/localBoards");
 			return [];
 		}
 	});
-	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
+	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(0);
+	const [activeBoardData, setActiveBoardData] = useState<Board>(currentBoardData);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [modifiedBoardIds, setModifiedBoardIds] = useState<Set<string>>(new Set());
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -98,31 +100,30 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					return;
 				}
 
-				const currentBoards = [...localBoards];
-				const [movedBoard] = currentBoards.splice(evt.oldIndex, 1);
-				currentBoards.splice(evt.newIndex, 0, movedBoard);
+				// Reorder boards in local state
+				const updatedBoards = [...localBoards];
+				const [movedBoard] = updatedBoards.splice(evt.oldIndex, 1);
+				updatedBoards.splice(evt.newIndex, 0, movedBoard);
 
-				// Update board.index to be the new 0-based array index
-				const finalBoards = currentBoards.map((board, idx) => ({
-					...board,
-					index: idx // 0-based index
-				}));
-
-				setLocalBoards(finalBoards);
-
-				// Update selectedBoardIndex (which is a 0-based array index)
-				if (selectedBoardIndex === evt.oldIndex) {
-					setSelectedBoardIndex(evt.newIndex);
-				} else {
-					// Adjust selectedBoardIndex if an item moved across it
-					if (evt.oldIndex < selectedBoardIndex && evt.newIndex >= selectedBoardIndex) {
-						// Item moved from before selected to at or after selected: selected moves left
-						setSelectedBoardIndex(prevIdx => prevIdx - 1);
-					} else if (evt.oldIndex > selectedBoardIndex && evt.newIndex <= selectedBoardIndex) {
-						// Item moved from after selected to at or before selected: selected moves right
-						setSelectedBoardIndex(prevIdx => prevIdx + 1);
+				// Update the taskBoardFilesRegistry order based on the sorted boards
+				const newRegistry: { [key: string]: { boardId: string; filePath: string; boardName: string; boardDescription: string } } = {};
+				updatedBoards.forEach((board) => {
+					const filePath = plugin.taskBoardFileManager.getBoardFilepathFromRegistry(board.id);
+					if (filePath) {
+						newRegistry[board.id] = {
+							boardId: board.id,
+							filePath: filePath,
+							boardName: board.name,
+							boardDescription: board.description || ''
+						};
 					}
-				}
+				});
+
+				// Update plugin settings with new registry order
+				plugin.settings.data.taskBoardFilesRegistry = newRegistry;
+				plugin.saveSettings();
+
+				setLocalBoards(updatedBoards);
 				setIsEdited(true);
 			},
 		});
@@ -167,6 +168,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				const updatedBoards = [...localBoards];
 				updatedBoards[selectedBoardIndex].swimlanes = updatedConfig;
 				setLocalBoards(updatedBoards);
+				setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[selectedBoardIndex].id));
 				setIsEdited(true);
 			}
 		);
@@ -191,6 +193,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			filePaths: columnData.filePaths,
 		});
 		setLocalBoards(updatedBoards);
+		setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[boardIndex].id));
 		handleCloseAddColumnModal();
 		setIsEdited(true);
 	};
@@ -237,8 +240,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				nodesData: {},
 			},
 		};
-		setLocalBoards([...oldBoards, newBoard]);
-		setSelectedBoardIndex(localBoards.length);
+		const updatedBoards = [...oldBoards, newBoard];
+		setLocalBoards(updatedBoards);
+		setModifiedBoardIds(prev => new Set(prev).add(newBoard.id));
+		setSelectedBoardIndex(updatedBoards.length - 1);
 		setIsEdited(true);
 	};
 
@@ -276,6 +281,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 		const updatedBoards = [...localBoards, duplicatedBoard];
 		setLocalBoards(updatedBoards);
+		setModifiedBoardIds(prev => new Set(prev).add(duplicatedBoard.id));
 		setSelectedBoardIndex(updatedBoards.length - 1);
 		setIsEdited(true);
 	}
@@ -320,13 +326,31 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const column = updatedBoards[boardIndex].columns[columnIndex];
 		column.active = !column.active; // Toggle the active state
 		setLocalBoards(updatedBoards); // Update the state
-		// onSave(updatedBoards); // Save the updated state
+		setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[boardIndex].id));
+		setIsEdited(true);
 	};
 
 	// Function to save changes
-	const handleSave = () => {
-		onSave(localBoards, selectedBoardIndex);
-		// onClose();
+	const handleSave = async () => {
+		// Save only modified boards
+		for (const boardId of modifiedBoardIds) {
+			const boardToSave = localBoards.find(board => board.id === boardId);
+			if (boardToSave) {
+				const filePath = plugin.taskBoardFileManager.getBoardFilepathFromRegistry(boardId);
+				if (filePath) {
+					await plugin.taskBoardFileManager.saveBoardToFile(filePath, boardToSave);
+				}
+			}
+		}
+
+		// Find and return the updated current board data
+		const updatedCurrentBoard = localBoards.find(board => board.id === currentBoardData.id);
+		if (updatedCurrentBoard) {
+			onSave(updatedCurrentBoard);
+		}
+
+		// Reset modified boards tracking
+		setModifiedBoardIds(new Set());
 	};
 
 	const renderGlobalSettingsTab = (boardIndex: number) => {
@@ -383,6 +407,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		(updatedBoards[boardIndex].columns[columnIndex] as any)[field] = value;
 
 		setLocalBoards(updatedBoards);
+		setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[boardIndex].id));
 		setIsEdited(true);
 	};
 
@@ -391,6 +416,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const updatedBoards = [...localBoards];
 		updatedBoards[index].name = newName;
 		setLocalBoards(updatedBoards);
+		setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[index].id));
 		setIsEdited(true);
 	};
 
@@ -398,6 +424,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const updatedBoards = [...localBoards];
 		updatedBoards[index].description = description;
 		setLocalBoards(updatedBoards);
+		setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[index].id));
 		setIsEdited(true);
 	};
 
@@ -424,6 +451,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			updatedBoards[boardIndex][field] = value as boolean;
 		}
 		setLocalBoards(updatedBoards);
+		setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[boardIndex].id));
 		setIsEdited(true);
 	};
 
@@ -440,6 +468,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					const updatedBoards = [...localBoards];
 					updatedBoards[boardIndex].columns.splice(columnIndex, 1);
 					setLocalBoards(updatedBoards);
+					setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[boardIndex].id));
 					setIsEdited(true);
 				} else {
 					bugReporterManagerInsatance.showNotice(35, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${localBoards[boardIndex].columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
@@ -482,6 +511,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					});
 
 					setLocalBoards(updatedBoards);
+					setModifiedBoardIds(prev => new Set(prev).add(updatedBoards[selectedBoardIndex].id));
 					setIsEdited(true);
 
 					// I need to re-render the columnListRef section here
@@ -507,7 +537,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			globalSettingsHTMLSection.current.empty();
 		}
 
-		const board = localBoards[boardIndex];
+		let board: Board;
+		if (localBoards && localBoards.length > 0)
+			board = localBoards[boardIndex];
+		else
+			board = currentBoardData;
 
 		return (
 			<div className="boardConfigModalMainContent-Active">
@@ -911,50 +945,61 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	return (
 		<>
 			{renderAddColumnModal()}
-			<button className="boardConfigModalSidebarToggleBtn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
-				<FaAlignJustify className="boardConfigModalSidebarToggleBtnIcon" size={15} enableBackground={0} />
-			</button>
+			{allBoardsData && allBoardsData.length > 0 && (
+				<button className="boardConfigModalSidebarToggleBtn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
+					<FaAlignJustify className="boardConfigModalSidebarToggleBtnIcon" size={15} enableBackground={0} />
+				</button>
+			)}
 			<div className="boardConfigModalHome">
-				<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
-					<div className="boardConfigModalSidebarBtnArea" >
-						<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => {
-							setSelectedBoardIndex(-1);
-							toggleSidebar();
-						}}>{t("global-settings")}</div>
+				{allBoardsData && allBoardsData.length > 0 && (
+					<>
+						<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
+							<div className="boardConfigModalSidebarBtnArea" >
+								<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => {
+									setSelectedBoardIndex(-1);
+									toggleSidebar();
+								}}>{t("global-settings")}</div>
 
-						<hr className="boardConfigModalHr-100" />
+								<hr className="boardConfigModalHr-100" />
 
-						<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-						<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
-							{localBoards.map((board, index) => (
-								<div
-									key={board.name} // Changed key from index to board.name
-									className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
-									onClick={() => {
-										setSelectedBoardIndex(index);
-										toggleSidebar();
-									}}
-								>
-									<span>
-										{board.name}
-									</span>
-									<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+								<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
+								<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
+									{localBoards.map((board, index) => (
+										<div
+											key={board.name} // Changed key from index to board.name
+											className={`boardConfigModalSidebarBtnArea-btn${index === selectedBoardIndex ? "-active" : ""}`}
+											onClick={() => {
+												setSelectedBoardIndex(index);
+												toggleSidebar();
+											}}
+										>
+											<span>
+												{board.name}
+											</span>
+											<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+										</div>
+									))}
 								</div>
-							))}
+							</div>
+							<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
+								<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
+								<hr className="boardConfigModalHr-100" />
+								<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
+							</div>
 						</div>
+						<div className="boardConfigModalMainContent">
+							{selectedBoardIndex === -1
+								? <>{renderGlobalSettingsTab(selectedBoardIndex)}</>
+								: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
+							}
+						</div>
+					</>
+				)}
+				{(!allBoardsData || allBoardsData.length === 0) && (
+					<div className="boardConfigModalMainContent" style={{ width: '100%', padding: '20px' }}>
+						<div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(0)}</div>
 					</div>
-					<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
-						<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard(localBoards)}>{t("add-board")}</button>
-						<hr className="boardConfigModalHr-100" />
-						<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
-					</div>
-				</div>
-				<div className="boardConfigModalMainContent">
-					{selectedBoardIndex === -1
-						? <>{renderGlobalSettingsTab(selectedBoardIndex)}</>
-						: <div className="boardConfigModalMainContentBoardSettingTab">{renderBoardSettings(selectedBoardIndex)}</div>
-					}
-				</div>
+				)}
 			</div>
 
 			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
@@ -966,24 +1011,25 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 export class BoardConfigureModal extends Modal {
 	root: ReactDOM.Root;
 	settingsManager: SettingsManager;
-	boards: Board[];
-	activeBoardIndex: number;
+	currentBoardData: Board;
+	allBoardsData: Board[] | undefined;
 	isEdited: boolean;
-	onSave: (updatedBoards: Board[], boardIndex: number) => void;
+	onSave: (updatedBoard: Board) => void;
 	plugin: TaskBoard;
 
 	constructor(
 		plugin: TaskBoard,
-		boards: Board[],
-		activeBoardIndex: number,
-		onSave: (updatedBoards: Board[], boardIndex: number) => void
+		currentBoardData: Board,
+		onSave: (updatedBoard: Board) => void,
+		allBoardsData?: Board[]
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
-		this.boards = boards;
-		this.activeBoardIndex = activeBoardIndex;
-		this.isEdited = false;
+		this.currentBoardData = currentBoardData;
 		this.onSave = onSave;
+		this.allBoardsData = allBoardsData;
+
+		this.isEdited = false;
 		this.settingsManager = new SettingsManager(plugin);
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
@@ -996,11 +1042,11 @@ export class BoardConfigureModal extends Modal {
 			<ConfigModalContent
 				plugin={this.plugin}
 				settingManager={this.settingsManager}
-				boards={this.boards}
-				activeBoardIndex={this.activeBoardIndex}
-				onSave={(updatedBoards: Board[], boardIndex: number) => {
+				currentBoardData={this.currentBoardData}
+				allBoardsData={this.allBoardsData}
+				onSave={(updatedBoard: Board) => {
 					this.isEdited = false;
-					this.onSave(updatedBoards, boardIndex);
+					this.onSave(updatedBoard);
 					this.close();
 				}}
 				onClose={() => this.close()}

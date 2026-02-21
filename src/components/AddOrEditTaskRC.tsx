@@ -6,7 +6,6 @@ import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
-import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
@@ -171,38 +170,6 @@ export const AddOrEditTaskRC: React.FC<{
 				(status) => status.symbol === symbol
 			);
 		const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
-		// if (statusType === statusTypeNames.DONE) {
-		// 	const globalSettings = plugin.settings.data;
-		// 	const moment = _moment as unknown as typeof _moment.default;
-		// 	const currentDateValue = moment().format(
-		// 		globalSettings?.taskCompletionDateTimePattern
-		// 	);
-		// 	const newTitle = sanitizeCompletionDate(
-		// 		globalSettings,
-		// 		task.title,
-		// 		currentDateValue
-		// 	);
-		// 	setTitle(newTitle);
-		// } else if (statusType === statusTypeNames.CANCELLED) {
-		// 	const globalSettings = plugin.settings.data;
-		// 	const moment = _moment as unknown as typeof _moment.default;
-		// 	const currentDateValue = moment().format(
-		// 		globalSettings?.taskCompletionDateTimePattern
-		// 	);
-		// 	const newTitle = sanitizeCancelledDate(
-		// 		globalSettings,
-		// 		task.title,
-		// 		currentDateValue
-		// 	);
-		// 	setTitle(newTitle);
-		// } else {
-		// 	let newTitle = task.title;
-		// 	const globalSettings = plugin.settings.data;
-		// 	newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
-		// 	newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
-		// 	setTitle(newTitle);
-		// }
-
 		const globalSettings = plugin.settings.data;
 		const newTitle = sanitizeStatus(globalSettings, task.title, symbol, statusType);
 		setTitle(newTitle);

@@ -12,9 +12,11 @@ import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
 } from "../MarkdownFileOperations";
-import { moment as _moment } from "obsidian";
 import { statusTypeNames } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { format } from "date-fns";
+import { DEFAULT_DATE_TIME_FORMAT } from "src/interfaces/Constants";
+import { getCurrentLocalDateTimeString } from "../DateTimeCalculations";
 
 /**
  * Handle task note status change (checkbox change)
@@ -32,9 +34,8 @@ export const handleTaskNoteStatusChange = async (
 			globalSettings.customStatuses,
 			task.status,
 		);
-		const moment = _moment as unknown as typeof _moment.default;
-		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern,
+		const currentDateValue = getCurrentLocalDateTimeString(
+			globalSettings.dateTimeFormat,
 		);
 
 		const updatedTask = {
@@ -59,7 +60,7 @@ export const handleTaskNoteStatusChange = async (
 		}
 		const newStatusName = getStatusNameFromStatusSymbol(
 			newStatus.newSymbol,
-			plugin.settings.data
+			plugin.settings.data,
 		);
 
 		// Update frontmatter with new status
@@ -144,10 +145,8 @@ export const handleTaskNote2NormalNote = async (
 				: [frontmatter.tags];
 			tags = tags.filter(
 				(tag: string) =>
-					tag.includes(
-						plugin.settings.data
-							.taskNoteIdentifierTag
-					) === false
+					tag.includes(plugin.settings.data.taskNoteIdentifierTag) ===
+					false,
 			);
 
 			// If no other tags remain, we could remove the tags property entirely
