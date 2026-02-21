@@ -92,7 +92,16 @@ export class TaskBoardView extends ItemView {
 			} else {
 				// First lets check if this leafID already exists in localStorage
 				const filePath = await this.plugin.taskBoardFileManager.getFilepathFromLeafID(leafID);
-				if (filePath === null) {
+				if (filePath) {
+					const lastViewedBoardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(filePath || "");
+					if (lastViewedBoardData)
+						this.renderBoard(lastViewedBoardData, undefined);
+					else
+						bugReporterManagerInsatance.showNotice(184, `There was an issue with opening the task board file : ${filePath}`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
+
+					// } else if (filePath === undefined) {
+					// 	bugReporterManagerInsatance.showNotice(186, `There was some issue while fetching the filepath from localStorage for the following leafID : ${leafID}`, "filePath is undefined", "TaskBoardView.tsx/onOpen");
+				} else {
 					// In this case, mostly user is opening the leaf from the ribbon icon
 					// Show last viewed board
 					const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
@@ -100,14 +109,6 @@ export class TaskBoardView extends ItemView {
 						this.renderBoard(lastViewedBoardData, undefined);
 					else
 						bugReporterManagerInsatance.showNotice(185, `There was an issue with opening the last viewed board by user`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
-				} else if (filePath === undefined) {
-					bugReporterManagerInsatance.showNotice(186, `There was some issue while fetching the filepath from localStorage for the following leafID : ${leafID}`, "filePath is undefined", "TaskBoardView.tsx/onOpen");
-				} else {
-					const lastViewedBoardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(filePath || "");
-					if (lastViewedBoardData)
-						this.renderBoard(lastViewedBoardData, undefined);
-					else
-						bugReporterManagerInsatance.showNotice(184, `There was an issue with opening the task board file : ${filePath}`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
 				}
 			}
 		}

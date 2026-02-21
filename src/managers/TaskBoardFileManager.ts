@@ -791,7 +791,7 @@ export default class TaskBoardFileManager {
 			};
 
 			// const key = `taskboard-leaf-${leafID}`;
-			localStorage.setItem(
+			this.app.saveLocalStorage(
 				LEAFID_FILEPATH_MAPPING_KEY,
 				JSON.stringify(oldMappingData),
 			);
@@ -813,12 +813,10 @@ export default class TaskBoardFileManager {
 	 * string - The stored file path if found for the particular leafID
 	 *
 	 * undefined - If there was some error encountered
-	 *
-	 * null - If the
 	 */
 	async getFilepathFromLeafID(
 		leafID: string,
-	): Promise<string | undefined | null> {
+	): Promise<string | undefined> {
 		try {
 			if (!leafID) {
 				console.error(
@@ -827,6 +825,7 @@ export default class TaskBoardFileManager {
 				return undefined;
 			}
 
+			console.log("Mapping data : ", this.leafIdFilePathMapping);
 			const leafFilepath = this.leafIdFilePathMapping[leafID];
 			if (leafFilepath) {
 				console.log(
@@ -835,7 +834,7 @@ export default class TaskBoardFileManager {
 				return leafFilepath;
 			} else {
 				console.warn(`No filepath mapping found for leaf ${leafID}`);
-				return null;
+				return undefined;
 			}
 		} catch (error) {
 			console.error(
