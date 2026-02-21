@@ -134,6 +134,7 @@ export interface globalSettingsData {
 	safeGuardFeature: boolean;
 	taskBoardFilesRegistry: taskBoardFilesRegistryType;
 	lastViewHistory: {
+		boardFilePath: string;
 		viewedType: string;
 		boardIndex: number;
 		settingTab: number;
@@ -439,6 +440,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		experimentalFeatures: false,
 		safeGuardFeature: true,
 		lastViewHistory: {
+			boardFilePath: "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
 			viewedType: "kanban",
 			boardIndex: 0,
 			settingTab: 0,
@@ -461,20 +463,20 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				filePath:
 					"Meta/Task_Board/Boards/Time Based Workflow.taskboard",
 				boardName: "Time Based Workflow",
-				boardDescription: "",
+				boardDescription: "This board contains dated type columns for managing time critical scheduled tasks.",
 			},
 			"2957159294": {
 				boardId: "2957159294",
 				filePath: "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
 				boardName: "Tag Based Workflow",
-				boardDescription: "",
+				boardDescription: "This board contains tagged type columns for custom kanban workflow.",
 			},
 			"4271106430": {
 				boardId: "4271106430",
 				filePath:
 					"Meta/Task_Board/Boards/Status Based Workflow.taskboard",
 				boardName: "Status Based Workflow",
-				boardDescription: "",
+				boardDescription: "This board contains status type columns for a cyclic workflow to move tasks from one stage to another using just the checkbox.",
 			},
 		},
 		loadAllBoards: false,

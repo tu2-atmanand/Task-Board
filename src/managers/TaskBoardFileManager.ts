@@ -9,6 +9,7 @@ import { App, TFile, Notice, normalizePath } from "obsidian";
 import { Board } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { LEAFID_FILEPATH_MAPPING_KEY } from "src/interfaces/Constants";
 
 /**
  * Interface for storing recently loaded board data keyed by file path
@@ -17,14 +18,24 @@ interface recentBoardsDataType {
 	[filePath: string]: Board;
 }
 
+interface leafIdFilePathMapType {
+	[leafID: string]: string;
+}
+
 export default class TaskBoardFileManager {
 	private app: App;
 	private plugin: TaskBoard;
-	private recentBoardsData: recentBoardsDataType = {};
+	private recentBoardsData: recentBoardsDataType = {}; // This will hold the board-files data which user opened in the current Obsidian session. So, opening them again becomes faster.
+	private leafIdFilePathMapping: leafIdFilePathMapType = {}; // This will hold the mapping of all the older leafs(Obsidian tabs) and which board-file they are rendering, opened in the past.
 
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
 		this.app = plugin.app;
+
+		const mappingData: leafIdFilePathMapType = JSON.parse(
+			this.app.loadLocalStorage(LEAFID_FILEPATH_MAPPING_KEY),
+		);
+		this.leafIdFilePathMapping = mappingData;
 	}
 
 	/**
@@ -36,7 +47,7 @@ export default class TaskBoardFileManager {
 	 * @param filePath - The path to the .taskboard file
 	 * @returns The board configuration object, or null if file doesn't exist or cannot be parsed
 	 */
-	async loadBoardFromFile(filePath: string): Promise<Board | null> {
+	async loadBoardFromDisk(filePath: string): Promise<Board | null> {
 		try {
 			// Check if file exists
 			const fileExists = await this.app.vault.adapter.exists(filePath);
@@ -78,19 +89,7 @@ export default class TaskBoardFileManager {
 					console.log(
 						`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
 					);
-					await this.addNewBoardToRegistry(
-						boardData.id,
-						filePath,
-						boardData,
-					);
 				}
-			} else {
-				// Board ID doesn't exist in registry - add it
-				await this.addNewBoardToRegistry(
-					boardData.id,
-					filePath,
-					boardData,
-				);
 			}
 
 			return boardData;
@@ -102,6 +101,7 @@ export default class TaskBoardFileManager {
 
 	/**
 	 * @deprecated This function is deprecated. Use loadBoardUsingID instead.
+	 *
 	 * Loads the specific board data from the memory cache (recentBoardsData),
 	 * Based on the boardIndex passed. This method relies on board indexing which
 	 * is being phased out in favor of ID-based lookup.
@@ -185,11 +185,13 @@ export default class TaskBoardFileManager {
 			}
 
 			// Load board from file (disk) since not found in cache
-			const boardData = await this.loadBoardFromFile(filePath);
+			const boardData = await this.loadBoardFromDisk(filePath);
 
 			if (boardData) {
 				// Cache the board data in memory using file path as key
 				this.recentBoardsData[filePath] = boardData;
+				// Update the registry to move this board on top
+				this.addNewBoardToRegistry(boardData.id, filePath, boardData);
 				console.log(
 					`Loaded and cached board "${boardData.name}" from: ${filePath}`,
 				);
@@ -233,7 +235,7 @@ export default class TaskBoardFileManager {
 				}
 
 				// Load board from file
-				const boardData = await this.loadBoardFromFile(
+				const boardData = await this.loadBoardFromDisk(
 					registryEntry.filePath,
 				);
 
@@ -310,6 +312,7 @@ export default class TaskBoardFileManager {
 
 	/**
 	 * @deprecated This function is deprecated. Use saveBoard(updatedBoardData) instead.
+	 *
 	 * Save board configuration to disk by board index passed
 	 * If no boardIndex has been passed, it will update currentBoard data
 	 * Also updates the cached board data in memory
@@ -452,27 +455,32 @@ export default class TaskBoardFileManager {
 		boardData?: Board,
 	): Promise<void> {
 		try {
-			const taskBoardFilesRegistry =
+			let updatedTaskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry || {};
 
 			// Check if board with this ID already exists
-			if (taskBoardFilesRegistry[boardId]) {
-				console.log(
-					`Board ID "${boardId}" already exists in registry at: ${taskBoardFilesRegistry[boardId].filePath}`,
-				);
-				return;
+			if (updatedTaskBoardFilesRegistry[boardId]) {
+				// console.log(
+				// 	`Board ID "${boardId}" already exists in registry at: ${taskBoardFilesRegistry[boardId].filePath}`,
+				// );
+				// return;
+
+				// Delete the older entry incase user wants to update some configuration and to move the last viewed board on top.
+				delete updatedTaskBoardFilesRegistry[boardId];
 			}
 
 			// Add or update the registry entry using boardId as key
-			taskBoardFilesRegistry[boardId] = {
+			const newEntry = {
 				boardId: boardId,
 				filePath: filePath,
 				boardName: boardData?.name || "",
 				boardDescription: boardData?.description || "",
 			};
 
-			this.plugin.settings.data.taskBoardFilesRegistry =
-				taskBoardFilesRegistry;
+			this.plugin.settings.data.taskBoardFilesRegistry = {
+				[boardId]: newEntry,
+				...updatedTaskBoardFilesRegistry,
+			};
 			await this.plugin.saveSettings();
 
 			// Cache the board data if provided
@@ -489,7 +497,7 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Check if a .taskboard file exists
+	 * Check if a .taskboard file exists for the given .taskboard file path.
 	 * @param filePath - The path to the .taskboard file
 	 * @returns boolean - True if file exists, false otherwise
 	 */
@@ -661,19 +669,30 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Returns the board data for a specific board ID
-	 * @param boardId - The ID of the board to retrieve
-	 * @returns The board configuration object, or null if not found
+	 * Fetches the first entry from the taskBoardFilesRegistry.
+	 * Attempts to first get the board data if present in the cache.
+	 * Otherwise, load the board from disk.
+	 *
+	 * @returns The last opened board data. undefined if there is any error.
 	 */
-	async getBoardData(boardId: string): Promise<Board | null> {
-		const board = Object.values(this.recentBoardsData).find(
-			(b) => b.id === boardId,
+	async getLastOpenedBoard(): Promise<Board | undefined> {
+		const firstItemFromRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry[0];
+
+		const boardData = await this.loadBoardUsingPath(
+			firstItemFromRegistry.filePath,
 		);
-		return board || null;
+		if (boardData) {
+			return boardData;
+		}
+
+		console.error(`Error loading the last opened board.`);
+		return undefined;
 	}
 
 	/**
-	 * @deprecated This method is deprecated. Use getBoardData(boardId) instead.
+	 * @deprecated This method is deprecated. Use getBoardData(boardId) instead. We should no longer manage boards based on their boardIndex.
+	 *
 	 * Returns the board data that was last active/used by user.
 	 * @returns The cached board data, or null if no board has been loaded
 	 */
@@ -686,7 +705,8 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * @deprecated This method is deprecated. currentBoardIndex is no longer used.
+	 * @deprecated This method is deprecated. currentBoardIndex is no longer used. We should no longer manage boards based on their boardIndex.
+	 *
 	 * Get the index of the last used board as per the saved files registry
 	 * @returns The index of the currently loaded board, or null if no board has been loaded
 	 */
@@ -695,24 +715,6 @@ export default class TaskBoardFileManager {
 			"getCurrentBoardIndex is deprecated. Index-based lookup is no longer supported.",
 		);
 		return null;
-	}
-
-	/**
-	 * @deprecated This method is deprecated. Use getBoardFilepathFromRegistry instead.
-	 * Get the index of a board from the registry based on its boardId
-	 * @param boardId - The ID of the board
-	 * @returns The index of the board in the registry, or null if not found
-	 */
-	getBoardIndexFromRegistry(boardId: string): number | null {
-		console.warn(
-			"getBoardIndexFromRegistry is deprecated. Use getBoardFilepathFromRegistry instead.",
-		);
-		const taskBoardFilesRegistry =
-			this.plugin.settings.data.taskBoardFilesRegistry || {};
-		const index = Object.values(taskBoardFilesRegistry).findIndex(
-			(entry) => entry.boardId === boardId,
-		);
-		return index >= 0 ? index : null;
 	}
 
 	/**
@@ -730,6 +732,26 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
+	 * Get the index of a board from the registry based on its boardId
+	 * @param boardId - The ID of the board
+	 * @returns The index of the board in the registry, or null if not found
+	 */
+	getBoardIndexFromRegistry(boardId: string): number | null {
+		console.warn(
+			"getBoardIndexFromRegistry is deprecated. Use getBoardFilepathFromRegistry instead.",
+		);
+		const taskBoardFilesRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry || {};
+		// const index = Object.values(taskBoardFilesRegistry).findIndex(
+		// 	(entry) => entry.boardId === boardId,
+		// );
+
+		const allBoardIDs = Object.keys(taskBoardFilesRegistry);
+		const index = allBoardIDs.indexOf(boardId);
+		return index >= 0 ? index : null;
+	}
+
+	/**
 	 * Clear the cached board data
 	 * Useful when switching between different boards or clearing state
 	 */
@@ -744,46 +766,83 @@ export default class TaskBoardFileManager {
 	 * @param leafID - The ID of the Obsidian leaf (tab)
 	 * @param filePath - The path to the .taskboard file
 	 */
-	setFilepathToLeafID(leafID: string, filePath: string): void {
+	async setFilepathToLeafID(leafID: string, filePath: string): Promise<void> {
 		try {
-			if (!leafID || leafID.trim() === "") {
-				console.error("Cannot set filepath to leaf ID: leafID is empty");
+			if (!leafID) {
+				console.error(
+					"Cannot set filepath to leaf ID: leafID is empty",
+				);
 				return;
 			}
+
 			if (!filePath || filePath.trim() === "") {
-				console.error("Cannot set filepath to leaf ID: filePath is empty");
+				console.error(
+					"Cannot set filepath to leaf ID: filePath is empty",
+				);
 				return;
 			}
-			const key = `taskboard-leaf-${leafID}`;
-			localStorage.setItem(key, filePath);
-			console.log(`Stored filepath mapping: leaf ${leafID} -> ${filePath}`);
+			let oldMappingData: leafIdFilePathMapType =
+				this.leafIdFilePathMapping;
+			// if (oldMappingData[leafID]) delete oldMappingData[leafID];
+
+			oldMappingData = {
+				[leafID]: filePath,
+				...oldMappingData,
+			};
+
+			// const key = `taskboard-leaf-${leafID}`;
+			localStorage.setItem(
+				LEAFID_FILEPATH_MAPPING_KEY,
+				JSON.stringify(oldMappingData),
+			);
+			console.log(
+				`Stored filepath mapping: leaf ${leafID} -> ${filePath}`,
+			);
 		} catch (error) {
-			console.error(`Error storing filepath mapping for leaf ${leafID}:`, error);
+			console.error(
+				`Error storing filepath mapping for leaf ${leafID}:`,
+				error,
+			);
 		}
 	}
 
 	/**
 	 * Retrieve the file path associated with a leaf ID from localStorage
 	 * @param leafID - The ID of the Obsidian leaf (tab)
-	 * @returns The stored file path, or null if not found
+	 * @returns
+	 * string - The stored file path if found for the particular leafID
+	 *
+	 * undefined - If there was some error encountered
+	 *
+	 * null - If the
 	 */
-	getFilepathFromLeafID(leafID: string): string | null {
+	async getFilepathFromLeafID(
+		leafID: string,
+	): Promise<string | undefined | null> {
 		try {
-			if (!leafID || leafID.trim() === "") {
-				console.error("Cannot get filepath from leaf ID: leafID is empty");
+			if (!leafID) {
+				console.error(
+					"Cannot get filepath from leaf ID: leafID is empty",
+				);
+				return undefined;
+			}
+
+			const leafFilepath = this.leafIdFilePathMapping[leafID];
+			if (leafFilepath) {
+				console.log(
+					`Retrieved filepath mapping: leaf ${leafID} -> ${leafFilepath}`,
+				);
+				return leafFilepath;
+			} else {
+				console.warn(`No filepath mapping found for leaf ${leafID}`);
 				return null;
 			}
-			const key = `taskboard-leaf-${leafID}`;
-			const filePath = localStorage.getItem(key);
-			if (filePath) {
-				console.log(`Retrieved filepath mapping: leaf ${leafID} -> ${filePath}`);
-				return filePath;
-			}
-			console.warn(`No filepath mapping found for leaf ${leafID}`);
-			return null;
 		} catch (error) {
-			console.error(`Error retrieving filepath mapping for leaf ${leafID}:`, error);
-			return null;
+			console.error(
+				`Error retrieving filepath mapping for leaf ${leafID}:`,
+				error,
+			);
+			return undefined;
 		}
 	}
 }

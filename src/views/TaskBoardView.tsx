@@ -64,38 +64,52 @@ export class TaskBoardView extends ItemView {
 
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
 
-		// All boards data will be loaded based on user configuration
-		let allBoardsData;
-		if (this.plugin.settings.data.loadAllBoards)
-			allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
+		if (this.plugin.settings.data.loadAllBoards) {
+			// All boards data will be loaded based on user configuration
+			let allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
 
-		// Check if a specific .taskboard file was clicked from File Navigator
-		// First check the leaf instance directly (set by monkey patch)
-		const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
-
-		console.log("TaskBoardView.tsx : clickedFilePath from leaf:", clickedFilePath);
-
-		let clickedFileData: Board | undefined;
-		if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
-			// User clicked on a specific .taskboard file - load just that file
-			clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
-			if (clickedFileData)
-				this.renderBoard(clickedFileData, allBoardsData);
-			else
-				bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
 		} else {
-			// This will be the case, if the leaf was already opened before Obsidian app was closed or it was in in-active state and now suddenly brought into active state.
-			// In this case, we should : 
-			// - Fetch the leaf id from the this.leaf.id
-			// - Now, from the mapping stored in localStorage, get the filePath for this leaf.id
-			// - Using this filePath, fetch the boardData.
+			// Here we shall handle essentially three cases of opening this view : 
+			// 1. When the board file is clicked from file-navigator.
+			// 2. When the leaf changes from in-active state to active state.
+			// 3. When the plugin ribbon icon is clicked.
 			const leafID = this.leaf?.id;
-			const filePath = await this.plugin.taskBoardFileManager.getFilepathFromLeafID(String(leafID));
-			const lastViewedBoardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(filePath || "");
-			if (lastViewedBoardData)
-				this.renderBoard(lastViewedBoardData, allBoardsData);
-			else
-				bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${filePath}`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
+			console.log("Leaf ID : ", leafID);
+
+			const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
+			console.log("TaskBoardView.tsx : clickedFilePath from leaf:", clickedFilePath);
+			let clickedFileData: Board | undefined;
+			if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
+				// Check if a specific .taskboard file was clicked from File Navigator
+				// First check the leaf instance directly (set by monkey patch)
+				clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
+				if (clickedFileData)
+					this.renderBoard(clickedFileData, undefined);
+				else
+					bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
+
+				this.plugin.taskBoardFileManager.setFilepathToLeafID(leafID, clickedFilePath);
+			} else {
+				// First lets check if this leafID already exists in localStorage
+				const filePath = await this.plugin.taskBoardFileManager.getFilepathFromLeafID(leafID);
+				if (filePath === null) {
+					// In this case, mostly user is opening the leaf from the ribbon icon
+					// Show last viewed board
+					const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
+					if (lastViewedBoardData)
+						this.renderBoard(lastViewedBoardData, undefined);
+					else
+						bugReporterManagerInsatance.showNotice(185, `There was an issue with opening the last viewed board by user`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
+				} else if (filePath === undefined) {
+					bugReporterManagerInsatance.showNotice(186, `There was some issue while fetching the filepath from localStorage for the following leafID : ${leafID}`, "filePath is undefined", "TaskBoardView.tsx/onOpen");
+				} else {
+					const lastViewedBoardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(filePath || "");
+					if (lastViewedBoardData)
+						this.renderBoard(lastViewedBoardData, undefined);
+					else
+						bugReporterManagerInsatance.showNotice(184, `There was an issue with opening the task board file : ${filePath}`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
+				}
+			}
 		}
 	}
 

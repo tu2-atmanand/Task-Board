@@ -525,7 +525,7 @@ declare module "obsidian" {
 		height: number;
 		tabHeaderInnerIconEl: HTMLElement;
 		tabHeaderInnerTitleEl: HTMLElement;
-		id: number;
+		id: string;
 	}
 
 	interface MarkdownScrollableEditView extends MarkdownBaseView {
