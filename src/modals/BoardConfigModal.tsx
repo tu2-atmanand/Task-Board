@@ -537,7 +537,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			globalSettingsHTMLSection.current.empty();
 		}
 
-		const board = localBoards[boardIndex];
+		let board: Board;
+		if (localBoards && localBoards.length > 0)
+			board = localBoards[boardIndex];
+		else
+			board = currentBoardData;
 
 		return (
 			<div className="boardConfigModalMainContent-Active">
