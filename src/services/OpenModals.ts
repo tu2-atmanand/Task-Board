@@ -21,6 +21,7 @@ import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
 import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/interfaces/Constants";
 import { AddOrEditTaskModal } from "src/modals/AddOrEditTaskModal";
 import { BoardConfigureModal } from "src/modals/BoardConfigModal";
+import { BoardsExplorerModal } from "src/modals/BoardsExplorer";
 import { BugReporterModal } from "src/modals/BugReporterModal";
 import { DiffContentCompareModal } from "src/modals/DiffContentCompareModal";
 import { ScanFilterModal } from "src/modals/ScanFilterModal";
@@ -40,9 +41,23 @@ export const openBoardConfigModal = (
 	new BoardConfigureModal(plugin, currentBoardData, onSave).open();
 };
 
-// Function to open the BoardConfigModal
+// Function to open the ScanVaultModal
 export const openScanVaultModal = (app: App, plugin: TaskBoard) => {
 	new ScanVaultModal(app, plugin).open();
+};
+
+// Function to open the BoardsExplorerModal
+export const openBoardsExplorerModal = (plugin: TaskBoard) => {
+	const boardsRegistry = plugin.settings.data.taskBoardFilesRegistry || {};
+
+	const onBoardSelect = (boardId: string, boardName: string) => {
+		// When a board is selected, you can perform any action here
+		// For now, we just emit an event to switch to that board
+		console.log(`Board selected: ${boardName} (ID: ${boardId})`);
+		eventEmitter.emit("BOARD_SELECTED", { boardId, boardName });
+	};
+
+	new BoardsExplorerModal(plugin, boardsRegistry, onBoardSelect).open();
 };
 
 export const openAddNewTaskInCurrentFileModal = (

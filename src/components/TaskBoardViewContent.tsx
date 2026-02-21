@@ -9,7 +9,7 @@ import { taskJsonMerged } from "src/interfaces/TaskItem";
 import { App, debounce, Platform, Menu } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
+import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal, openBoardsExplorerModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
@@ -881,7 +881,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 						) : (
 							<button
 								className="boardsExplorerModalButton"
-								// onClick={openBoardsExplorerModal}
+								onClick={() => openBoardsExplorerModal(plugin)}
 								aria-label={t("boards-explorer-modal")}
 							>
 								<LayoutGridIcon size={20} />
