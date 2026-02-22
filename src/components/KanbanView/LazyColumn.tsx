@@ -633,7 +633,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				}
 			}
 		} catch (err) {
-			console.log("While drag leave : ", err);
+			// console.log("While drag leave : ", err);
 			// ignore and continue cleanup
 		}
 

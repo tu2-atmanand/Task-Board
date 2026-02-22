@@ -1404,7 +1404,6 @@ class DragDropTasksManager {
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
 	): void {
-		console.log("handleDropEvent...");
 		e.preventDefault();
 
 		// All checks before proceeding with the calculations...
