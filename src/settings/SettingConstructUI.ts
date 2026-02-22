@@ -2701,7 +2701,7 @@ export class SettingsManager {
 						const hoursDiff = Math.abs(
 							differenceInHours(parsed, testDate),
 						);
-						if (hoursDiff > 48) {
+						if (hoursDiff > 1) {
 							new Notice(
 								"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
 									parsed.toISOString() +
