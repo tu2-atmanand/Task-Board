@@ -49,7 +49,7 @@ import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -1174,7 +1174,7 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on("quit", () => {
-				const currentTime = getCurrentLocalTimeString();
+				const currentTime = getCurrentLocalDateTimeString();
 				this.app.saveLocalStorage(
 					OBSIDIAN_CLOSED_TIME_KEY,
 					currentTime,

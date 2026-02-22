@@ -23,15 +23,14 @@ import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
+import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
-
-// Helper modal functions may be provided elsewhere; declare them for TypeScript
-declare function showTextInputModal(app: any, options: { title?: string; placeholder?: string; initialValue?: string }): Promise<string | null>;
-declare function showConfirmationModal(app: any, options: any): Promise<boolean>;
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
+import { startOfDay, isToday, compareAsc, isAfter, isBefore } from 'date-fns';
+import { DEFAULT_DATE_FORMAT } from 'src/interfaces/Constants';
+import { showTextInputModal } from 'src/modals/TextInputModal';
 
 export interface swimlaneDataProp {
 	property: string;
@@ -380,43 +379,72 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	// ========================================
 
 	const getColorIndicator = useCallback(() => {
-		const today = new Date();
-		const taskUniversalDate = parseUniversalDate(universalDate) || new Date(universalDate);
+		// Return grey if there's no universal date
+		if (!universalDate) {
+			return 'grey';
+		}
 
-		if (taskUniversalDate.toDateString() === today.toDateString()) {
-			if (task.time) {
-				const [startStr, endStr] = task.time.contains('-') ? task.time.split('-') : [task.time, task.time];
-				const [startHours, startMinutes] = startStr.contains(':') ? startStr.trim().split(':').map(Number) : [startStr, 0].map(Number);
-				const [endHours, endMinutes] = endStr.contains(':') ? endStr.trim().split(':').map(Number) : [endStr, 0].map(Number);
+		// Use robust date parser for reliable parsing
+		const dateFormatToUse = plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT;
+		const parsedTaskDate = robustDateParser(universalDate, dateFormatToUse);
 
-				const startTime = new Date(today);
-				startTime.setHours(startHours, startMinutes, 0, 0);
+		if (!parsedTaskDate) {
+			return 'grey'; // Invalid date, return grey
+		}
 
-				const endTime = new Date(today);
-				endTime.setHours(endHours, endMinutes, 0, 0);
+		// Set to start of day for accurate date comparison
+		const taskDateAtStartOfDay = startOfDay(parsedTaskDate);
+		const today = startOfDay(new Date());
 
-				const now = new Date();
+		// Check if the task date is today
+		if (isToday(taskDateAtStartOfDay)) {
+			// If there's a time component, use it for more detailed color indication
+			if (task.time && task.time.trim() !== "") {
+				try {
+					const [startStr, endStr] = task.time.includes('-') ? task.time.split('-') : [task.time, task.time];
+					const [startHours, startMinutes] = startStr.includes(':') ?
+						startStr.trim().split(':').map(Number) :
+						[parseInt(startStr.trim()), 0];
+					const [endHours, endMinutes] = endStr.includes(':') ?
+						endStr.trim().split(':').map(Number) :
+						[parseInt(endStr.trim()), 0];
 
-				if (now < startTime) {
-					// return 'var(--color-yellow)'; // Not started yet
-					return '#e8ce4aa8'; // Not started yet
-				} else if (now >= startTime && now <= endTime) {
-					return 'var(--color-blue)'; // In progress
-				} else if (now > endTime) {
-					return '#f23a3ab8'; // Past due
+					const startTime = new Date(today);
+					startTime.setHours(startHours, startMinutes, 0, 0);
+
+					const endTime = new Date(today);
+					endTime.setHours(endHours, endMinutes, 0, 0);
+
+					const now = new Date();
+
+					if (compareAsc(now, startTime) < 0) {
+						// Not started yet
+						return 'var(--color-yellow)';
+					} else if (compareAsc(now, startTime) >= 0 && compareAsc(now, endTime) <= 0) {
+						// In progress
+						return 'var(--color-blue)';
+					} else if (compareAsc(now, endTime) > 0) {
+						// Past due
+						return '#f23a3ab8';
+					}
+				} catch (error) {
+					// If time parsing fails, return yellow for "due today"
+					return 'var(--color-yellow)';
 				}
 			} else {
-				return 'var(--color-yellow)'; // Due today but no time info
+				// Due today but no time info
+				return 'var(--color-yellow)';
 			}
-		} else if (taskUniversalDate > today) {
-			return 'green'; // Due in future
-		} else if (taskUniversalDate < today) {
-			// return 'var(--color-red)'; // Past due
-			return '#f23a3ab8'; // Past due
+		} else if (isAfter(taskDateAtStartOfDay, today)) {
+			// Due in future
+			return 'green';
+		} else if (isBefore(taskDateAtStartOfDay, today)) {
+			// Past due
+			return '#f23a3ab8';
 		} else {
-			return 'grey'; // No due date
+			return 'grey'; // No due date or comparison failed
 		}
-	}, [universalDate, task.time]);
+	}, [universalDate, task.time, plugin.settings.data.globalSettings.dateFormat]);
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
@@ -667,7 +695,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
-						updateTaskItemStatus(plugin, task, status.value);
+						updateTaskItemStatus(plugin, task, task, status.value);
 					})
 				});
 			})
@@ -682,7 +710,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			priorityOptions.forEach((p) => {
 				priMenu.addItem((it) => {
 					it.setTitle(p.text);
-					it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
+					it.onClick(() => updateTaskItemPriority(plugin, task, task, p.value));
 				});
 			});
 		});
@@ -706,7 +734,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setTitle(t("start-date"));
 			it.onClick(async () => {
 				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'startDate', newDate);
+					updateTaskItemDate(plugin, task, task, 'startDate', newDate);
 				})
 			});
 		});
@@ -715,7 +743,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setTitle(t("scheduled-date"));
 			it.onClick(async () => {
 				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
+					updateTaskItemDate(plugin, task, task, 'scheduledDate', newDate);
 				})
 			});
 		});
@@ -724,7 +752,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setTitle(t("due-date"));
 			it.onClick(async () => {
 				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'due', newDate);
+					updateTaskItemDate(plugin, task, task, 'due', newDate);
 				})
 			});
 		});

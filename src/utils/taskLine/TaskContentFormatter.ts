@@ -22,8 +22,8 @@ import { priorityEmojis } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
 import { cursorLocation } from "src/interfaces/TaskItem";
 import { generateTaskId } from "../TaskItemUtils";
-import { moment as _moment } from "obsidian";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { getCurrentLocalDateTimeString } from "../DateTimeCalculations";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -78,10 +78,7 @@ export const addIdToTaskContent = async (
 ): Promise<{ formattedTaskContent: string; newId: string | undefined }> => {
 	const taskId = extractTaskId(formattedTaskContent);
 	let newId = undefined;
-	if (
-		(!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) ||
-		forcefullyAddId
-	) {
+	if ((!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) || forcefullyAddId) {
 		newId = generateTaskId(Plugin);
 		const format = Plugin.settings.data.globalSettings.taskPropertyFormat;
 		switch (format) {
@@ -287,9 +284,8 @@ export const sanitizeStatus = (
 
 	if (newStatusType === statusTypeNames.DONE) {
 		if (globalSettings.autoAddCompletedDate) {
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern,
+			const currentDateValue = getCurrentLocalDateTimeString(
+				globalSettings.dateTimeFormat,
 			);
 			newTitle = sanitizeCompletionDate(
 				globalSettings,
@@ -299,9 +295,8 @@ export const sanitizeStatus = (
 		}
 	} else if (newStatusType === statusTypeNames.CANCELLED) {
 		if (globalSettings.autoAddCancelledDate) {
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.taskCompletionDateTimePattern,
+			const currentDateValue = getCurrentLocalDateTimeString(
+				globalSettings.dateTimeFormat,
 			);
 			newTitle = sanitizeCancelledDate(
 				globalSettings,
@@ -321,7 +316,7 @@ export const sanitizeStatus = (
  * Function to sanitize the created date inside the task title.
  * @param globalSettings - The global settings data.
  * @param title  - The title of the task.
- * @param createdDate - The new created date. Only single format supported right now. (YYYY-MM-dd)
+ * @param createdDate - The new created date. Only single format supported right now. (yyyy-MM-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the created date at a specific position.
  * @returns The sanitized created date string to be used in the task title.
  */
@@ -523,7 +518,7 @@ export const sanitizeScheduledDate = (
  * Function to sanitize the tags inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param dueDate - The due date of the task. Only one format supported right now. (YYYY-mm-dd)
+ * @param dueDate - The due date of the task. Only one format supported right now. (yyyy-mm-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the due date at a specific position.
  * @returns The sanitized due date string to be used in the task title.
  */
@@ -588,7 +583,7 @@ export const sanitizeDueDate = (
  * Function to sanitize the completion date inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param completionDate - The completion date of the task. Only one format supported right now. (YYYY-mm-dd)
+ * @param completionDate - The completion date of the task. Only one format supported right now. (yyyy-mm-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the completion date at a specific position.
  * @returns The sanitized completion date string to be used in the task title.
  */
@@ -655,7 +650,7 @@ export const sanitizeCompletionDate = (
  * Function to sanitize the cancellation date inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param cancelledDate - The cancellation date of the task. Only one format supported right now. (YYYY-mm-dd)
+ * @param cancelledDate - The cancellation date of the task. Only one format supported right now. (yyyy-mm-dd)
  * @param cursorLocation - (Optional) The cursor location to insert the cancellation date at a specific position.
  * @returns The sanitized cancellation date string to be used in the task title.
  */
@@ -1038,7 +1033,7 @@ export const sanitizeTags = (
  * Function to sanitize the reminder inside the task title.
  * @param globalSettings - The global settings data.
  * @param title - The title of the task.
- * @param newReminder - The new reminder to be sanitized and added to the title. Must be in the format "YYYY-MM-ddTHH:mm".
+ * @param newReminder - The new reminder to be sanitized and added to the title. Must be in the format "yyyy-MM-ddTHH:mm".
  * @param cursorLocation - (Optional) The cursor location to insert the reminder at a specific position.
  * @returns The sanitized reminder string to be used in the task title.
  */
@@ -1183,7 +1178,7 @@ export const sanitizeDependsOn = (
 
 // 	const dayPlannerPlugin =
 // 		plugin.settings.data.globalSettings.dayPlannerPlugin;
-// 	const globalSettings = plugin.settings.data.globalSettings;
+// 	const globalSettings = plugin.settings.data;
 
 // 	let dueDateWithFormat: string = "";
 // 	let completedWitFormat: string = "";
@@ -1281,8 +1276,7 @@ export const sanitizeDependsOn = (
  */
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Get the list of properties to hide
-	const hiddenProperties =
-		plugin.settings.data.globalSettings.hiddenTaskProperties || [];
+	const hiddenProperties = plugin.settings.data.globalSettings.hiddenTaskProperties || [];
 
 	// If no properties are configured to hide and the legacy setting is false, return original title
 	if (
@@ -1303,7 +1297,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		.trim();
 
 	// // If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
-	// if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+	// if (plugin.settings.data.globalSettings.globalSettings.showTaskWithoutMetadata) {
 	// 	return cleanTaskTitleLegacy(task);
 	// }
 

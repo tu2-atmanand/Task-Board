@@ -8,7 +8,7 @@ import { t } from "src/utils/lang/helper";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { taskItemEmpty } from "src/interfaces/Mapping";
 import { taskItem } from "src/interfaces/TaskItem";
@@ -89,7 +89,7 @@ export class AddOrEditTaskView extends ItemView {
 				this.task.title = "";
 
 				// Sanitize filename
-				const noteName = this.task.title || getCurrentLocalTimeString();
+				const noteName = this.task.title || getCurrentLocalDateTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}

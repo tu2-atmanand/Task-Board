@@ -249,7 +249,7 @@ ${entry.bugContent}
 
 			// Create new bug report entry with current version
 			const newEntry: BugReportEntry = {
-				timestamp: getCurrentLocalTimeString(),
+				timestamp: getCurrentLocalDateTimeString(),
 				id,
 				message,
 				context,
