@@ -380,7 +380,13 @@ class DragDropTasksManager {
 
 			// newTask[dateType] = newDateValue;
 
-			updateTaskItemDate(plugin, newTask, dateType, newDateValue);
+			updateTaskItemDate(
+				plugin,
+				oldTask,
+				newTask,
+				dateType,
+				newDateValue,
+			);
 		} else if (
 			targetColumn.datedBasedColumn &&
 			targetColumn.datedBasedColumn.from <=
@@ -398,7 +404,13 @@ class DragDropTasksManager {
 			datePicker.onDateSelected = async (date: string | null) => {
 				if (date) {
 					// newTask[dateType] = date;
-					updateTaskItemDate(plugin, newTask, dateType, date);
+					updateTaskItemDate(
+						plugin,
+						oldTask,
+						newTask,
+						dateType,
+						date,
+					);
 				}
 			};
 
@@ -465,7 +477,7 @@ class DragDropTasksManager {
 		// Extract the priority value from the source column
 		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
 
-		updateTaskItemPriority(plugin, newTask, targetColumnPrioirty);
+		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
 
 	/**
@@ -520,7 +532,7 @@ class DragDropTasksManager {
 		const targetColumnStatusValue =
 			(targetColumn.taskStatus as string) || "";
 
-		updateTaskItemStatus(plugin, newTask, targetColumnStatusValue);
+		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
 	};
 
 	handleTaskMove_DONE_to_TODO = (
@@ -620,7 +632,13 @@ class DragDropTasksManager {
 
 			// newTask[dateType] = newDateValue;
 
-			updateTaskItemDate(plugin, newTask, dateType, newDateValue);
+			updateTaskItemDate(
+				plugin,
+				oldTask,
+				newTask,
+				dateType,
+				newDateValue,
+			);
 		} else if (
 			targetColumn.datedBasedColumn &&
 			targetColumn.datedBasedColumn.from <=
@@ -638,7 +656,13 @@ class DragDropTasksManager {
 			datePicker.onDateSelected = async (date: string | null) => {
 				if (date) {
 					// newTask[dateType] = date;
-					updateTaskItemDate(plugin, newTask, dateType, date);
+					updateTaskItemDate(
+						plugin,
+						oldTask,
+						newTask,
+						dateType,
+						date,
+					);
 				}
 			};
 
@@ -772,7 +796,7 @@ class DragDropTasksManager {
 		// Extract the priority value from the source column
 		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
 
-		updateTaskItemPriority(plugin, newTask, targetColumnPrioirty);
+		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
 
 	/**
@@ -829,7 +853,7 @@ class DragDropTasksManager {
 		const targetColumnStatusValue =
 			(targetColumn.taskStatus as string) || "";
 
-		updateTaskItemStatus(plugin, newTask, targetColumnStatusValue);
+		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
 	};
 
 	/**
@@ -877,7 +901,12 @@ class DragDropTasksManager {
 			);
 
 		// FINALLY - Update the task in the note.
-		updateTaskItemStatus(plugin, newTask, newStatus?.symbol ?? "x");
+		updateTaskItemStatus(
+			plugin,
+			oldTask,
+			newTask,
+			newStatus?.symbol ?? "x",
+		);
 	};
 
 	/**

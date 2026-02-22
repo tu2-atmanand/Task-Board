@@ -39,7 +39,7 @@ import {
 } from "../utils/taskNote/FrontmatterOperations";
 import { t } from "../utils/lang/helper";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { getCurrentLocalTimeString } from "../utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { UniversalDateOptions } from "src/interfaces/Enums";
 import {
@@ -67,7 +67,7 @@ export default class VaultScanner {
 		this.plugin = plugin;
 		this.tasksCache = {
 			VaultName: this.plugin.app?.vault.getName(),
-			Modified_at: getCurrentLocalTimeString(),
+			Modified_at: getCurrentLocalDateTimeString(),
 			Pending: {},
 			Completed: {},
 		}; // Reset task structure
@@ -87,7 +87,7 @@ export default class VaultScanner {
 			);
 			this.tasksCache = {
 				VaultName: this.plugin?.app.vault.getName(),
-				Modified_at: getCurrentLocalTimeString(),
+				Modified_at: getCurrentLocalDateTimeString(),
 				Pending: {},
 				Completed: {},
 			};
@@ -349,7 +349,7 @@ export default class VaultScanner {
 							) {
 								const universalDateFormat =
 									this.plugin.settings.data.globalSettings
-										.universalDateFormat;
+										.dateFormat;
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
@@ -648,7 +648,7 @@ export default class VaultScanner {
 	async saveTasksToJsonCache() {
 		// if (!this.tasksDetectedOrUpdated) return;
 
-		this.tasksCache.Modified_at = getCurrentLocalTimeString();
+		this.tasksCache.Modified_at = getCurrentLocalDateTimeString();
 		const result = await writeJsonCacheDataToDisk(
 			this.plugin,
 			this.tasksCache,

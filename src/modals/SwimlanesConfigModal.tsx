@@ -121,8 +121,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 		{ value: 'tags', label: t('tags') },
 		{ value: 'priority', label: t('priority') },
 		{ value: 'status', label: t('status') },
-		// { value: 'scheduledDate', label: t('scheduled-date')},
-		{ value: 'custom', label: t('custom-property') },
+		// { value: 'custom', label: t('custom-property') }, // This can be enabled after implementing the following feature : https://github.com/tu2-atmanand/Task-Board/issues/688
 	];
 
 	const sortOptions = [
