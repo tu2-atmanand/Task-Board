@@ -1299,7 +1299,7 @@
       "scanMode": "automatic",
       "showModifiedFilesNotice": false,
       "dateFormat": "yyyy-MM-dd",
-      "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss"
+      "dateTimeFormat": "yyyy-MM-dd/HH:mm:ss"
     }
   }
 }
