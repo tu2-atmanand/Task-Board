@@ -266,20 +266,26 @@
       "renderVisibleNodes": false,
       "edgeType": "default"
     },
-    "taskBoardFilesRegistry": [
-      {
-        "boardId": "3103563481",
-        "filePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
-      },
-      {
+    "taskBoardFilesRegistry": {
+      "2957159294": {
         "boardId": "2957159294",
-        "filePath": "Meta/Task_Board/Boards/Tag Based Workflow.taskboard"
+        "filePath": "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
+        "boardName": "Tag Based Workflow",
+        "boardDescription": ""
       },
-      {
+      "3103563481": {
+        "boardId": "3103563481",
+        "filePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+        "boardName": "Time Based Workflow",
+        "boardDescription": ""
+      },
+      "4271106430": {
         "boardId": "4271106430",
-        "filePath": "Meta/Task_Board/Boards/Status Based Workflow.taskboard"
+        "filePath": "Meta/Task_Board/Boards/Status Based Workflow.taskboard",
+        "boardName": "Status Based Workflow",
+        "boardDescription": ""
       }
-    ],
+    },
     "searchQuery": "",
     "dateFormat": "yyyy/MM/dd",
     "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",

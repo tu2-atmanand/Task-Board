@@ -21,13 +21,208 @@
 
 ## Recent Bug Reports
 
-Timestamp : 2026-02-21T15:56:34
-ID : 183
+Timestamp : 2026-02-21T19:47:00
+ID : 186
+Message : There was some issue while fetching the filepath from localStorage for the following leafID : e993213dc6bf51cd
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+filePath is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T19:55:50
+ID : 186
+Message : There was some issue while fetching the filepath from localStorage for the following leafID : e993213dc6bf51cd
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+filePath is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T19:56:18
+ID : 186
+Message : There was some issue while fetching the filepath from localStorage for the following leafID : e993213dc6bf51cd
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+filePath is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T20:01:46
+ID : 186
+Message : There was some issue while fetching the filepath from localStorage for the following leafID : ffc9c6a52193b699
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+filePath is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T20:03:28
+ID : 184
 Message : There was an issue with opening the task board file : undefined
 Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
 Version : 1.9.5
 
 #### Bug Content
 ```log
 lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T21:29:39
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T21:31:01
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T21:47:41
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T21:53:14
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T22:01:20
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : TaskBoardView.tsx/onOpen
+Version : 1.9.5
+Version : 1.9.5
+Version : 1.9.5
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-02-21T22:15:04
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 1.9.5
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
 ```
