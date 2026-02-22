@@ -1399,31 +1399,31 @@ export default class TaskBoard extends Plugin {
 
 		if (previousVersion == "" || currentVersion !== previousVersion) {
 			// A short custom message to show in Obsidian's Notice on plugin update.
-			// if (previousVersion !== "") {
-			// 	const customMessage = new Notice("", 0);
+			if (previousVersion !== "") {
+				const customMessage = new Notice("", 0);
 
-			// 	const messageContainer = customMessage.containerEl;
+				const messageContainer = customMessage.containerEl;
 
-			// 	const customMessageContainer = messageContainer.createDiv({
-			// 		cls: "taskboardCustomMessageContainer",
-			// 	});
+				const customMessageContainer = messageContainer.createDiv({
+					cls: "taskboardCustomMessageContainer",
+				});
 
-			// 	customMessageContainer.createEl("h3", { text: "Task Board" });
-			// 	customMessageContainer.createEl("p", {
-			// 		text: "Note for existing users",
-			// 		cls: "taskboardCustomMessageContainerBold",
-			// 	});
-			// 	customMessageContainer.createEl("span", {
-			// 		text: "If you were using the custom statuses from Tasks plugin configs. Please import them in Task Board's setting, using a button in the new Custom Statuses setting section. Task Board will no longer import the custom statuses from Tasks plugin automatically.",
-			// 	});
-			// 	customMessageContainer.createEl("p", {
-			// 		text: "Read the release notes for all the latest features : ",
-			// 	});
-			// 	customMessageContainer.createEl("a", {
-			// 		text: "Task Board v1.9.4",
-			// 		href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
-			// 	});
-			// }
+				customMessageContainer.createEl("h3", { text: "Task Board" });
+				customMessageContainer.createEl("p", {
+					text: "Note for existing users",
+					cls: "taskboardCustomMessageContainerBold",
+				});
+				customMessageContainer.createEl("span", {
+					text: "This new version will be using the date-fns library for managing all date-time related calculations. Because of this more features are possible in the future. Kindly take a look at the two new settings added under the 'Formats' tab in task boards settings.",
+				});
+				customMessageContainer.createEl("p", {
+					text: "Read the release notes for all the changes : ",
+				});
+				customMessageContainer.createEl("a", {
+					text: "Task Board v1.9.6",
+					href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
+				});
+			}
 
 			// Show a message to existing users to re-scan the vault on minor version updates
 			// if (runMandatoryScan && previousVersion === "") {
