@@ -42,8 +42,8 @@ export const openBoardConfigModal = (
 };
 
 // Function to open the ScanVaultModal
-export const openScanVaultModal = (app: App, plugin: TaskBoard) => {
-	new ScanVaultModal(app, plugin).open();
+export const openScanVaultModal = (plugin: TaskBoard) => {
+	new ScanVaultModal(plugin).open();
 };
 
 // Function to open the BoardsExplorerModal

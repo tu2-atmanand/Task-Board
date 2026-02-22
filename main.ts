@@ -684,7 +684,7 @@ export default class TaskBoard extends Plugin {
 			id: "open-scan-vault-modal",
 			name: t("open-scan-vault-modal"),
 			callback: () => {
-				openScanVaultModal(this.app, this.plugin);
+				openScanVaultModal(this.plugin);
 			},
 		});
 

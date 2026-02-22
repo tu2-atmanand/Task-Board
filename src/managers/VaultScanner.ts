@@ -666,35 +666,6 @@ export default class VaultScanner {
 
 		// const result = this.saveTasksToJsonCacheDebounced();
 	}
-
-	/**
-	 * Discover all .taskboard files in the vault
-	 * This method scans through all files and identifies board configuration files
-	 * @returns Array of discovered .taskboard file paths
-	 */
-	discoverTaskboardFiles(): string[] {
-		try {
-			const allFiles = this.app.vault.getAllLoadedFiles();
-			const taskboardFiles = allFiles
-				.filter(
-					(file) =>
-						file instanceof TFile && file.extension === "taskboard",
-				)
-				.map((file) => (file as TFile).path);
-
-			console.log(
-				`VaultScanner: Discovered ${taskboardFiles.length} .taskboard files:`,
-				taskboardFiles,
-			);
-			return taskboardFiles;
-		} catch (error) {
-			console.error(
-				"VaultScanner: Error discovering .taskboard files:",
-				error,
-			);
-			return [];
-		}
-	}
 }
 
 /**

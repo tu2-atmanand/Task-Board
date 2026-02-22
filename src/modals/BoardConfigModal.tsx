@@ -338,7 +338,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			if (boardToSave) {
 				const filePath = plugin.taskBoardFileManager.getBoardFilepathFromRegistry(boardId);
 				if (filePath) {
-					await plugin.taskBoardFileManager.saveBoardToFile(filePath, boardToSave);
+					await plugin.taskBoardFileManager.saveBoard(boardToSave, filePath);
 				}
 			}
 		}
