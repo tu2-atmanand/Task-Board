@@ -1,15 +1,15 @@
 // src/views/TaskBoardView.tsx
 
-import { ItemView, Platform, WorkspaceLeaf } from "obsidian";
+import { ItemView, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
-import { RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
+import { funnelIcon, RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
 import { StrictMode } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContent from "src/components/TaskBoardViewContent";
 import type TaskBoard from "../../main";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { openScanVaultModal } from "../services/OpenModals";
+import { openBoardConfigModal, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
@@ -17,8 +17,8 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
 	leaf: WorkspaceLeaf;
-	// boards: Board[];
 	root: Root | null = null;
+	private currentFilePath: string | undefined = undefined;
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
 		super(leaf);
@@ -37,11 +37,173 @@ export class TaskBoardView extends ItemView {
 		return t("task-board");
 	}
 
-	getSettings() {
-		return this.plugin.settings;
+	onPaneMenu(menu: Menu, source: "more-options" | "tab-header" | string): void {
+		if (source === "more-options") {
+			menu.addItem((item) => {
+				item.setTitle(t("quick-actions"));
+				item.setIsLabel(true);
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("refresh-the-board"));
+				item.setIcon("rotate-cw");
+				item.onClick(async () => {
+					// refreshBoardButton();
+				});
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("show-hide-properties"));
+				item.setIcon("list");
+				item.onClick(async () => {
+					// handlePropertiesBtnClick(event);
+				});
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("open-board-filters-modal"));
+				item.setIcon(funnelIcon);
+				item.onClick(async () => {
+					// handleFilterButtonClick(event);
+				});
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("open-board-configuration-modal"));
+				item.setIcon("settings");
+				item.onClick(async () => {
+					// openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
+					// 	// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+					// 	// setCurrentBoardData(updatedBoard);
+					// 	this.plugin.taskBoardFileManager.saveBoard(updatedBoard);
+					// })
+				});
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("scan-vault-modal"));
+				item.setIcon(ScanVaultIcon);
+				item.onClick(async () => {
+					openScanVaultModal(this.plugin);
+				});
+			});
+
+
+			menu.addItem((item) => {
+				item.setTitle(t("view-type"));
+				item.setIsLabel(true);
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("kanban-view"));
+				item.setIcon("square-kanban");
+				item.onClick(async () => {
+					eventEmitter.emit("SWITCH_VIEW", 'kanban');
+				});
+			});
+			menu.addItem((item) => {
+				item.setTitle(t("map-view"));
+				item.setIcon("network");
+				item.onClick(async () => {
+					eventEmitter.emit("SWITCH_VIEW", 'map');
+				});
+			});
+		}
 	}
 
+	/**
+	 * This is called by Obsidian when the layout is about to be save its state/layout.
+	 * @returns The state data to be stored inside the workspace.json file inside the
+	 * Obsidian's config folder. (.obsidian/workspace.json)
+	 */
+	getState() {
+		// Save the current filePath to the workspace state
+		return {
+			...super.getState(),
+			...(this.currentFilePath ? { filePath: this.currentFilePath } : {}),
+		};
+	}
+
+	/**
+	 * This setState is always called after the onOpen function has finished its work by Obsidian.
+	 * If the leaf was saved by Obsidian in its workspace.json file previosly,
+	 * we can get the data in this function through the state param.
+	 * @param state 
+	 * @param result 
+	 */
+	async setState(state: any, result: ViewStateResult): Promise<void> {
+		const { filePath } = state;
+		console.log(`Running setState for filepath :${filePath}`);
+
+		if (this.plugin.settings.data.loadAllBoards) {
+			// All boards data will be loaded based on user configuration
+			let allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
+			new Notice("Implementation is pending...", 0);
+
+		} else {
+			// Check if a specific .taskboard file was clicked from File Navigator
+			const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
+			if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
+				// Load and render the clicked file
+				const clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
+				if (clickedFileData) {
+					this.currentFilePath = clickedFilePath;
+					this.renderBoard(clickedFileData, undefined);
+				} else {
+					bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
+				}
+			} else {
+				// In this case, mostly user is opening the leaf from the ribbon icon
+				// Show last viewed board
+
+				// Check if the board was already loaded by setState() when workspace was restored
+				// if (this.currentFilePath) {
+				if (filePath && typeof filePath === "string") {
+					// Use the filePath from saved state to load and render the board
+					const boardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(
+						filePath
+					);
+					if (boardData) {
+						this.currentFilePath = filePath;
+						this.renderBoard(boardData, undefined);
+					} else {
+						bugReporterManagerInsatance.showNotice(
+							183,
+							`There was an issue with opening the task board file : ${filePath}`,
+							"boardData is undefined",
+							"TaskBoardView.tsx/setState"
+						);
+					}
+				}
+				// }
+				else {
+					const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
+					if (lastViewedBoardData) {
+						// Get the filePath from the registry
+						const taskBoardFilesRegistry = this.plugin.settings.data.taskBoardFilesRegistry || {};
+						const registryEntries = Object.entries(taskBoardFilesRegistry)
+							.filter(([key]) => isNaN(Number(key)))
+							.slice(0, 1);
+
+						if (registryEntries.length > 0) {
+							const [, firstItemFromRegistry] = registryEntries[0];
+							if (firstItemFromRegistry?.filePath) {
+								this.currentFilePath = firstItemFromRegistry.filePath;
+							}
+						}
+
+						this.renderBoard(lastViewedBoardData, undefined);
+					} else {
+						bugReporterManagerInsatance.showNotice(185, `There was an issue with opening the last viewed board by user`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
+					}
+
+				}
+			}
+		}
+
+		await super.setState(state, result);
+	}
+
+	/**
+	 * This function is ran by Obsidian, whenever a new leaf is created or
+	 * an in-active leaf is brough to life.
+	 */
 	async onOpen() {
+		console.log("Running onOpen...");
 		if (Platform.isMobile) {
 			this.addAction(RefreshIcon, t("refresh-board-button"), async () => {
 				const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
@@ -58,60 +220,11 @@ export class TaskBoardView extends ItemView {
 
 		if (!Platform.isMobile || mandatoryScanSignal) {
 			this.addAction(ScanVaultIcon, t("scan-vault-modal"), () => {
-				openScanVaultModal(this.app, this.plugin);
+				openScanVaultModal(this.plugin);
 			}).addClass("taskboardScanVaultBtn");
 		}
 
 		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
-
-		if (this.plugin.settings.data.loadAllBoards) {
-			// All boards data will be loaded based on user configuration
-			let allBoardsData = await this.plugin.taskBoardFileManager.getAllBoards();
-
-		} else {
-			// Here we shall handle essentially three cases of opening this view : 
-			// 1. When the board file is clicked from file-navigator.
-			// 2. When the leaf changes from in-active state to active state.
-			// 3. When the plugin ribbon icon is clicked.
-			const leafID = this.leaf?.id;
-			console.log("Leaf ID : ", leafID);
-
-			const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
-			console.log("TaskBoardView.tsx : clickedFilePath from leaf:", clickedFilePath);
-			let clickedFileData: Board | undefined;
-			if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
-				// Check if a specific .taskboard file was clicked from File Navigator
-				// First check the leaf instance directly (set by monkey patch)
-				clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
-				if (clickedFileData)
-					this.renderBoard(clickedFileData, undefined);
-				else
-					bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
-
-				this.plugin.taskBoardFileManager.setFilepathToLeafID(leafID, clickedFilePath);
-			} else {
-				// First lets check if this leafID already exists in localStorage
-				const filePath = await this.plugin.taskBoardFileManager.getFilepathFromLeafID(leafID);
-				if (filePath) {
-					const lastViewedBoardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(filePath || "");
-					if (lastViewedBoardData)
-						this.renderBoard(lastViewedBoardData, undefined);
-					else
-						bugReporterManagerInsatance.showNotice(184, `There was an issue with opening the task board file : ${filePath}`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
-
-					// } else if (filePath === undefined) {
-					// 	bugReporterManagerInsatance.showNotice(186, `There was some issue while fetching the filepath from localStorage for the following leafID : ${leafID}`, "filePath is undefined", "TaskBoardView.tsx/onOpen");
-				} else {
-					// In this case, mostly user is opening the leaf from the ribbon icon
-					// Show last viewed board
-					const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
-					if (lastViewedBoardData)
-						this.renderBoard(lastViewedBoardData, undefined);
-					else
-						bugReporterManagerInsatance.showNotice(185, `There was an issue with opening the last viewed board by user`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
-				}
-			}
-		}
 	}
 
 	async highlighgtScanvaultIcon() {
@@ -147,9 +260,13 @@ export class TaskBoardView extends ItemView {
 					plugin={this.plugin}
 					allBoards={allBoardsData}
 					currentBoardData={currentBoardData}
+					currentLeaf={this.leaf}
 				/>,
 			</StrictMode>,
 		);
+
+		// Signal the workspace to save the updated layout state
+		this.app.workspace.requestSaveLayout();
 	}
 
 	async onClose() {
