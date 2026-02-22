@@ -1,4 +1,4 @@
-// src/utils/boardFilterer.ts
+// src/utils/advancedFilterer.ts
 
 import { taskItem } from "src/interfaces/TaskItem";
 import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter";
@@ -16,9 +16,10 @@ import { robustDateParser } from "../DateTimeCalculations";
  * Filters tasks based on the board's filter configuration
  * @param tasks - Array of tasks to filter
  * @param filterState - The root filter state containing all filter groups
+ * @param dateFormat - The date format string (e.g., DEFAULT_DATE_FORMAT)
  * @returns Filtered array of tasks
  */
-export function boardFilterer(
+export function advancedFilterer(
 	tasks: taskItem[],
 	filterState: RootFilterState | undefined,
 	dateFormat: string = DEFAULT_DATE_FORMAT,
@@ -162,7 +163,7 @@ function evaluateFilter(
 					String(item)
 						.replace("#", "")
 						.toLowerCase()
-						.includes(String(value).replace("#", "").toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase()),
 				);
 			}
 			return true;
@@ -205,7 +206,7 @@ function evaluateFilter(
 				return taskValue.some(
 					(tag) =>
 						String(tag).toLowerCase() ===
-						String(value).toLowerCase()
+						String(value).toLowerCase(),
 				);
 			}
 			return false;
@@ -214,7 +215,7 @@ function evaluateFilter(
 				return !taskValue.some(
 					(tag) =>
 						String(tag).toLowerCase() ===
-						String(value).toLowerCase()
+						String(value).toLowerCase(),
 				);
 			}
 			return true;
@@ -277,7 +278,7 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 			if (property.startsWith("tags.")) {
 				const tagName = property.substring(5);
 				return task.tags.some(
-					(tag) => tag.toLowerCase() === tagName.toLowerCase()
+					(tag) => tag.toLowerCase() === tagName.toLowerCase(),
 				);
 			}
 			return undefined;
@@ -314,7 +315,7 @@ function compareDates(date1: any, date2: any, dateFormat: string): number {
  * @returns true if empty, false otherwise
  */
 export function isRootFilterStateEmpty(
-	filterState: RootFilterState | undefined
+	filterState: RootFilterState | undefined,
 ): boolean {
 	if (!filterState) return true;
 	if (!filterState.filterGroups || filterState.filterGroups.length === 0)

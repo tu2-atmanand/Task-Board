@@ -7,7 +7,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
-import { boardFilterer } from "./BoardFilterer";
+import { advancedFilterer } from "./BoardFilterer";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
 import { getAllTaskTags } from "../TaskItemUtils";
 
@@ -293,7 +293,7 @@ export const columnSegregator = (
 	 * -------------------------------------------------------------
 	 */
 	if (columnData?.filters && columnData.filters.filterGroups) {
-		tasksToDisplay = boardFilterer(tasksToDisplay, columnData.filters);
+		tasksToDisplay = advancedFilterer(tasksToDisplay, columnData.filters);
 	}
 
 	/**

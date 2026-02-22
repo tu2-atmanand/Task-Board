@@ -17,7 +17,7 @@ import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
+import { advancedFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
@@ -115,8 +115,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: boardFilterer(allTasks.Pending, boardFilter),
-				Completed: boardFilterer(allTasks.Completed, boardFilter),
+				Pending: advancedFilterer(allTasks.Pending, boardFilter),
+				Completed: advancedFilterer(allTasks.Completed, boardFilter),
 			};
 
 			// Update task count in settings
