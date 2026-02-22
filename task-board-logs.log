@@ -13,216 +13,60 @@
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
-  - Task Board v1.9.5
   - BRAT v1.4.0
   - Tasks v7.22.0
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
+  - Task Board v1.9.5
 
 ## Recent Bug Reports
 
-Timestamp : 2026-02-21T19:47:00
-ID : 186
-Message : There was some issue while fetching the filepath from localStorage for the following leafID : e993213dc6bf51cd
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-filePath is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T19:55:50
-ID : 186
-Message : There was some issue while fetching the filepath from localStorage for the following leafID : e993213dc6bf51cd
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-filePath is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T19:56:18
-ID : 186
-Message : There was some issue while fetching the filepath from localStorage for the following leafID : e993213dc6bf51cd
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-filePath is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T20:01:46
-ID : 186
-Message : There was some issue while fetching the filepath from localStorage for the following leafID : ffc9c6a52193b699
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-filePath is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T20:03:28
-ID : 184
-Message : There was an issue with opening the task board file : undefined
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T21:29:39
-ID : 185
-Message : There was an issue with opening the last viewed board by user
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T21:31:01
-ID : 185
-Message : There was an issue with opening the last viewed board by user
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T21:47:41
-ID : 185
-Message : There was an issue with opening the last viewed board by user
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T21:53:14
-ID : 185
-Message : There was an issue with opening the last viewed board by user
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T22:01:20
-ID : 185
-Message : There was an issue with opening the last viewed board by user
-Context : TaskBoardView.tsx/onOpen
-Version : 1.9.5
-Version : 1.9.5
-Version : 1.9.5
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-02-21T22:15:04
-ID : 142
+Timestamp : 2026-02-22T11:01:22
+ID : 149
 Message : 
-Context : DragDropTasksManager.ts/handleDropEvent
+Context : undefined
 Version : 1.9.5
 
 #### Bug Content
 ```log
-No current drag data available for drop operation.currentDragData=null
+There is testing going on.
+```
+
+-------------
+
+Timestamp : 2026-02-22T11:27:53
+ID : 149
+Message : 
+Context : undefined
+Version : 1.9.5
+
+#### Bug Content
+```log
+There is testing going on.
+```
+
+-------------
+
+Timestamp : 2026-02-22T11:35:29
+ID : 149
+Message : 
+Context : undefined
+Version : 1.9.5
+
+#### Bug Content
+```log
+This is a test bug.
+```
+
+-------------
+
+Timestamp : 2026-02-22T11:42:40
+ID : 149
+Message : 
+Context : OpenModals.ts/openAddNewTaskNoteModal/callback()
+Version : 1.9.5
+
+#### Bug Content
+```log
+This is a test bug.
 ```
