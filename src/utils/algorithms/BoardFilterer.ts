@@ -179,13 +179,13 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 		case "<=":
 			return Number(taskValue) <= Number(value);
 		case "before":
-			return compareDates(taskValue, value) < 0;
+			return compareDates(taskValue, value, dateFormat) < 0;
 		case "after":
-			return compareDates(taskValue, value) > 0;
+			return compareDates(taskValue, value, dateFormat) > 0;
 		case "onOrBefore":
-			return compareDates(taskValue, value) <= 0;
+			return compareDates(taskValue, value, dateFormat) <= 0;
 		case "onOrAfter":
-			return compareDates(taskValue, value) >= 0;
+			return compareDates(taskValue, value, dateFormat) >= 0;
 		case "hasTag":
 			if (Array.isArray(taskValue)) {
 				return taskValue.some(
