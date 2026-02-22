@@ -1,11 +1,11 @@
 import { t } from "i18next";
 import TaskBoard from "main";
-import { Notice, } from "obsidian";
+import { Notice } from "obsidian";
 import { newReleaseVersion } from "src/interfaces/Constants";
 import { BugReporterModal } from "src/modals/BugReporterModal";
 import { fsPromises } from "src/services/FileSystem";
 import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 /**
  * Interface for bug report entries
@@ -32,7 +32,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 20;
-	private readonly MAX_USED_ID = 181; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
+	private readonly MAX_USED_ID = 186; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -136,9 +136,10 @@ class BugReporterManager {
 			const bugEntries: BugReportEntry[] = [];
 
 			for (const section of bugReportSections) {
-				if (!section.trim()) continue;
+				const sectionTrimmed = section.trim();
+				if (!sectionTrimmed.trim()) continue;
 
-				const parsed = this.parseBugReportEntry(section);
+				const parsed = this.parseBugReportEntry(sectionTrimmed);
 				if (parsed) {
 					bugEntries.push(parsed);
 				}
@@ -179,15 +180,18 @@ class BugReporterManager {
 			}
 
 			const contextMatch = entryText.match(
-				/Context\s*:\s*([\s\S]*?)(?=\n#### Bug Content|\n\n|$)/,
+				/Context\s*:\s*(.+?)(?=\Version|$)/,
+				// /Context\s*:\s*([\s\S]*?)(?=\n#### Bug Content|\n\n|$)/,
 			);
 			if (contextMatch) {
 				entry.context = contextMatch[1].trim();
 			}
 
-			// Extract version (for backward compatibility, set to null if not found)
+			// Extract version (for backward compatibility
 			const versionMatch = entryText.match(/Version\s*:\s*(.+?)(?=\n|$)/);
-			entry.version = versionMatch ? versionMatch[1].trim() : "Older than 1.9.3";
+			entry.version = versionMatch
+				? versionMatch[1].trim()
+				: "Older than 1.9.3";
 
 			// Extract bug content from code block
 			const bugContentMatch = entryText.match(/```log\n([\s\S]*?)\n```/);
@@ -197,10 +201,10 @@ class BugReporterManager {
 
 			// Validate that all required fields are present
 			if (
-				entry.timestamp &&
-				entry.id !== undefined &&
-				entry.message &&
-				entry.context &&
+				entry.timestamp ||
+				entry.id !== undefined ||
+				entry.message ||
+				entry.context ||
 				entry.bugContent
 			) {
 				return entry as BugReportEntry;
@@ -221,7 +225,7 @@ class BugReporterManager {
 ID : ${entry.id}
 Message : ${entry.message}
 Context : ${entry.context}
-Version : ${newReleaseVersion}
+Version : ${entry.version ?? "Older than 1.9.3"}
 
 #### Bug Content
 \`\`\`log
@@ -349,11 +353,7 @@ ${entry.bugContent}
 	/**
 	 * Appends a new bug report at the end of the log file.
 	 */
-	addToLogs = (
-		id: number,
-		bugContent: string,
-		context: string,
-	) => {
+	addToLogs = (id: number, bugContent: string, context: string) => {
 		// STEP 1 - Check if this type of bug, based on the id, is already visible to the user or not
 		if (this.alreadyShownBugsIDs.includes(id)) {
 			// Bug already shown, don't show again
