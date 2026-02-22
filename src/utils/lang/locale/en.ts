@@ -592,7 +592,7 @@ const en: Lang = {
 	"on-or-after": "on or after",
 	"before": "before",
 	"on-or-before": "on or before",
-	"verify": "Verify"
+	"validate": "Validate"
 };
 
 export default en;
