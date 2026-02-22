@@ -1,9 +1,8 @@
 // /src/modals/SwimlanesConfigModal.tsx
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Modal, App, BooleanValue } from 'obsidian';
+import { Modal, App } from 'obsidian';
 import ReactDOM from "react-dom/client";
-import TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
 import Sortable from 'sortablejs';
 import { RxDragHandleDots2 } from 'react-icons/rx';

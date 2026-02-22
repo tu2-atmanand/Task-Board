@@ -1,76 +1,59 @@
 // src/components/TaskBoardViewContent.tsx
 
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban, Save, LayoutGridIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
-import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
+import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
+import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform, Menu } from "obsidian";
+import { App, debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { handleUpdateBoards } from "../utils/BoardOperations";
-import { bugReporter, openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
-import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
+import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal, openBoardsExplorerModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { DEFAULT_DATE_FORMAT, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
+import { advancedFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs: Board[] }> = ({ app, plugin, boardConfigs }) => {
-	const [boards, setBoards] = useState<Board[]>(boardConfigs);
-	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.globalSettings.lastViewHistory.boardIndex ?? 0);
+const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf, allBoards?: Board[] }> = ({ plugin, currentBoardData, currentLeaf, allBoards }) => {
+	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
+	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
+	const [boardData, setCurrentBoardData] = useState<Board>();
+	const [allBoardsData, setAllBoardsData] = useState<Board[] | undefined>(allBoards);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
-	const [filteredTasksPerColumn, setFilteredTasksPerColumn] = useState<typeof allTasksArrangedPerColumn>([]);
-	const [viewType, setViewType] = useState<string>(plugin.settings.data.globalSettings.lastViewHistory.viewedType || viewTypeNames.kanban);
+	const [viewType, setViewType] = useState<string>(plugin.settings.data.lastViewHistory.viewedType || viewTypeNames.kanban);
 
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [freshInstall, setFreshInstall] = useState(false);
-	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.globalSettings.searchQuery ? true : false);
-	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.globalSettings.searchQuery ?? "");
+	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.searchQuery ? true : false);
+	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
 
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
+	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
 
-	const [showAllElements, setShowAllElements] = useState(true);
-	const [leafWidth, setLeafWidth] = useState<number>(1000);
-	const [isMobileView, setIsMobileView] = useState(false);
+	const [viewWidth, setviewWidth] = useState<number>(currentLeaf.width);
+	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
+	const [isMobileView, setIsMobileView] = useState(false); // show elements for screens smaller than 800px
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
 	const [editorModified, setEditorModified] = useState(plugin.editorModified);
 
-	// plugin.registerEvent(
-	// 	plugin.app.workspace.on("resize", () => {
-	// 		// Now I should find if the leaf of type taskboard-view is active or not. If its active then I should find its width. If its less than 400px then hide the progress bar.
-	// 		const taskBoardLeaf =
-	// 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
-	// 		console.log(
-	// 			"Window resized",
-	// 			"\nTaskBoardLeaf:",
-	// 			taskBoardLeaf
-	// 		);
-	// 		if (taskBoardLeaf) {
-	// 			const width = taskBoardLeaf.width;
-	// 			console.log("TaskBoardLeaf width:", width);
-	// 			setLeafWidth(width);
-	// 		}
-	// 	})
-	// );
-
 	useEffect(() => {
 		const handleResize = () => {
-			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
+			const taskBoardLeaf = currentLeaf;
 			if (taskBoardLeaf) {
-				setLeafWidth(taskBoardLeaf.width);
+				setviewWidth(taskBoardLeaf.width);
 			}
 		};
+
 		handleResize();
 		plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
 		return () => {
@@ -79,15 +62,26 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	useEffect(() => {
-		setShowAllElements(leafWidth >= 1000);
-		setIsMobileView(leafWidth <= 800); // For even little bigger screen smartphones, let go with 800
-	}, [leafWidth]);
+		setShowAllElements(viewWidth >= 1000);
+		setIsMobileView(viewWidth <= 800); // For even little bigger screen smartphones, let go with 800
+	}, [viewWidth]);
 
 	useEffect(() => {
 		const fetchData = async () => {
+			console.log("TASK BOARD : Does this run while switching boards...");
 			try {
-				const data = await loadBoardsData(plugin);
-				setBoards(data);
+				// if (currentBoardData) {
+				setCurrentBoardData(currentBoardData);
+
+				// Get index of the new board from the registry based on the board id.
+				const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(currentBoardData.id);;
+				const registryLength = Object.keys(plugin.settings.data.taskBoardFilesRegistry || {}).length; setActiveBoardIndex(indexOfNewBoard ?? registryLength);
+				// } else {
+				// 	const data = await plugin.taskBoardFileManager.loadBoardUsingIndex(activeBoardIndex);
+				// 	if (!data) throw "Board data not found.";
+
+				// 	setCurrentBoardData(data);
+				// }
 
 				const allTasks = await loadTasksAndMerge(plugin, true);
 				if (allTasks) {
@@ -95,9 +89,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					setFreshInstall(false);
 				}
 			} catch (error) {
-				console.error(
-					"Error loading tasks cache from disk\nIf this is appearing on a fresh install then no need to worry.\n",
-					error
+				bugReporterManagerInsatance.addToLogs(
+					131,
+					`No need to worry about this bug, if its appearing on the fresh install.\n${String(error)}`,
+					"TaskBoardViewContent.tsx/loading boards and tasks useEffect",
 				);
 				setFreshInstall(true);
 			}
@@ -106,62 +101,45 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		fetchData();
 	}, [refreshCount]);
 
-	const allTasksArrangedPerColumn = useMemo(() => {
-		// console.log("Calculating allTasksArrangedPerColumn...");
-		setFilteredTasksPerColumn([]);
-		if (allTasks && boards[activeBoardIndex]) {
-			// Apply board filters to pending tasks
-			const currentBoard = boards[activeBoardIndex];
+	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
+	const filteredAndSearchedTasks = useMemo(() => {
+		if (allTasks && boardData) {
+			const currentBoard = boardData;
 			const boardFilter = currentBoard.boardFilter;
+			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
-			// Create a copy of allTasks with filtered pending tasks
-			const filteredAllTasks = {
+			// Apply board filters to tasks
+			const boardFilteredTasks = {
 				...allTasks,
-				Pending: boardFilterer(allTasks.Pending, boardFilter),
-				Completed: boardFilterer(allTasks.Completed, boardFilter),
+				Pending: advancedFilterer(allTasks.Pending, boardFilter, dateFormat),
+				Completed: advancedFilterer(allTasks.Completed, boardFilter, dateFormat),
 			};
-			plugin.settings.data.boardConfigs[activeBoardIndex].taskCount = {
-				pending: filteredAllTasks.Pending.length,
-				completed: filteredAllTasks.Completed.length,
-			};
-			setFilteredTasks(filteredAllTasks);
 
+			let newBoardData = currentBoard;
+			// Update task count in settings
+			newBoardData.taskCount = {
+				pending: boardFilteredTasks.Pending.length,
+				completed: boardFilteredTasks.Completed.length,
+			};
+
+			setFilteredTasks(boardFilteredTasks);
+
+			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
-				const searchQueryFilteredTasks = handleSearchSubmit(filteredAllTasks);
-				return currentBoard.columns
-					.filter((column) => column.active)
-					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, searchQueryFilteredTasks)
-					);
-			} else {
-				return currentBoard.columns
-					.filter((column) => column.active)
-					.map((column: ColumnData) =>
-						columnSegregator(plugin.settings, activeBoardIndex, column, filteredAllTasks, (updatedBoardData: Board) => {
-							// I think this below code is not required as we simply want to update the data on the disk.
-							// setBoards((prevBoards) => {
-							// 	const updatedBoards = [...prevBoards];
-							// 	updatedBoards[activeBoardIndex] = updatedBoardData;
-							// 	return updatedBoards;
-							// });
-
-							plugin.settings.data.boardConfigs[activeBoardIndex] = updatedBoardData;
-							// Technically, at later point in time, when user will make any changes, the latest data will be updated on the disk, so we need not have to update it everytime during this column seggregation.
-							// const newSettings = plugin.settings;
-							// plugin.saveSettings(newSettings);
-						})
-					);
+				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+				return searchFiltered || boardFilteredTasks;
 			}
 
+			return boardFilteredTasks;
 		}
-		return [];
-	}, [allTasks, activeBoardIndex]);
+		return { Pending: [], Completed: [] };
+	}, [allTasks, currentBoardData, searchQuery]);
 
 	useEffect(() => {
-		if (allTasksArrangedPerColumn.length > 0) {
+		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
 			setLoading(false);
 		}
-	}, [allTasksArrangedPerColumn]);
+	}, [filteredAndSearchedTasks]);
 
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
@@ -187,9 +165,21 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	useEffect(() => {
+		const handleMapDataUpdated = (eventData: { status: boolean }) => {
+			if (eventData.status)
+				setMapViewDataUpdated(true);
+			else
+				setMapViewDataUpdated(false);
+		};
+
+		eventEmitter.on("MAP_UPDATED", handleMapDataUpdated);
+		return () => eventEmitter.off("MAP_UPDATED", handleMapDataUpdated);
+	}, []);
+
+	useEffect(() => {
 		const refreshView = (viewType: string) => {
 			setViewType(viewType);
-			plugin.settings.data.globalSettings.lastViewHistory.viewedType = viewType;
+			plugin.settings.data.lastViewHistory.viewedType = viewType;
 			plugin.saveSettings();
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);
@@ -207,37 +197,36 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}, []);
 
 	const refreshBoardButton = useCallback(() => {
-		plugin.realTimeScanner.processAllUpdatedFiles().then(() => console.log("Finished processing all updated files."));
-		plugin.processCreateQueue().then(() => console.log("Finished processing create queue."));
-		plugin.processDeleteQueue().then(() => console.log("Finished processing delete queue."));
-		plugin.processRenameQueue().then(() => console.log("Finished processing rename queue."));
+		plugin.realTimeScanner.processAllUpdatedFiles(); //.then(() => console.log("Finished processing all updated files."));
+		plugin.processCreateQueue(); //.then(() => console.log("Finished processing create queue."));
+		plugin.processDeleteQueue(); //.then(() => console.log("Finished processing delete queue."));
+		plugin.processRenameQueue(); //.then(() => console.log("Finished processing rename queue."));
 
 		setTimeout(() => {
-			console.log("Now will emit REFRESH_BOARD event...");
 			eventEmitter.emit("REFRESH_BOARD");
 		}, 100)
 	}, []);
 
 	function handleOpenAddNewTaskModal() {
-		openAddNewTaskModal(app, plugin);
+		openAddNewTaskModal(plugin);
 	}
 
 	function handleOpenTaskBoardActionsModal() {
-		openTaskBoardActionsModal(plugin, activeBoardIndex);
+		if (boardData)
+			openTaskBoardActionsModal(plugin, boardData);
 	}
 
 	function handleSearchButtonClick() {
 		if (showSearchInput) {
 			setSearchQuery("");
 			// el.currentTarget.focus();
-			setFilteredTasksPerColumn([]);
-			plugin.settings.data.globalSettings.searchQuery = "";
+			plugin.settings.data.searchQuery = "";
 
 			eventEmitter.emit("REFRESH_COLUMN");
 			plugin.saveSettings();
 			setShowSearchInput(false);
 		} else {
-			setSearchQuery(plugin.settings.data.globalSettings.searchQuery || "");
+			setSearchQuery(plugin.settings.data.searchQuery || "");
 			handleSearchSubmit();
 			setShowSearchInput(true);
 		}
@@ -251,11 +240,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | null {
 		if (!searchQuery.trim()) {
-			setFilteredTasksPerColumn([]);
 			return null;
 		}
-
-		// plugin.settings.data.globalSettings.searchQuery = searchQuery;
 
 		const lowerQuery = searchQuery.toLowerCase();
 		let searchFilteredTasks: taskJsonMerged | null = null;
@@ -281,67 +267,32 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					}
 				})
 			};
-		}
-		else {
-			const filtered = allTasksArrangedPerColumn.map((column) => {
-				const filteredTasks = column
-					.filter((task) => {
-						if (lowerQuery.startsWith("file:")) {
-							return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
-						} else {
-							const titleMatch = task.title.toLowerCase().includes(lowerQuery);
-							const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
-							return titleMatch || bodyMatch;
-						}
-					});
-				// TODO : This highliting option also cannot work as it destroys the other functionalities of the taskItem.
-				// .map((task) => {
-				// 	const highlightedTitle = highlightMatch(task.title, searchQuery);
-				// 	const highlightedBody = highlightMatch(task.body.join("\n"), searchQuery);
-
-				// 	return {
-				// 		...task,
-				// 		title: highlightedTitle,
-				// 		body: highlightedBody.split("\n"),
-				// 	};
-				// });
-				return filteredTasks;
-			});
-			setFilteredTasksPerColumn(filtered);
 
 			setTimeout(() => {
-				plugin.settings.data.globalSettings.searchQuery = lowerQuery;
+				plugin.settings.data.searchQuery = lowerQuery;
 				plugin.saveSettings();
 			}, 100);
 		}
 
-
 		return searchFilteredTasks;
-	}
-
-	function handleViewTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
-		const newViewType = e.target.value;
-		setViewType(newViewType);
-		plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
-		plugin.saveSettings();
 	}
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
 		try {
-			const currentBoardConfig = boards[activeBoardIndex];
+			const currentBoardConfig = boardData;
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
 				const filterModal = new ViewTaskFilterModal(
-					plugin, false, undefined, activeBoardIndex, currentBoardConfig.name
+					plugin, false, undefined, activeBoardIndex, currentBoardConfig!.name
 				);
 
 				// Set initial filter state
-				if (currentBoardConfig.boardFilter) {
+				if (currentBoardConfig!.boardFilter) {
 					setTimeout(() => {
 						// Use type assertion to resolve non-null issues
 						// const filterState = filterModal.liveFilterState as RootFilterState;
 						if (filterModal.taskFilterComponent) {
-							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig.boardFilter!);
+							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.boardFilter);
 						}
 					}, 100);
 				}
@@ -350,12 +301,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				filterModal.filterCloseCallback = async (filterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedBoards = [...boards];
-						updatedBoards[activeBoardIndex].boardFilter = filterState;
-						setBoards(updatedBoards);
+						const updatedcurrentBoardData = boardData;
+						updatedcurrentBoardData!.boardFilter = filterState;
+						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
+						boardData!.boardFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -388,15 +339,15 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					false, // forColumn = false since this is for board-level filter
 					undefined,
 					activeBoardIndex,
-					boards[activeBoardIndex]?.name || "Board",
+					boardData?.name || "Board",
 				);
 
 				// Load existing filter state if available
-				if (currentBoardConfig.boardFilter) {
+				if (currentBoardConfig!.boardFilter) {
 					// Wait for component to be created and loaded
 					setTimeout(() => {
 						if (popover.taskFilterComponent) {
-							popover.taskFilterComponent.loadFilterState(currentBoardConfig.boardFilter!);
+							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.boardFilter!);
 						}
 					}, 100);
 				}
@@ -405,12 +356,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				popover.onClose = async (filterState?: RootFilterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedBoards = [...boards];
-						updatedBoards[activeBoardIndex].boardFilter = filterState;
-						setBoards(updatedBoards);
+						const updatedcurrentBoardData = boardData;
+						updatedcurrentBoardData!.boardFilter = filterState;
+						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						plugin.settings.data.boardConfigs[activeBoardIndex].boardFilter = filterState;
+						boardData!.boardFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -428,15 +379,13 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}
 
 	function togglePropertyNameInSettings(propertyName: string) {
-		let visibleProperties = plugin.settings.data.globalSettings.visiblePropertiesList || [];
+		let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
 
-		console.log("Current properties list :", visibleProperties, "\nRemove following property :", propertyName, "\nWill remove from the following index :", visibleProperties.indexOf(propertyName));
 		if (visibleProperties.includes(propertyName)) {
 			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
-			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+			plugin.settings.data.visiblePropertiesList = visibleProperties;
 
 		} else {
-			console.log("Property Name:", propertyName);
 			let index = -1;
 			switch (propertyName) {
 				case taskPropertiesNames.SubTasks:
@@ -462,7 +411,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			}
 			visibleProperties.push(propertyName);
 
-			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+			plugin.settings.data.visiblePropertiesList = visibleProperties;
 		}
 
 		plugin.saveSettings();
@@ -484,7 +433,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.onClick(async () => {
 				togglePropertyNameInSettings(taskPropertiesNames.ID);
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ID))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -492,7 +441,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.onClick(async () => {
 				togglePropertyNameInSettings(taskPropertiesNames.Checkbox);
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -501,7 +450,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Status);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Status))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -510,7 +459,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Priority);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Priority))
 		});
 
 		propertyMenu.addItem((item) => {
@@ -519,7 +468,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Tags);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Tags))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("time"));
@@ -527,7 +476,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Time);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Time))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("reminder"));
@@ -535,7 +484,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Reminder);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Reminder))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Reminder))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("created-date"));
@@ -543,7 +492,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.CreatedDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("start-date"));
@@ -551,7 +500,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.StartDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.StartDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.StartDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("scheduled-date"));
@@ -559,7 +508,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.ScheduledDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("due-date"));
@@ -567,7 +516,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.DueDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DueDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DueDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("completed-date"));
@@ -575,7 +524,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.CompletionDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("cancelled-date"));
@@ -583,7 +532,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.CancelledDate);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("dependencies"));
@@ -591,7 +540,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.Dependencies);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("file-name"));
@@ -599,7 +548,55 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				togglePropertyNameInSettings(taskPropertiesNames.FilePath);
 
 			})
-			item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("file-name-in-header"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.FilePathInHeader);
+
+			})
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("parent-folder"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.ParentFolder);
+
+			})
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("full-path"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.FullPath);
+
+			})
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("file-name-in-header"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.FilePathInHeader);
+
+			})
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("parent-folder"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.ParentFolder);
+
+			})
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("full-path"));
+			item.onClick(async () => {
+				togglePropertyNameInSettings(taskPropertiesNames.FullPath);
+
+			})
+			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
 		});
 
 		propertyMenu.addSeparator();
@@ -614,7 +611,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
 			});
 
 			subTasksMenu.addItem((item) => {
@@ -623,7 +620,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
 			});
 
 			// subTasksMenu.addItem((item) => {
@@ -633,7 +630,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
 
 			// 	})
-			// 	item.setChecked(!plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+			// 	item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
 			// });
 		});
 
@@ -648,7 +645,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description));
 			});
 
 			subTasksMenu.addItem((item) => {
@@ -658,7 +655,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
 			});
 		});
 
@@ -671,9 +668,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	function handleBoardSelection(index: number) {
 		if (index !== activeBoardIndex) {
 			setSearchQuery("");
-			setFilteredTasksPerColumn([]);
-			plugin.settings.data.globalSettings.searchQuery = "";
-			plugin.settings.data.globalSettings.lastViewHistory.boardIndex = index;
+			plugin.settings.data.searchQuery = "";
+			plugin.settings.data.lastViewHistory.boardIndex = index;
 			setActiveBoardIndex(index);
 			setTimeout(() => {
 				eventEmitter.emit("REFRESH_BOARD");
@@ -685,6 +681,11 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	}
 
 	function toggleBoardSidebar() {
+		// Only allow opening sidebar if allBoardsData is available
+		if (!allBoardsData || allBoardsData.length === 0) {
+			return;
+		}
+
 		if (showBoardSidebar) {
 			closeBoardSidebar();
 		} else {
@@ -737,16 +738,19 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			item.setTitle(t("open-board-configuration-modal"));
 			item.setIcon("settings");
 			item.onClick(async () => {
-				openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
-					handleUpdateBoards(plugin, updatedBoards, setBoards)
-				);
+				openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
+					// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+					setCurrentBoardData(updatedBoard);
+					plugin.taskBoardFileManager.saveBoard(updatedBoard);
+				}
+				)
 			});
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("scan-vault-modal"));
 			item.setIcon(ScanVaultIcon);
 			item.onClick(async () => {
-				openScanVaultModal(plugin.app, plugin);
+				openScanVaultModal(plugin);
 			});
 		});
 
@@ -764,7 +768,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		});
 		sortMenu.addItem((item) => {
 			item.setTitle(t("map-view"));
-			item.setIcon("waypoints");
+			item.setIcon("network");
 			item.onClick(async () => {
 				eventEmitter.emit("SWITCH_VIEW", 'map');
 			});
@@ -776,12 +780,47 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		);
 	}
 
+	function handleViewChangeDropdownClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+		const viewMenu = new Menu();
+
+		setTimeout(() => {
+			eventEmitter.emit("SAVE_MAP");
+		}, 200)
+
+		viewMenu.addItem((item) => {
+			item.setTitle(t("kanban-view"));
+			item.setIcon("square-kanban");
+			item.onClick(async () => {
+				const newViewType = viewTypeNames.kanban;
+				setViewType(newViewType);
+				plugin.settings.data.lastViewHistory.viewedType = newViewType;
+				plugin.saveSettings();
+			});
+		});
+
+		viewMenu.addItem((item) => {
+			item.setTitle(t("map-view"));
+			item.setIcon("network");
+			item.onClick(async () => {
+				const newViewType = viewTypeNames.map;
+				setViewType(newViewType);
+				plugin.settings.data.lastViewHistory.viewedType = newViewType;
+				plugin.saveSettings();
+			});
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		viewMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
 	// useEffect(() => {
 	// 	const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
 	// 	if (taskBoardLeaf) {
 	// 		console.log("View width :", taskBoardLeaf.width);
 	// 	}
-	// }, [leafWidth]);
+	// }, [viewWidth]);
 
 	// Close sidebar when clicking outside or pressing escape
 	useEffect(() => {
@@ -797,40 +836,69 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		}
 	}, [showBoardSidebar]);
 
+	const viewTypeIconComponent = () => {
+		switch (viewType) {
+			case viewTypeNames.kanban:
+				return <SquareKanban size={20} />;
+			case viewTypeNames.map:
+				return <Network size={18} />;
+			default:
+				return <BrickWall size={18} />;
+		}
+	}
+
 	return (
 		<div className="taskBoardView">
 			<div className="taskBoardHeader">
-				{!showAllElements ? (
-					// Mobile view: Hamburger button + current board name
+				{/* On Left-side */}
+				{allBoardsData && allBoardsData.length > 0 ? (
+					<>
+						{showAllElements ? (
+							<div className="boardTitles">
+								{allBoardsData.map((board, index) => (
+									<button
+										key={index}
+										className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
+										onClick={() => handleBoardSelection(index)}
+									>
+										{board.name}
+									</button>
+								))}
+							</div>
+						) : (
+							<div className="mobileBoardHeader">
+								<button
+									className="hamburgerMenuButton"
+									onClick={toggleBoardSidebar}
+									aria-label={t("toggle-board-drawer")}
+								>
+									<MenuICon size={20} />
+								</button>
+								{!showSearchInput && (
+									<span className="currentBoardName">{boardData?.name}</span>
+								)}
+							</div>
+						)}
+					</>
+				) : (
 					<div className="mobileBoardHeader">
 						<button
-							className="hamburgerMenuButton"
-							onClick={toggleBoardSidebar}
-							aria-label={t("toggle-board-drawer")}
+							className="boardsExplorerModalButton"
+							onClick={() => openBoardsExplorerModal(plugin)}
+							aria-label={t("boards-explorer-modal")}
 						>
-							<MenuICon size={20} />
+							<LayoutGridIcon size={20} />
 						</button>
 						{!showSearchInput && (
-							<span className="currentBoardName">{boards[activeBoardIndex]?.name}</span>
+							<span className="currentBoardName">{boardData?.name}</span>
 						)}
 					</div>
-				) : (
-					// Desktop view: Original board titles
-					<div className="boardTitles">
-						{boards.map((board, index) => (
-							<button
-								key={index}
-								className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
-								onClick={() => handleBoardSelection(index)}
-							>
-								{board.name}
-							</button>
-						))}
-					</div>
 				)}
+
+				{/* On Right-side */}
 				<div className="taskBoardHeaderBtns">
 					<div className="taskCountContainer">
-						<div className={`taskCountContainerProgressBar${leafWidth >= 1500 ? "" : "-hidden"}`}>
+						<div className={`taskCountContainerProgressBar${isMobileView ? "-hidden" : ""}`}>
 							<div
 								className="taskCountContainerProgressBarProgress"
 								style={{
@@ -893,10 +961,12 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
 						aria-label={t("board-configure-button")}
 						onClick={() =>
-							openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
-								handleUpdateBoards(plugin, updatedBoards, setBoards)
-							)
-						}
+							openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
+								// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+								setCurrentBoardData(updatedBoard);
+								plugin.taskBoardFileManager.saveBoard(updatedBoard);
+							}
+							)}
 					>
 						<Settings size={18} />
 					</button>
@@ -905,16 +975,30 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						<Bot size={20} />
 					</button> */}
 
-					<select
+					<div
 						className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						value={viewType}
-						onChange={(e) => { handleViewTypeChange(e); }}
+						onClick={(e) => handleViewChangeDropdownClick(e)}
 					>
-						<option value={viewTypeNames.kanban}>{t("kanban")}</option>
-						{/* <option value="list">List</option>
-							<option value="table">Table</option> */}
-						<option value={viewTypeNames.map}>{t("map")}</option>
-					</select>
+						<div className="taskBoardViewDropdownIcon">
+							{viewTypeIconComponent()}
+						</div>
+						<div className="taskBoardViewDropdownName">{t(viewType)}</div>
+					</div>
+
+					{viewType === viewTypeNames.map && (
+						<button
+							className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
+							onClick={(e) => {
+								if (mapViewDataUpdated) {
+									console.log("Emitting SAVE_MAP event...");
+									eventEmitter.emit("SAVE_MAP");
+									setMapViewDataUpdated(false);
+								}
+							}}
+						>
+							<Save size={18} />
+						</button>
+					)}
 
 					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
 						<RefreshCcw size={18} />
@@ -928,74 +1012,76 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				</div>
 			</div>
 
-			{/* Mobile board sidebar overlay */}
-			{!showAllElements && showBoardSidebar && (
-				<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
-					<div
-						className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
-						onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
-					>
-						<div className="boardSidebarHeader">
-							<h3>{t("your-boards")}</h3>
-						</div>
-						<div className="boardSidebarContent">
-							<div className="boardSidebarContentBtnContainer">
-								{boards.map((board, index) => (
-									<div
-										key={index}
-										className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
-										onClick={() => handleBoardSelection(index)}
-									>
-										<div className="boardSidebarCardTitle" >
-											{board.name}
-										</div>
-										<div className="boardSidebarCardDescription" >
-											{board?.description}
-										</div>
-										<div className="taskCountContainerProgress" >
-											<div className={"taskCountContainerProgressBar"}>
-												<div
-													className="taskCountContainerProgressBarIndicator"
-													style={{
-														width: `${((board?.taskCount ? board.taskCount.completed : 0) / (board?.taskCount ? board?.taskCount.pending + board.taskCount.completed : 1)) * 100}%`,
-													}}
-												/>
-											</div>
-											<span className="taskCountContainerProgressCount">
-												{(board?.taskCount ? board.taskCount.completed : 0)} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
-											</span>
-										</div>
-									</div>
-								))}
+			{/* Mobile board sidebar overlay (only render if allBoardsData is available) */}
+			{
+				allBoardsData && allBoardsData.length > 0 && !showAllElements && showBoardSidebar && (
+					<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
+						<div
+							className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
+							onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
+						>
+							<div className="boardSidebarHeader">
+								<h3>{t("your-boards")}</h3>
 							</div>
-							<div className="boardSidebarFooter">
-								<button
-									className="boardConfigureBtn"
-									onClick={() =>
-										openBoardConfigModal(plugin, boards, activeBoardIndex, (updatedBoards) =>
-											handleUpdateBoards(plugin, updatedBoards, setBoards)
-										)
-									}
-								>
-									{t("configure-boards")}
-								</button>
+							<div className="boardSidebarContent">
+								<div className="boardSidebarContentBtnContainer">
+									{allBoardsData.map((board, index) => (
+										<div
+											key={index}
+											className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
+											onClick={() => handleBoardSelection(index)}
+										>
+											<div className="boardSidebarCardTitle" >
+												{board.name}
+											</div>
+											<div className="boardSidebarCardDescription" >
+												{board?.description}
+											</div>
+											<div className="taskCountContainerProgress" >
+												<div className={"taskCountContainerProgressBar"}>
+													<div
+														className="taskCountContainerProgressBarIndicator"
+														style={{
+															width: `${((board?.taskCount ? board.taskCount.completed : 0) / (board?.taskCount ? board?.taskCount.pending + board.taskCount.completed : 1)) * 100}%`,
+														}}
+													/>
+												</div>
+												<span className="taskCountContainerProgressCount">
+													{(board?.taskCount ? board.taskCount.completed : 0)} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
+												</span>
+											</div>
+										</div>
+									))}
+								</div>
+								<div className="boardSidebarFooter">
+									<button
+										className="boardConfigureBtn"
+										onClick={() =>
+											openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
+												// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+												setCurrentBoardData(updatedBoard);
+												plugin.taskBoardFileManager.saveBoard(updatedBoard);
+											}
+											)
+										}
+									>
+										{t("configure-boards")}
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			)
+				)
 			}
 
 			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
-				{boards[activeBoardIndex] ? (
+				{boardData ? (
 					viewType === viewTypeNames.kanban ? (
 						<KanbanBoard
-							app={app}
 							plugin={plugin}
-							board={boards[activeBoardIndex]}
-							allTasks={allTasks}
-							tasksPerColumn={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
-							loading={loading}
+							currentBoardData={boardData}
+							currentBoardIndex={activeBoardIndex}
+							filteredAndSearchedTasks={filteredAndSearchedTasks}
 							freshInstall={freshInstall}
 						/>
 					) : viewType === viewTypeNames.map ? (
@@ -1021,9 +1107,10 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 						) : (
 							<MapView
 								plugin={plugin}
+								activeBoardData={boardData}
 								activeBoardIndex={activeBoardIndex}
-								allTasksArranged={filteredTasksPerColumn.length > 0 ? filteredTasksPerColumn : allTasksArrangedPerColumn}
-								focusOnTaskId={plugin.settings.data.globalSettings.lastViewHistory.taskId || ""}
+								filteredTasks={filteredAndSearchedTasks}
+								focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
 							/>
 						)
 					) : (
@@ -1031,7 +1118,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 							{/* Placeholder for other view types */}
 							{viewType === "list" && "List view coming soon."}
 							{viewType === "table" && "Table view coming soon."}
-							{viewType === "calender" && "Calender view coming soon."}
+							{viewType === "inbox" && "Inbox view coming soon."}
 							{viewType === "gantt" && "Gantt chart view coming soon."}
 						</div>
 					)
