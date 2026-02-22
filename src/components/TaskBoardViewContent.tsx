@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
 import { taskJsonMerged } from "src/interfaces/TaskItem";
 
-import { App, debounce, Platform, Menu } from "obsidian";
+import { App, debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal, openBoardsExplorerModal } from "../services/OpenModals";
@@ -21,7 +21,7 @@ import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Board, allBoards?: Board[] }> = ({ plugin, currentBoardData, allBoards }) => {
+const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf, allBoards?: Board[] }> = ({ plugin, currentBoardData, currentLeaf, allBoards }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
 	const [boardData, setCurrentBoardData] = useState<Board>();
@@ -39,38 +39,21 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
 	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
 
-	const [showAllElements, setShowAllElements] = useState(true);
-	const [leafWidth, setLeafWidth] = useState<number>(1000);
-	const [isMobileView, setIsMobileView] = useState(false);
+	const [viewWidth, setviewWidth] = useState<number>(currentLeaf.width);
+	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
+	const [isMobileView, setIsMobileView] = useState(false); // show elements for screens smaller than 800px
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
 	const [editorModified, setEditorModified] = useState(plugin.editorModified);
 
-	// plugin.registerEvent(
-	// 	plugin.app.workspace.on("resize", () => {
-	// 		// Now I should find if the leaf of type taskboard-view is active or not. If its active then I should find its width. If its less than 400px then hide the progress bar.
-	// 		const taskBoardLeaf =
-	// 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
-	// 		console.log(
-	// 			"Window resized",
-	// 			"\nTaskBoardLeaf:",
-	// 			taskBoardLeaf
-	// 		);
-	// 		if (taskBoardLeaf) {
-	// 			const width = taskBoardLeaf.width;
-	// 			console.log("TaskBoardLeaf width:", width);
-	// 			setLeafWidth(width);
-	// 		}
-	// 	})
-	// );
-
 	useEffect(() => {
 		const handleResize = () => {
-			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
+			const taskBoardLeaf = currentLeaf;
 			if (taskBoardLeaf) {
-				setLeafWidth(taskBoardLeaf.width);
+				setviewWidth(taskBoardLeaf.width);
 			}
 		};
+
 		handleResize();
 		plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
 		return () => {
@@ -79,9 +62,9 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	}, []);
 
 	useEffect(() => {
-		setShowAllElements(leafWidth >= 1000);
-		setIsMobileView(leafWidth <= 800); // For even little bigger screen smartphones, let go with 800
-	}, [leafWidth]);
+		setShowAllElements(viewWidth >= 1000);
+		setIsMobileView(viewWidth <= 800); // For even little bigger screen smartphones, let go with 800
+	}, [viewWidth]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -767,7 +750,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 			item.setTitle(t("scan-vault-modal"));
 			item.setIcon(ScanVaultIcon);
 			item.onClick(async () => {
-				openScanVaultModal(plugin.app, plugin);
+				openScanVaultModal(plugin);
 			});
 		});
 
@@ -837,7 +820,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	// 	if (taskBoardLeaf) {
 	// 		console.log("View width :", taskBoardLeaf.width);
 	// 	}
-	// }, [leafWidth]);
+	// }, [viewWidth]);
 
 	// Close sidebar when clicking outside or pressing escape
 	useEffect(() => {
@@ -867,51 +850,55 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	return (
 		<div className="taskBoardView">
 			<div className="taskBoardHeader">
-				{!showAllElements ? (
-					// Mobile view: Hamburger button + current board name
-					<div className="mobileBoardHeader">
-						{allBoardsData && allBoardsData.length > 0 ? (
-							<button
-								className="hamburgerMenuButton"
-								onClick={toggleBoardSidebar}
-								aria-label={t("toggle-board-drawer")}
-							>
-								<MenuICon size={20} />
-							</button>
+				{/* On Left-side */}
+				{allBoardsData && allBoardsData.length > 0 ? (
+					<>
+						{showAllElements ? (
+							<div className="boardTitles">
+								{allBoardsData.map((board, index) => (
+									<button
+										key={index}
+										className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
+										onClick={() => handleBoardSelection(index)}
+									>
+										{board.name}
+									</button>
+								))}
+							</div>
 						) : (
-							<button
-								className="boardsExplorerModalButton"
-								onClick={() => openBoardsExplorerModal(plugin)}
-								aria-label={t("boards-explorer-modal")}
-							>
-								<LayoutGridIcon size={20} />
-							</button>
+							<div className="mobileBoardHeader">
+								<button
+									className="hamburgerMenuButton"
+									onClick={toggleBoardSidebar}
+									aria-label={t("toggle-board-drawer")}
+								>
+									<MenuICon size={20} />
+								</button>
+								{!showSearchInput && (
+									<span className="currentBoardName">{boardData?.name}</span>
+								)}
+							</div>
 						)}
+					</>
+				) : (
+					<div className="mobileBoardHeader">
+						<button
+							className="boardsExplorerModalButton"
+							onClick={() => openBoardsExplorerModal(plugin)}
+							aria-label={t("boards-explorer-modal")}
+						>
+							<LayoutGridIcon size={20} />
+						</button>
 						{!showSearchInput && (
 							<span className="currentBoardName">{boardData?.name}</span>
 						)}
 					</div>
-				) : (
-					// Desktop view: Original board titles (only render if allBoardsData is available)
-					allBoardsData && allBoardsData.length > 0 ? (
-						<div className="boardTitles">
-							{allBoardsData.map((board, index) => (
-								<button
-									key={index}
-									className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
-									onClick={() => handleBoardSelection(index)}
-								>
-									{board.name}
-								</button>
-							))}
-						</div>
-					) : (
-						<div className="boardTitles"></div>
-					)
 				)}
+
+				{/* On Right-side */}
 				<div className="taskBoardHeaderBtns">
 					<div className="taskCountContainer">
-						<div className={`taskCountContainerProgressBar${leafWidth >= 1500 ? "" : "-hidden"}`}>
+						<div className={`taskCountContainerProgressBar${isMobileView ? "-hidden" : ""}`}>
 							<div
 								className="taskCountContainerProgressBarProgress"
 								style={{
