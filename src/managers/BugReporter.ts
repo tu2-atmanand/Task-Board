@@ -136,9 +136,10 @@ class BugReporterManager {
 			const bugEntries: BugReportEntry[] = [];
 
 			for (const section of bugReportSections) {
-				if (!section.trim()) continue;
+				const sectionTrimmed = section.trim();
+				if (!sectionTrimmed.trim()) continue;
 
-				const parsed = this.parseBugReportEntry(section);
+				const parsed = this.parseBugReportEntry(sectionTrimmed);
 				if (parsed) {
 					bugEntries.push(parsed);
 				}
@@ -179,13 +180,14 @@ class BugReporterManager {
 			}
 
 			const contextMatch = entryText.match(
-				/Context\s*:\s*([\s\S]*?)(?=\n#### Bug Content|\n\n|$)/,
+				/Context\s*:\s*(.+?)(?=\Version|$)/,
+				// /Context\s*:\s*([\s\S]*?)(?=\n#### Bug Content|\n\n|$)/,
 			);
 			if (contextMatch) {
 				entry.context = contextMatch[1].trim();
 			}
 
-			// Extract version (for backward compatibility, set to null if not found)
+			// Extract version (for backward compatibility
 			const versionMatch = entryText.match(/Version\s*:\s*(.+?)(?=\n|$)/);
 			entry.version = versionMatch
 				? versionMatch[1].trim()
@@ -199,10 +201,10 @@ class BugReporterManager {
 
 			// Validate that all required fields are present
 			if (
-				entry.timestamp &&
-				entry.id !== undefined &&
-				entry.message &&
-				entry.context &&
+				entry.timestamp ||
+				entry.id !== undefined ||
+				entry.message ||
+				entry.context ||
 				entry.bugContent
 			) {
 				return entry as BugReportEntry;
@@ -223,7 +225,7 @@ class BugReporterManager {
 ID : ${entry.id}
 Message : ${entry.message}
 Context : ${entry.context}
-Version : ${newReleaseVersion}
+Version : ${entry.version ?? "Older than 1.9.3"}
 
 #### Bug Content
 \`\`\`log
