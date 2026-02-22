@@ -349,7 +349,7 @@ export default class VaultScanner {
 							) {
 								const universalDateFormat =
 									this.plugin.settings.data.globalSettings
-										.universalDateFormat;
+										.dateFormat;
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment

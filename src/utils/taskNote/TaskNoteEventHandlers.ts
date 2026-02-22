@@ -34,7 +34,7 @@ export const handleTaskNoteStatusChange = async (
 		);
 		const moment = _moment as unknown as typeof _moment.default;
 		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern,
+			globalSettings?.dateTimeFormat,
 		);
 
 		const updatedTask = {

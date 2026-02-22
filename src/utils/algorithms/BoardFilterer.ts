@@ -8,6 +8,9 @@ import {
 	Filter,
 } from "src/interfaces/BoardConfigs";
 import { getAllTaskTags } from "../TaskItemUtils";
+import { compareAsc } from "date-fns";
+import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
+import { robustDateParser } from "../DateTimeCalculations";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -17,7 +20,8 @@ import { getAllTaskTags } from "../TaskItemUtils";
  */
 export function boardFilterer(
 	tasks: taskItem[],
-	filterState: RootFilterState | undefined
+	filterState: RootFilterState | undefined,
+	dateFormat: string = DEFAULT_DATE_FORMAT,
 ): taskItem[] {
 	// TODO : This function runs more number of times than it should be running.
 	// If no filter state or no filter groups, return all tasks
@@ -35,7 +39,7 @@ export function boardFilterer(
 
 	return tasks.filter((task) => {
 		const groupResults = filterGroups.map((group) =>
-			evaluateFilterGroup(task, group)
+			evaluateFilterGroup(task, group, dateFormat),
 		);
 
 		// Combine group results based on root condition
@@ -55,14 +59,20 @@ export function boardFilterer(
 /**
  * Evaluates a single filter group against a task
  */
-function evaluateFilterGroup(task: taskItem, group: FilterGroup): boolean {
+function evaluateFilterGroup(
+	task: taskItem,
+	group: FilterGroup,
+	dateFormat: string,
+): boolean {
 	const { groupCondition, filters } = group;
 
 	if (!filters || filters.length === 0) {
 		return true;
 	}
 
-	const filterResults = filters.map((filter) => evaluateFilter(task, filter));
+	const filterResults = filters.map((filter) =>
+		evaluateFilter(task, filter, dateFormat),
+	);
 
 	// Combine filter results based on group condition
 	switch (groupCondition) {
@@ -80,7 +90,11 @@ function evaluateFilterGroup(task: taskItem, group: FilterGroup): boolean {
 /**
  * Evaluates a single filter against a task
  */
-function evaluateFilter(task: taskItem, filter: Filter): boolean {
+function evaluateFilter(
+	task: taskItem,
+	filter: Filter,
+	dateFormat: string,
+): boolean {
 	const { property, condition, value } = filter;
 
 	// Get the property value from the task
@@ -133,7 +147,7 @@ function evaluateFilter(task: taskItem, filter: Filter): boolean {
 					String(item)
 						.replace("#", "")
 						.toLowerCase()
-						.includes(String(value).replace("#", "").toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase()),
 				);
 			}
 			return false;
@@ -271,20 +285,27 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 }
 
 /**
- * Compares two dates
- * Returns: -1 if date1 < date2, 0 if equal, 1 if date1 > date2
+ * Compares two dates using robust parsing
+ * Handles multiple date formats automatically
+ * @returns -1 if date1 < date2, 0 if equal, 1 if date1 > date2
  */
-function compareDates(date1: any, date2: any): number {
-	const d1 = new Date(date1);
-	const d2 = new Date(date2);
-
-	if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+function compareDates(date1: any, date2: any, dateFormat: string): number {
+	if (!date1 || !date2) {
 		return 0;
 	}
 
-	if (d1 < d2) return -1;
-	if (d1 > d2) return 1;
-	return 0;
+	// Use robust parser for both dates
+	const parsedDate1 = robustDateParser(String(date1), dateFormat);
+	const parsedDate2 = robustDateParser(String(date2), dateFormat);
+
+	// If either date is invalid, return 0
+	if (!parsedDate1 || !parsedDate2) {
+		return 0;
+	}
+
+	// Compare dates
+	const comparison = compareAsc(parsedDate1, parsedDate2);
+	return comparison;
 }
 
 /**
