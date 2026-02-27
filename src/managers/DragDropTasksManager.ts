@@ -419,7 +419,7 @@ class DragDropTasksManager {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
 				30,
-				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
+				"The column configurations are currupted. Configurations are not valid for this operation. The value of 'from' should be always lower or equal to value of 'to'. Kindly verify the column configuration in which you just dropped the task.",
 				`Column configuration :	${JSON.stringify(targetColumn)}`,
 				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated",
 			);

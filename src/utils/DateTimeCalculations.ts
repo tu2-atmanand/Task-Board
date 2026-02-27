@@ -345,16 +345,14 @@ export function getAllDatesInRelativeRange(
  * @returns The universal date of the task as a string, or an empty string if not set. */
 export const getUniversalDateFromTask = (
 	task: taskItem,
-	plugin: TaskBoard,
+	universalDateSetting: string,
 ): string => {
 	// Method 1 - Comparing
-	const universalDateChoice = plugin.settings.data.globalSettings.universalDate;
-
-	if (universalDateChoice === UniversalDateOptions.dueDate) {
+	if (universalDateSetting === UniversalDateOptions.dueDate) {
 		return task.due;
-	} else if (universalDateChoice === UniversalDateOptions.startDate) {
+	} else if (universalDateSetting === UniversalDateOptions.startDate) {
 		return task.startDate || "";
-	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
+	} else if (universalDateSetting === UniversalDateOptions.scheduledDate) {
 		return task.scheduledDate || "";
 	}
 	return "";

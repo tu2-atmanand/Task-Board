@@ -66,9 +66,9 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		}
 	}, [plugin.settings.data.globalSettings]);
 
-	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, plugin));
+	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
-		setUniversalDate(getUniversalDateFromTask(task, plugin));
+		setUniversalDate(getUniversalDateFromTask(task, globalSettings.universalDate));
 	}, [task.due, task.startDate, task.scheduledDate]);
 
 
@@ -695,7 +695,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
-						updateTaskItemStatus(plugin,task, task, status.value);
+						updateTaskItemStatus(plugin, task, task, status.value);
 					})
 				});
 			})

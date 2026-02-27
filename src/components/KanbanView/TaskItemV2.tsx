@@ -66,9 +66,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		}
 	}, [plugin.settings.data.globalSettings]);
 
-	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, plugin));
+	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
-		setUniversalDate(getUniversalDateFromTask(task, plugin));
+		setUniversalDate(getUniversalDateFromTask(task, globalSettings.universalDate));
 	}, [task.due, task.startDate, task.scheduledDate]);
 
 
