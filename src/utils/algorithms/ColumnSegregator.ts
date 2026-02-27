@@ -278,19 +278,11 @@ export const columnSegregator = (
 			});
 			break;
 		case colTypeNames.completed:
-			const tasksLimit = columnData?.limit;
-
-			// This sorting will be done through the columnData.sortCriteria for this column if its configured
-			// const sortedCompletedTasks = completedTasks.sort((a, b): number => {
-			// 	if (a.completion && b.completion) {
-			// 		const dateA = new Date(a.completion).getTime();
-			// 		const dateB = new Date(b.completion).getTime();
-			// 		return dateB - dateA;
-			// 	}
-			// 	return 0;
-			// });
-
-			tasksToDisplay = completedTasks.slice(0, tasksLimit);
+			// NOTE : to apply the sorting algorithm properly, we have to take all the completed tasks.
+			// Here we are taking around 1000 which should be enough.
+			// After applying the filtering and sorting algorithms, we will slice as per the configs limit.
+			// A better approach is under discussion. See this : https://github.com/tu2-atmanand/Task-Board/issues/68
+			tasksToDisplay = completedTasks.slice(0, 1000);
 			break;
 		case colTypeNames.taskPriority:
 			tasksToDisplay = pendingTasks.filter(
@@ -388,6 +380,10 @@ export const columnSegregator = (
 				columnData.sortCriteria,
 			);
 		}
+	}
+
+	if (columnData.colType === colTypeNames.completed) {
+		tasksToDisplay = tasksToDisplay.slice(0, columnData?.limit ?? 20);
 	}
 
 	return tasksToDisplay;
