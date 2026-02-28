@@ -690,9 +690,6 @@ export function fileTypeAllowedForScanning(
 ): boolean {
 	const filePath = file.path.toLocaleLowerCase();
 
-	// Will stop proceeding with the rest of the checks, if the file is from the archived task-notes folder.
-	if (!globalSettings.archivedTBNotesFolderPath.trim()) return true;
-
 	if (
 		file instanceof TFolder ||
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
