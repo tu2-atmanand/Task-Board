@@ -1,7 +1,6 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import { moment as _moment } from "obsidian";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";

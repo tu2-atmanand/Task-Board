@@ -34,20 +34,12 @@ export function checkFileFilters(
 		}
 	});
 
-	if (fileInFilters && scanFilters.files.polarity === 1) {
-		return [true, true];
-	} else if (fileInFilters && scanFilters.files.polarity === 2) {
-		return [true, false];
-	} else if (!fileInFilters && scanFilters.files.polarity === 1) {
+	if (fileInFilters && scanFilters.files.polarity === 1) return [true, true];
+	if (fileInFilters && scanFilters.files.polarity === 2) return [true, false];
+	if (!fileInFilters && scanFilters.files.polarity === 1)
 		return [false, false];
-	} else if (!fileInFilters && scanFilters.files.polarity === 2) {
+	if (!fileInFilters && scanFilters.files.polarity === 2)
 		return [false, true];
-	}
-	// else {
-	// 	return false;
-	// }
-
-	// return true;
 }
 
 /**
@@ -190,16 +182,6 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 	file: TFile,
 	scanFilters: scanFilters,
 ): boolean {
-	// if (allowedFileExtensionsRegEx.test(file.path) === false) {
-	// 	return false; // Only process markdown files
-	// }
-
-	debugger;
-
-	let allowedForScanning_Files: boolean[] = [];
-	let allowedForScanning_Frontmatter: boolean[] = [];
-	let allowedForScanning_Folder: boolean[] = [];
-
 	if (
 		scanFilters.files.polarity === 3 &&
 		scanFilters.frontmatter.polarity === 3 &&
@@ -210,93 +192,43 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 
 	const fileName = file.path; // Extract file name along with the path
 	const parentFolder = file.parent?.path || "";
+	let fileRes: boolean[] | undefined;
+	let fmRes: boolean[] | undefined;
+	let folderRes: boolean[] | undefined;
 
 	if (
 		scanFilters.files.polarity !== 3 &&
 		scanFilters.files.values.length > 0
 	) {
-		const result = checkFileFilters(fileName, scanFilters);
-		if (result !== undefined) {
-			// Whether the file is allowed for scanning or not allowed for scanning, will return it as it is.
-			// return result;
-			allowedForScanning_Files = result;
-		} else {
-			// Otherwise, will continue to test this file as per the "Frontmatter" and "Folder" criteria.
-			allowedForScanning_Files = [];
-		}
+		fileRes = checkFileFilters(fileName, scanFilters);
 	}
+	// Explicit mention precedence
+	if (fileRes?.[0]) return fileRes[1];
 
 	if (
 		scanFilters.frontmatter.polarity !== 3 &&
 		scanFilters.frontmatter.values.length > 0
 	) {
-		const result = checkFrontMatterFilters(plugin, file, scanFilters);
-		if (result !== undefined) {
-			// return result;
-			allowedForScanning_Frontmatter = result;
-		} else {
-			// Otherwise, will continue to test this file as per the "Folder" criteria.
-			allowedForScanning_Frontmatter = [];
-		}
+		fmRes = checkFrontMatterFilters(plugin, file, scanFilters);
 	}
+	if (fmRes?.[0]) return fmRes[1];
 
 	if (
 		scanFilters.folders.polarity !== 3 &&
 		scanFilters.folders.values.length > 0
 	) {
-		const result = checkFolderFilters(parentFolder, scanFilters);
-		if (result !== undefined) {
-			// return result;
-			allowedForScanning_Folder = result;
-		} else {
-			allowedForScanning_Folder = [];
-			// console.log("This comment should not run");
-			// return false; // If no specific filter matches, default to true
-		}
+		folderRes = checkFolderFilters(parentFolder, scanFilters);
 	}
+	if (folderRes?.[0]) return folderRes[1];
 
-	// If the file is explicitely mentioned in the scanFilters.files then will directly go for the result without depending on the other type of scan filters.
-	if (allowedForScanning_Files.length > 0 && allowedForScanning_Files[0]) {
-		if (allowedForScanning_Files[1]) return true;
-		else return false;
-	}
+	// Otherwise combine enabled filters deterministically (AND across enabled filters)
+	let allowed = true;
+	if (fileRes) allowed = allowed && fileRes[1];
+	if (fmRes) allowed = allowed && fmRes[1];
+	if (folderRes) allowed = allowed && folderRes[1];
 
-	// If the frontmatter is explicitely mentioned in the scanFilters.frontmatter then will directly go for the result without depending on the other type of scan filters.
-	if (
-		allowedForScanning_Frontmatter.length > 0 &&
-		allowedForScanning_Frontmatter[0]
-	) {
-		if (allowedForScanning_Frontmatter[1]) return true;
-		else return false;
-	}
-
-	// If the folder is explicitely mentioned in the scanFilters.folders then will directly go for the result without depending on the other type of scan filters.
-	if (allowedForScanning_Folder.length > 0 && allowedForScanning_Folder[0]) {
-		if (allowedForScanning_Folder[1]) return true;
-		else return false;
-	}
-
-	// --------------------------------------------
-	// The below logic is to test if two or more filters are enabled and how they are related to each other.
-	// --------------------------------------------
-
-	if (allowedForScanning_Files.length > 0) {
-		if (allowedForScanning_Files[1]) return true;
-		else return false;
-	}
-
-	if (allowedForScanning_Frontmatter.length > 0) {
-		if (allowedForScanning_Frontmatter[1]) return true;
-		else return false;
-	}
-
-	if (allowedForScanning_Folder.length > 0) {
-		if (allowedForScanning_Folder[1]) return true;
-		else return false;
-	}
-
-	// This logic is getting too complex here.
-	return false;
+	// If no enabled filter produced a result, default allow
+	return fileRes || fmRes || folderRes ? allowed : true;
 }
 
 /**
