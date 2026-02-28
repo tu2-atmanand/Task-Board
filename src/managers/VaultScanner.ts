@@ -689,15 +689,13 @@ export function fileTypeAllowedForScanning(
 	file: TFile | TAbstractFile,
 ): boolean {
 	const filePath = file.path.toLocaleLowerCase();
+	const isFileInArchivedTaskNotesFolder = globalSettings.archivedTBNotesFolderPath.trim() !== "" && filePath.startsWith(globalSettings.archivedTBNotesFolderPath.toLowerCase());
 
 	if (
 		file instanceof TFolder ||
+		isFileInArchivedTaskNotesFolder ||
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
 		!allowedFileExtensionsRegEx.test(file.path) ||
-		(globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
-			filePath.startsWith(
-				globalSettings.archivedTBNotesFolderPath.toLowerCase(),
-			)) ||
 		filePath === globalSettings.archivedTasksFilePath.toLowerCase()
 	) {
 		return false;
