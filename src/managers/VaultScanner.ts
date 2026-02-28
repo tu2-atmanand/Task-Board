@@ -690,12 +690,7 @@ export function fileTypeAllowedForScanning(
 ): boolean {
 	const filePath = file.path.toLocaleLowerCase();
 
-	// Exclude .taskboard files from task scanning (they are board configuration files, not task files)
-	if (file instanceof TFile && file.extension === "taskboard") {
-		console.log(`Excluding .taskboard file from scanning: ${file.path}`);
-		return false;
-	}
-
+	// Will stop proceeding with the rest of the checks, if the file is from the archived task-notes folder.
 	if (!globalSettings.archivedTBNotesFolderPath.trim()) return true;
 
 	if (
@@ -728,30 +723,30 @@ export function buildTaskFromRawContent(
 	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
 	const title = lines[0]; // extractTitle(lines[0]);
-	const time = extractTime(lines[0]) ?? "";
-	const createdDate = extractCreatedDate(lines[0]) ?? "";
-	const startDate = extractStartDate(lines[0]) ?? "";
-	const scheduledDate = extractScheduledDate(lines[0]) ?? "";
-	const due = extractDueDate(lines[0]) ?? "";
+	const time = extractTime(lines[0]);
+	const createdDate = extractCreatedDate(lines[0]);
+	const startDate = extractStartDate(lines[0]);
+	const scheduledDate = extractScheduledDate(lines[0]);
+	const due = extractDueDate(lines[0]);
 	const priority = extractPriority(lines[0]);
 	const tags = extractTags(lines[0]);
-	const completionDate = extractCompletionDate(lines[0]) ?? "";
-	const cancelledDate = extractCancelledDate(lines[0]) ?? "";
+	const completionDate = extractCompletionDate(lines[0]);
+	const cancelledDate = extractCancelledDate(lines[0]);
 	const body = extractBody(lines, 1, indentationString);
 
 	return {
 		title: title,
 		status: taskStatus,
 		body: body,
-		time: time[1] ?? "",
-		createdDate: createdDate[1] ?? "",
-		startDate: startDate[1] ?? "",
-		scheduledDate: scheduledDate[1] ?? "",
-		due: due[1] ?? "",
+		time: time?.[1] ?? "",
+		createdDate: createdDate?.[1] ?? "",
+		startDate: startDate?.[1] ?? "",
+		scheduledDate: scheduledDate?.[1] ?? "",
+		due: due?.[1] ?? "",
 		tags: tags,
 		priority: priority.value,
-		completion: completionDate[1] ?? "",
-		cancelledDate: cancelledDate[1] ?? "",
+		completion: completionDate?.[1] ?? "",
+		cancelledDate: cancelledDate?.[1] ?? "",
 		filePath: filePath || "",
 	};
 }

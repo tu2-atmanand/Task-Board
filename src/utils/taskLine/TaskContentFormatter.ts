@@ -358,21 +358,13 @@ export const sanitizeCreatedDate = (
 	);
 	if (formattedCreatedDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			createdDateWithFormat = formattedCreatedDate
-				? `➕${formattedCreatedDate}`
-				: "";
+			createdDateWithFormat = `➕${formattedCreatedDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			createdDateWithFormat = formattedCreatedDate
-				? `➕ ${formattedCreatedDate}`
-				: "";
+			createdDateWithFormat = `➕ ${formattedCreatedDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			createdDateWithFormat = formattedCreatedDate
-				? `[created:: ${formattedCreatedDate}]`
-				: "";
+			createdDateWithFormat = `[created:: ${formattedCreatedDate}]`;
 		} else {
-			createdDateWithFormat = formattedCreatedDate
-				? `@created(${formattedCreatedDate})`
-				: "";
+			createdDateWithFormat = `@created(${formattedCreatedDate})`;
 		}
 	}
 
@@ -433,21 +425,13 @@ export const sanitizeStartDate = (
 	);
 	if (formattedStartDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			startDateWithFormat = formattedStartDate
-				? `🛫${formattedStartDate}`
-				: "";
+			startDateWithFormat = `🛫${formattedStartDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			startDateWithFormat = formattedStartDate
-				? `🛫 ${formattedStartDate}`
-				: "";
+			startDateWithFormat = `🛫 ${formattedStartDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			startDateWithFormat = formattedStartDate
-				? `[start:: ${formattedStartDate}]`
-				: "";
+			startDateWithFormat = `[start:: ${formattedStartDate}]`;
 		} else {
-			startDateWithFormat = formattedStartDate
-				? `@start(${formattedStartDate})`
-				: "";
+			startDateWithFormat = `@start(${formattedStartDate})`;
 		}
 	}
 
@@ -510,21 +494,13 @@ export const sanitizeScheduledDate = (
 	);
 	if (formattedScheduledDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			scheduledDateWithFormat = formattedScheduledDate
-				? `⏳${formattedScheduledDate}`
-				: "";
+			scheduledDateWithFormat = `⏳${formattedScheduledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			scheduledDateWithFormat = formattedScheduledDate
-				? `⏳ ${formattedScheduledDate}`
-				: "";
+			scheduledDateWithFormat = `⏳ ${formattedScheduledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			scheduledDateWithFormat = formattedScheduledDate
-				? `[scheduled:: ${formattedScheduledDate}]`
-				: "";
+			scheduledDateWithFormat = `[scheduled:: ${formattedScheduledDate}]`;
 		} else {
-			scheduledDateWithFormat = formattedScheduledDate
-				? `@scheduled(${formattedScheduledDate})`
-				: "";
+			scheduledDateWithFormat = `@scheduled(${formattedScheduledDate})`;
 		}
 	}
 
@@ -588,19 +564,13 @@ export const sanitizeDueDate = (
 	);
 	if (formattedDueDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			dueDateWithFormat = formattedDueDate ? `📅${formattedDueDate}` : "";
+			dueDateWithFormat = `📅${formattedDueDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			dueDateWithFormat = formattedDueDate
-				? `📅 ${formattedDueDate}`
-				: "";
+			dueDateWithFormat = `📅 ${formattedDueDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			dueDateWithFormat = formattedDueDate
-				? `[due:: ${formattedDueDate}]`
-				: "";
+			dueDateWithFormat = `[due:: ${formattedDueDate}]`;
 		} else {
-			dueDateWithFormat = formattedDueDate
-				? `@due(${formattedDueDate})`
-				: "";
+			dueDateWithFormat = `@due(${formattedDueDate})`;
 		}
 	}
 
@@ -659,21 +629,13 @@ export const sanitizeCompletionDate = (
 	);
 	if (formattedCompletionDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			completedWitFormat = formattedCompletionDate
-				? `✅${formattedCompletionDate} `
-				: "";
+			completedWitFormat = `✅${formattedCompletionDate} `;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			completedWitFormat = formattedCompletionDate
-				? `✅ ${formattedCompletionDate} `
-				: "";
+			completedWitFormat = `✅ ${formattedCompletionDate} `;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			completedWitFormat = formattedCompletionDate
-				? `[completion:: ${formattedCompletionDate}] `
-				: "";
+			completedWitFormat = `[completion:: ${formattedCompletionDate}] `;
 		} else {
-			completedWitFormat = formattedCompletionDate
-				? `@completion(${formattedCompletionDate}) `
-				: "";
+			completedWitFormat = `@completion(${formattedCompletionDate}) `;
 		}
 	}
 
@@ -737,21 +699,13 @@ export const sanitizeCancelledDate = (
 	);
 	if (formattedCancelledDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			cancelledWithFormat = formattedCancelledDate
-				? `❌${formattedCancelledDate}`
-				: "";
+			cancelledWithFormat = `❌${formattedCancelledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			cancelledWithFormat = formattedCancelledDate
-				? `❌ ${formattedCancelledDate}`
-				: "";
+			cancelledWithFormat = `❌ ${formattedCancelledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			cancelledWithFormat = formattedCancelledDate
-				? `[cancelled:: ${formattedCancelledDate}]`
-				: "";
+			cancelledWithFormat = `[cancelled:: ${formattedCancelledDate}]`;
 		} else {
-			cancelledWithFormat = formattedCancelledDate
-				? `@cancelled(${formattedCancelledDate})`
-				: "";
+			cancelledWithFormat = `@cancelled(${formattedCancelledDate})`;
 		}
 	}
 
