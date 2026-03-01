@@ -75,8 +75,6 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 
-			if (file.path.endsWith('.png')) debugger;
-
 			if (fileTypeAllowedForScanning(globalSettings, file)) {
 				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);

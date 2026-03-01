@@ -76,7 +76,7 @@ export const getTaskFromId = async (
 
 /**
  * Generates a random unique ID using the Web Crypto API.
- * 
+ *
  * For example : '1851955511'.
  * @return {string} a random unique ID for a task
  */
@@ -88,7 +88,7 @@ export function generateRandomTempTaskId(): string {
 
 /**
  * Generates a random unique ID using the Web Crypto API.
- * 
+ *
  * For example : 1851955511.
  * @return a random unique 10 digit number
  */
@@ -143,7 +143,7 @@ export const applyIdToTaskItem = async (
 
 		return newId;
 	} else {
-		if (extractTaskId(task.title) !== "") return undefined;
+		if (extractTaskId(task.title)?.[0] !== "") return undefined;
 
 		const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
 		return newIdToReturn;
