@@ -41,12 +41,13 @@ export interface currentDragDataPayload {
  */
 class DragDropTasksManager {
 	private static instance: DragDropTasksManager;
+	private plugin: TaskBoard | null = null;
 
 	// Hold the current drag payload so dragover handlers can access it reliably
 	private currentDragData: currentDragDataPayload | null = null;
 	private desiredDropIndex: number | null = null;
+	private clonedDraggedElement: HTMLElement | null = null;
 	// private dropIndicator: HTMLElement | null = null; // deprecated
-	private plugin: TaskBoard | null = null;
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -106,6 +107,10 @@ class DragDropTasksManager {
 	 */
 	clearCurrentDragData() {
 		this.currentDragData = null;
+		if (this.clonedDraggedElement) {
+			document.body.removeChild(this.clonedDraggedElement);
+			this.clonedDraggedElement = null;
+		}
 	}
 
 	// --------------------------------------
@@ -1209,16 +1214,25 @@ class DragDropTasksManager {
 		e: DragEvent,
 		draggedTaskItem: HTMLDivElement,
 		currentDragData: currentDragDataPayload,
-		dragIndex: number,
 	): void {
 		if (!e.dataTransfer) return;
-
-		// prevent column drag from also starting
-		e.stopPropagation();
 
 		this.setCurrentDragData(currentDragData);
 
 		e.dataTransfer.effectAllowed = "move";
+
+		// Set a drag image from the whole task element so the preview is the full card
+		// NOTE : The below code worked and then it just stopped working. Also, a long back it worked during screen recording then stopped working. So, its not dependent on the code, but the platform and some other unknown factor.
+		const clone = e.targetNode?.parentNode?.cloneNode(true) as HTMLElement;
+		clone.setAttribute(
+			"style",
+			"position: absolute; left: 0px; top: 0px; z-index: -1",
+		);
+		console.log(clone);
+		document.body.appendChild(clone);
+		this.clonedDraggedElement = clone;
+		const rectangle = clone.getBoundingClientRect();
+		e.dataTransfer.setDragImage(clone, rectangle.width/2, rectangle.height/2);
 
 		// TODO : I probably wont need this anymore since I am using the singleton manager to hold the current drag data.
 		// provide a JSON payload so drop handlers can inspect
@@ -1245,7 +1259,6 @@ class DragDropTasksManager {
 
 		// Visual dim / dragging class
 		this.dimDraggedTaskItem(draggedTaskItem);
-		// draggedTaskItem.classList.add('task-item-dragging');
 	}
 
 	/**

@@ -880,41 +880,19 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// prevent column drag from also starting
+		e.stopPropagation();
+
 		if (!columnData) {
 			e.preventDefault();
 			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskItem.tsx/handleDragStart");
 			return;
 		}
-
-		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
 			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index, swimlaneData: swimlaneData };
-			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
-
-			// Add dragging class after a small delay to not affect the drag image
-			// const clone = el.cloneNode(true) as HTMLDivElement;
-			// requestAnimationFrame(() => {
-			// 	e.dataTransfer?.setDragImage(clone, 0, 0);
-			// });
-			// clone.classList.add("task-item-dragging");
-
-			// Also set a drag image from the whole task element so the preview is the full card
-			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
-			// if (taskItemRef.current && e.dataTransfer) {
-			// 	console.log("TaskItemRef.current", taskItemRef.current);
-			// 	const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
-			// 	// clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
-			// 	clone.style.opacity = '0.5';
-			// 	clone.style.position = 'absolute';
-			// 	// clone.style.top = '-9999px';
-			// 	// document.body.appendChild(clone);
-			// 	const rect = taskItemRef.current.getBoundingClientRect();
-			// 	e.dataTransfer.setDragImage(clone, rect.width, rect.height);
-			// 	setTimeout(() => {
-			// 		try { document.body.removeChild(clone); } catch { }
-			// 	}, 0);
-			// }
+			// Delegate to manager for standardized behavior (sets current payload and dims element)
+			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload);
 		} catch (err) {
 			// fallback minimal behavior
 			// try {
@@ -1289,6 +1267,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.priority, task.tags, activeBoardSettings]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
+	// TODO : Why we are not memoizing the footer component ?
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	// ========================================
@@ -1298,12 +1277,12 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		<div className='taskItemContainer'>
 			<div
 				ref={taskItemRef}
-				className={`taskItem ${isThistaskCompleted ? 'completed' : ''}`}
+				className={`taskItem${isThistaskCompleted ? ' completed' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
-				draggable={true}
+				draggable={Platform.isDesktopApp}
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>
@@ -1316,23 +1295,18 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					{plugin.settings.data.globalSettings.experimentalFeatures && (
 						<>
 							{
-								Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
-									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-									</>
-								) : (
+								Platform.isDesktopApp ? (
 									<>
 										{/* Drag Handle */}
-										{columnData?.colType !== colTypeNames.allPending && (
-											<div className="taskItemDragBtn"
-											// aria-label={t("drag-task-card")}
-											// draggable={true}
-											// onDragStart={handleDragStart}
-											// onDragEnd={handleDragEnd}
-											>
+										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+											<div className="taskItemDragBtn">
 												<Grip size={18} enableBackground={0} opacity={0.4} />
 											</div>
 										)}
+									</>
+								) : (
+									<>
+										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
 									</>
 								)
 							}
