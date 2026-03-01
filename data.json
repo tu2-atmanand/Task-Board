@@ -883,26 +883,7 @@
         "showFilteredTags": true,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1772190641193-2239144968",
-              "groupCondition": "any",
-              "filters": [
-                {
-                  "id": "id-1772190641195-2204921645",
-                  "property": "filePath",
-                  "condition": "contains",
-                  "value": "TaskNotes"
-                },
-                {
-                  "id": "id-1772190657105-1706080770",
-                  "property": "filePath",
-                  "condition": "contains",
-                  "value": "Roll"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "swimlanes": {
           "enabled": false,
@@ -914,8 +895,8 @@
           "verticalHeaderUI": false
         },
         "taskCount": {
-          "pending": 0,
-          "completed": 0
+          "pending": 88,
+          "completed": 8
         }
       },
       {
@@ -1012,8 +993,8 @@
         },
         "description": "This board is for testing drag and drop feature for status based workflow.",
         "taskCount": {
-          "pending": 77,
-          "completed": 7
+          "pending": 88,
+          "completed": 8
         }
       }
     ],
@@ -1023,11 +1004,11 @@
         "files": {
           "polarity": 3,
           "values": [
-            "Roll/Now.md"
+            "A new file added-renamed.md"
           ]
         },
         "folders": {
-          "polarity": 2,
+          "polarity": 3,
           "values": [
             "Bible",
             "Roll",
@@ -1205,9 +1186,9 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 4,
+        "boardIndex": 5,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInSplit",
@@ -1330,7 +1311,7 @@
         "createdDate",
         "filePath"
       ],
-      "taskCardStyle": "bases",
+      "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
       "autoAddCancelledDate": true,
       "scanMode": "automatic",
