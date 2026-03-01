@@ -658,45 +658,54 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		setIsDragOver(false);
 		setInsertIndex(null);
 
-		const targetColumnContainer = tasksContainerRef.current;
-		if (!targetColumnContainer) {
-			return;
-		}
+		try {
+			const targetColumnContainer = tasksContainerRef.current;
+			if (!targetColumnContainer) {
+				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
+			}
 
-		// We are basically doing same thing from the handleDrop function below.
-		dragDropTasksManagerInsatance.handleDropEvent(
-			e.nativeEvent,
-			columnData,
-			targetColumnContainer,
-			swimlaneData
-		);
+			// We are basically doing same thing from the handleDrop function below.
+			dragDropTasksManagerInsatance.handleDropEvent(
+				e.nativeEvent,
+				columnData,
+				targetColumnContainer,
+				swimlaneData
+			);
 
-		// Clear manager payload (drag finished)
-		dragDropTasksManagerInsatance.clearCurrentDragData();
-		dragDropTasksManagerInsatance.clearDesiredDropIndex();
+			// Clear manager payload (drag finished)
+			dragDropTasksManagerInsatance.clearCurrentDragData();
+			dragDropTasksManagerInsatance.clearDesiredDropIndex();
 
-		// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-		// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
-		// const updated = [...localTasks];
-		// const [moved] = updated.splice(dragIndex, 1);
-		// updated.splice(dropIndex, 0, moved);
-		// setLocalTasks(updated);
-		// // If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
-		// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-		// if (hasManualOrder) {
-		// 	columnData.tasksIdManualOrder = updated.map(t => t.id);
-		// }
+			// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+			// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+			// const updated = [...localTasks];
+			// const [moved] = updated.splice(dragIndex, 1);
+			// updated.splice(dropIndex, 0, moved);
+			// setLocalTasks(updated);
+			// // If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
+			// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			// if (hasManualOrder) {
+			// 	columnData.tasksIdManualOrder = updated.map(t => t.id);
+			// }
 
-		// clear any pending raf
-		if (rafRef.current) {
-			cancelAnimationFrame(rafRef.current);
-			rafRef.current = null;
+			// clear any pending raf
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				188,
+				String(error),
+				"Column.tsx/handleTaskDrop",
+			);
 		}
 	};
 
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(false);
+		setInsertIndex(null);
 
 		try {
 			// Get the data of the dragged task -- No need anymore, since its already stored in the dragdropmanager.
@@ -708,7 +717,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			// 	if (!task || !sourceColumnData) return;
 
 			// Get the target column container
-			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+			const targetColumnContainer = (e.currentTarget);
+			if (!targetColumnContainer) {
+				throw `e.currentTarget not found : ${JSON.stringify(targetColumnContainer)}`;
+			}
 
 
 			// Try to locate the source container by stable column id first (works for all colTypes) -- No need to find this anymore, since I am not making use of sourceColumnContainer in dragdropmanager.
@@ -853,7 +865,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							onDragOver={(e) => { handleDragOver(e); }}
 							onDragLeave={handleDragLeave}
 							onDrop={handleDrop}
-							onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
+							onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); }}
 						>
 							{columnData.minimized ? <></> : (
 								<>
