@@ -1098,6 +1098,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: row;
 	align-content: center;
 	align-items: center;
+	max-width: -webkit-fill-available;
 }
 
 .taskItemFileNameSection {
