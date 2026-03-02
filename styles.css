@@ -6533,6 +6533,9 @@ svg.react-flow__connectionline {
 	flex: 1;
 	overflow-y: auto;
 	overflow-x: hidden;
+	display: flex;
+	flex-direction: column;
+	padding-bottom: 1rem;
 }
 
 .tasksImporterPanelTaskList {
