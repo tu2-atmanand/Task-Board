@@ -321,7 +321,7 @@ export class SettingsManager {
 				),
 			);
 
-		["files", "folders", "frontmatter", "tags"].forEach((type) => {
+		["tags", "frontmatter", "files", "folders"].forEach((type) => {
 			const filterType = type as keyof typeof scanFilters;
 			const filter = scanFilters[filterType];
 
@@ -2574,7 +2574,7 @@ export class SettingsManager {
 					.setPlaceholder("yyyy-MM-dd"),
 			)
 			.addButton((btn) => {
-				btn.setButtonText(t("verify"));
+				btn.setButtonText(t("validate"));
 				btn.onClick(() => {
 					try {
 						const testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
@@ -2666,10 +2666,10 @@ export class SettingsManager {
 					.setPlaceholder("yyyy-MM-dd/HH:mm"),
 			)
 			.addButton((btn) => {
-				btn.setButtonText(t("verify"));
+				btn.setButtonText(t("validate"));
 				btn.onClick(() => {
 					try {
-						const testDate = new Date(2026, 1, 18, 14, 30, 45); // Fixed reference date: Feb 18, 2026, 14:30:45
+						const testDate = new Date();
 						const userFormat = this.globalSettings?.dateTimeFormat;
 
 						if (!userFormat || userFormat.trim().length === 0) {

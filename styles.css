@@ -281,17 +281,112 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	justify-content: center;
 	gap: 4px;
 	border-radius: 5px;
-	padding-inline: 4px;
-	min-height: 100%;
+	padding: 6px;
 	box-shadow: 0px 0px 1px 1px var(--text-faint);
 	background: var(--background-modifier-border);
 	min-width: 80px;
+	position: relative;
+	cursor: pointer;
 }
 
 .taskBoardViewDropdownIcon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+/* Custom Dropdown Menu Styles */
+@keyframes dropdownSlideIn {
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scaleY(0.95);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+	}
+}
+
+@keyframes dropdownSlideOut {
+	from {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(-8px) scaleY(0.95);
+	}
+}
+
+.taskBoardViewDropdownMenu {
+	position: absolute;
+	top: 100%;
+	width: max-content;
+	min-width: 100%;
+	margin-top: 6px;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+	z-index: 1000;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-8px) scaleY(0.95);
+	transform-origin: top center;
+	transition: opacity 0.25s cubic-bezier(0.4, 0.2, 0.2, 1),
+		visibility 0.25s cubic-bezier(0.4, 0.2, 0.2, 1),
+		transform 0.25s cubic-bezier(0.4, 0.2, 0.2, 1);
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.taskBoardViewDropdownMenu--open {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0) scaleY(1);
+	pointer-events: auto;
+	animation: dropdownSlideIn 0.25s cubic-bezier(0.4, 0.2, 0.2, 1) forwards;
+}
+
+.taskBoardViewDropdownItem {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 8px 6px;
+	cursor: pointer;
+	transition: background-color 0.15s ease,
+		color 0.15s ease;
+	color: var(--text-normal);
+	font-size: 0.8rem;
+	user-select: none;
+	position: relative;
+}
+
+.taskBoardViewDropdownItem:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-accent);
+}
+
+.taskBoardViewDropdownItem:active {
+	background-color: var(--background-modifier-active);
+}
+
+.taskBoardViewDropdownItem--active {
+	background-color: var(--background-modifier-active);
+	color: var(--text-accent);
+}
+
+.taskBoardViewDropdownItem--active::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 3px;
+	background: var(--color-accent);
+	border-radius: 0 2px 2px 0;
 }
 
 .taskBoardViewHeaderHideElements {
@@ -1098,6 +1193,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: row;
 	align-content: center;
 	align-items: center;
+	max-width: -webkit-fill-available;
 }
 
 .taskItemFileNameSection {
@@ -1341,7 +1437,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	max-width: calc(var(--task-board-column-width) - 5rem);
+	/* max-width: calc(var(--task-board-column-width) - 5rem); */
 }
 
 /*-----------------------------------------------------------
@@ -6437,6 +6533,9 @@ svg.react-flow__connectionline {
 	flex: 1;
 	overflow-y: auto;
 	overflow-x: hidden;
+	display: flex;
+	flex-direction: column;
+	padding-bottom: 1rem;
 }
 
 .tasksImporterPanelTaskList {

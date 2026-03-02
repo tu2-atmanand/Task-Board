@@ -7,7 +7,6 @@ import {
 	isValid,
 	eachDayOfInterval,
 	startOfToday,
-	parseISO,
 } from "date-fns";
 import {
 	DEFAULT_DATE_FORMAT,
@@ -19,9 +18,18 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 /**
  * Robust date parser that detects date format and parses accordingly.
  * Prioritizes ISO format (YYYY-MM-DD) and common date formats.
- * @param dateString - The date string to parse (e.g., "2026-02-19", "19/02/2026")
- * @param preferredFormat - The preferred format to try first (e.g., "dd/MM/yyyy")
+ *
+ * @param dateString - The date string to parse (e.g., "2026-02-19", "19/02/2026T10:30:00")
+ * @param preferredFormat - The preferred format to try first (e.g., "yyyy-MM-dd", "dd/MM/yyyyTHH:mm:ss" )
+ * @param timePresent - Whether this is a date-time string or just a date string
  * @returns Parsed Date object or null if parsing fails
+ *
+ * @note This function is getting called three times for each and every task item:
+ * 	- First for board level advanced filter (if date related filter is applied)
+ * 	- Second for column level advanced filter (if date related filter is applied)
+ * 	- Third for the card rendering from the component.
+ *
+ * Either we need to somehow cache the value or need to find a better approach.
  */
 export const robustDateParser = (
 	dateString: string,
@@ -33,65 +41,74 @@ export const robustDateParser = (
 
 	const trimmed = dateString.trim();
 
-	// Try ISO format first (YYYY-MM-DD) since Tasks plugin uses this
-	if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-		try {
-			const parsed = parseISO(trimmed);
-			if (isValid(parsed)) {
-				return parsed;
-			}
-		} catch (error) {
-			// Fall through to other formats
+	// // Try ISO format first (YYYY-MM-DD) since Tasks plugin uses this
+	// if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+	// 	try {
+	// 		const parsed = parseISO(trimmed);
+	// 		if (isValid(parsed)) {
+	// 			return parsed;
+	// 		}
+	// 	} catch (error) {
+	// 		// Fall through to other formats
+	// 	}
+	// }
+
+	// // Detect separator in the input string
+	// const separatorMatch = trimmed.match(/[-/\\.\s]/);
+	// const inputSeparator = separatorMatch ? separatorMatch[0] : "-";
+
+	// // Build format list based on detected separator and preferred format
+	// const formatsToTry: string[] = [];
+
+	// // Add preferred format first (if it uses the correct separator)
+	// const preferredSeparator = preferredFormat.match(/[-/\\.\s]/)?.[0] || "-";
+	// if (preferredSeparator === inputSeparator) {
+	// 	formatsToTry.push(preferredFormat);
+	// }
+
+	// // Add common formats with matching separator
+	// const commonFormats = {
+	// 	"-": [
+	// 		"yyyy-MM-dd",
+	// 		"yyyy-MM-dd HH:mm:ss",
+	// 		"yyyy-MM-dd'T'HH:mm:ss",
+	// 		"dd-MM-yyyy",
+	// 		"MM-dd-yyyy",
+	// 	],
+	// 	"/": [
+	// 		"dd/MM/yyyy",
+	// 		"MM/dd/yyyy",
+	// 		"yyyy/MM/dd",
+	// 		"dd/MM/yyyy HH:mm:ss",
+	// 		"MM/dd/yyyy HH:mm:ss",
+	// 	],
+	// 	".": ["dd.MM.yyyy", "yyyy.MM.dd", "dd.MM.yyyy HH:mm:ss"],
+	// };
+
+	// formatsToTry.push(
+	// 	...(commonFormats[inputSeparator as keyof typeof commonFormats] || []),
+	// );
+
+	try {
+		const parsed = parse(trimmed, preferredFormat, new Date());
+		if (isValid(parsed)) {
+			return parsed;
 		}
-	}
 
-	// Detect separator in the input string
-	const separatorMatch = trimmed.match(/[-/\\.\s]/);
-	const inputSeparator = separatorMatch ? separatorMatch[0] : "-";
-
-	// Build format list based on detected separator and preferred format
-	const formatsToTry: string[] = [];
-
-	// Add preferred format first (if it uses the correct separator)
-	const preferredSeparator = preferredFormat.match(/[-/\\.\s]/)?.[0] || "-";
-	if (preferredSeparator === inputSeparator) {
-		formatsToTry.push(preferredFormat);
-	}
-
-	// Add common formats with matching separator
-	const commonFormats = {
-		"-": [
-			"yyyy-MM-dd",
-			"yyyy-MM-dd HH:mm:ss",
-			"yyyy-MM-dd'T'HH:mm:ss",
-			"dd-MM-yyyy",
-			"MM-dd-yyyy",
-		],
-		"/": [
-			"dd/MM/yyyy",
-			"MM/dd/yyyy",
-			"yyyy/MM/dd",
-			"dd/MM/yyyy HH:mm:ss",
-			"MM/dd/yyyy HH:mm:ss",
-		],
-		".": ["dd.MM.yyyy", "yyyy.MM.dd", "dd.MM.yyyy HH:mm:ss"],
-	};
-
-	formatsToTry.push(
-		...(commonFormats[inputSeparator as keyof typeof commonFormats] || []),
-	);
-
-	// Try parsing with each format
-	for (const fmt of formatsToTry) {
-		try {
-			const parsed = parse(trimmed, fmt, new Date());
-			if (isValid(parsed)) {
-				return parsed;
-			}
-		} catch (error) {
-			// Continue to next format
+		// If no format worked, try native Date parsing
+		const nativeDate = new Date(dateString);
+		if (isValid(nativeDate)) {
+			return nativeDate;
 		}
+	} catch (error) {
+		bugReporterManagerInsatance.addToLogs(
+			187,
+			`${JSON.stringify(error)}\n\nDate string : ${trimmed}\nDate format : ${preferredFormat}\n`,
+			"DateTimeCalculations.ts/robustDateParser",
+		);
+		return null;
 	}
+	// }
 
 	// Last resort: try native Date parsing for ISO strings and other formats
 	try {
@@ -152,7 +169,7 @@ export const getCurrentLocalDateTimeString = (
 
 /**
  * @deprecated moment.js and date-fns libraries dont follow the same formatting. Hence, its better to only proceed with using a single library for all date formatting. Hence, will no longer use moment.js library in this project.
- * 
+ *
  * @description Returns current local date-time formatted according to the specified format.
  * This is a legacy function for backward compatibility.
  * Uses moment.js library for formatting.
@@ -190,47 +207,16 @@ export const getCurrentLocalDateTimeStringLegacy = (
  *
  * @returns Formatted date string if successful, otherwise returns the original dateString.
  */
-export const formatDateAsPerSettings = (
+export const formatDateStringAsPerSettings = (
 	dateString: string,
-	dateFormat: string = "yyyy-MM-dd",
+	dateFormat: string = DEFAULT_DATE_FORMAT,
 ): string => {
-	if (!dateString || !dateFormat) {
+	if (!dateString) {
 		return dateString;
 	}
 
 	try {
-		// TODO : This is not required, because when user will enter the format, they will verify it there itself. Hence, the format will be always correct. This, simply adds more code of creating for-loop, etc, which can be avoided.
-		// Array of common date formats to try parsing
-		const formatsToTry = [
-			dateFormat,
-			"yyyy-MM-dd",
-			"YYYY-MM-DD",
-			"dd/MM/yyyy",
-			"DD/MM/YYYY",
-			"MM/dd/yyyy",
-			"MM/DD/YYYY",
-			"yyyy/MM/dd",
-			"YYYY/MM/DD",
-		];
-
-		let parsedDate: Date | null = null;
-
-		// Try parsing with different formats
-		for (const fmt of formatsToTry) {
-			const parsed = parse(dateString, fmt, new Date());
-			if (isValid(parsed)) {
-				parsedDate = parsed;
-				break;
-			}
-		}
-
-		// If no format worked, try native Date parsing
-		if (!parsedDate) {
-			const nativeDate = new Date(dateString);
-			if (isValid(nativeDate)) {
-				parsedDate = nativeDate;
-			}
-		}
+		let parsedDate: Date | null = robustDateParser(dateString, dateFormat);
 
 		// If we have a valid date, format it
 		if (parsedDate) {
@@ -253,47 +239,21 @@ export const formatDateAsPerSettings = (
  */
 export const formatDateTimeAsPerSettings = (
 	dateTimeString: string,
-	dateTimeFormat: string = "yyyy-MM-dd HH:mm:ss",
+	dateTimeFormat: string = DEFAULT_DATE_TIME_FORMAT,
 ): string => {
-	if (!dateTimeString || !dateTimeFormat) {
+	if (!dateTimeString) {
 		return dateTimeString;
 	}
 
 	try {
-		// Array of common date-time formats to try parsing
-		const formatsToTry = [
+		let parsedDate: Date | null = robustDateParser(
+			dateTimeString,
 			dateTimeFormat,
-			"yyyy-MM-dd HH:mm:ss",
-			"yyyy-MM-dd'T'HH:mm:ss",
-			"YYYY-MM-DD HH:mm:ss",
-			"YYYY-MM-DD'T'HH:mm:ss",
-			"dd/MM/yyyy HH:mm:ss",
-			"MM/dd/yyyy HH:mm:ss",
-			"yyyy/MM/dd HH:mm:ss",
-		];
+		);
 
-		let parsedDateTime: Date | null = null;
-
-		// Try parsing with different formats
-		for (const fmt of formatsToTry) {
-			const parsed = parse(dateTimeString, fmt, new Date());
-			if (isValid(parsed)) {
-				parsedDateTime = parsed;
-				break;
-			}
-		}
-
-		// If no format worked, try native Date parsing
-		if (!parsedDateTime) {
-			const nativeDate = new Date(dateTimeString);
-			if (isValid(nativeDate)) {
-				parsedDateTime = nativeDate;
-			}
-		}
-
-		// If we have a valid date-time, format it
-		if (parsedDateTime) {
-			return format(parsedDateTime, dateTimeFormat);
+		// If we have a valid date, format it
+		if (parsedDate) {
+			return format(parsedDate, dateTimeFormat);
 		}
 
 		return dateTimeString;
@@ -345,16 +305,14 @@ export function getAllDatesInRelativeRange(
  * @returns The universal date of the task as a string, or an empty string if not set. */
 export const getUniversalDateFromTask = (
 	task: taskItem,
-	plugin: TaskBoard,
+	universalDateSetting: string,
 ): string => {
 	// Method 1 - Comparing
-	const universalDateChoice = plugin.settings.data.globalSettings.universalDate;
-
-	if (universalDateChoice === UniversalDateOptions.dueDate) {
+	if (universalDateSetting === UniversalDateOptions.dueDate) {
 		return task.due;
-	} else if (universalDateChoice === UniversalDateOptions.startDate) {
+	} else if (universalDateSetting === UniversalDateOptions.startDate) {
 		return task.startDate || "";
-	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
+	} else if (universalDateSetting === UniversalDateOptions.scheduledDate) {
 		return task.scheduledDate || "";
 	}
 	return "";
@@ -379,13 +337,12 @@ export const getUniversalDateFromTask = (
  * @param plugin - The TaskBoard plugin object.
  * @returns An emoji representing the universal date type, or an empty string if not set.
  */
-export const getUniversalDateEmoji = (plugin: TaskBoard): string => {
-	const universalDateChoice = plugin.settings.data.globalSettings.universalDate;
-	if (universalDateChoice === UniversalDateOptions.dueDate) {
+export const getUniversalDateEmoji = (universalDateSetting: string): string => {
+	if (universalDateSetting === UniversalDateOptions.dueDate) {
 		return "📅";
-	} else if (universalDateChoice === UniversalDateOptions.scheduledDate) {
+	} else if (universalDateSetting === UniversalDateOptions.scheduledDate) {
 		return "⏳";
-	} else if (universalDateChoice === UniversalDateOptions.startDate) {
+	} else if (universalDateSetting === UniversalDateOptions.startDate) {
 		return "🛫";
 	}
 	return "";

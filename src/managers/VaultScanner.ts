@@ -39,7 +39,6 @@ import {
 } from "../utils/taskNote/FrontmatterOperations";
 import { t } from "../utils/lang/helper";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations";
 import { priorityEmojis } from "src/interfaces/Mapping";
 import { UniversalDateOptions } from "src/interfaces/Enums";
 import {
@@ -48,6 +47,7 @@ import {
 } from "src/utils/algorithms/ScanningFilterer";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import { bugReporterManagerInsatance } from "./BugReporter";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -128,11 +128,11 @@ export default class VaultScanner {
 			 */
 			// Below code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
 			// if (
-			// 	this.plugin.settings.data.globalSettings
+			// 	this.plugin.settings.data
 			// 		.frontmatterPropertyForReminder &&
 			// 	frontmatter &&
 			// 	frontmatter[
-			// 		this.plugin.settings.data.globalSettings
+			// 		this.plugin.settings.data
 			// 			.frontmatterPropertyForReminder
 			// 	]
 			// ) {
@@ -141,7 +141,7 @@ export default class VaultScanner {
 			// 		frontmatter: frontmatter,
 			// 		reminder:
 			// 			frontmatter[
-			// 				this.plugin.settings.data.globalSettings
+			// 				this.plugin.settings.data
 			// 					.frontmatterPropertyForReminder
 			// 			],
 			// 	};
@@ -312,16 +312,21 @@ export default class VaultScanner {
 							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
 							const createdDate = extractCreatedDate(line);
-							let startDate = extractStartDate(line);
-							let scheduledDate = extractScheduledDate(line);
-							let dueDate = extractDueDate(line);
+							let startDate: RegExpMatchArray | null | string =
+								extractStartDate(line);
+							let scheduledDate:
+								| RegExpMatchArray
+								| null
+								| string = extractScheduledDate(line);
+							let dueDate: RegExpMatchArray | null | string =
+								extractDueDate(line);
 							const priority = extractPriority(line);
 							const dependsOn = extractDependsOn(line);
 							const reminder = extractReminder(
 								line,
-								startDate,
-								scheduledDate,
-								dueDate,
+								startDate ? startDate[1] : "",
+								scheduledDate ? scheduledDate[1] : "",
+								dueDate ? dueDate[1] : "",
 							);
 							const completionDate = extractCompletionDate(line);
 							const cancelledDate = extractCancelledDate(line);
@@ -333,23 +338,14 @@ export default class VaultScanner {
 
 							if (
 								this.plugin.settings.data.globalSettings
-									.dailyNotesPluginComp &&
-								((this.plugin.settings.data.globalSettings
-									.universalDate ===
-									UniversalDateOptions.dueDate &&
-									dueDate === "") ||
-									(this.plugin.settings.data.globalSettings
-										.universalDate ===
-										UniversalDateOptions.startDate &&
-										startDate === "") ||
-									(this.plugin.settings.data.globalSettings
-										.universalDate ===
-										UniversalDateOptions.scheduledDate &&
-										scheduledDate === ""))
+									.dailyNotesPluginComp
 							) {
 								const universalDateFormat =
 									this.plugin.settings.data.globalSettings
 										.dateFormat;
+								const universalDateConfig =
+									this.plugin.settings.data.globalSettings
+										.universalDate;
 								const basename = file.basename;
 
 								// Check if the basename matches the dueFormat using moment
@@ -363,21 +359,21 @@ export default class VaultScanner {
 									).isValid()
 								) {
 									if (
-										this.plugin.settings.data.globalSettings
-											.universalDate ===
-										UniversalDateOptions.dueDate
+										universalDateConfig ===
+											UniversalDateOptions.dueDate &&
+										!dueDate
 									) {
 										dueDate = basename; // If the basename matches the dueFormat, assign it to due
 									} else if (
-										this.plugin.settings.data.globalSettings
-											.universalDate ===
-										UniversalDateOptions.startDate
+										universalDateConfig ===
+											UniversalDateOptions.startDate &&
+										!startDate
 									) {
 										startDate = basename; // If the basename matches the dueFormat, assign it to startDate
 									} else if (
-										this.plugin.settings.data.globalSettings
-											.universalDate ===
-										UniversalDateOptions.scheduledDate
+										universalDateConfig ===
+											UniversalDateOptions.scheduledDate &&
+										!scheduledDate
 									) {
 										scheduledDate = basename; // If the basename matches the dueFormat, assign it to scheduledDate
 									}
@@ -396,20 +392,22 @@ export default class VaultScanner {
 
 							const task: taskItem = {
 								id: legacyId
-									? legacyId
+									? (legacyId[1] ?? "")
 									: generateRandomTempTaskId(),
-								legacyId: legacyId, // Storing the legacyId for backward compatibility
+								legacyId: legacyId ? legacyId[1] : "", // Storing the legacyId for backward compatibility
 								status: taskStatus,
 								title: title,
 								body: bodyLines,
-								time: time,
-								createdDate: createdDate,
-								startDate: startDate,
-								scheduledDate: scheduledDate,
-								due: dueDate,
+								time: time ? time[1] : "",
+								createdDate: createdDate ? createdDate[1] : "",
+								startDate: startDate ? startDate[1] : "",
+								scheduledDate: scheduledDate
+									? scheduledDate[1]
+									: "",
+								due: dueDate ? dueDate[1] : "",
 								tags: tags,
 								frontmatterTags: frontmatterTags,
-								priority: priority,
+								priority: priority.value,
 								dependsOn: dependsOn
 									? dependsOn[1]
 											.split(",")
@@ -426,9 +424,13 @@ export default class VaultScanner {
 													.length
 											: line.length,
 								},
-								completion: completionDate,
-								cancelledDate: cancelledDate,
-								reminder: reminder,
+								completion: completionDate
+									? completionDate[1]
+									: "",
+								cancelledDate: cancelledDate
+									? cancelledDate[1]
+									: "",
+								reminder: reminder.value,
 							};
 
 							if (isThisCompletedTask) {
@@ -498,7 +500,7 @@ export default class VaultScanner {
 					// 	// The second sub-condition is to check if the older file was a task-note. This second sub-condition is required in the case when user simply removes the taskNoteIdentifierTag from the frontmatter of the note, so its not longer a task-note now and also if the note doesnt have any tasks in its content, then this task-note cache should be removed.
 					// 	(oldPendingFileCache.length === 1 &&
 					// 		isTaskNotePresentInTags(
-					// 			this.plugin.settings.data.globalSettings
+					// 			this.plugin.settings.data
 					// 				.taskNoteIdentifierTag,
 					// 			oldPendingFileCache[0].tags
 					// 		));
@@ -515,7 +517,7 @@ export default class VaultScanner {
 				// 	(oldCompletedFileCache &&
 				// 		oldCompletedFileCache.length === 1 &&
 				// 		isTaskNotePresentInTags(
-				// 			this.plugin.settings.data.globalSettings
+				// 			this.plugin.settings.data
 				// 				.taskNoteIdentifierTag,
 				// 			oldCompletedFileCache[0].tags
 				// 		));
@@ -631,7 +633,7 @@ export default class VaultScanner {
 	// 		);
 	// 		// this.plugin.saveSettings(); // This was to save the uniqueIdCounter in settings, but moved that to be saved immediately when the ID is generated.
 	// 		if (
-	// 			this.plugin.settings.data.globalSettings.realTimeScanner &&
+	// 			this.plugin.settings.data.realTimeScanner &&
 	// 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
 	// 		) {
@@ -656,10 +658,10 @@ export default class VaultScanner {
 
 		setTimeout(() => {
 			eventEmitter.emit("REFRESH_COLUMN");
-			// 	if (this.plugin.settings.data.globalSettings.searchQuery) {
+			// 	if (this.plugin.settings.data.searchQuery) {
 			// 		console.log(
 			// 			"Refreshing the board now after saving...\nSetting : ",
-			// 			this.plugin.settings.data.globalSettings.searchQuery
+			// 			this.plugin.settings.data.searchQuery
 			// 		);
 			// 		eventEmitter.emit("REFRESH_BOARD");
 			// 	} else {
@@ -677,26 +679,23 @@ export default class VaultScanner {
 /**
  * Checks if the file is allowed for scanning based on its extension and plugin settings.
  * It also checks if the file is not the archived tasks file or inside the archived TB notes folder.
- * @param plugin - The TaskBoard plugin instance
- * @param file - The file to check (TFile)
+ * Additionally, it excludes .taskboard files from scanning as they are board configuration files.
+ * @param globalSettings - The global settings from the plugin
+ * @param file - The file to check (TFile or TAbstractFile)
  * @returns boolean - True if the file is allowed for scanning, false otherwise
  */
 export function fileTypeAllowedForScanning(
 	globalSettings: globalSettingsData,
 	file: TFile | TAbstractFile,
 ): boolean {
-	// console.log("Condition 1 :", notAllowedFileExtensionsRegEx.test(file.path), "\nCondition 2 :", file.path ===
-	// 		plugin.settings.data.globalSettings.archivedTasksFilePath, "\nCondition 3 :", , "\nCondition 4 :", )
-
 	const filePath = file.path.toLocaleLowerCase();
+	const isFileInArchivedTaskNotesFolder = globalSettings.archivedTBNotesFolderPath.trim() !== "" && filePath.startsWith(globalSettings.archivedTBNotesFolderPath.toLowerCase());
+
 	if (
 		file instanceof TFolder ||
+		isFileInArchivedTaskNotesFolder ||
 		// notAllowedFileExtensionsRegEx.test(file.path) ||
 		!allowedFileExtensionsRegEx.test(file.path) ||
-		(globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
-			filePath.startsWith(
-				globalSettings.archivedTBNotesFolderPath.toLowerCase(),
-			)) ||
 		filePath === globalSettings.archivedTasksFilePath.toLowerCase()
 	) {
 		return false;
@@ -734,15 +733,15 @@ export function buildTaskFromRawContent(
 		title: title,
 		status: taskStatus,
 		body: body,
-		time: time,
-		createdDate: createdDate,
-		startDate: startDate,
-		scheduledDate: scheduledDate,
-		due: due,
+		time: time?.[1] ?? "",
+		createdDate: createdDate?.[1] ?? "",
+		startDate: startDate?.[1] ?? "",
+		scheduledDate: scheduledDate?.[1] ?? "",
+		due: due?.[1] ?? "",
 		tags: tags,
-		priority: priority,
-		completion: completionDate,
-		cancelledDate: cancelledDate,
+		priority: priority.value,
+		completion: completionDate?.[1] ?? "",
+		cancelledDate: cancelledDate?.[1] ?? "",
 		filePath: filePath || "",
 	};
 }
@@ -785,7 +784,7 @@ export function extractTitle(text: string): string {
  * @param {string} text - The task string.
  * @returns {string} The task id.
  */
-export function extractTaskId(text: string): string {
+export function extractTaskId(text: string): RegExpMatchArray | null {
 	// const combinedIdRegex = new RegExp(
 	// 	`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
 	// 	"g" // add the 'g' flag if you want to match all occurrences
@@ -793,29 +792,29 @@ export function extractTaskId(text: string): string {
 	// let idMatch = text.match(combinedIdRegex);
 	// console.log("ID match while scanning :", idMatch);
 	// if (idMatch && idMatch[1]) {
-	// 	return idMatch[1].trim();
+	// 	return idMatch;
 	// }
 
 	let idMatch = text.match(
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex,
 	);
 	if (idMatch && idMatch[1]) {
-		return idMatch[1].trim();
+		return idMatch;
 	}
 
 	idMatch = text.match(
 		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex,
 	);
 	if (idMatch && idMatch[1]) {
-		return idMatch[1].trim();
+		return idMatch;
 	}
 
 	idMatch = text.match(/\@id\(\s*(.*?)\)/);
 	if (idMatch && idMatch[1]) {
-		return idMatch[1].trim();
+		return idMatch;
 	}
 
-	return "";
+	return null;
 }
 
 /**
@@ -892,118 +891,142 @@ export function extractBody(
  * @param {string} text - The task string.
  * @returns {string} The extracted time string, or an empty string if no match.
  */
-export function extractTime(text: string): string {
+export function extractTime(text: string): RegExpMatchArray | null {
 	let match = text.match(/\[time::\s*(.*?)\]/);
-	if (match) {
-		return match[1];
+	if (match && match[1]) {
+		return match;
+	}
+
+	match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.durationRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
 	match = text.match(/@time\((.*?)\)/);
-	if (match) {
-		return match[1];
-	}
-
-	match = text.match(/⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);
-	if (match) {
-		return match[1];
+	if (match && match[1]) {
+		return match;
 	}
 
 	// Check if time is at the start of the task
-	const timeAtStartMatch = text.match(
-		/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/,
-	);
+	const timeAtStartMatch = text
+		.trim()
+		.match(/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);
 
-	if (timeAtStartMatch) {
+	if (timeAtStartMatch && timeAtStartMatch[1]) {
 		// If time is at the start, extract it
-		return timeAtStartMatch[1];
+		return timeAtStartMatch;
 	}
 
-	// Otherwise, look for time elsewhere in the line
-	const timeIntitleMatch = text.match(
-		/⏰\s*\[(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\]/,
-	);
-	return timeIntitleMatch ? timeIntitleMatch[1] : "";
+	return null;
 }
 
 // Extract Created date from task title
-export function extractCreatedDate(text: string): string {
-	let match = text.match(/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.createdDateRegex,
-		);
+export function extractCreatedDate(text: string): RegExpMatchArray | null {
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.createdDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@created\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.createdDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@created\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match;
+	}
+
+	return null;
 }
 
 // Extract Start date from task title
-export function extractStartDate(text: string): string {
-	let match = text.match(/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.startDateRegex,
-		);
+export function extractStartDate(text: string): RegExpMatchArray | null {
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.startDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@start\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.startDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@start\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match;
+	}
+
+	return null;
 }
 
 // Extract Scheduled date from task title
-export function extractScheduledDate(text: string): string {
-	let match = text.match(/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.scheduledDateRegex,
-		);
+export function extractScheduledDate(text: string): RegExpMatchArray | null {
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+			.scheduledDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@scheduled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+			.scheduledDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@scheduled\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match;
+	}
+
+	return null;
 }
 
 // Extract Due date from task title
-export function extractDueDate(text: string): string {
-	let match = text.match(/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/);
-
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex,
-		);
+export function extractDueDate(text: string): RegExpMatchArray | null {
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dueDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	if (!match) {
-		match = text.match(/\@due\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	return match ? match[1] : "";
+	match = text.match(/\@due\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match;
+	}
+
+	return null;
 }
 
 // Extract priority from task title using RegEx
-export function extractPriority(text: string): number {
+export function extractPriority(text: string): {
+	parsedString: string;
+	value: number;
+} {
 	// Execute the regex to find all priority emoji matches
 	const matches =
 		text.match(
@@ -1022,7 +1045,7 @@ export function extractPriority(text: string): number {
 			([, value]) => value === emoji,
 		);
 		if (priorityMatch) {
-			return parseInt(priorityMatch[0]); // Return the first matching priority
+			return { parsedString: emoji, value: parseInt(priorityMatch[0]) }; // Return the first matching priority
 		}
 	}
 
@@ -1030,21 +1053,21 @@ export function extractPriority(text: string): number {
 		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex,
 	);
 	if (match) {
-		return parseInt(match[1]);
+		return { parsedString: match[0], value: parseInt(match[1].trim()) };
 	}
 
 	match = text.match(/@priority\(\s*(\d{1,2})\s*\)/);
 	if (match) {
-		return parseInt(match[1]);
+		return { parsedString: match[0], value: parseInt(match[1].trim()) };
 	}
 
 	// Default priority if no emoji is found
-	return 0;
+	return { parsedString: "", value: 0 };
 }
 
 // Extract tags from task title
 export function extractTags(text: string): string[] {
-	text = text.replace(/<(mark|font).*?>/g, "");
+	text = text.replace(/<(mark|font).*?>/g, ""); // TODO : this might not required, try removing this.
 	const matches = text.match(TaskRegularExpressions.hashTagsRegex);
 	return matches ? matches.map((tag) => tag.trim()) : [];
 }
@@ -1054,15 +1077,18 @@ export function extractReminder(
 	startDate?: string,
 	scheduledDate?: string,
 	dueDate?: string,
-): string {
+): {
+	parsedString: string;
+	value: string;
+} {
 	let match = text.match(/\[reminder::\s*(.*?)\]/);
 	if (match) {
-		return match[1].replace(` `, "T").trim();
+		return { parsedString: match[0], value: match[1].trim() };
 	}
 
 	match = text.match(/@reminder\(\s*(.*?)\s*\)/);
 	if (match) {
-		return match[1].replace(` `, "T").trim();
+		return { parsedString: match[0], value: match[1].trim() };
 	}
 
 	// This will be enabled, after Tasks plugin will support the reminder property.
@@ -1072,26 +1098,26 @@ export function extractReminder(
 	// }
 
 	// New patterns
-	match = text.match(/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/);
-	if (match) {
-		const dateStr = match[1];
-		if (dateStr.includes(" ")) {
-			const [date, time] = dateStr.split(" ");
-			return `${date}T${time}`;
-		} else {
-			return `${dateStr}T09:00`;
-		}
-	}
+	// match = text.match(/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/);
+	// if (match) {
+	// 	const dateStr = match[1];
+	// 	if (dateStr.includes(" ")) {
+	// 		const [date, time] = dateStr.split(" ");
+	// 		return `${date}T${time}`;
+	// 	} else {
+	// 		return `${dateStr}T09:00`;
+	// 	}
+	// }
 
 	match = text.match(/\(\@(\d{2}:\d{2})\)/);
 	if (match) {
 		const baseDate = startDate || scheduledDate || dueDate;
 		if (baseDate) {
-			return `${baseDate}T${match[1]}`;
+			return { parsedString: match[0], value: `${baseDate}T${match[1]}` };
 		}
 	}
 
-	return "";
+	return { parsedString: "", value: "" };
 }
 
 /**
@@ -1126,55 +1152,52 @@ export function extractDependsOn(text: string): RegExpMatchArray | null {
 }
 
 // Extract completion date-time value
-export function extractCompletionDate(text: string): string {
-	let match = text.match(/✅\s*.*?(?=\s|$)/);
-
-	// If not found, try to match the [completion:: 2024-09-28] format
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex,
-		);
-		if (match) {
-			return match
-				? match[0].replace("[completion::", "").replace("]", "").trim()
-				: "";
-		}
+export function extractCompletionDate(text: string): RegExpMatchArray | null {
+	let match = text.match(
+		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.doneDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	if (!match) {
-		match = text.match(/\@completion\(\s*(.*?)\s*\)/);
-		if (match) {
-			return match
-				? match[0].replace("@completion(", "").replace(")", "").trim()
-				: "";
-		}
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
-	// Return the matched date or date-time, or an empty string if no match
-	return match ? match[0].replace("✅", "").trim() : "";
+
+	match = text.match(/\@completion\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match;
+	}
+
+	return null;
 }
 
-export function extractCancelledDate(text: string): string {
+export function extractCancelledDate(text: string): RegExpMatchArray | null {
 	let match = text.match(
 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
 			.cancelledDateRegex,
 	);
-
-	// If not found, try to match the [cancelled:: 2024-09-28] format
-	if (!match) {
-		match = text.match(
-			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-				.cancelledDateRegex,
-		);
+	if (match && match[1]) {
+		return match;
 	}
 
-	if (!match) {
-		match = text.match(
-			/\@cancelled\(\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})\)/,
-		);
+	match = text.match(
+		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+			.cancelledDateRegex,
+	);
+	if (match && match[1]) {
+		return match;
 	}
 
-	// Return the matched date or date-time, or an empty string if no match
-	return match ? match[1].trim() : "";
+	match = text.match(/\@cancelled\(\s*([^ ]+)\)/);
+	if (match && match[1]) {
+		return match;
+	}
+
+	return null;
 }
 
 /**

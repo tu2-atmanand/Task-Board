@@ -13,122 +13,19 @@
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
-  - Task Board v1.9.5
   - BRAT v1.4.0
   - Tasks v7.22.0
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
+  - Task Board v1.9.6
 
 ## Recent Bug Reports
 
-Timestamp : undefined
-ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : 2026-02-22T15:08:19
-ID : 62
-Message : undefined
-Context : undefined
-Version : 1.9.5
-
-#### Bug Content
-```log
-OldTask location :{"startLine":5,"startCharIndex":0,"endLine":7,"endCharIndex":25}
-
-OldTask content inside task-board-cache :- [ ] This is some nice task content, updated. ⏳ 2025-12-06 [id:: 254]
-
-At present the content inside file at line number 5 is: - [x] This is some nice task content, updated. ⏳ 2025-12-06 [id:: 254]
-```
-
--------------
-
-Timestamp : 2026-02-22T15:12:12
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.5
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-02-22T15:21:25
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.5
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-02-22T15:39:14
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.5
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-02-22T15:40:32
-ID : 62
-Message : undefined
-Context : undefined
-Version : 1.9.5
-
-#### Bug Content
-```log
-OldTask location :{"startLine":3,"startCharIndex":0,"endLine":3,"endCharIndex":164}
-
-OldTask content inside task-board-cache :1. [ ] Test a numbered task, update more. 📅 2026-02-18 [scheduled:: 2026-02-12] [id:: 587] [priority:: 2] #Test ⏰ 16:01 - 17:01
-
-At present the content inside file at line number 3 is: 1. [x] Test a numbered task, update more. 📅 2026-02-18 [scheduled:: 2026-02-12] [id:: 587] [priority:: 2] #Test ⏰ 16:01 - 17:01 [completion:: 2026-02-22T15:39:57]
-```
-
--------------
-
-Timestamp : 2026-02-22T18:27:38
-ID : 62
-Message : undefined
-Context : undefined
-Version : 1.9.5
-
-#### Bug Content
-```log
-OldTask location :{"startLine":5,"startCharIndex":0,"endLine":7,"endCharIndex":25}
-
-OldTask content inside task-board-cache :- [ ] This is some nice task content, updated. ⏳ 2025-12-06 [id:: 254] #done
-
-At present the content inside file at line number 5 is: - [x] This is some nice task content, updated. ⏳ 2025-12-06 [id:: 254] #done [completion:: 2026-02-22T15:21:29]
-```
-
--------------
-
-Timestamp : 2026-02-22T19:09:52
+Timestamp : 2026-03-02T10:50:54
 ID : 142
 Message : 
 Context : DragDropTasksManager.ts/handleDropEvent
-Version : 1.9.5
+Version : 1.9.6
 
 #### Bug Content
 ```log

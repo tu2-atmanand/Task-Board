@@ -41,12 +41,13 @@ export interface currentDragDataPayload {
  */
 class DragDropTasksManager {
 	private static instance: DragDropTasksManager;
+	private plugin: TaskBoard | null = null;
 
 	// Hold the current drag payload so dragover handlers can access it reliably
 	private currentDragData: currentDragDataPayload | null = null;
 	private desiredDropIndex: number | null = null;
+	// private clonedDraggedElement: HTMLElement | null = null;
 	// private dropIndicator: HTMLElement | null = null; // deprecated
-	private plugin: TaskBoard | null = null;
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -106,6 +107,10 @@ class DragDropTasksManager {
 	 */
 	clearCurrentDragData() {
 		this.currentDragData = null;
+		// if (this.clonedDraggedElement) {
+		// 	document.body.removeChild(this.clonedDraggedElement);
+		// 	this.clonedDraggedElement = null;
+		// }
 	}
 
 	// --------------------------------------
@@ -419,7 +424,7 @@ class DragDropTasksManager {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
 				30,
-				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
+				"The column configurations are currupted. Configurations are not valid for this operation. The value of 'from' should be always lower or equal to value of 'to'. Kindly verify the column configuration in which you just dropped the task.",
 				`Column configuration :	${JSON.stringify(targetColumn)}`,
 				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated",
 			);
@@ -1202,23 +1207,30 @@ class DragDropTasksManager {
 	 * @param {DragEvent} e - The drag event.
 	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element.
 	 * @param {currentDragDataPayload} currentDragData - The current drag data payload.
-	 * @param {number} dragIndex (Optional) - The index of the task item being dragged.
-	 *
 	 */
 	public handleDragStartEvent(
 		e: DragEvent,
 		draggedTaskItem: HTMLDivElement,
 		currentDragData: currentDragDataPayload,
-		dragIndex: number,
 	): void {
 		if (!e.dataTransfer) return;
-
-		// prevent column drag from also starting
-		e.stopPropagation();
 
 		this.setCurrentDragData(currentDragData);
 
 		e.dataTransfer.effectAllowed = "move";
+
+		// Set a drag image from the whole task element so the preview is the full card
+		// NOTE : The below code worked and then it just stopped working. Also, a long back it worked during screen recording then stopped working. So, its not dependent on the code, but the platform and some other unknown factor.
+		// const clone = e.targetNode?.parentNode?.cloneNode(true) as HTMLElement;
+		// clone.setAttribute(
+		// 	"style",
+		// 	"position: absolute; left: 0px; top: 0px; z-index: -1",
+		// );
+		// console.log(clone);
+		// document.body.appendChild(clone);
+		// this.clonedDraggedElement = clone;
+		// const rectangle = clone.getBoundingClientRect();
+		// e.dataTransfer.setDragImage(clone, rectangle.width/2, rectangle.height/2);
 
 		// TODO : I probably wont need this anymore since I am using the singleton manager to hold the current drag data.
 		// provide a JSON payload so drop handlers can inspect
@@ -1245,7 +1257,6 @@ class DragDropTasksManager {
 
 		// Visual dim / dragging class
 		this.dimDraggedTaskItem(draggedTaskItem);
-		// draggedTaskItem.classList.add('task-item-dragging');
 	}
 
 	/**
