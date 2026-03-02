@@ -527,8 +527,8 @@
           ]
         },
         "taskCount": {
-          "pending": 31,
-          "completed": 1
+          "pending": 88,
+          "completed": 8
         },
         "swimlanes": {
           "enabled": true,
@@ -723,8 +723,8 @@
           "filterGroups": []
         },
         "taskCount": {
-          "pending": 77,
-          "completed": 7
+          "pending": 88,
+          "completed": 8
         },
         "swimlanes": {
           "enabled": false,
@@ -995,6 +995,10 @@
         "taskCount": {
           "pending": 88,
           "completed": 8
+        },
+        "filterConfig": {
+          "enableSavedFilters": true,
+          "savedConfigs": []
         }
       }
     ],
@@ -1186,7 +1190,7 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 5,
+        "boardIndex": 2,
         "taskId": "",
         "settingTab": 1
       },
@@ -1309,7 +1313,8 @@
         "cancelledDate",
         "status",
         "createdDate",
-        "filePath"
+        "filePath",
+        "dependsOn"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
