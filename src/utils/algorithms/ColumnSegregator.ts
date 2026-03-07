@@ -1,15 +1,17 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import { moment as _moment } from "obsidian";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
-import { boardFilterer } from "./BoardFilterer";
+import { advancedFilterer } from "./BoardFilterer";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
 import { getAllTaskTags } from "../TaskItemUtils";
+import { differenceInDays } from "date-fns";
+import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
+import { robustDateParser } from "../DateTimeCalculations";
 
 /**
  * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
@@ -23,14 +25,12 @@ import { getAllTaskTags } from "../TaskItemUtils";
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
-	activeBoardIndex: number,
+	activeBoardData: Board,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged | null,
-	onBoardDataChange?: (boardData: Board) => void
+	onBoardDataChange?: (boardData: Board) => void,
 ): taskItem[] => {
-	if (activeBoardIndex < 0 || !allTasks) return [];
-
-	const boardConfigs = settings.data.boardConfigs;
+	if (!allTasks) return [];
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
@@ -110,7 +110,7 @@ export const columnSegregator = (
 				// //  ---------- METHOD 2 -------------
 				// const today = new Date();
 				// /**
-				//  * Formats a Date object into "DD/MM/YYYY" format.
+				//  * Formats a Date object into "dd/MM/yyyy" format.
 				//  */
 				// function formatDate(date: Date): string {
 				// 	const day = String(date.getDate()).padStart(2, "0");
@@ -137,14 +137,24 @@ export const columnSegregator = (
 				// const diffDays = daysBetween(formatDate(today), taskUniversalDate);
 
 				//  ---------- METHOD 3 -------------
+				// Parse the task's universal date using robust parser
+				const universalDateFormat =
+					settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+
+				let parsedTaskDate = robustDateParser(
+					taskUniversalDate,
+					universalDateFormat,
+				);
+
+				if (!parsedTaskDate) {
+					return false;
+				}
+
 				const today = new Date();
 				today.setHours(0, 0, 0, 0);
+				parsedTaskDate.setHours(0, 0, 0, 0);
 
-				const moment = _moment as unknown as typeof _moment.default;
-				const diffDays = moment(taskUniversalDate).diff(
-					moment(today),
-					"days"
-				);
+				const diffDays = differenceInDays(parsedTaskDate, today);
 
 				// console.log(
 				// 	"diffDays",
@@ -165,7 +175,7 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.untagged:
 			tasksToDisplay = pendingTasks.filter(
-				(task) => getAllTaskTags(task).length === 0
+				(task) => getAllTaskTags(task).length === 0,
 			);
 			break;
 		case colTypeNames.namedTag:
@@ -178,10 +188,10 @@ export const columnSegregator = (
 
 					const result = matchTagsWithWildcards(
 						columnData?.coltag || "",
-						tag
+						tag,
 					);
 					return result !== null;
-				})
+				}),
 			);
 			break;
 		case colTypeNames.pathFiltered:
@@ -208,7 +218,7 @@ export const columnSegregator = (
 									// Check if the task's file path contains the pattern
 									return lowerCasePath.includes(pattern);
 								}
-							}
+							},
 						);
 						return matchedPattern;
 					});
@@ -221,23 +231,21 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.otherTags:
 			// 1. Get the current board based on activeBoardIndex index
-			const currentBoard = boardConfigs.find(
-				(board: Board) => board.index === activeBoardIndex
-			);
+			const currentBoard = activeBoardData;
 
 			// 2. Collect all coltags from columns where colType is 'namedTag'
 			const namedTags =
 				currentBoard?.columns
 					.filter(
 						(col: ColumnData) =>
-							col.colType === colTypeNames.namedTag && col.coltag
+							col.colType === colTypeNames.namedTag && col.coltag,
 					)
 					.map((col: ColumnData) =>
-						col.coltag?.toLowerCase().replace(`#`, "")
+						col.coltag?.toLowerCase().replace(`#`, ""),
 					)
 					.filter(
 						(tag): tag is string =>
-							typeof tag === "string" && tag.length > 0
+							typeof tag === "string" && tag.length > 0,
 					) || [];
 
 			// 3. Now filter tasks
@@ -270,13 +278,13 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.taskPriority:
 			tasksToDisplay = pendingTasks.filter(
-				(task) => task.priority === columnData.taskPriority
+				(task) => task.priority === columnData.taskPriority,
 			);
 			break;
 		case colTypeNames.taskStatus:
 			const allTasks = [...pendingTasks, ...completedTasks];
 			tasksToDisplay = allTasks.filter(
-				(task) => task.status === columnData.taskStatus
+				(task) => task.status === columnData.taskStatus,
 			);
 			break;
 		case colTypeNames.allPending:
@@ -293,7 +301,12 @@ export const columnSegregator = (
 	 * -------------------------------------------------------------
 	 */
 	if (columnData?.filters && columnData.filters.filterGroups) {
-		tasksToDisplay = boardFilterer(tasksToDisplay, columnData.filters);
+		const dateFormat = settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+		tasksToDisplay = advancedFilterer(
+			tasksToDisplay,
+			columnData.filters,
+			dateFormat,
+		);
 	}
 
 	/**
@@ -301,11 +314,11 @@ export const columnSegregator = (
 	 * 		SORTING
 	 * -------------------------------------------------------------
 	 */
-	if (columnData.sortCriteria && columnData.sortCriteria.length > 0) {
+	if (columnData?.sortCriteria && columnData.sortCriteria.length > 0) {
 		// TODO : This code can be moved inside the ColumnSortingAlgorithm function.
 		// If manualOrder is one of the sorting criteria, apply manual ordering using columnData.tasksIdManualOrder
 		const hasManualOrder = columnData.sortCriteria.some(
-			(c) => c.criteria === "manualOrder"
+			(c) => c.criteria === "manualOrder",
 		);
 		if (hasManualOrder) {
 			// Ensure tasksIdManualOrder exists
@@ -316,7 +329,7 @@ export const columnSegregator = (
 			// Add any new tasks (not present in manual order) to the TOP of the manual order array
 			const currentIds = tasksToDisplay.map((t) => t.id);
 			const missingIds = currentIds.filter(
-				(id) => !columnData.tasksIdManualOrder!.includes(id)
+				(id) => !columnData.tasksIdManualOrder!.includes(id),
 			);
 			if (missingIds.length > 0) {
 				// Prepend missing ids so newest appear on top
@@ -327,7 +340,7 @@ export const columnSegregator = (
 			}
 
 			let newTasksIdManualOrder = columnData.tasksIdManualOrder;
-			let currentBoardData = settings.data.boardConfigs[activeBoardIndex];
+			let currentBoardData = activeBoardData;
 
 			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
@@ -340,7 +353,7 @@ export const columnSegregator = (
 				} else {
 					newTasksIdManualOrder.splice(
 						newTasksIdManualOrder.indexOf(id),
-						1
+						1,
 					);
 					didTasksIdManualOrderChange = true;
 				}
@@ -350,12 +363,7 @@ export const columnSegregator = (
 			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
 			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
 				newTasksIdManualOrder;
-			console.log(
-				"columnSegregator...\nNew manual order :",
-				newTasksIdManualOrder,
-				"\nOld manual order :",
-				columnData.tasksIdManualOrder
-			);
+
 			if (onBoardDataChange && didTasksIdManualOrderChange) {
 				onBoardDataChange(currentBoardData);
 			}
@@ -364,9 +372,9 @@ export const columnSegregator = (
 		} else {
 			// Default algorithm for other criteria
 			tasksToDisplay = columnSortingAlgorithm(
-				settings.data.globalSettings.defaultStartTime,
+				settings.data.defaultStartTime,
 				tasksToDisplay,
-				columnData.sortCriteria
+				columnData.sortCriteria,
 			);
 		}
 	}

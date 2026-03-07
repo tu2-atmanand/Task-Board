@@ -13,7 +13,7 @@ import {
 	getQuickAddPluginChoices,
 } from "src/services/MultiSuggest";
 import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { bugReporter, openScanFiltersModal } from "src/services/OpenModals";
+import { openScanFiltersModal } from "src/services/OpenModals";
 import { CustomStatusModal } from "src/modals/CustomStatusConfigurator";
 import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
 import {
@@ -35,7 +35,6 @@ import {
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
-	defaultTaskStatuses,
 	statusTypeNames,
 	scanModeOptions,
 } from "src/interfaces/Enums";
@@ -49,12 +48,13 @@ import { createFragmentWithHTML } from "src/utils/UIHelpers";
 import { StatusType } from "src/interfaces/StatusConfiguration";
 import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { isValid, parse, format, differenceInHours } from "date-fns";
 
 export class SettingsManager {
 	win: Window;
 	app: App;
 	plugin: TaskBoard;
-	globalSettings: globalSettingsData | null = null;
+	globalSettings: globalSettingsData;
 	allPickrs: Pickr[] = [];
 	reloadNoticeAlreadyShown: boolean = false;
 
@@ -62,6 +62,7 @@ export class SettingsManager {
 		this.app = plugin.app;
 		this.plugin = plugin;
 		this.win = window;
+		this.globalSettings = this.plugin.settings.data;
 	}
 
 	private getPropertyDisplayName(
@@ -107,6 +108,12 @@ export class SettingsManager {
 		return displayNames[property as keyof typeof displayNames] || null;
 	}
 
+	/**
+	 * Shows an Obsidian Notice to reload the application.
+	 * It tracks if such a notice has already been shown.
+	 * If already shown, will not show again.
+	 * @returns void
+	 */
 	private openReloadNoticeIfNeeded() {
 		if (!this.reloadNoticeAlreadyShown) {
 			sleep(100).then(() => {
@@ -121,7 +128,7 @@ export class SettingsManager {
 	// Function to load the settings from data.json
 	async loadSettings(): Promise<void> {
 		try {
-			const settingsData = this.plugin.settings.data.globalSettings;
+			const settingsData = this.plugin.settings.data;
 			this.globalSettings = settingsData;
 		} catch (err) {
 			bugReporterManagerInsatance.showNotice(
@@ -138,7 +145,7 @@ export class SettingsManager {
 		if (!this.globalSettings) return;
 
 		try {
-			this.plugin.settings.data.globalSettings = this.globalSettings;
+			this.plugin.settings.data = this.globalSettings;
 			this.plugin.saveSettings();
 		} catch (err) {
 			bugReporterManagerInsatance.showNotice(
@@ -227,7 +234,7 @@ export class SettingsManager {
 				tabContent.empty();
 				sections[tabName]();
 
-				// Store the tabIndex inside `this.plugin.settings.data.globalSettings.lastViewHistory.settingTab` and call this.saveSetting()
+				// Store the tabIndex inside `this.plugin.settings.data.lastViewHistory.settingTab` and call this.saveSetting()
 				const tabKeys = Object.keys(sections);
 				const tabIndex = tabKeys.indexOf(tabName);
 				if (this.globalSettings) {
@@ -245,8 +252,7 @@ export class SettingsManager {
 		// Set the last viewed tab
 		const defaultTab =
 			Object.keys(sections)[
-				this.plugin.settings.data.globalSettings.lastViewHistory
-					.settingTab
+				this.plugin.settings.data.lastViewHistory.settingTab
 			];
 		tabs[defaultTab].click();
 
@@ -268,9 +274,6 @@ export class SettingsManager {
 		// if (this.contentEl) {
 		// 	this.contentEl.empty(); // Empty the contentEl to remove all child elements
 		// }
-
-		// Reset global settings if necessary
-		this.globalSettings = null;
 
 		this.reloadNoticeAlreadyShown = false;
 
@@ -296,6 +299,7 @@ export class SettingsManager {
 		const {
 			scanFilters,
 			openOnStartup,
+			loadAllBoards,
 			scanMode,
 			tasksCacheFilePath,
 			showModifiedFilesNotice,
@@ -317,7 +321,7 @@ export class SettingsManager {
 				),
 			);
 
-		["files", "folders", "frontMatter", "tags"].forEach((type) => {
+		["files", "folders", "frontmatter", "tags"].forEach((type) => {
 			const filterType = type as keyof typeof scanFilters;
 			const filter = scanFilters[filterType];
 
@@ -346,9 +350,8 @@ export class SettingsManager {
 			});
 			configureBtn.addEventListener("click", () => {
 				openScanFiltersModal(this.plugin, filterType, (newValues) => {
-					this.plugin.settings.data.globalSettings.scanFilters[
-						filterType
-					].values = newValues;
+					this.plugin.settings.data.scanFilters[filterType].values =
+						newValues;
 					this.plugin.saveSettings();
 					refreshTagList(); // Refresh the tag list after updating values
 				});
@@ -400,9 +403,8 @@ export class SettingsManager {
 				const newPolarity = Number(
 					(e.target as HTMLSelectElement).value,
 				);
-				this.plugin.settings.data.globalSettings.scanFilters[
-					filterType
-				].polarity = newPolarity;
+				this.plugin.settings.data.scanFilters[filterType].polarity =
+					newPolarity;
 				this.plugin.saveSettings();
 			});
 		});
@@ -451,6 +453,8 @@ export class SettingsManager {
 						this.globalSettings!.scanMode =
 							value as scanModeOptions;
 						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
 					}),
 			);
 
@@ -476,57 +480,140 @@ export class SettingsManager {
 			)
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddUniqueID).onChange(async (value) => {
-					this.globalSettings!.autoAddUniqueID = value;
+					this.globalSettings.autoAddUniqueID = value;
 					await this.saveSettings();
 
 					this.openReloadNoticeIfNeeded();
 				}),
 			);
 
-		new Setting(contentEl)
-			.setClass("taskBoard-settings-wide-input")
-			.setName(t("tasks-cache-file-path"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("tasks-cache-file-path-description") +
-						"<br/>" +
-						t("tasks-cache-file-path-description-2"),
-				),
-			)
-			.addDropdown((dropdown) => {
-				const defaultPath = `${this.plugin.app.vault.configDir}/plugins/task-board/tasks.json`;
-				const suggestionContent = [
-					defaultPath,
-					...getFolderSuggestions(this.app).map((item) =>
-						normalizePath(`${item}/task-board-cache.json`),
+		const tasksCachePathSettingsContainer = contentEl.createDiv({
+			cls: "task-board-single-setting-container",
+		});
+		const renderTasksCachePathSetting = () => {
+			tasksCachePathSettingsContainer.empty();
+
+			let newPath = this.globalSettings.tasksCacheFilePath;
+			new Setting(tasksCachePathSettingsContainer)
+				.setClass("taskBoard-settings-wide-input")
+				.setName(t("tasks-cache-file-path"))
+				.setDesc(
+					createFragmentWithHTML(
+						t("tasks-cache-file-path-description") +
+							"<br/>" +
+							t("tasks-cache-file-path-description-2"),
 					),
-				];
-				// Add 'Default' option label for the default path
-				dropdown.addOption(defaultPath, `Default - ${defaultPath}`);
+				)
+				.addText((text) => {
+					text.setValue(newPath).onChange((editedPath: string) => {
+						if (editedPath.endsWith(".json")) {
+							newPath = normalizePath(editedPath);
+						} else {
+							newPath = normalizePath(
+								editedPath + "/task-board-cache.json",
+							);
+						}
+					});
 
-				// Add options to dropdown
-				suggestionContent.forEach((path) => {
-					dropdown.addOption(path, path);
-				});
+					// const inputEl = text.inputEl;
+					// const suggestionContent = getFolderSuggestions(this.app);
+					// const onSelectCallback = async (selectedPath: string) => {
+					// 	let newPath = "";
+					// 	if (this.globalSettings) {
+					// 		if (selectedPath.endsWith(".json")) {
+					// 			this.globalSettings.tasksCacheFilePath =
+					// 				selectedPath;
+					// 			newPath = selectedPath;
+					// 		} else {
+					// 			newPath = normalizePath(
+					// 				selectedPath + "/task-board-cache.json",
+					// 			);
+					// 			this.globalSettings.tasksCacheFilePath =
+					// 				newPath;
+					// 		}
+					// 	}
+					// 	renderTasksCachePathSetting();
+					// 	await this.saveSettings();
+					// };
 
-				// Set current value
-				dropdown.setValue(tasksCacheFilePath);
+					// new MultiSuggest(
+					// 	inputEl,
+					// 	new Set(suggestionContent),
+					// 	onSelectCallback,
+					// 	this.app,
+					// );
+				})
+				.addButton((button) =>
+					button.setButtonText(t("transfer")).onClick(async () => {
+						const result = await moveTasksCacheFileToNewPath(
+							this.app,
+							tasksCacheFilePath,
+							newPath,
+						);
+						if (result) {
+							this.globalSettings.tasksCacheFilePath = newPath;
+							this.saveSettings();
 
-				dropdown.onChange(async (selectedPath) => {
-					const result = await moveTasksCacheFileToNewPath(
-						this.plugin,
-						tasksCacheFilePath,
-						selectedPath,
-					);
+							renderTasksCachePathSetting();
+							new Notice(
+								`Task Board cache file path changed to new location succussfully. New location : ${this.globalSettings.tasksCacheFilePath}`,
+							);
+						} else {
+							new Notice(
+								"Task Board : Failed to change the path. Check logs for more info.",
+							);
+							this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+							this.saveSettings();
 
-					if (this.globalSettings && result) {
-						this.globalSettings.tasksCacheFilePath = selectedPath;
-						await this.saveSettings();
+							renderTasksCachePathSetting();
+						}
+					}),
+				)
+				.addButton((button) =>
+					button.setButtonText(t("reset")).onClick(async () => {
+						newPath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 
-						this.openReloadNoticeIfNeeded();
-					}
-				});
-			});
+						const result = await moveTasksCacheFileToNewPath(
+							this.app,
+							tasksCacheFilePath,
+							newPath,
+						);
+
+						if (result) {
+							this.globalSettings.tasksCacheFilePath = newPath;
+							this.saveSettings();
+
+							renderTasksCachePathSetting();
+							new Notice(
+								`Task Board cache file path reset was succussfully.`,
+							);
+						} else {
+							new Notice(
+								"Task Board : Failed to change the path. Check logs for more info.",
+							);
+							this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+							this.saveSettings();
+
+							renderTasksCachePathSetting();
+						}
+
+						renderTasksCachePathSetting();
+					}),
+				);
+		};
+
+		renderTasksCachePathSetting();
+
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl)
+			.setName(t("load-all-boards"))
+			.setDesc(t("load-all-boards-info"))
+			.addToggle((toggle) =>
+				toggle.setValue(loadAllBoards).onChange(async (value) => {
+					this.globalSettings!.loadAllBoards = value;
+					await this.saveSettings();
+				}),
+			);
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
@@ -555,7 +642,14 @@ export class SettingsManager {
 		// New setting for updating language file
 		new Setting(contentEl)
 			.setName(t("update-language-translations"))
-			.setDesc(t("update-language-translations-info"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("update-language-translations-info") +
+						" <a href='https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/'>" +
+						t("task-board-docs") +
+						".",
+				),
+			)
 			.addButton((button) =>
 				button.setButtonText("Update").onClick(async () => {
 					const result = await downloadAndApplyLanguageFile(
@@ -649,6 +743,13 @@ export class SettingsManager {
 						" : " +
 						"</b>" +
 						t("manual-sorting-feature-info") +
+						"</li>" +
+						"<li>" +
+						"<b>" +
+						"Task card menu" +
+						" : " +
+						"</b>" +
+						"Easily change various properties of tasks and access quick actions through the menu. Specially useful on mobile as an alternative to drag and drop feature." +
 						"</li>" +
 						"</ul>",
 				),
@@ -881,31 +982,32 @@ export class SettingsManager {
 			);
 
 		// Lazy loading settings for Kanban view
-		new Setting(contentEl)
-			.setName("Enable lazy loading for Kanban view")
-			.setDesc(
-				"When enabled, only a limited number of task cards are initially rendered per column. More tasks load automatically as you scroll within each column. This significantly improves performance for boards with thousands of tasks. This setting is just to provide a backward compatibility in case user faces any issue with rendering. If there are no issues faced with this approach, this setting will be removed in the future releases and this technique will be used a default behavior for rendering the columns.",
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(
-						this.globalSettings!.kanbanView?.lazyLoadingEnabled ??
-							false,
-					)
-					.onChange(async (value) => {
-						if (!this.globalSettings!.kanbanView) {
-							this.globalSettings!.kanbanView = {
-								lazyLoadingEnabled: false,
-								initialTaskCount: 20,
-								loadMoreCount: 10,
-								scrollThresholdPercent: 80,
-							};
-						}
-						this.globalSettings!.kanbanView.lazyLoadingEnabled =
-							value;
-						await this.saveSettings();
-					}),
-			);
+		// @deprecated - v1.9.0
+		// new Setting(contentEl)
+		// 	.setName("Enable lazy loading for Kanban view")
+		// 	.setDesc(
+		// 		"When enabled, only a limited number of task cards are initially rendered per column. More tasks load automatically as you scroll within each column. This significantly improves performance for boards with thousands of tasks. This setting is just to provide a backward compatibility in case user faces any issue with rendering. If there are no issues faced with this approach, this setting will be removed in the future releases and this technique will be used a default behavior for rendering the columns.",
+		// 	)
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(
+		// 				this.globalSettings!.kanbanView?.lazyLoadingEnabled ??
+		// 					false,
+		// 			)
+		// 			.onChange(async (value) => {
+		// 				if (!this.globalSettings!.kanbanView) {
+		// 					this.globalSettings!.kanbanView = {
+		// 						lazyLoadingEnabled: false,
+		// 						initialTaskCount: 20,
+		// 						loadMoreCount: 10,
+		// 						scrollThresholdPercent: 80,
+		// 					};
+		// 				}
+		// 				this.globalSettings!.kanbanView.lazyLoadingEnabled =
+		// 					value;
+		// 				await this.saveSettings();
+		// 			}),
+		// 	);
 
 		new Setting(contentEl).setName(t("tag-colors")).setHeading();
 
@@ -915,8 +1017,9 @@ export class SettingsManager {
 			.addDropdown((dropdown) =>
 				dropdown
 					.addOptions({
-						[TagColorType.Text]: t("text-of-the-tag"),
-						[TagColorType.Background]: t("background-of-the-card"),
+						[TagColorType.TagText]: t("text-of-the-tag"),
+						[TagColorType.TagBg]: t("tag-background"),
+						[TagColorType.CardBg]: t("background-of-the-card"),
 					})
 					.setValue(tagColorsType)
 					.onChange(async (value) => {
@@ -992,18 +1095,18 @@ export class SettingsManager {
 							.buttonEl.setCssStyles({
 								cursor: "grab",
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								maxWidth: "max-content !important",
@@ -1020,18 +1123,18 @@ export class SettingsManager {
 							})
 							.inputEl.setCssStyles({
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								minWidth: "23vw !important",
@@ -1045,11 +1148,11 @@ export class SettingsManager {
 							)
 							.then(() => {
 								const colorMap =
-									this.plugin.settings.data.globalSettings.tagColors.map(
+									this.plugin.settings.data.tagColors.map(
 										(tagColor) => ({
 											color:
 												this.plugin.settings.data
-													.globalSettings.tagColors[
+													.tagColors[
 													tagColor.priority - 1
 												]?.color || "#ff0000",
 										}),
@@ -1114,18 +1217,18 @@ export class SettingsManager {
 							})
 							.inputEl.setCssStyles({
 								backgroundColor:
-									this.globalSettings!.tagColorsType ===
-									TagColorType.Background
+									this.globalSettings!.tagColorsType !==
+									TagColorType.TagText
 										? tag.color
 										: "",
 								color:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? tag.color
 										: "",
 								border:
 									this.globalSettings!.tagColorsType ===
-									TagColorType.Text
+									TagColorType.TagText
 										? `1px solid ${tag.color}`
 										: "",
 								minWidth: "23vw !important",
@@ -1152,21 +1255,23 @@ export class SettingsManager {
 		renderTagColors();
 
 		// Add "Add New Tag Color" button
-		new Setting(contentEl).addButton((btn) =>
-			btn
-				.setButtonText(t("add-tag-color"))
-				.setCta()
-				.onClick(async () => {
-					const newTag = {
-						name: "",
-						color: "rgba(255, 0, 0, 1)",
-						priority: this.globalSettings!.tagColors.length + 1,
-					};
-					this.globalSettings!.tagColors.push(newTag);
-					await this.saveSettings();
-					renderTagColors();
-				}),
-		);
+		new Setting(contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-tag-color"))
+					.setCta()
+					.onClick(async () => {
+						const newTag = {
+							name: "",
+							color: "rgba(255, 0, 0, 1)",
+							priority: this.globalSettings!.tagColors.length + 1,
+						};
+						this.globalSettings!.tagColors.push(newTag);
+						await this.saveSettings();
+						renderTagColors();
+					}),
+			)
+			.setClass("task-board-settingtab-add-tag-color-btn");
 
 		// new Setting(contentEl)
 		// 	.setName(t("live-editor-and-reading-mode"))
@@ -1268,8 +1373,7 @@ export class SettingsManager {
 		const renderCustomStatuses = () => {
 			customStatusesContainer.empty(); // Clear existing rendered rows
 
-			const customStatuses =
-				this.plugin.settings.data.globalSettings.customStatuses;
+			const customStatuses = this.plugin.settings.data.customStatuses;
 
 			if (!customStatuses || customStatuses.length === 0) {
 				customStatusesContainer.createDiv({
@@ -1368,14 +1472,15 @@ export class SettingsManager {
 								symbol: updatedStatus.symbol,
 								name: updatedStatus.name,
 								nextStatusSymbol:
-									updatedStatus.nextStatusSymbol,
+									updatedStatus.nextStatusSymbol === ""
+										? " "
+										: updatedStatus.nextStatusSymbol,
 								availableAsCommand:
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,
 							};
-							this.plugin.settings.data.globalSettings!.customStatuses[
-								index
-							] = customStatus;
+							this.plugin.settings.data!.customStatuses[index] =
+								customStatus;
 							await this.saveSettings();
 							renderCustomStatuses();
 						}
@@ -1402,8 +1507,7 @@ export class SettingsManager {
 		renderCustomStatuses();
 
 		const isTasksPluginEnabled =
-			this.plugin.settings.data.globalSettings.compatiblePlugins
-				.tasksPlugin;
+			this.plugin.settings.data.compatiblePlugins.tasksPlugin;
 		// Add "Add New Status" button
 		new Setting(contentEl)
 			.addButton((btn) =>
@@ -1510,7 +1614,7 @@ export class SettingsManager {
 			// Use Obsidian's MarkdownUIRenderer to render markdown
 			// @ts-ignore
 			MarkdownUIRenderer.renderSubtaskText(
-				this.plugin.app,
+				this.app,
 				markdown,
 				markdownPreviewEl,
 				"",
@@ -1643,8 +1747,10 @@ export class SettingsManager {
 			.setDesc(t("default-note-for-new-tasks-description"))
 			.addText((text) => {
 				text.setValue(preDefinedNote).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.preDefinedNote = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.preDefinedNote = normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
@@ -1671,12 +1777,14 @@ export class SettingsManager {
 			.setDesc(t("file-for-archived-tasks-description"))
 			.addText((text) => {
 				text.setValue(archivedTasksFilePath).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.archivedTasksFilePath = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.archivedTasksFilePath = normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
-				const suggestionContent = getFileSuggestions(this.plugin.app);
+				const suggestionContent = getFileSuggestions(this.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTasksFilePath =
@@ -1753,20 +1861,38 @@ export class SettingsManager {
 				inputEl.placeholder = "e.g., #taskNote";
 			});
 
+		const folderSuggestions = getFolderSuggestions(this.app);
+
 		// Setting for choosing the default location for task notes
 		new Setting(contentEl)
 			.setName(t("default-location-for-new-task-notes"))
 			.setDesc(t("default-location-for-new-task-notes-description"))
 			.addText((text) => {
 				text.setValue(taskNoteDefaultLocation).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.taskNoteDefaultLocation = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.taskNoteDefaultLocation =
+							normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
-				// For folders, we could use folder suggestions or just allow text input
-				// For now, let's keep it simple with text input
 				inputEl.placeholder = "e.g., Task Notes/";
+				const onSelectCallback = async (selectedPath: string) => {
+					if (this.globalSettings) {
+						this.globalSettings.taskNoteDefaultLocation =
+							selectedPath;
+					}
+					text.setValue(selectedPath);
+					await this.saveSettings();
+				};
+
+				new MultiSuggest(
+					inputEl,
+					new Set(folderSuggestions),
+					onSelectCallback,
+					this.app,
+				);
 			});
 
 		// Setting for choosing the default file to archive tasks
@@ -1775,13 +1901,15 @@ export class SettingsManager {
 			.setDesc(t("folder-for-archived-task-notes-description"))
 			.addText((text) => {
 				text.setValue(archivedTBNotesFolderPath).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.archivedTBNotesFolderPath = value;
+					if (this.globalSettings) {
+						const normalized = normalizePath(value);
+						this.globalSettings.archivedTBNotesFolderPath =
+							normalized;
+					}
 				});
 
 				const inputEl = text.inputEl;
 				inputEl.placeholder = "e.g., TaskBoard/TaskNotes";
-				const suggestionContent = getFolderSuggestions(this.plugin.app);
 				const onSelectCallback = async (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTBNotesFolderPath =
@@ -1793,7 +1921,7 @@ export class SettingsManager {
 
 				new MultiSuggest(
 					inputEl,
-					new Set(suggestionContent),
+					new Set(folderSuggestions),
 					onSelectCallback,
 					this.app,
 				);
@@ -1842,8 +1970,7 @@ export class SettingsManager {
 							frontmatterItem !== null,
 					);
 
-				this.plugin.settings.data.globalSettings.frontmatterFormatting =
-					newOrder;
+				this.plugin.settings.data.frontmatterFormatting = newOrder;
 			},
 		});
 
@@ -1882,7 +2009,7 @@ export class SettingsManager {
 							text.setValue(sortfrontmatterItem.key)
 								.setPlaceholder(t("Enter property key"))
 								.onChange((value) => {
-									this.plugin.settings.data.globalSettings.frontmatterFormatting[
+									this.plugin.settings.data.frontmatterFormatting[
 										index
 									].key = value.trim();
 								});
@@ -1897,10 +2024,10 @@ export class SettingsManager {
 					// 		.setTooltip(t("remove-sort-criterion"))
 					// 		.onClick(async () => {
 					// 			if (
-					// 				this.plugin.settings.data.globalSettings
+					// 				this.plugin.settings.data
 					// 					.frontmatterFormatting
 					// 			) {
-					// 				this.plugin.settings.data.globalSettings.frontmatterFormatting.splice(
+					// 				this.plugin.settings.data.frontmatterFormatting.splice(
 					// 					index,
 					// 					1
 					// 				);
@@ -1925,18 +2052,18 @@ export class SettingsManager {
 		// addNewSortingButton.addEventListener("click", async () => {
 		// 	const newfrontmatterItem: frontmatterFormatting = {
 		// 		index:
-		// 			(this.plugin.settings.data.globalSettings
+		// 			(this.plugin.settings.data
 		// 				.frontmatterFormatting?.length || 0) + 1,
 		// 		property: "",
 		// 		key: "",
 		// 	};
 		// 	if (
-		// 		!this.plugin.settings.data.globalSettings.frontmatterFormatting
+		// 		!this.plugin.settings.data.frontmatterFormatting
 		// 	) {
-		// 		this.plugin.settings.data.globalSettings.frontmatterFormatting =
+		// 		this.plugin.settings.data.frontmatterFormatting =
 		// 			[];
 		// 	}
-		// 	this.plugin.settings.data.globalSettings.frontmatterFormatting.push(
+		// 	this.plugin.settings.data.frontmatterFormatting.push(
 		// 		newfrontmatterItem
 		// 	);
 		// 	renderFrontmatterFormattingItems();
@@ -2220,8 +2347,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("auto-add-created-date-to-tasks"))
-			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.setName(t("auto-add-created-date"))
+			.setDesc(t("auto-add-created-date-desc"))
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddCreatedDate).onChange(async (value) => {
 					this.globalSettings!.autoAddCreatedDate = value;
@@ -2231,8 +2358,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("auto-add-completed-date-to-tasks"))
-			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.setName(t("auto-add-completed-date"))
+			.setDesc(t("auto-add-completed-date-desc"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(autoAddCompletedDate)
@@ -2244,8 +2371,8 @@ export class SettingsManager {
 
 		// Setting for Auto Adding Created Date while creating new Tasks through AddTaskModal
 		new Setting(contentEl)
-			.setName(t("auto-add-cancelled-date-to-tasks"))
-			.setDesc(t("auto-add-created-date-to-tasks-desc"))
+			.setName(t("auto-add-cancelled-date"))
+			.setDesc(t("auto-add-cancelled-date-desc"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(autoAddCancelledDate)
@@ -2294,68 +2421,68 @@ export class SettingsManager {
 		new Setting(contentEl)
 			.setName("QuickAdd " + t("plugin-compatibility"))
 			.setDesc(t("quickadd-plugin-compatibility-description"))
-			.setTooltip(
-				t("Install and enable QuickAdd plugin to use this setting."),
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(
-						compatiblePlugins.quickAddPlugin &&
-							communityPlugins.isQuickAddPluginEnabled(),
-					)
-					.onChange(async (value) => {
-						if (
-							this.globalSettings &&
-							!communityPlugins.isQuickAddPluginEnabled()
-						) {
-							new Notice(t("quickadd-plugin-not-enabled"));
-							this.globalSettings.compatiblePlugins.quickAddPlugin = false;
-						} else if (this.globalSettings) {
-							this.globalSettings.compatiblePlugins.quickAddPlugin =
-								value;
+			.addToggle((toggle) => {
+				toggle.onChange(async (value) => {
+					if (
+						this.globalSettings &&
+						!communityPlugins.isQuickAddPluginEnabled()
+					) {
+						new Notice(t("quickadd-plugin-not-enabled"));
+						this.globalSettings.compatiblePlugins.quickAddPlugin = false;
+					} else if (this.globalSettings) {
+						this.globalSettings.compatiblePlugins.quickAddPlugin =
+							value;
 
-							this.openReloadNoticeIfNeeded();
-						}
+						this.openReloadNoticeIfNeeded();
+					}
 
-						await this.saveSettings();
-					}),
-			)
+					await this.saveSettings();
+				});
+				// toggle.onClick();
+			})
 			.setDisabled(!communityPlugins.isQuickAddPluginEnabled());
 
-		new Setting(contentEl)
-			.setName(t("default-quickadd-choice"))
-			.setDesc(t("default-quickadd-choice-description"))
-			.setTooltip(t("Enable the above setting to use this setting."))
-			.addText((text) => {
-				text.setValue(quickAddPluginDefaultChoice).onChange((value) => {
-					if (this.globalSettings)
-						this.globalSettings.quickAddPluginDefaultChoice = value;
-				});
+		if (communityPlugins.isQuickAddPluginEnabled()) {
+			new Setting(contentEl)
+				.setName(t("default-quickadd-choice"))
+				.setDesc(t("default-quickadd-choice-description"))
+				.setTooltip(t("Enable the above setting to use this setting."))
+				.addText((text) => {
+					text.setValue(quickAddPluginDefaultChoice).onChange(
+						(value) => {
+							if (this.globalSettings)
+								this.globalSettings.quickAddPluginDefaultChoice =
+									value;
+						},
+					);
 
-				const inputEl = text.inputEl;
-				const suggestionContent = getQuickAddPluginChoices(
-					this.app,
-					communityPlugins.quickAddPlugin,
-				);
-				const onSelectCallback = async (selectedChoiceName: string) => {
-					if (this.globalSettings) {
-						this.globalSettings.quickAddPluginDefaultChoice =
-							selectedChoiceName;
-					}
-					text.setValue(selectedChoiceName);
-					await this.saveSettings();
-				};
+					const inputEl = text.inputEl;
+					const suggestionContent = getQuickAddPluginChoices(
+						this.app,
+						communityPlugins.quickAddPlugin,
+					);
+					const onSelectCallback = async (
+						selectedChoiceName: string,
+					) => {
+						if (this.globalSettings) {
+							this.globalSettings.quickAddPluginDefaultChoice =
+								selectedChoiceName;
+						}
+						text.setValue(selectedChoiceName);
+						await this.saveSettings();
+					};
 
-				new MultiSuggest(
-					inputEl,
-					new Set(suggestionContent),
-					onSelectCallback,
-					this.app,
+					new MultiSuggest(
+						inputEl,
+						new Set(suggestionContent),
+						onSelectCallback,
+						this.app,
+					);
+				})
+				.setDisabled(
+					!this.globalSettings!.compatiblePlugins.quickAddPlugin,
 				);
-			})
-			.setDisabled(
-				!this.globalSettings!.compatiblePlugins.quickAddPlugin,
-			);
+		}
 
 		new Setting(contentEl)
 			.setName(t("push-notification-compatibility"))
@@ -2391,7 +2518,8 @@ export class SettingsManager {
 		// });
 
 		const {
-			universalDateFormat,
+			dateFormat,
+			dateTimeFormat,
 			defaultStartTime,
 			firstDayOfWeek,
 			taskCompletionInLocalTime,
@@ -2417,19 +2545,190 @@ export class SettingsManager {
 					}),
 			);
 
-		// Text input for the universalDateFormat
+		// Text input for the dateFormat
 		new Setting(contentEl)
-			.setName(t("universal-date-format"))
-			.setDesc(t("universal-date-format-info"))
+			.setName(t("date-format"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("date-format-info") +
+						"<br/>" +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t(
+							"If you are using inline-tasks, then please note that, this plugin dont scan all kinds of format at present. For example, if there are spaces as a seperater (2026 01 01), then this plugin might fail to scan the value, even if its able to apply the date.",
+						) +
+						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+						"date-fns library formatting guide." +
+						"</a>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t("date-format-date-fns-note") +
+						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+						"date-fns library formatting guide." +
+						"</a>",
+				),
+			)
 			.addText((text) =>
 				text
-					.setValue(universalDateFormat)
+					.setValue(dateFormat)
 					.onChange(async (value) => {
-						this.globalSettings!.universalDateFormat = value;
+						this.globalSettings!.dateFormat = value;
 						await this.saveSettings();
 					})
-					.setPlaceholder("YYYY-MM-DD"),
-			);
+					.setPlaceholder("yyyy-MM-dd"),
+			)
+			.addButton((btn) => {
+				btn.setButtonText(t("verify"));
+				btn.onClick(() => {
+					try {
+						const testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
+						const userFormat = this.globalSettings?.dateFormat;
+
+						if (!userFormat || userFormat.trim().length === 0) {
+							new Notice("Please enter a date format.");
+							return;
+						}
+
+						// Format the test date using the user's format
+						const formattedDate = format(testDate, userFormat);
+
+						// Try to parse it back
+						const parsed = parse(
+							formattedDate,
+							userFormat,
+							testDate,
+						);
+
+						// (1) Check if parsing succeeded
+						if (!isValid(parsed)) {
+							new Notice(
+								"❌ Invalid date format. Parsing failed.",
+							);
+							return;
+						}
+
+						// (2) Check if the parsed date is reasonably close (within 48 hours)
+						// This catches common mistakes like swapped date parts
+						const hoursDiff = Math.abs(
+							differenceInHours(parsed, testDate),
+						);
+						if (hoursDiff > 48) {
+							new Notice(
+								"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+									parsed.toDateString() +
+									", expected: " +
+									testDate.toDateString() +
+									"). Please verify.",
+							);
+							return;
+						}
+
+						// All checks passed
+						new Notice(
+							"✅ Date format is valid! Example: " +
+								formattedDate,
+						);
+					} catch (error) {
+						new Notice(
+							"❌ Format validation error: " +
+								(error instanceof Error
+									? error.message
+									: String(error)),
+						);
+					}
+				});
+			});
+
+		// Text input for the dateTimeFormat
+		new Setting(contentEl)
+			.setName(t("date-time-format"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("date-time-format-info") +
+						"<br/>" +
+						"<br/>" +
+						"<b>" +
+						t("note") +
+						" :</b> " +
+						t("date-format-date-fns-note") +
+						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+						"date-fns library formatting guide." +
+						"</a>",
+				),
+			)
+			.addText((text) =>
+				text
+					.setValue(dateTimeFormat)
+					.onChange(async (value) => {
+						this.globalSettings!.dateTimeFormat = value;
+						await this.saveSettings();
+					})
+					.setPlaceholder("yyyy-MM-dd/HH:mm"),
+			)
+			.addButton((btn) => {
+				btn.setButtonText(t("verify"));
+				btn.onClick(() => {
+					try {
+						const testDate = new Date(2026, 1, 18, 14, 30, 45); // Fixed reference date: Feb 18, 2026, 14:30:45
+						const userFormat = this.globalSettings?.dateTimeFormat;
+
+						if (!userFormat || userFormat.trim().length === 0) {
+							new Notice("Please enter a date-time format.");
+							return;
+						}
+
+						// Format the test date using the user's format
+						const formattedDateTime = format(testDate, userFormat);
+
+						// Try to parse it back
+						const parsed = parse(
+							formattedDateTime,
+							userFormat,
+							testDate,
+						);
+
+						// (1) Check if parsing succeeded
+						if (!isValid(parsed)) {
+							new Notice(
+								"❌ Invalid date-time format. Parsing failed.",
+							);
+							return;
+						}
+
+						// (2) Check if the parsed date is reasonably close (within 1 hour for time accuracy)
+						// This catches common mistakes like swapped date parts or time format issues
+						const hoursDiff = Math.abs(
+							differenceInHours(parsed, testDate),
+						);
+						if (hoursDiff > 48) {
+							new Notice(
+								"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+									parsed.toISOString() +
+									", expected: " +
+									testDate.toISOString() +
+									"). Please verify.",
+							);
+							return;
+						}
+
+						// All checks passed
+						new Notice(
+							"✅ Date-time format is valid! Example: " +
+								formattedDateTime,
+						);
+					} catch (error) {
+						new Notice(
+							"❌ Format validation error: " +
+								(error instanceof Error
+									? error.message
+									: String(error)),
+						);
+					}
+				});
+			});
 
 		// Text input for the default startime
 		new Setting(contentEl)
@@ -2458,7 +2757,7 @@ export class SettingsManager {
 		// 				await this.saveSettings();
 		// 				updatePreview();
 		// 			})
-		// 			.setPlaceholder("YYYY-MM-DD/HH:mm")
+		// 			.setPlaceholder("yyyy-MM-dd/HH:mm")
 		// 	);
 
 		// Setting for firstDayOfWeek
@@ -2487,32 +2786,32 @@ export class SettingsManager {
 				});
 			});
 
-		// Setting for taskCompletionInLocalTime
-		new Setting(contentEl)
-			.setName(t("task-completion-in-local-time"))
-			.setDesc(t("task-completion-in-local-time-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(taskCompletionInLocalTime)
-					.onChange(async (value) => {
-						this.globalSettings!.taskCompletionInLocalTime = value;
-						await this.saveSettings();
-					}),
-			);
+		// // Setting for taskCompletionInLocalTime
+		// new Setting(contentEl)
+		// 	.setName(t("task-completion-in-local-time"))
+		// 	.setDesc(t("task-completion-in-local-time-info"))
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(taskCompletionInLocalTime)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.taskCompletionInLocalTime = value;
+		// 				await this.saveSettings();
+		// 			}),
+		// 	);
 
-		// Setting for taskCompletionShowUtcOffset
-		new Setting(contentEl)
-			.setName(t("show-utc-offset-for-task-completion"))
-			.setDesc(t("show-utc-offset-for-task-completion-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(taskCompletionShowUtcOffset)
-					.onChange(async (value) => {
-						this.globalSettings!.taskCompletionShowUtcOffset =
-							value;
-						await this.saveSettings();
-					}),
-			);
+		// // Setting for taskCompletionShowUtcOffset
+		// new Setting(contentEl)
+		// 	.setName(t("show-utc-offset-for-task-completion"))
+		// 	.setDesc(t("show-utc-offset-for-task-completion-info"))
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(taskCompletionShowUtcOffset)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.taskCompletionShowUtcOffset =
+		// 					value;
+		// 				await this.saveSettings();
+		// 			}),
+		// 	);
 	}
 }
 

@@ -6,11 +6,13 @@ import { SettingsManager } from "src/settings/SettingConstructUI";
 import type TaskBoard from "../../main";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
+import { TaskBoardIcon } from "src/interfaces/Icons";
 
 export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
 	settingsManager: SettingsManager;
 	globalSettings: globalSettingsData | null = null;
+	icon: string = TaskBoardIcon;
 
 	constructor(app: App, plugin: TaskBoard) {
 		super(app, plugin);

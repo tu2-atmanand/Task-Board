@@ -1,7 +1,4 @@
 export class TaskRegularExpressions {
-	public static readonly dateFormat = "YYYY-MM-DD";
-	public static readonly dateTimeFormat = "YYYY-MM-DDTHH:mm";
-
 	// Matches indentation before a list marker (including > for potentially nested blockquotes or Obsidian callouts)
 	public static readonly indentationRegex = /^([\s\t>]*)/;
 
@@ -103,6 +100,7 @@ export interface DefaultTaskSerializerSymbols {
 		Lowest: string;
 		None: string;
 	};
+	readonly duration: string;
 	readonly startDateSymbol: string;
 	readonly createdDateSymbol: string;
 	readonly scheduledDateSymbol: string;
@@ -116,6 +114,7 @@ export interface DefaultTaskSerializerSymbols {
 	readonly dependsOnCompletedSymbol: string;
 	readonly TaskFormatRegularExpressions: {
 		priorityRegex: RegExp;
+		durationRegex: RegExp;
 		startDateRegex: RegExp;
 		createdDateRegex: RegExp;
 		scheduledDateRegex: RegExp;
@@ -129,6 +128,7 @@ export interface DefaultTaskSerializerSymbols {
 	};
 	readonly TaskFormatRegularExpWithGlobal: {
 		priorityRegex: RegExp;
+		durationRegex: RegExp;
 		startDateRegex: RegExp;
 		createdDateRegex: RegExp;
 		scheduledDateRegex: RegExp;
@@ -143,18 +143,17 @@ export interface DefaultTaskSerializerSymbols {
 }
 
 function dateFieldRegex(symbols: string, filter: string) {
-	return fieldRegex(
-		symbols,
-		"(\\d{4}-\\d{2}-\\d{2}|\\d{2}-\\d{2}-\\d{4})",
-		filter
-	);
+	// Match symbol with optional emoji variant selector, optional space (0 or 1), and capture any contiguous non-space characters
+	// This allows flexible date format parsing (YYYY-MM-DD, YYYY/MM/DD, ISO 8601, etc.)
+	let source = symbols + "\uFE0F? ?([^ ]+)";
+	return filter ? new RegExp(source, filter) : new RegExp(source);
 }
 
 function fieldRegex(symbols: string, valueRegexString: string, filter: string) {
 	// \uFE0F? allows an optional Variant Selector 16 on emojis.
 	let source = symbols + "\uFE0F?";
 	if (valueRegexString !== "") {
-		source += " *" + valueRegexString;
+		source += " ?" + valueRegexString;
 	}
 	// The regexes end with `$` because they will be matched and
 	// removed from the end until none are left.
@@ -176,6 +175,7 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 		Lowest: "⏬",
 		None: "",
 	},
+	duration: "⏰",
 	startDateSymbol: "🛫",
 	createdDateSymbol: "➕",
 	scheduledDateSymbol: "⏳",
@@ -189,6 +189,7 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 	idSymbol: "🆔",
 	TaskFormatRegularExpressions: {
 		priorityRegex: fieldRegex("(🔺|⏫|🔼|🔽|⏬)", "", ""),
+		durationRegex: dateFieldRegex("⏰", ""),
 		startDateRegex: dateFieldRegex("🛫", ""),
 		createdDateRegex: dateFieldRegex("➕", ""),
 		scheduledDateRegex: dateFieldRegex("(?:⏳|⌛)", ""),
@@ -200,16 +201,17 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 		dependsOnRegex: fieldRegex(
 			"⛔",
 			"(" + TaskRegularExpressions.taskIdSequenceRegex.source + ")",
-			""
+			"",
 		),
 		idRegex: fieldRegex(
 			"🆔",
 			"(" + TaskRegularExpressions.taskIdRegex.source + ")",
-			""
+			"",
 		),
 	},
 	TaskFormatRegularExpWithGlobal: {
 		priorityRegex: fieldRegex("(🔺|⏫|🔼|🔽|⏬)", "", "g"),
+		durationRegex: dateFieldRegex("⏰", "g"),
 		startDateRegex: dateFieldRegex("🛫", "g"),
 		createdDateRegex: dateFieldRegex("➕", "g"),
 		scheduledDateRegex: dateFieldRegex("(?:⏳|⌛)", "g"),
@@ -221,12 +223,12 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 		dependsOnRegex: fieldRegex(
 			"⛔",
 			"(" + TaskRegularExpressions.taskIdSequenceRegex.source + ")",
-			"g"
+			"g",
 		),
 		idRegex: fieldRegex(
 			"🆔",
 			"(" + TaskRegularExpressions.taskIdRegex.source + ")",
-			"g"
+			"g",
 		),
 	},
 } as const;

@@ -23,8 +23,9 @@ export enum UniversalDateOptions {
 }
 
 export enum TagColorType {
-	Text = "text",
-	Background = "background",
+	TagText = "text",
+	TagBg = "tagBg",
+	CardBg = "background",
 }
 
 export enum NotificationService {
@@ -63,6 +64,9 @@ export enum taskPropertiesNames {
 	Checkbox = "checkbox",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",
+	FilePathInHeader = "filePathInHeader",
+	ParentFolder = "parentFolder",
+	FullPath = "fullPath",
 }
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {

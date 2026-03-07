@@ -2,57 +2,71 @@
 
 ## System Information
 
-- **Obsidian version**: 1.10.3
-- **Installer version**: 1.10.3
+- **Obsidian version**: 1.11.5
+- **Installer version**: 1.11.5
 - **Operating system**: Windows 10 Home Single Language 10.0.19045
 - **Use [[Wikilinks]]**: true
-- **Base color scheme**: light
+- **Base color scheme**: dark
 - **Community theme**: none
 - **Snippets enabled**: 2
-- **Plugins installed**: 51
+- **Plugins installed**: 53
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
-  - Calendar v1.5.10
-  - Task Board v1.8.7
-  - Style Settings v1.0.9
   - BRAT v1.4.0
-  - TaskNotes v4.2.0
-  - Dataview v0.5.68
+  - Tasks v7.22.0
+  - Hover Editor v0.11.28
   - Excalidraw v2.18.3
+  - Task Board v1.9.5
 
 ## Recent Bug Reports
 
-Timestamp : 2026-01-15T16:47:07.456Z
-ID : 4
-Message : Error showing filter popover
-Context : Column.tsx/column-menu/configure-conlum-filters
+Timestamp : 2026-02-22T11:01:22
+ID : 149
+Message : 
+Context : undefined
+Version : 1.9.5
 
 #### Bug Content
 ```log
-Dont show popover.
+There is testing going on.
 ```
 
 -------------
 
-Timestamp : 2026-01-15T16:47:11.710Z
-ID : 27
-Message : Error in Sortable onSort for child tasks
-Context : AddOrEditTaskRC.tsx/childTasksListRef useEffect
+Timestamp : 2026-02-22T11:27:53
+ID : 149
+Message : 
+Context : undefined
+Version : 1.9.5
 
 #### Bug Content
 ```log
-Testing the new bug reporter.
+There is testing going on.
 ```
 
 -------------
 
-Timestamp : 2026-01-15T16:47:59.447Z
-ID : 4
-Message : Error showing filter popover
-Context : Column.tsx/column-menu/configure-conlum-filters
+Timestamp : 2026-02-22T11:35:29
+ID : 149
+Message : 
+Context : undefined
+Version : 1.9.5
 
 #### Bug Content
 ```log
-Dont show popover.
+This is a test bug.
+```
+
+-------------
+
+Timestamp : 2026-02-22T11:42:40
+ID : 149
+Message : 
+Context : OpenModals.ts/openAddNewTaskNoteModal/callback()
+Version : 1.9.5
+
+#### Bug Content
+```log
+This is a test bug.
 ```
