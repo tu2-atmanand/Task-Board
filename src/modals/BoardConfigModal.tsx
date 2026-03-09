@@ -550,18 +550,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
-						<div className="boardConfigModalMainContent-Active-Body-InputItems">
-							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-								<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
-								<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
-							</div>
-							<button
-								className="boardConfigModalMainContentConfigureSwimlanesBtn"
-								onClick={handleSwimlanesConfigureBtnClick}
-							>{t("configure")}</button>
+					<div className="boardConfigModalMainContent-Active-Body-InputItems">
+						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+							<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
+							<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
 						</div>
-					)}
+						<button
+							className="boardConfigModalMainContentConfigureSwimlanesBtn"
+							onClick={handleSwimlanesConfigureBtnClick}
+						>{t("configure")}</button>
+					</div>
 
 					<hr className="boardConfigModalHr-100" />
 

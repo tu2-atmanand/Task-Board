@@ -675,8 +675,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	const handleMenuButtonClicked = (event: React.MouseEvent) => {
 		event.stopPropagation();
 
-		if (!globalSettings.experimentalFeatures) return;
-
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
@@ -1292,26 +1290,22 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					{memoizedRenderHeader}
 
 					{/* Drag Handle and Task Menu button */}
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
-						<>
-							{
-								Platform.isDesktopApp ? (
-									<>
-										{/* Drag Handle */}
-										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
-											<div className="taskItemDragBtn">
-												<Grip size={18} enableBackground={0} opacity={0.4} />
-											</div>
-										)}
-									</>
-								) : (
-									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-									</>
-								)
-							}
-						</>
-					)}
+					{
+						Platform.isDesktopApp ? (
+							<>
+								{/* Drag Handle */}
+								{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+									<div className="taskItemDragBtn">
+										<Grip size={18} enableBackground={0} opacity={0.4} />
+									</div>
+								)}
+							</>
+						) : (
+							<>
+								<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+							</>
+						)
+					}
 
 					{/* Task Content */}
 					<div className="taskItemMainBody">
