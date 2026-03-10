@@ -9,6 +9,7 @@ import { t } from 'src/utils/lang/helper';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
+import { HeaderUITypeOptions } from 'src/interfaces/Enums';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -38,7 +39,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		customValue,
 		groupAllRest,
 		maxHeight: maxSwimlaneHeight,
-		verticalHeaderUI,
+		headerUIType,
 		minimized
 	} = board.swimlanes;
 
@@ -256,7 +257,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			{/* Swimlane Rows */}
 			<div className="swimlanesContainer">
 				{/* Top header showing column headers and counts */}
-				<div className={`swimlanesHeaderContainer${verticalHeaderUI ? ' verticalUI' : ''}`}>
+				<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
 					<div className="swimlanesHeaderRow">
 						{activeColumns.map((column, colIndex) => (
 							<MemoizedSwimlanColumn
@@ -274,7 +275,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				</div>
 				{swimlanes.map((swimlane, rowIndex) => (
 					<React.Fragment key={swimlane.swimlaneValue}>
-						{verticalHeaderUI ? (
+						{headerUIType === HeaderUITypeOptions.vertical ? (
 							<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`}>
 								{/* Swimlane Label */}
 								<div className='swimlaneHeaderContainer-vertical'>

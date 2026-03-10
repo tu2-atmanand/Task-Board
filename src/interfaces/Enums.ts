@@ -216,3 +216,8 @@ export enum scanModeOptions {
 	AUTOMATIC = "automatic",
 	MANUAL = "manual",
 }
+
+export enum HeaderUITypeOptions {
+	horizontal = "hor",
+	vertical = "vert",
+}

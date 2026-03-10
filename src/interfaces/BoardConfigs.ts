@@ -1,3 +1,5 @@
+import { HeaderUITypeOptions } from "./Enums";
+
 export interface columnSortingCriteria {
 	criteria:
 		| "status"
@@ -108,7 +110,7 @@ export interface FilterConfigSettings {
 	savedConfigs: SavedFilterConfig[];
 }
 
-export interface swimlaneConfigs {
+export type swimlaneConfigs = {
 	enabled: boolean;
 	hideEmptySwimlanes: boolean;
 	maxHeight: string;
@@ -120,9 +122,9 @@ export interface swimlaneConfigs {
 		index: number;
 	}[]; // This is only if user selects "custom" as the sort criteria.
 	groupAllRest?: boolean; // This will be only visible for customSortOrder. It will help user to decide if they want to group all the rest of the task below the custom sort order.
-	verticalHeaderUI: boolean; // This is a temporary setting for user telemetry. Later will remove it based on user feedback.
+	headerUIType: string;
 	minimized: string[]; // This will store the names of the minimized swimlanes.
-}
+};
 
 export type Board = {
 	name: string;
