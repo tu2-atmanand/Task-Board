@@ -2146,7 +2146,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	top: 0;
 	overflow: hidden;
 	min-width: 180px;
-	max-width: 250px;
+	max-width: 220px;
 	gap: .5em;
 	transition: transform 0.3s ease-in-out;
 }
@@ -2229,6 +2229,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* border: 2px solid #54f72275 !important;
 	color: #60ff2fbd !important; */
 	cursor: pointer;
+	border: 2px solid var(--color-green) !important;
 }
 
 .boardConfigModalSidebarSaveBtn:hover {
@@ -2316,6 +2317,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 10px;
 	padding: 4px;
+	overflow-y: unset;
+	overflow-x: auto;
+	padding-top: 0.8rem;
 }
 
 .boardConfigModalColumnRow.Hidden {
@@ -2517,7 +2521,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 		align-self: center;
 		border: 2px solid var(--color-green) !important;
 		cursor: pointer;
-		width: 90%;
+		width: 100%;
 	}
 
 	.addColumnModalOverlayContent {
