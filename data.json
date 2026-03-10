@@ -26,10 +26,10 @@
               "367",
               "362",
               "372",
-              "373",
+              "2621707603",
               "370",
               263,
-              "2621707603"
+              "373"
             ]
           },
           {
@@ -555,7 +555,7 @@
             }
           ],
           "groupAllRest": true,
-          "verticalHeaderUI": true,
+          "headerUIType": "vert",
           "minimized": []
         }
       },
@@ -1170,7 +1170,7 @@
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
       "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
-      "universalDate": "scheduledDate",
+      "universalDate": "due",
       "archivedTasksFilePath": "",
       "showFileNameInCard": true,
       "showFrontmatterTagsOnCards": true,
@@ -1195,9 +1195,9 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 0,
+        "boardIndex": 1,
         "taskId": "",
-        "settingTab": 0
+        "settingTab": 7
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInSplit",
@@ -1326,7 +1326,7 @@
       "autoAddCancelledDate": true,
       "scanMode": "automatic",
       "showModifiedFilesNotice": false,
-      "dateFormat": "M-d",
+      "dateFormat": "yyyy-MM-dd",
       "dateTimeFormat": "yyyy-MM-dd/HH:mm:ss"
     }
   }
