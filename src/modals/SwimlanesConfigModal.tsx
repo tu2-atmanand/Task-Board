@@ -240,7 +240,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 						{sortCriteria === 'custom' && (
 							<div className="swimlanesConfigManualSortSection">
 								<h3 className="swimlanesConfigManualSortHeading">
-									{t('manual-sorting-mapping')}
+									{t("custom-swimlanes")}
 								</h3>
 								<div className="swimlanesConfigManualSortDescription">
 									{t('manual-sorting-mapping-info')}
@@ -295,6 +295,21 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 									</button>
 								</div>
 
+								{/* Enable/Disable groupAllRest */}
+								<div className="swimlanesConfigItem">
+									<div className="swimlanesConfigLabel">
+										<label>{t('aggregator-swimlane')}</label>
+										<div className="swimlanesConfigDescription">
+											{t('aggregator-swimlane-info')}
+										</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={groupAllRest}
+										onChange={(e) => setGroupAllRest(e.target.checked)}
+									/>
+								</div>
+
 								{/* Hide Empty Swimlanes */}
 								<div className="swimlanesConfigItem">
 									<div className="swimlanesConfigLabel">
@@ -309,21 +324,6 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 										type="checkbox"
 										checked={hideEmptySwimlanes}
 										onChange={(e) => setHideEmptySwimlanes(e.target.checked)}
-									/>
-								</div>
-
-								{/* Enable/Disable groupAllRest */}
-								<div className="swimlanesConfigItem">
-									<div className="swimlanesConfigLabel">
-										<label>{t('aggregator-swimlane')}</label>
-										<div className="swimlanesConfigDescription">
-											{t('aggregator-swimlane-info')}
-										</div>
-									</div>
-									<input
-										type="checkbox"
-										checked={groupAllRest}
-										onChange={(e) => setGroupAllRest(e.target.checked)}
 									/>
 								</div>
 							</div>
