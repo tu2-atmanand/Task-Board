@@ -1086,20 +1086,7 @@
         "showFilteredTags": true,
         "boardFilter": {
           "rootCondition": "any",
-          "filterGroups": [
-            {
-              "id": "id-1773509238628-2300564299",
-              "groupCondition": "all",
-              "filters": [
-                {
-                  "id": "id-1773509238638-4132699389",
-                  "property": "content",
-                  "condition": "contains",
-                  "value": "sdfasdfs"
-                }
-              ]
-            }
-          ]
+          "filterGroups": []
         },
         "swimlanes": {
           "enabled": false,
@@ -1112,8 +1099,8 @@
         },
         "description": "This board is for testing drag and drop feature for status based workflow.",
         "taskCount": {
-          "pending": 0,
-          "completed": 0
+          "pending": 88,
+          "completed": 8
         }
       }
     ],
@@ -1301,7 +1288,7 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 617,
+      "uniqueIdCounter": 631,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
