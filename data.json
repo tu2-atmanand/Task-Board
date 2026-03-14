@@ -1194,8 +1194,8 @@
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "kanban",
-        "boardIndex": 1,
+        "viewedType": "map",
+        "boardIndex": 5,
         "taskId": "",
         "settingTab": 7
       },
@@ -1319,7 +1319,8 @@
         "status",
         "createdDate",
         "filePath",
-        "dependsOn"
+        "dependsOn",
+        "checkbox"
       ],
       "taskCardStyle": "emoji",
       "autoAddCompletedDate": true,
