@@ -689,7 +689,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
-					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} (**[${status.value}]**)`, item.titleEl, '', null);
+					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} **[${status.value}]**`, item.titleEl, '', null);
 					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
@@ -767,7 +767,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		taskItemMenu.addSeparator();
 
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("quick-actions"));
+			item.setTitle(t("task-actions"));
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
@@ -781,6 +781,36 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					new Notice(t("copy-task-title-unsuccessful"));
 				}
 			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor"));
+			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.Modal);
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor-in"));
+			const taskEditorMenu = item.setSubmenu();
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("columns-2");
+				subItem.setTitle(t("right-split"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
+			});
+
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("picture-in-picture-2");
+				subItem.setTitle(t("new-window"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("note-actions"));
+			item.setIsLabel(true);
 		});
 
 		taskItemMenu.addItem((item) => {
@@ -801,7 +831,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
 			item.setIcon("file-text");
-			item.setTitle(t("note-actions"));
+			item.setTitle(t("more-note-actions"));
 
 			const submenu = (item as any).setSubmenu();
 

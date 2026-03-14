@@ -595,7 +595,13 @@ const en: Lang = {
 	"validate": "Validate",
 	"load-more": "Load more",
 	"ui-type-for-swimlanes-header": "UI Type for swimlanes headers",
-	"ui-type-for-swimlanes-header-info": "Chose how the headers of the swimlanes should be rendered. Vertical headers will usually look good on desktop screens. For mobile screens, the horizontal headers UI will look better to save some screen width."
+	"ui-type-for-swimlanes-header-info": "Chose how the headers of the swimlanes should be rendered. Vertical headers will usually look good on desktop screens. For mobile screens, the horizontal headers UI will look better to save some screen width.",
+	"more-note-actions": "More note actions",
+	"task-actions": "Task actions",
+	"open-task-editor": "Open task editor",
+	"open-task-editor-in": "Open task editor in",
+	"right-split": "Right split",
+	"new-window": "New window"
 };
 
 export default en;

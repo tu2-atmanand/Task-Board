@@ -8,7 +8,8 @@ export enum taskPropertyFormatOptions {
 export enum EditButtonMode {
 	None = "none",
 	Modal = "popUp",
-	View = "view",
+	ViewInSplitTab = "viewInSplit",
+	ViewInWindow = "viewInWindow",
 	TasksPluginModal = "tasksPluginModal",
 	NoteInTab = "noteInTab",
 	NoteInSplit = "noteInSplit",

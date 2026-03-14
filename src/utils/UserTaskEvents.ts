@@ -57,7 +57,18 @@ export const handleEditTask = (
 				openEditTaskModal(plugin, task);
 			}
 			break;
-		case EditButtonMode.View:
+		case EditButtonMode.ViewInSplitTab:
+			openEditTaskView(
+				plugin,
+				isThisATaskNote,
+				false,
+				true,
+				task,
+				task.filePath,
+				"split",
+			);
+			break;
+		case EditButtonMode.ViewInWindow:
 			openEditTaskView(
 				plugin,
 				isThisATaskNote,
