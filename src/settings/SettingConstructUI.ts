@@ -2261,7 +2261,8 @@ export class SettingsManager {
 						[EditButtonMode.Modal]: t(
 							"use-edit-task-modal-feature",
 						),
-						[EditButtonMode.View]: t(
+						[EditButtonMode.ViewInSplitTab]: t("task-editor-tab"),
+						[EditButtonMode.ViewInWindow]: t(
 							"use-edit-task-window-feature",
 						),
 						[EditButtonMode.TasksPluginModal]:
