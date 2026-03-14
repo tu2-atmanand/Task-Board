@@ -86,9 +86,10 @@ export const addIdToTaskContent = async (
 	forcefullyAddId?: boolean,
 ): Promise<{ formattedTaskContent: string; newId: string | undefined }> => {
 	const taskId = extractTaskId(formattedTaskContent);
-	let newId = undefined;
+	let newId = taskId?.[1];
 	if (
-		(!taskId && Plugin.settings.data.globalSettings.autoAddUniqueID) ||
+		(taskId === null &&
+			Plugin.settings.data.globalSettings.autoAddUniqueID) ||
 		forcefullyAddId
 	) {
 		newId = generateTaskId(Plugin);
