@@ -625,11 +625,6 @@ export const AddOrEditTaskRC: React.FC<{
 	}, [plugin.app]);
 
 	const handleOpenTaskInMapView = () => {
-		// if (!globalSettings.experimentalFeatures) {
-		// 	new Notice(t("enable-experimental-features-message"));
-		// 	return;
-		// }
-
 		applyIdToTaskItem(plugin, task).then((newId) => {
 			globalSettings.lastViewHistory.viewedType = 'map';
 			globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
@@ -1096,7 +1091,7 @@ export const AddOrEditTaskRC: React.FC<{
 				event.ctrlKey = false;
 				break;
 			case EditButtonMode.Modal:
-			case EditButtonMode.View:
+			case EditButtonMode.ViewInWindow:
 			case EditButtonMode.TasksPluginModal:
 			default:
 				const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);

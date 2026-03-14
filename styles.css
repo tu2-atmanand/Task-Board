@@ -2146,7 +2146,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	top: 0;
 	overflow: hidden;
 	min-width: 180px;
-	max-width: 250px;
+	max-width: 220px;
 	gap: .5em;
 	transition: transform 0.3s ease-in-out;
 }
@@ -2229,6 +2229,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* border: 2px solid #54f72275 !important;
 	color: #60ff2fbd !important; */
 	cursor: pointer;
+	border: 2px solid var(--color-green) !important;
 }
 
 .boardConfigModalSidebarSaveBtn:hover {
@@ -2316,6 +2317,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 10px;
 	padding: 4px;
+	overflow-y: unset;
+	overflow-x: auto;
+	padding-top: 0.8rem;
 }
 
 .boardConfigModalColumnRow.Hidden {
@@ -2517,7 +2521,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 		align-self: center;
 		border: 2px solid var(--color-green) !important;
 		cursor: pointer;
-		width: 90%;
+		width: 100%;
 	}
 
 	.addColumnModalOverlayContent {
@@ -3356,7 +3360,9 @@ li:hover .taskboard-hidden-property {
 }
 
 
-/* ------- Checkboxes Icons -------------- */
+/* --------------------------------------------------------------
+ Checkboxes Icons 
+ ------------------------------------------------------------- */
 
 /*Icon: ITS Icons*/
 @font-face {
@@ -3400,7 +3406,7 @@ li:hover .taskboard-hidden-property {
 	--chbx-r: 249, 190, 123;
 }
 
-body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-task=X],
+body:not(.alt-chkbx-off) input:is([data-task=X],
 	[data-task=">"],
 	[data-task="-"],
 	[data-task=D],
@@ -3438,7 +3444,7 @@ body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-tas
 	[data-task=s],
 	[data-task=H],
 	[data-task="<"]) :is(.task-list-label, p)>input:is([type=checkbox], [type=checkbox i]):checked,
-body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-task=X],
+body:not(.alt-chkbx-off) input:is([data-task=X],
 	[data-task=">"],
 	[data-task="-"],
 	[data-task=D],
@@ -3556,7 +3562,6 @@ body:not(.alt-chkbx-off) .taskItemCheckbox.taskItemCheckbox-checked:is([data-tas
 	font: var(--its);
 	font-family: var(--its);
 	font-size: inherit;
-	font-weight: 10;
 	text-align: center;
 	border: 0;
 	border: none !important;
@@ -3566,7 +3571,7 @@ body:not(.alt-chkbx-off) .taskItemCheckbox.taskItemCheckbox-checked:is([data-tas
 	background-image: none !important;
 }
 
-body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-task=X],
+body:not(.alt-chkbx-off) input:is([data-task=X],
 	[data-task=">"],
 	[data-task="-"],
 	[data-task=D],
@@ -3604,7 +3609,7 @@ body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-tas
 	[data-task=s],
 	[data-task=H],
 	[data-task="<"]) :is(.task-list-label, p)>input:is([type=checkbox], [type=checkbox i]):checked::after,
-body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task]:is([data-task=X],
+body:not(.alt-chkbx-off) input:is([data-task=X],
 	[data-task=">"],
 	[data-task="-"],
 	[data-task=D],
@@ -3725,27 +3730,32 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked:is([data-task=X],
 	-webkit-mask-image: unset;
 	border: none !important;
 	background-image: none !important;
+	font: var(--its);
+	font-family: var(--its);
+	font-size: inherit;
+	text-align: center;
+	border: 0;
+	cursor: pointer;
 }
 
-/*--Checkbox Type Icons--*/
-/* Apply ITS font family to all checkbox icons */
+/* Below line is to render the checkboxes inside the Obsidian editor */
+body:not(.alt-chkbx-off) .task-list-label>input[type=checkbox]:checked::after,
+/* Below line is to render the checkboxes inside the task card menu under the status sub-menu */
+body:not(.alt-chkbx-off) .task-list-item>input[type=checkbox]:checked::after,
+/* Below lines is to render the checkboxes inside the task board view */
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox::after,
+body:not(.alt-chkbx-off) .view-content>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked p>input[type=checkbox]:checked::after {
 	font-family: "its";
 }
 
-body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=x]::after,
-body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x]>input[type=checkbox]:checked::after,
-body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x] p>input[type=checkbox]:checked::after,
-body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=X]::after,
-body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X]>input[type=checkbox]:checked::after,
-body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X] p>input[type=checkbox]:checked::after {
-	content: "\ec01";
-	color: var(--accent2-lite, var(--text-accent));
-}
-
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=">"]::after,
+/* Below line is to render the checkboxes inside the Obsidian editor */
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task=">"]::after,
+/* Below line is to render the checkboxes inside the task card menu under the status sub-menu */
+body:not(.alt-chkbx-off) .task-list-item[data-task=">"]>input[type=checkbox]:checked::after,
+/* Below lines is to render the checkboxes inside the task board view */
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=">"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=">"] p>input[type=checkbox]:checked::after {
 	content: "\ec03";
@@ -3753,6 +3763,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=">"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="<"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="<"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="<"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="<"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="<"] p>input[type=checkbox]:checked::after {
 	content: "\ec03";
@@ -3761,6 +3773,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="<"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=D]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="D"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="D"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=D]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=D] p>input[type=checkbox]:checked::after {
 	content: "\ec04";
@@ -3768,6 +3782,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=D] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="-"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="-"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="-"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="-"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="-"] p>input[type=checkbox]:checked::after {
 	content: "\ec02";
@@ -3775,6 +3791,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="-"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="?"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="?"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="?"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="?"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="?"] p>input[type=checkbox]:checked::after {
 	content: "\ec05";
@@ -3782,6 +3800,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="?"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="!"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="!"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="!"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="!"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="!"] p>input[type=checkbox]:checked::after {
 	content: "\ec08";
@@ -3789,6 +3809,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="!"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="+"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="+"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="+"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="+"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="+"] p>input[type=checkbox]:checked::after {
 	content: "\ec06";
@@ -3796,6 +3818,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="+"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="/"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="/"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="/"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="/"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="/"] p>input[type=checkbox]:checked::after {
 	content: "\ec17";
@@ -3803,6 +3827,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="/"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=R]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="R"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="R"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=R]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=R] p>input[type=checkbox]:checked::after {
 	content: "\ec07";
@@ -3810,6 +3836,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=R] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=i]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="i"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="i"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=i]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=i] p>input[type=checkbox]:checked::after {
 	content: "\ec09";
@@ -3817,6 +3845,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=i] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=B]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="B"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="B"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=B]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=B] p>input[type=checkbox]:checked::after {
 	content: "\ec10";
@@ -3824,6 +3854,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=B] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=P]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="P"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="P"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=P]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=P] p>input[type=checkbox]:checked::after {
 	content: "\ec11";
@@ -3831,6 +3863,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=P] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=C]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="C"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="C"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=C]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=C] p>input[type=checkbox]:checked::after {
 	content: "\ec12";
@@ -3838,6 +3872,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=C] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=I]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="I"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="I"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=I]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=I] p>input[type=checkbox]:checked::after {
 	content: "\ec16";
@@ -3845,6 +3881,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=I] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=Q]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="Q"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="Q"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=Q]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=Q] p>input[type=checkbox]:checked::after {
 	content: "\ec13";
@@ -3852,6 +3890,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=Q] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=N]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="N"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="N"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=N]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=N] p>input[type=checkbox]:checked::after {
 	content: "\ec14";
@@ -3859,6 +3899,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=N] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=b]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="b"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="b"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=b]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=b] p>input[type=checkbox]:checked::after {
 	content: "\ec15";
@@ -3866,6 +3908,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=b] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=p]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="p"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="p"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=p]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=p] p>input[type=checkbox]:checked::after {
 	content: "\ec19";
@@ -3873,6 +3917,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=p] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=E]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="E"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="E"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=E]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=E] p>input[type=checkbox]:checked::after {
 	content: "\ec18";
@@ -3880,6 +3926,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=E] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=L]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="L"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="L"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=L]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=L] p>input[type=checkbox]:checked::after {
 	content: "\ec21";
@@ -3887,6 +3935,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=L] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=A]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="A"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="A"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=A]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=A] p>input[type=checkbox]:checked::after {
 	content: "\ec20";
@@ -3894,6 +3944,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=A] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=r]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="r"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="r"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r] p>input[type=checkbox]:checked::after {
 	content: "\ec22" !important;
@@ -3901,6 +3953,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=r] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=c]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="c"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="c"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=c]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=c] p>input[type=checkbox]:checked::after {
 	content: "\ec29";
@@ -3908,6 +3962,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=c] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=o]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="o"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="o"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=o]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=o] p>input[type=checkbox]:checked::after {
 	content: "\ec24";
@@ -3915,6 +3971,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=o] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=d]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="d"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="d"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=d]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=d] p>input[type=checkbox]:checked::after {
 	content: "\ec25";
@@ -3922,6 +3980,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=d] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=T]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="T"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="T"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=T]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=T] p>input[type=checkbox]:checked::after {
 	content: "\ec26";
@@ -3929,6 +3989,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=T] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=t]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="t"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="t"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=t]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=t] p>input[type=checkbox]:checked::after {
 	content: "\ec27";
@@ -3936,6 +3998,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=t] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=O]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="O"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="O"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=O]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=O] p>input[type=checkbox]:checked::after {
 	content: "\e805";
@@ -3943,6 +4007,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=O] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=F]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="F"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="F"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=F]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=F] p>input[type=checkbox]:checked::after {
 	content: "\ec28";
@@ -3950,6 +4016,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=F] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=W]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="W"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="W"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=W]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=W] p>input[type=checkbox]:checked::after {
 	content: "\e813";
@@ -3957,6 +4025,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=W] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="~"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="~"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="~"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="~"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="~"] p>input[type=checkbox]:checked::after {
 	content: "\ec33";
@@ -3964,6 +4034,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="~"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="@"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="@"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="@"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="@"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="@"] p>input[type=checkbox]:checked::after {
 	content: "\e900";
@@ -3971,6 +4043,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="@"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=f]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="f"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="f"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=f]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=f] p>input[type=checkbox]:checked::after {
 	content: "\e81e";
@@ -3978,6 +4052,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=f] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=H]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="H"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="H"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=H]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=H] p>input[type=checkbox]:checked::after {
 	content: "\ec30";
@@ -3985,6 +4061,8 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=H] p>input[type=che
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task="&"]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="&"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="&"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="&"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="&"] p>input[type=checkbox]:checked::after {
 	content: "\ec32";
@@ -3992,13 +4070,30 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task="&"] p>input[type=c
 }
 
 body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=s]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="s"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="s"]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s]>input[type=checkbox]:checked::after,
 body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=checkbox]:checked::after {
 	content: "\ec31";
 	color: rgb(var(--chbx-d));
 }
 
-.taskItemCheckbox:is([data-task="x"],
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=x]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="x"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="x"]>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x]>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=x] p>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .view-content .taskItemCheckbox[data-task=X]::after,
+body:not(.alt-chkbx-off) .task-list-item-checkbox[data-task="X"]::after,
+body:not(.alt-chkbx-off) .task-list-item[data-task="X"]>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X]>input[type=checkbox]:checked::after,
+body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=X] p>input[type=checkbox]:checked::after {
+	content: "\ec01";
+	color: var(--accent2-lite, var(--text-accent));
+}
+
+input[type=checkbox]:checked,
+input:is([data-task="x"],
 	[data-task="X"],
 	[data-task=">"],
 	[data-task="-"],
@@ -4039,7 +4134,24 @@ body:not(.alt-chkbx-off) .taskItemCheckbox-checked[data-task=s] p>input[type=che
 	[data-task="<"]) {
 	border: 0 !important;
 	background-image: none !important;
+	background: transparent !important;
 	/* This will remove the border of the checkbox so only the icon is visible*/
+}
+
+input[type=checkbox]:checked:after {
+	content: "";
+	top: -1px;
+	inset-inline-start: 1px;
+	position: absolute;
+	width: var(--checkbox-size);
+	height: var(--checkbox-size);
+	display: block;
+	background-color: transparent !important;
+	-webkit-mask-position: none !important;
+	-webkit-mask-size: none !important;
+	-webkit-mask-repeat: none !important;
+	-webkit-mask-image: none !important;
+	font-size: 0.9rem;
 }
 
 
@@ -4557,7 +4669,9 @@ PICKR 1.8.2 MIT | https://github.com/Simonwep/pickr
 	background-size: 100%, 0.25em;
 }
 
-/* ReactFlow necessary CSS from its bundle */
+/* -------------------------------------------------------
+ReactFlow necessary CSS from its bundle 
+--------------------------------------------------------*/
 .react-flow {
 	direction: ltr;
 
@@ -7335,7 +7449,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 /* Empty swimlane message */
 .emptyBoardMessage {
-	grid-column: 1 / -1;
 	display: flex;
 	align-items: center;
 	justify-content: center;

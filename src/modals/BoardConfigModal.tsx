@@ -14,7 +14,7 @@ import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
+import { colTypeNames, HeaderUITypeOptions, UniversalDateOptions } from "src/interfaces/Enums";
 import { Board, ColumnData, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { AddColumnModal } from "./AddColumnModal";
@@ -226,7 +226,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				sortCriteria: 'asc',
 				minimized: [],
 				maxHeight: '300px',
-				verticalHeaderUI: false
+				headerUIType: HeaderUITypeOptions.horizontal
 			},
 		};
 		setLocalBoards([...oldBoards, newBoard]);
@@ -550,18 +550,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						/>
 					</div>
 
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
-						<div className="boardConfigModalMainContent-Active-Body-InputItems">
-							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-								<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
-								<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
-							</div>
-							<button
-								className="boardConfigModalMainContentConfigureSwimlanesBtn"
-								onClick={handleSwimlanesConfigureBtnClick}
-							>{t("configure")}</button>
+					<div className="boardConfigModalMainContent-Active-Body-InputItems">
+						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+							<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
+							<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
 						</div>
-					)}
+						<button
+							className="boardConfigModalMainContentConfigureSwimlanesBtn"
+							onClick={handleSwimlanesConfigureBtnClick}
+						>{t("configure")}</button>
+					</div>
 
 					<hr className="boardConfigModalHr-100" />
 

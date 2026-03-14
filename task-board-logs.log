@@ -13,21 +13,34 @@
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
+  - Task Board v1.9.7
   - BRAT v1.4.0
   - Tasks v7.22.0
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
-  - Task Board v1.9.6
 
 ## Recent Bug Reports
 
-Timestamp : 2026-03-02T10:50:54
-ID : 142
+Timestamp : 2026-03-14T23:47:28
+ID : 91
 Message : 
-Context : DragDropTasksManager.ts/handleDropEvent
-Version : 1.9.6
+Context : undefined
+Version : 1.9.7
 
 #### Bug Content
 ```log
-No current drag data available for drop operation.currentDragData=null
+Column data : undefined
+```
+
+-------------
+
+Timestamp : 2026-03-15T00:09:46
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "620". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 1.9.7
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
 ```

@@ -8,6 +8,7 @@ import Sortable from 'sortablejs';
 import { RxDragHandleDots2 } from 'react-icons/rx';
 import { FaTrash } from 'react-icons/fa';
 import { swimlaneConfigs } from 'src/interfaces/BoardConfigs';
+import { HeaderUITypeOptions } from 'src/interfaces/Enums';
 
 interface SwimlanesConfigModalProps {
 	swimlaneConfig: swimlaneConfigs;
@@ -32,7 +33,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 	);
 	const [maxHeight, setmaxHeight] = useState(swimlaneConfig.maxHeight || '300px');
 	const [groupAllRest, setGroupAllRest] = useState(swimlaneConfig.groupAllRest);
-	const [verticalHeaderUI, setVerticalHeaderUI] = useState(swimlaneConfig.verticalHeaderUI || false);
+	const [headerUIType, setHeaderUIType] = useState(swimlaneConfig.headerUIType || HeaderUITypeOptions.horizontal);
 
 	const sortableListRef = useRef<HTMLDivElement | null>(null);
 	const sortableInstanceRef = useRef<any>(null);
@@ -86,7 +87,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 			sortCriteria,
 			customSortOrder: sortCriteria === 'custom' ? customSortOrder : undefined,
 			groupAllRest,
-			verticalHeaderUI,
+			headerUIType,
 			minimized: []
 		};
 		onSave(updatedConfig);
@@ -239,7 +240,7 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 						{sortCriteria === 'custom' && (
 							<div className="swimlanesConfigManualSortSection">
 								<h3 className="swimlanesConfigManualSortHeading">
-									{t('manual-sorting-mapping')}
+									{t("custom-swimlanes")}
 								</h3>
 								<div className="swimlanesConfigManualSortDescription">
 									{t('manual-sorting-mapping-info')}
@@ -294,6 +295,21 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 									</button>
 								</div>
 
+								{/* Enable/Disable groupAllRest */}
+								<div className="swimlanesConfigItem">
+									<div className="swimlanesConfigLabel">
+										<label>{t('aggregator-swimlane')}</label>
+										<div className="swimlanesConfigDescription">
+											{t('aggregator-swimlane-info')}
+										</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={groupAllRest}
+										onChange={(e) => setGroupAllRest(e.target.checked)}
+									/>
+								</div>
+
 								{/* Hide Empty Swimlanes */}
 								<div className="swimlanesConfigItem">
 									<div className="swimlanesConfigLabel">
@@ -310,37 +326,29 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 										onChange={(e) => setHideEmptySwimlanes(e.target.checked)}
 									/>
 								</div>
-
-								{/* Enable/Disable groupAllRest */}
-								<div className="swimlanesConfigItem">
-									<div className="swimlanesConfigLabel">
-										<label>{t('aggregator-swimlane')}</label>
-										<div className="swimlanesConfigDescription">
-											{t('aggregator-swimlane-info')}
-										</div>
-									</div>
-									<input
-										type="checkbox"
-										checked={groupAllRest}
-										onChange={(e) => setGroupAllRest(e.target.checked)}
-									/>
-								</div>
 							</div>
 						)}
 
 						{/* Enable/Disable verticalSwimlaneHeader UI */}
 						<div className="swimlanesConfigItem">
 							<div className="swimlanesConfigLabel">
-								<label>{'UI type : vertical swimlane header on left'}</label>
+								<label>{t("ui-type-for-swimlanes-header")}</label>
 								<div className="swimlanesConfigDescription">
-									{'Enable this setting to display the swimlane header as vertical bar on left.This is an experimental setting to get user feedback. This setting will be removed in the future and a common UI type will be selected based on the better ergonomic design and majority votes from the community.'}
+									{t("ui-type-for-swimlanes-header-info")}
 								</div>
 							</div>
-							<input
-								type="checkbox"
-								checked={verticalHeaderUI}
-								onChange={(e) => setVerticalHeaderUI(e.target.checked)}
-							/>
+							<select
+								value={headerUIType}
+								onChange={(e) => setHeaderUIType(e.target.value)}
+								className="swimlanesConfigSelect"
+							>
+								<option key={HeaderUITypeOptions.horizontal} value={HeaderUITypeOptions.horizontal}>
+									{t("horizontal")}
+								</option>
+								<option key={HeaderUITypeOptions.vertical} value={HeaderUITypeOptions.vertical}>
+									{t("vertical")}
+								</option>
+							</select>
 						</div>
 					</>
 				)}

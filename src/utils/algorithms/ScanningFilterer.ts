@@ -5,6 +5,7 @@ import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskCompleted, isTaskLine } from "../CheckBoxUtils";
 import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
 import { getTaskFromId } from "../TaskItemUtils";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 /**
  * Checks whether the file is mentioned in the "Files" filter or not and based on the logic returns a truth array to specify if the file is explicitely mentioned inside the filter and whether its allowed for scanning or not.
@@ -19,15 +20,21 @@ export function checkFileFilters(
 ): boolean[] | undefined {
 	// const fileInFilters = scanFilters.files.values.includes(fileName);
 	const fileInFilters = scanFilters.files.values.some((value) => {
-		if (value.startsWith("/") && value.endsWith("/")) {
-			// Try to create a RegExp from the pattern
+		// Check if value is in regex format: /pattern/flags
+		// Parse /pattern/flags using regex (handles escaped slashes in pattern)
+		const match = value.trim().match(/^\/(.*?)\/([gimsuy]*)$/);
+		if (match && match[1]) {
 			try {
-				const pattern = value.slice(1, -1);
-				const regex = new RegExp(pattern);
+				const [, pattern, flags] = match;
+				const regex = new RegExp(pattern, flags);
 				return regex.test(fileName);
-			} catch {
-				// Invalid regex, skip this value
-				return true;
+			} catch (error) {
+				bugReporterManagerInsatance.addToLogs(
+					189,
+					JSON.stringify(error),
+					"ScanningFileterer.ts/checkFileFilters",
+				);
+				return false; // Skip invalid patterns
 			}
 		} else {
 			return value === fileName;
@@ -109,15 +116,21 @@ export function checkFolderFilters(
 
 	if (!folderInFilters && parentFolder !== "") {
 		folderInFilters = scanFilters.folders.values.some((filter: string) => {
-			if (filter.startsWith("/") && filter.endsWith("/")) {
-				// Try to create a RegExp from the pattern
+			// Check if filter is in regex format: /pattern/flags
+			// Parse /pattern/flags using regex (handles escaped slashes in pattern)
+			const match = filter.trim().match(/^\/(.*?)\/([gimsuy]*)$/);
+			if (match && match[1]) {
 				try {
-					const pattern = filter.slice(1, -1);
-					const regex = new RegExp(pattern);
+					const [, pattern, flags] = match;
+					const regex = new RegExp(pattern, flags);
 					return regex.test(parentFolder);
-				} catch {
-					// Invalid regex, skip this value
-					return false;
+				} catch (error) {
+					bugReporterManagerInsatance.addToLogs(
+						190,
+						JSON.stringify(error),
+						"ScanningFileterer.ts/checkFileFilters",
+					);
+					return false; // Skip invalid patterns
 				}
 			} else {
 				// Check if parentFolder is exactly the filter OR is a subfolder of the filter

@@ -165,8 +165,9 @@ const en: Lang = {
 	"file-not-found-at-path": "File not found at path:",
 	"edit-button-mode": "Edit button action",
 	"edit-button-mode-info": "Select what should the edit button do.",
-	"use-edit-task-modal-feature": "Edit task modal",
-	"use-edit-task-window-feature": "Edit task window",
+	"use-edit-task-modal-feature": "Task editor (modal)",
+	"task-editor-tab": "Task editor (tab)",
+	"use-edit-task-window-feature": "Task editor (window)",
 	"open-note-in-new-tab": "Open note in new tab",
 	"open-note-in-right-split": "Open note in right split",
 	"open-note-in-new-window": "Open note in new window",
@@ -502,7 +503,7 @@ const en: Lang = {
 	'max-swimlane-height-info': 'Set a maximum height for the swimlane to avoid consuming a lot of space. Smaller height helps optimized rendering. Enter the value along with units. For example "300px" or "20vh", etc.',
 	'swimlane-sort-order': 'Swimlane sort order',
 	'swimlane-sort-order-info': 'Select the order in which the swimlanes should be sorted. Ascending and descending are the common options. But custom sorting will help you with more flexibility. This new sorting option has been specifically designed to adopt "Story Map" methodology in this plugin.',
-	'manual-sorting-mapping': 'Manual sorting mapping',
+	"custom-swimlanes": 'Custom swimlanes',
 	'manual-sorting-mapping-info': 'Enter the values for the property you have selected and arrange their order to have a custom sorting.',
 	'enter-property-value': 'Enter property value',
 	'add-row': 'Add row',
@@ -593,7 +594,16 @@ const en: Lang = {
 	"before": "before",
 	"on-or-before": "on or before",
 	"validate": "Validate",
-	"load-more": "Load more"
+	"load-more": "Load more",
+	"ui-type-for-swimlanes-header": "UI Type for swimlanes headers",
+	"ui-type-for-swimlanes-header-info": "Chose how the headers of the swimlanes should be rendered. Vertical headers will usually look good on desktop screens. For mobile screens, the horizontal headers UI will look better to save some screen width.",
+	"more-note-actions": "More note actions",
+	"task-actions": "Task actions",
+	"open-task-editor": "Open task editor",
+	"open-task-editor-in": "Open task editor in",
+	"right-split": "Right split",
+	"new-window": "New window",
+	"this-board-not-found": "This board was not found. Switch to a different board.",
 };
 
 export default en;

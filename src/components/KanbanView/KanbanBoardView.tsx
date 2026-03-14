@@ -28,22 +28,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 	// Second memo: Segregate filtered tasks by column (for Kanban view only)
 	const allTasksArrangedPerColumn = useMemo(() => {
 		if (board && filteredAndSearchedTasks) {
-			return board.columns
+			const finalArrangedTasks = board.columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
 					columnSegregator(plugin.settings, board.index, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
 						plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
 					})
 				);
+
+			setLoading(false);
+			return finalArrangedTasks;
 		}
+
+		setLoading(false);
 		return [];
 	}, [filteredAndSearchedTasks, board]);
 
-	useEffect(() => {
-		if (allTasksArrangedPerColumn.flat().length > 0) {
-			setLoading(false);
-		}
-	}, [allTasksArrangedPerColumn]);
+	// useEffect(() => {
+	// 	if (allTasksArrangedPerColumn.flat().length > 0) {
+	// 		setLoading(false);
+	// 	}
+	// }, [allTasksArrangedPerColumn]);
 
 	return (
 		<div className="kanbanBoard">

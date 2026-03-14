@@ -675,8 +675,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	const handleMenuButtonClicked = (event: React.MouseEvent) => {
 		event.stopPropagation();
 
-		if (!globalSettings.experimentalFeatures) return;
-
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
@@ -691,7 +689,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
-					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} (**[${status.value}]**)`, item.titleEl, '', null);
+					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} **[${status.value}]**`, item.titleEl, '', null);
 					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
@@ -757,19 +755,19 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			});
 		});
 
-		// Reminder item - open prompt for date/time
-		taskItemMenu.addItem((item) => {
-			item.setIcon("clock");
-			item.setTitle(t("reminder"));
-			item.onClick(async () => {
-				// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
-			});
-		});
+		// TODO : Reminder item - open prompt for date/time
+		// taskItemMenu.addItem((item) => {
+		// 	item.setIcon("clock");
+		// 	item.setTitle(t("reminder"));
+		// 	item.onClick(async () => {
+		// 		// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+		// 	});
+		// });
 
 		taskItemMenu.addSeparator();
 
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("quick-actions"));
+			item.setTitle(t("task-actions"));
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
@@ -783,6 +781,36 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					new Notice(t("copy-task-title-unsuccessful"));
 				}
 			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor"));
+			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.Modal);
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor-in"));
+			const taskEditorMenu = item.setSubmenu();
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("columns-2");
+				subItem.setTitle(t("right-split"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
+			});
+
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("picture-in-picture-2");
+				subItem.setTitle(t("new-window"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("note-actions"));
+			item.setIsLabel(true);
 		});
 
 		taskItemMenu.addItem((item) => {
@@ -803,7 +831,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
 			item.setIcon("file-text");
-			item.setTitle(t("note-actions"));
+			item.setTitle(t("more-note-actions"));
 
 			const submenu = (item as any).setSubmenu();
 
@@ -1292,26 +1320,22 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					{memoizedRenderHeader}
 
 					{/* Drag Handle and Task Menu button */}
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
-						<>
-							{
-								Platform.isDesktopApp ? (
-									<>
-										{/* Drag Handle */}
-										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
-											<div className="taskItemDragBtn">
-												<Grip size={18} enableBackground={0} opacity={0.4} />
-											</div>
-										)}
-									</>
-								) : (
-									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-									</>
-								)
-							}
-						</>
-					)}
+					{
+						Platform.isDesktopApp ? (
+							<>
+								{/* Drag Handle */}
+								{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+									<div className="taskItemDragBtn">
+										<Grip size={18} enableBackground={0} opacity={0.4} />
+									</div>
+								)}
+							</>
+						) : (
+							<>
+								<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+							</>
+						)
+					}
 
 					{/* Task Content */}
 					<div className="taskItemMainBody">

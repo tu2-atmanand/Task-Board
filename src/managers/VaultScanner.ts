@@ -780,9 +780,9 @@ export function extractTitle(text: string): string {
 
 /**
  * Extracts the task id from a task string by matching the id regex.
- * Supports both plugin and Dataview id formats.
+ * Supports both Task's plugin and Dataview plugin id formats.
  * @param {string} text - The task string.
- * @returns {string} The task id.
+ * @returns {RegExpMatchArray} A regular expression array, where [0] is the extracted string and [1] is the value of the id.
  */
 export function extractTaskId(text: string): RegExpMatchArray | null {
 	// const combinedIdRegex = new RegExp(
