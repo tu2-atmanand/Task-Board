@@ -1004,6 +1004,117 @@
           "enableSavedFilters": true,
           "savedConfigs": []
         }
+      },
+      {
+        "name": "Board with 0 tasks",
+        "index": 6,
+        "columns": [
+          {
+            "id": 1494706620,
+            "index": 1,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "Backlog",
+            "taskStatus": " "
+          },
+          {
+            "id": 3409874282,
+            "index": 2,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "Important",
+            "taskStatus": "*"
+          },
+          {
+            "id": 1325035215,
+            "index": 3,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "Ready to start",
+            "taskStatus": ">"
+          },
+          {
+            "id": 1737759567,
+            "index": 4,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "In Progress",
+            "taskStatus": "/"
+          },
+          {
+            "id": 2562502448,
+            "index": 5,
+            "colType": "taskStatus",
+            "active": true,
+            "collapsed": false,
+            "name": "In Review",
+            "taskStatus": "?"
+          },
+          {
+            "id": 2503637624,
+            "index": 6,
+            "colType": "completed",
+            "active": true,
+            "collapsed": false,
+            "name": "Completed",
+            "limit": 20,
+            "filters": {
+              "rootCondition": "any",
+              "filterGroups": [
+                {
+                  "id": "id-1772026334014-2439699349",
+                  "groupCondition": "all",
+                  "filters": [
+                    {
+                      "id": "id-1772026334021-3309780026",
+                      "property": "createdDate",
+                      "condition": "after",
+                      "value": "2025-12-31"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "hideEmptyColumns": false,
+        "showColumnTags": true,
+        "showFilteredTags": true,
+        "boardFilter": {
+          "rootCondition": "any",
+          "filterGroups": [
+            {
+              "id": "id-1773509238628-2300564299",
+              "groupCondition": "all",
+              "filters": [
+                {
+                  "id": "id-1773509238638-4132699389",
+                  "property": "content",
+                  "condition": "contains",
+                  "value": "sdfasdfs"
+                }
+              ]
+            }
+          ]
+        },
+        "swimlanes": {
+          "enabled": false,
+          "hideEmptySwimlanes": false,
+          "property": "tags",
+          "sortCriteria": "asc",
+          "minimized": [],
+          "maxHeight": "300px",
+          "verticalHeaderUI": false
+        },
+        "description": "This board is for testing drag and drop feature for status based workflow.",
+        "taskCount": {
+          "pending": 0,
+          "completed": 0
+        }
       }
     ],
     "globalSettings": {
@@ -1195,7 +1306,7 @@
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "map",
-        "boardIndex": 5,
+        "boardIndex": 6,
         "taskId": "",
         "settingTab": 7
       },
