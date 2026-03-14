@@ -18,6 +18,13 @@
 
 <p align="center">An <a href="https://obsidian.md/">Obsidian</a> plugin to view and manage all your tasks, throughout the vault on a centralized board using various kinds of views. Use boards to manage small to large projects.</p>
 
+> :warning: Attention
+>
+> Right now this plugin have a serious issue with the "Map view" feature. You can read more about it here. The data of the map view is being stored inside a `LocalStorage`, which a very bad system design to store user's data. This architecture will be completely changed in the next major release, version `2.0.0`.
+> 
+> Please be aware of this issue and use the feature cautiously. Would rather request to not use the feature for your day to day workflow till the issue has been fixed.
+
+
 ![Task Board Thumbnail](./assets/MainThumbnail-4.png)
 
 > YouTube playlist : [Task Board - Obsidian plugin](https://youtube.com/playlist?list=PLqEPxsDi1dtepfcaUO9r1BTGZN6IuhvvH&si=yohu1rczpRVq68D6)
