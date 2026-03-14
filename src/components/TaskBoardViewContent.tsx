@@ -132,19 +132,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
 				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+
+				setLoading(false);
 				return searchFiltered || boardFilteredTasks;
 			}
 
+			setLoading(false);
 			return boardFilteredTasks;
 		}
+
+		setLoading(false);
 		return { Pending: [], Completed: [] };
 	}, [allTasks, activeBoardIndex, searchQuery]);
-
-	useEffect(() => {
-		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
-			setLoading(false);
-		}
-	}, [filteredAndSearchedTasks]);
 
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
@@ -1059,7 +1058,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					)
 				) : (
 					<div className="emptyBoardMessage">
-						Switch to different board.
+						{t("this-board-not-found")}
 					</div>
 				)}
 			</div>

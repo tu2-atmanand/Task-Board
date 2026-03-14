@@ -601,7 +601,8 @@ const en: Lang = {
 	"open-task-editor": "Open task editor",
 	"open-task-editor-in": "Open task editor in",
 	"right-split": "Right split",
-	"new-window": "New window"
+	"new-window": "New window",
+	"this-board-not-found": "This board was not found. Switch to a different board.",
 };
 
 export default en;
