@@ -755,14 +755,14 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			});
 		});
 
-		// Reminder item - open prompt for date/time
-		taskItemMenu.addItem((item) => {
-			item.setIcon("clock");
-			item.setTitle(t("reminder"));
-			item.onClick(async () => {
-				// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
-			});
-		});
+		// TODO : Reminder item - open prompt for date/time
+		// taskItemMenu.addItem((item) => {
+		// 	item.setIcon("clock");
+		// 	item.setTitle(t("reminder"));
+		// 	item.onClick(async () => {
+		// 		// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+		// 	});
+		// });
 
 		taskItemMenu.addSeparator();
 
