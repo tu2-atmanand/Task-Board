@@ -49,6 +49,10 @@ class DragDropTasksManager {
 	// private clonedDraggedElement: HTMLElement | null = null;
 	// private dropIndicator: HTMLElement | null = null; // deprecated
 
+	// Auto-scroll state
+	private scrollIntervalId: number | null = null;
+	private isAutoScrolling: boolean = false;
+
 	private constructor() {
 		// Private constructor to enforce singleton pattern
 	}
@@ -107,10 +111,80 @@ class DragDropTasksManager {
 	 */
 	clearCurrentDragData() {
 		this.currentDragData = null;
+		this.stopAutoScroll();
 		// if (this.clonedDraggedElement) {
 		// 	document.body.removeChild(this.clonedDraggedElement);
 		// 	this.clonedDraggedElement = null;
 		// }
+	}
+
+	// --------------------------------------
+	// Auto-scroll functionality for horizontal panning during drag
+	// --------------------------------------
+
+	/**
+	 * Start auto-scroll monitoring during drag
+	 * Called from dragstart event handler
+	 */
+	startAutoScroll(): void {
+		if (this.isAutoScrolling) return;
+
+		this.isAutoScrolling = true;
+
+		const handleDragOver = (e: Event) => {
+			this.handleAutoScroll(e as DragEvent);
+		};
+
+		const handleDragEnd = () => {
+			this.stopAutoScroll();
+			document.removeEventListener('dragover', handleDragOver);
+			document.removeEventListener('dragend', handleDragEnd);
+		};
+
+		document.addEventListener('dragover', handleDragOver);
+		document.addEventListener('dragend', handleDragEnd);
+	}
+
+	/**
+	 * Handle auto-scroll based on mouse position during drag
+	 * @param e - The drag event
+	 */
+	private handleAutoScroll(e: DragEvent): void {
+		if (!this.plugin) return;
+
+		const edgePercent = this.plugin.settings.data.globalSettings.dragAutoScrollEdgePercent || 20;
+		const scrollSpeed = 15;
+		const viewportWidth = window.innerWidth;
+		const edgeThreshold = (viewportWidth * edgePercent) / 100;
+
+		const columnsContainer = document.querySelector('.columnsContainer') as HTMLElement;
+		if (!columnsContainer) return;
+
+		const clientX = e.clientX;
+
+		if (clientX < edgeThreshold) {
+			const scrollLeft = columnsContainer.scrollLeft;
+			if (scrollLeft > 0) {
+				columnsContainer.scrollLeft = Math.max(0, scrollLeft - scrollSpeed);
+			}
+		} else if (clientX > viewportWidth - edgeThreshold) {
+			const scrollLeft = columnsContainer.scrollLeft;
+			const maxScrollLeft = columnsContainer.scrollWidth - columnsContainer.clientWidth;
+			if (scrollLeft < maxScrollLeft) {
+				columnsContainer.scrollLeft = Math.min(maxScrollLeft, scrollLeft + scrollSpeed);
+			}
+		}
+	}
+
+	/**
+	 * Stop auto-scroll monitoring
+	 */
+	stopAutoScroll(): void {
+		this.isAutoScrolling = false;
+		if (this.scrollIntervalId !== null) {
+			clearInterval(this.scrollIntervalId);
+			this.scrollIntervalId = null;
+		}
 	}
 
 	// --------------------------------------
@@ -1216,6 +1290,8 @@ class DragDropTasksManager {
 		if (!e.dataTransfer) return;
 
 		this.setCurrentDragData(currentDragData);
+
+		this.startAutoScroll();
 
 		e.dataTransfer.effectAllowed = "move";
 

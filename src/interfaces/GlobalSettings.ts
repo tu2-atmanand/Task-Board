@@ -92,6 +92,7 @@ export interface globalSettingsData {
 	visiblePropertiesList: string[];
 	taskCardStyle: string;
 	showVerticalScroll: boolean;
+	dragAutoScrollEdgePercent: number;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
@@ -460,6 +461,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			],
 			taskCardStyle: taskCardStyleNames.EMOJI,
 			showVerticalScroll: true,
+			dragAutoScrollEdgePercent: 20,
 			tagColors: [
 				{
 					name: "bug",
