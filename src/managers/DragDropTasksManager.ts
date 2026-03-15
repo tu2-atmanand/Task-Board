@@ -137,12 +137,12 @@ class DragDropTasksManager {
 
 		const handleDragEnd = () => {
 			this.stopAutoScroll();
-			document.removeEventListener('dragover', handleDragOver);
-			document.removeEventListener('dragend', handleDragEnd);
+			document.removeEventListener("dragover", handleDragOver);
+			document.removeEventListener("dragend", handleDragEnd);
 		};
 
-		document.addEventListener('dragover', handleDragOver);
-		document.addEventListener('dragend', handleDragEnd);
+		document.addEventListener("dragover", handleDragOver);
+		document.addEventListener("dragend", handleDragEnd);
 	}
 
 	/**
@@ -152,10 +152,17 @@ class DragDropTasksManager {
 	private handleAutoScroll(e: DragEvent): void {
 		if (!this.plugin) return;
 
-		const edgePercent = this.plugin.settings.data.globalSettings.dragAutoScrollEdgePercent || 20;
-		const scrollSpeed = 15;
-		const viewportWidth = window.innerWidth;
-		const viewportHeight = window.innerHeight;
+		const edgePercent =
+			this.plugin.settings.data.globalSettings
+				.dragAutoScrollEdgePercent || 20;
+		const scrollSpeed = 10;
+		const taskBoardViewSection = document.querySelector(
+			".taskBoardViewSection",
+		);
+		const viewportWidth =
+			taskBoardViewSection?.clientWidth ?? window.innerWidth;
+		const viewportHeight =
+			taskBoardViewSection?.clientHeight ?? window.innerHeight;
 		const horizontalEdgeThreshold = (viewportWidth * edgePercent) / 100;
 		const verticalEdgeThreshold = (viewportHeight * edgePercent) / 100;
 
@@ -163,37 +170,57 @@ class DragDropTasksManager {
 		const clientY = e.clientY;
 
 		// Try to find the horizontal scroll container (works for both normal kanban and swimlanes)
-		const horizontalContainer = document.querySelector('.columnsContainer, .swimlanesContainer') as HTMLElement;
+		const horizontalContainer = document.querySelector(
+			".columnsContainer, .swimlanesContainer",
+		) as HTMLElement;
 		if (horizontalContainer) {
 			// Horizontal scroll (left/right)
 			if (clientX < horizontalEdgeThreshold) {
 				const scrollLeft = horizontalContainer.scrollLeft;
 				if (scrollLeft > 0) {
-					horizontalContainer.scrollLeft = Math.max(0, scrollLeft - scrollSpeed);
+					horizontalContainer.scrollLeft = Math.max(
+						0,
+						scrollLeft - scrollSpeed,
+					);
 				}
 			} else if (clientX > viewportWidth - horizontalEdgeThreshold) {
 				const scrollLeft = horizontalContainer.scrollLeft;
-				const maxScrollLeft = horizontalContainer.scrollWidth - horizontalContainer.clientWidth;
+				const maxScrollLeft =
+					horizontalContainer.scrollWidth -
+					horizontalContainer.clientWidth;
 				if (scrollLeft < maxScrollLeft) {
-					horizontalContainer.scrollLeft = Math.min(maxScrollLeft, scrollLeft + scrollSpeed);
+					horizontalContainer.scrollLeft = Math.min(
+						maxScrollLeft,
+						scrollLeft + scrollSpeed,
+					);
 				}
 			}
 		}
 
 		// Vertical scroll for swimlanes (top/bottom)
 		// Find the swimlanes container for vertical scrolling
-		const swimlanesContainer = document.querySelector('.swimlanesContainer') as HTMLElement;
+		const swimlanesContainer = document.querySelector(
+			".swimlanesContainer",
+		) as HTMLElement;
 		if (swimlanesContainer) {
 			if (clientY < verticalEdgeThreshold) {
 				const scrollTop = swimlanesContainer.scrollTop;
 				if (scrollTop > 0) {
-					swimlanesContainer.scrollTop = Math.max(0, scrollTop - scrollSpeed);
+					swimlanesContainer.scrollTop = Math.max(
+						0,
+						scrollTop - scrollSpeed,
+					);
 				}
 			} else if (clientY > viewportHeight - verticalEdgeThreshold) {
 				const scrollTop = swimlanesContainer.scrollTop;
-				const maxScrollTop = swimlanesContainer.scrollHeight - swimlanesContainer.clientHeight;
+				const maxScrollTop =
+					swimlanesContainer.scrollHeight -
+					swimlanesContainer.clientHeight;
 				if (scrollTop < maxScrollTop) {
-					swimlanesContainer.scrollTop = Math.min(maxScrollTop, scrollTop + scrollSpeed);
+					swimlanesContainer.scrollTop = Math.min(
+						maxScrollTop,
+						scrollTop + scrollSpeed,
+					);
 				}
 			}
 		}
