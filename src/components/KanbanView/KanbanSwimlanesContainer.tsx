@@ -259,7 +259,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				{/* Top header showing column headers and counts */}
 				<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
 					{/* A small Icon at the top right corner inside the swimlanes container */}
-					<TableCellsSplit strokeWidth={1.5} size={30} className='swimlanesContainerIcon' />
+					{headerUIType === HeaderUITypeOptions.vertical && (
+						<TableCellsSplit strokeWidth={1.5} size={32} className='swimlanesContainerIcon' />
+					)}
 
 					<div className="swimlanesHeaderRow">
 						{activeColumns.map((column, colIndex) => (
