@@ -6,7 +6,7 @@ import {
 	TAbstractFile,
 	TFile,
 	TFolder,
-	moment as _moment,
+	// moment as _moment,
 } from "obsidian";
 import {
 	extractCheckboxSymbol,
@@ -48,6 +48,7 @@ import {
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import { bugReporterManagerInsatance } from "./BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import { parse } from "date-fns/parse";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -61,6 +62,7 @@ export default class VaultScanner {
 	tasksCache: jsonCacheData;
 	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
+	testDate: Date;
 
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
@@ -73,6 +75,7 @@ export default class VaultScanner {
 		}; // Reset task structure
 		this.tasksDetectedOrUpdated = false;
 		this.indentationString = getObsidianIndentationSetting(plugin);
+		this.testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
 	}
 
 	async initializeTasksCache() {
@@ -311,15 +314,17 @@ export default class VaultScanner {
 							);
 							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
-							const createdDate = extractCreatedDate(line);
+							const createdDate =
+								extractCreatedDate(line)?.[1] ?? "";
 							let startDate: RegExpMatchArray | null | string =
-								extractStartDate(line);
+								extractStartDate(line)?.[1] ?? "";
 							let scheduledDate:
 								| RegExpMatchArray
 								| null
-								| string = extractScheduledDate(line);
+								| string =
+								extractScheduledDate(line)?.[1] ?? "";
 							let dueDate: RegExpMatchArray | null | string =
-								extractDueDate(line);
+								extractDueDate(line)?.[1] ?? "";
 							const priority = extractPriority(line);
 							const dependsOn = extractDependsOn(line);
 							const reminder = extractReminder(
@@ -328,8 +333,10 @@ export default class VaultScanner {
 								scheduledDate ? scheduledDate[1] : "",
 								dueDate ? dueDate[1] : "",
 							);
-							const completionDate = extractCompletionDate(line);
-							const cancelledDate = extractCancelledDate(line);
+							const completionDate =
+								extractCompletionDate(line)?.[1] ?? "";
+							const cancelledDate =
+								extractCancelledDate(line)?.[1] ?? "";
 							const bodyLines = extractBody(
 								lines,
 								lineIndex + 1,
@@ -348,16 +355,13 @@ export default class VaultScanner {
 										.universalDate;
 								const basename = file.basename;
 
-								// Check if the basename matches the dueFormat using moment
-								const moment =
-									_moment as unknown as typeof _moment.default;
-								if (
-									moment(
-										basename,
-										universalDateFormat,
-										true,
-									).isValid()
-								) {
+								// Check if the basename matches the date format
+								const parsed = parse(
+									basename,
+									universalDateFormat,
+									this.testDate,
+								);
+								if (parsed) {
 									if (
 										universalDateConfig ===
 											UniversalDateOptions.dueDate &&
@@ -399,12 +403,12 @@ export default class VaultScanner {
 								title: title,
 								body: bodyLines,
 								time: time ? time[1] : "",
-								createdDate: createdDate ? createdDate[1] : "",
-								startDate: startDate ? startDate[1] : "",
+								createdDate: createdDate ? createdDate : "",
+								startDate: startDate ? startDate : "",
 								scheduledDate: scheduledDate
-									? scheduledDate[1]
+									? scheduledDate
 									: "",
-								due: dueDate ? dueDate[1] : "",
+								due: dueDate ? dueDate : "",
 								tags: tags,
 								frontmatterTags: frontmatterTags,
 								priority: priority.value,
@@ -425,10 +429,10 @@ export default class VaultScanner {
 											: line.length,
 								},
 								completion: completionDate
-									? completionDate[1]
+									? completionDate
 									: "",
 								cancelledDate: cancelledDate
-									? cancelledDate[1]
+									? cancelledDate
 									: "",
 								reminder: reminder.value,
 							};
@@ -689,7 +693,11 @@ export function fileTypeAllowedForScanning(
 	file: TFile | TAbstractFile,
 ): boolean {
 	const filePath = file.path.toLocaleLowerCase();
-	const isFileInArchivedTaskNotesFolder = globalSettings.archivedTBNotesFolderPath.trim() !== "" && filePath.startsWith(globalSettings.archivedTBNotesFolderPath.toLowerCase());
+	const isFileInArchivedTaskNotesFolder =
+		globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
+		filePath.startsWith(
+			globalSettings.archivedTBNotesFolderPath.toLowerCase(),
+		);
 
 	if (
 		file instanceof TFolder ||
