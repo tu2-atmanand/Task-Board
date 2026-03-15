@@ -2865,13 +2865,25 @@ li:hover .taskboard-hidden-property {
 .custom-status-field-status-pill.done {
 	background-color: var(--color-green) !important;
 	border-color: var(--color-green) !important;
-	color: var(--color-base-10) !important;
+	color: white !important;
 }
 
 .custom-status-field-status-pill.cancelled {
 	background-color: var(--color-red) !important;
 	border-color: var(--color-red) !important;
-	color: var(--color-base-10) !important;
+	color: white !important;
+}
+
+.custom-status-field-status-pill.wip {
+	background-color: var(--color-blue) !important;
+	border-color: var(--color-blue) !important;
+	color: white !important;
+}
+
+.custom-status-field-status-pill.hold {
+	background-color: var(--color-yellow) !important;
+	border-color: var(--color-yellow) !important;
+	color: white !important;
 }
 
 .custom-status-buttons {

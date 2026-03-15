@@ -1435,6 +1435,14 @@ export class SettingsManager {
 						status.type === statusTypeNames.CANCELLED
 							? " cancelled"
 							: ""
+					}${
+						status.type === statusTypeNames.IN_PROGRESS
+							? " wip"
+							: ""
+					}${
+						status.type === statusTypeNames.ON_HOLD
+							? " hold"
+							: ""
 					}`,
 					text: status.type,
 				});
