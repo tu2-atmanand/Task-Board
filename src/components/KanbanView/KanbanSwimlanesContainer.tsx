@@ -6,7 +6,7 @@ import { taskItem } from 'src/interfaces/TaskItem';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
 import { t } from 'src/utils/lang/helper';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, TableCellsSplit } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { HeaderUITypeOptions } from 'src/interfaces/Enums';
@@ -258,6 +258,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			<div className="swimlanesContainer">
 				{/* Top header showing column headers and counts */}
 				<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
+					{/* A small Icon at the top right corner inside the swimlanes container */}
+					<TableCellsSplit strokeWidth={1.5} size={30} className='swimlanesContainerIcon' />
+
 					<div className="swimlanesHeaderRow">
 						{activeColumns.map((column, colIndex) => (
 							<MemoizedSwimlanColumn

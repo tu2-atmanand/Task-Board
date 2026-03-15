@@ -44,60 +44,140 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 		return [];
 	}, [filteredAndSearchedTasks, board]);
 
+	// Memoize columns separation for swimlanes
+	const { columnsInSwimlanes, columnsOutsideSwimlanes, swimlaneColumnTasks, outsideSwimlaneColumnTasks } = useMemo(() => {
+		if (!board?.swimlanes?.enabled) {
+			return {
+				columnsInSwimlanes: [],
+				columnsOutsideSwimlanes: [],
+				swimlaneColumnTasks: [],
+				outsideSwimlaneColumnTasks: []
+			};
+		}
+
+		const activeColumns = board.columns.filter((column) => column.active);
+		const outsideSwimlanes: ColumnData[] = [];
+		const insideSwimlanes: ColumnData[] = [];
+		const outsideTasks: taskItem[][] = [];
+		const insideTasks: taskItem[][] = [];
+
+		activeColumns.forEach((column, index) => {
+			if (column.swimlaneEnabled === false) {
+				outsideSwimlanes.push(column);
+				outsideTasks.push(allTasksArrangedPerColumn[index] || []);
+			} else {
+				insideSwimlanes.push(column);
+				insideTasks.push(allTasksArrangedPerColumn[index] || []);
+			}
+		});
+
+		return {
+			columnsOutsideSwimlanes: outsideSwimlanes,
+			columnsInSwimlanes: insideSwimlanes,
+			outsideSwimlaneColumnTasks: outsideTasks,
+			swimlaneColumnTasks: insideTasks
+		};
+	}, [board, allTasksArrangedPerColumn]);
+
 	// useEffect(() => {
 	// 	if (allTasksArrangedPerColumn.flat().length > 0) {
 	// 		setLoading(false);
 	// 	}
 	// }, [allTasksArrangedPerColumn]);
 
+	const renderColumns = (columns: ColumnData[], tasks: taskItem[][]) => {
+		return columns.map((column, index) => (
+			<MemoizedColumn
+				key={`${column.id}-${index}`}
+				plugin={plugin}
+				columnIndex={column.index}
+				activeBoardData={board}
+				columnData={column}
+				tasksForThisColumn={tasks[index] || []}
+				Component={ColumnComponent}
+			/>
+		));
+	};
+
+	const renderLoadingOrEmpty = () => {
+		if (loading) {
+			return (
+				<div className="loadingContainer">
+					{freshInstall ? (
+						<h2 className="initializationMessage">
+							{t("fresh-install-1")}
+							<br />
+							<br />
+							{t("fresh-install-2")}
+							<br />
+							<br />
+							{t("fresh-install-3")}
+						</h2>
+					) : (
+						<>
+							<div className="spinner"></div>
+							<p>{t("loading-tasks")}</p>
+						</>
+					)}
+				</div>
+			);
+		}
+
+		if (board?.columns?.length === 0) {
+			return (
+				<div className="emptyBoardMessage">
+					Create columns on this board using the board config modal from top right corner button.
+				</div>
+			);
+		}
+
+		return null;
+	};
+
+	// When swimlanes are enabled but some columns are excluded
+	const hasExcludedColumns = board?.swimlanes?.enabled && columnsOutsideSwimlanes.length > 0;
+	const hasSwimlaneColumns = board?.swimlanes?.enabled && columnsInSwimlanes.length > 0;
+
+	// Create a modified board for swimlanes that only contains swimlane-enabled columns
+	const swimlaneBoard = hasSwimlaneColumns ? {
+		...board,
+		columns: columnsInSwimlanes
+	} : null;
+
 	return (
 		<div className="kanbanBoard">
-			<div className="columnsContainer">
-				{loading ? (
-					<div className="loadingContainer">
-						{freshInstall ? (
-							<h2 className="initializationMessage">
-								{t("fresh-install-1")}
-								<br />
-								<br />
-								{t("fresh-install-2")}
-								<br />
-								<br />
-								{t("fresh-install-3")}
-							</h2>
-						) : (
-							<>
-								<div className="spinner"></div>
-								<p>{t("loading-tasks")}</p>
-							</>
+			{hasExcludedColumns && (
+				<div className="columnsContainer">
+					{renderColumns(columnsOutsideSwimlanes, outsideSwimlaneColumnTasks)}
+				</div>
+			)}
+			{hasSwimlaneColumns ? (
+				<KanbanSwimlanesContainer
+					plugin={plugin}
+					board={swimlaneBoard!}
+					tasksPerColumn={swimlaneColumnTasks}
+				/>
+			) : (
+				!hasExcludedColumns && (
+					<div className="columnsContainer">
+						{renderLoadingOrEmpty() || (
+							board?.columns
+								.filter((column) => column.active)
+								.map((column, index) => (
+									<MemoizedColumn
+										key={index}
+										plugin={plugin}
+										columnIndex={column.index}
+										activeBoardData={board}
+										columnData={column}
+										tasksForThisColumn={allTasksArrangedPerColumn[index]}
+										Component={ColumnComponent}
+									/>
+								))
 						)}
 					</div>
-				) : board?.columns?.length === 0 ? (
-					<div className="emptyBoardMessage">
-						Create columns on this board using the board config modal from top right corner button.
-					</div>
-				) : board?.swimlanes?.enabled ? (
-					<KanbanSwimlanesContainer
-						plugin={plugin}
-						board={board}
-						tasksPerColumn={allTasksArrangedPerColumn}
-					/>
-				) : (
-					board?.columns
-						.filter((column) => column.active)
-						.map((column, index) => (
-							<MemoizedColumn
-								key={index}
-								plugin={plugin}
-								columnIndex={column.index}
-								activeBoardData={board}
-								columnData={column}
-								tasksForThisColumn={allTasksArrangedPerColumn[index]}
-								Component={ColumnComponent}
-							/>
-						))
-				)}
-			</div>
+				)
+			)}
 		</div>
 	);
 };

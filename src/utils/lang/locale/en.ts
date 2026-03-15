@@ -395,6 +395,8 @@ const en: Lang = {
 	"hide-column": "Hide column",
 	"minimize-column": "Minimize column",
 	"maximize-column": "Maximize column",
+	"exclude-from-swimlanes": "Exclude from swimlanes",
+	"include-in-swimlanes": "Include in swimlanes",
 	"default-start-time": "Default start time",
 	"default-start-time-info": "Enter the time value which should be considered as a start-time for tasks with no time property. This time is like your start of the day. It will be helpful for sorting your tasks. For example, whether you want the tasks with no time property to appear above or below the tasks with time property, when you sort the column using the start-time property.",
 	"refresh-the-board": "Refresh the board",
@@ -604,7 +606,7 @@ const en: Lang = {
 	"right-split": "Right split",
 	"new-window": "New window",
 	"this-board-not-found": "This board was not found. Switch to a different board.",
-	"no-swimlanes-found-message": "Looks like you have enabled the swimlanes but havent configured it correctly. Please check your swimlanes configuration again or disable it to render the kanban view correctly."
+	"no-swimlanes-found-message": "Looks like you have enabled the swimlanes but havent configured it correctly. Please check your swimlanes configuration again or disable it to render the normal kanban view."
 };
 
 export default en;

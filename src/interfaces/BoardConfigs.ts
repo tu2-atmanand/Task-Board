@@ -69,6 +69,7 @@ export type ColumnData = {
 	active: boolean;
 	collapsed?: boolean;
 	minimized?: boolean;
+	swimlaneEnabled?: boolean;
 	name: string;
 	coltag?: string;
 	filePaths?: string;
