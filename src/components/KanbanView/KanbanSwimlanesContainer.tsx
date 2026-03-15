@@ -53,7 +53,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// }));
 
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
-		if (!board.swimlanes?.enabled || !tasksPerColumn) {
+		if (!tasksPerColumn) {
 			return [];
 		}
 
@@ -190,7 +190,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	if (swimlanes.length === 0) {
 		return (
 			<div className="emptyBoardMessage">
-				{t('no-swimlanes-found') || 'No swimlanes found for this configuration.'}
+				{t('no-swimlanes-found-message')}
 			</div>
 		);
 	}
