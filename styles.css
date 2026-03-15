@@ -7180,19 +7180,22 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 }
 
 .swimlanesHeaderContainer.verticalUI {
-	/* margin-left: 2rem; */
+	display: flex;
+	flex-direction: row;
 }
 
 .swimlanesHeaderRow {
 	display: flex;
 	flex-direction: row;
 	gap: 5px;
-	backdrop-filter: blur(5px);
-	margin-left: 2rem;
 }
 
 .swimlanesHeaderRow .TaskBoardColumnsSection {
 	margin-right: 0px;
+	backdrop-filter: blur(5px);
+	border: none;
+	height: max-content;
+	border-radius: 5px 5px 0 0;
 }
 
 .swimlanesHeaderRow .TaskBoardColumnsSection .taskBoardColumnSecHeader {
@@ -7242,15 +7245,13 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	flex: 1;
 	overflow-y: auto;
 	gap: 2px;
-	width: fit-content;
+	/* width: fit-content; */
 	padding: 2px;
 	background-color: var(--background-primary);
 }
 
 .swimlanesContainerIcon {
-	position: absolute;
-	top: 4px;
-	left: 0;
+	margin-top: 4px;
 }
 
 /* Individual swimlane row */
