@@ -24,8 +24,8 @@ import {
 import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
-import { DatePickerModal } from "src/modals/date_picker";
 import { bugReporterManagerInsatance } from "./BugReporter";
+import { openDateInputModal } from "src/services/OpenModals";
 
 export interface currentDragDataPayload {
 	task: taskItem;
@@ -493,14 +493,8 @@ class DragDropTasksManager {
 				targetColumn.datedBasedColumn.to
 		) {
 			// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
-
-			const oldDateValueOfTheTask = newTask[dateType] || "";
+			const dateType = targetColumn.datedBasedColumn.dateType;
+			// const oldDateValueOfTheTask = newTask[dateType] || "";
 
 			const newDateValue = getAllDatesInRelativeRange(
 				targetColumn.datedBasedColumn?.from,
@@ -521,29 +515,30 @@ class DragDropTasksManager {
 			targetColumn.datedBasedColumn.from <=
 				targetColumn.datedBasedColumn.to
 		) {
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn.dateType;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin);
-			datePicker.onDateSelected = async (date: string | null) => {
-				if (date) {
-					// newTask[dateType] = date;
-					updateTaskItemDate(
-						plugin,
-						oldTask,
-						newTask,
-						dateType,
-						date,
-					);
-				}
-			};
+			// const datePicker = new DatePickerModal(plugin, dateType);
+			// datePicker.onDateSelected = async (date: string | null) => {};
 
-			datePicker.open();
+			openDateInputModal(
+				plugin,
+				dateType,
+				async (date: string | null) => {
+					if (date) {
+						// newTask[dateType] = date;
+						updateTaskItemDate(
+							plugin,
+							oldTask,
+							newTask,
+							dateType,
+							date,
+						);
+					}
+				},
+			);
+
+			// datePicker.open();
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
@@ -747,12 +742,7 @@ class DragDropTasksManager {
 				targetColumn.datedBasedColumn.to
 		) {
 			// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn?.dateType;
 
 			const newDateValue = getAllDatesInRelativeRange(
 				targetColumn.datedBasedColumn?.from,
@@ -773,29 +763,40 @@ class DragDropTasksManager {
 			targetColumn.datedBasedColumn.from <=
 				targetColumn.datedBasedColumn.to
 		) {
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn?.dateType;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin);
-			datePicker.onDateSelected = async (date: string | null) => {
-				if (date) {
-					// newTask[dateType] = date;
-					updateTaskItemDate(
-						plugin,
-						oldTask,
-						newTask,
-						dateType,
-						date,
-					);
-				}
-			};
+			// const datePicker = new DatePickerModal(plugin, dateType);
+			// datePicker.onDateSelected = async (date: string | null) => {
+			// 	if (date) {
+			// 		// newTask[dateType] = date;
+			// 		updateTaskItemDate(
+			// 			plugin,
+			// 			oldTask,
+			// 			newTask,
+			// 			dateType,
+			// 			date,
+			// 		);
+			// 	}
+			// };
+			// datePicker.open();
 
-			datePicker.open();
+			openDateInputModal(
+				plugin,
+				dateType,
+				async (date: string | null) => {
+					if (date) {
+						// newTask[dateType] = date;
+						updateTaskItemDate(
+							plugin,
+							oldTask,
+							newTask,
+							dateType,
+							date,
+						);
+					}
+				},
+			);
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(

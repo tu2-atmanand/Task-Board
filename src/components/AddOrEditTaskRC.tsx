@@ -6,7 +6,7 @@ import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
-import { moment as _moment } from "obsidian";
+// import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";

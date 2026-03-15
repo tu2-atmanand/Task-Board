@@ -1,4 +1,3 @@
-import TaskBoard from "main";
 import { UniversalDateOptions } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
@@ -14,6 +13,13 @@ import {
 } from "src/interfaces/Constants";
 import { moment as _moment } from "obsidian";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+
+/**
+ * A simple function to get today's date in the user's custom format from the plugin's setting using the date-fns library.
+ * @param str The custom date format set by user in the plugin setting.
+ * @returns Today's date as string in the custom date format.
+ */
+export const formatToday = (str: string): string => format(new Date(), str);
 
 /**
  * Robust date parser that detects date format and parses accordingly.

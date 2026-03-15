@@ -328,7 +328,7 @@ export const updateTaskItemDate = (
 	plugin: TaskBoard,
 	taskOld: taskItem,
 	taskUpdated: taskItem,
-	dateType: "startDate" | "scheduledDate" | "due",
+	dateType: string,
 	newDate: string,
 ): void => {
 	let newTask = { ...taskUpdated } as taskItem;

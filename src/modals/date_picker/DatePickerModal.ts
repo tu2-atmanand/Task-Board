@@ -21,6 +21,7 @@ export class DatePickerModal extends Modal {
 		this.dateName = dateName;
 		this.initialDate = initialDate;
 		this.dateMark = dateMark;
+		this.setTitle("Change " + this.dateName + " Date");
 	}
 
 	onOpen() {
