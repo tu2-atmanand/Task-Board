@@ -37,10 +37,36 @@ Column data : undefined
 Timestamp : 2026-03-15T00:09:46
 ID : 17
 Message : Following duplicate IDs has been found for tasks with IDs: "620". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
+Context : undefined
 Version : 1.9.7
 
 #### Bug Content
 ```log
 ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-03-15T12:52:43
+ID : 142
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-15T14:34:25
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 1.9.7
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
 ```

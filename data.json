@@ -269,7 +269,8 @@
             "active": true,
             "collapsed": false,
             "name": "Other tags",
-            "minimized": false
+            "minimized": false,
+            "swimlaneEnabled": true
           },
           {
             "colType": "untagged",
@@ -291,7 +292,8 @@
                 "uid": "k6wjlc63"
               }
             ],
-            "minimized": false
+            "minimized": false,
+            "swimlaneEnabled": true
           },
           {
             "id": 1643647904,
@@ -987,13 +989,14 @@
           "filterGroups": []
         },
         "swimlanes": {
-          "enabled": false,
+          "enabled": true,
           "hideEmptySwimlanes": false,
           "property": "tags",
-          "sortCriteria": "asc",
-          "minimized": [],
           "maxHeight": "300px",
-          "verticalHeaderUI": false
+          "sortCriteria": "custom",
+          "customSortOrder": [],
+          "headerUIType": "hor",
+          "minimized": []
         },
         "description": "This board is for testing drag and drop feature for status based workflow.",
         "taskCount": {
@@ -1292,8 +1295,8 @@
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
-        "viewedType": "map",
-        "boardIndex": 6,
+        "viewedType": "kanban",
+        "boardIndex": 5,
         "taskId": "",
         "settingTab": 7
       },
