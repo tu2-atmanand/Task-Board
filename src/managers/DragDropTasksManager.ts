@@ -155,23 +155,46 @@ class DragDropTasksManager {
 		const edgePercent = this.plugin.settings.data.globalSettings.dragAutoScrollEdgePercent || 20;
 		const scrollSpeed = 15;
 		const viewportWidth = window.innerWidth;
-		const edgeThreshold = (viewportWidth * edgePercent) / 100;
-
-		const columnsContainer = document.querySelector('.columnsContainer') as HTMLElement;
-		if (!columnsContainer) return;
+		const viewportHeight = window.innerHeight;
+		const horizontalEdgeThreshold = (viewportWidth * edgePercent) / 100;
+		const verticalEdgeThreshold = (viewportHeight * edgePercent) / 100;
 
 		const clientX = e.clientX;
+		const clientY = e.clientY;
 
-		if (clientX < edgeThreshold) {
-			const scrollLeft = columnsContainer.scrollLeft;
-			if (scrollLeft > 0) {
-				columnsContainer.scrollLeft = Math.max(0, scrollLeft - scrollSpeed);
+		// Try to find the horizontal scroll container (works for both normal kanban and swimlanes)
+		const horizontalContainer = document.querySelector('.columnsContainer, .swimlanesContainer') as HTMLElement;
+		if (horizontalContainer) {
+			// Horizontal scroll (left/right)
+			if (clientX < horizontalEdgeThreshold) {
+				const scrollLeft = horizontalContainer.scrollLeft;
+				if (scrollLeft > 0) {
+					horizontalContainer.scrollLeft = Math.max(0, scrollLeft - scrollSpeed);
+				}
+			} else if (clientX > viewportWidth - horizontalEdgeThreshold) {
+				const scrollLeft = horizontalContainer.scrollLeft;
+				const maxScrollLeft = horizontalContainer.scrollWidth - horizontalContainer.clientWidth;
+				if (scrollLeft < maxScrollLeft) {
+					horizontalContainer.scrollLeft = Math.min(maxScrollLeft, scrollLeft + scrollSpeed);
+				}
 			}
-		} else if (clientX > viewportWidth - edgeThreshold) {
-			const scrollLeft = columnsContainer.scrollLeft;
-			const maxScrollLeft = columnsContainer.scrollWidth - columnsContainer.clientWidth;
-			if (scrollLeft < maxScrollLeft) {
-				columnsContainer.scrollLeft = Math.min(maxScrollLeft, scrollLeft + scrollSpeed);
+		}
+
+		// Vertical scroll for swimlanes (top/bottom)
+		// Find the swimlanes container for vertical scrolling
+		const swimlanesContainer = document.querySelector('.swimlanesContainer') as HTMLElement;
+		if (swimlanesContainer) {
+			if (clientY < verticalEdgeThreshold) {
+				const scrollTop = swimlanesContainer.scrollTop;
+				if (scrollTop > 0) {
+					swimlanesContainer.scrollTop = Math.max(0, scrollTop - scrollSpeed);
+				}
+			} else if (clientY > viewportHeight - verticalEdgeThreshold) {
+				const scrollTop = swimlanesContainer.scrollTop;
+				const maxScrollTop = swimlanesContainer.scrollHeight - swimlanesContainer.clientHeight;
+				if (scrollTop < maxScrollTop) {
+					swimlanesContainer.scrollTop = Math.min(maxScrollTop, scrollTop + scrollSpeed);
+				}
 			}
 		}
 	}
