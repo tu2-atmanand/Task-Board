@@ -100,153 +100,78 @@ export class SwimlanesConfigModal extends Modal {
 						this.enabled = value;
 						this.renderContent(container.parentElement!);
 					}),)
-
-		// const item = container.createDiv({
-		// 	cls: 'swimlanesConfigItem',
-		// });
-
-		// const label = item.createDiv({
-		// 	cls: 'swimlanesConfigLabel',
-		// });
-		// label.createEl('label', { text: t('enable-swimlanes') });
-		// label.createDiv({
-		// 	cls: 'swimlanesConfigDescription',
-		// 	text: t('enable-swimlanes-info-1') + '\n' + t('enable-swimlanes-info-2'),
-		// });
-
-		// const checkbox = item.createEl('input', {
-		// 	attr: { type: 'checkbox' },
-		// });
-		// checkbox.checked = this.enabled;
-		// checkbox.addEventListener('change', (e) => {
-		// 	this.enabled = (e.target as HTMLInputElement).checked;
-		// 	this.renderContent(container.parentElement!);
-		// });
 	}
 
 	private renderPropertySelection(container: HTMLElement) {
-		const item = container.createDiv({
-			cls: 'swimlanesConfigItem',
-		});
-
-		const label = item.createDiv({
-			cls: 'swimlanesConfigLabel',
-		});
-		label.createEl('label', { text: t('task-property') });
-		label.createDiv({
-			cls: 'swimlanesConfigDescription',
-			text: t('task-property-info'),
-		});
-
-		const select = item.createEl('select', {
-			cls: 'swimlanesConfigSelect',
-		});
-
 		const propertyOptions = [
 			{ value: 'tags', label: t('tags') },
 			{ value: 'priority', label: t('priority') },
 			{ value: 'status', label: t('status') },
 		];
 
-		propertyOptions.forEach((option) => {
-			select.createEl('option', {
-				attr: { value: option.value },
-				text: option.label,
+		new Setting(container)
+			.setName(t('task-property'))
+			.setDesc(t('task-property-info'))
+			.addDropdown((dropdown) => {
+				propertyOptions.forEach((option) => {
+					dropdown.addOption(option.value, option.label);
+				});
+				dropdown
+					.setValue(this.property)
+					.onChange(async (value) => {
+						this.property =
+							value;
+						this.renderContent(container.parentElement!);
+					})
 			});
-		});
-
-		select.value = this.property;
-		select.addEventListener('change', (e) => {
-			this.property = (e.target as HTMLSelectElement).value;
-			this.renderContent(container.parentElement!);
-		});
 	}
 
 	private renderCustomValue(container: HTMLElement) {
 		if (this.property !== 'custom') return;
 
-		const item = container.createDiv({
-			cls: 'swimlanesConfigItem',
-		});
-
-		const label = item.createDiv({
-			cls: 'swimlanesConfigLabel',
-		});
-		label.createEl('label', { text: t('custom-property-key') });
-		label.createDiv({
-			cls: 'swimlanesConfigDescription',
-			text: t('custom-property-key-info'),
-		});
-
-		const input = item.createEl('input', {
-			attr: { type: 'text', placeholder: 'e.g.: project' },
-			cls: 'swimlanesConfigInput',
-		});
-		input.value = this.customValue;
-		input.addEventListener('input', (e) => {
-			this.customValue = (e.target as HTMLInputElement).value;
-		});
+		new Setting(container)
+			.setName(t('custom-property-key'))
+			.setDesc(t('custom-property-key-info'))
+			.addText((text) => {
+				text.setValue(this.customValue).onChange((value) => {
+					this.customValue = value;
+				});
+			});
 	}
 
 	private renderMaxHeight(container: HTMLElement) {
-		const item = container.createDiv({
-			cls: 'swimlanesConfigItem',
-		});
-
-		const label = item.createDiv({
-			cls: 'swimlanesConfigLabel',
-		});
-		label.createEl('label', { text: t('max-swimlane-height') });
-		label.createDiv({
-			cls: 'swimlanesConfigDescription',
-			text: t('max-swimlane-height-info'),
-		});
-
-		const input = item.createEl('input', {
-			attr: { type: 'text', placeholder: 'Default is 300px' },
-		});
-		input.value = this.maxHeight || '300px';
-		input.addEventListener('input', (e) => {
-			this.maxHeight = (e.target as HTMLInputElement).value;
-		});
+		new Setting(container)
+			.setName(t('max-swimlane-height'))
+			.setDesc(t('max-swimlane-height-info'))
+			.addText((text) => {
+				text.setValue(this.maxHeight).onChange((value) => {
+					this.maxHeight = value;
+				});
+			});
 	}
 
 	private renderSortCriteria(container: HTMLElement) {
-		const item = container.createDiv({
-			cls: 'swimlanesConfigItem',
-		});
-
-		const label = item.createDiv({
-			cls: 'swimlanesConfigLabel',
-		});
-		label.createEl('label', { text: t('swimlane-sort-order') });
-		label.createDiv({
-			cls: 'swimlanesConfigDescription',
-			text: t('swimlane-sort-order-info'),
-		});
-
-		const select = item.createEl('select', {
-			cls: 'swimlanesConfigSelect',
-		});
-
 		const sortOptions = [
 			{ value: 'asc', label: t('ascending') },
 			{ value: 'desc', label: t('descending') },
 			{ value: 'custom', label: t('custom-sorting') },
 		];
 
-		sortOptions.forEach((option) => {
-			select.createEl('option', {
-				attr: { value: option.value },
-				text: option.label,
+		new Setting(container)
+			.setName(t('task-property'))
+			.setDesc(t('task-property-info'))
+			.addDropdown((dropdown) => {
+				sortOptions.forEach((option) => {
+					dropdown.addOption(option.value, option.label);
+				});
+				dropdown
+					.setValue(this.sortCriteria)
+					.onChange(async (value) => {
+						this.sortCriteria =
+							value;
+						this.renderContent(container.parentElement!);
+					})
 			});
-		});
-
-		select.value = this.sortCriteria;
-		select.addEventListener('change', (e) => {
-			this.sortCriteria = (e.target as HTMLSelectElement).value;
-			this.renderContent(container.parentElement!);
-		});
 
 		if (this.sortCriteria === 'custom') {
 			this.renderCustomSortSection(container);
@@ -324,7 +249,7 @@ export class SwimlanesConfigModal extends Modal {
 
 			const deleteBtn = row.createEl('button', {
 				cls: 'swimlanesConfigSortRowDeleteBtn',
-				text: '×',
+				text: '❌',
 			});
 			deleteBtn.addEventListener('click', () => this.handleRemoveSortRow(rowIndex));
 		});
@@ -375,82 +300,49 @@ export class SwimlanesConfigModal extends Modal {
 	}
 
 	private renderGroupAllRest(container: HTMLElement) {
-		const item = container.createDiv({
-			cls: 'swimlanesConfigItem',
-		});
-
-		const label = item.createDiv({
-			cls: 'swimlanesConfigLabel',
-		});
-		label.createEl('label', { text: t('aggregator-swimlane') });
-		label.createDiv({
-			cls: 'swimlanesConfigDescription',
-			text: t('aggregator-swimlane-info'),
-		});
-
-		const checkbox = item.createEl('input', {
-			attr: { type: 'checkbox' },
-		});
-		checkbox.checked = this.groupAllRest;
-		checkbox.addEventListener('change', (e) => {
-			this.groupAllRest = (e.target as HTMLInputElement).checked;
-		});
+		new Setting(container)
+			.setName(t('aggregator-swimlane'))
+			.setDesc(t('aggregator-swimlane-info'))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.groupAllRest)
+					.onChange(async (value) => {
+						this.groupAllRest = value;
+					}),)
 	}
 
 	private renderHideEmptySwimlanes(container: HTMLElement) {
-		const item = container.createDiv({
-			cls: 'swimlanesConfigItem',
-		});
-
-		const label = item.createDiv({
-			cls: 'swimlanesConfigLabel',
-		});
-		label.createEl('label', { text: t('hide-empty-swimlanes') });
-		label.createDiv({
-			cls: 'swimlanesConfigDescription',
-			text: t('hide-empty-swimlanes-info'),
-		});
-
-		const checkbox = item.createEl('input', {
-			attr: { type: 'checkbox' },
-		});
-		checkbox.checked = this.hideEmptySwimlanes;
-		checkbox.addEventListener('change', (e) => {
-			this.hideEmptySwimlanes = (e.target as HTMLInputElement).checked;
-		});
+		new Setting(container)
+			.setName(t('hide-empty-swimlanes'))
+			.setDesc(t('hide-empty-swimlanes-info'))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.hideEmptySwimlanes)
+					.onChange(async (value) => {
+						this.hideEmptySwimlanes = value;
+					}),)
 	}
 
 	private renderHeaderUIType(container: HTMLElement) {
-		const item = container.createDiv({
-			cls: 'swimlanesConfigItem',
-		});
+		const uiTypeOptions = [
+			{ value: HeaderUITypeOptions.horizontal, label: t('horizontal') },
+			{ value: HeaderUITypeOptions.vertical, label: t('vertical') },
+		];
 
-		const label = item.createDiv({
-			cls: 'swimlanesConfigLabel',
-		});
-		label.createEl('label', { text: t('ui-type-for-swimlanes-header') });
-		label.createDiv({
-			cls: 'swimlanesConfigDescription',
-			text: t('ui-type-for-swimlanes-header-info'),
-		});
-
-		const select = item.createEl('select', {
-			cls: 'swimlanesConfigSelect',
-		});
-
-		select.createEl('option', {
-			attr: { value: HeaderUITypeOptions.horizontal },
-			text: t('horizontal'),
-		});
-		select.createEl('option', {
-			attr: { value: HeaderUITypeOptions.vertical },
-			text: t('vertical'),
-		});
-
-		select.value = this.headerUIType;
-		select.addEventListener('change', (e) => {
-			this.headerUIType = (e.target as HTMLSelectElement).value;
-		});
+		new Setting(container)
+			.setName(t('ui-type-for-swimlanes-header'))
+			.setDesc(t('ui-type-for-swimlanes-header-info'))
+			.addDropdown((dropdown) => {
+				uiTypeOptions.forEach((option) => {
+					dropdown.addOption(option.value, option.label);
+				});
+				dropdown
+					.setValue(this.headerUIType)
+					.onChange(async (value) => {
+						this.headerUIType =
+							value;
+					})
+			});
 	}
 
 	private renderButtons(container: HTMLElement) {
