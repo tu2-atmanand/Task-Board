@@ -1,7 +1,7 @@
 // src/components/KanbanBoard.tsx
 
 import { Board, ColumnData } from "../../interfaces/BoardConfigs";
-import React, { memo, useEffect, useMemo, useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
@@ -22,10 +22,9 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSearchedTasks, freshInstall }) => {
 	const [loading, setLoading] = useState(true);
 
-	// Check if lazy loading is enabled
-	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn;
 
-	// Second memo: Segregate filtered tasks by column (for Kanban view only)
+	// Segregate filtered tasks by column (for Kanban view only)
 	const allTasksArrangedPerColumn = useMemo(() => {
 		if (board && filteredAndSearchedTasks) {
 			const finalArrangedTasks = board.columns
@@ -43,47 +42,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 		setLoading(false);
 		return [];
 	}, [filteredAndSearchedTasks, board]);
-
-	// Memoize columns separation for swimlanes
-	const { columnsInSwimlanes, columnsOutsideSwimlanes, swimlaneColumnTasks, outsideSwimlaneColumnTasks } = useMemo(() => {
-		if (!board?.swimlanes?.enabled) {
-			return {
-				columnsInSwimlanes: [],
-				columnsOutsideSwimlanes: [],
-				swimlaneColumnTasks: [],
-				outsideSwimlaneColumnTasks: []
-			};
-		}
-
-		const activeColumns = board.columns.filter((column) => column.active);
-		const outsideSwimlanes: ColumnData[] = [];
-		const insideSwimlanes: ColumnData[] = [];
-		const outsideTasks: taskItem[][] = [];
-		const insideTasks: taskItem[][] = [];
-
-		activeColumns.forEach((column, index) => {
-			if (column.swimlaneEnabled === false) {
-				outsideSwimlanes.push(column);
-				outsideTasks.push(allTasksArrangedPerColumn[index] || []);
-			} else {
-				insideSwimlanes.push(column);
-				insideTasks.push(allTasksArrangedPerColumn[index] || []);
-			}
-		});
-
-		return {
-			columnsOutsideSwimlanes: outsideSwimlanes,
-			columnsInSwimlanes: insideSwimlanes,
-			outsideSwimlaneColumnTasks: outsideTasks,
-			swimlaneColumnTasks: insideTasks
-		};
-	}, [board, allTasksArrangedPerColumn]);
-
-	// useEffect(() => {
-	// 	if (allTasksArrangedPerColumn.flat().length > 0) {
-	// 		setLoading(false);
-	// 	}
-	// }, [allTasksArrangedPerColumn]);
 
 	const renderColumns = (columns: ColumnData[], tasks: taskItem[][]) => {
 		return columns.map((column, index) => (
@@ -134,49 +92,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 		return null;
 	};
 
-	// When swimlanes are enabled but some columns are excluded
-	const hasExcludedColumns = board?.swimlanes?.enabled && columnsOutsideSwimlanes.length > 0;
-	const hasSwimlaneColumns = board?.swimlanes?.enabled && columnsInSwimlanes.length > 0;
-
-	// Create a modified board for swimlanes that only contains swimlane-enabled columns
-	const swimlaneBoard = hasSwimlaneColumns ? {
-		...board,
-		columns: columnsInSwimlanes
-	} : null;
+	const isSwimlanesEnabled = board?.swimlanes?.enabled === true;
 
 	return (
 		<div className="kanbanBoard">
-			{hasExcludedColumns && (
-				<div className="columnsContainer">
-					{renderColumns(columnsOutsideSwimlanes, outsideSwimlaneColumnTasks)}
-				</div>
-			)}
-			{hasSwimlaneColumns ? (
-				<KanbanSwimlanesContainer
-					plugin={plugin}
-					board={swimlaneBoard!}
-					tasksPerColumn={swimlaneColumnTasks}
-				/>
-			) : (
-				!hasExcludedColumns && (
-					<div className="columnsContainer">
-						{renderLoadingOrEmpty() || (
-							board?.columns
-								.filter((column) => column.active)
-								.map((column, index) => (
-									<MemoizedColumn
-										key={index}
-										plugin={plugin}
-										columnIndex={column.index}
-										activeBoardData={board}
-										columnData={column}
-										tasksForThisColumn={allTasksArrangedPerColumn[index]}
-										Component={ColumnComponent}
-									/>
-								))
-						)}
-					</div>
-				)
+			{renderLoadingOrEmpty() || (
+				<>
+					{isSwimlanesEnabled ? (
+						<KanbanSwimlanesContainer
+							plugin={plugin}
+							board={board}
+							tasksPerColumn={allTasksArrangedPerColumn}
+						/>
+					) : (
+						<div className="columnsContainer">
+							{renderColumns(
+								board?.columns?.filter((column) => column.active) || [],
+								allTasksArrangedPerColumn
+							)}
+						</div>
+					)}
+				</>
 			)}
 		</div>
 	);

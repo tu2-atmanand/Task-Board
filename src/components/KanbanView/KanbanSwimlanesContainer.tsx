@@ -29,7 +29,42 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	board,
 	tasksPerColumn,
 }) => {
-	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn;
+
+	// Separate columns into swimlane-enabled and excluded
+	const { columnsInSwimlanes, columnsOutsideSwimlanes, swimlaneColumnTasks, outsideSwimlaneColumnTasks } = useMemo(() => {
+		const activeColumns = board.columns.filter((col) => col.active);
+		const outsideSwimlanes: ColumnData[] = [];
+		const insideSwimlanes: ColumnData[] = [];
+		const outsideTasks: taskItem[][] = [];
+		const insideTasks: taskItem[][] = [];
+
+		activeColumns.forEach((column, index) => {
+			if (column.swimlaneEnabled === false) {
+				outsideSwimlanes.push(column);
+				outsideTasks.push(tasksPerColumn[index] || []);
+			} else {
+				insideSwimlanes.push(column);
+				insideTasks.push(tasksPerColumn[index] || []);
+			}
+		});
+
+		return {
+			columnsOutsideSwimlanes: outsideSwimlanes,
+			columnsInSwimlanes: insideSwimlanes,
+			outsideSwimlaneColumnTasks: outsideTasks,
+			swimlaneColumnTasks: insideTasks
+		};
+	}, [board.columns, tasksPerColumn]);
+
+	// Create a modified board for swimlanes with only swimlane-enabled columns
+	const swimlaneBoard = useMemo(() => {
+		if (columnsInSwimlanes.length === 0) return null;
+		return {
+			...board,
+			columns: columnsInSwimlanes
+		};
+	}, [board, columnsInSwimlanes]);
 
 	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
 	const {
@@ -43,17 +78,11 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		minimized
 	} = board.swimlanes;
 
-	const activeColumns = board.columns
-		.filter((col) => col.active);
-	// .map((col) => ({
-	// 	// create a shallow copy so we don't mutate original board state
-	// 	...col,
-	// 	sortCriteria: col.sortCriteria || [],
-	// 	tasksIdManualOrder: Array.isArray(col.tasksIdManualOrder) ? col.tasksIdManualOrder : [],
-	// }));
+	// Use only swimlane-enabled columns for swimlanes
+	const activeColumns = columnsInSwimlanes.filter((col) => col.active);
 
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
-		if (!tasksPerColumn) {
+		if (!swimlaneColumnTasks) {
 			return [];
 		}
 
@@ -62,7 +91,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 		// Extract unique values for the swimlane property from tasksPerColumn
 		const uniqueSwimlanValues = extractUniquePropertyValuesFromColumns(
-			tasksPerColumn,
+			swimlaneColumnTasks,
 			property,
 			customValue
 		);
@@ -135,8 +164,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		// Create swimlane rows with tasks organized by column
 		const swimlaneRows: SwimlaneRow[] = sortedSwimlaneValues.map((swimlaneItem) => {
 			const tasksByColumn = activeColumns.map((column, colIdx) => {
-				// tasksPerColumn is expected to align with active columns order
-				const columnTasks = tasksPerColumn[colIdx] || [];
+				// swimlaneColumnTasks is expected to align with active columns order
+				const columnTasks = swimlaneColumnTasks[colIdx] || [];
 
 				// If this swimlane is the aggregated "All rest", include any task whose
 				// property values are in the remainingValuesForAllRest list.
@@ -187,7 +216,24 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		return swimlaneRows;
 	}, [board, tasksPerColumn, plugin]);
 
-	if (swimlanes.length === 0) {
+	const hasExcludedColumns = columnsOutsideSwimlanes.length > 0;
+	const hasSwimlaneColumns = columnsInSwimlanes.length > 0;
+
+	const renderExcludedColumns = () => {
+		return columnsOutsideSwimlanes.map((column, index) => (
+			<MemoizedSwimlanColumn
+				key={`outside-${column.id}-${index}`}
+				plugin={plugin}
+				columnIndex={column.index}
+				activeBoardData={board}
+				columnData={column}
+				tasksForThisColumn={outsideSwimlaneColumnTasks[index] || []}
+				Component={ColumnComponent}
+			/>
+		));
+	};
+
+	if (swimlanes.length === 0 && !hasExcludedColumns) {
 		return (
 			<div className="emptyBoardMessage">
 				{t('no-swimlanes-found-message')}
@@ -253,8 +299,15 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// Render a sticky header row of column headers across swimlanes
 	return (
 		<div className="kanbanSwimlanesGrid">
+			{/* Columns excluded from swimlanes (rendered on the left) */}
+			{hasExcludedColumns && (
+				<div className="columnsContainer">
+					{renderExcludedColumns()}
+				</div>
+			)}
 
 			{/* Swimlane Rows */}
+			{hasSwimlaneColumns && swimlaneBoard && (
 			<div className="swimlanesContainer">
 				{/* Top header showing column headers and counts */}
 				<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
@@ -269,9 +322,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								key={`header-${column.id}`}
 								plugin={plugin}
 								columnIndex={column.index}
-								activeBoardData={board}
+								activeBoardData={swimlaneBoard}
 								columnData={column}
-								tasksForThisColumn={tasksPerColumn?.[colIndex] || []}
+								tasksForThisColumn={swimlaneColumnTasks?.[colIndex] || []}
 								Component={ColumnComponent}
 								headerOnly={true}
 							/>
@@ -366,6 +419,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 					</React.Fragment>
 				))}
 			</div>
+			)}
 		</div>
 	);
 };
