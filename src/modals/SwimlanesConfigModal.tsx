@@ -1,12 +1,8 @@
 // /src/modals/SwimlanesConfigModal.tsx
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Modal, App } from 'obsidian';
-import ReactDOM from "react-dom/client";
+import { Modal, App, Setting } from 'obsidian';
 import { t } from 'src/utils/lang/helper';
 import Sortable from 'sortablejs';
-import { RxDragHandleDots2 } from 'react-icons/rx';
-import { FaTrash } from 'react-icons/fa';
 import { swimlaneConfigs } from 'src/interfaces/BoardConfigs';
 import { HeaderUITypeOptions } from 'src/interfaces/Enums';
 
@@ -16,36 +12,325 @@ interface SwimlanesConfigModalProps {
 	onCancel: () => void;
 }
 
-const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
-	swimlaneConfig,
-	onSave,
-	onCancel,
-}) => {
-	const [enabled, setEnabled] = useState(swimlaneConfig.enabled);
-	const [property, setProperty] = useState(swimlaneConfig.property || 'tags');
-	const [customValue, setCustomValue] = useState(swimlaneConfig.customValue || '');
-	const [sortCriteria, setSortCriteria] = useState(swimlaneConfig.sortCriteria || 'asc');
-	const [hideEmptySwimlanes, setHideEmptySwimlanes] = useState(
-		swimlaneConfig.hideEmptySwimlanes ?? false
-	);
-	const [customSortOrder, setCustomSortOrder] = useState<{ value: string; index: number }[]>(
-		swimlaneConfig.customSortOrder || []
-	);
-	const [maxHeight, setmaxHeight] = useState(swimlaneConfig.maxHeight || '300px');
-	const [groupAllRest, setGroupAllRest] = useState(swimlaneConfig.groupAllRest);
-	const [headerUIType, setHeaderUIType] = useState(swimlaneConfig.headerUIType || HeaderUITypeOptions.horizontal);
+export class SwimlanesConfigModal extends Modal {
+	swimlaneConfig: swimlaneConfigs;
+	onSave: (config: swimlaneConfigs) => void;
+	onCancel: () => void;
 
-	const sortableListRef = useRef<HTMLDivElement | null>(null);
-	const sortableInstanceRef = useRef<any>(null);
+	private enabled: boolean;
+	private property: string;
+	private customValue: string;
+	private sortCriteria: string;
+	private hideEmptySwimlanes: boolean;
+	private customSortOrder: { value: string; index: number }[];
+	private maxHeight: string;
+	private groupAllRest: boolean;
+	private headerUIType: string;
 
-	// Initialize Sortable for custom sort order
-	useEffect(() => {
-		if (sortCriteria === 'custom' && sortableListRef.current) {
-			if (sortableInstanceRef.current) {
-				sortableInstanceRef.current.destroy();
-			}
+	private sortableInstance: Sortable | null = null;
+	private sortableListEl: HTMLElement | null = null;
 
-			sortableInstanceRef.current = Sortable.create(sortableListRef.current, {
+	constructor(
+		app: App,
+		swimlaneConfig: swimlaneConfigs,
+		onSave: (config: swimlaneConfigs) => void,
+		onCancel: () => void
+	) {
+		super(app);
+		this.swimlaneConfig = swimlaneConfig;
+		this.onSave = onSave;
+		this.onCancel = onCancel;
+
+		this.enabled = swimlaneConfig.enabled;
+		this.property = swimlaneConfig.property || 'tags';
+		this.customValue = swimlaneConfig.customValue || '';
+		this.sortCriteria = swimlaneConfig.sortCriteria || 'asc';
+		this.hideEmptySwimlanes = swimlaneConfig.hideEmptySwimlanes ?? false;
+		this.customSortOrder = swimlaneConfig.customSortOrder || [];
+		this.maxHeight = swimlaneConfig.maxHeight || '300px';
+		this.groupAllRest = swimlaneConfig.groupAllRest ?? true;
+		this.headerUIType = swimlaneConfig.headerUIType || HeaderUITypeOptions.horizontal;
+
+		this.modalEl.classList.add('swimlanes-config-modal');
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+
+		contentEl.setAttribute('data-type', 'task-board-view');
+
+		this.renderContent(contentEl);
+	}
+
+	private renderContent(container: HTMLElement) {
+		container.empty();
+
+		const modalContent = container.createDiv({
+			cls: 'swimlanesConfigContent',
+		});
+
+		this.renderHeader(modalContent);
+		this.renderEnabledToggle(modalContent);
+
+		if (this.enabled) {
+			this.renderPropertySelection(modalContent);
+			this.renderCustomValue(modalContent);
+			this.renderMaxHeight(modalContent);
+			this.renderSortCriteria(modalContent);
+			this.renderHeaderUIType(modalContent);
+		}
+
+		this.renderButtons(modalContent);
+	}
+
+	private renderHeader(container: HTMLElement) {
+		container.createEl('h2', {
+			text: t('configure-kanban-swimlanes'),
+		});
+	}
+
+	private renderEnabledToggle(container: HTMLElement) {
+		new Setting(container)
+			.setName(t('enable-swimlanes'))
+			.setDesc(t('enable-swimlanes-info-1') + '\n' + t('enable-swimlanes-info-2'))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.enabled)
+					.onChange(async (value) => {
+						this.enabled = value;
+						this.renderContent(container.parentElement!);
+					}),)
+
+		// const item = container.createDiv({
+		// 	cls: 'swimlanesConfigItem',
+		// });
+
+		// const label = item.createDiv({
+		// 	cls: 'swimlanesConfigLabel',
+		// });
+		// label.createEl('label', { text: t('enable-swimlanes') });
+		// label.createDiv({
+		// 	cls: 'swimlanesConfigDescription',
+		// 	text: t('enable-swimlanes-info-1') + '\n' + t('enable-swimlanes-info-2'),
+		// });
+
+		// const checkbox = item.createEl('input', {
+		// 	attr: { type: 'checkbox' },
+		// });
+		// checkbox.checked = this.enabled;
+		// checkbox.addEventListener('change', (e) => {
+		// 	this.enabled = (e.target as HTMLInputElement).checked;
+		// 	this.renderContent(container.parentElement!);
+		// });
+	}
+
+	private renderPropertySelection(container: HTMLElement) {
+		const item = container.createDiv({
+			cls: 'swimlanesConfigItem',
+		});
+
+		const label = item.createDiv({
+			cls: 'swimlanesConfigLabel',
+		});
+		label.createEl('label', { text: t('task-property') });
+		label.createDiv({
+			cls: 'swimlanesConfigDescription',
+			text: t('task-property-info'),
+		});
+
+		const select = item.createEl('select', {
+			cls: 'swimlanesConfigSelect',
+		});
+
+		const propertyOptions = [
+			{ value: 'tags', label: t('tags') },
+			{ value: 'priority', label: t('priority') },
+			{ value: 'status', label: t('status') },
+		];
+
+		propertyOptions.forEach((option) => {
+			select.createEl('option', {
+				attr: { value: option.value },
+				text: option.label,
+			});
+		});
+
+		select.value = this.property;
+		select.addEventListener('change', (e) => {
+			this.property = (e.target as HTMLSelectElement).value;
+			this.renderContent(container.parentElement!);
+		});
+	}
+
+	private renderCustomValue(container: HTMLElement) {
+		if (this.property !== 'custom') return;
+
+		const item = container.createDiv({
+			cls: 'swimlanesConfigItem',
+		});
+
+		const label = item.createDiv({
+			cls: 'swimlanesConfigLabel',
+		});
+		label.createEl('label', { text: t('custom-property-key') });
+		label.createDiv({
+			cls: 'swimlanesConfigDescription',
+			text: t('custom-property-key-info'),
+		});
+
+		const input = item.createEl('input', {
+			attr: { type: 'text', placeholder: 'e.g.: project' },
+			cls: 'swimlanesConfigInput',
+		});
+		input.value = this.customValue;
+		input.addEventListener('input', (e) => {
+			this.customValue = (e.target as HTMLInputElement).value;
+		});
+	}
+
+	private renderMaxHeight(container: HTMLElement) {
+		const item = container.createDiv({
+			cls: 'swimlanesConfigItem',
+		});
+
+		const label = item.createDiv({
+			cls: 'swimlanesConfigLabel',
+		});
+		label.createEl('label', { text: t('max-swimlane-height') });
+		label.createDiv({
+			cls: 'swimlanesConfigDescription',
+			text: t('max-swimlane-height-info'),
+		});
+
+		const input = item.createEl('input', {
+			attr: { type: 'text', placeholder: 'Default is 300px' },
+		});
+		input.value = this.maxHeight || '300px';
+		input.addEventListener('input', (e) => {
+			this.maxHeight = (e.target as HTMLInputElement).value;
+		});
+	}
+
+	private renderSortCriteria(container: HTMLElement) {
+		const item = container.createDiv({
+			cls: 'swimlanesConfigItem',
+		});
+
+		const label = item.createDiv({
+			cls: 'swimlanesConfigLabel',
+		});
+		label.createEl('label', { text: t('swimlane-sort-order') });
+		label.createDiv({
+			cls: 'swimlanesConfigDescription',
+			text: t('swimlane-sort-order-info'),
+		});
+
+		const select = item.createEl('select', {
+			cls: 'swimlanesConfigSelect',
+		});
+
+		const sortOptions = [
+			{ value: 'asc', label: t('ascending') },
+			{ value: 'desc', label: t('descending') },
+			{ value: 'custom', label: t('custom-sorting') },
+		];
+
+		sortOptions.forEach((option) => {
+			select.createEl('option', {
+				attr: { value: option.value },
+				text: option.label,
+			});
+		});
+
+		select.value = this.sortCriteria;
+		select.addEventListener('change', (e) => {
+			this.sortCriteria = (e.target as HTMLSelectElement).value;
+			this.renderContent(container.parentElement!);
+		});
+
+		if (this.sortCriteria === 'custom') {
+			this.renderCustomSortSection(container);
+		}
+	}
+
+	private renderCustomSortSection(container: HTMLElement) {
+		const section = container.createDiv({
+			cls: 'swimlanesConfigManualSortSection',
+		});
+
+		section.createEl('h3', {
+			cls: 'swimlanesConfigManualSortHeading',
+			text: t('custom-swimlanes'),
+		});
+
+		section.createDiv({
+			cls: 'swimlanesConfigManualSortDescription',
+			text: t('manual-sorting-mapping-info'),
+		});
+
+		const sortContainer = section.createDiv({
+			cls: 'swimlaneConfigsManualSortContainer',
+		});
+
+		this.sortableListEl = sortContainer.createDiv({
+			cls: 'swimlanesConfigSortRowsList',
+		});
+
+		this.renderSortRows();
+
+		const addButton = sortContainer.createEl('button', {
+			cls: 'swimlanesConfigAddSortRowBtn',
+			text: t('add-row'),
+		});
+		addButton.addEventListener('click', () => this.handleAddSortRow());
+
+		this.renderGroupAllRest(section);
+		this.renderHideEmptySwimlanes(section);
+	}
+
+	private renderSortRows() {
+		if (!this.sortableListEl) return;
+
+		this.sortableListEl.empty();
+
+		if (this.sortableInstance) {
+			this.sortableInstance.destroy();
+			this.sortableInstance = null;
+		}
+
+		this.customSortOrder.forEach((sortRow, rowIndex) => {
+			const row = this.sortableListEl!.createDiv({
+				cls: 'swimlanesConfigSortRow',
+			});
+
+			row.createSpan({
+				cls: 'swimlanesConfigSortRowDragHandle',
+				text: '⋮⋮',
+			});
+
+			row.createSpan({
+				cls: 'swimlanesConfigSortRowIndex',
+				text: String(sortRow.index),
+			});
+
+			const input = row.createEl('input', {
+				attr: { type: 'text', placeholder: t('enter-property-value') },
+				cls: 'swimlanesConfigSortRowInput',
+			});
+			input.value = sortRow.value;
+			input.addEventListener('input', (e) => {
+				this.customSortOrder[rowIndex].value = (e.target as HTMLInputElement).value;
+			});
+
+			const deleteBtn = row.createEl('button', {
+				cls: 'swimlanesConfigSortRowDeleteBtn',
+				text: '×',
+			});
+			deleteBtn.addEventListener('click', () => this.handleRemoveSortRow(rowIndex));
+		});
+
+		if (this.sortCriteria === 'custom') {
+			this.sortableInstance = Sortable.create(this.sortableListEl, {
 				animation: 150,
 				handle: '.swimlanesConfigSortRowDragHandle',
 				ghostClass: 'swimlanesConfigSortRowGhost',
@@ -54,360 +339,160 @@ const SwimlanesConfigContent: React.FC<SwimlanesConfigModalProps> = ({
 				onEnd: (evt) => {
 					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
-					const newOrder = [...customSortOrder];
+					const newOrder = [...this.customSortOrder];
 					const [movedItem] = newOrder.splice(evt.oldIndex, 1);
 					newOrder.splice(evt.newIndex, 0, movedItem);
 
-					// Update indexes
 					const updatedOrder = newOrder.map((item, idx) => ({
 						...item,
 						index: idx + 1,
 					}));
 
-					setCustomSortOrder(updatedOrder);
+					this.customSortOrder = updatedOrder;
+					this.renderSortRows();
 				},
 			});
 		}
+	}
 
-		return () => {
-			if (sortableInstanceRef.current) {
-				sortableInstanceRef.current.destroy();
-				sortableInstanceRef.current = null;
-			}
-		};
-	}, [sortCriteria, customSortOrder.length]);
-
-	const handleSave = () => {
-		const updatedConfig: swimlaneConfigs = {
-			enabled,
-			hideEmptySwimlanes,
-			property,
-			maxHeight,
-			customValue: customValue || undefined,
-			sortCriteria,
-			customSortOrder: sortCriteria === 'custom' ? customSortOrder : undefined,
-			groupAllRest,
-			headerUIType,
-			minimized: []
-		};
-		onSave(updatedConfig);
-	};
-
-	const handleAddSortRow = () => {
-		const newIndex = customSortOrder.length + 1;
-		setCustomSortOrder([
-			...customSortOrder,
+	private handleAddSortRow() {
+		const newIndex = this.customSortOrder.length + 1;
+		this.customSortOrder = [
+			...this.customSortOrder,
 			{ value: '', index: newIndex },
-		]);
-	};
+		];
+		this.renderSortRows();
+	}
 
-	const handleRemoveSortRow = (rowIndex: number) => {
-		const updatedOrder = customSortOrder
+	private handleRemoveSortRow(rowIndex: number) {
+		this.customSortOrder = this.customSortOrder
 			.filter((_, idx) => idx !== rowIndex)
 			.map((item, idx) => ({
 				...item,
 				index: idx + 1,
 			}));
-		setCustomSortOrder(updatedOrder);
-	};
-
-	const handleSortRowValueChange = (rowIndex: number, newValue: string) => {
-		const updatedOrder = [...customSortOrder];
-		updatedOrder[rowIndex].value = newValue;
-		setCustomSortOrder(updatedOrder);
-	};
-
-	// Available swimlane properties
-	const propertyOptions = [
-		{ value: 'tags', label: t('tags') },
-		{ value: 'priority', label: t('priority') },
-		{ value: 'status', label: t('status') },
-		// { value: 'custom', label: t('custom-property') }, // This can be enabled after implementing the following feature : https://github.com/tu2-atmanand/Task-Board/issues/688
-	];
-
-	const sortOptions = [
-		{ value: 'asc', label: t('ascending') },
-		{ value: 'desc', label: t('descending') },
-		{ value: 'custom', label: t('custom-sorting') },
-	];
-
-	return (
-		<div className="swimlanesConfigContent">
-			<div className="swimlanesConfigSection">
-				<h2>{t("configure-kanban-swimlanes")}</h2>
-
-				{/* Enable/Disable Swimlanes */}
-				<div className="swimlanesConfigItem">
-					<div className="swimlanesConfigLabel">
-						<label>{t("enable-swimlanes")}</label>
-						<div className="swimlanesConfigDescription">
-							{t("enable-swimlanes-info-1")}
-							<br />
-							{t("enable-swimlanes-info-2")}
-						</div>
-					</div>
-					<input
-						type="checkbox"
-						checked={enabled}
-						onChange={(e) => setEnabled(e.target.checked)}
-					/>
-				</div>
-
-				{enabled && (
-					<>
-						{/* Property Selection */}
-						<div className="swimlanesConfigItem">
-							<div className="swimlanesConfigLabel">
-								<label>{t('task-property')}</label>
-								<div className="swimlanesConfigDescription">
-									{t('task-property-info')}
-								</div>
-							</div>
-							<select
-								value={property}
-								onChange={(e) => setProperty(e.target.value)}
-								className="swimlanesConfigSelect"
-							>
-								{propertyOptions.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
-						</div>
-
-						{/* Custom Value (only shown if property is 'custom') */}
-						{property === 'custom' && (
-							<div className="swimlanesConfigItem">
-								<div className="swimlanesConfigLabel">
-									<label>
-										{t('custom-property-key')}
-									</label>
-									<div className="swimlanesConfigDescription">
-										{t('custom-property-key-info')}
-									</div>
-								</div>
-								<input
-									type="text"
-									placeholder={'e.g.: project'}
-									value={customValue}
-									onChange={(e) => setCustomValue(e.target.value)}
-									className="swimlanesConfigInput"
-								/>
-							</div>
-						)}
-
-						{/* Set custom min swimlane height */}
-						<div className="swimlanesConfigItem">
-							<div className="swimlanesConfigLabel">
-								<label>
-									{t('max-swimlane-height')}
-								</label>
-								<div className="swimlanesConfigDescription">
-									{t('max-swimlane-height-info')}
-								</div>
-							</div>
-							<input
-								type="text"
-								placeholder={'Default is 300px'}
-								value={maxHeight || '300px'}
-								onChange={(e) => setmaxHeight(e.target.value)}
-							/>
-						</div>
-
-						{/* Sort Criteria */}
-						<div className="swimlanesConfigItem">
-							<div className="swimlanesConfigLabel">
-								<label>{t('swimlane-sort-order')}</label>
-								<div className="swimlanesConfigDescription">
-									{t('swimlane-sort-order-info')}
-								</div>
-							</div>
-							<select
-								value={sortCriteria}
-								onChange={(e) => setSortCriteria(e.target.value)}
-								className="swimlanesConfigSelect"
-							>
-								{sortOptions.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
-						</div>
-
-						{/* Manual Sorting Mapping Section */}
-						{sortCriteria === 'custom' && (
-							<div className="swimlanesConfigManualSortSection">
-								<h3 className="swimlanesConfigManualSortHeading">
-									{t("custom-swimlanes")}
-								</h3>
-								<div className="swimlanesConfigManualSortDescription">
-									{t('manual-sorting-mapping-info')}
-								</div>
-
-								<div className='swimlaneConfigsManualSortContainer'>
-									{/* Sortable List */}
-									<div
-										ref={sortableListRef}
-										className="swimlanesConfigSortRowsList"
-									>
-										{customSortOrder.map((sortRow, rowIndex) => (
-											<div
-												key={rowIndex}
-												className="swimlanesConfigSortRow"
-											>
-												<RxDragHandleDots2
-													className="swimlanesConfigSortRowDragHandle"
-													size={16}
-												/>
-												<div className="swimlanesConfigSortRowIndex">
-													{sortRow.index}
-												</div>
-												<input
-													type="text"
-													placeholder={t('enter-property-value')}
-													value={sortRow.value}
-													onChange={(e) =>
-														handleSortRowValueChange(
-															rowIndex,
-															e.target.value
-														)
-													}
-													className="swimlanesConfigSortRowInput"
-												/>
-												<FaTrash
-													className="swimlanesConfigSortRowDeleteBtn"
-													size={20}
-													onClick={() => handleRemoveSortRow(rowIndex)}
-													title={t('delete')}
-												/>
-											</div>
-										))}
-									</div>
-
-									{/* Add Row Button */}
-									<button
-										className="swimlanesConfigAddSortRowBtn"
-										onClick={handleAddSortRow}
-									>
-										{t('add-row')}
-									</button>
-								</div>
-
-								{/* Enable/Disable groupAllRest */}
-								<div className="swimlanesConfigItem">
-									<div className="swimlanesConfigLabel">
-										<label>{t('aggregator-swimlane')}</label>
-										<div className="swimlanesConfigDescription">
-											{t('aggregator-swimlane-info')}
-										</div>
-									</div>
-									<input
-										type="checkbox"
-										checked={groupAllRest}
-										onChange={(e) => setGroupAllRest(e.target.checked)}
-									/>
-								</div>
-
-								{/* Hide Empty Swimlanes */}
-								<div className="swimlanesConfigItem">
-									<div className="swimlanesConfigLabel">
-										<label>
-											{t('hide-empty-swimlanes')}
-										</label>
-										<div className="swimlanesConfigDescription">
-											{t('hide-empty-swimlanes-info')}
-										</div>
-									</div>
-									<input
-										type="checkbox"
-										checked={hideEmptySwimlanes}
-										onChange={(e) => setHideEmptySwimlanes(e.target.checked)}
-									/>
-								</div>
-							</div>
-						)}
-
-						{/* Enable/Disable verticalSwimlaneHeader UI */}
-						<div className="swimlanesConfigItem">
-							<div className="swimlanesConfigLabel">
-								<label>{t("ui-type-for-swimlanes-header")}</label>
-								<div className="swimlanesConfigDescription">
-									{t("ui-type-for-swimlanes-header-info")}
-								</div>
-							</div>
-							<select
-								value={headerUIType}
-								onChange={(e) => setHeaderUIType(e.target.value)}
-								className="swimlanesConfigSelect"
-							>
-								<option key={HeaderUITypeOptions.horizontal} value={HeaderUITypeOptions.horizontal}>
-									{t("horizontal")}
-								</option>
-								<option key={HeaderUITypeOptions.vertical} value={HeaderUITypeOptions.vertical}>
-									{t("vertical")}
-								</option>
-							</select>
-						</div>
-					</>
-				)}
-			</div>
-
-			{/* Action Buttons */}
-			<div className="swimlanesConfigButtonsContainer">
-				<button
-					className="swimlanesConfigBtn swimlanesConfigBtnCancel"
-					onClick={onCancel}
-				>
-					{t('cancel') || 'Cancel'}
-				</button>
-				<button
-					className="swimlanesConfigBtn swimlanesConfigBtnSave"
-					onClick={handleSave}
-				>
-					{t('save') || 'Save'}
-				</button>
-			</div>
-		</div >
-	);
-};
-
-export class SwimlanesConfigModal extends Modal {
-	root: ReactDOM.Root | null = null;
-	swimlaneConfig: swimlaneConfigs;
-	onSave: (config: swimlaneConfigs) => void;
-
-	constructor(
-		app: App,
-		swimlaneConfig: swimlaneConfigs,
-		onSave: (config: swimlaneConfigs) => void
-	) {
-		super(app);
-		this.swimlaneConfig = swimlaneConfig;
-		this.onSave = onSave;
-		this.modalEl.classList.add('swimlanes-config-modal');
+		this.renderSortRows();
 	}
 
-	onOpen() {
-		const { contentEl } = this;
-		this.root = ReactDOM.createRoot(contentEl);
-		this.root.render(
-			<SwimlanesConfigContent
-				swimlaneConfig={this.swimlaneConfig}
-				onSave={(config) => {
-					this.onSave(config);
-					this.close();
-				}}
-				onCancel={() => this.close()}
-			/>
-		);
+	private renderGroupAllRest(container: HTMLElement) {
+		const item = container.createDiv({
+			cls: 'swimlanesConfigItem',
+		});
+
+		const label = item.createDiv({
+			cls: 'swimlanesConfigLabel',
+		});
+		label.createEl('label', { text: t('aggregator-swimlane') });
+		label.createDiv({
+			cls: 'swimlanesConfigDescription',
+			text: t('aggregator-swimlane-info'),
+		});
+
+		const checkbox = item.createEl('input', {
+			attr: { type: 'checkbox' },
+		});
+		checkbox.checked = this.groupAllRest;
+		checkbox.addEventListener('change', (e) => {
+			this.groupAllRest = (e.target as HTMLInputElement).checked;
+		});
+	}
+
+	private renderHideEmptySwimlanes(container: HTMLElement) {
+		const item = container.createDiv({
+			cls: 'swimlanesConfigItem',
+		});
+
+		const label = item.createDiv({
+			cls: 'swimlanesConfigLabel',
+		});
+		label.createEl('label', { text: t('hide-empty-swimlanes') });
+		label.createDiv({
+			cls: 'swimlanesConfigDescription',
+			text: t('hide-empty-swimlanes-info'),
+		});
+
+		const checkbox = item.createEl('input', {
+			attr: { type: 'checkbox' },
+		});
+		checkbox.checked = this.hideEmptySwimlanes;
+		checkbox.addEventListener('change', (e) => {
+			this.hideEmptySwimlanes = (e.target as HTMLInputElement).checked;
+		});
+	}
+
+	private renderHeaderUIType(container: HTMLElement) {
+		const item = container.createDiv({
+			cls: 'swimlanesConfigItem',
+		});
+
+		const label = item.createDiv({
+			cls: 'swimlanesConfigLabel',
+		});
+		label.createEl('label', { text: t('ui-type-for-swimlanes-header') });
+		label.createDiv({
+			cls: 'swimlanesConfigDescription',
+			text: t('ui-type-for-swimlanes-header-info'),
+		});
+
+		const select = item.createEl('select', {
+			cls: 'swimlanesConfigSelect',
+		});
+
+		select.createEl('option', {
+			attr: { value: HeaderUITypeOptions.horizontal },
+			text: t('horizontal'),
+		});
+		select.createEl('option', {
+			attr: { value: HeaderUITypeOptions.vertical },
+			text: t('vertical'),
+		});
+
+		select.value = this.headerUIType;
+		select.addEventListener('change', (e) => {
+			this.headerUIType = (e.target as HTMLSelectElement).value;
+		});
+	}
+
+	private renderButtons(container: HTMLElement) {
+		const buttonsContainer = container.createDiv({
+			cls: 'swimlanesConfigButtonsContainer',
+		});
+
+		const cancelButton = buttonsContainer.createEl('button', {
+			cls: 'swimlanesConfigBtn swimlanesConfigBtnCancel',
+			text: t('cancel') || 'Cancel',
+		});
+		cancelButton.addEventListener('click', () => {
+			this.onCancel();
+			this.close();
+		});
+
+		const saveButton = buttonsContainer.createEl('button', {
+			cls: 'swimlanesConfigBtn swimlanesConfigBtnSave',
+			text: t('save') || 'Save',
+		});
+		saveButton.addEventListener('click', () => {
+			const updatedConfig: swimlaneConfigs = {
+				enabled: this.enabled,
+				hideEmptySwimlanes: this.hideEmptySwimlanes,
+				property: this.property,
+				maxHeight: this.maxHeight,
+				customValue: this.customValue || undefined,
+				sortCriteria: this.sortCriteria,
+				customSortOrder: this.sortCriteria === 'custom' ? this.customSortOrder : undefined,
+				groupAllRest: this.groupAllRest,
+				headerUIType: this.headerUIType,
+				minimized: [],
+			};
+			this.onSave(updatedConfig);
+			this.close();
+		});
 	}
 
 	onClose() {
-		if (this.root) {
-			this.root.unmount();
-			this.root = null;
+		if (this.sortableInstance) {
+			this.sortableInstance.destroy();
+			this.sortableInstance = null;
 		}
 		const { contentEl } = this;
 		contentEl.empty();

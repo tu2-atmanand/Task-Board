@@ -168,7 +168,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				updatedBoards[selectedBoardIndex].swimlanes = updatedConfig;
 				setLocalBoards(updatedBoards);
 				setIsEdited(true);
-			}
+			},
+			() => {}
 		);
 
 		swimlaneModal.open();
