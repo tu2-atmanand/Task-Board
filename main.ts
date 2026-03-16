@@ -179,7 +179,15 @@ export default class TaskBoard extends Plugin {
 
 	async activateView(leafLayout: string) {
 		let leaf: WorkspaceLeaf | null = null;
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+		let leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+
+		if (leaves.length === 0) {
+			this.app.workspace.iterateAllLeaves((leaf) => {
+				if (leaf.view instanceof TaskBoardView) {
+					leaves.push(leaf);
+				}
+			});
+		}
 
 		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
 			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
@@ -192,21 +200,12 @@ export default class TaskBoard extends Plugin {
 			(leaf) => !isFromMainWindow(leaf),
 		);
 
-		if (leafLayout === "icon") {
+		if (leafLayout === "icon" || leafLayout === "tab") {
 			// Focus on any existing leaf, prioritizing MainWindow
 			leaf =
 				mainWindowLeaf ||
 				separateWindowLeaf ||
 				this.app.workspace.getLeaf("tab");
-		} else if (leafLayout === "tab") {
-			// Check if a leaf exists in MainWindow
-			if (mainWindowLeaf) {
-				// Prevent duplicate in MainWindow
-				leaf = mainWindowLeaf;
-			} else {
-				// Allow opening a new leaf in MainWindow
-				leaf = this.app.workspace.getLeaf("tab");
-			}
 		} else if (leafLayout === "window") {
 			// Check if a leaf exists in SeparateWindow
 			if (separateWindowLeaf) {
