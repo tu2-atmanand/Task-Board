@@ -24,7 +24,7 @@ import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/
 import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { openDateInputModal } from 'src/services/OpenModals';
@@ -756,14 +756,14 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			});
 		});
 
-		// TODO : Reminder item - open prompt for date/time
+		// Reminder item - open prompt for date/time
 		taskItemMenu.addItem((item) => {
 			item.setIcon("clock");
 			item.setTitle(t("reminder"));
 			item.onClick(async () => {
 				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
-				modal.onDateTimeSelected = (dateTime) => {
-					console.log(dateTime); // e.g., "2024-01-15T14:30" or "14:30"
+				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
+					updateTaskItemReminder(plugin, task, task, dateTime);
 				};
 				modal.open();
 			});

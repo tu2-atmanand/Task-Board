@@ -21,6 +21,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 import {
 	sanitizeDueDate,
 	sanitizePriority,
+	sanitizeReminder,
 	sanitizeScheduledDate,
 	sanitizeStartDate,
 	sanitizeStatus,
@@ -443,6 +444,11 @@ export const updateTaskItemReminder = (
 			});
 		});
 	} else {
+		newTask.title = sanitizeReminder(
+			plugin.settings.data.globalSettings,
+			taskOld.title,
+			newReminder,
+		);
 		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				taskOld.filePath,

@@ -17,7 +17,7 @@ import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regula
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { openDateInputModal } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
-import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType } from 'src/interfaces/Enums';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType, UniversalDateOptions } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -25,12 +25,13 @@ import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/
 import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { startOfDay, isToday, compareAsc, isAfter, isBefore } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from 'src/interfaces/Constants';
 import { showTextInputModal } from 'src/modals/TextInputModal';
+import { DateTimePickerModal } from 'src/modals/date_time_picker/DateTimePickerModal';
 
 export interface swimlaneDataProp {
 	property: string;
@@ -732,7 +733,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setTitle(t("start-date"));
 			it.onClick(async () => {
 				openDateInputModal(plugin, t("start"), (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'startDate', newDate);
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
 				}, task.startDate)
 			});
 		});
@@ -741,7 +742,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setTitle(t("scheduled-date"));
 			it.onClick(async () => {
 				openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'scheduledDate', newDate);
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
 				}, task.scheduledDate)
 			});
 		});
@@ -750,19 +751,23 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setTitle(t("due-date"));
 			it.onClick(async () => {
 				openDateInputModal(plugin, t("due"), (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'due', newDate);
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
 				}, task.due)
 			});
 		});
 
-		// TODO : Reminder item - open prompt for date/time
-		// taskItemMenu.addItem((item) => {
-		// 	item.setIcon("clock");
-		// 	item.setTitle(t("reminder"));
-		// 	item.onClick(async () => {
-		// 		// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
-		// 	});
-		// });
+		// Reminder item - open prompt for date/time
+		taskItemMenu.addItem((item) => {
+			item.setIcon("clock");
+			item.setTitle(t("reminder"));
+			item.onClick(async () => {
+				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
+				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
+					updateTaskItemReminder(plugin, task, task, dateTime);
+				};
+				modal.open();
+			});
+		});
 
 		taskItemMenu.addSeparator();
 
