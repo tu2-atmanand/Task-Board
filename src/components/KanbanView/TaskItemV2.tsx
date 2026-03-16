@@ -731,27 +731,27 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setIcon("calendar-plus")
 			it.setTitle(t("start-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
+				openDateInputModal(plugin, t("start"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, 'startDate', newDate);
-				})
+				}, task.startDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar-clock")
 			it.setTitle(t("scheduled-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
+				openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, 'scheduledDate', newDate);
-				})
+				}, task.scheduledDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar")
 			it.setTitle(t("due-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
+				openDateInputModal(plugin, t("due"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, 'due', newDate);
-				})
+				}, task.due)
 			});
 		});
 

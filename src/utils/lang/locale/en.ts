@@ -606,7 +606,16 @@ const en: Lang = {
 	"right-split": "Right split",
 	"new-window": "New window",
 	"this-board-not-found": "This board was not found. Switch to a different board.",
-	"no-swimlanes-found-message": "Looks like you have enabled the swimlanes but havent configured it correctly. Please check your swimlanes configuration again or disable it to render the normal kanban view."
+	"no-swimlanes-found-message": "Looks like you have enabled the swimlanes but havent configured it correctly. Please check your swimlanes configuration again or disable it to render the normal kanban view.",
+	"select-time": "Select time",
+	"select-date": "Select date",
+	"clear-time": "Clear time",
+	"morning": "Morning",
+	"noon": "Noon",
+	"afternoon": "Afternoon",
+	"evening": "Evening",
+	"night": "Night",
+	"apply": "Apply"
 };
 
 export default en;

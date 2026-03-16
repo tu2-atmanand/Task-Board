@@ -1,5 +1,3 @@
-import { HeaderUITypeOptions } from "./Enums";
-
 export interface columnSortingCriteria {
 	criteria:
 		| "status"

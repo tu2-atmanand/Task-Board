@@ -27,6 +27,18 @@
 	max-width: 100vw;
 }
 
+.modal[modal-type="task-board-scan-vault-modal"] {
+	min-height: auto;
+	max-width: 90vw;
+	min-width: 50vw;
+}
+
+.modal[modal-type="task-board-date-time-picker"] {
+	min-height: auto;
+	max-width: 90vw;
+	min-width: fit-content;
+}
+
 .modal-container[modal-type='task-board-edit-task'] {
 	justify-content: flex-end;
 }
@@ -7677,7 +7689,7 @@ Date picker modal styles
 }
 
 .date-picker-root-container .calendar-day.today {
-	background-color: var(--interactive-accent-hover);
+	border: 2px solid var(--interactive-accent-hover);
 	color: var(--text-on-accent);
 	font-weight: var(--font-bold);
 }
@@ -7741,6 +7753,145 @@ Date picker modal styles
 	padding: var(--size-2-1) var(--size-2-2);
 	border-radius: var(--radius-s);
 	font-size: var(--font-ui-smaller);
+}
+
+
+/* Date Time Picker Component Styles */
+.date-time-picker-root-container {
+	display: flex;
+	flex-direction: column;
+	width: fit-content;
+}
+
+.date-time-picker-root-container .date-time-picker-container {
+	display: flex;
+	flex-direction: column;
+	width: fit-content;
+	min-width: fit-content;
+}
+
+.date-time-picker-root-container .date-time-picker-main-panel {
+	display: flex;
+	gap: var(--size-2-3);
+	padding: var(--size-2-3);
+	width: fit-content;
+	min-width: fit-content;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.date-time-picker-root-container .date-time-picker-left-panel {
+	flex: 1;
+	min-width: 180px;
+	border-right: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-direction: column;
+}
+
+.date-time-picker-root-container .date-time-picker-right-panel {
+	flex: 1;
+	min-width: 280px;
+}
+
+.date-time-picker-root-container .date-time-picker-section-title {
+	font-size: var(--font-ui-medium);
+	font-weight: var(--font-bold);
+	margin-bottom: var(--size-4-2);
+	color: var(--text-normal);
+}
+
+/* Time Picker Styles */
+.date-time-picker-root-container .time-picker-container {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.date-time-picker-root-container .time-input {
+	width: 100%;
+	padding: var(--size-2-2);
+	font-size: var(--font-ui-medium);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	box-sizing: border-box;
+}
+
+.date-time-picker-root-container .quick-time-options {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-1);
+	margin-top: var(--size-2-3);
+}
+
+.date-time-picker-root-container .quick-time-option {
+	padding: var(--size-2-2);
+	background: var(--background-secondary);
+	border-radius: var(--radius-s);
+	cursor: pointer;
+	text-align: center;
+	color: var(--text-normal);
+}
+
+.date-time-picker-root-container .quick-time-option:hover {
+	background: var(--background-modifier-hover);
+}
+
+.date-time-picker-root-container .quick-time-option.clear-time {
+	color: var(--text-error);
+	background: var(--background-modifier-error-bg);
+}
+
+.date-time-picker-root-container .quick-time-option.clear-time:hover {
+	background: var(--background-modifier-error);
+	color: var(--text-on-error);
+}
+
+/* Date Picker Wrapper */
+.date-time-picker-root-container .date-picker-wrapper {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
+.date-time-picker-root-container .date-picker-picker-container {
+	width: 100%;
+}
+
+/* Date Time Picker Buttons */
+.date-time-picker-root-container .date-time-picker-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--size-2-2);
+	padding: var(--size-2-3);
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.date-time-picker-root-container .date-time-picker-btn {
+	padding: var(--size-2-2) var(--size-2-4);
+	border-radius: var(--radius-s);
+	font-size: var(--font-ui-medium);
+	cursor: pointer;
+	border: none;
+}
+
+.date-time-picker-root-container .cancel-btn {
+	background: var(--background-secondary);
+	color: var(--text-normal);
+}
+
+.date-time-picker-root-container .cancel-btn:hover {
+	background: var(--background-modifier-hover);
+}
+
+.date-time-picker-root-container .apply-btn {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.date-time-picker-root-container .apply-btn:hover {
+	background: var(--interactive-accent-hover);
 }
 
 

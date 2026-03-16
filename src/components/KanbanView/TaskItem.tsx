@@ -16,7 +16,7 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
-import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType } from 'src/interfaces/Enums';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType, UniversalDateOptions } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -31,6 +31,7 @@ import { openDateInputModal } from 'src/services/OpenModals';
 import { showTextInputModal } from 'src/modals/TextInputModal';
 import { startOfDay, isToday, compareAsc, isAfter, isBefore } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from 'src/interfaces/Constants';
+import { DateTimePickerModal } from 'src/modals/date_time_picker/DateTimePickerModal';
 
 export interface swimlaneDataProp {
 	property: string;
@@ -731,38 +732,42 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			it.setIcon("calendar-plus")
 			it.setTitle(t("start-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'startDate', newDate);
-				})
+				openDateInputModal(plugin, t("start"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
+				}, task.startDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar-clock")
 			it.setTitle(t("scheduled-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'scheduledDate', newDate);
-				})
+				openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
+				}, task.scheduledDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar")
 			it.setTitle(t("due-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'due', newDate);
-				})
+				openDateInputModal(plugin, t("due"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
+				}, task.due)
 			});
 		});
 
 		// TODO : Reminder item - open prompt for date/time
-		// taskItemMenu.addItem((item) => {
-		// 	item.setIcon("clock");
-		// 	item.setTitle(t("reminder"));
-		// 	item.onClick(async () => {
-		// 		// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
-		// 	});
-		// });
+		taskItemMenu.addItem((item) => {
+			item.setIcon("clock");
+			item.setTitle(t("reminder"));
+			item.onClick(async () => {
+				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
+				modal.onDateTimeSelected = (dateTime) => {
+					console.log(dateTime); // e.g., "2024-01-15T14:30" or "14:30"
+				};
+				modal.open();
+			});
+		});
 
 		taskItemMenu.addSeparator();
 
