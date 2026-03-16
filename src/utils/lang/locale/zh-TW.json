@@ -55,7 +55,7 @@
 	"confirm-delete": "確認刪除",
 	"confirm-task-delete-description": "您確定要刪除此任務嗎？",
 	"vault-scanning-complete": "保險庫掃描完整。",
-	"scan-tasks-from-the-vault": "從保險庫掃描任務",
+	"vault-scanner": "從保險庫掃描任務",
 	"scan-tasks-from-the-vault-description-1": "僅當未正確檢測/掃描您的任務或板上行動時，才能運行此功能。",
 	"scan-tasks-from-the-vault-description-2": "您不必經常運行此功能，插件將自動檢測新添加/編輯的任務。",
 	"scan-tasks-from-the-vault-description-3": "注意：如果您正在掃描以檢測未檢測到的任務，請先從插件設置中檢查您的“過濾器掃描”。",

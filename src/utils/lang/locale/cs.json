@@ -55,7 +55,7 @@
 	"confirm-delete": "Potvrďte odstranění",
 	"confirm-task-delete-description": "Jste si jisti, že chcete tento úkol odstranit?",
 	"vault-scanning-complete": "Kompletní skenování trezoru.",
-	"scan-tasks-from-the-vault": "Skenujte úkoly z trezoru",
+	"vault-scanner": "Skenujte úkoly z trezoru",
 	"scan-tasks-from-the-vault-description-1": "Spusťte tuto funkci pouze v případě, že vaše úkoly nebyly řádně detekovány/naskenovány nebo rada působí.",
 	"scan-tasks-from-the-vault-description-2": "Tuto funkci nemusíte spustit často, plugin automaticky detekuje nově přidané/upravené úkoly.",
 	"scan-tasks-from-the-vault-description-3": "Poznámka: Nejprve zkontrolujte své „filtry pro skenování“ z nastavení pluginu, pokud skenujete, abyste zjistili nezjištěné úkoly.",

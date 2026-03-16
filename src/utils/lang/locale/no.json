@@ -55,7 +55,7 @@
 	"confirm-delete": "Bekreft slett",
 	"confirm-task-delete-description": "Er du sikker på at du vil slette denne oppgaven?",
 	"vault-scanning-complete": "Hvelv skanning fullført.",
-	"scan-tasks-from-the-vault": "Skanne oppgaver fra hvelvet",
+	"vault-scanner": "Skanne oppgaver fra hvelvet",
 	"scan-tasks-from-the-vault-description-1": "Kjør denne funksjonen bare hvis oppgavene dine ikke har blitt oppdaget/skannet riktig eller styret opptrer uro.",
 	"scan-tasks-from-the-vault-description-2": "Du trenger ikke å kjøre denne funksjonen ofte, pluginen vil oppdage nylig lagt til/redigerte oppgaver.",
 	"scan-tasks-from-the-vault-description-3": "Merk: Sjekk 'filtrene dine for skanning' fra plugin -innstillingene først, hvis du skanner for å oppdage uoppdagede oppgaver.",

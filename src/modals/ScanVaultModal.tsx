@@ -159,19 +159,21 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 	return (
 		<div className="scanVaultModalHome">
-			<h2>{t("scan-tasks-from-the-vault")}</h2>
+			<h2>{t("vault-scanner")}</h2>
 			{localStorage.getItem("manadatoryScan") === "true" ?
-				(<>
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
-					<br />
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href={`https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`}>Task Board v{newReleaseVersion}</a>.</div>
-				</>
+				(
+					<>
+						<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
+						<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
+						<br />
+						<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href={`https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`}>Task Board v{newReleaseVersion}</a>.</div>
+					</>
 				) :
-				(<>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-1")}</div>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-2")}</div>
-				</>
+				(
+					<>
+						<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-1")}</div>
+						<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-2")}</div>
+					</>
 				)}
 
 			<div className="scanVaultModalHomeSecondSection" >

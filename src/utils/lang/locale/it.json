@@ -55,7 +55,7 @@
 	"confirm-delete": "Conferma Elimina",
 	"confirm-task-delete-description": "Sei sicuro di voler eliminare questa attività?",
 	"vault-scanning-complete": "Scansione a volta completa.",
-	"scan-tasks-from-the-vault": "Scansionare le attività dal Vault",
+	"vault-scanner": "Scansionare le attività dal Vault",
 	"scan-tasks-from-the-vault-description-1": "Esegui questa funzione solo se le tue attività non sono state correttamente rilevate/scansionate o la scheda agisce in grado di essere stanche.",
 	"scan-tasks-from-the-vault-description-2": "Non è necessario eseguire questa funzione spesso, il plug -in rileverà automaticamente le attività di recente aggiunta/modificata.",
 	"scan-tasks-from-the-vault-description-3": "Nota: controlla prima i 'filtri per la scansione' dalle impostazioni del plug -in, se si scansiona per rilevare attività non rilevate.",

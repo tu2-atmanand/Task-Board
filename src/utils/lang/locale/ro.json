@@ -55,7 +55,7 @@
 	"confirm-delete": "Confirmați ștergerea",
 	"confirm-task-delete-description": "Ești sigur că vrei să ștergi această sarcină?",
 	"vault-scanning-complete": "Scanarea bolții completă.",
-	"scan-tasks-from-the-vault": "Scanați sarcinile din boltă",
+	"vault-scanner": "Scanați sarcinile din boltă",
 	"scan-tasks-from-the-vault-description-1": "Rulați această caracteristică numai dacă sarcinile dvs. nu au fost detectate în mod corespunzător/scanate în mod corespunzător, sau placa acționează Weired.",
 	"scan-tasks-from-the-vault-description-2": "Nu trebuie să rulați această caracteristică des, pluginul va detecta automat sarcini recent adăugate/editate.",
 	"scan-tasks-from-the-vault-description-3": "Notă: Vă rugăm să verificați mai întâi „filtrele de scanare” din setările pluginului, dacă scanați pentru a detecta sarcini nedetectate.",

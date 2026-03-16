@@ -55,7 +55,7 @@
 	"confirm-task-delete-description": "Are you sure you want to delete this task?",
 	"yes": "Yes",
 	"no": "No",
-	"scan-tasks-from-the-vault": "Scan tasks from the vault",
+	"vault-scanner": "Scan tasks from the vault",
 	"scan-tasks-from-the-vault-description-1": "Run this feature only on the fresh install or if your tasks has not been properly detected/scanned or the board is acting weired.",
 	"scan-tasks-from-the-vault-description-2": "You dont have to run this feature often. The plugin will auto detect newly added/edited tasks from your notes.",
 	"scan-tasks-from-the-vault-description-3": "You might first want to check the scanning filters you have applied in setting to avoid any confusion.",
