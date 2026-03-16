@@ -484,18 +484,18 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				}
 			}
 
-			const getOpacityValue = (color: string): number => {
-				const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
-				if (rgbaMatch) {
-					const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
-					return opacity;
-				}
-				return 1;
-			};
+			// const getOpacityValue = (color: string): number => {
+			// 	const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+			// 	if (rgbaMatch) {
+			// 		const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+			// 		return opacity;
+			// 	}
+			// 	return 1;
+			// };
 
-			if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-				return updateRGBAOpacity(highestPriorityTag.color, 0.2);
-			}
+			// if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+			// 	return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+			// }
 
 			return highestPriorityTag?.color;
 		}
