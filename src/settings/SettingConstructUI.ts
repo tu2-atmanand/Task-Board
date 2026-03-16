@@ -1439,11 +1439,7 @@ export class SettingsManager {
 						status.type === statusTypeNames.IN_PROGRESS
 							? " wip"
 							: ""
-					}${
-						status.type === statusTypeNames.ON_HOLD
-							? " hold"
-							: ""
-					}`,
+					}${status.type === statusTypeNames.ON_HOLD ? " hold" : ""}`,
 					text: status.type,
 				});
 
@@ -1484,6 +1480,7 @@ export class SettingsManager {
 							] = customStatus;
 							await this.saveSettings();
 							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
 						}
 					};
 					modal.open();
@@ -1500,6 +1497,7 @@ export class SettingsManager {
 					this.globalSettings!.customStatuses.splice(index, 1);
 					await this.saveSettings();
 					renderCustomStatuses();
+					this.openReloadNoticeIfNeeded();
 				};
 			});
 		};

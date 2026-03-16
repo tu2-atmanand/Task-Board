@@ -63,6 +63,7 @@ export default class VaultScanner {
 	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
 	testDate: Date;
+	supportedChecklistSymbols: string[];
 
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
@@ -74,8 +75,16 @@ export default class VaultScanner {
 			Completed: {},
 		}; // Reset task structure
 		this.tasksDetectedOrUpdated = false;
+
+		// Some recursively used constants
 		this.indentationString = getObsidianIndentationSetting(plugin);
 		this.testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
+		this.supportedChecklistSymbols = [];
+		this.plugin.settings.data.globalSettings.customStatuses.forEach(
+			(status) => {
+				this.supportedChecklistSymbols.push(status.symbol);
+			},
+		);
 	}
 
 	async initializeTasksCache() {
@@ -298,15 +307,29 @@ export default class VaultScanner {
 
 				return "true";
 			} else {
-				// Else, proceed with normal task line detection inside the file content.
+				// Else, proceed with inline-tasks(checklists) detection inside the file content.
 				for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
 					const line = lines[lineIndex];
 					if (isTaskLine(line)) {
+						const taskStatus = extractCheckboxSymbol(line);
+
+						// Since v1.10.0 - Read this ticket : https://github.com/tu2-atmanand/Task-Board/issues/737
+						if (
+							!this.supportedChecklistSymbols.includes(taskStatus)
+						) {
+							const bodyLines = extractBody(
+								lines,
+								lineIndex + 1,
+								this.indentationString,
+							);
+							lineIndex = lineIndex + bodyLines.length;
+							continue; // We will going to skip storing this task inside the cache.
+						}
+
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
 							this.tasksDetectedOrUpdated = true;
 							const legacyId = extractTaskId(line);
-							const taskStatus = extractCheckboxSymbol(line);
 							const isThisCompletedTask = isTaskCompleted(
 								line,
 								false,

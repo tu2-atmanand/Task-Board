@@ -56,8 +56,8 @@ export default class TaskBoard extends Plugin {
 	plugin: TaskBoard;
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
-	vaultScanner: VaultScanner;
-	realTimeScanner: RealTimeScanner;
+	vaultScanner!: VaultScanner;
+	realTimeScanner!: RealTimeScanner;
 	// taskBoardFileStack: string[] = [];
 	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
@@ -97,12 +97,6 @@ export default class TaskBoard extends Plugin {
 		this.app = this.plugin.app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.vaultScanner = new VaultScanner(this.app, this.plugin);
-		this.realTimeScanner = new RealTimeScanner(
-			this.app,
-			this.plugin,
-			this.vaultScanner,
-		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -118,13 +112,20 @@ export default class TaskBoard extends Plugin {
 
 	async onload() {
 		console.log("Task Board : Loading...");
+		// Loads settings data and creating the Settings Tab in main Setting
+		await this.loadSettings();
+
+		this.vaultScanner = new VaultScanner(this.app, this.plugin);
+		this.realTimeScanner = new RealTimeScanner(
+			this.app,
+			this.plugin,
+			this.vaultScanner,
+		);
 
 		// NOTE : I feel, if these singleton instances needs the latest version of 'this', then they might show some unexpected behavior as I am not updating the 'this' inside those singleton instances latest during the plugin life-cycle.
 		dragDropTasksManagerInsatance.setPlugin(this);
 		bugReporterManagerInsatance.setPlugin(this);
 
-		// Loads settings data and creating the Settings Tab in main Setting
-		await this.loadSettings();
 		this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
