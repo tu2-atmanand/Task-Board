@@ -261,7 +261,7 @@ const en: Lang = {
 	"scan-tasks-from-the-vault-info-2": "Use filters for scanning from the plugin setting if you want to exclude certain files, folders or tasks from getting scanned. (Scroll this modal to read points at the bottom)",
 	"points-to-note": "Points to note",
 	"scan-vault-from-the-vault-upgrade-message-1": "Task Board has been updated to version",
-	"scan-vault-from-the-vault-upgrade-message-2": "This new release has brought various new features, which requires you to re-scan the vault.",
+	"scan-vault-from-the-vault-upgrade-message-2": "This new release has brought various new features, which requires you to re-scan the vault. (Scroll this modal to read points at the bottom)",
 	"scan-vault-from-the-vault-upgrade-message-3": "Read the release notes for this new version here",
 	"import": "Import",
 	"export": "Export",
@@ -615,7 +615,8 @@ const en: Lang = {
 	"afternoon": "Afternoon",
 	"evening": "Evening",
 	"night": "Night",
-	"apply": "Apply"
+	"apply": "Apply",
+	"no-columns-message": "Create columns in this kanban view using the view configuration button from top right corner."
 };
 
 export default en;

@@ -57,26 +57,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 		));
 	};
 
-	const renderLoadingOrEmpty = () => {
+	const renderLoadingOrEmpty = useMemo(() => {
 		if (loading) {
 			return (
 				<div className="loadingContainer">
-					{freshInstall ? (
-						<h2 className="initializationMessage">
-							{t("fresh-install-1")}
-							<br />
-							<br />
-							{t("fresh-install-2")}
-							<br />
-							<br />
-							{t("fresh-install-3")}
-						</h2>
-					) : (
-						<>
-							<div className="spinner"></div>
-							<p>{t("loading-tasks")}</p>
-						</>
-					)}
+					<div className="spinner"></div>
+					<p>{t("loading-tasks")}</p>
 				</div>
 			);
 		}
@@ -84,19 +70,39 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 		if (board?.columns?.length === 0) {
 			return (
 				<div className="emptyBoardMessage">
-					Create columns on this board using the board config modal from top right corner button.
+					{t("no-columns-message")}
 				</div>
 			);
 		}
 
 		return null;
-	};
+	}, [loading]);
+
+	const renderFreshInstallMessage = useMemo(() => {
+		if (freshInstall) {
+			return (
+				<div className="loadingContainer">
+					<h2 className="initializationMessage">
+						{t("fresh-install-1")}
+						<br />
+						<br />
+						{t("fresh-install-2")}
+						<br />
+						<br />
+						{t("fresh-install-3")}
+					</h2>
+				</div>
+			);
+		}
+
+		return null;
+	}, [freshInstall]);
 
 	const isSwimlanesEnabled = board?.swimlanes?.enabled === true;
 
 	return (
 		<div className="kanbanBoard">
-			{renderLoadingOrEmpty() || (
+			{renderLoadingOrEmpty || renderFreshInstallMessage || (
 				<>
 					{isSwimlanesEnabled ? (
 						<KanbanSwimlanesContainer
