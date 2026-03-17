@@ -55,7 +55,7 @@
 	"confirm-delete": "削除を確認します",
 	"confirm-task-delete-description": "このタスクを削除したいですか？",
 	"vault-scanning-complete": "ボールトスキャンが完了します。",
-	"scan-tasks-from-the-vault": "ボールトからタスクをスキャンします",
+	"vault-scanner": "ボールトからタスクをスキャンします",
 	"scan-tasks-from-the-vault-description-1": "タスクが適切に検出/スキャンされていない場合、またはボードがワイヤードを作っている場合にのみ、この機能を実行します。",
 	"scan-tasks-from-the-vault-description-2": "この機能を頻繁に実行する必要はありません。プラグインは、新しく追加/編集されたタスクを自動検出します。",
 	"scan-tasks-from-the-vault-description-3": "注：検出されていないタスクを検出するためにスキャンしている場合は、最初にプラグイン設定から「スキャンのフィルター」を確認してください。",

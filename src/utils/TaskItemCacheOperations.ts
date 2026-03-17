@@ -14,7 +14,7 @@ import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
 } from "./JsonFileOperations";
-import { getCurrentLocalTimeString } from "./DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "./DateTimeCalculations";
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
@@ -170,7 +170,7 @@ export const updateTaskInJson = async (
 		// Create the updated data object with both updated Pending and Completed tasks
 		const updatedData: jsonCacheData = {
 			VaultName: plugin.app.vault.getName(),
-			Modified_at: getCurrentLocalTimeString(),
+			Modified_at: getCurrentLocalDateTimeString(),
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
 		};

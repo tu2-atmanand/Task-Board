@@ -1,4 +1,3 @@
-import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
 import { BoardConfigs } from "./BoardConfigs";
 import {
 	EditButtonMode,
@@ -17,8 +16,10 @@ import {
 	defaultTaskStatuses,
 	taskCardStyleNames,
 	scanModeOptions,
+	HeaderUITypeOptions,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants";
 
 export interface scanFilters {
 	files: {
@@ -74,9 +75,9 @@ export interface globalSettingsData {
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskPropertyFormat: string;
-	taskCompletionDateTimePattern: string;
+	dateFormat: string;
+	dateTimeFormat: string;
 	dailyNotesPluginComp: boolean;
-	universalDateFormat: string;
 	defaultStartTime: string;
 	taskCompletionInLocalTime: boolean;
 	taskCompletionShowUtcOffset: boolean;
@@ -91,6 +92,7 @@ export interface globalSettingsData {
 	visiblePropertiesList: string[];
 	taskCardStyle: string;
 	showVerticalScroll: boolean;
+	dragAutoScrollEdgePercent: number;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
@@ -253,7 +255,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					sortCriteria: "asc",
 					minimized: [],
 					maxHeight: "300px",
-					verticalHeaderUI: false,
+					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
 			{
@@ -319,7 +321,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					sortCriteria: "asc",
 					minimized: [],
 					maxHeight: "300px",
-					verticalHeaderUI: false,
+					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
 			{
@@ -395,7 +397,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					sortCriteria: "asc",
 					minimized: [],
 					maxHeight: "300px",
-					verticalHeaderUI: false,
+					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
 		],
@@ -424,10 +426,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			showTaskWithoutMetadata: true,
 			ignoreFileNameDates: false,
 			taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
-			taskCompletionDateTimePattern:
-				TaskRegularExpressions.dateTimeFormat,
+			dateFormat: DEFAULT_DATE_FORMAT,
+			dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
 			dailyNotesPluginComp: false,
-			universalDateFormat: TaskRegularExpressions.dateFormat,
 			defaultStartTime: "",
 			taskCompletionInLocalTime: true,
 			taskCompletionShowUtcOffset: false,
@@ -460,6 +461,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			],
 			taskCardStyle: taskCardStyleNames.EMOJI,
 			showVerticalScroll: true,
+			dragAutoScrollEdgePercent: 20,
 			tagColors: [
 				{
 					name: "bug",

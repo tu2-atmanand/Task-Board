@@ -76,7 +76,7 @@ export const getTaskFromId = async (
 
 /**
  * Generates a random unique ID using the Web Crypto API.
- * 
+ *
  * For example : '1851955511'.
  * @return {string} a random unique ID for a task
  */
@@ -88,7 +88,7 @@ export function generateRandomTempTaskId(): string {
 
 /**
  * Generates a random unique ID using the Web Crypto API.
- * 
+ *
  * For example : 1851955511.
  * @return a random unique 10 digit number
  */
@@ -121,8 +121,6 @@ export function generateTaskId(plugin: TaskBoard): string {
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The taskItem object representing the task to which an id needs to be applied.
  * @returns A promise that resolves to the new id if applied, or undefined if the task already has an id or if an error occurs.
- *
- * @throws Will throw an error if there are issues updating the task in the file.
  */
 export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
@@ -143,7 +141,8 @@ export const applyIdToTaskItem = async (
 
 		return newId;
 	} else {
-		if (extractTaskId(task.title) !== "") return undefined;
+		const extractedTaskId = extractTaskId(task.title)?.[1];
+		if (extractedTaskId) return extractedTaskId;
 
 		const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
 		return newIdToReturn;

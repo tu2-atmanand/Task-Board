@@ -1,4 +1,4 @@
-export const newReleaseVersion = "1.9.5";
+export const newReleaseVersion = "1.9.7";
 // Plugin view type identifiers
 export const VIEW_TYPE_TASKBOARD = "task-board-view";
 export const VIEW_TYPE_ADD_OR_EDIT_TASK = "add-or-edit-task-view";
@@ -17,3 +17,7 @@ export const DEFAULT_TASKS_CACHE_FILE = "task-board-data.json";
 export const DEFAULT_ARCHIVED_TASKS_FILE = "archived-tasks.json";
 export const DEFAULT_PREDEFINED_NOTE = "Task_board_note.md";
 export const DEFAULT_TASKS_FOLDER = "TaskNotes";
+
+export const DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+export const DEFAULT_TIME_FORMAT = "HH:mm:ss";
+export const DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";

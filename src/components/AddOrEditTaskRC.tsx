@@ -6,7 +6,7 @@ import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
-import { moment as _moment } from "obsidian";
+// import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
@@ -175,7 +175,7 @@ export const AddOrEditTaskRC: React.FC<{
 		// 	const globalSettings = plugin.settings.data.globalSettings;
 		// 	const moment = _moment as unknown as typeof _moment.default;
 		// 	const currentDateValue = moment().format(
-		// 		globalSettings?.taskCompletionDateTimePattern
+		// 		globalSettings?.dateTimeFormat
 		// 	);
 		// 	const newTitle = sanitizeCompletionDate(
 		// 		globalSettings,
@@ -187,7 +187,7 @@ export const AddOrEditTaskRC: React.FC<{
 		// 	const globalSettings = plugin.settings.data.globalSettings;
 		// 	const moment = _moment as unknown as typeof _moment.default;
 		// 	const currentDateValue = moment().format(
-		// 		globalSettings?.taskCompletionDateTimePattern
+		// 		globalSettings?.dateTimeFormat
 		// 	);
 		// 	const newTitle = sanitizeCancelledDate(
 		// 		globalSettings,
@@ -625,11 +625,6 @@ export const AddOrEditTaskRC: React.FC<{
 	}, [plugin.app]);
 
 	const handleOpenTaskInMapView = () => {
-		// if (!globalSettings.experimentalFeatures) {
-		// 	new Notice(t("enable-experimental-features-message"));
-		// 	return;
-		// }
-
 		applyIdToTaskItem(plugin, task).then((newId) => {
 			globalSettings.lastViewHistory.viewedType = 'map';
 			globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
@@ -1096,7 +1091,7 @@ export const AddOrEditTaskRC: React.FC<{
 				event.ctrlKey = false;
 				break;
 			case EditButtonMode.Modal:
-			case EditButtonMode.View:
+			case EditButtonMode.ViewInWindow:
 			case EditButtonMode.TasksPluginModal:
 			default:
 				const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);

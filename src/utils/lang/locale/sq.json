@@ -55,7 +55,7 @@
 	"confirm-delete": "Konfirmoni Fshi",
 	"confirm-task-delete-description": "A jeni i sigurt që doni të fshini këtë detyrë?",
 	"vault-scanning-complete": "Skanimi i kasafortës i plotë.",
-	"scan-tasks-from-the-vault": "Skanoni detyrat nga kasaforta",
+	"vault-scanner": "Skanoni detyrat nga kasaforta",
 	"scan-tasks-from-the-vault-description-1": "Drejtoni këtë veçori vetëm nëse detyrat tuaja nuk janë zbuluar/skanuar siç duhet ose Bordi po vepron i quar.",
 	"scan-tasks-from-the-vault-description-2": "Ju nuk duhet ta ekzekutoni këtë veçori shpesh, shtojca do të zbulojë automatikisht detyrat e shtuara/redaktuara rishtas.",
 	"scan-tasks-from-the-vault-description-3": "Shënim: Ju lutemi kontrolloni së pari 'filtrat tuaj për skanimin' nga cilësimet e shtojcave, nëse skanoni për të zbuluar detyrat e pazbuluara.",

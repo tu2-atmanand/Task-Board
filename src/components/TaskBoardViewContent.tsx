@@ -17,7 +17,7 @@ import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
 import { VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { boardFilterer } from "src/utils/algorithms/BoardFilterer";
+import { advancedFilterer } from "src/utils/algorithms/BoardFilterer";
 import { ViewTaskFilterModal } from 'src/components/BoardFilters';
 import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
@@ -37,6 +37,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.globalSettings.searchQuery ?? "");
 
 	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
+	const viewDropdownRef = useRef<HTMLDivElement>(null);
 
 	const [showAllElements, setShowAllElements] = useState(true);
 	const [leafWidth, setLeafWidth] = useState<number>(1000);
@@ -44,6 +45,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
 	const [editorModified, setEditorModified] = useState(plugin.editorModified);
+	const [showViewDropdown, setShowViewDropdown] = useState(false);
 
 	// plugin.registerEvent(
 	// 	plugin.app.workspace.on("resize", () => {
@@ -115,8 +117,8 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: boardFilterer(allTasks.Pending, boardFilter),
-				Completed: boardFilterer(allTasks.Completed, boardFilter),
+				Pending: advancedFilterer(allTasks.Pending, boardFilter),
+				Completed: advancedFilterer(allTasks.Completed, boardFilter),
 			};
 
 			// Update task count in settings
@@ -130,19 +132,18 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
 				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+
+				setLoading(false);
 				return searchFiltered || boardFilteredTasks;
 			}
 
+			setLoading(false);
 			return boardFilteredTasks;
 		}
+
+		setLoading(false);
 		return { Pending: [], Completed: [] };
 	}, [allTasks, activeBoardIndex, searchQuery]);
-
-	useEffect(() => {
-		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
-			setLoading(false);
-		}
-	}, [filteredAndSearchedTasks]);
 
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
@@ -738,36 +739,30 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		);
 	}
 
-	function handleViewChangeDropdownClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-		const viewMenu = new Menu();
-
-		viewMenu.addItem((item) => {
-			item.setTitle(t("kanban-view"));
-			item.setIcon("square-kanban");
-			item.onClick(async () => {
-				const newViewType = viewTypeNames.kanban;
-				setViewType(newViewType);
-				plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
-				plugin.saveSettings();
-			});
-		});
-
-		viewMenu.addItem((item) => {
-			item.setTitle(t("map-view"));
-			item.setIcon("network");
-			item.onClick(async () => {
-				const newViewType = viewTypeNames.map;
-				setViewType(newViewType);
-				plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
-				plugin.saveSettings();
-			});
-		});
-
-		// Use native event if available (React event has nativeEvent property)
-		viewMenu.showAtMouseEvent(
-			(event instanceof MouseEvent ? event : event.nativeEvent)
-		);
+	function handleViewChangeDropdownClick() {
+		setShowViewDropdown(!showViewDropdown);
 	}
+
+	function handleViewTypeSelect(newViewType: string) {
+		setViewType(newViewType);
+		plugin.settings.data.globalSettings.lastViewHistory.viewedType = newViewType;
+		plugin.saveSettings();
+		setShowViewDropdown(false);
+	}
+
+	// Close dropdown when clicking outside
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (viewDropdownRef.current && !viewDropdownRef.current.contains(event.target as Node)) {
+				setShowViewDropdown(false);
+			}
+		}
+
+		if (showViewDropdown) {
+			document.addEventListener('mousedown', handleClickOutside);
+			return () => document.removeEventListener('mousedown', handleClickOutside);
+		}
+	}, [showViewDropdown]);
 
 	// useEffect(() => {
 	// 	const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
@@ -793,7 +788,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	const viewTypeIconComponent = () => {
 		switch (viewType) {
 			case viewTypeNames.kanban:
-				return <SquareKanban size={20} />;
+				return <SquareKanban size={18} />;
 			case viewTypeNames.map:
 				return <Network size={18} />;
 			default:
@@ -910,15 +905,38 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					</button> */}
 
 					<div
+						ref={viewDropdownRef}
 						className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						onClick={(e) => {
-							handleViewChangeDropdownClick(e)
-						}}
+						onClick={handleViewChangeDropdownClick}
 					>
 						<div className="taskBoardViewDropdownIcon">
 							{viewTypeIconComponent()}
 						</div>
 						<div className="taskBoardViewDropdownName">{t(viewType)}</div>
+
+						{/* Custom Dropdown Menu */}
+						<div className={`taskBoardViewDropdownMenu ${showViewDropdown ? 'taskBoardViewDropdownMenu--open' : ''}`}>
+							<div
+								className={`taskBoardViewDropdownItem ${viewType === viewTypeNames.kanban ? 'taskBoardViewDropdownItem--active' : ''}`}
+								onClick={(e) => {
+									e.stopPropagation();
+									handleViewTypeSelect(viewTypeNames.kanban);
+								}}
+							>
+								<KanbanSquare size={18} />
+								<span>{t("kanban-view")}</span>
+							</div>
+							<div
+								className={`taskBoardViewDropdownItem ${viewType === viewTypeNames.map ? 'taskBoardViewDropdownItem--active' : ''}`}
+								onClick={(e) => {
+									e.stopPropagation();
+									handleViewTypeSelect(viewTypeNames.map);
+								}}
+							>
+								<Network size={16} />
+								<div>{t("map-view")}</div>
+							</div>
+						</div>
 					</div>
 
 					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
@@ -1040,7 +1058,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 					)
 				) : (
 					<div className="emptyBoardMessage">
-						Switch to different board.
+						{t("this-board-not-found")}
 					</div>
 				)}
 			</div>

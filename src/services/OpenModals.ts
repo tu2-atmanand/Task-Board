@@ -28,7 +28,7 @@ import { ScanVaultModal } from "src/modals/ScanVaultModal";
 import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { DatePickerModal } from "src/modals/date_picker";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { scanFilters } from "src/interfaces/GlobalSettings";
 
 // Function to open the BoardConfigModal
@@ -191,7 +191,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								});
 							});
 					} else {
-						const newName = getCurrentLocalTimeString();
+						const newName = getCurrentLocalDateTimeString();
 						const parts = newTask.filePath.split("/");
 						const dirPath = parts.slice(0, -1).join("/").trim();
 						const newPath = normalizePath(
@@ -798,8 +798,8 @@ export const openEditTaskView = async (
 export const openDateInputModal = async (
 	plugin: TaskBoard,
 	dateName: string,
-	initialValue: string,
 	onSelect: (newDate: string) => void,
+	initialValue?: string,
 ) => {
 	const datePicker = new DatePickerModal(plugin, dateName, initialValue);
 	datePicker.onDateSelected = async (date: string) => {

@@ -7,7 +7,7 @@ import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
 import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
 import { taskItemEmpty } from "src/interfaces/Mapping";
@@ -84,7 +84,7 @@ export class AddOrEditTaskModal extends Modal {
 				this.task.title = "";
 
 				// Sanitize filename
-				const noteName = this.task.title || getCurrentLocalTimeString();
+				const noteName = this.task.title || getCurrentLocalDateTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}

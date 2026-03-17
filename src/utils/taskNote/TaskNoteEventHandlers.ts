@@ -12,9 +12,10 @@ import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
 } from "../MarkdownFileOperations";
-import { moment as _moment } from "obsidian";
+// import { moment as _moment } from "obsidian";
 import { statusTypeNames } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { formatToday } from "../DateTimeCalculations";
 
 /**
  * Handle task note status change (checkbox change)
@@ -32,10 +33,11 @@ export const handleTaskNoteStatusChange = async (
 			globalSettings.customStatuses,
 			task.status,
 		);
-		const moment = _moment as unknown as typeof _moment.default;
-		const currentDateValue = moment().format(
-			globalSettings?.taskCompletionDateTimePattern,
-		);
+		// const moment = _moment as unknown as typeof _moment.default;
+		// const currentDateValue = moment().format(
+		// 	globalSettings?.dateTimeFormat,
+		// );
+		const currentDateValue = formatToday(globalSettings.dateFormat);
 
 		const updatedTask = {
 			...task,

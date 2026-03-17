@@ -55,7 +55,7 @@
 	"confirm-delete": "Bevestig verwijderen",
 	"confirm-task-delete-description": "Weet u zeker dat u deze taak wilt verwijderen?",
 	"vault-scanning-complete": "Vault Scanning compleet.",
-	"scan-tasks-from-the-vault": "Scan taken van de kluis",
+	"vault-scanner": "Scan taken van de kluis",
 	"scan-tasks-from-the-vault-description-1": "Voer deze functie alleen uit als uw taken niet correct zijn gedetecteerd/gescand of het bord wordt geacteerd.",
 	"scan-tasks-from-the-vault-description-2": "U hoeft deze functie niet vaak uit te voeren, de plug -in zal automatisch nieuw toegevoegde/bewerkte taken detecteren.",
 	"scan-tasks-from-the-vault-description-3": "OPMERKING: Controleer eerst uw 'Filters om te scannen' vanuit de plug -in -instellingen, als u scannen om niet -gedetecteerde taken te detecteren.",

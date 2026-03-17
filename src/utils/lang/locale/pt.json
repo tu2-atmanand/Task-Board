@@ -55,7 +55,7 @@
 	"confirm-delete": "Confirme excluir",
 	"confirm-task-delete-description": "Tem certeza de que deseja excluir esta tarefa?",
 	"vault-scanning-complete": "Varredura de cofre completa.",
-	"scan-tasks-from-the-vault": "Digitalizar tarefas do cofre",
+	"vault-scanner": "Digitalizar tarefas do cofre",
 	"scan-tasks-from-the-vault-description-1": "Execute esse recurso apenas se suas tarefas não tiverem sido adequadamente detectadas/digitalizadas ou a placa estiver atuando.",
 	"scan-tasks-from-the-vault-description-2": "Você não precisa executar esse recurso com frequência, o plug -in detectará automaticamente tarefas adicionadas/editadas.",
 	"scan-tasks-from-the-vault-description-3": "Nota: Verifique primeiro seus 'filtros para digitalização' nas configurações do plug -in, se você estiver digitalizando para detectar tarefas não detectadas.",

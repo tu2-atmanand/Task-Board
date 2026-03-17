@@ -11,7 +11,7 @@ import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
 import { newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
 
@@ -48,22 +48,24 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
 	const [progress, setProgress] = useState(0);
+	const [scannedFilesCount, setScannedFilesCount] = useState<number>();
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
 		VaultName: app.vault.getName(),
-		Modified_at: getCurrentLocalTimeString(),
+		Modified_at: getCurrentLocalDateTimeString(),
 		Pending: {},
 		Completed: {},
 	});
 
 	const runScan = async () => {
 		setIsRunning(true);
+		let totalScannedFilesCount = 0;
 
 		// Reset terminal output and collected tasks
 		vaultScanner.tasksCache.Pending = {};
 		vaultScanner.tasksCache.Completed = {};
 		vaultScanner.tasksCache.VaultName = app.vault.getName();
-		vaultScanner.tasksCache.Modified_at = getCurrentLocalTimeString();
+		vaultScanner.tasksCache.Modified_at = getCurrentLocalDateTimeString();
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
@@ -77,6 +79,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 					await vaultScanner.extractTasksFromFile(file, scanFilters);
+					totalScannedFilesCount++;
 				}
 			}
 
@@ -85,6 +88,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		// setIsRunning(false);
 		setCollectedTasks(vaultScanner.tasksCache);
+		setScannedFilesCount(totalScannedFilesCount);
 		new Notice(t("vault-scanning-complete"));
 
 		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
@@ -155,19 +159,21 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 	return (
 		<div className="scanVaultModalHome">
-			<h2>{t("scan-tasks-from-the-vault")}</h2>
+			<h2>{t("vault-scanner")}</h2>
 			{localStorage.getItem("manadatoryScan") === "true" ?
-				(<>
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
-					<br />
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href={`https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`}>Task Board v{newReleaseVersion}</a>.</div>
-				</>
+				(
+					<>
+						<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
+						<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
+						<br />
+						<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href={`https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`}>Task Board v{newReleaseVersion}</a>.</div>
+					</>
 				) :
-				(<>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-1")}</div>
-					<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-2")}</div>
-				</>
+				(
+					<>
+						<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-1")}</div>
+						<div className="setting-item-description">{t("scan-tasks-from-the-vault-info-2")}</div>
+					</>
 				)}
 
 			<div className="scanVaultModalHomeSecondSection" >
@@ -178,6 +184,12 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 					{isRunning ? progress.toFixed(0) : t("run")}
 				</button>
 			</div>
+
+			{progress === 100 && (
+				<div className="scanVaultModalHomeScannedFilesCountSection">
+					Total files scanned : {scannedFilesCount}
+				</div>
+			)}
 
 			<div className="scanVaultModalHomeThirdSection">
 				<div className={`scanVaultModalHomeTerminal ${showCollectedTasks ? 'scanVaultModalHomeTerminalSlideOut' : 'scanVaultModalHomeTerminalSlideIn'}`}>

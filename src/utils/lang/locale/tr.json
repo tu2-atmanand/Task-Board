@@ -55,7 +55,7 @@
 	"confirm-delete": "Silini onaylayın",
 	"confirm-task-delete-description": "Bu görevi silmek istediğinden emin misiniz?",
 	"vault-scanning-complete": "Kasa taraması tamamlandı.",
-	"scan-tasks-from-the-vault": "Görevleri tonozdan tarama",
+	"vault-scanner": "Görevleri tonozdan tarama",
 	"scan-tasks-from-the-vault-description-1": "Bu özelliği yalnızca görevleriniz düzgün bir şekilde algılanmamış/taranmamışsa veya kartın tuhaf davranması durumunda çalıştırın.",
 	"scan-tasks-from-the-vault-description-2": "Bu özelliği sık sık çalıştırmak zorunda değilsiniz, eklenti yeni eklenen/düzenlenmiş görevleri otomatik olarak algılayacaktır.",
 	"scan-tasks-from-the-vault-description-3": "Not: Belirlenmemiş görevleri algılamak için tarama yapıyorsanız, lütfen eklenti ayarlarından 'tarama için filtrelerinizi' kontrol edin.",

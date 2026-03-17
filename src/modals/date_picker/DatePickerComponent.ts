@@ -1,7 +1,24 @@
 import { Component, setIcon, App } from "obsidian";
-import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
+import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
+import {
+	format,
+	addDays,
+	addWeeks,
+	addMonths,
+	addYears,
+	startOfMonth,
+	endOfMonth,
+	startOfWeek,
+	endOfWeek,
+	isBefore,
+	isSameDay,
+	isSameMonth,
+	eachDayOfInterval,
+	isToday as isTodayDateFns,
+} from "date-fns";
+import { robustDateParser } from "src/utils/DateTimeCalculations";
 
 export interface DatePickerState {
 	selectedDate: string | null;
@@ -15,8 +32,7 @@ export class DatePickerComponent extends Component {
 	private dateName: string | undefined = "";
 	private state: DatePickerState;
 	private onDateChange?: (date: string) => void;
-	private currentViewDate: moment.Moment;
-	private moment: typeof _moment.default;
+	private currentViewDate: Date;
 
 	constructor(
 		hostEl: HTMLElement,
@@ -34,10 +50,13 @@ export class DatePickerComponent extends Component {
 			selectedDate: initialDate || null,
 			dateMark: dateMark,
 		};
-		this.moment = _moment as unknown as typeof _moment.default;
+		// Parse initial date or use current date
 		this.currentViewDate = initialDate
-			? this.moment(initialDate)
-			: this.moment();
+			? robustDateParser(
+					initialDate,
+					plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT,
+				) || new Date()
+			: new Date();
 	}
 
 	onload(): void {
@@ -74,10 +93,10 @@ export class DatePickerComponent extends Component {
 			cls: "date-picker-container",
 		});
 
-		const heading = datePickerContainer.createEl("h2", {
-			cls: "date-picker-heading",
-			text: "Change " + this.dateName + " Date",
-		});
+		// const heading = datePickerContainer.createEl("h2", {
+		// 	cls: "date-picker-heading",
+		// 	text: "Change " + this.dateName + " Date",
+		// });
 
 		const mainPanel = datePickerContainer.createDiv({
 			cls: "date-picker-main-panel",
@@ -128,11 +147,20 @@ export class DatePickerComponent extends Component {
 				cls: "quick-option-label",
 			});
 
-			const date = this.moment().add(
-				option.amount,
-				option.unit as moment.unitOfTime.DurationConstructor,
-			);
-			const formattedDate = date.format("YYYY-MM-DD");
+			let date = new Date();
+			if (option.unit === "days") {
+				date = addDays(date, option.amount);
+			} else if (option.unit === "weeks") {
+				date = addWeeks(date, option.amount);
+			} else if (option.unit === "months") {
+				date = addMonths(date, option.amount);
+			} else if (option.unit === "years") {
+				date = addYears(date, option.amount);
+			}
+
+			const usersDateFormat =
+				this.plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT;
+			const formattedDate = format(date, usersDateFormat);
 
 			optionEl.createSpan({
 				text: formattedDate,
@@ -179,7 +207,7 @@ export class DatePickerComponent extends Component {
 
 	private renderCalendarHeader(
 		container: HTMLElement,
-		currentDate: moment.Moment,
+		currentDate: Date,
 	): void {
 		const header = container.createDiv({
 			cls: "calendar-header",
@@ -199,7 +227,7 @@ export class DatePickerComponent extends Component {
 		// Month/Year display
 		const monthYear = header.createDiv({
 			cls: "calendar-month-year",
-			text: currentDate.format("MMMM YYYY"),
+			text: format(currentDate, "MMMM yyyy"),
 		});
 
 		// Next month button
@@ -216,7 +244,7 @@ export class DatePickerComponent extends Component {
 
 	private renderCalendarGrid(
 		container: HTMLElement,
-		currentDate: moment.Moment,
+		currentDate: Date,
 	): void {
 		const grid = container.createDiv({
 			cls: "calendar-grid",
@@ -232,30 +260,32 @@ export class DatePickerComponent extends Component {
 		});
 
 		// Get first day of month and number of days
-		const firstDay = currentDate.clone().startOf("month");
-		const lastDay = currentDate.clone().endOf("month");
-		const startDate = firstDay.clone().startOf("week");
-		const endDate = lastDay.clone().endOf("week");
+		const firstDay = startOfMonth(currentDate);
+		const lastDay = endOfMonth(currentDate);
+		const startDate = startOfWeek(firstDay);
+		const endDate = endOfWeek(lastDay);
 
 		// Generate calendar days
-		const current = startDate.clone();
-		while (current.isSameOrBefore(endDate)) {
+		const days = eachDayOfInterval({ start: startDate, end: endDate });
+		days.forEach((day) => {
 			const dayEl = grid.createDiv({
 				cls: "calendar-day",
-				text: current.format("D"),
+				text: format(day, "d"),
 			});
 
-			const dateStr = current.format("YYYY-MM-DD");
+			const usersDateFormat =
+				this.plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT;
+			const dateStr = format(day, usersDateFormat);
 
 			// Store the full date string for easy comparison later
 			dayEl.setAttribute("data-date", dateStr);
 
 			// Add classes for styling
-			if (!current.isSame(firstDay, "month")) {
+			if (!isSameMonth(day, firstDay)) {
 				dayEl.addClass("other-month");
 			}
 
-			if (current.isSame(this.moment(), "day")) {
+			if (isTodayDateFns(day)) {
 				dayEl.addClass("today");
 			}
 
@@ -269,13 +299,11 @@ export class DatePickerComponent extends Component {
 				e.stopPropagation();
 				this.setSelectedDate(dateStr);
 			});
-
-			current.add(1, "day");
-		}
+		});
 	}
 
 	private navigateMonth(direction: number): void {
-		this.currentViewDate.add(direction, "month");
+		this.currentViewDate = addMonths(this.currentViewDate, direction);
 		this.render();
 	}
 

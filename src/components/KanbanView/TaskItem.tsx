@@ -16,19 +16,22 @@ import { Board } from 'src/interfaces/BoardConfigs';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
-import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType } from 'src/interfaces/Enums';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType, UniversalDateOptions } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { getUniversalDateFromTask, parseUniversalDate } from 'src/utils/DateTimeCalculations';
+import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { openDateInputModal } from 'src/services/OpenModals';
 import { showTextInputModal } from 'src/modals/TextInputModal';
+import { startOfDay, isToday, compareAsc, isAfter, isBefore } from 'date-fns';
+import { DEFAULT_DATE_FORMAT } from 'src/interfaces/Constants';
+import { DateTimePickerModal } from 'src/modals/date_time_picker/DateTimePickerModal';
 
 export interface swimlaneDataProp {
 	property: string;
@@ -64,9 +67,9 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		}
 	}, [plugin.settings.data.globalSettings]);
 
-	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, plugin));
+	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
-		setUniversalDate(getUniversalDateFromTask(task, plugin));
+		setUniversalDate(getUniversalDateFromTask(task, globalSettings.universalDate));
 	}, [task.due, task.startDate, task.scheduledDate]);
 
 
@@ -377,43 +380,72 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	// ========================================
 
 	const getColorIndicator = useCallback(() => {
-		const today = new Date();
-		const taskUniversalDate = parseUniversalDate(universalDate) || new Date(universalDate);
+		// Return grey if there's no universal date
+		if (!universalDate) {
+			return 'grey';
+		}
 
-		if (taskUniversalDate.toDateString() === today.toDateString()) {
-			if (task.time) {
-				const [startStr, endStr] = task.time.contains('-') ? task.time.split('-') : [task.time, task.time];
-				const [startHours, startMinutes] = startStr.contains(':') ? startStr.trim().split(':').map(Number) : [startStr, 0].map(Number);
-				const [endHours, endMinutes] = endStr.contains(':') ? endStr.trim().split(':').map(Number) : [endStr, 0].map(Number);
+		// Use robust date parser for reliable parsing
+		const dateFormatToUse = plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT;
+		const parsedTaskDate = robustDateParser(universalDate, dateFormatToUse);
 
-				const startTime = new Date(today);
-				startTime.setHours(startHours, startMinutes, 0, 0);
+		if (!parsedTaskDate) {
+			return 'grey'; // Invalid date, return grey
+		}
 
-				const endTime = new Date(today);
-				endTime.setHours(endHours, endMinutes, 0, 0);
+		// Set to start of day for accurate date comparison
+		const taskDateAtStartOfDay = startOfDay(parsedTaskDate);
+		const today = startOfDay(new Date());
 
-				const now = new Date();
+		// Check if the task date is today
+		if (isToday(taskDateAtStartOfDay)) {
+			// If there's a time component, use it for more detailed color indication
+			if (task.time && task.time.trim() !== "") {
+				try {
+					const [startStr, endStr] = task.time.includes('-') ? task.time.split('-') : [task.time, task.time];
+					const [startHours, startMinutes] = startStr.includes(':') ?
+						startStr.trim().split(':').map(Number) :
+						[parseInt(startStr.trim()), 0];
+					const [endHours, endMinutes] = endStr.includes(':') ?
+						endStr.trim().split(':').map(Number) :
+						[parseInt(endStr.trim()), 0];
 
-				if (now < startTime) {
-					// return 'var(--color-yellow)'; // Not started yet
-					return '#e8ce4aa8'; // Not started yet
-				} else if (now >= startTime && now <= endTime) {
-					return 'var(--color-blue)'; // In progress
-				} else if (now > endTime) {
-					return '#f23a3ab8'; // Past due
+					const startTime = new Date(today);
+					startTime.setHours(startHours, startMinutes, 0, 0);
+
+					const endTime = new Date(today);
+					endTime.setHours(endHours, endMinutes, 0, 0);
+
+					const now = new Date();
+
+					if (compareAsc(now, startTime) < 0) {
+						// Not started yet
+						return 'var(--color-yellow)';
+					} else if (compareAsc(now, startTime) >= 0 && compareAsc(now, endTime) <= 0) {
+						// In progress
+						return 'var(--color-blue)';
+					} else if (compareAsc(now, endTime) > 0) {
+						// Past due
+						return '#f23a3ab8';
+					}
+				} catch (error) {
+					// If time parsing fails, return yellow for "due today"
+					return 'var(--color-yellow)';
 				}
 			} else {
-				return 'var(--color-yellow)'; // Due today but no time info
+				// Due today but no time info
+				return 'var(--color-yellow)';
 			}
-		} else if (taskUniversalDate > today) {
-			return 'green'; // Due in future
-		} else if (taskUniversalDate < today) {
-			// return 'var(--color-red)'; // Past due
-			return '#f23a3ab8'; // Past due
+		} else if (isAfter(taskDateAtStartOfDay, today)) {
+			// Due in future
+			return 'green';
+		} else if (isBefore(taskDateAtStartOfDay, today)) {
+			// Past due
+			return '#f23a3ab8';
 		} else {
-			return 'grey'; // No due date
+			return 'grey'; // No due date or comparison failed
 		}
-	}, [universalDate, task.time]);
+	}, [universalDate, task.time, plugin.settings.data.globalSettings.dateFormat]);
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(tags: string[]): string | undefined {
@@ -452,18 +484,18 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				}
 			}
 
-			const getOpacityValue = (color: string): number => {
-				const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
-				if (rgbaMatch) {
-					const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
-					return opacity;
-				}
-				return 1;
-			};
+			// const getOpacityValue = (color: string): number => {
+			// 	const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+			// 	if (rgbaMatch) {
+			// 		const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+			// 		return opacity;
+			// 	}
+			// 	return 1;
+			// };
 
-			if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-				return updateRGBAOpacity(highestPriorityTag.color, 0.2);
-			}
+			// if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+			// 	return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+			// }
 
 			return highestPriorityTag?.color;
 		}
@@ -644,8 +676,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	const handleMenuButtonClicked = (event: React.MouseEvent) => {
 		event.stopPropagation();
 
-		if (!globalSettings.experimentalFeatures) return;
-
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
@@ -660,11 +690,11 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
-					const itemDocFragment = MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} (**[${status.value}]**)`, item.titleEl, '', null);
+					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} **[${status.value}]**`, item.titleEl, '', null);
 					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
-						updateTaskItemStatus(plugin, task, status.value);
+						updateTaskItemStatus(plugin, task, task, status.value);
 					})
 				});
 			})
@@ -679,7 +709,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			priorityOptions.forEach((p) => {
 				priMenu.addItem((it) => {
 					it.setTitle(p.text);
-					it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
+					it.onClick(() => updateTaskItemPriority(plugin, task, task, p.value));
 				});
 			});
 		});
@@ -702,27 +732,27 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			it.setIcon("calendar-plus")
 			it.setTitle(t("start-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'startDate', newDate);
-				})
+				openDateInputModal(plugin, t("start"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
+				}, task.startDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar-clock")
 			it.setTitle(t("scheduled-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
-				})
+				openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
+				}, task.scheduledDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar")
 			it.setTitle(t("due-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'due', newDate);
-				})
+				openDateInputModal(plugin, t("due"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
+				}, task.due)
 			});
 		});
 
@@ -731,14 +761,18 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 			item.setIcon("clock");
 			item.setTitle(t("reminder"));
 			item.onClick(async () => {
-				// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
+				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
+					updateTaskItemReminder(plugin, task, task, dateTime);
+				};
+				modal.open();
 			});
 		});
 
 		taskItemMenu.addSeparator();
 
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("quick-actions"));
+			item.setTitle(t("task-actions"));
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
@@ -752,6 +786,36 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					new Notice(t("copy-task-title-unsuccessful"));
 				}
 			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor"));
+			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.Modal);
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor-in"));
+			const taskEditorMenu = item.setSubmenu();
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("columns-2");
+				subItem.setTitle(t("right-split"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
+			});
+
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("picture-in-picture-2");
+				subItem.setTitle(t("new-window"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("note-actions"));
+			item.setIsLabel(true);
 		});
 
 		taskItemMenu.addItem((item) => {
@@ -772,7 +836,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
 			item.setIcon("file-text");
-			item.setTitle(t("note-actions"));
+			item.setTitle(t("more-note-actions"));
 
 			const submenu = (item as any).setSubmenu();
 
@@ -849,41 +913,19 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// prevent column drag from also starting
+		e.stopPropagation();
+
 		if (!columnData) {
 			e.preventDefault();
 			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskItem.tsx/handleDragStart");
 			return;
 		}
-
-		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
 			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentBoardIndex: activeBoardSettings.index, swimlaneData: swimlaneData };
-			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
-
-			// Add dragging class after a small delay to not affect the drag image
-			// const clone = el.cloneNode(true) as HTMLDivElement;
-			// requestAnimationFrame(() => {
-			// 	e.dataTransfer?.setDragImage(clone, 0, 0);
-			// });
-			// clone.classList.add("task-item-dragging");
-
-			// Also set a drag image from the whole task element so the preview is the full card
-			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
-			// if (taskItemRef.current && e.dataTransfer) {
-			// 	console.log("TaskItemRef.current", taskItemRef.current);
-			// 	const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
-			// 	// clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
-			// 	clone.style.opacity = '0.5';
-			// 	clone.style.position = 'absolute';
-			// 	// clone.style.top = '-9999px';
-			// 	// document.body.appendChild(clone);
-			// 	const rect = taskItemRef.current.getBoundingClientRect();
-			// 	e.dataTransfer.setDragImage(clone, rect.width, rect.height);
-			// 	setTimeout(() => {
-			// 		try { document.body.removeChild(clone); } catch { }
-			// 	}, 0);
-			// }
+			// Delegate to manager for standardized behavior (sets current payload and dims element)
+			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload);
 		} catch (err) {
 			// fallback minimal behavior
 			// try {
@@ -1258,6 +1300,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.priority, task.tags, activeBoardSettings]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.globalSettings.visiblePropertiesList, task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
+	// TODO : Why we are not memoizing the footer component ?
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	// ========================================
@@ -1267,12 +1310,12 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		<div className='taskItemContainer'>
 			<div
 				ref={taskItemRef}
-				className={`taskItem ${isThistaskCompleted ? 'completed' : ''}`}
+				className={`taskItem${isThistaskCompleted ? ' completed' : ''}`}
 				key={taskIdKey}
 				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
-				draggable={true}
+				draggable={Platform.isDesktopApp}
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>
@@ -1282,31 +1325,22 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 					{memoizedRenderHeader}
 
 					{/* Drag Handle and Task Menu button */}
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
-						<>
-							{
-								Platform.isPhone || plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.map ? (
-									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-									</>
-								) : (
-									<>
-										{/* Drag Handle */}
-										{columnData?.colType !== colTypeNames.allPending && (
-											<div className="taskItemDragBtn"
-											// aria-label={t("drag-task-card")}
-											// draggable={true}
-											// onDragStart={handleDragStart}
-											// onDragEnd={handleDragEnd}
-											>
-												<Grip size={18} enableBackground={0} opacity={0.4} />
-											</div>
-										)}
-									</>
-								)
-							}
-						</>
-					)}
+					{
+						Platform.isDesktopApp ? (
+							<>
+								{/* Drag Handle */}
+								{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+									<div className="taskItemDragBtn">
+										<Grip size={18} enableBackground={0} opacity={0.4} />
+									</div>
+								)}
+							</>
+						) : (
+							<>
+								<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+							</>
+						)
+					}
 
 					{/* Task Content */}
 					<div className="taskItemMainBody">

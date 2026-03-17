@@ -58,7 +58,7 @@
 	"confirm-delete": "Potwierdź Usuń",
 	"confirm-task-delete-description": "Czy na pewno chcesz usunąć to zadanie?",
 	"vault-scanning-complete": "Kompletne skanowanie skanowania skarbca.",
-	"scan-tasks-from-the-vault": "Zadania ze skanowania ze sklepienia",
+	"vault-scanner": "Zadania ze skanowania ze sklepienia",
 	"scan-tasks-from-the-vault-description-1": "Uruchom tę funkcję tylko wtedy, gdy twoje zadania nie zostały właściwie wykryte/zeskanowane lub płyta działa.",
 	"scan-tasks-from-the-vault-description-2": "Nie musisz często uruchamiać tej funkcji, wtyczka automatycznie wykryje nowo dodane/edytowane zadania.",
 	"scan-tasks-from-the-vault-description-3": "Uwaga: Najpierw sprawdź swoje „filtry do skanowania” z ustawień wtyczki, jeśli skanujesz, aby wykryć niewykryte zadania.",

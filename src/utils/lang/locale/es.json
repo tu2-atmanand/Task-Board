@@ -65,7 +65,7 @@
 	"yes": "Sí",
 	"no": "No",
 	"vault-scanning-complete": "Escaneo de bóveda completado.",
-	"scan-tasks-from-the-vault": "Escanear tareas desde la bóveda",
+	"vault-scanner": "Escanear tareas desde la bóveda",
 	"scan-tasks-from-the-vault-description-1": "Ejecute esta función solo si sus tareas no se han detectado/escaneado correctamente o si el tablero actúa de manera extraña.",
 	"scan-tasks-from-the-vault-description-2": "No es necesario ejecutar esta función con frecuencia, el complemento detectará automáticamente las tareas recién agregadas o editadas.",
 	"scan-tasks-from-the-vault-description-3": "NOTA: primero verifique sus 'filtros para escaneo' desde la configuración del complemento, si está escaneando para detectar tareas no detectadas.",

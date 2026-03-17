@@ -49,15 +49,15 @@ import { migrateSettings } from "src/settings/SettingSynchronizer";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
-	vaultScanner: VaultScanner;
-	realTimeScanner: RealTimeScanner;
+	vaultScanner!: VaultScanner;
+	realTimeScanner!: RealTimeScanner;
 	// taskBoardFileStack: string[] = [];
 	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
@@ -97,12 +97,6 @@ export default class TaskBoard extends Plugin {
 		this.app = this.plugin.app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.vaultScanner = new VaultScanner(this.app, this.plugin);
-		this.realTimeScanner = new RealTimeScanner(
-			this.app,
-			this.plugin,
-			this.vaultScanner,
-		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -118,13 +112,20 @@ export default class TaskBoard extends Plugin {
 
 	async onload() {
 		console.log("Task Board : Loading...");
+		// Loads settings data and creating the Settings Tab in main Setting
+		await this.loadSettings();
+
+		this.vaultScanner = new VaultScanner(this.app, this.plugin);
+		this.realTimeScanner = new RealTimeScanner(
+			this.app,
+			this.plugin,
+			this.vaultScanner,
+		);
 
 		// NOTE : I feel, if these singleton instances needs the latest version of 'this', then they might show some unexpected behavior as I am not updating the 'this' inside those singleton instances latest during the plugin life-cycle.
 		dragDropTasksManagerInsatance.setPlugin(this);
 		bugReporterManagerInsatance.setPlugin(this);
 
-		// Loads settings data and creating the Settings Tab in main Setting
-		await this.loadSettings();
 		this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
@@ -179,7 +180,15 @@ export default class TaskBoard extends Plugin {
 
 	async activateView(leafLayout: string) {
 		let leaf: WorkspaceLeaf | null = null;
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+		let leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+
+		if (leaves.length === 0) {
+			this.app.workspace.iterateAllLeaves((leaf) => {
+				if (leaf.view instanceof TaskBoardView) {
+					leaves.push(leaf);
+				}
+			});
+		}
 
 		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
 			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
@@ -192,21 +201,12 @@ export default class TaskBoard extends Plugin {
 			(leaf) => !isFromMainWindow(leaf),
 		);
 
-		if (leafLayout === "icon") {
+		if (leafLayout === "icon" || leafLayout === "tab") {
 			// Focus on any existing leaf, prioritizing MainWindow
 			leaf =
 				mainWindowLeaf ||
 				separateWindowLeaf ||
 				this.app.workspace.getLeaf("tab");
-		} else if (leafLayout === "tab") {
-			// Check if a leaf exists in MainWindow
-			if (mainWindowLeaf) {
-				// Prevent duplicate in MainWindow
-				leaf = mainWindowLeaf;
-			} else {
-				// Allow opening a new leaf in MainWindow
-				leaf = this.app.workspace.getLeaf("tab");
-			}
 		} else if (leafLayout === "window") {
 			// Check if a leaf exists in SeparateWindow
 			if (separateWindowLeaf) {
@@ -1174,7 +1174,7 @@ export default class TaskBoard extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on("quit", () => {
-				const currentTime = getCurrentLocalTimeString();
+				const currentTime = getCurrentLocalDateTimeString();
 				this.app.saveLocalStorage(
 					OBSIDIAN_CLOSED_TIME_KEY,
 					currentTime,
@@ -1414,13 +1414,13 @@ export default class TaskBoard extends Plugin {
 			// 		cls: "taskboardCustomMessageContainerBold",
 			// 	});
 			// 	customMessageContainer.createEl("span", {
-			// 		text: "If you were using the custom statuses from Tasks plugin configs. Please import them in Task Board's setting, using a button in the new Custom Statuses setting section. Task Board will no longer import the custom statuses from Tasks plugin automatically.",
+			// 		text: "This new version will be using the date-fns library for managing all date-time related calculations. Because of this more features are possible in the future. Kindly take a look at the two new settings added under the 'Formats' tab in task boards settings.",
 			// 	});
 			// 	customMessageContainer.createEl("p", {
-			// 		text: "Read the release notes for all the latest features : ",
+			// 		text: "Read the release notes for all the changes : ",
 			// 	});
 			// 	customMessageContainer.createEl("a", {
-			// 		text: "Task Board v1.9.4",
+			// 		text: "Task Board v1.9.6",
 			// 		href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
 			// 	});
 			// }

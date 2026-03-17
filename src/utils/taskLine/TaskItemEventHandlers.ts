@@ -7,7 +7,7 @@ import {
 	isTaskRecurring,
 } from "./TaskLineUtils";
 import TaskBoard from "main";
-import { moment as _moment } from "obsidian";
+// import { moment as _moment } from "obsidian";
 import { t } from "../lang/helper";
 import { taskItem } from "src/interfaces/TaskItem";
 import { TasksPluginApi } from "src/services/tasks-plugin/api";
@@ -85,7 +85,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 		// 	const globalSettings = plugin.settings.data.globalSettings;
 		// 	const moment = _moment as unknown as typeof _moment.default;
 		// 	const currentDateValue = moment().format(
-		// 		globalSettings?.taskCompletionDateTimePattern
+		// 		globalSettings?.dateTimeFormat
 		// 	);
 		// 	let newTitle = "";
 		// 	if (newStatus.type === statusTypeNames.DONE) {
