@@ -135,6 +135,9 @@ export default class TaskBoard extends Plugin {
 
 		await this.vaultScanner.initializeTasksCache();
 
+		// Register the Kanban view
+		this.registerTaskBoardView();
+
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
 			this.compatiblePluginsAvailabilityCheck();
@@ -150,9 +153,6 @@ export default class TaskBoard extends Plugin {
 
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
-
-			// Register the Kanban view
-			this.registerTaskBoardView();
 
 			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
