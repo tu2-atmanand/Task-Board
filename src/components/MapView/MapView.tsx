@@ -104,6 +104,9 @@ const MapView: React.FC<MapViewProps> = ({
 	// Task importer panel state
 	const [isImporterPanelVisible, setIsImporterPanelVisible] = useState(false);
 
+	// Track newly imported task ID to select it when it appears
+	const [newlyImportedTaskId, setNewlyImportedTaskId] = useState<string | null>(null);
+
 	// ReactFlow instance ref so we can programmatically set viewport when switching boards
 	const reactFlowInstanceRef = useRef<any | null>(null);
 
@@ -210,6 +213,23 @@ const MapView: React.FC<MapViewProps> = ({
 		setBoardChangeKey(prev => prev + 1);
 	}, [activeBoardIndex]);
 
+	// Listen for task import events to select newly imported tasks
+	useEffect(() => {
+		const handleTaskImported = (taskId: string) => {
+			setNewlyImportedTaskId(taskId);
+			// Clear the selection after a delay to allow user interaction
+			// setTimeout(() => {
+			// 	setNewlyImportedTaskId(null);
+			// }, 2000);
+		};
+
+		eventEmitter.on('TASK_IMPORTED_TO_MAP', handleTaskImported);
+
+		return () => {
+			eventEmitter.off('TASK_IMPORTED_TO_MAP', handleTaskImported);
+		};
+	}, []);
+
 
 	// const reactFlowInstance = useReactFlow();
 	// useEffect(() => {
@@ -308,6 +328,7 @@ const MapView: React.FC<MapViewProps> = ({
 						y: safeY,
 					},
 					width: nodeWidth,
+					selected: id === newlyImportedTaskId, // Select newly imported nodes
 				});
 			}
 		});
@@ -319,7 +340,7 @@ const MapView: React.FC<MapViewProps> = ({
 		}
 
 		return newNodes;
-	}, [allTasksFlattened, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey]);
+	}, [allTasksFlattened, activeBoardSettings, activeBoardIndex, storageLoaded, boardChangeKey, newlyImportedTaskId]);
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
