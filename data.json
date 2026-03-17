@@ -23,10 +23,10 @@
               }
             ],
             "tasksIdManualOrder": [
+              "632",
               "367",
               "362",
               "372",
-              "2621707603",
               "370",
               263,
               "373"
@@ -263,21 +263,11 @@
       {
         "columns": [
           {
-            "id": 3464921309,
-            "index": 1,
-            "colType": "otherTags",
-            "active": true,
-            "collapsed": false,
-            "name": "Other tags",
-            "minimized": false,
-            "swimlaneEnabled": true
-          },
-          {
             "colType": "untagged",
             "active": true,
             "collapsed": false,
             "name": "Backlogs",
-            "index": 2,
+            "index": 1,
             "id": 2441116899,
             "sortCriterias": [],
             "filters": {
@@ -292,8 +282,18 @@
                 "uid": "k6wjlc63"
               }
             ],
-            "minimized": false,
-            "swimlaneEnabled": true
+            "minimized": true,
+            "swimlaneEnabled": false
+          },
+          {
+            "id": 3464921309,
+            "index": 2,
+            "colType": "otherTags",
+            "active": true,
+            "collapsed": false,
+            "name": "Other tags",
+            "minimized": true,
+            "swimlaneEnabled": false
           },
           {
             "id": 1643647904,
@@ -548,17 +548,19 @@
               "index": 1
             },
             {
-              "value": "second",
+              "value": "third",
               "index": 2
             },
             {
-              "value": "third",
+              "value": "second",
               "index": 3
             }
           ],
           "groupAllRest": true,
           "headerUIType": "vert",
-          "minimized": []
+          "minimized": [
+            "Tags: All rest"
+          ]
         }
       },
       {
@@ -668,15 +670,6 @@
             "workLimit": 5
           },
           {
-            "id": 4001604020,
-            "index": 6,
-            "colType": "namedTag",
-            "active": true,
-            "collapsed": false,
-            "name": "Test",
-            "coltag": "Test"
-          },
-          {
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
@@ -695,7 +688,8 @@
             "index": 8,
             "coltag": "done",
             "id": 1813505005,
-            "minimized": false
+            "minimized": false,
+            "sortCriteria": []
           },
           {
             "id": 1513258338,
@@ -925,7 +919,8 @@
             "active": true,
             "collapsed": false,
             "name": "Important",
-            "taskStatus": "*"
+            "taskStatus": "*",
+            "swimlaneEnabled": true
           },
           {
             "id": 3261396994,
@@ -992,10 +987,10 @@
           "enabled": true,
           "hideEmptySwimlanes": false,
           "property": "tags",
-          "maxHeight": "300px",
-          "sortCriteria": "custom",
-          "customSortOrder": [],
-          "headerUIType": "hor",
+          "maxHeight": "400px",
+          "sortCriteria": "asc",
+          "groupAllRest": false,
+          "headerUIType": "vert",
           "minimized": []
         },
         "description": "This board is for testing drag and drop feature for status based workflow.",
@@ -1157,7 +1152,7 @@
       "columnWidth": "300px",
       "showHeader": true,
       "showFooter": true,
-      "showVerticalScroll": true,
+      "showVerticalScroll": false,
       "tagColors": [
         {
           "name": "Bug",
@@ -1206,7 +1201,7 @@
         }
       ],
       "editButtonAction": "popUp",
-      "openOnStartup": false,
+      "openOnStartup": true,
       "customStatuses": [
         {
           "symbol": " ",
@@ -1256,10 +1251,24 @@
           "nextStatusSymbol": "x",
           "availableAsCommand": true,
           "type": "CANCELLED"
+        },
+        {
+          "symbol": "G",
+          "name": "On Hold",
+          "nextStatusSymbol": "/",
+          "availableAsCommand": false,
+          "type": "ON_HOLD"
+        },
+        {
+          "symbol": "i",
+          "name": "Information",
+          "nextStatusSymbol": "/",
+          "availableAsCommand": false,
+          "type": "TODO"
         }
       ],
       "showTaskWithoutMetadata": false,
-      "tagColorsType": "background",
+      "tagColorsType": "text",
       "compatiblePlugins": {
         "dailyNotesPlugin": false,
         "tasksPlugin": true,
@@ -1271,7 +1280,7 @@
       "quickAddPluginDefaultChoice": "Task Board Temp Tasks",
       "autoAddCreatedDate": true,
       "autoAddUniversalDate": true,
-      "universalDate": "due",
+      "universalDate": "scheduledDate",
       "archivedTasksFilePath": "",
       "showFileNameInCard": true,
       "showFrontmatterTagsOnCards": true,
@@ -1291,14 +1300,14 @@
       "taskPropertyFormat": "2",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
-      "uniqueIdCounter": 631,
+      "uniqueIdCounter": 634,
       "experimentalFeatures": true,
       "searchQuery": "",
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 5,
+        "boardIndex": 0,
         "taskId": "",
-        "settingTab": 7
+        "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
       "doubleClickCardToEdit": "noteInSplit",

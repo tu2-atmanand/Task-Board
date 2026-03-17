@@ -18,6 +18,7 @@
   - Tasks v7.22.0
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
+  - Calendar v1.5.10
 
 ## Recent Bug Reports
 
@@ -63,10 +64,102 @@ No current drag data available for drop operation.currentDragData=null
 Timestamp : 2026-03-15T14:34:25
 ID : 142
 Message : 
-Context : DragDropTasksManager.ts/handleDropEvent
+Context : undefined
 Version : 1.9.7
 
 #### Bug Content
 ```log
 No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-15T17:07:32
+ID : 142
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-15T17:15:06
+ID : 142
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-15T17:21:40
+ID : 142
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-15T17:21:42
+ID : 91
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+Column data : undefined
+```
+
+-------------
+
+Timestamp : 2026-03-15T17:41:45
+ID : 142
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-15T18:31:33
+ID : 142
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-15T21:48:48
+ID : 141
+Message : 
+Context : DragDropTasksManager.ts/handleColumnDragOverEvent
+Version : 1.9.7
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
 ```
