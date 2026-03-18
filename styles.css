@@ -115,7 +115,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	cursor: pointer;
 }
 
-/* // src/components/TaskBoardViewContent.tsx*/
+/* // src/components/TaskBoardViewContainer.tsx*/
 .taskBoardView {
 	display: flex;
 	flex-direction: column;

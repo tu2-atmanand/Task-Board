@@ -1,4 +1,4 @@
-// src/components/TaskBoardViewContent.tsx
+// src/components/TaskBoardViewContainer.tsx
 
 import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban, Save, LayoutGridIcon } from 'lucide-react';
@@ -13,15 +13,15 @@ import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTask
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { DEFAULT_DATE_FORMAT, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { advancedFilterer } from "src/utils/algorithms/BoardFilterer";
-import { ViewTaskFilterModal } from 'src/components/BoardFilters';
+import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
+import { TaskFilterPopover } from "./AdvancedFilterer/TaskFilterPopover";
+import { advancedFilterer } from "src/utils/algorithms/AdvancedFilterer";
+import { TaskFilterModal } from 'src/components/AdvancedFilterer';
 import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf, allBoards?: Board[] }> = ({ plugin, currentBoardData, currentLeaf, allBoards }) => {
+const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf, allBoards?: Board[] }> = ({ plugin, currentBoardData, currentLeaf, allBoards }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
 	const [boardData, setCurrentBoardData] = useState<Board>();
@@ -36,7 +36,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.searchQuery ? true : false);
 	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
 
-	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
+	const filterPopoverRef = useRef<TaskFilterPopover | null>(null);
 	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
 
 	const [viewWidth, setviewWidth] = useState<number>(currentLeaf.width);
@@ -92,7 +92,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				bugReporterManagerInsatance.addToLogs(
 					131,
 					`No need to worry about this bug, if its appearing on the fresh install.\n${String(error)}`,
-					"TaskBoardViewContent.tsx/loading boards and tasks useEffect",
+					"TaskBoardViewContainer.tsx/loading boards and tasks useEffect",
 				);
 				setFreshInstall(true);
 			}
@@ -147,7 +147,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				const allTasks = await loadTasksAndMerge(plugin, false);
 				setAllTasks(allTasks);
 			} catch (error) {
-				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
+				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContainer.tsx/debouncedRefreshColumn");
 			}
 		}, 500),
 		[plugin]
@@ -282,7 +282,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 			const currentBoardConfig = boardData;
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
-				const filterModal = new ViewTaskFilterModal(
+				const filterModal = new TaskFilterModal(
 					plugin, false, undefined, activeBoardIndex, currentBoardConfig!.name
 				);
 
@@ -334,7 +334,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				};
 
 				// Create and show popover
-				const popover = new ViewTaskFilterPopover(
+				const popover = new TaskFilterPopover(
 					plugin,
 					false, // forColumn = false since this is for board-level filter
 					undefined,
@@ -374,7 +374,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				filterPopoverRef.current = popover;
 			}
 		} catch (error) {
-			bugReporterManagerInsatance.showNotice(29, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+			bugReporterManagerInsatance.showNotice(29, "Error showing filter popover", String(error), "TaskBoardViewContainer.tsx/handleFilterButtonClick");
 		}
 	}
 
@@ -1132,4 +1132,4 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	);
 };
 
-export default TaskBoardViewContent;
+export default TaskBoardViewContainer;

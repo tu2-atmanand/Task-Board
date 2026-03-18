@@ -100,7 +100,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 
 	// 		if (titleElement && task.title !== "") {
 	// 			let cleanedTitle = cleanTaskTitleLegacy(task);
-	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContainer.tsx
 	// 			// const searchQuery = plugin.settings.data.searchQuery || '';
 	// 			// if (searchQuery) {
 	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -184,7 +184,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	// 			// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
 	// 			element.empty(); // Clear previous content
 
-	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContent.tsx
+	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContainer.tsx
 	// 			// const searchQuery = plugin.settings.data.searchQuery || '';
 	// 			// if (searchQuery) {
 	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

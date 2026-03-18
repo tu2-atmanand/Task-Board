@@ -2,10 +2,10 @@ import { Modal } from "obsidian";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { RootFilterState } from "src/interfaces/BoardConfigs";
-import { TaskFilterComponent } from "./ViewTaskFilter";
+import { TaskFilterComponent } from "./TaskFilterComponent";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-export class ViewTaskFilterModal extends Modal {
+export class TaskFilterModal extends Modal {
 	private plugin: TaskBoard;
 	public activeBoardIndex?: number;
 	public taskFilterComponent: TaskFilterComponent | null;
@@ -70,7 +70,7 @@ export class ViewTaskFilterModal extends Modal {
 				bugReporterManagerInsatance.addToLogs(
 					114,
 					String(error),
-					"ViewTaskFilterModal.ts/onClose",
+					"TaskFilterModal.ts/onClose",
 				);
 			}
 		}
@@ -84,7 +84,7 @@ export class ViewTaskFilterModal extends Modal {
 				bugReporterManagerInsatance.addToLogs(
 					115,
 					String(error),
-					"ViewTaskFilterModal.ts/onClose",
+					"TaskFilterModal.ts/onClose",
 				);
 			}
 		}

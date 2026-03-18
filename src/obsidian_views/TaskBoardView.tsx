@@ -6,10 +6,10 @@ import { funnelIcon, RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/inter
 import { StrictMode } from "react";
 
 import { Board } from "src/interfaces/BoardConfigs";
-import TaskBoardViewContent from "src/components/TaskBoardViewContent";
+import TaskBoardViewContainer from "src/components/TaskBoardViewContainer";
 import type TaskBoard from "../../main";
 import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { openBoardConfigModal, openScanVaultModal } from "../services/OpenModals";
+import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
@@ -256,7 +256,7 @@ export class TaskBoardView extends ItemView {
 		this.root = createRoot(this.containerEl.children[1]);
 		this.root.render(
 			<StrictMode>
-				<TaskBoardViewContent
+				<TaskBoardViewContainer
 					plugin={this.plugin}
 					allBoards={allBoardsData}
 					currentBoardData={currentBoardData}

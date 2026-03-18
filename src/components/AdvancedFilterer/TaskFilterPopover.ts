@@ -1,4 +1,4 @@
-// /src/components/BoardFilters/ViewTaskFilterPopover.ts
+// /src/components/BoardFilters/TaskFilterPopover.ts
 
 import { App } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
@@ -6,10 +6,10 @@ import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { RootFilterState } from "src/interfaces/BoardConfigs";
-import { TaskFilterComponent } from "./ViewTaskFilter";
+import { TaskFilterComponent } from "./TaskFilterComponent";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-export class ViewTaskFilterPopover
+export class TaskFilterPopover
 	extends Component
 	implements CloseableComponent
 {
@@ -225,7 +225,7 @@ export class ViewTaskFilterPopover
 				bugReporterManagerInsatance.addToLogs(
 					116,
 					String(error),
-					"ViewTaskFilterPopover.ts/close",
+					"TaskFilterPopover.ts/close",
 				);
 			}
 		}
@@ -253,7 +253,7 @@ export class ViewTaskFilterPopover
 				bugReporterManagerInsatance.addToLogs(
 					117,
 					String(error),
-					"ViewTaskFilterPopover.ts/close",
+					"TaskFilterPopover.ts/close",
 				);
 			}
 		}

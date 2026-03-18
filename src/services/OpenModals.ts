@@ -5,7 +5,7 @@ import {
 	addTaskInNote,
 	updateTaskInFile,
 } from "src/utils/taskLine/TaskLineUtils";
-import { AddOrEditTaskView } from "src/views/AddOrEditTaskView";
+import { AddOrEditTaskView } from "src/obsidian_views/AddOrEditTaskView";
 import { Board } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";

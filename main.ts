@@ -23,7 +23,7 @@ import {
 	openScanVaultModal,
 } from "src/services/OpenModals";
 
-import { TaskBoardView } from "./src/views/TaskBoardView";
+import { TaskBoardView } from "./src/obsidian_views/TaskBoardView";
 import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import VaultScanner, {
 	fileTypeAllowedForScanning,

@@ -9,12 +9,12 @@ import TaskBoard from 'main';
 import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
-import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
+import { TaskFilterPopover } from 'src/components/AdvancedFilterer/TaskFilterPopover';
 import { eventEmitter } from 'src/services/EventEmitter';
-import { ViewTaskFilterModal } from 'src/components/BoardFilters';
+import { TaskFilterModal } from 'src/components/AdvancedFilterer';
 import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
 import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
-import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
+import { isRootFilterStateEmpty } from 'src/utils/algorithms/AdvancedFilterer';
 import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
 import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
 import TaskItemV2 from './TaskItemV2';
@@ -315,7 +315,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
-						const filterModal = new ViewTaskFilterModal(
+						const filterModal = new TaskFilterModal(
 							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
 						);
 
@@ -347,7 +347,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 						// Create and show filter popover
 						// leafId is undefined for column filters (not tied to a specific leaf)
-						const popover = new ViewTaskFilterPopover(
+						const popover = new TaskFilterPopover(
 							plugin,
 							true, // forColumn is true
 							undefined,

@@ -7,7 +7,7 @@ import {
 } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
-import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
+import { generateIdForFilters } from "src/components/AdvancedFilterer/TaskFilterComponent";
 import { colTypeNames } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { generateRandomNumber } from "src/utils/TaskItemUtils";

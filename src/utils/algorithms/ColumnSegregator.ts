@@ -6,7 +6,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
-import { advancedFilterer } from "./BoardFilterer";
+import { advancedFilterer } from "./AdvancedFilterer";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
 import { getAllTaskTags } from "../TaskItemUtils";
 import { differenceInDays } from "date-fns";
