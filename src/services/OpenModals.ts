@@ -38,7 +38,7 @@ export const openBoardConfigModal = (
 	currentViewIndex: number,
 	onSave: (updatedBoard: Board) => void,
 ) => {
-	new BoardConfigureModal(plugin, currentBoardData, onSave).open();
+	new BoardConfigureModal(plugin, currentBoardData, currentViewIndex, onSave).open();
 };
 
 // Function to open the ScanVaultModal
