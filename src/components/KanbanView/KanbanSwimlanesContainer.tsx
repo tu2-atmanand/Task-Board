@@ -1,7 +1,7 @@
 // src/components/KanbanView/KanbanSwimlanesContainer.tsx
 
 import React, { useMemo, memo } from 'react';
-import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, View } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import LazyColumn from './LazyColumn';
 import type TaskBoard from 'main';
@@ -13,7 +13,8 @@ import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
 	currentBoardData: Board;
-	currentBoardIndex: number;
+	currentView: View;
+	currentViewIndex: number;
 	tasksPerColumn: taskItem[][];
 }
 
@@ -27,7 +28,8 @@ interface SwimlaneRow {
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	plugin,
 	currentBoardData,
-	currentBoardIndex,
+	currentView,
+	currentViewIndex,
 	tasksPerColumn,
 }) => {
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
@@ -42,7 +44,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		maxHeight: maxSwimlaneHeight,
 		verticalHeaderUI,
 		minimized
-	} = currentBoardData.swimlanes;
+	} = currentView.kanbanView!.swimlanes;
 
 	const activeColumns = currentBoardData.columns
 		.filter((col) => col.active);
@@ -267,8 +269,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								key={`header-${column.id}`}
 								plugin={plugin}
 								activeBoardData={currentBoardData}
+								currentView={currentView}
+								currentViewIndex={currentViewIndex}
 								columnData={column}
-								activeBoardIndex={currentBoardIndex}
 								tasksForThisColumn={tasksPerColumn?.[colIndex] || []}
 								Component={ColumnComponent}
 								headerOnly={true}
@@ -308,12 +311,13 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												key={`${swimlane.swimlaneValue}-${column.id}`}
 												plugin={plugin}
 												activeBoardData={currentBoardData}
+												currentView={currentView}
+												currentViewIndex={currentViewIndex}
 												columnData={column}
-												activeBoardIndex={currentBoardIndex}
 												tasksForThisColumn={swimlane.tasks[colIndex] || []}
 												Component={ColumnComponent}
-												swimlaneData={swimlaneData}
 												hideColumnHeader={true}
+												swimlaneData={swimlaneData}
 											/>
 										);
 									})}
@@ -349,8 +353,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												key={`${swimlane.swimlaneValue}-${column.id}`}
 												plugin={plugin}
 												activeBoardData={currentBoardData}
+												currentView={currentView}
+												currentViewIndex={currentViewIndex}
 												columnData={column}
-												activeBoardIndex={currentBoardIndex}
 												tasksForThisColumn={swimlane.tasks[colIndex] || []}
 												Component={ColumnComponent}
 												hideColumnHeader={true}
@@ -459,8 +464,9 @@ function getPropertyValues(
 const MemoizedSwimlanColumn = memo<{
 	plugin: TaskBoard;
 	activeBoardData: Board;
+	currentView: View;
+	currentViewIndex: number;
 	columnData: ColumnData;
-	activeBoardIndex: number;
 	tasksForThisColumn: taskItem[];
 	Component: typeof LazyColumn;
 	swimlaneData?: { property: string, value: string };
@@ -471,6 +477,8 @@ const MemoizedSwimlanColumn = memo<{
 }, (prevProps, nextProps) => {
 	return (
 		prevProps.activeBoardData === nextProps.activeBoardData &&
+		prevProps.currentView === nextProps.currentView &&
+		prevProps.currentViewIndex === nextProps.currentViewIndex &&
 		prevProps.columnData === nextProps.columnData &&
 		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
 		prevProps.Component === nextProps.Component &&

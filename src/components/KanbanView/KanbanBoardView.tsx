@@ -1,10 +1,8 @@
 // src/components/KanbanBoard.tsx
 
-import { Board, ColumnData } from "../../interfaces/BoardConfigs";
+import { Board, ColumnData, View } from "../../interfaces/BoardConfigs";
 import React, { memo, useEffect, useMemo, useState } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-
-import { App } from "obsidian";
 import LazyColumn from "./LazyColumn";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer";
 import type TaskBoard from "main";
@@ -14,21 +12,25 @@ import { columnSegregator } from "src/utils/algorithms/ColumnSegregator";
 interface KanbanBoardProps {
 	plugin: TaskBoard;
 	currentBoardData: Board;
-	currentBoardIndex: number;
+	currentView: View;
+	currentViewIndex: number;
 	filteredAndSearchedTasks: taskJsonMerged;
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentBoardIndex, filteredAndSearchedTasks, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
 	const [loading, setLoading] = useState(true);
 
 	// Check if lazy loading is enabled
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 
+	// Get columns from the current view's kanban configuration
+	const columns = currentView?.kanbanView?.columns || [];
+
 	// Second memo: Segregate filtered tasks by column (for Kanban view only)
 	const allTasksArrangedPerColumn = useMemo(() => {
-		if (currentBoardData && filteredAndSearchedTasks) {
-			return currentBoardData.columns
+		if (currentBoardData && currentView && filteredAndSearchedTasks) {
+			return columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
 					columnSegregator(plugin.settings, currentBoardData, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
@@ -40,7 +42,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 				);
 		}
 		return [];
-	}, [filteredAndSearchedTasks, currentBoardData]);
+	}, [filteredAndSearchedTasks, currentBoardData, currentView]);
 
 	useEffect(() => {
 		if (allTasksArrangedPerColumn.flat().length > 0) {
@@ -70,27 +72,29 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 							</>
 						)}
 					</div>
-				) : currentBoardData?.columns?.length === 0 ? (
+				) : columns?.length === 0 ? (
 					<div className="emptyBoardMessage">
-						Create columns on this board using the board config modal from top right corner button.
+						Create columns on this view using the view config modal from top right corner button.
 					</div>
-				) : currentBoardData?.swimlanes?.enabled ? (
+				) : currentView?.kanbanView?.swimlanes?.enabled ? (
 					<KanbanSwimlanesContainer
 						plugin={plugin}
 						currentBoardData={currentBoardData}
-						currentBoardIndex={currentBoardIndex}
+						currentView={currentView}
+						currentViewIndex={currentViewIndex}
 						tasksPerColumn={allTasksArrangedPerColumn}
 					/>
 				) : (
-					currentBoardData?.columns
+					columns
 						.filter((column) => column.active)
 						.map((column, index) => (
 							<MemoizedColumn
 								key={index}
 								plugin={plugin}
 								activeBoardData={currentBoardData}
+								currentView={currentView}
+								currentViewIndex={currentViewIndex}
 								columnData={column}
-								activeBoardIndex={currentBoardIndex}
 								tasksForThisColumn={allTasksArrangedPerColumn[index]}
 								Component={ColumnComponent}
 							/>
@@ -104,8 +108,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 const MemoizedColumn = memo<{
 	plugin: TaskBoard;
 	activeBoardData: Board;
+	currentView: View;
+	currentViewIndex: number;
 	columnData: ColumnData;
-	activeBoardIndex: number;
 	tasksForThisColumn: taskItem[];
 	Component: typeof LazyColumn;
 }>(({ Component, ...props }) => {
@@ -113,6 +118,8 @@ const MemoizedColumn = memo<{
 }, (prevProps, nextProps) => {
 	return (
 		prevProps.activeBoardData === nextProps.activeBoardData &&
+		prevProps.currentView === nextProps.currentView &&
+		prevProps.currentViewIndex === nextProps.currentViewIndex &&
 		prevProps.columnData === nextProps.columnData &&
 		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
 		prevProps.Component === nextProps.Component

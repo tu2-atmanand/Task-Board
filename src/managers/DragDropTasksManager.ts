@@ -12,7 +12,7 @@ import {
 	updateTaskItemTags,
 } from "src/utils/UserTaskEvents";
 import { eventEmitter } from "src/services/EventEmitter";
-import { swimlaneDataProp } from "src/components/KanbanView/TaskItem";
+import { swimlaneDataProp } from "src/components/TaskCard/TaskItem";
 import {
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,

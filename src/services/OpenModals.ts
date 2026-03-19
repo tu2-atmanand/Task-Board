@@ -26,7 +26,6 @@ import { BugReporterModal } from "src/modals/BugReporterModal";
 import { DiffContentCompareModal } from "src/modals/DiffContentCompareModal";
 import { ScanFilterModal } from "src/modals/ScanFilterModal";
 import { ScanVaultModal } from "src/modals/ScanVaultModal";
-import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { DatePickerModal } from "src/modals/date_picker";
 import { scanFilters } from "src/interfaces/GlobalSettings";
@@ -36,6 +35,7 @@ import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 export const openBoardConfigModal = (
 	plugin: TaskBoard,
 	currentBoardData: Board,
+	currentViewIndex: number,
 	onSave: (updatedBoard: Board) => void,
 ) => {
 	new BoardConfigureModal(plugin, currentBoardData, onSave).open();
@@ -526,16 +526,16 @@ export const openDiffContentCompareModal = (
 	});
 };
 
-export const openTaskBoardActionsModal = (
-	plugin: TaskBoard,
-	activeBoardData: Board,
-) => {
-	const actionModal = new TaskBoardActionsModal(
-		plugin,
-		activeBoardData.columns,
-	);
-	actionModal.open();
-};
+// export const openTaskBoardActionsModal = (
+// 	plugin: TaskBoard,
+// 	activeBoardData: Board,
+// ) => {
+// 	const actionModal = new TaskBoardActionsModal(
+// 		plugin,
+// 		activeBoardData.columns,
+// 	);
+// 	actionModal.open();
+// };
 
 export const openScanFiltersModal = (
 	plugin: TaskBoard,

@@ -76,7 +76,6 @@ export class TaskFilterComponent extends Component {
 		plugin: TaskBoard,
 		app: App,
 		private leafId?: string | undefined,
-		activeBoardIndex?: number,
 		private initialFilterState?: RootFilterState,
 	) {
 		super();
@@ -84,7 +83,6 @@ export class TaskFilterComponent extends Component {
 		this.plugin = plugin;
 		this.app = app;
 		this.pluginSettings = plugin.settings;
-		this.activeBoardIndex = activeBoardIndex;
 	}
 
 	onload() {

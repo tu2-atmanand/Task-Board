@@ -1504,13 +1504,13 @@ export default class TaskBoard extends Plugin {
 				);
 
 				// Import DEFAULT_BOARDS from BoardConfigs
-				const { DEFAULT_BOARDS } =
+				const { DEFAULT_BOARD } =
 					await import("src/interfaces/BoardConfigs");
 
 				// Try to create missing default board files
 				const createdCount =
 					await this.taskBoardFileManager.createMissingDefaultBoardFiles(
-						DEFAULT_BOARDS,
+						[DEFAULT_BOARD],
 					);
 
 				if (createdCount > 0) {

@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { taskItem } from 'src/interfaces/TaskItem';
-import TaskItem from '../KanbanView/TaskItem';
+import TaskItem from '../TaskCard/TaskItem';
 import TaskBoard from 'main';
-import { Board } from 'src/interfaces/BoardConfigs';
+import { Board, View } from 'src/interfaces/BoardConfigs';
 import { t } from 'src/utils/lang/helper';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { applyIdToTaskItem } from 'src/utils/TaskItemUtils';
@@ -15,7 +15,8 @@ interface TasksImporterPanelProps {
 	plugin: TaskBoard;
 	allTasksArranged: taskItem[][];
 	activeBoardSettings: Board;
-	activeBoardIndex: number;
+	activeViewData: View;
+	activeViewIndex: number;
 	isVisible: boolean;
 	onClose: () => void;
 }
@@ -24,7 +25,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 	plugin,
 	allTasksArranged,
 	activeBoardSettings,
-	activeBoardIndex,
+	activeViewData,
+	activeViewIndex,
 	isVisible,
 	onClose
 }) => {
@@ -217,8 +219,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 											key={task.id}
 											plugin={plugin}
 											task={task}
-											activeBoardSettings={activeBoardSettings}
-											activeBoardIndex={activeBoardIndex}
+											activeViewData={activeViewData}
+											activeViewIndex={activeViewIndex}
 											dataAttributeIndex={0} // TODO : No need of this data in this case.
 										/>
 									</div>

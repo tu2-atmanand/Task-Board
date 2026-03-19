@@ -19,10 +19,9 @@ import {
 import { taskItem, UpdateTaskEventData, taskJsonMerged } from 'src/interfaces/TaskItem';
 import TaskBoard from 'main';
 import ResizableNodeSelected from './ResizableNodeSelected';
-import TaskItem from '../KanbanView/TaskItem';
+import TaskItem from '../TaskCard/TaskItem';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskLineUtils';
 import { debounce, Menu, Notice, Platform } from 'obsidian';
-import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY } from 'src/interfaces/Constants';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
 import { MapViewMinimap } from './MapViewMinimap';
@@ -33,12 +32,13 @@ import { TasksImporterPanel } from './TasksImporterPanel';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
 import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { Board, nodeDataType, nodePositionWidth, viewPortType } from 'src/interfaces/BoardConfigs';
+import { Board, View, nodeDataType, nodePositionWidth, viewPortType } from 'src/interfaces/BoardConfigs';
 
 type MapViewProps = {
 	plugin: TaskBoard;
 	activeBoardData: Board;
-	activeBoardIndex: number;
+	currentView: View;
+	currentViewIndex: number;
 	filteredTasks: taskJsonMerged;
 	focusOnTaskId?: string;
 };
@@ -50,7 +50,7 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, activeBoardData, activeBoardIndex, filteredTasks, focusOnTaskId
+	plugin, activeBoardData, currentView, currentViewIndex, filteredTasks, focusOnTaskId
 }) => {
 	plugin.settings.data.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.mapView;
@@ -97,10 +97,14 @@ const MapView: React.FC<MapViewProps> = ({
 			if (!mapDataUpdated.current) return;
 
 			let newBoardData = activeBoardData;
-			newBoardData.mapView = {
-				viewPortData: viewport,
-				nodesData: allNodesData.current,
-			};
+			// Update the currentView's mapView data
+			const viewIndex = newBoardData.views.findIndex(v => v.viewId === currentView.viewId);
+			if (viewIndex >= 0) {
+				newBoardData.views[viewIndex].mapView = {
+					viewPortData: viewport,
+					nodesData: allNodesData.current,
+				};
+			}
 			plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 			emitMapDataUpdatedSignal(false);
@@ -108,7 +112,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 		eventEmitter.on("SAVE_MAP", saveMapDataListener);
 		return () => eventEmitter.off("SAVE_MAP", saveMapDataListener);
-	}, [activeBoardData, viewport]);
+	}, [activeBoardData, currentView, viewport]);
 
 	const emitMapDataUpdatedSignal = (flag: boolean) => {
 		console.log("emitMapDataUpdatedSignal called....\nflag : ", mapDataUpdated.current);
@@ -126,7 +130,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// Load positions from the active board data
 	const loadAllNodesData = () => {
 		try {
-			const list = activeBoardData?.mapView?.nodesData ? activeBoardData.mapView.nodesData : {};
+			const list = currentView?.mapView?.nodesData ? currentView.mapView.nodesData : {};
 			// const map: Record<string, nodeDataType> = {};
 			// list.forEach(item => {
 			// 	if (item && typeof item.key === 'string') {
@@ -143,7 +147,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// Load viewport from the active board data
 	const loadViewport = (): viewPortType => {
 		try {
-			const vp = activeBoardData?.mapView?.viewPortData;
+			const vp = currentView?.mapView?.viewPortData;
 			if (vp && typeof vp === 'object') {
 				return {
 					x: Number.isFinite(vp.x) ? vp.x : 10,
@@ -277,8 +281,8 @@ const MapView: React.FC<MapViewProps> = ({
 							dataAttributeIndex={0}
 							plugin={plugin}
 							task={task}
-							activeBoardSettings={activeBoardData}
-							activeBoardIndex={activeBoardIndex}
+							activeViewData={currentView}
+							activeViewIndex={currentViewIndex}
 						/>
 					},
 					position: {
@@ -874,7 +878,8 @@ const MapView: React.FC<MapViewProps> = ({
 						plugin={plugin}
 						allTasksArranged={[allTasksFlattened]}
 						activeBoardSettings={activeBoardData}
-						activeBoardIndex={activeBoardIndex}
+						activeViewData={currentView}
+						activeViewIndex={currentViewIndex}
 						isVisible={isImporterPanelVisible}
 						onClose={() => setIsImporterPanelVisible(false)}
 					/>
@@ -1017,7 +1022,8 @@ const MapView: React.FC<MapViewProps> = ({
 							plugin={plugin}
 							allTasksArranged={[allTasksFlattened]}
 							activeBoardSettings={activeBoardData}
-							activeBoardIndex={activeBoardIndex}
+							activeViewData={currentView}
+							activeViewIndex={currentViewIndex}
 							isVisible={isImporterPanelVisible}
 							onClose={() => setIsImporterPanelVisible(false)}
 						/>

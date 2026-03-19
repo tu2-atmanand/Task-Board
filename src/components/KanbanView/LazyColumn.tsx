@@ -3,10 +3,10 @@
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 
 import { CSSProperties } from 'react';
-import TaskItem, { swimlaneDataProp } from './TaskItem';
+import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
-import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, RootFilterState, View } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
 import { TaskFilterPopover } from 'src/components/AdvancedFilterer/TaskFilterPopover';
@@ -17,7 +17,7 @@ import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
 import { isRootFilterStateEmpty } from 'src/utils/algorithms/AdvancedFilterer';
 import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
 import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
-import TaskItemV2 from './TaskItemV2';
+import TaskItemV2 from '../TaskCard/TaskItemV2';
 import { AlertOctagon } from 'lucide-react';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
@@ -28,7 +28,8 @@ type CustomCSSProperties = CSSProperties & {
 export interface LazyColumnProps {
 	plugin: TaskBoard;
 	activeBoardData: Board;
-	activeBoardIndex: number;
+	currentView: View;
+	currentViewIndex: number;
 	columnData: ColumnData;
 	// columnIndex: number;
 	tasksForThisColumn: taskItem[];
@@ -41,15 +42,16 @@ export interface LazyColumnProps {
 const LazyColumn: React.FC<LazyColumnProps> = ({
 	plugin,
 	activeBoardData,
+	currentView,
+	currentViewIndex,
 	columnData,
-	activeBoardIndex,
 	tasksForThisColumn,
 	swimlaneData,
 	hideColumnHeader = false,
 	headerOnly = false,
 }) => {
 	// console.log("Column Data :", columnData);
-	if (!headerOnly && activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
+	if (!headerOnly && currentView.kanbanView && currentView.kanbanView.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 
@@ -57,6 +59,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	const initialTaskCount = 20;
 	const loadMoreCount = 10;
 	const scrollThresholdPercent = 80;
+
+	const [currentViewData, setCurrentViewData] = useState(currentView);
 
 	// State for managing visible tasks
 	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);
@@ -239,7 +243,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 		if (columnIndex !== -1) {
 			let newBoardData = activeBoardData;
-			newBoardData.columns[columnIndex].minimized = !newBoardData.columns[columnIndex].minimized;
+			newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].minimized = !newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].minimized;
 			plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 			eventEmitter.emit('REFRESH_BOARD');
@@ -277,14 +281,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						// Update the column configuration in the board data
 
 						// if (activeBoardData.index !== -1) {
-						const columnIndex = activeBoardData.columns.findIndex(
+						const columnIndex = activeBoardData.views[currentViewIndex].kanbanView!.columns.findIndex(
 							(col: ColumnData) => col.id === columnData.id
 						);
 
 						if (columnIndex !== -1) {
 							// Update the column configuration
 							let newBoardData = activeBoardData;
-							newBoardData.columns[columnIndex] = updatedColumnConfiguration;
+							newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex] = updatedColumnConfiguration;
 							plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 						}
@@ -316,7 +320,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new TaskFilterModal(
-							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
+							plugin, true, undefined, columnData.name, columnData.filters
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
@@ -325,7 +329,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
-									newBoardData.columns[columnIndex].filters = filterState;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
 
 									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
@@ -351,7 +355,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							plugin,
 							true, // forColumn is true
 							undefined,
-							boardIndex,
 							columnData.name,
 							columnData.filters
 						);
@@ -362,7 +365,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
-									newBoardData.columns[columnIndex].filters = filterState;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
 
 									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
@@ -405,7 +408,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				if (columnIndex !== -1) {
 					// Set the active property to false
 					let newBoardData = activeBoardData;
-					newBoardData.columns[columnIndex].active = false;
+					newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].active = false;
 
 					plugin.taskBoardFileManager.saveBoard(newBoardData);
 
@@ -883,8 +886,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																dataAttributeIndex={i}
 																plugin={plugin}
 																task={task}
-																activeBoardSettings={activeBoardData}
-																activeBoardIndex={activeBoardIndex}
+																activeViewData={currentViewData}
+																activeViewIndex={currentViewIndex}
 																columnIndex={columnData.index}
 																swimlaneData={swimlaneData}
 															/>
@@ -929,8 +932,8 @@ const MemoizedTaskItem = memo<{
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
-	activeBoardSettings: Board;
-	activeBoardIndex: number;
+	activeViewData: View;
+	activeViewIndex: number;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
 }>(({ Component, ...props }) => {
@@ -939,8 +942,8 @@ const MemoizedTaskItem = memo<{
 	return (
 		prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
 		prevProps.task === nextProps.task &&
-		prevProps.activeBoardSettings === nextProps.activeBoardSettings &&
-		prevProps.activeBoardIndex === nextProps.activeBoardIndex &&
+		prevProps.activeViewData === nextProps.activeViewData &&
+		prevProps.activeViewIndex === nextProps.activeViewIndex &&
 		prevProps.columnIndex === nextProps.columnIndex &&
 		prevProps.swimlaneData === nextProps.swimlaneData
 	);

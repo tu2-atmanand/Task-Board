@@ -18,7 +18,6 @@ import {
 	scanModeOptions,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
-import { DEFAULT_BOARDS } from "./BoardConfigs";
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants";
 
 export interface scanFilters {
@@ -135,8 +134,6 @@ export interface globalSettingsData {
 	taskBoardFilesRegistry: taskBoardFilesRegistryType;
 	lastViewHistory: {
 		boardFilePath: string;
-		viewedType: string;
-		boardIndex: number;
 		settingTab: number;
 		taskId?: string;
 	};
@@ -441,8 +438,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		safeGuardFeature: true,
 		lastViewHistory: {
 			boardFilePath: "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-			viewedType: "kanban",
-			boardIndex: 0,
 			settingTab: 0,
 		},
 		boundTaskCompletionToChildTasks: false,

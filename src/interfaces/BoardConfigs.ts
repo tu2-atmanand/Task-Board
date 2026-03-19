@@ -1,5 +1,5 @@
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
-import { colTypeNames, defaultTaskStatuses } from "./Enums";
+import { colTypeNames, defaultTaskStatuses, viewTypeNames } from "./Enums";
 
 export interface columnSortingCriteria {
 	criteria:
@@ -143,293 +143,318 @@ export type nodeDataType = {
 	[taskID: string]: nodePositionWidth;
 };
 
-export type Board = {
-	id: string;
-	name: string;
+/**
+ * Interface for the Task Board view. It will store the data specific to a particular view created by user inside the board.
+ */
+export interface View {
+	viewId: string;
+	viewName: string;
+	viewType: string;
 	description?: string;
-	columns: ColumnData[];
-	hideEmptyColumns: boolean;
-	showColumnTags: boolean;
 	showFilteredTags: boolean;
-	boardFilter: RootFilterState;
-	filterConfig?: FilterConfigSettings;
-	taskCount?: {
+	viewFilter: RootFilterState;
+	taskCount: {
 		pending: number;
 		completed: number;
 	};
-	swimlanes: swimlaneConfigs;
-	mapView: {
+
+	// All configurations specific to the kanban view
+	kanbanView?: {
+		columns: ColumnData[];
+		showColumnTags: boolean;
+		hideEmptyColumns: boolean;
+		swimlanes: swimlaneConfigs;
+	};
+
+	// All configurations specific to the map view
+	mapView?: {
 		viewPortData: viewPortType;
 		nodesData: nodeDataType;
 	};
+
+	// More views will be added in the future
+}
+
+export interface Board {
+	id: string;
+	name: string;
+	description?: string;
+	filterConfig?: FilterConfigSettings;
+
+	views: View[];
+	lastViewId: string;
+
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
 	filterPolarity?: string;
+}
+
+// A single board is a single project, inside a board user will create multiple types of views to visualize their tasks in different ways. Hence, when user will install this plugin for the first time, will only going to have a single board to which will be enought show the capabilities of this plugin and later user can easily create more boards.
+export const DEFAULT_BOARD: Board = {
+	id: "3103563481",
+	name: "My Project",
+	description:
+		"This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards.",
+	lastViewId: "view-3103563481-1",
+	views: [
+		{
+			viewId: "view-3103563481-1",
+			viewName: "Time Based Kanban",
+			viewType: viewTypeNames.kanban,
+			showFilteredTags: true,
+			viewFilter: {
+				rootCondition: "any",
+				filterGroups: [],
+			},
+			taskCount: {
+				pending: 0,
+				completed: 0,
+			},
+			kanbanView: {
+				columns: [
+					{
+						id: 1,
+						colType: colTypeNames.undated,
+						active: true,
+						collapsed: false,
+						name: "Undated Tasks",
+						index: 1,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
+						},
+					},
+					{
+						id: 2,
+						colType: colTypeNames.dated,
+						active: true,
+						collapsed: false,
+						name: "Over Due",
+						index: 2,
+						datedBasedColumn: {
+							dateType: "due",
+							from: -300,
+							to: -1,
+						},
+					},
+					{
+						id: 3,
+						colType: colTypeNames.dated,
+						active: true,
+						collapsed: false,
+						name: "Today",
+						index: 3,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 0,
+							to: 0,
+						},
+					},
+					{
+						id: 4,
+						colType: colTypeNames.dated,
+						active: true,
+						collapsed: false,
+						name: "Tomorrow",
+						index: 4,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 1,
+							to: 1,
+						},
+					},
+					{
+						id: 5,
+						colType: colTypeNames.dated,
+						active: true,
+						collapsed: false,
+						name: "Future",
+						index: 5,
+						datedBasedColumn: {
+							dateType: "due",
+							from: 2,
+							to: 300,
+						},
+					},
+					{
+						id: 6,
+						colType: colTypeNames.completed,
+						active: true,
+						collapsed: false,
+						limit: 20,
+						name: "Completed",
+						index: 6,
+					},
+				],
+				showColumnTags: false,
+				hideEmptyColumns: false,
+				swimlanes: {
+					enabled: false,
+					hideEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: [],
+					maxHeight: "300px",
+					verticalHeaderUI: false,
+				},
+			},
+		},
+		{
+			viewId: "view-3103563481-2",
+			viewName: "Tag Based Kanban",
+			viewType: viewTypeNames.kanban,
+			showFilteredTags: true,
+			viewFilter: {
+				rootCondition: "any",
+				filterGroups: [],
+			},
+			taskCount: {
+				pending: 0,
+				completed: 0,
+			},
+			kanbanView: {
+				columns: [
+					{
+						id: 7,
+						colType: colTypeNames.untagged,
+						active: true,
+						collapsed: false,
+						name: "Backlogs",
+						index: 1,
+					},
+					{
+						id: 8,
+						colType: colTypeNames.namedTag,
+						active: true,
+						collapsed: false,
+						name: "Important",
+						index: 2,
+						coltag: "important",
+					},
+					{
+						id: 9,
+						colType: colTypeNames.namedTag,
+						active: true,
+						collapsed: false,
+						name: "WIP",
+						index: 3,
+						coltag: "wip",
+					},
+					{
+						id: 11,
+						colType: colTypeNames.namedTag,
+						active: true,
+						collapsed: false,
+						name: "In Review",
+						index: 5,
+						coltag: "review",
+					},
+					{
+						id: 12,
+						colType: colTypeNames.completed,
+						active: true,
+						collapsed: false,
+						index: 6,
+						limit: 20,
+						name: "Completed",
+					},
+				],
+				showColumnTags: false,
+				hideEmptyColumns: false,
+				swimlanes: {
+					enabled: false,
+					hideEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: [],
+					maxHeight: "300px",
+					verticalHeaderUI: false,
+				},
+			},
+		},
+		{
+			viewId: "view-3103563481-3",
+			viewName: "Status Based Kanban",
+			viewType: viewTypeNames.kanban,
+			showFilteredTags: true,
+			viewFilter: {
+				rootCondition: "any",
+				filterGroups: [],
+			},
+			taskCount: {
+				pending: 0,
+				completed: 0,
+			},
+			kanbanView: {
+				columns: [
+					{
+						id: 7,
+						colType: colTypeNames.taskStatus,
+						taskStatus: defaultTaskStatuses.unchecked,
+						active: true,
+						collapsed: false,
+						name: "Backlogs",
+						index: 1,
+					},
+					{
+						id: 8,
+						colType: colTypeNames.taskStatus,
+						taskStatus: defaultTaskStatuses.scheduled,
+						active: true,
+						collapsed: false,
+						name: "Ready to start",
+						index: 2,
+					},
+					{
+						id: 9,
+						colType: colTypeNames.taskStatus,
+						taskStatus: defaultTaskStatuses.inprogress,
+						active: true,
+						collapsed: false,
+						name: "In Progress",
+						index: 3,
+					},
+					{
+						id: 11,
+						colType: colTypeNames.taskStatus,
+						taskStatus: defaultTaskStatuses.question,
+						active: true,
+						collapsed: false,
+						name: "In Review",
+						index: 5,
+					},
+					{
+						id: 12,
+						colType: colTypeNames.completed,
+						active: true,
+						collapsed: false,
+						index: 6,
+						limit: 20,
+						name: "Completed",
+					},
+					{
+						id: 13,
+						colType: colTypeNames.taskStatus,
+						taskStatus: defaultTaskStatuses.dropped,
+						active: true,
+						collapsed: false,
+						name: "Cancelled",
+						index: 7,
+					},
+				],
+				showColumnTags: false,
+				hideEmptyColumns: false,
+				swimlanes: {
+					enabled: false,
+					hideEmptySwimlanes: false,
+					property: "tags",
+					sortCriteria: "asc",
+					minimized: [],
+					maxHeight: "300px",
+					verticalHeaderUI: false,
+				},
+			},
+		},
+	],
 };
-
-export type BoardConfigs = Board[];
-
-export const DEFAULT_BOARDS: BoardConfigs = [
-	{
-		columns: [
-			{
-				id: 1,
-				colType: colTypeNames.undated,
-				active: true,
-				collapsed: false,
-				name: "Undated Tasks",
-				index: 1,
-				datedBasedColumn: {
-					dateType: "due",
-					from: 0,
-					to: 0,
-				},
-			},
-			{
-				id: 2,
-				colType: colTypeNames.dated,
-				active: true,
-				collapsed: false,
-				name: "Over Due",
-				index: 2,
-				datedBasedColumn: {
-					dateType: "due",
-					from: -300,
-					to: -1,
-				},
-			},
-			{
-				id: 3,
-				colType: colTypeNames.dated,
-				active: true,
-				collapsed: false,
-				name: "Today",
-				index: 3,
-				datedBasedColumn: {
-					dateType: "due",
-					from: 0,
-					to: 0,
-				},
-			},
-			{
-				id: 4,
-				colType: colTypeNames.dated,
-				active: true,
-				collapsed: false,
-				name: "Tomorrow",
-				index: 4,
-				datedBasedColumn: {
-					dateType: "due",
-					from: 1,
-					to: 1,
-				},
-			},
-			{
-				id: 5,
-				colType: colTypeNames.dated,
-				active: true,
-				collapsed: false,
-				name: "Future",
-				index: 5,
-				datedBasedColumn: {
-					dateType: "due",
-					from: 2,
-					to: 300,
-				},
-			},
-			{
-				id: 6,
-				colType: colTypeNames.completed,
-				active: true,
-				collapsed: false,
-				limit: 20,
-				name: "Completed",
-				index: 6,
-			},
-		],
-		id: "3103563481",
-		name: "Time Based Workflow",
-		showColumnTags: false,
-		showFilteredTags: true,
-		hideEmptyColumns: false,
-		boardFilter: {
-			rootCondition: "any",
-			filterGroups: [],
-		},
-		swimlanes: {
-			enabled: false,
-			hideEmptySwimlanes: false,
-			property: "tags",
-			sortCriteria: "asc",
-			minimized: [],
-			maxHeight: "300px",
-			verticalHeaderUI: false,
-		},
-		mapView: {
-			viewPortData: {
-				x: 0,
-				y: 0,
-				zoom: 0.5,
-			},
-			nodesData: {},
-		},
-	},
-	{
-		columns: [
-			{
-				id: 7,
-				colType: colTypeNames.untagged,
-				active: true,
-				collapsed: false,
-				name: "Backlogs",
-				index: 1,
-			},
-			{
-				id: 8,
-				colType: colTypeNames.namedTag,
-				active: true,
-				collapsed: false,
-				name: "Important",
-				index: 2,
-				coltag: "important",
-			},
-			{
-				id: 9,
-				colType: colTypeNames.namedTag,
-				active: true,
-				collapsed: false,
-				name: "WIP",
-				index: 3,
-				coltag: "wip",
-			},
-			{
-				id: 11,
-				colType: colTypeNames.namedTag,
-				active: true,
-				collapsed: false,
-				name: "In Review",
-				index: 5,
-				coltag: "review",
-			},
-			{
-				id: 12,
-				colType: colTypeNames.completed,
-				active: true,
-				collapsed: false,
-				index: 6,
-				limit: 20,
-				name: "Completed",
-			},
-		],
-		id: "2957159294",
-		name: "Tag Based Workflow",
-		showColumnTags: false,
-		showFilteredTags: true,
-		hideEmptyColumns: false,
-		boardFilter: {
-			rootCondition: "any",
-			filterGroups: [],
-		},
-		swimlanes: {
-			enabled: false,
-			hideEmptySwimlanes: false,
-			property: "tags",
-			sortCriteria: "asc",
-			minimized: [],
-			maxHeight: "300px",
-			verticalHeaderUI: false,
-		},
-		mapView: {
-			viewPortData: {
-				x: 0,
-				y: 0,
-				zoom: 0.5,
-			},
-			nodesData: {},
-		},
-	},
-	{
-		columns: [
-			{
-				id: 7,
-				colType: colTypeNames.taskStatus,
-				taskStatus: defaultTaskStatuses.unchecked,
-				active: true,
-				collapsed: false,
-				name: "Backlogs",
-				index: 1,
-			},
-			{
-				id: 8,
-				colType: colTypeNames.taskStatus,
-				taskStatus: defaultTaskStatuses.scheduled,
-				active: true,
-				collapsed: false,
-				name: "Ready to start",
-				index: 2,
-			},
-			{
-				id: 9,
-				colType: colTypeNames.taskStatus,
-				taskStatus: defaultTaskStatuses.inprogress,
-				active: true,
-				collapsed: false,
-				name: "In Progress",
-				index: 3,
-			},
-			{
-				id: 11,
-				colType: colTypeNames.taskStatus,
-				taskStatus: defaultTaskStatuses.question,
-				active: true,
-				collapsed: false,
-				name: "In Review",
-				index: 5,
-			},
-			{
-				id: 12,
-				colType: colTypeNames.completed,
-				active: true,
-				collapsed: false,
-				index: 6,
-				limit: 20,
-				name: "Completed",
-			},
-			{
-				id: 13,
-				colType: colTypeNames.taskStatus,
-				taskStatus: defaultTaskStatuses.dropped,
-				active: true,
-				collapsed: false,
-				name: "Cancelled",
-				index: 7,
-			},
-		],
-		id: "4271106430",
-		name: "Status Based Workflow",
-		showColumnTags: false,
-		showFilteredTags: true,
-		hideEmptyColumns: false,
-		boardFilter: {
-			rootCondition: "any",
-			filterGroups: [],
-		},
-		swimlanes: {
-			enabled: false,
-			hideEmptySwimlanes: false,
-			property: "tags",
-			sortCriteria: "asc",
-			minimized: [],
-			maxHeight: "300px",
-			verticalHeaderUI: false,
-		},
-		mapView: {
-			viewPortData: {
-				x: 0,
-				y: 0,
-				zoom: 0.5,
-			},
-			nodesData: {},
-		},
-	},
-];

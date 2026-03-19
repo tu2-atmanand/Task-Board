@@ -36,12 +36,12 @@ export interface swimlaneDataProp {
 	value: string;
 }
 
-const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeBoardSettings, activeBoardIndex, columnIndex, swimlaneData }) => {
+const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeViewData, activeViewIndex, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
-	const columnData = columnIndex !== undefined ? activeBoardSettings?.columns[columnIndex - 1] : undefined;
+	const columnData = columnIndex !== undefined ? activeViewData.kanbanView!.columns[columnIndex - 1] : undefined;
 	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
@@ -883,7 +883,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 				task,
 				taskIndex: String(dataAttributeIndex),
 				sourceColumnData: columnData,
-				currentBoardIndex: activeBoardIndex,
+				currentBoardIndex: activeViewIndex,
 				swimlaneData: swimlaneData
 			};
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
@@ -974,7 +974,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 
 										// If columnIndex is defined, proceed to get the column
 										if (
-											(!activeBoardSettings?.showColumnTags) &&
+											(activeViewData.kanbanView!.showColumnTags) &&
 											columnData &&
 											columnData?.colType === colTypeNames.namedTag &&
 											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
@@ -1242,7 +1242,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	const renderChildTasks = () => {
 		try {
 			// Render only if the last viewed history is Kanban and there are child tasks
-			if (plugin.settings.data.lastViewHistory.viewedType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
+			if (activeViewData.viewType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
 				return (
 					<div className="taskItemChildTasksSection">
 						{/* Placeholder for future child tasks rendering */}
@@ -1282,7 +1282,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.visiblePropertiesList, task.priority, task.tags, activeBoardSettings]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.visiblePropertiesList, task.priority, task.tags, activeViewData]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.visiblePropertiesList, task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
@@ -1312,7 +1312,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 					{plugin.settings.data.experimentalFeatures && (
 						<>
 							{
-								Platform.isPhone || plugin.settings.data.lastViewHistory.viewedType === viewTypeNames.map ? (
+								Platform.isPhone || activeViewData.viewType === viewTypeNames.map ? (
 									<>
 										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
 									</>

@@ -7,7 +7,6 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class TaskFilterModal extends Modal {
 	private plugin: TaskBoard;
-	public activeBoardIndex?: number;
 	public taskFilterComponent: TaskFilterComponent | null;
 	private columnOrBoardName?: string;
 	private initialFilterState?: RootFilterState;
@@ -19,13 +18,11 @@ export class TaskFilterModal extends Modal {
 		plugin: TaskBoard,
 		forColumn: boolean,
 		private leafId?: string,
-		activeBoardIndex?: number,
 		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
-		this.activeBoardIndex = activeBoardIndex;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
 
@@ -51,7 +48,6 @@ export class TaskFilterModal extends Modal {
 			this.plugin,
 			this.app,
 			this.leafId,
-			this.activeBoardIndex,
 			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded

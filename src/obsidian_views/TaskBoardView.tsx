@@ -258,7 +258,6 @@ export class TaskBoardView extends ItemView {
 			<StrictMode>
 				<TaskBoardViewContainer
 					plugin={this.plugin}
-					allBoards={allBoardsData}
 					currentBoardData={currentBoardData}
 					currentLeaf={this.leaf}
 				/>,

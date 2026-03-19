@@ -22,7 +22,6 @@ export class TaskFilterPopover
 	private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
 	public onClose: ((filterState?: RootFilterState) => void) | null = null;
-	private activeBoardIndex?: number;
 	private columnOrBoardName?: string;
 	private initialFilterState?: RootFilterState;
 
@@ -30,7 +29,6 @@ export class TaskFilterPopover
 		plugin: TaskBoard,
 		forColumn: boolean,
 		private leafId?: string | undefined,
-		activeBoardIndex?: number,
 		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState,
 	) {
@@ -38,7 +36,6 @@ export class TaskFilterPopover
 		this.plugin = plugin;
 		this.app = plugin.app;
 		this.forColumn = forColumn;
-		this.activeBoardIndex = activeBoardIndex;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
 		this.win = plugin.app.workspace.containerEl.win || window;
@@ -90,7 +87,6 @@ export class TaskFilterPopover
 			this.plugin,
 			this.app,
 			this.leafId,
-			this.activeBoardIndex,
 			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded
