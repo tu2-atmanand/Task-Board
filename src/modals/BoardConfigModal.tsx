@@ -2,7 +2,7 @@
 
 import { Modal, Notice } from "obsidian";
 import Sortable from "sortablejs";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
@@ -467,6 +467,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// --------------------------------------------------------------
 	// ALL RENDERING LOGIC BELOW
 	// --------------------------------------------------------------
+
+	const getViewTypeIconComponent = (viewTypeName: string | undefined, size: number) => {
+		let viewType = viewTypeName ?? currentBoardData.views[currentViewIndex].viewType;
+		switch (viewType) {
+			case viewTypeNames.kanban:
+				return <SquareKanban size={size} strokeWidth={1.5} />;
+			case viewTypeNames.map:
+				return <Network size={size - 2} strokeWidth={1.5} />;
+			default:
+				return <BrickWall size={size - 2} strokeWidth={1.5} />;
+		}
+	}
 
 	// For Small Screens UI - Toggle Sidebar Visibility
 	const [isSidebarVisible, setIsSidebarVisible] = useState(false);
@@ -978,13 +990,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	return (
 		<>
 			{renderAddColumnModal()}
-			{allViewsData && allViewsData.length > 0 && (
+			{allViewsData && (
 				<button className="boardConfigModalSidebarToggleBtn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
 					<FaAlignJustify className="boardConfigModalSidebarToggleBtnIcon" size={15} enableBackground={0} />
 				</button>
 			)}
 			<div className="boardConfigModalHome">
-				{allViewsData && allViewsData.length > 0 && (
+				{allViewsData && (
 					<>
 						<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
 							<div className="boardConfigModalSidebarBtnArea" >
@@ -1006,24 +1018,29 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 								<hr className="boardConfigModalHr-100" />
 
-								<div className="boardConfigModalSettingDescription">{t("your-boards")}</div>
-								<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
-									{allViewsData.map((view, index) => (
-										<div
-											key={view.viewName} // Changed key from index to view.name
-											className={`boardConfigModalSidebarBtnArea-btn${index === selectedViewIndex ? "-active" : ""}`}
-											onClick={() => {
-												setSelectedViewIndex(index);
-												toggleSidebar();
-											}}
-										>
-											<span>
-												{view.viewName}
-											</span>
-											<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+								{allViewsData.length > 0 && (
+									<>
+										<div className="boardConfigModalSettingDescription">{t("your-views")}</div>
+										<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
+											{allViewsData.map((view, index) => (
+												<div
+													key={view.viewName} // Changed key from index to view.name
+													className={`boardConfigModalSidebarBtnArea-btn${index === selectedViewIndex ? "-active" : ""}`}
+													onClick={() => {
+														setSelectedViewIndex(index);
+														toggleSidebar();
+													}}
+												>
+													{getViewTypeIconComponent(view.viewType, 14)}
+													<span>
+														{view.viewName}
+													</span>
+													<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+												</div>
+											))}
 										</div>
-									))}
-								</div>
+									</>
+								)}
 							</div>
 							<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
 								<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewView()}>{t("add-view")}</button>
@@ -1040,11 +1057,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 									: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
 						</div>
 					</>
-				)}
-				{(!allViewsData || allViewsData.length === 0) && (
-					<div className="boardConfigModalMainContent" style={{ width: '100%', padding: '20px' }}>
-						<div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(0)}</div>
-					</div>
 				)}
 			</div>
 
