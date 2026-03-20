@@ -31,7 +31,7 @@ export interface currentDragDataPayload {
 	task: taskItem;
 	taskIndex: string;
 	sourceColumnData: ColumnData;
-	currentBoardIndex: number;
+	currentViewIndex: number;
 	swimlaneData: swimlaneDataProp | null | undefined;
 }
 
@@ -871,10 +871,9 @@ class DragDropTasksManager {
 			);
 		}
 
-		const newStatus =
-			plugin.settings.data.customStatuses.find(
-				(status) => status.type === statusTypeNames.DONE,
-			);
+		const newStatus = plugin.settings.data.customStatuses.find(
+			(status) => status.type === statusTypeNames.DONE,
+		);
 
 		// FINALLY - Update the task in the note.
 		updateTaskItemStatus(plugin, newTask, newStatus?.symbol ?? "x");
@@ -933,10 +932,11 @@ class DragDropTasksManager {
 
 		if (!newBoardData) {
 			throw "Board data not found";
-			return;
 		}
 
-		newBoardData!.columns[targetColumnData.index - 1] = targetColumnData;
+		newBoardData.views[
+			currentDragData.currentViewIndex
+		].kanbanView!.columns[targetColumnData.index - 1] = targetColumnData;
 
 		// Persist settings and refresh the board
 		// plugin.saveSettings(newSettings);

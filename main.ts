@@ -1492,6 +1492,7 @@ export default class TaskBoard extends Plugin {
 	private async checkAndCreateBoardFiles() {
 		try {
 			console.log("Task Board: Checking for configured board files...");
+			debugger;
 
 			// Get the missing board files
 			const missingFiles =

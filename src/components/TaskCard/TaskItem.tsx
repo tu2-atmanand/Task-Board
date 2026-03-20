@@ -883,7 +883,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 				task,
 				taskIndex: String(dataAttributeIndex),
 				sourceColumnData: columnData,
-				currentBoardIndex: activeViewIndex,
+				currentViewIndex: activeViewIndex,
 				swimlaneData: swimlaneData
 			};
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);

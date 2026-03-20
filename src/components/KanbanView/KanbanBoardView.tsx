@@ -33,11 +33,15 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 			return columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, currentBoardData, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
+					columnSegregator(plugin.settings, currentView, column, filteredAndSearchedTasks, (updatedViewData: View) => {
 						// plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
+						let updatedBoardData = { ...currentBoardData };
+						if (updatedBoardData.views) {
+							updatedBoardData.views[currentViewIndex] = updatedViewData;
+						}
 
-						// TODO Add a debounce here, as this callback will be called at high rate.
-						plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+						// Using the plugin's debounced save function to update the board data with the new view configuration
+						plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoardData);
 					})
 				);
 		}

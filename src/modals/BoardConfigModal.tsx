@@ -18,6 +18,7 @@ import { colTypeNames, UniversalDateOptions, viewTypeNames } from "src/interface
 import { Board, ColumnData, swimlaneConfigs, View } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { AddColumnModal } from "./AddColumnModal";
+import { AddViewModal } from "./AddViewModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
@@ -227,6 +228,26 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	}
 
+	const handleAddNewView = () => {
+		const app = plugin.app;
+		const modal = new AddViewModal(
+			app,
+			currentBoardData,
+			{
+				onCancel: () => {
+					// Do nothing on cancel
+				},
+				onSubmit: (updatedBoardData: Board) => {
+					setActiveBoardData(updatedBoardData);
+					setAllViewsData(updatedBoardData.views || []);
+					setSelectedViewIndex(updatedBoardData.views ? updatedBoardData.views.length - 1 : -1);
+					setIsEdited(true);
+				},
+			}
+		);
+		modal.open();
+	};
+
 	const handleDeleteCurrentView = () => {
 		const app = plugin.app;
 		const mssg = t("view-delete-confirmation-message");
@@ -352,11 +373,36 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
-	type BooleanBoardProperties = 'showColumnTags' | 'showFilteredTags' | 'hideEmptyColumns';
-	const handleToggleChange = (viewIndex: number, field: BooleanBoardProperties, value: boolean) => {
+	const handleDuplicateCurrentBoard = () => {
+		const duplicatedBoard: Board = {
+			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
+			id: generateRandomTempTaskId(),
+			name: `${activeBoardData.name} ${t("copy-suffix")}`,
+			views: activeBoardData.views ? activeBoardData.views.map((view) => ({
+				...view,
+				id: String(Date.now() + Math.random()), // New unique ID for each view
+			})) : [],
+		};
+
+		onClose();
+	};
+
+	type BooleanBoardProperties = 'showFilteredTags';
+	type BooleanKanbanProperties = 'hideEmptyColumns' | 'showColumnTags';
+
+	const handleToggleBoardSettings = (viewIndex: number, field: BooleanBoardProperties, value: boolean) => {
 		const updatedViewsData = [...allViewsData];
 		if (updatedViewsData[viewIndex]) {
-			updatedViewsData[viewIndex][field] = value as boolean;
+			(updatedViewsData[viewIndex] as any)[field] = value as boolean;
+		}
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	const handleToggleKanbanViewSettings = (viewIndex: number, field: BooleanKanbanProperties, value: boolean) => {
+		const updatedViewsData = [...allViewsData];
+		if (updatedViewsData[viewIndex] && updatedViewsData[viewIndex].kanbanView) {
+			(updatedViewsData[viewIndex].kanbanView as any)[field] = value as boolean;
 		}
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);
@@ -513,8 +559,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<hr className="boardConfigModalHr-100" />
 
 					<div className="boardConfigModalDoubleBtnContainer">
-						<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentView}>{t("duplicate-this-board")}</button>
-						<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentView}>{t("delete-this-board")}</button>
+						<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
 					</div>
 				</div>
 			</div>
@@ -578,7 +623,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								<input
 									type="checkbox"
 									checked={view.kanbanView!.showColumnTags}
-									onChange={(e) => handleToggleChange(viewIndex, "showColumnTags", e.target.checked)}
+									onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "showColumnTags", e.target.checked)}
 								/>
 							</div>
 							<div className="boardConfigModalMainContent-Active-Body-InputItems">
@@ -589,7 +634,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								<input
 									type="checkbox"
 									checked={view.kanbanView!.hideEmptyColumns}
-									onChange={(e) => handleToggleChange(viewIndex, "hideEmptyColumns", e.target.checked)}
+									onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "hideEmptyColumns", e.target.checked)}
 								/>
 							</div>
 							<div className="boardConfigModalMainContent-Active-Body-InputItems">
@@ -966,23 +1011,18 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								</div>
 							</div>
 							<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
-								<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewBoard()}>{t("add-view")}</button>
+								<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewView()}>{t("add-view")}</button>
 								<hr className="boardConfigModalHr-100" />
 								<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
 							</div>
 						</div>
+
 						<div className="boardConfigModalMainContent">
-							{switch (selectedViewIndex) {
-							case -2:
-							<>{renderGlobalSettingsTab(selectedViewIndex)}</>
-							break;
-							case -1:
-							<>{renderBoardConfigTab()}</>
-							break;
-							default:
-							<div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>
-							break;
-							}}
+							{selectedViewIndex === -2
+								? renderGlobalSettingsTab(selectedViewIndex)
+								: selectedViewIndex === -1
+									? renderBoardConfigTab()
+									: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
 						</div>
 					</>
 				)}
@@ -1025,7 +1065,7 @@ export class BoardConfigureModal extends Modal {
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
 
-		this.modalEl.setAttribute('modal-type', 'task-view-config');
+		this.modalEl.setAttribute('modal-type', 'task-board-config');
 	}
 
 	onOpen() {

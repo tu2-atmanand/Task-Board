@@ -46,8 +46,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		minimized
 	} = currentView.kanbanView!.swimlanes;
 
-	const activeColumns = currentBoardData.columns
-		.filter((col) => col.active);
+	const activeColumns = currentView.kanbanView?.columns
+		.filter((col: ColumnData) => col.active) || [];
 	// .map((col) => ({
 	// 	// create a shallow copy so we don't mutate original board state
 	// 	...col,
@@ -56,7 +56,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// }));
 
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
-		if (!currentBoardData.swimlanes?.enabled || !tasksPerColumn) {
+		if (!currentView.kanbanView?.swimlanes?.enabled || !tasksPerColumn) {
 			return [];
 		}
 
@@ -137,7 +137,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 		// Create swimlane rows with tasks organized by column
 		const swimlaneRows: SwimlaneRow[] = sortedSwimlaneValues.map((swimlaneItem) => {
-			const tasksByColumn = activeColumns.map((column, colIdx) => {
+			const tasksByColumn = activeColumns.map((column: ColumnData, colIdx: number) => {
 				// tasksPerColumn is expected to align with active columns order
 				const columnTasks = tasksPerColumn[colIdx] || [];
 
@@ -181,7 +181,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		});
 
 		// Filter out empty swimlanes if hideEmptySwimlanes is false
-		if (currentBoardData.swimlanes.hideEmptySwimlanes) {
+		if (currentView.kanbanView?.swimlanes?.hideEmptySwimlanes) {
 			return swimlaneRows.filter((row) =>
 				row.tasks.some((columnTasks) => columnTasks.length > 0)
 			);
@@ -237,14 +237,30 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			if (!swimlaneName) return;
 			// const boardIndex = currentBoardData.index; // plugin.settings.data.boardConfigs.findIndex((b) => b.index === currentBoardData.index);
 			// if (boardIndex === -1) return;
-			const swimCfg = currentBoardData.swimlanes || { minimized: [] };
+			const swimCfg = currentView.kanbanView?.swimlanes || { minimized: [] };
 			const arr = Array.isArray(swimCfg.minimized) ? [...swimCfg.minimized] : [];
 			const idx = arr.indexOf(swimlaneName);
 			if (idx === -1) arr.push(swimlaneName); else arr.splice(idx, 1);
-			currentBoardData.swimlanes.minimized = arr;
+
+			// Create updated view data with new swimlanes configuration
+			const updatedView: View = {
+				...currentView,
+				kanbanView: {
+					...currentView.kanbanView!,
+					swimlanes: {
+						...currentView.kanbanView!.swimlanes,
+						minimized: arr,
+					},
+				},
+			};
+
+			const updatedBoardData = { ...currentBoardData };
+			if (updatedBoardData.views) {
+				updatedBoardData.views[currentViewIndex] = updatedView;
+			}
 
 
-			await plugin.taskBoardFileManager.saveBoard(currentBoardData);
+			await plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoardData);
 			eventEmitter.emit('REFRESH_BOARD');
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(
@@ -264,7 +280,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				{/* Top header showing column headers and counts */}
 				<div className={`swimlanesHeaderContainer${verticalHeaderUI ? ' verticalUI' : ''}`}>
 					<div className="swimlanesHeaderRow">
-						{activeColumns.map((column, colIndex) => (
+						{activeColumns.map((column: ColumnData, colIndex: number) => (
 							<MemoizedSwimlanColumn
 								key={`header-${column.id}`}
 								plugin={plugin}
@@ -300,9 +316,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 								{/* Columns for this Swimlane */}
 								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
-									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
+									{swimlane.minimized ? null : activeColumns.map((column: ColumnData, colIndex: number) => {
 										const swimlaneData = {
-											property: currentBoardData.swimlanes.property,
+											property: currentView.kanbanView?.swimlanes?.property || 'tags',
 											value: swimlane.swimlaneValue,
 										};
 
@@ -342,9 +358,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 								{/* Columns for this Swimlane */}
 								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
-									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
+									{swimlane.minimized ? null : activeColumns.map((column: ColumnData, colIndex: number) => {
 										const swimlaneData = {
-											property: currentBoardData.swimlanes.property,
+											property: currentView.kanbanView?.swimlanes?.property || 'tags',
 											value: swimlane.swimlaneValue,
 										};
 

@@ -27,6 +27,7 @@ export default class TaskBoardFileManager {
 	private plugin: TaskBoard;
 	private recentBoardsData: recentBoardsDataType = {}; // This will hold the board-files data which user opened in the current Obsidian session. So, opening them again becomes faster.
 	private leafIdFilePathMapping: leafIdFilePathMapType = {}; // This will hold the mapping of all the older leafs(Obsidian tabs) and which board-file they are rendering, opened in the past.
+	private debouncedSaveBoardTimers: Map<string, NodeJS.Timeout> = new Map(); // Track debounce timers per board
 
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
@@ -464,12 +465,81 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Adds a new .taskboard file to the registry in settings
-	 * if it does not already exist. Updates the registry as a map keyed by boardId.
-	 * @param boardId - The ID of the board
-	 * @param filePath - The path to the .taskboard file
-	 * @param boardData - (Optional) The board data to cache
+	 * Debounced version of saveBoard that prevents rapid successive saves.
+	 * Each board ID has its own debounce timer. If called multiple times within the debounce window,
+	 * only the most recent save operation will execute.
+	 * @param updatedBoardData - The updated board configuration object (must contain valid id)
+	 * @param filePath - (Optional) The file path to save to
+	 * @param delayMs - (Optional) Debounce delay in milliseconds, default 1000ms
 	 */
+	debouncedSaveBoard(
+		updatedBoardData: Board,
+		filePath?: string,
+		delayMs: number = 1000,
+	): void {
+		const boardId = updatedBoardData.id;
+
+		if (!boardId || boardId.trim() === "") {
+			console.error(`Cannot debounce save: Board data does not contain a valid ID`);
+			return;
+		}
+
+		// Clear any existing timer for this board
+		const existingTimer = this.debouncedSaveBoardTimers.get(boardId);
+		if (existingTimer) {
+			clearTimeout(existingTimer);
+		}
+
+		// Set a new timer to save after the debounce delay
+		const newTimer = setTimeout(async () => {
+			try {
+				await this.saveBoard(updatedBoardData, filePath);
+				this.debouncedSaveBoardTimers.delete(boardId);
+			} catch (error) {
+				console.error(
+					`Error in debounced save for board ID ${boardId}:`,
+					error,
+				);
+				this.debouncedSaveBoardTimers.delete(boardId);
+			}
+		}, delayMs);
+
+		// Store the timer for potential cancellation
+		this.debouncedSaveBoardTimers.set(boardId, newTimer);
+	}
+
+	/**
+	 * Clear all pending debounced saves. Useful for cleanup on plugin unload.
+	 */
+	clearAllDebouncedSaves(): void {
+		this.debouncedSaveBoardTimers.forEach((timer) => {
+			clearTimeout(timer);
+		});
+		this.debouncedSaveBoardTimers.clear();
+	}
+
+	/**
+	 * Force save immediately, canceling any pending debounced save for this board.
+	 * @param updatedBoardData - The board configuration to save immediately
+	 * @param filePath - (Optional) The file path to save to
+	 * @returns Promise resolving to true if saved successfully
+	 */
+	async forceSaveBoard(
+		updatedBoardData: Board,
+		filePath?: string,
+	): Promise<boolean> {
+		const boardId = updatedBoardData.id;
+
+		// Cancel any pending debounced save for this board
+		const existingTimer = this.debouncedSaveBoardTimers.get(boardId);
+		if (existingTimer) {
+			clearTimeout(existingTimer);
+			this.debouncedSaveBoardTimers.delete(boardId);
+		}
+
+		// Save immediately
+		return await this.saveBoard(updatedBoardData, filePath);
+	}
 	async addNewBoardToRegistry(
 		boardId: string,
 		filePath: string,

@@ -60,13 +60,13 @@ export function getViewsByType(board: Board, viewType: string): View[] {
  * @param board The board to add the view to
  * @param viewType The type of view to create ('kanban' or 'map')
  * @param viewName The name of the new view
- * @returns The newly created view
+ * @returns The updated board with the new view added
  */
 export function addViewToBoard(
 	board: Board,
 	viewType: string,
 	viewName: string,
-): View {
+): Board {
 	const newViewId = `view-${board.id}-${Date.now()}`;
 
 	// Create base view structure
@@ -83,7 +83,11 @@ export function addViewToBoard(
 			pending: 0,
 			completed: 0,
 		},
-		kanbanView: {
+	};
+
+	// Add default columns if it's a kanban view
+	if (viewType === viewTypeNames.kanban) {
+		newView.kanbanView = {
 			columns: [],
 			showColumnTags: false,
 			hideEmptyColumns: false,
@@ -96,26 +100,20 @@ export function addViewToBoard(
 				maxHeight: "300px",
 				verticalHeaderUI: false,
 			},
-		},
-		mapView: {
+		};
+	} else if (viewType === viewTypeNames.map) {
+		newView.mapView = {
 			viewPortData: {
 				x: 0,
 				y: 0,
 				zoom: 0.5,
 			},
 			nodesData: {},
-		},
-	};
-
-	// Add default columns if it's a kanban view
-	if (viewType === viewTypeNames.kanban) {
-		if (newView.kanbanView === undefined) {
-		}
+		};
 	}
-	newView.kanbanView.columns = createDefaultKanbanColumns();
 
 	board.views.push(newView);
-	return newView;
+	return board;
 }
 
 /**

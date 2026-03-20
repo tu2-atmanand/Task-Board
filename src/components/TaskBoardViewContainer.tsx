@@ -877,14 +877,15 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		}
 	}, [showBoardSidebar]);
 
-	const viewTypeIconComponent = () => {
-		switch (boardData.views[currentViewIndex].viewType) {
+	const viewTypeIconComponent = (viewTypeName: string | undefined) => {
+		let viewType = viewTypeName ?? boardData.views[currentViewIndex].viewType;
+		switch (viewType) {
 			case viewTypeNames.kanban:
-				return <SquareKanban size={20} />;
+				return <SquareKanban size={18} strokeWidth={1.5} />;
 			case viewTypeNames.map:
-				return <Network size={18} />;
+				return <Network size={16} strokeWidth={1.5} />;
 			default:
-				return <BrickWall size={18} />;
+				return <BrickWall size={16} strokeWidth={1.5} />;
 		}
 	}
 
@@ -902,6 +903,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 										className={`boardTitleButton${index === currentViewIndex ? "Active" : ""}`}
 										onClick={() => handleViewSelect(index)}
 									>
+										{viewTypeIconComponent(view.viewType)}
 										{view.viewName}
 									</button>
 								))}

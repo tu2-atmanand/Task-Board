@@ -23,7 +23,7 @@ import { allowedFileExtensionsRegEx } from "src/regularExpressions/Miscelleneous
 import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
 import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
-import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNames } from "src/interfaces/Enums";
+import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNames, viewTypeNames } from "src/interfaces/Enums";
 import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
 import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
@@ -598,7 +598,6 @@ export const AddOrEditTaskRC: React.FC<{
 		// }
 
 		applyIdToTaskItem(plugin, task).then((newId) => {
-			globalSettings.lastViewHistory.viewedType = 'map';
 			globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
 
 			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
@@ -606,7 +605,7 @@ export const AddOrEditTaskRC: React.FC<{
 			plugin.realTimeScanner.processAllUpdatedFiles(filePath).then(() => {
 				onClose();
 				sleep(1000).then(() => {
-					eventEmitter.emit("SWITCH_VIEW", 'map');
+					eventEmitter.emit("SWITCH_VIEW", viewTypeNames.map);
 				});
 			});
 		});

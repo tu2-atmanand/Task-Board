@@ -1,7 +1,7 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, View } from "src/interfaces/BoardConfigs";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
@@ -17,20 +17,21 @@ import { robustDateParser } from "../DateTimeCalculations";
  * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
  *
  * @param {PluginDataJson} settings - The plugin settings object.
- * @param {number} activeBoardIndex - The index of the active board.
+ * @param {number} activeViewData - The active view configs.
  * @param {ColumnData} columnData - The single column configs.
  * @param {taskJsonMerged | null} allTasks - The collection of all tasks to segregate.
+ * @param {function} onBoardDataChange - Optional callback function to update the board data when changes occur (e.g., when manual ordering is enabled and tasks are reordered).
  * @returns {taskItem[]} - The tasks to display in the column.
  */
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
-	activeBoardData: Board,
+	activeViewData: View,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged | null,
-	onBoardDataChange?: (boardData: Board) => void,
+	onBoardDataChange?: (updatedViewData: View) => void,
 ): taskItem[] => {
-	if (!allTasks) return [];
+	if (!allTasks || !activeViewData || !activeViewData.kanbanView) return [];
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
@@ -230,12 +231,8 @@ export const columnSegregator = (
 			}
 			break;
 		case colTypeNames.otherTags:
-			// 1. Get the current board based on activeBoardIndex index
-			const currentBoard = activeBoardData;
-
-			// 2. Collect all coltags from columns where colType is 'namedTag'
 			const namedTags =
-				currentBoard?.columns
+				activeViewData.kanbanView.columns
 					.filter(
 						(col: ColumnData) =>
 							col.colType === colTypeNames.namedTag && col.coltag,
@@ -340,7 +337,7 @@ export const columnSegregator = (
 			}
 
 			let newTasksIdManualOrder = columnData.tasksIdManualOrder;
-			let currentBoardData = activeBoardData;
+			let updatedViewdData = activeViewData;
 
 			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
@@ -361,11 +358,12 @@ export const columnSegregator = (
 
 			// Update the newTasksIdManualOrder inside board data.
 			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
-			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
-				newTasksIdManualOrder;
+			updatedViewdData.kanbanView!.columns[
+				columnData.index - 1
+			].tasksIdManualOrder = newTasksIdManualOrder;
 
 			if (onBoardDataChange && didTasksIdManualOrderChange) {
-				onBoardDataChange(currentBoardData);
+				onBoardDataChange(updatedViewdData);
 			}
 
 			tasksToDisplay = sorted;

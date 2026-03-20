@@ -591,7 +591,13 @@ const en: Lang = {
 	"on-or-after": "on or after",
 	"before": "before",
 	"on-or-before": "on or before",
-	"verify": "Verify"
+	"verify": "Verify",
+	"board-settings": "Board settings",
+	"add-view": "Add view",
+	"duplicate-this-view": "Duplicate this view",
+	"delete-this-view": "Delete this view",
+	"view-name": "View name",
+	"view-description": "View description",
 };
 
 export default en;

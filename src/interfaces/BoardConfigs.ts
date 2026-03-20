@@ -199,7 +199,7 @@ export const DEFAULT_BOARD: Board = {
 	views: [
 		{
 			viewId: "view-3103563481-1",
-			viewName: "Time Based Kanban",
+			viewName: "Time Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
 			viewFilter: {
@@ -302,7 +302,7 @@ export const DEFAULT_BOARD: Board = {
 		},
 		{
 			viewId: "view-3103563481-2",
-			viewName: "Tag Based Kanban",
+			viewName: "Tag Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
 			viewFilter: {
@@ -375,7 +375,7 @@ export const DEFAULT_BOARD: Board = {
 		},
 		{
 			viewId: "view-3103563481-3",
-			viewName: "Status Based Kanban",
+			viewName: "Status Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
 			viewFilter: {
@@ -454,6 +454,28 @@ export const DEFAULT_BOARD: Board = {
 					maxHeight: "300px",
 					verticalHeaderUI: false,
 				},
+			},
+		},
+		{
+			viewId: "view-3103563481-4",
+			viewName: "Map View",
+			viewType: viewTypeNames.map,
+			showFilteredTags: true,
+			viewFilter: {
+				rootCondition: "any",
+				filterGroups: [],
+			},
+			taskCount: {
+				pending: 0,
+				completed: 0,
+			},
+			mapView: {
+				viewPortData: {
+					x: 0,
+					y: 0,
+					zoom: 1,
+				},
+				nodesData: {},
 			},
 		},
 	],
