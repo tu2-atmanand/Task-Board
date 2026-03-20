@@ -1,5 +1,10 @@
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
-import { colTypeNames, defaultTaskStatuses, viewTypeNames } from "./Enums";
+import {
+	colTypeNames,
+	defaultTaskStatuses,
+	viewsPanelPropertiesToShow,
+	viewTypeNames,
+} from "./Enums";
 
 export interface columnSortingCriteria {
 	criteria:
@@ -184,6 +189,11 @@ export interface Board {
 
 	views: View[];
 	lastViewId: string;
+	viewsPanel: {
+		isOpen: boolean;
+		width: number;
+		propertiesToShow: string[];
+	};
 
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
@@ -481,4 +491,12 @@ export const DEFAULT_BOARD: Board = {
 			},
 		},
 	],
+	viewsPanel: {
+		isOpen: true,
+		width: 300,
+		propertiesToShow: [
+			viewsPanelPropertiesToShow.Title,
+			viewsPanelPropertiesToShow.Description,
+		],
+	},
 };

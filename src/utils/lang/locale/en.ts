@@ -598,6 +598,9 @@ const en: Lang = {
 	"delete-this-view": "Delete this view",
 	"view-name": "View name",
 	"view-description": "View description",
+	"your-views": "Your views",
+	"no-views-created-yet": "No views created yet",
+	"select-a-view": "Select a view",
 };
 
 export default en;

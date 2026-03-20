@@ -216,3 +216,11 @@ export enum scanModeOptions {
 	AUTOMATIC = "automatic",
 	MANUAL = "manual",
 }
+
+export enum viewsPanelPropertiesToShow {
+	Title = "title",
+	Description = "description",
+	progress = "progress",
+	CreatedDate = "createdDate",
+	ModifiedDate = "modifiedDate",
+}
