@@ -49,7 +49,13 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			<div className="taskBoardViewContainer noViews">
 				<div className="noViewsMessage">
 					<p>{t("no-views-in-board")}</p>
-					<button onClick={() => openBoardConfigModal(plugin, boardData, currentViewIndex, () => {
+					<button onClick={() => openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
+						setCurrentBoardData(updatedBoard);
+						plugin.taskBoardFileManager.saveBoard(updatedBoard);
+
+						setTimeout(() => {
+							eventEmitter.emit("REFRESH_BOARD");
+						}, 100);
 					})}>
 						{t("add-view")}
 					</button>
@@ -256,7 +262,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 		setTimeout(() => {
 			eventEmitter.emit("REFRESH_BOARD");
-		}, 100)
+		}, 100);
 	}, []);
 
 	function handleOpenAddNewTaskModal() {
@@ -721,7 +727,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			setSearchQuery("");
 			plugin.settings.data.searchQuery = "";
 			setCurrentViewIndex(index);
-			
+
 			// Update the board's lastViewId to persist view selection
 			if (boardData?.views && index >= 0 && index < boardData.views.length) {
 				const updatedBoard = { ...boardData };
@@ -729,7 +735,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				setCurrentBoardData(updatedBoard);
 				plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoard);
 			}
-			
+
 			setTimeout(() => {
 				eventEmitter.emit("REFRESH_BOARD");
 				// plugin.saveSettings();
@@ -795,6 +801,10 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
 					setCurrentBoardData(updatedBoard);
 					plugin.taskBoardFileManager.saveBoard(updatedBoard);
+
+					setTimeout(() => {
+						eventEmitter.emit("REFRESH_BOARD");
+					}, 100);
 				}
 				)
 			});
@@ -1025,6 +1035,10 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 								// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
 								setCurrentBoardData(updatedBoard);
 								plugin.taskBoardFileManager.saveBoard(updatedBoard);
+
+								setTimeout(() => {
+									eventEmitter.emit("REFRESH_BOARD");
+								}, 100);
 							}
 							)}
 					>
@@ -1121,6 +1135,10 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 												// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
 												setCurrentBoardData(updatedBoard);
 												plugin.taskBoardFileManager.saveBoard(updatedBoard);
+
+												setTimeout(() => {
+													eventEmitter.emit("REFRESH_BOARD");
+												}, 100);
 											}
 											)
 										}

@@ -62,7 +62,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (
 			selectedViewIndex === -1 ||
 			!columnListRef.current ||
-			!allViewsData[selectedViewIndex]
+			!allViewsData[selectedViewIndex] ||
+			allViewsData[selectedViewIndex].viewType !== viewTypeNames.kanban
 		)
 			return;
 
@@ -155,7 +156,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// Kanban Column - UseEffect to initialize the MultiSuggest component for file path inputs in column configuration when the add/edit column modal is opened
 	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 	useEffect(() => {
-		allViewsData[selectedViewIndex]?.kanbanView!.columns.forEach((column, index) => {
+		const view = allViewsData[selectedViewIndex];
+		if (!view || view.viewType !== viewTypeNames.kanban) return;
+
+		view.kanbanView?.columns.forEach((column, index) => {
 			const fileInputElement = filePathInputRefs.current[column.id];
 			if (!fileInputElement) return;
 
@@ -181,7 +185,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (
 			selectedViewIndex === -1 ||
 			!columnListRef.current ||
-			!allViewsData[selectedViewIndex]
+			!allViewsData[selectedViewIndex] ||
+			allViewsData[selectedViewIndex].viewType !== viewTypeNames.kanban
 		)
 			return;
 
@@ -318,24 +323,12 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const viewToDuplicate = allViewsData[selectedViewIndex];
 		const duplicatedView: View = {
 			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
-			name: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
-			index: allViewsData.length,
-			filterConfig: undefined,
-			taskCount: undefined,
-			boardFilter: {
-				rootCondition: "any",
-				filterGroups: [],
-			},
-			swimlanes: viewToDuplicate.kanbanView!.swimlanes || {
-				enabled: false,
-				hideEmptySwimlanes: false,
-				property: 'tags',
-				sortCriteria: 'asc',
-			},
+			viewId: generateRandomTempTaskId(),
+			viewName: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
 		};
 
 		// Regenerate IDs for all columns to ensure uniqueness
-		if (duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
+		if (duplicatedView?.kanbanView && duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
 			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column) => ({
 				...column,
 				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
@@ -423,9 +416,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
 			id: generateRandomTempTaskId(),
 			name: `${activeBoardData.name} ${t("copy-suffix")}`,
-			views: activeBoardData.views ? activeBoardData.views.map((view) => ({
+			views: activeBoardData.views ? activeBoardData.views.map((view: View) => ({
 				...view,
-				id: String(Date.now() + Math.random()), // New unique ID for each view
+				viewId: generateRandomTempTaskId(), // New unique ID for each view
 			})) : [],
 		};
 
@@ -454,7 +447,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Board Management - Function to handle saving the complete board configuration by saving the updated board data to the file system and updating the current view with the new board data after saving.
 	const handleSave = async () => {
-		// Save only modified boards
 		let boardToSave = activeBoardData;
 		boardToSave.views = allViewsData;
 

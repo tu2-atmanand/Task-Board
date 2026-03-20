@@ -195,10 +195,10 @@ export const DEFAULT_BOARD: Board = {
 	name: "My Project",
 	description:
 		"This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards.",
-	lastViewId: "view-3103563481-1",
+	lastViewId: "3103563482",
 	views: [
 		{
-			viewId: "view-3103563481-1",
+			viewId: "3103563482",
 			viewName: "Time Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
@@ -213,7 +213,7 @@ export const DEFAULT_BOARD: Board = {
 			kanbanView: {
 				columns: [
 					{
-						id: 1,
+						id: 3103563491,
 						colType: colTypeNames.undated,
 						active: true,
 						collapsed: false,
@@ -226,7 +226,7 @@ export const DEFAULT_BOARD: Board = {
 						},
 					},
 					{
-						id: 2,
+						id: 3103563492,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -239,7 +239,7 @@ export const DEFAULT_BOARD: Board = {
 						},
 					},
 					{
-						id: 3,
+						id: 3103563493,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -252,7 +252,7 @@ export const DEFAULT_BOARD: Board = {
 						},
 					},
 					{
-						id: 4,
+						id: 3103563494,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -265,7 +265,7 @@ export const DEFAULT_BOARD: Board = {
 						},
 					},
 					{
-						id: 5,
+						id: 3103563495,
 						colType: colTypeNames.dated,
 						active: true,
 						collapsed: false,
@@ -278,7 +278,7 @@ export const DEFAULT_BOARD: Board = {
 						},
 					},
 					{
-						id: 6,
+						id: 3103563496,
 						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
@@ -301,7 +301,7 @@ export const DEFAULT_BOARD: Board = {
 			},
 		},
 		{
-			viewId: "view-3103563481-2",
+			viewId: "3103563483",
 			viewName: "Tag Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
@@ -316,7 +316,7 @@ export const DEFAULT_BOARD: Board = {
 			kanbanView: {
 				columns: [
 					{
-						id: 7,
+						id: 3103563497,
 						colType: colTypeNames.untagged,
 						active: true,
 						collapsed: false,
@@ -324,7 +324,7 @@ export const DEFAULT_BOARD: Board = {
 						index: 1,
 					},
 					{
-						id: 8,
+						id: 3103563498,
 						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
@@ -333,7 +333,7 @@ export const DEFAULT_BOARD: Board = {
 						coltag: "important",
 					},
 					{
-						id: 9,
+						id: 3103563499,
 						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
@@ -342,7 +342,7 @@ export const DEFAULT_BOARD: Board = {
 						coltag: "wip",
 					},
 					{
-						id: 11,
+						id: 3103563500,
 						colType: colTypeNames.namedTag,
 						active: true,
 						collapsed: false,
@@ -351,7 +351,7 @@ export const DEFAULT_BOARD: Board = {
 						coltag: "review",
 					},
 					{
-						id: 12,
+						id: 3103563501,
 						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
@@ -374,7 +374,7 @@ export const DEFAULT_BOARD: Board = {
 			},
 		},
 		{
-			viewId: "view-3103563481-3",
+			viewId: "3103563484",
 			viewName: "Status Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
@@ -389,7 +389,7 @@ export const DEFAULT_BOARD: Board = {
 			kanbanView: {
 				columns: [
 					{
-						id: 7,
+						id: 3103563502,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.unchecked,
 						active: true,
@@ -398,7 +398,7 @@ export const DEFAULT_BOARD: Board = {
 						index: 1,
 					},
 					{
-						id: 8,
+						id: 3103563503,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.scheduled,
 						active: true,
@@ -407,7 +407,7 @@ export const DEFAULT_BOARD: Board = {
 						index: 2,
 					},
 					{
-						id: 9,
+						id: 3103563504,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.inprogress,
 						active: true,
@@ -416,7 +416,7 @@ export const DEFAULT_BOARD: Board = {
 						index: 3,
 					},
 					{
-						id: 11,
+						id: 3103563505,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.question,
 						active: true,
@@ -425,7 +425,7 @@ export const DEFAULT_BOARD: Board = {
 						index: 5,
 					},
 					{
-						id: 12,
+						id: 3103563506,
 						colType: colTypeNames.completed,
 						active: true,
 						collapsed: false,
@@ -434,7 +434,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Completed",
 					},
 					{
-						id: 13,
+						id: 3103563507,
 						colType: colTypeNames.taskStatus,
 						taskStatus: defaultTaskStatuses.dropped,
 						active: true,
@@ -457,7 +457,7 @@ export const DEFAULT_BOARD: Board = {
 			},
 		},
 		{
-			viewId: "view-3103563481-4",
+			viewId: "3103563485",
 			viewName: "Map View",
 			viewType: viewTypeNames.map,
 			showFilteredTags: true,

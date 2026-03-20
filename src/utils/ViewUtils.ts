@@ -67,7 +67,7 @@ export function addViewToBoard(
 	viewType: string,
 	viewName: string,
 ): Board {
-	const newViewId = `view-${board.id}-${Date.now()}`;
+	const newViewId = generateRandomTempTaskId();
 
 	// Create base view structure
 	const newView: View = {
@@ -145,7 +145,7 @@ export function duplicateViewInBoard(board: Board, viewIndex: number): boolean {
 	const newView: View = JSON.parse(JSON.stringify(originalView));
 
 	// Generate new view ID
-	newView.viewId = `view-${board.id}-${Date.now()}`;
+	newView.viewId = generateRandomTempTaskId();
 	newView.viewName = `${originalView.viewName} (Copy)`;
 
 	board.views.push(newView);
