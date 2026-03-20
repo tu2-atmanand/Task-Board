@@ -43,6 +43,10 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		return null;
 	});
 
+	// Resizable drawer state
+	const [isResizing, setIsResizing] = useState(false);
+	const drawerRef = useRef<HTMLDivElement>(null);
+
 	// Display a message that no views are present inside this board. Stop here only instead of moving with the rest of the code which is dependent on the views.
 	if (!currentView) {
 		return (
@@ -904,7 +908,51 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		}
 	}, [showViewsPanel]);
 
-	const viewTypeIconComponent = (viewTypeName: string | undefined, size: number) => {
+	// Handle drawer resize
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isResizing || !drawerRef.current) return;
+
+			// Get the parent container's position
+			const parentRect = drawerRef.current.parentElement?.getBoundingClientRect();
+			if (!parentRect) return;
+
+			// Calculate new width based on mouse position
+			const newWidth = e.clientX - parentRect.left;
+
+			// Set minimum and maximum width constraints (e.g., 150px to 500px)
+			const minWidth = 150;
+			const maxWidth = 500;
+
+			if (newWidth >= minWidth && newWidth <= maxWidth) {
+				// Update the board data with the new width
+				const updatedBoard = { ...boardData };
+				updatedBoard.viewsPanel.width = newWidth;
+				setCurrentBoardData(updatedBoard);
+			}
+		};
+
+		const handleMouseUp = () => {
+			if (isResizing) {
+				setIsResizing(false);
+				// Save the updated board configuration
+				if (boardData) {
+					plugin.taskBoardFileManager.debouncedSaveBoard(boardData);
+				}
+			}
+		};
+
+		if (isResizing) {
+			document.addEventListener('mousemove', handleMouseMove);
+			document.addEventListener('mouseup', handleMouseUp);
+			return () => {
+				document.removeEventListener('mousemove', handleMouseMove);
+				document.removeEventListener('mouseup', handleMouseUp);
+			};
+		}
+	}, [isResizing, boardData, plugin]);
+
+	const getViewTypeIconComponent = (viewTypeName: string | undefined, size: number) => {
 		let viewType = viewTypeName ?? boardData.views[currentViewIndex].viewType;
 		switch (viewType) {
 			case viewTypeNames.kanban:
@@ -928,11 +976,12 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 			{/* Drawer opened from the left side */}
 			<div
+				ref={drawerRef}
 				className={`boardSidebarDrawer ${showViewsPanel ? 'boardSidebarDrawer--open' : 'boardSidebarDrawer--closed'}`}
 				onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
 				style={{ width: `${showViewsPanel ? boardData.viewsPanel.width : 0}px` }}
 			>
-				<div className="boardSidebar">
+				<div className="boardSidebar" style={{ width: `${boardData.viewsPanel.width}px` }}>
 					<div className="boardSidebarBoardHeader">
 						<h3>{boardData.name}</h3>
 						<p>{boardData.description}</p>
@@ -1027,7 +1076,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 										onClick={() => handleViewSelect(index)}
 									>
 										<div className="boardSidebarCardTitle" >
-											{viewTypeIconComponent(view.viewType, 20)}
+											{getViewTypeIconComponent(view.viewType, 20)}
 											{view.viewName}
 										</div>
 										{boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description) && (
@@ -1054,28 +1103,18 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 								))}
 							</div>
 						)}
-						{/* <div className="boardSidebarFooter">
-							<button
-								className="boardConfigureBtn"
-								onClick={() =>
-									openBoardConfigModal(plugin, currentBoardData, currentViewIndex, (updatedBoard: Board) => {
-										// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-										setCurrentBoardData(updatedBoard);
-										plugin.taskBoardFileManager.saveBoard(updatedBoard);
-
-										setTimeout(() => {
-											eventEmitter.emit("REFRESH_BOARD");
-										}, 100);
-									}
-									)
-								}
-							>
-								{t("configure-views")}
-							</button>
-						</div> */}
 					</div>
 				</div>
 			</div>
+
+			{/* Resizable Separator */}
+			{showViewsPanel && (
+				<div
+					className="boardSidebarResizer"
+					onMouseDown={() => setIsResizing(true)}
+					aria-label="Resize drawer"
+				/>
+			)}
 
 			{/* Main content area with smooth transition */}
 			<div className="taskBoardMainContent">
@@ -1091,7 +1130,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 												className={`viewTitleButton${index === currentViewIndex ? "Active" : ""}`}
 												onClick={() => handleViewSelect(index)}
 											>
-												{viewTypeIconComponent(view.viewType, 18)}
+												{getViewTypeIconComponent(view.viewType, 18)}
 												{view.viewName}
 											</button>
 										))}
@@ -1201,7 +1240,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 						onClick={(e) => handleViewChangeDropdownClick(e)}
 					>
 						<div className="taskBoardViewDropdownIcon">
-							{viewTypeIconComponent()}
+							{getViewTypeIconComponent()}
 						</div>
 						<div className="taskBoardViewDropdownName">{currentView?.viewName || "Unknown"}</div>
 					</div> */}
