@@ -513,7 +513,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// UseEffect and function to render the global settings UI in the board configuration modal when the global settings tab is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts.
 	useEffect(() => {
-		if (selectedViewIndex !== -1) return;
+		if (selectedViewIndex !== -2) return;
 
 		if (globalSettingsHTMLSection.current) {
 			settingManager.cleanUp();
