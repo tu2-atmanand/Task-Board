@@ -6,7 +6,7 @@
  */
 
 import { App, TFile, Notice, normalizePath } from "obsidian";
-import { Board } from "src/interfaces/BoardConfigs";
+import { Board, DEFAULT_BOARD } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import { LEAFID_FILEPATH_MAPPING_KEY } from "src/interfaces/Constants";
@@ -28,10 +28,12 @@ export default class TaskBoardFileManager {
 	private recentBoardsData: recentBoardsDataType = {}; // This will hold the board-files data which user opened in the current Obsidian session. So, opening them again becomes faster.
 	private leafIdFilePathMapping: leafIdFilePathMapType = {}; // This will hold the mapping of all the older leafs(Obsidian tabs) and which board-file they are rendering, opened in the past.
 	private debouncedSaveBoardTimers: Map<string, NodeJS.Timeout> = new Map(); // Track debounce timers per board
+	private currentPluginVersion: string;
 
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
 		this.app = plugin.app;
+		this.currentPluginVersion = plugin.settings.version;
 
 		const mappingData: leafIdFilePathMapType = JSON.parse(
 			this.app.loadLocalStorage(LEAFID_FILEPATH_MAPPING_KEY),
@@ -92,6 +94,8 @@ export default class TaskBoardFileManager {
 					);
 				}
 			}
+
+			boardData = this.applyMigrationIfNeeded(boardData);
 
 			return boardData;
 		} catch (error) {
@@ -480,7 +484,9 @@ export default class TaskBoardFileManager {
 		const boardId = updatedBoardData.id;
 
 		if (!boardId || boardId.trim() === "") {
-			console.error(`Cannot debounce save: Board data does not contain a valid ID`);
+			console.error(
+				`Cannot debounce save: Board data does not contain a valid ID`,
+			);
 			return;
 		}
 
@@ -796,6 +802,63 @@ export default class TaskBoardFileManager {
 	clearCurrentBoardCache(): void {
 		this.recentBoardsData = {};
 		console.log("Cleared cached board data");
+	}
+
+	/**
+	 * Migration for the following new properties :
+	 * - boardData.viewPanel
+	 *
+	 * @Date - 2026-04-01
+	 */
+	runMigrationForVersion_2_0_0(oldBoardData: Board): Board {
+		let newBoardData = { ...oldBoardData };
+		if (!oldBoardData?.viewsPanel) {
+			newBoardData["viewsPanel"] = DEFAULT_BOARD.viewsPanel;
+		}
+
+		return newBoardData;
+	}
+
+	/**
+	 * This function will be used to run a migration check whenever any board is loaded. Based on the pluginVersion property in the board data, we can decide if we need to run any migration steps to update the board data structure to be compatible with the current plugin version.
+	 * This is important to ensure that users can still load their existing boards even after we release updates that may change the board data structure.
+	 *
+	 * First will check if the boardData.pluginVersion is different from the currentPluginVersion. If they are different, it means the board data was last saved with an older version of the plugin, and we may need to run migrations.
+	 * Then based on the pluginVersion in the board data, we can determine which migration steps to run to update the board data structure to be compatible with the current plugin version.
+	 * After running the necessary migrations, we should also update the pluginVersion in the board data to the currentPluginVersion, so that we don't run the same migrations again in the future.
+	 * Finally, we save the migrated board data back to disk and return the updated board data object.
+	 *
+	 * @param boardData - The old board data to check if it needs migrations
+	 *
+	 * @returns - The migrated board data that is compatible with the current plugin version. If no migration was needed, it returns the original board data.
+	 */
+	applyMigrationIfNeeded(boardData: Board): Board {
+		try {
+			if (boardData.pluginVersion === this.currentPluginVersion) {
+				//Board data plugin version matches current plugin version. No migration needed.
+				return boardData;
+			} else {
+				// There are two situations :
+				// 1. boardData.pluginVersion === "";
+				// 2. boardData.pluginVersion !== this.currentPluginVersion;
+				// In both these cases, will apply all the migrations.
+				// Here we can run all the migrations sequentially since we don't know which version it was last saved with.
+				// Will add a date to the version specific migration function to remember when that migration was introduced.
+				// If the date has crossed 6 months, will remove that migration, since its very old now.
+
+				boardData = this.runMigrationForVersion_2_0_0(boardData);
+			}
+
+			// After applying necessary migrations, update the pluginVersion in the board data
+			boardData.pluginVersion = this.currentPluginVersion;
+
+			this.saveBoard(boardData);
+
+			return boardData;
+		} catch (error) {
+			console.error(`Error applying migration to board data:`, error);
+			return boardData; // Return original data if migration fails to prevent data loss
+		}
 	}
 
 	// --------------------------------------------------------------------
