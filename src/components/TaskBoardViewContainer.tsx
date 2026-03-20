@@ -102,6 +102,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		setIsMobileView(viewWidth <= 800); // For even little bigger screen smartphones, let go with 800
 	}, [viewWidth]);
 
+	// Update currentView when currentViewIndex or boardData changes
+	useEffect(() => {
+		if (boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
+			const newView = boardData.views[currentViewIndex];
+			setCurrentView(newView);
+		}
+	}, [currentViewIndex, boardData?.views]);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			console.log("TASK BOARD : Does this run while switching boards...");
@@ -713,6 +721,15 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			setSearchQuery("");
 			plugin.settings.data.searchQuery = "";
 			setCurrentViewIndex(index);
+			
+			// Update the board's lastViewId to persist view selection
+			if (boardData?.views && index >= 0 && index < boardData.views.length) {
+				const updatedBoard = { ...boardData };
+				updatedBoard.lastViewId = boardData.views[index].viewId;
+				setCurrentBoardData(updatedBoard);
+				plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoard);
+			}
+			
 			setTimeout(() => {
 				eventEmitter.emit("REFRESH_BOARD");
 				// plugin.saveSettings();
@@ -896,11 +913,11 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				{boardData.views && boardData.views.length > 0 ? (
 					<>
 						{showAllElements ? (
-							<div className="boardTitles">
+							<div className="viewSwitcherBar">
 								{boardData.views.map((view, index) => (
 									<button
 										key={index}
-										className={`boardTitleButton${index === currentViewIndex ? "Active" : ""}`}
+										className={`viewTitleButton${index === currentViewIndex ? "Active" : ""}`}
 										onClick={() => handleViewSelect(index)}
 									>
 										{viewTypeIconComponent(view.viewType)}
@@ -918,7 +935,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 									<MenuICon size={20} />
 								</button>
 								{!showSearchInput && (
-									<span className="currentBoardName">{boardData?.name}</span>
+									<span className="currentViewName">{currentView.viewName}</span>
 								)}
 							</div>
 						)}
@@ -933,7 +950,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 							<LayoutGridIcon size={20} />
 						</button>
 						{!showSearchInput && (
-							<span className="currentBoardName">{boardData?.name}</span>
+							<span className="currentViewName">{currentView.viewName}</span>
 						)}
 					</div>
 				)}

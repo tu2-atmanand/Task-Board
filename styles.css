@@ -160,14 +160,14 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* max-height: 90%; */
 }
 
-.boardTitles {
+.viewSwitcherBar {
 	display: flex;
 	flex-direction: row;
 	gap: 0.5em;
 	overflow: auto;
 }
 
-.boardTitleButton {
+.viewTitleButton {
 	background: transparent !important;
 	border-radius: var(--radius-s);
 	cursor: pointer;
@@ -176,7 +176,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 5px;
 }
 
-.boardTitleButtonActive {
+.viewTitleButtonActive {
 	box-shadow: var(--embed-block-shadow-hover) !important;
 	background: var(--background-secondary-alt) !important;
 	border-radius: var(--radius-s);
@@ -5944,7 +5944,7 @@ svg.react-flow__connectionline {
 	background: var(--background-modifier-active);
 }
 
-.currentBoardName {
+.currentViewName {
 	font-weight: 500;
 	/* max-width: 150px; */
 	overflow: hidden;
