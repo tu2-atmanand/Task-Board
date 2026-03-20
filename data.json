@@ -40,20 +40,7 @@
     "columnWidth": "300px",
     "visiblePropertiesList": [
       "id",
-      "title",
-      "status",
-      "tags",
-      "time",
-      "reminder",
-      "priority",
-      "createdDate",
-      "startDate",
-      "scheduledDate",
-      "dueDate",
-      "completionDate",
-      "cancelledDate",
-      "dependsOn",
-      "filePath"
+      "title"
     ],
     "taskCardStyle": "emoji",
     "showVerticalScroll": true,

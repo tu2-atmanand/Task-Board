@@ -77,10 +77,50 @@ undefined
 Timestamp : 2026-03-20T09:07:59
 ID : 185
 Message : There was an issue with opening the last viewed board by user
-Context : TaskBoardView.tsx/onOpen
+Context : undefined
 Version : 1.9.5
 
 #### Bug Content
 ```log
 lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T10:09:00
+ID : 7
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
+```
+
+-------------
+
+Timestamp : 2026-03-20T10:09:59
+ID : 141
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-03-20T10:10:00
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
 ```
