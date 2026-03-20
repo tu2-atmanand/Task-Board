@@ -88,7 +88,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		};
 	}, [selectedViewIndex, allViewsData]);
 
-	// useEffect for view sorting
+	// useEffect for view order sorting
 	useEffect(() => {
 		if (!boardListRef.current) return;
 
@@ -115,48 +115,22 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		};
 	}, [allViewsData, selectedViewIndex]);
 
-	// Function to add a new column to the selected view
+	// --------------------------------------------------------------
+	// ALL EVENT HANDLING LOGIC BELOW
+	// --------------------------------------------------------------
+
+	// Kanban Column - Function to handle opening a modal for adding a new column
 	const handleOpenAddColumnModal = () => {
 		setIsAddColumnModalOpen(true);
 		// renderAddColumnModal();
 	};
 
+	// Kanban Column - Function to handle closing the add column modal
 	const handleCloseAddColumnModal = () => {
 		setIsAddColumnModalOpen(false);
 	};
 
-	const handleSwimlanesConfigureBtnClick = () => {
-		if (selectedViewIndex === -1) {
-			new Notice(t("no-view-selected"));
-			return;
-		}
-
-		const view = allViewsData[selectedViewIndex];
-		const currentSwimlaneConfig = view.kanbanView!.swimlanes || {
-			enabled: false,
-			hideEmptySwimlanes: false,
-			property: 'tags',
-			customValue: '',
-			sortCriteria: 'asc',
-			customSortOrder: [],
-			minimized: false,
-			maxHeight: '300px',
-		};
-
-		const swimlaneModal = new SwimlanesConfigModal(
-			plugin.app,
-			currentSwimlaneConfig,
-			(updatedConfig: swimlaneConfigs) => {
-				const updatedViewsData = [...allViewsData];
-				updatedViewsData[selectedViewIndex].kanbanView!.swimlanes = updatedConfig;
-				setAllViewsData(updatedViewsData);
-				setIsEdited(true);
-			}
-		);
-
-		swimlaneModal.open();
-	};
-
+	// Kanban Column - Function to handle adding a new column to the selected Kanban specific view using the data submitted from the add column modal
 	const handleAddColumn = (viewIndex: number, columnData: ColumnData) => {
 		const updatedViewsData = [...allViewsData];
 		updatedViewsData[viewIndex].kanbanView!.columns.push({
@@ -178,146 +152,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	};
 
-	// Function to render the Add Column Modal
-	const renderAddColumnModal = () => {
-		if (!isAddColumnModalOpen) return null;
-
-		const modal = new AddColumnModal(plugin.app, {
-			app: plugin.app,
-			onCancel: handleCloseAddColumnModal, // Previously onClose
-			onSubmit: (columnData: ColumnData) => handleAddColumn(selectedViewIndex, columnData),
-		});
-		modal.open();
-	};
-
-	const handleDuplicateCurrentView = async () => {
-		if (selectedViewIndex === -1) {
-			new Notice(t("no-view-selected-to-duplicate"));
-			return;
-		}
-		const viewToDuplicate = allViewsData[selectedViewIndex];
-		const duplicatedView: View = {
-			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
-			name: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
-			index: allViewsData.length,
-			filterConfig: undefined,
-			taskCount: undefined,
-			boardFilter: {
-				rootCondition: "any",
-				filterGroups: [],
-			},
-			swimlanes: viewToDuplicate.kanbanView!.swimlanes || {
-				enabled: false,
-				hideEmptySwimlanes: false,
-				property: 'tags',
-				sortCriteria: 'asc',
-			},
-		};
-
-		// Regenerate IDs for all columns to ensure uniqueness
-		if (duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
-			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column) => ({
-				...column,
-				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
-			}));
-		}
-
-		const updatedViewsData = [...allViewsData, duplicatedView];
-		setAllViewsData(updatedViewsData);
-		setSelectedViewIndex(updatedViewsData.length - 1);
-		setIsEdited(true);
-	}
-
-	const handleAddNewView = () => {
-		const app = plugin.app;
-		const modal = new AddViewModal(
-			app,
-			currentBoardData,
-			{
-				onCancel: () => {
-					// Do nothing on cancel
-				},
-				onSubmit: (updatedBoardData: Board) => {
-					setActiveBoardData(updatedBoardData);
-					setAllViewsData(updatedBoardData.views || []);
-					setSelectedViewIndex(updatedBoardData.views ? updatedBoardData.views.length - 1 : -1);
-					setIsEdited(true);
-				},
-			}
-		);
-		modal.open();
-	};
-
-	const handleDeleteCurrentView = () => {
-		const app = plugin.app;
-		const mssg = t("view-delete-confirmation-message");
-		const deleteModal = new DeleteConfirmationModal(app, {
-			app,
-			mssg,
-			onConfirm: () => {
-				new Notice('NOT IMPLEMENTED');
-
-				if (selectedViewIndex !== -1) {
-					const updatedViewsData = [...allViewsData];
-					updatedViewsData.splice(selectedViewIndex, 1);
-					setAllViewsData(updatedViewsData);
-					setIsEdited(true);
-					// if (updatedViewsData.length === 0) {
-					// 	handleAddNewBoard(updatedViewsData);
-					// 	setSelectedViewIndex(0);
-					// } else if (selectedViewIndex !== 0) {
-					// 	setSelectedViewIndex(selectedViewIndex - 1);
-					// }
-				} else {
-					new Notice(t("no-view-selected-to-delete"));
-				}
-			},
-			onCancel: () => {
-				// console.log("Board Deletion Operation Cancelled.");
-			},
-		});
-		deleteModal.open();
-	};
-
-	const toggleActiveState = (viewIndex: number, columnIndex: number) => {
-		const updatedViewsData = [...allViewsData];
-		const column = updatedViewsData[viewIndex].kanbanView!.columns[columnIndex];
-		column.active = !column.active; // Toggle the active state
-		setAllViewsData(updatedViewsData); // Update the state
-		setIsEdited(true);
-	};
-
-	// Function to save changes
-	const handleSave = async () => {
-		// Save only modified boards
-		let boardToSave = activeBoardData;
-		boardToSave.views = allViewsData;
-
-		if (boardToSave) {
-			const filePath = plugin.taskBoardFileManager.getBoardFilepathFromRegistry(boardToSave.id);
-			if (filePath) {
-				await plugin.taskBoardFileManager.saveBoard(boardToSave, filePath);
-			}
-		}
-
-		// Find and return the updated current view data
-		// const updatedCurrentBoard = allViewsData.find(view => view.id === currentBoardData.id);
-		// if (updatedCurrentBoard) {
-		onSave(boardToSave);
-		// }
-	};
-
-	useEffect(() => {
-		if (selectedViewIndex !== -1) return;
-
-		if (globalSettingsHTMLSection.current) {
-			settingManager.cleanUp();
-			globalSettingsHTMLSection.current.empty();
-			// Render global settings
-			settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
-		}
-	}, [selectedViewIndex]);
-
+	// Kanban Column - UseEffect to initialize the MultiSuggest component for file path inputs in column configuration when the add/edit column modal is opened
 	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 	useEffect(() => {
 		allViewsData[selectedViewIndex]?.kanbanView!.columns.forEach((column, index) => {
@@ -341,98 +176,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		});
 	}, [plugin.app, selectedViewIndex, allViewsData]);
 
-	// Function to handle column change
-	const handleColumnChange = (
-		viewIndex: number,
-		columnIndex: number,
-		field: string,
-		value: any
-	) => {
-		// evt?.preventDefault();
-		// evt?.stopPropagation();
-		// console.log(`Updating column at viewIndex: ${viewIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
-		const updatedViewsData = [...allViewsData];
-		(updatedViewsData[viewIndex].kanbanView!.columns[columnIndex] as any)[field] = value;
-
-		setAllViewsData(updatedViewsData);
-		setIsEdited(true);
-	};
-
-	// Function to handle view name change
-	const handleViewNameChange = (index: number, newName: string) => {
-		const updatedViewsData = [...allViewsData];
-		updatedViewsData[index].viewName = newName;
-		setAllViewsData(updatedViewsData);
-		setIsEdited(true);
-	};
-
-	const handleBoardDescriptionChange = (index: number, description: string) => {
-		const updatedViewsData = [...allViewsData];
-		updatedViewsData[index].description = description;
-		setAllViewsData(updatedViewsData);
-		setIsEdited(true);
-	};
-
-	const handleDuplicateCurrentBoard = () => {
-		const duplicatedBoard: Board = {
-			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
-			id: generateRandomTempTaskId(),
-			name: `${activeBoardData.name} ${t("copy-suffix")}`,
-			views: activeBoardData.views ? activeBoardData.views.map((view) => ({
-				...view,
-				id: String(Date.now() + Math.random()), // New unique ID for each view
-			})) : [],
-		};
-
-		onClose();
-	};
-
-	type BooleanBoardProperties = 'showFilteredTags';
-	type BooleanKanbanProperties = 'hideEmptyColumns' | 'showColumnTags';
-
-	const handleToggleBoardSettings = (viewIndex: number, field: BooleanBoardProperties, value: boolean) => {
-		const updatedViewsData = [...allViewsData];
-		if (updatedViewsData[viewIndex]) {
-			(updatedViewsData[viewIndex] as any)[field] = value as boolean;
-		}
-		setAllViewsData(updatedViewsData);
-		setIsEdited(true);
-	};
-
-	const handleToggleKanbanViewSettings = (viewIndex: number, field: BooleanKanbanProperties, value: boolean) => {
-		const updatedViewsData = [...allViewsData];
-		if (updatedViewsData[viewIndex] && updatedViewsData[viewIndex].kanbanView) {
-			(updatedViewsData[viewIndex].kanbanView as any)[field] = value as boolean;
-		}
-		setAllViewsData(updatedViewsData);
-		setIsEdited(true);
-	};
-
-	// Function to delete a column from the selected view
-	const handleDeleteColumnFromBoard = (viewIndex: number, columnIndex: number) => {
-		const app = plugin.app;
-		const mssg = t("column-delete-confirmation-message") + allViewsData[viewIndex].kanbanView!.columns[columnIndex].name;
-
-		const deleteModal = new DeleteConfirmationModal(app, {
-			app,
-			mssg,
-			onConfirm: () => {
-				if (columnIndex !== -1) {
-					const updatedViewsData = [...allViewsData];
-					updatedViewsData[viewIndex].kanbanView!.columns.splice(columnIndex, 1);
-					setAllViewsData(updatedViewsData);
-					setIsEdited(true);
-				} else {
-					bugReporterManagerInsatance.showNotice(35, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${allViewsData[viewIndex].kanbanView!.columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
-				}
-			},
-			onCancel: () => {
-				// console.log("Board Deletion Operation Cancelled.");
-			},
-		});
-		deleteModal.open();
-	};
-
+	// Kanban Column - UseEffect to handle column reordering using SortableJS whenever the selected view or its columns change
 	useEffect(() => {
 		if (
 			selectedViewIndex === -1 ||
@@ -481,18 +225,266 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		};
 	}, [selectedViewIndex, allViewsData]);
 
-	// For Small Screens UI
+	// Kanban Column - Function to handle any property change for a specific column in the selected Kanban specific view. This is a generic function that can be used for changing any property of a column by passing the appropriate field and value.
+	const handleColumnChange = (
+		viewIndex: number,
+		columnIndex: number,
+		field: string,
+		value: any
+	) => {
+		// evt?.preventDefault();
+		// evt?.stopPropagation();
+		// console.log(`Updating column at viewIndex: ${viewIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
+		const updatedViewsData = [...allViewsData];
+		(updatedViewsData[viewIndex].kanbanView!.columns[columnIndex] as any)[field] = value;
+
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	// Kanban Column - Function to handle toggling the visibility of a column in the selected Kanban specific view by toggling its "active" property
+	const toggleActiveState = (viewIndex: number, columnIndex: number) => {
+		const updatedViewsData = [...allViewsData];
+		const column = updatedViewsData[viewIndex].kanbanView!.columns[columnIndex];
+		column.active = !column.active; // Toggle the active state
+		setAllViewsData(updatedViewsData); // Update the state
+		setIsEdited(true);
+	};
+
+	// Kanban Column - Function to handle deleting a column from the selected Kanban specific view after confirming the action in a confirmation modal
+	const handleDeleteColumnFromBoard = (viewIndex: number, columnIndex: number) => {
+		const app = plugin.app;
+		const mssg = t("column-delete-confirmation-message") + allViewsData[viewIndex].kanbanView!.columns[columnIndex].name;
+
+		const deleteModal = new DeleteConfirmationModal(app, {
+			app,
+			mssg,
+			onConfirm: () => {
+				if (columnIndex !== -1) {
+					const updatedViewsData = [...allViewsData];
+					updatedViewsData[viewIndex].kanbanView!.columns.splice(columnIndex, 1);
+					setAllViewsData(updatedViewsData);
+					setIsEdited(true);
+				} else {
+					bugReporterManagerInsatance.showNotice(35, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${allViewsData[viewIndex].kanbanView!.columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
+				}
+			},
+			onCancel: () => {
+				// console.log("Board Deletion Operation Cancelled.");
+			},
+		});
+		deleteModal.open();
+	};
+
+	// Kanban Swimlanes - Function to handle opening the swimlane configuration modal for the selected Kanban specific view and passing the current swimlane configuration to the modal
+	const handleSwimlanesConfigureBtnClick = () => {
+		if (selectedViewIndex === -1) {
+			new Notice(t("no-view-selected"));
+			return;
+		}
+
+		const view = allViewsData[selectedViewIndex];
+		const currentSwimlaneConfig = view.kanbanView!.swimlanes || {
+			enabled: false,
+			hideEmptySwimlanes: false,
+			property: 'tags',
+			customValue: '',
+			sortCriteria: 'asc',
+			customSortOrder: [],
+			minimized: false,
+			maxHeight: '300px',
+		};
+
+		const swimlaneModal = new SwimlanesConfigModal(
+			plugin.app,
+			currentSwimlaneConfig,
+			(updatedConfig: swimlaneConfigs) => {
+				const updatedViewsData = [...allViewsData];
+				updatedViewsData[selectedViewIndex].kanbanView!.swimlanes = updatedConfig;
+				setAllViewsData(updatedViewsData);
+				setIsEdited(true);
+			}
+		);
+
+		swimlaneModal.open();
+	};
+
+	// View Management - Function to handle duplicating the currently selected view in the board configuration modal by creating a copy of the view data with a new name and adding it to the list of views in the state
+	const handleDuplicateCurrentView = async () => {
+		if (selectedViewIndex === -1) {
+			new Notice(t("no-view-selected-to-duplicate"));
+			return;
+		}
+		const viewToDuplicate = allViewsData[selectedViewIndex];
+		const duplicatedView: View = {
+			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
+			name: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
+			index: allViewsData.length,
+			filterConfig: undefined,
+			taskCount: undefined,
+			boardFilter: {
+				rootCondition: "any",
+				filterGroups: [],
+			},
+			swimlanes: viewToDuplicate.kanbanView!.swimlanes || {
+				enabled: false,
+				hideEmptySwimlanes: false,
+				property: 'tags',
+				sortCriteria: 'asc',
+			},
+		};
+
+		// Regenerate IDs for all columns to ensure uniqueness
+		if (duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
+			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column) => ({
+				...column,
+				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
+			}));
+		}
+
+		const updatedViewsData = [...allViewsData, duplicatedView];
+		setAllViewsData(updatedViewsData);
+		setSelectedViewIndex(updatedViewsData.length - 1);
+		setIsEdited(true);
+	}
+
+	// View Management - Function to handle opening the add view modal when the "Add View" button is clicked in the sidebar of the board configuration modal
+	const handleAddNewView = () => {
+		const app = plugin.app;
+		const modal = new AddViewModal(
+			app,
+			currentBoardData,
+			{
+				onCancel: () => {
+					// Do nothing on cancel
+				},
+				onSubmit: (updatedBoardData: Board) => {
+					setActiveBoardData(updatedBoardData);
+					setAllViewsData(updatedBoardData.views || []);
+					setSelectedViewIndex(updatedBoardData.views ? updatedBoardData.views.length - 1 : -1);
+					setIsEdited(true);
+				},
+			}
+		);
+		modal.open();
+	};
+
+	// View Management - Function to handle deleting the currently selected view from the board configuration after confirming the action in a confirmation modal
+	const handleDeleteCurrentView = () => {
+		const app = plugin.app;
+		const mssg = t("view-delete-confirmation-message");
+		const deleteModal = new DeleteConfirmationModal(app, {
+			app,
+			mssg,
+			onConfirm: () => {
+				new Notice('NOT IMPLEMENTED');
+
+				if (selectedViewIndex !== -1) {
+					const updatedViewsData = [...allViewsData];
+					updatedViewsData.splice(selectedViewIndex, 1);
+					setAllViewsData(updatedViewsData);
+					setIsEdited(true);
+					// if (updatedViewsData.length === 0) {
+					// 	handleAddNewBoard(updatedViewsData);
+					// 	setSelectedViewIndex(0);
+					// } else if (selectedViewIndex !== 0) {
+					// 	setSelectedViewIndex(selectedViewIndex - 1);
+					// }
+				} else {
+					new Notice(t("no-view-selected-to-delete"));
+				}
+			},
+			onCancel: () => {
+				// console.log("Board Deletion Operation Cancelled.");
+			},
+		});
+		deleteModal.open();
+	};
+
+	// Board Management - Function to handle changing the name of the active view.
+	const handleViewNameChange = (index: number, newName: string) => {
+		const updatedViewsData = [...allViewsData];
+		updatedViewsData[index].viewName = newName;
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	// Board Management - Function to handle changing the description of the active view.
+	const handleBoardDescriptionChange = (index: number, description: string) => {
+		const updatedViewsData = [...allViewsData];
+		updatedViewsData[index].description = description;
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
+	const handleDuplicateCurrentBoard = () => {
+		const duplicatedBoard: Board = {
+			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
+			id: generateRandomTempTaskId(),
+			name: `${activeBoardData.name} ${t("copy-suffix")}`,
+			views: activeBoardData.views ? activeBoardData.views.map((view) => ({
+				...view,
+				id: String(Date.now() + Math.random()), // New unique ID for each view
+			})) : [],
+		};
+
+		onClose();
+	};
+
+	// Toggle Settings - Function to handle toggling any boolean setting for the board or for a specific view by passing the appropriate field and value to the generic toggle functions defined below
+	type BooleanBoardProperties = 'showFilteredTags';
+	type BooleanKanbanProperties = 'hideEmptyColumns' | 'showColumnTags';
+	const handleToggleBoardSettings = (viewIndex: number, field: BooleanBoardProperties, value: boolean) => {
+		const updatedViewsData = [...allViewsData];
+		if (updatedViewsData[viewIndex]) {
+			(updatedViewsData[viewIndex] as any)[field] = value as boolean;
+		}
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+	const handleToggleKanbanViewSettings = (viewIndex: number, field: BooleanKanbanProperties, value: boolean) => {
+		const updatedViewsData = [...allViewsData];
+		if (updatedViewsData[viewIndex] && updatedViewsData[viewIndex].kanbanView) {
+			(updatedViewsData[viewIndex].kanbanView as any)[field] = value as boolean;
+		}
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	// Board Management - Function to handle saving the complete board configuration by saving the updated board data to the file system and updating the current view with the new board data after saving.
+	const handleSave = async () => {
+		// Save only modified boards
+		let boardToSave = activeBoardData;
+		boardToSave.views = allViewsData;
+
+		if (boardToSave) {
+			const filePath = plugin.taskBoardFileManager.getBoardFilepathFromRegistry(boardToSave.id);
+			if (filePath) {
+				await plugin.taskBoardFileManager.saveBoard(boardToSave, filePath);
+			}
+		}
+
+		// Find and return the updated current view data
+		// const updatedCurrentBoard = allViewsData.find(view => view.id === currentBoardData.id);
+		// if (updatedCurrentBoard) {
+		onSave(boardToSave);
+		// }
+	};
+
+	// --------------------------------------------------------------
+	// ALL RENDERING LOGIC BELOW
+	// --------------------------------------------------------------
+
+	// For Small Screens UI - Toggle Sidebar Visibility
 	const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 	const sidebarRef = useRef<HTMLDivElement>(null);
-
 	const toggleSidebar = () => setIsSidebarVisible(!isSidebarVisible);
-
 	const handleClickOutside = (event: MouseEvent) => {
 		if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
 			setIsSidebarVisible(false);
 		}
 	};
-
 	useEffect(() => {
 		if (isSidebarVisible) {
 			document.addEventListener("mousedown", handleClickOutside);
@@ -507,13 +499,42 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		}
 	}, [isSidebarVisible]);
 
+	// Function to render the add column modal when the "Add Column" button is clicked in the configuration of a Kanban specific view.
+	const renderAddColumnModal = () => {
+		if (!isAddColumnModalOpen) return null;
+
+		const modal = new AddColumnModal(plugin.app, {
+			app: plugin.app,
+			onCancel: handleCloseAddColumnModal, // Previously onClose
+			onSubmit: (columnData: ColumnData) => handleAddColumn(selectedViewIndex, columnData),
+		});
+		modal.open();
+	};
+
+	// UseEffect and function to render the global settings UI in the board configuration modal when the global settings tab is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts.
+	useEffect(() => {
+		if (selectedViewIndex !== -1) return;
+
+		if (globalSettingsHTMLSection.current) {
+			settingManager.cleanUp();
+			globalSettingsHTMLSection.current.empty();
+			// Render global settings
+			settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
+		}
+	}, [selectedViewIndex]);
 	const renderGlobalSettingsTab = (viewIndex: number) => {
 		return (
 			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
 		);
 	}
 
+	// Function to render the board settings UI in the board configuration modal when a specific view is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts.
 	const renderBoardConfigTab = () => {
+		if (globalSettingsHTMLSection.current) {
+			settingManager.cleanUp();
+			globalSettingsHTMLSection.current.empty();
+		}
+
 		return (
 			<div className="boardConfigTab">
 				<div className="boardConfigModalMainContent-Active">
@@ -566,6 +587,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 	}
 
+	// Function to render the view specific settings UI in the board configuration modal when a specific view is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts. This function also handles rendering the UI for configuring the settings of a Kanban specific view and for configuring the columns in a Kanban specific view.
 	const renderViewSettings = (viewIndex: number) => {
 		if (globalSettingsHTMLSection.current) {
 			settingManager.cleanUp();
@@ -960,6 +982,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 	};
 
+	// Main render function for the board configuration modal which renders the sidebar with the list of views and the global settings tab and the main content area with the settings for the selected view or for the global settings based on the current state of the selected view index. This function also handles rendering the toggle button for the sidebar on small screens and rendering the add column modal when it is open.
 	return (
 		<>
 			{renderAddColumnModal()}
@@ -1038,7 +1061,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	);
 };
 
-// BoardConfigureModal class for modal behavior
+/**
+ * BoardConfigureModal is a modal component that provides a user interface for configuring the settings of a task board and its views in the TaskBoard plugin. It allows users to manage their boards and views, configure settings for each view, and save their configurations. The modal uses React for rendering the UI and manages its state using React's useState and useEffect hooks. It also integrates with the Obsidian plugin API to handle file management and settings management for the task boards.
+ */
 export class BoardConfigureModal extends Modal {
 	root: ReactDOM.Root;
 	settingsManager: SettingsManager;
@@ -1048,6 +1073,13 @@ export class BoardConfigureModal extends Modal {
 	onSave: (updatedBoard: Board) => void;
 	plugin: TaskBoard;
 
+	/**
+	 * Constructor for the BoardConfigureModal class which initializes the modal with the current board data, the index of the currently active view, and a callback function to handle saving the updated board data when the user saves their configurations. It also sets up the React root for rendering the modal content and initializes the settings manager for managing global settings in the modal.
+	 * @param plugin - The instance of the TaskBoard plugin that is opening the modal, used for accessing plugin settings and file management functionalities.
+	 * @param currentBoardData - The data of the currently active board that is being configured in the modal, used for populating the UI with the current settings and for saving the updated settings back to the file system.
+	 * @param currentViewIndex - The index of the currently active view in the board that is being configured, used for determining which view's settings to display and edit in the modal.
+	 * @param onSave - A callback function that is called when the user saves their configurations in the modal, which receives the updated board data as an argument and is responsible for handling the saving of the updated board data to the file system and updating the current view with the new board data after saving.
+	 */
 	constructor(
 		plugin: TaskBoard,
 		currentBoardData: Board,
