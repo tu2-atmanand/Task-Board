@@ -1,5 +1,5 @@
 {
-  "version": "1.9.5",
+  "version": "2.0.0-beta-1",
   "data": {
     "lang": "en",
     "openOnStartup": false,
@@ -252,7 +252,8 @@
       "viewedType": "kanban",
       "boardIndex": 0,
       "settingTab": 0,
-      "taskId": ""
+      "taskId": "",
+      "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
     },
     "boundTaskCompletionToChildTasks": false,
     "mapView": {
@@ -267,23 +268,11 @@
       "edgeType": "default"
     },
     "taskBoardFilesRegistry": {
-      "2957159294": {
-        "boardId": "2957159294",
-        "filePath": "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
-        "boardName": "Tag Based Workflow",
-        "boardDescription": ""
-      },
       "3103563481": {
         "boardId": "3103563481",
-        "filePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-        "boardName": "Time Based Workflow",
-        "boardDescription": ""
-      },
-      "4271106430": {
-        "boardId": "4271106430",
-        "filePath": "Meta/Task_Board/Boards/Status Based Workflow.taskboard",
-        "boardName": "Status Based Workflow",
-        "boardDescription": ""
+        "filePath": "Meta/Task_Board/Boards/My Project Board.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
     },
     "searchQuery": "",

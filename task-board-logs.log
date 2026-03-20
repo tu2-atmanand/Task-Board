@@ -13,60 +13,74 @@
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
+  - Task Board v1.9.4
   - BRAT v1.4.0
   - Tasks v7.22.0
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
-  - Task Board v1.9.5
+  - Calendar v1.5.10
 
 ## Recent Bug Reports
 
-Timestamp : 2026-02-22T11:01:22
+Timestamp : undefined
 ID : 149
-Message : 
+Message : undefined
 Context : undefined
-Version : 1.9.5
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-There is testing going on.
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-02-22T11:27:53
+Timestamp : undefined
 ID : 149
-Message : 
+Message : undefined
 Context : undefined
-Version : 1.9.5
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-There is testing going on.
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-02-22T11:35:29
+Timestamp : undefined
 ID : 149
-Message : 
+Message : undefined
 Context : undefined
-Version : 1.9.5
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-This is a test bug.
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-02-22T11:42:40
+Timestamp : undefined
 ID : 149
-Message : 
-Context : OpenModals.ts/openAddNewTaskNoteModal/callback()
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T09:07:59
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : TaskBoardView.tsx/onOpen
 Version : 1.9.5
 
 #### Bug Content
 ```log
-This is a test bug.
+lastViewedBoardData is undefined
 ```
