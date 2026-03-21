@@ -1462,6 +1462,12 @@ export default class TaskBoard extends Plugin {
 			// new Notice(smallMessage, 0);
 			// }
 
+			// This will run only on a fresh plugin install
+			if (previousVersion === "") {
+				// creates the DEFAULT_BOARD file if it doesnt exists.
+				await this.createTemplateBoard();
+			}
+
 			// make the localStorage flag, 'manadatoryScan' to True
 			if (previousVersion === "" || runMandatoryScan) {
 				localStorage.setItem(MANDATORY_SCAN_KEY, "true");
@@ -1481,9 +1487,43 @@ export default class TaskBoard extends Plugin {
 			// 	})
 			// );
 		}
+	}
 
-		// Check if .taskboard files exist and create missing ones
-		await this.checkAndCreateBoardFiles();
+	/**
+	 * This function only runs during the plugin installation time and
+	 * creates the template board(DEFAULT_BOARD) for user to use for the
+	 * first time.
+	 */
+	private async createTemplateBoard() {
+		try {
+			// Import DEFAULT_BOARDS from BoardConfigs
+			const { DEFAULT_BOARD } =
+				await import("src/interfaces/BoardConfigs");
+			const DEFAULT_BOARD_REGISTRY_ITEM = Object.values(
+				DEFAULT_SETTINGS.data.taskBoardFilesRegistry,
+			)[0];
+
+			const success = await this.taskBoardFileManager.createNewBoardFile(
+				DEFAULT_BOARD_REGISTRY_ITEM.filePath,
+				DEFAULT_BOARD,
+			);
+
+			if (success) {
+				new Notice(
+					`Task Board: Created the template board file to help you start using the plugin quickly.\n\nBoard Path : ${DEFAULT_BOARD_REGISTRY_ITEM.filePath}`,
+					0,
+				);
+			} else {
+				throw "Task Board: There was an issue while creating the template board file. Please check the logs.";
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(
+				34,
+				"Error checking or creating board files",
+				error as string,
+				"main.ts/checkAndCreateBoardFiles",
+			);
+		}
 	}
 
 	/**
