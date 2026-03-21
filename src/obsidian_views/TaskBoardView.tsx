@@ -9,7 +9,7 @@ import { Board, DEFAULT_BOARD } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContainer from "src/components/TaskBoardViewContainer";
 import type TaskBoard from "../../main";
 import { MANDATORY_SCAN_KEY, PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { openScanVaultModal } from "../services/OpenModals";
+import { openBoardsExplorerModal, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
@@ -316,7 +316,7 @@ export class TaskBoardView extends ItemView {
 			},
 		});
 		scanBtn.addEventListener("click", () => {
-			openScanVaultModal(this.plugin);
+			openBoardsExplorerModal(this.plugin);
 		});
 	}
 
