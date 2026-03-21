@@ -33,6 +33,7 @@ import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
 import {
+	MANDATORY_SCAN_KEY,
 	newReleaseVersion,
 	OBSIDIAN_CLOSED_TIME_KEY,
 	VIEW_TYPE_TASKBOARD,
@@ -1463,7 +1464,7 @@ export default class TaskBoard extends Plugin {
 
 			// make the localStorage flag, 'manadatoryScan' to True
 			if (previousVersion === "" || runMandatoryScan) {
-				localStorage.setItem("manadatoryScan", "true");
+				localStorage.setItem(MANDATORY_SCAN_KEY, "true");
 			}
 
 			this.settings.version = currentVersion;

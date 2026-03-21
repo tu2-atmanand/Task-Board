@@ -10,7 +10,7 @@ import VaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScan
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { MANDATORY_SCAN_KEY, newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
@@ -92,8 +92,9 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		findMaxIdCounterAndUpdateSettings(plugin);
 
-		if (localStorage.getItem("manadatoryScan") === "true") {
-			localStorage.setItem("manadatoryScan", "false");
+		// If mandatory scan, close all existing Task Board views to force re-opening with the newly scanned data. Else, just emit REFRESH_BOARD event to update the existing board(s) with the newly scanned data.
+		if (localStorage.getItem(MANDATORY_SCAN_KEY) === "true") {
+			localStorage.setItem(MANDATORY_SCAN_KEY, "false");
 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD).forEach((leaf) => {
 				leaf.detach();
 			});
@@ -156,7 +157,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	return (
 		<div className="scanVaultModalHome">
 			<h2>{t("scan-tasks-from-the-vault")}</h2>
-			{localStorage.getItem("manadatoryScan") === "true" ?
+			{localStorage.getItem(MANDATORY_SCAN_KEY) === "true" ?
 				(<>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>

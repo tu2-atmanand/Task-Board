@@ -315,7 +315,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					// 	(col: ColumnData) => col.id === columnData.id
 					// );
 
-					const boardIndex = plugin.taskBoardFileManager.getBoardIndexFromRegistry(activeBoardData.id) ?? undefined;
 					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
