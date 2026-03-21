@@ -1042,23 +1042,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 							>
 								<EllipsisVertical size={18} strokeWidth={1.5} />
 							</button>
-							<button
-								className="boardSidebarViewHeaderViewsConfigureBtn"
-								onClick={() =>
-									openBoardConfigModal(plugin, currentBoardData, currentViewIndex, (updatedBoard: Board) => {
-										// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-										setCurrentBoardData(updatedBoard);
-										plugin.taskBoardFileManager.saveBoard(updatedBoard);
-
-										setTimeout(() => {
-											eventEmitter.emit("REFRESH_BOARD");
-										}, 100);
-									})
-								}
-								aria-label={t("configure-views")}
-							>
-								<Settings size={18} strokeWidth={1.5} />
-							</button>
 						</div>
 					</div>
 
