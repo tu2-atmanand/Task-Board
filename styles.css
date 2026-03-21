@@ -8084,3 +8084,133 @@ Date picker modal styles
 		font-size: 0.9rem;
 	}
 }
+/* No Board Found Styles */
+
+.taskboard-no-board-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	padding: 2rem;
+	background: var(--background-primary, #fff);
+}
+
+.taskboard-no-board-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+	max-width: 500px;
+	padding: 2rem;
+	border-radius: var(--radius-m, 8px);
+	background: var(--background-secondary, #f5f5f5);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	text-align: center;
+}
+
+.taskboard-no-board-title {
+	margin: 0;
+	font-size: 1.75rem;
+	font-weight: 600;
+	color: var(--text-normal, #222);
+	line-height: 1.2;
+}
+
+.taskboard-no-board-description {
+	margin: 0;
+	font-size: 1rem;
+	color: var(--text-muted, #666);
+	line-height: 1.5;
+	letter-spacing: 0.3px;
+}
+
+.taskboard-no-board-buttons {
+	display: flex;
+	gap: 1rem;
+	width: 100%;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.taskboard-no-board-create-btn,
+.taskboard-no-board-scan-btn {
+	flex: 1;
+	min-width: 140px;
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: var(--radius-s, 4px);
+	font-size: 1rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	outline: none;
+}
+
+.taskboard-no-board-create-btn {
+	background: var(--interactive-accent, #7c3aed);
+	color: white;
+	box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2);
+}
+
+.taskboard-no-board-create-btn:hover {
+	background: var(--interactive-accent-hover, #6d28d9);
+	box-shadow: 0 4px 8px rgba(124, 58, 237, 0.3);
+	transform: translateY(-1px);
+}
+
+.taskboard-no-board-create-btn:active {
+	transform: translateY(0);
+	box-shadow: 0 1px 2px rgba(124, 58, 237, 0.2);
+}
+
+.taskboard-no-board-scan-btn {
+	background: var(--background-tertiary, #e5e5e5);
+	color: var(--text-normal, #222);
+	border: 1px solid var(--border-color, #d0d0d0);
+}
+
+.taskboard-no-board-scan-btn:hover {
+	background: var(--interactive-accent, #7c3aed);
+	color: white;
+	border-color: var(--interactive-accent, #7c3aed);
+	box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2);
+	transform: translateY(-1px);
+}
+
+.taskboard-no-board-scan-btn:active {
+	transform: translateY(0);
+}
+
+/* Responsive Design */
+
+@media (max-width: 600px) {
+	.taskboard-no-board-wrapper {
+		padding: 1rem;
+	}
+
+	.taskboard-no-board-container {
+		padding: 1.5rem;
+		gap: 1.25rem;
+	}
+
+	.taskboard-no-board-title {
+		font-size: 1.5rem;
+	}
+
+	.taskboard-no-board-description {
+		font-size: 0.95rem;
+	}
+
+	.taskboard-no-board-buttons {
+		gap: 0.75rem;
+	}
+
+	.taskboard-no-board-create-btn,
+	.taskboard-no-board-scan-btn {
+		min-width: 120px;
+		padding: 0.65rem 1.25rem;
+		font-size: 0.95rem;
+	}
+}

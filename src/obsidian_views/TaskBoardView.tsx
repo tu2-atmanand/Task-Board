@@ -5,14 +5,15 @@ import { Root, createRoot } from "react-dom/client";
 import { funnelIcon, RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
 import { StrictMode } from "react";
 
-import { Board } from "src/interfaces/BoardConfigs";
+import { Board, DEFAULT_BOARD } from "src/interfaces/BoardConfigs";
 import TaskBoardViewContainer from "src/components/TaskBoardViewContainer";
 import type TaskBoard from "../../main";
-import { PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { MANDATORY_SCAN_KEY, PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
@@ -184,7 +185,7 @@ export class TaskBoardView extends ItemView {
 					this.renderBoard(lastViewedBoardData);
 				} else {
 					this.renderNoBoard();
-					bugReporterManagerInsatance.showNotice(185, `There was an issue with opening the last viewed board by user`, "lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
+					bugReporterManagerInsatance.addToLogs(185, "There was an issue with opening the last viewed board. lastViewedBoardData is undefined", "TaskBoardView.tsx/onOpen");
 				}
 
 			}
@@ -211,7 +212,7 @@ export class TaskBoardView extends ItemView {
 			}).addClass("taskboardRefreshBtn");
 		}
 
-		const mandatoryScanSignal = localStorage.getItem("manadatoryScan") === "true";
+		const mandatoryScanSignal = localStorage.getItem(MANDATORY_SCAN_KEY) === "true";
 
 		if (!Platform.isMobile || mandatoryScanSignal) {
 			this.addAction(ScanVaultIcon, t("scan-vault-modal"), () => {
@@ -266,14 +267,107 @@ export class TaskBoardView extends ItemView {
 
 	/**
 	 * This function will render a message to the user when there is no board to show in the view. This can happen when user opens the view for the first time and there is no board created, or when there is an issue with loading the board data. 
-	 * Will show a button to create a new board when there is no board found.
-	 * @todo
+	 * Will show a button to create a new board and to scan the vault when there is no board found.
 	 **/
 	private renderNoBoard() {
-		this.containerEl.createEl("h2", {
+		const container = this.containerEl.children[1] as HTMLElement;
+		container.empty(); // Clear any previous content
+
+		const wrapper = container.createDiv({ cls: "taskboard-no-board-wrapper" });
+
+		const content = wrapper.createDiv({ cls: "taskboard-no-board-container" });
+
+		// Main message
+		content.createEl("h2", {
 			text: t("no-board-found"),
-			cls: "taskboard-no-board-message",
+			cls: "taskboard-no-board-title",
 		});
+
+		// Detailed description
+		const description = content.createEl("p", {
+			cls: "taskboard-no-board-description",
+		});
+		description.innerHTML = t("no-boards-found-description") ||
+			"This plugin didn't find any boards in your vault. Please re-scan the vault to find any available boards. Or create a new template board.";
+
+		// Action buttons
+		const buttonContainer = content.createDiv({
+			cls: "taskboard-no-board-buttons",
+		});
+
+		// Create template board button
+		const createBtn = buttonContainer.createEl("button", {
+			text: t("create-template-board") || "Create Template Board",
+			cls: "taskboard-no-board-create-btn",
+			attr: {
+				"aria-label": t("create-template-board") || "Create a new template board",
+			},
+		});
+		createBtn.addEventListener("click", () => {
+			this.handleCreateTemplateBoard();
+		});
+
+		// Scan vault button
+		const scanBtn = buttonContainer.createEl("button", {
+			text: t("scan-vault-modal") || "Scan Vault",
+			cls: "taskboard-no-board-scan-btn",
+			attr: {
+				"aria-label": t("scan-vault-modal") || "Scan the vault for boards",
+			},
+		});
+		scanBtn.addEventListener("click", () => {
+			openScanVaultModal(this.plugin);
+		});
+	}
+
+	/**
+	 * Creates a new template board from DEFAULT_BOARD, saves it to disk, and renders it in the current view.
+	 * Generates a unique ID and file path for the new board.
+	 */
+	private async handleCreateTemplateBoard() {
+		try {
+			// Generate unique ID and filename for the new template board
+			const boardId = generateRandomTempTaskId();
+			const timestamp = new Date().getTime();
+			const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
+
+			// Create a deep copy of DEFAULT_BOARD and update its properties
+			const newBoard: Board = JSON.parse(JSON.stringify(DEFAULT_BOARD));
+			newBoard.id = boardId;
+
+			// Save the board to disk
+			const saveSuccess = await this.plugin.taskBoardFileManager.createNewBoardFile(
+				filePath,
+				newBoard,
+			);
+
+			if (!saveSuccess) {
+				bugReporterManagerInsatance.showNotice(
+					187,
+					"Failed to create template board",
+					"saveBoardToDisk returned false",
+					"TaskBoardView.tsx/handleCreateTemplateBoard",
+				);
+				return;
+			}
+
+			// Update current file path
+			this.currentFilePath = filePath;
+
+			// Show success notice
+			new Notice(t("board-created-successfully") || "Template board created successfully!");
+
+			// Render the newly created board
+			this.renderBoard(newBoard);
+
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(
+				187,
+				"Error creating template board",
+				String(error),
+				"TaskBoardView.tsx/handleCreateTemplateBoard",
+			);
+		}
 	}
 
 	async onClose() {
