@@ -20,6 +20,7 @@ import {
 	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openAddNewTaskNoteModal,
+	openBoardsExplorerModal,
 	openScanVaultModal,
 } from "src/services/OpenModals";
 
@@ -679,6 +680,13 @@ export default class TaskBoard extends Plugin {
 			name: t("open-task-board-in-new-window"),
 			callback: () => {
 				this.activateView("window");
+			},
+		});
+		this.addCommand({
+			id: "open-task-boards-explorer",
+			name: t("open-task-boards-explorer"),
+			callback: () => {
+				openBoardsExplorerModal(this);
 			},
 		});
 		this.addCommand({
@@ -1527,6 +1535,9 @@ export default class TaskBoard extends Plugin {
 	}
 
 	/**
+	 * @deprecated - In the new design, we will not going to create multiple board files,
+	 * instead there will be a single bord file. Please use the {@link createTemplateBoard()} function.
+	 *
 	 * Check if configured board files exist, and create missing default board files
 	 * This is called during plugin initialization
 	 */
