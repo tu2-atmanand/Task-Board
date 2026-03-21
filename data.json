@@ -21,13 +21,13 @@
         "values": []
       }
     },
-    "firstDayOfWeek": "2",
+    "firstDayOfWeek": "Mon",
     "showTaskWithoutMetadata": true,
     "ignoreFileNameDates": false,
     "taskPropertyFormat": "2",
-    "taskCompletionDateTimePattern": "yyyy-MM-ddTHH:mm",
     "dailyNotesPluginComp": false,
-    "universalDateFormat": "yyyy-MM-dd",
+    "dateFormat": "yyyy-MM-dd",
+    "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",
     "defaultStartTime": "",
     "taskCompletionInLocalTime": true,
     "taskCompletionShowUtcOffset": false,
@@ -40,7 +40,20 @@
     "columnWidth": "300px",
     "visiblePropertiesList": [
       "id",
-      "title"
+      "title",
+      "status",
+      "tags",
+      "time",
+      "reminder",
+      "priority",
+      "createdDate",
+      "startDate",
+      "scheduledDate",
+      "dueDate",
+      "completionDate",
+      "cancelledDate",
+      "dependsOn",
+      "filePath"
     ],
     "taskCardStyle": "emoji",
     "showVerticalScroll": true,
@@ -128,7 +141,7 @@
       "reminderPlugin": false,
       "quickAddPlugin": false
     },
-    "taskNoteIdentifierTag": "task",
+    "taskNoteIdentifierTag": "taskNote",
     "preDefinedNote": "Meta/Task_Board/New_Tasks.md",
     "archivedTasksFilePath": "",
     "taskNoteDefaultLocation": "Meta/Task_Board/Task_Notes",
@@ -232,15 +245,13 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": false,
-    "uniqueIdCounter": 608,
+    "uniqueIdCounter": 634,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
-      "viewedType": "kanban",
-      "boardIndex": 0,
+      "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
       "settingTab": 0,
-      "taskId": "",
-      "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
+      "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
     "mapView": {
@@ -249,12 +260,18 @@
       "optimizedRender": false,
       "arrowDirection": "c2p",
       "animatedEdges": false,
-      "scrollAction": "pan",
+      "scrollAction": "zoom",
       "showMinimap": true,
       "renderVisibleNodes": false,
       "edgeType": "default"
     },
     "taskBoardFilesRegistry": {
+      "901052398": {
+        "boardId": "901052398",
+        "filePath": "TaskBoard-Template-1774097758616.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
       "3103563481": {
         "boardId": "3103563481",
         "filePath": "Meta/Task_Board/Boards/My Project Board.taskboard",
@@ -262,9 +279,7 @@
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
     },
-    "searchQuery": "",
-    "dateFormat": "yyyy/MM/dd",
-    "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",
-    "loadAllBoards": false
+    "loadAllBoards": false,
+    "searchQuery": ""
   }
 }

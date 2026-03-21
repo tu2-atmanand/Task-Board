@@ -7,7 +7,7 @@
 - **Operating system**: Windows 10 Home Single Language 10.0.19045
 - **Use [[Wikilinks]]**: true
 - **Base color scheme**: dark
-- **Community theme**: none
+- **Community theme**: Blue Topaz v2024121301
 - **Snippets enabled**: 2
 - **Plugins installed**: 53
 - **Plugins enabled**: 
@@ -117,10 +117,88 @@ SourceColumn=null
 Timestamp : 2026-03-20T10:10:00
 ID : 142
 Message : 
-Context : DragDropTasksManager.ts/handleDropEvent
+Context : undefined
 Version : 2.0.0-beta-1
 
 #### Bug Content
 ```log
 No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-20T20:59:39
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T21:30:39
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T21:46:20
+ID : 187
+Message : Failed to create template board
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+saveBoardToDisk returned false
+```
+
+-------------
+
+Timestamp : 2026-03-21T18:25:51
+ID : 185
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+There was an issue with opening the last viewed board. lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-21T19:50:13
+ID : 7
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
+```
+
+-------------
+
+Timestamp : 2026-03-21T21:39:08
+ID : 7
+Message : 
+Context : TaskItem.tsx/renderHeader
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
 ```
