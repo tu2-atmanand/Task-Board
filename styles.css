@@ -410,7 +410,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	height: 100%;
 	/* max-height: 93%; */
 	/* margin-block-end: 20px; */
-	padding-block-end: 3.4rem;
+	/* padding-block-end: 3.4rem; */
 	width: 100%;
 	flex: 1;
 }
@@ -449,7 +449,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .columnsContainer {
 	display: flex;
 	overflow-x: auto;
-	padding-block: 4px;
+	/* padding-block: 4px; */
 	height: 100%;
 }
 
@@ -6171,15 +6171,18 @@ svg.react-flow__connectionline {
 }
 
 .boardSidebarCardTitle {
-	font-weight: 500;
-	font-size: 1rem !important;
-	color: var(--text-faint) !important;
-	font-size: var(--font-size-default);
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
 	gap: 0.4rem;
 	align-items: end;
+}
+
+.boardSidebarCardTitleText {
+	font-weight: 500;
+	color: var(--text-faint) !important;
+	font-size: var(--font-size-default);
+	padding-bottom: 1px;
 }
 
 .boardSidebarCard--active .boardSidebarCardTitle {
@@ -8084,6 +8087,7 @@ Date picker modal styles
 		font-size: 0.9rem;
 	}
 }
+
 /* No Board Found Styles */
 
 .taskboard-no-board-wrapper {

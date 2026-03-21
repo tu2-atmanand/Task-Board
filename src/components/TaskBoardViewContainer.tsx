@@ -1060,7 +1060,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 									>
 										<div className="boardSidebarCardTitle" >
 											{getViewTypeIconComponent(view.viewType, 20)}
-											{view.viewName}
+											<div className="boardSidebarCardTitleText">{view.viewName}</div>
 										</div>
 										{boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description) && (
 											<div className="boardSidebarCardDescription" >
