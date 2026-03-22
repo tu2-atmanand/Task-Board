@@ -240,10 +240,16 @@ export default class TaskBoard extends Plugin {
 		// Open or focus the leaf
 		if (leaf) {
 			this.leafIsActive = true;
+			leaf.setEphemeralState({ taskboardFilePath: filePath ?? "" });
+
 			await leaf.setViewState({
 				type: VIEW_TYPE_TASKBOARD,
 				active: true,
+				state: {
+					filePath: filePath ?? "",
+				},
 			});
+
 			this.app.workspace.revealLeaf(leaf);
 		}
 	}

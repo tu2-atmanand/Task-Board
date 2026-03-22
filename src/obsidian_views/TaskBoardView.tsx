@@ -19,7 +19,7 @@ export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
 	leaf: WorkspaceLeaf;
 	root: Root | null = null;
-	private currentFilePath: string | undefined = undefined;
+	private currentFilePath: string = "";
 	boardName: string = "No Board Loaded";
 
 	constructor(plugin: TaskBoard, leaf: WorkspaceLeaf) {
@@ -114,10 +114,12 @@ export class TaskBoardView extends ItemView {
 	 * Obsidian's config folder. (.obsidian/workspace.json)
 	 */
 	getState() {
+		console.log("Running getState...");
+		console.log("Value of currentFilePath : ", this.currentFilePath);
 		// Save the current filePath to the workspace state
 		return {
 			...super.getState(),
-			...(this.currentFilePath ? { filePath: this.currentFilePath } : {}),
+			filePath: this.currentFilePath ?? "",
 		};
 	}
 
@@ -129,8 +131,8 @@ export class TaskBoardView extends ItemView {
 	 * @param result 
 	 */
 	async setState(state: any, result: ViewStateResult): Promise<void> {
+		console.log(`Running setState...\nstate : ${JSON.parse(JSON.stringify(state))}\nresult : ${result}`);
 		const { filePath } = state;
-		console.log(`Running setState for filepath :${filePath}`);
 
 		// Check if a specific .taskboard file was clicked from File Navigator
 		const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
@@ -139,6 +141,10 @@ export class TaskBoardView extends ItemView {
 			const clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
 			if (clickedFileData) {
 				this.currentFilePath = clickedFilePath;
+				state.state = {
+					...state.state,
+					filePath: this.currentFilePath
+				};
 				this.renderBoard(clickedFileData);
 			} else {
 				bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
@@ -155,6 +161,10 @@ export class TaskBoardView extends ItemView {
 				);
 				if (boardData) {
 					this.currentFilePath = filePath;
+					state.state = {
+						...state.state,
+						filePath: this.currentFilePath
+					};
 					this.renderBoard(boardData);
 				} else {
 					bugReporterManagerInsatance.showNotice(
@@ -171,14 +181,16 @@ export class TaskBoardView extends ItemView {
 				if (lastViewedBoardData) {
 					// Get the filePath from the registry
 					const taskBoardFilesRegistry = this.plugin.settings.data.taskBoardFilesRegistry || {};
-					const registryEntries = Object.entries(taskBoardFilesRegistry)
-						.filter(([key]) => isNaN(Number(key)))
-						.slice(0, 1);
+					const registryEntries = Object.values(taskBoardFilesRegistry);
 
 					if (registryEntries.length > 0) {
-						const [, firstItemFromRegistry] = registryEntries[0];
-						if (firstItemFromRegistry?.filePath) {
+						const firstItemFromRegistry = registryEntries[0];
+						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
+							state.state = {
+								...state.state,
+								filePath: this.currentFilePath
+							};
 						}
 					}
 
