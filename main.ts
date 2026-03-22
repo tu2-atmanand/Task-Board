@@ -3,6 +3,7 @@
 import { around } from "monkey-around";
 import {
 	App,
+	debounce,
 	normalizePath,
 	Notice,
 	Plugin,
@@ -54,6 +55,7 @@ import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import { useCallback } from "react";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -1437,6 +1439,21 @@ export default class TaskBoard extends Plugin {
 		// 		}
 		// 	})
 		// );
+
+		const openBoardCallback = (data: {
+			layout: string;
+			filePath: string;
+			duplicate: boolean;
+		}) => {
+			try {
+				this.activateView(data.layout, data.duplicate, data.filePath);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+
+		eventEmitter.on("OPEN_BOARD", openBoardCallback);
+		return () => eventEmitter.off("OPEN_BOARD", openBoardCallback);
 	}
 
 	async onFileModifiedAndLostFocus() {

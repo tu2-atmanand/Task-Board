@@ -56,7 +56,11 @@ export const openBoardsExplorerModal = (plugin: TaskBoard) => {
 	const boardsRegistry = plugin.settings.data.taskBoardFilesRegistry || {};
 
 	const onBoardSelect = (boardId: string, filePath: string) => {
-		eventEmitter.emit("OPEN_BOARD", { boardId, filePath });
+		eventEmitter.emit("OPEN_BOARD", {
+			layout: "tab",
+			filePath: filePath,
+			duplicate: false,
+		});
 	};
 
 	new BoardsExplorerModal(plugin, boardsRegistry, onBoardSelect).open();
