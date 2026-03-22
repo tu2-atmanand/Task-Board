@@ -140,6 +140,7 @@ export default class TaskBoard extends Plugin {
 
 		await this.vaultScanner.initializeTasksCache();
 
+		// TODO : Remove the loadAllBoards entirely
 		if (this.settings.data.loadAllBoards)
 			await this.taskBoardFileManager.loadAllBoards();
 		// console.log(
@@ -159,6 +160,8 @@ export default class TaskBoard extends Plugin {
 
 			// Register few commands
 			this.registerCommands();
+
+			this.taskBoardFileManager.validateBoardFiles();
 
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();

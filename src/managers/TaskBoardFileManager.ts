@@ -11,6 +11,7 @@ import type TaskBoard from "main";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import { LEAFID_FILEPATH_MAPPING_KEY } from "src/interfaces/Constants";
 import { bugReporterManagerInsatance } from "./BugReporter";
+import { taskBoardFilesRegistryType } from "src/interfaces/GlobalSettings";
 
 /**
  * Interface for storing recently loaded board data keyed by file path
@@ -820,64 +821,36 @@ export default class TaskBoardFileManager {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Validate that all board files path present in settings also exist in the vault
-	 * @returns Array of missing file paths
+	 * Validate that all board files path present in the global setting registry are also present on the disk.
+	 * Clear the entries whose files are no longer present on the disk.
+	 * This function basically keeps the registry valid, so we dont face issues during runtime.
+	 * This function should run during plugin load time, that is when Obsidian opens.
+	 *
+	 * @returns void once the function has finished with its operations.
 	 */
-	async validateBoardFiles(): Promise<string[]> {
-		const taskBoardFilesRegistry =
+	async validateBoardFiles(): Promise<void> {
+		let taskBoardFilesRegistry: taskBoardFilesRegistryType =
 			this.plugin.settings.data.taskBoardFilesRegistry || {};
-		const missingFiles: string[] = [];
 
-		for (const [, entry] of Object.entries(taskBoardFilesRegistry)) {
-			const exists = await this.boardFileExists(entry.filePath);
-			if (!exists) {
-				missingFiles.push(entry.filePath);
-				console.warn(
-					`Expected board file not found: ${entry.filePath}. It may have been moved or deleted.`,
-				);
-			}
-		}
+		// Iterate through registry entries and check file existence
+		for (const [boardId, entry] of Object.entries(taskBoardFilesRegistry)) {
+			try {
+				const exists = await this.boardFileExists(entry.filePath);
 
-		return missingFiles;
-	}
-
-	/**
-	 * Create default board files that are configured in settings but don't exist yet
-	 * This is called during plugin initialization
-	 * @param defaultBoards - The default board configurations to create
-	 * @returns number - Count of files created
-	 */
-	async createMissingDefaultBoardFiles(
-		defaultBoards: Board[],
-	): Promise<number> {
-		const taskBoardFilesRegistry =
-			this.plugin.settings.data.taskBoardFilesRegistry || {};
-		let createdCount = 0;
-
-		const registryEntries = Object.entries(taskBoardFilesRegistry);
-		for (let i = 0; i < registryEntries.length; i++) {
-			const [, registryEntry] = registryEntries[i];
-			const exists = await this.boardFileExists(registryEntry.filePath);
-
-			if (!exists && i < defaultBoards.length) {
-				const created = await this.createNewBoardFile(
-					registryEntry.filePath,
-					defaultBoards[i],
-				);
-				if (created) {
-					createdCount++;
-					console.log(
-						`Created default board file: ${registryEntry.filePath}`,
-						defaultBoards[i].name,
-					);
-					new Notice(
-						`Created default board file: ${registryEntry.filePath} : ${defaultBoards[i].name}`,
-					);
+				if (!exists) {
+					// Remove the orphaned entry from the registry
+					delete taskBoardFilesRegistry[boardId];
 				}
+			} catch (error) {
+				// Handle potential errors during file check (permissions, invalid path, etc.)
+				console.error(error);
 			}
 		}
 
-		return createdCount;
+		// Update settings with cleaned registry
+		this.plugin.settings.data.taskBoardFilesRegistry =
+			taskBoardFilesRegistry;
+		await this.plugin.saveSettings(this.plugin.settings);
 	}
 
 	// --------------------------------------------------------------------
@@ -1098,5 +1071,47 @@ export default class TaskBoardFileManager {
 			);
 			return undefined;
 		}
+	}
+
+	/**
+	 * @deprecated - We will going to create only a single template board file using the {@link createNewBoardFile} function.
+	 * Hence no need of this function anymore.
+	 *
+	 * Create default board files that are configured in settings but don't exist yet
+	 * This is called during plugin initialization
+	 * @param defaultBoards - The default board configurations to create
+	 * @returns number - Count of files created
+	 */
+	async createMissingDefaultBoardFiles(
+		defaultBoards: Board[],
+	): Promise<number> {
+		const taskBoardFilesRegistry =
+			this.plugin.settings.data.taskBoardFilesRegistry || {};
+		let createdCount = 0;
+
+		const registryEntries = Object.entries(taskBoardFilesRegistry);
+		for (let i = 0; i < registryEntries.length; i++) {
+			const [, registryEntry] = registryEntries[i];
+			const exists = await this.boardFileExists(registryEntry.filePath);
+
+			if (!exists && i < defaultBoards.length) {
+				const created = await this.createNewBoardFile(
+					registryEntry.filePath,
+					defaultBoards[i],
+				);
+				if (created) {
+					createdCount++;
+					console.log(
+						`Created default board file: ${registryEntry.filePath}`,
+						defaultBoards[i].name,
+					);
+					new Notice(
+						`Created default board file: ${registryEntry.filePath} : ${defaultBoards[i].name}`,
+					);
+				}
+			}
+		}
+
+		return createdCount;
 	}
 }
