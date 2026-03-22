@@ -8,13 +8,13 @@ import { t } from "src/utils/lang/helper";
 export class BoardsExplorerModal extends Modal {
 	private plugin: TaskBoard;
 	private boardsRegistry: taskBoardFilesRegistryType;
-	private onBoardSelect: (boardId: string, boardName: string) => void;
+	private onBoardSelect: (boardId: string, filePath: string) => void;
 	private isScanning: boolean = false;
 
 	constructor(
 		plugin: TaskBoard,
 		boardsRegistry: taskBoardFilesRegistryType,
-		onBoardSelect: (boardId: string, boardName: string) => void,
+		onBoardSelect: (boardId: string, filePath: string) => void,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
@@ -78,7 +78,11 @@ export class BoardsExplorerModal extends Modal {
 
 		scanButton.addEventListener("click", async () => {
 			if (!this.isScanning) {
-				await this.handleScanBoards(mainContent, footerSection, scanButton);
+				await this.handleScanBoards(
+					mainContent,
+					footerSection,
+					scanButton,
+				);
 			}
 		});
 
@@ -288,7 +292,10 @@ export class BoardsExplorerModal extends Modal {
 	private async openBoard(boardId: string, filePath: string): Promise<void> {
 		try {
 			// Load the board data from disk
-			const boardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(filePath);
+			const boardData =
+				await this.plugin.taskBoardFileManager.loadBoardUsingPath(
+					filePath,
+				);
 
 			if (!boardData) {
 				new Notice(`Error loading board: ${boardId}`);
@@ -297,7 +304,7 @@ export class BoardsExplorerModal extends Modal {
 
 			// Call the onBoardSelect callback to handle opening the board
 			// This callback is responsible for opening the board in a view
-			this.onBoardSelect(boardId, boardData.name);
+			this.onBoardSelect(boardId, filePath);
 		} catch (error) {
 			console.error(`Error opening board ${boardId}:`, error);
 			new Notice(`Error opening board. Check console for details.`);

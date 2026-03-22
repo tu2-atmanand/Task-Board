@@ -38,7 +38,12 @@ export const openBoardConfigModal = (
 	currentViewIndex: number,
 	onSave: (updatedBoard: Board) => void,
 ) => {
-	new BoardConfigureModal(plugin, currentBoardData, currentViewIndex, onSave).open();
+	new BoardConfigureModal(
+		plugin,
+		currentBoardData,
+		currentViewIndex,
+		onSave,
+	).open();
 };
 
 // Function to open the ScanVaultModal
@@ -50,11 +55,8 @@ export const openScanVaultModal = (plugin: TaskBoard) => {
 export const openBoardsExplorerModal = (plugin: TaskBoard) => {
 	const boardsRegistry = plugin.settings.data.taskBoardFilesRegistry || {};
 
-	const onBoardSelect = (boardId: string, boardName: string) => {
-		// When a board is selected, you can perform any action here
-		// For now, we just emit an event to switch to that board
-		console.log(`Board selected: ${boardName} (ID: ${boardId})`);
-		eventEmitter.emit("BOARD_SELECTED", { boardId, boardName });
+	const onBoardSelect = (boardId: string, filePath: string) => {
+		eventEmitter.emit("OPEN_BOARD", { boardId, filePath });
 	};
 
 	new BoardsExplorerModal(plugin, boardsRegistry, onBoardSelect).open();

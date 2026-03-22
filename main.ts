@@ -193,11 +193,37 @@ export default class TaskBoard extends Plugin {
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
-	async activateView(leafLayout: string) {
+	/**
+	 * Opens the Task Board view using either the last viewed board file or opens the board file
+	 * whose filePath has been passed. Most of the time, this function will try to find an existing
+	 * leaf for the specific board file. If user specifically wants to have a duplicate leaf, pass
+	 * the {@link duplicate} as true.
+	 *
+	 * @param leafLayout - Where to open the board leaf/tab. New tab or new window.
+	 * @param duplicate - Whether to re-use already opened leaf or create a new one.
+	 * This will be true in only special cases, when user wants to specifical open a duplicate.
+	 * @param filePath (OPTIONAL) - The file path of the board to open. If no filePath has been
+	 * provided then will open the last viewed board.
+	 */
+	async activateView(
+		leafLayout: string,
+		duplicate: boolean,
+		filePath?: string,
+	) {
 		let leaf: WorkspaceLeaf | null = null;
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 
 		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
+			if (filePath) {
+				const state = leaf.getViewState();
+				if (
+					state?.state?.filePath &&
+					state?.state?.filePath !== filePath
+				) {
+					return false;
+				}
+			}
+
 			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
 			return "Notice" in leaf.view.containerEl.ownerDocument.defaultView;
 		}
@@ -216,7 +242,7 @@ export default class TaskBoard extends Plugin {
 				this.app.workspace.getLeaf("tab");
 		} else if (leafLayout === "tab") {
 			// Check if a leaf exists in MainWindow
-			if (mainWindowLeaf) {
+			if (mainWindowLeaf && !duplicate) {
 				// Prevent duplicate in MainWindow
 				leaf = mainWindowLeaf;
 			} else {
@@ -260,7 +286,7 @@ export default class TaskBoard extends Plugin {
 			TaskBoardIcon,
 			t("open-task-board") ?? "Open task board",
 			() => {
-				this.activateView("icon");
+				this.activateView("icon", false);
 
 				// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
 				// 	active: true,
@@ -630,7 +656,7 @@ export default class TaskBoard extends Plugin {
 	openAtStartup() {
 		if (!this.settings.data.openOnStartup) return;
 
-		this.activateView("icon");
+		this.activateView("icon", false);
 	}
 
 	registerTaskBoardStatusBar() {
@@ -681,14 +707,14 @@ export default class TaskBoard extends Plugin {
 			id: "open-task-board",
 			name: t("open-task-board"),
 			callback: () => {
-				this.activateView("tab");
+				this.activateView("tab", false);
 			},
 		});
 		this.addCommand({
 			id: "open-task-board-new-window",
 			name: t("open-task-board-in-new-window"),
 			callback: () => {
-				this.activateView("window");
+				this.activateView("window", false);
 			},
 		});
 		this.addCommand({
@@ -1543,62 +1569,62 @@ export default class TaskBoard extends Plugin {
 		}
 	}
 
-	/**
-	 * @deprecated - In the new design, we will not going to create multiple board files,
-	 * instead there will be a single bord file. Please use the {@link createTemplateBoard()} function.
-	 *
-	 * Check if configured board files exist, and create missing default board files
-	 * This is called during plugin initialization
-	 */
-	private async checkAndCreateBoardFiles() {
-		try {
-			console.log("Task Board: Checking for configured board files...");
+	// /**
+	//  * @deprecated - In the new design, we will not going to create multiple board files,
+	//  * instead there will be a single bord file. Please use the {@link createTemplateBoard()} function.
+	//  *
+	//  * Check if configured board files exist, and create missing default board files
+	//  * This is called during plugin initialization
+	//  */
+	// private async checkAndCreateBoardFiles() {
+	// 	try {
+	// 		console.log("Task Board: Checking for configured board files...");
 
-			// Get the missing board files
-			const missingFiles =
-				await this.taskBoardFileManager.validateBoardFiles();
+	// 		// Get the missing board files
+	// 		const missingFiles =
+	// 			await this.taskBoardFileManager.validateBoardFiles();
 
-			if (missingFiles.length > 0) {
-				console.log(
-					`Task Board: Found ${missingFiles.length} missing board file(s)`,
-					missingFiles,
-				);
+	// 		if (missingFiles.length > 0) {
+	// 			console.log(
+	// 				`Task Board: Found ${missingFiles.length} missing board file(s)`,
+	// 				missingFiles,
+	// 			);
 
-				// Import DEFAULT_BOARDS from BoardConfigs
-				const { DEFAULT_BOARD } =
-					await import("src/interfaces/BoardConfigs");
+	// 			// Import DEFAULT_BOARDS from BoardConfigs
+	// 			const { DEFAULT_BOARD } =
+	// 				await import("src/interfaces/BoardConfigs");
 
-				// Try to create missing default board files
-				const createdCount =
-					await this.taskBoardFileManager.createMissingDefaultBoardFiles(
-						[DEFAULT_BOARD],
-					);
+	// 			// Try to create missing default board files
+	// 			const createdCount =
+	// 				await this.taskBoardFileManager.createMissingDefaultBoardFiles(
+	// 					[DEFAULT_BOARD],
+	// 				);
 
-				if (createdCount > 0) {
-					new Notice(
-						`Task Board: Created ${createdCount} missing board file(s). Please restart the plugin or reload Obsidian to load the new boards.`,
-						5000,
-					);
-					console.log(
-						`Task Board: Successfully created ${createdCount} board file(s)`,
-					);
-				}
-			} else {
-				console.log("Task Board: All configured board files exist.");
-			}
-		} catch (error) {
-			console.error(
-				"Task Board: Error checking or creating board files:",
-				error,
-			);
-			bugReporterManagerInsatance.showNotice(
-				34,
-				"Error checking or creating board files",
-				error as string,
-				"main.ts/checkAndCreateBoardFiles",
-			);
-		}
-	}
+	// 			if (createdCount > 0) {
+	// 				new Notice(
+	// 					`Task Board: Created ${createdCount} missing board file(s). Please restart the plugin or reload Obsidian to load the new boards.`,
+	// 					5000,
+	// 				);
+	// 				console.log(
+	// 					`Task Board: Successfully created ${createdCount} board file(s)`,
+	// 				);
+	// 			}
+	// 		} else {
+	// 			console.log("Task Board: All configured board files exist.");
+	// 		}
+	// 	} catch (error) {
+	// 		console.error(
+	// 			"Task Board: Error checking or creating board files:",
+	// 			error,
+	// 		);
+	// 		bugReporterManagerInsatance.showNotice(
+	// 			34,
+	// 			"Error checking or creating board files",
+	// 			error as string,
+	// 			"main.ts/checkAndCreateBoardFiles",
+	// 		);
+	// 	}
+	// }
 
 	async fileExists(filePath: string): Promise<boolean> {
 		return await this.app.vault.adapter.exists(filePath);
