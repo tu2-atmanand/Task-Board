@@ -52,8 +52,7 @@
       "dueDate",
       "completionDate",
       "cancelledDate",
-      "dependsOn",
-      "filePath"
+      "dependsOn"
     ],
     "taskCardStyle": "emoji",
     "showVerticalScroll": true,

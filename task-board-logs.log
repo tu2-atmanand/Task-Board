@@ -13,12 +13,12 @@
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
+  - Task Board v1.9.4
   - BRAT v1.4.0
   - Tasks v7.22.0
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
   - Calendar v1.5.10
-  - Task Board v1.9.4
 
 ## Recent Bug Reports
 
@@ -208,11 +208,24 @@ TypeError: Cannot read properties of undefined (reading 'showColumnTags')
 Timestamp : 2026-03-22T22:03:08
 ID : 141
 Message : 
-Context : DragDropTasksManager.ts/handleColumnDragOverEvent
+Context : undefined
 Version : 2.0.0-beta-1
 
 #### Bug Content
 ```log
 No source column data available for dragover.
 SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-03-25T18:59:17
+ID : 7
+Message : 
+Context : TaskItem.tsx/renderHeader
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
 ```

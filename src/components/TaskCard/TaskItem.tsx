@@ -974,7 +974,8 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 
 										// If columnIndex is defined, proceed to get the column
 										if (
-											(activeViewData.kanbanView!.showColumnTags) &&
+											activeViewData.viewType === viewTypeNames.kanban &&
+											activeViewData.kanbanView!.showColumnTags &&
 											columnData &&
 											columnData?.colType === colTypeNames.namedTag &&
 											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
