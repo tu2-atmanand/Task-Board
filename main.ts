@@ -55,7 +55,6 @@ import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
-import { useCallback } from "react";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -140,6 +139,9 @@ export default class TaskBoard extends Plugin {
 
 		await loadTranslationsOnStartup(this);
 
+		// Register the Kanban view
+		this.registerTaskBoardView();
+
 		await this.vaultScanner.initializeTasksCache();
 
 		// TODO : Remove the loadAllBoards entirely
@@ -167,9 +169,6 @@ export default class TaskBoard extends Plugin {
 
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
-
-			// Register the Kanban view
-			this.registerTaskBoardView();
 
 			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
