@@ -1349,9 +1349,9 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 								<input
 									id={`${task.id}-checkbox`}
 									type="checkbox"
-									checked={false}
+									checked={task.status === " " ? false : true}
 									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
-									data-task={task.status}
+									data-task={cardLoadingAnimation ? 'x' : task.status}
 									dir='auto'
 									onChange={handleMainCheckBoxClick}
 									onClick={(e) => {
