@@ -13,6 +13,7 @@ import TaskBoard from 'main';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { updateTaskInFile } from 'src/utils/taskLine/TaskLineUtils';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
+import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 // interface EdgeWithToolbarProps extends EdgeProps {
 // 	plugin: TaskBoard;
@@ -58,7 +59,11 @@ export function EdgeWithToolbar(props: EdgeProps) {
 		// );
 
 		// if (!targetTask) {
-		// 	console.warn('Target task not found for edge deletion');
+		// bugReporterManagerInsatance.addToLogs(
+		// 	171,
+		// 	`Target task not found for edge deletion`,
+		// 	"EdgeWithToolbar.tsx/deleteEdge",
+		// );
 		// 	return;
 		// }
 
@@ -72,7 +77,7 @@ export function EdgeWithToolbar(props: EdgeProps) {
 
 		// // Update the task title to reflect the removed dependency
 		// const updatedTaskTitle = sanitizeDependsOn(
-		// 	plugin.settings.data.globalSettings,
+		// 	plugin.settings.data,
 		// 	updatedTargetTask.title,
 		// 	updatedTargetTask.dependsOn
 		// );

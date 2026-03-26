@@ -1,7 +1,7 @@
 // /src/modal/DiffContentCompareModal.ts
 
 import TaskBoard from "main";
-import { App, Modal, ButtonComponent } from "obsidian";
+import { Modal, ButtonComponent } from "obsidian";
 
 export type DiffSelection = "old" | "new";
 

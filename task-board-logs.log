@@ -2,57 +2,230 @@
 
 ## System Information
 
-- **Obsidian version**: 1.10.3
-- **Installer version**: 1.10.3
+- **Obsidian version**: 1.11.5
+- **Installer version**: 1.11.5
 - **Operating system**: Windows 10 Home Single Language 10.0.19045
 - **Use [[Wikilinks]]**: true
-- **Base color scheme**: light
-- **Community theme**: none
+- **Base color scheme**: dark
+- **Community theme**: Blue Topaz v2024121301
 - **Snippets enabled**: 2
-- **Plugins installed**: 51
+- **Plugins installed**: 53
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
-  - Calendar v1.5.10
-  - Task Board v1.8.7
-  - Style Settings v1.0.9
+  - Task Board v1.9.4
   - BRAT v1.4.0
-  - TaskNotes v4.2.0
-  - Dataview v0.5.68
+  - Tasks v7.22.0
+  - Hover Editor v0.11.28
   - Excalidraw v2.18.3
+  - Calendar v1.5.10
 
 ## Recent Bug Reports
 
-Timestamp : 2026-01-15T16:47:07.456Z
-ID : 4
-Message : Error showing filter popover
-Context : Column.tsx/column-menu/configure-conlum-filters
+Timestamp : undefined
+ID : 149
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-Dont show popover.
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-01-15T16:47:11.710Z
-ID : 27
-Message : Error in Sortable onSort for child tasks
-Context : AddOrEditTaskRC.tsx/childTasksListRef useEffect
+Timestamp : undefined
+ID : 149
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-Testing the new bug reporter.
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-01-15T16:47:59.447Z
-ID : 4
-Message : Error showing filter popover
-Context : Column.tsx/column-menu/configure-conlum-filters
+Timestamp : undefined
+ID : 149
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-Dont show popover.
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 149
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T09:07:59
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : undefined
+Version : 1.9.5
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T10:09:00
+ID : 7
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
+```
+
+-------------
+
+Timestamp : 2026-03-20T10:09:59
+ID : 141
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-03-20T10:10:00
+ID : 142
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-20T20:59:39
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T21:30:39
+ID : 185
+Message : There was an issue with opening the last viewed board by user
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-20T21:46:20
+ID : 187
+Message : Failed to create template board
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+saveBoardToDisk returned false
+```
+
+-------------
+
+Timestamp : 2026-03-21T18:25:51
+ID : 185
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+There was an issue with opening the last viewed board. lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-03-21T19:50:13
+ID : 7
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
+```
+
+-------------
+
+Timestamp : 2026-03-21T21:39:08
+ID : 7
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
+```
+
+-------------
+
+Timestamp : 2026-03-22T22:03:08
+ID : 141
+Message : 
+Context : undefined
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-03-25T18:59:17
+ID : 7
+Message : 
+Context : TaskItem.tsx/renderHeader
+Version : 2.0.0-beta-1
+
+#### Bug Content
+```log
+TypeError: Cannot read properties of undefined (reading 'showColumnTags')
 ```

@@ -10,18 +10,17 @@
 import TaskBoard from "main";
 import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
 import { eventEmitter } from "src/services/EventEmitter";
-import { bugReporter } from "src/services/OpenModals";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
 } from "./JsonFileOperations";
-import { getCurrentLocalTimeString } from "./DateTimeCalculations";
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
 } from "./taskNote/FrontmatterOperations";
 import { generateTaskId } from "./TaskItemUtils";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { getCurrentLocalDateTimeString } from "./DateTimeCalculations";
 
 /**
  * Move a task from Pending to Completed in the tasks.json file (cache file).
@@ -31,7 +30,7 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
  */
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -55,7 +54,7 @@ export const moveFromPendingToCompleted = async (
 			78,
 			"Error updating task in tasks.json",
 			error as string,
-			"TaskItemUtils.ts/moveFromPendingToCompleted"
+			"TaskItemUtils.ts/moveFromPendingToCompleted",
 		);
 	}
 
@@ -70,7 +69,7 @@ export const moveFromPendingToCompleted = async (
  */
 export const moveFromCompletedToPending = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -94,7 +93,7 @@ export const moveFromCompletedToPending = async (
 			79,
 			"Error updating task in tasks.json",
 			error as string,
-			"TaskItemUtils.ts/moveFromCompletedToPending"
+			"TaskItemUtils.ts/moveFromCompletedToPending",
 		);
 	}
 
@@ -141,7 +140,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
  */
 export const updateTaskInJson = async (
 	plugin: TaskBoard,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -153,14 +152,14 @@ export const updateTaskInJson = async (
 			return Object.entries(taskCategory).reduce(
 				(
 					acc: { [filePath: string]: taskItem[] },
-					[filePath, tasks]: [string, taskItem[]]
+					[filePath, tasks]: [string, taskItem[]],
 				) => {
 					acc[filePath] = tasks.map((task: taskItem) =>
-						task.id === updatedTask.id ? updatedTask : task
+						task.id === updatedTask.id ? updatedTask : task,
 					);
 					return acc;
 				},
-				{} as { [filePath: string]: taskItem[] } // Set the initial accumulator type
+				{} as { [filePath: string]: taskItem[] }, // Set the initial accumulator type
 			);
 		};
 
@@ -171,7 +170,7 @@ export const updateTaskInJson = async (
 		// Create the updated data object with both updated Pending and Completed tasks
 		const updatedData: jsonCacheData = {
 			VaultName: plugin.app.vault.getName(),
-			Modified_at: getCurrentLocalTimeString(),
+			Modified_at: getCurrentLocalDateTimeString(),
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
 		};
@@ -184,7 +183,7 @@ export const updateTaskInJson = async (
 			80,
 			"Error updating task in tasks.json",
 			String(error),
-			"TaskItemUtils.ts/updateTaskInJson"
+			"TaskItemUtils.ts/updateTaskInJson",
 		);
 	}
 };
@@ -219,7 +218,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 			81,
 			"Error deleting task from tasks.json",
 			String(error),
-			"TaskItemUtils.ts/deleteTaskFromJson"
+			"TaskItemUtils.ts/deleteTaskFromJson",
 		);
 	}
 };

@@ -10,10 +10,10 @@ import VaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScan
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { getCurrentLocalTimeString } from "src/utils/DateTimeCalculations";
+import { MANDATORY_SCAN_KEY, newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
+import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;
@@ -39,7 +39,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	});
 
 	// Update the uniqueIdCounter in settings to be one more than the max found ID
-	plugin.settings.data.globalSettings.uniqueIdCounter = maxId + 1;
+	plugin.settings.data.uniqueIdCounter = maxId + 1;
 	plugin.saveSettings();
 }
 
@@ -51,7 +51,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
 		VaultName: app.vault.getName(),
-		Modified_at: getCurrentLocalTimeString(),
+		Modified_at: getCurrentLocalDateTimeString(),
 		Pending: {},
 		Completed: {},
 	});
@@ -63,11 +63,11 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		vaultScanner.tasksCache.Pending = {};
 		vaultScanner.tasksCache.Completed = {};
 		vaultScanner.tasksCache.VaultName = app.vault.getName();
-		vaultScanner.tasksCache.Modified_at = getCurrentLocalTimeString();
+		vaultScanner.tasksCache.Modified_at = getCurrentLocalDateTimeString();
 
 		const files = app.vault.getFiles();
 		setProgress(0); // Reset progress
-		const globalSettings = plugin.settings.data.globalSettings;
+		const globalSettings = plugin.settings.data;
 		const scanFilters = globalSettings.scanFilters;
 
 		for (let i = 0; i < files.length; i++) {
@@ -92,8 +92,9 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		findMaxIdCounterAndUpdateSettings(plugin);
 
-		if (localStorage.getItem("manadatoryScan") === "true") {
-			localStorage.setItem("manadatoryScan", "false");
+		// If mandatory scan, close all existing Task Board views to force re-opening with the newly scanned data. Else, just emit REFRESH_BOARD event to update the existing board(s) with the newly scanned data.
+		if (localStorage.getItem(MANDATORY_SCAN_KEY) === "true") {
+			localStorage.setItem(MANDATORY_SCAN_KEY, "false");
 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD).forEach((leaf) => {
 				leaf.detach();
 			});
@@ -156,7 +157,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	return (
 		<div className="scanVaultModalHome">
 			<h2>{t("scan-tasks-from-the-vault")}</h2>
-			{localStorage.getItem("manadatoryScan") === "true" ?
+			{localStorage.getItem(MANDATORY_SCAN_KEY) === "true" ?
 				(<>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
@@ -226,8 +227,8 @@ export class ScanVaultModal extends Modal {
 	vaultScanner: VaultScanner;
 	plugin: TaskBoard;
 
-	constructor(app: App, plugin: TaskBoard) {
-		super(app);
+	constructor(plugin: TaskBoard) {
+		super(plugin.app);
 		this.plugin = plugin;
 		this.vaultScanner = plugin.vaultScanner;
 	}
