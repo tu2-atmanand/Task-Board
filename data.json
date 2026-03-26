@@ -41,7 +41,6 @@
     "visiblePropertiesList": [
       "id",
       "title",
-      "status",
       "tags",
       "time",
       "reminder",
@@ -52,7 +51,9 @@
       "dueDate",
       "completionDate",
       "cancelledDate",
-      "dependsOn"
+      "dependsOn",
+      "checkbox",
+      "status"
     ],
     "taskCardStyle": "emoji",
     "showVerticalScroll": true,
@@ -249,7 +250,7 @@
     "safeGuardFeature": true,
     "lastViewHistory": {
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-      "settingTab": 0,
+      "settingTab": 2,
       "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
