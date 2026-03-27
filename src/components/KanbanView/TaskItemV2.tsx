@@ -981,12 +981,13 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
+										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
 
 										const tagName = tag.replace('#', '');
-										const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+										const customTag = isCardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name.replace('#', '') === tagName);
 
-										const tagColor = customTag?.color || `var(--tag-color)`;
-										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										const tagColor = customTag?.color;
+										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : undefined; // 10% opacity background
 										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
