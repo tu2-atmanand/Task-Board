@@ -982,9 +982,10 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 									{task.tags.map((tag: string) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
+										const taskTag = tag.replace('#', '').toLowerCase();
+										const columnTag = columnData?.coltag?.replace('#', '').toLowerCase();
 
-										const tagName = tag.replace('#', '');
-										const customTag = isCardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name.replace('#', '') === tagName);
+										const customTag = isCardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name.replace('#', '').toLowerCase() === taskTag);
 
 										const tagColor = customTag?.color;
 										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : undefined; // 10% opacity background
@@ -995,7 +996,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&
 											columnData?.colType === colTypeNames.namedTag &&
-											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+											taskTag === columnTag
 										) {
 											return null;
 										}
@@ -1358,9 +1359,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								<input
 									id={`${task.id}-checkbox`}
 									type="checkbox"
-									checked={false}
+									checked={task.status === " " ? false : true}
 									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
-									data-task={task.status}
+									data-task={cardLoadingAnimation ? 'x' : task.status}
 									dir='auto'
 									onChange={handleMainCheckBoxClick}
 									onClick={(e) => {

@@ -1094,7 +1094,7 @@ export class SettingsManager {
 									this.globalSettings!.tagColorsType ===
 									TagColorType.TagText
 										? tag.color
-										: "",
+										: "white",
 								border:
 									this.globalSettings!.tagColorsType ===
 									TagColorType.TagText
@@ -1521,6 +1521,7 @@ export class SettingsManager {
 						);
 						if (flag) {
 							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
 						}
 					})
 					.setDisabled(!isTasksPluginEnabled),
@@ -1563,6 +1564,8 @@ export class SettingsManager {
 								);
 								await this.saveSettings();
 								renderCustomStatuses();
+
+								this.openReloadNoticeIfNeeded();
 							}
 						};
 

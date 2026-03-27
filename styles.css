@@ -1309,11 +1309,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: white;
 	text-align: center;
 	align-content: center;
-	opacity: 0.7;
+	opacity: 0.8;
 }
 
 .prioirtyCircle.p1 {
-	background-color: var(--background-modifier-error-hover);
+	background-color: var(--color-red);
 }
 
 .prioirtyCircle.p2 {
@@ -2998,7 +2998,7 @@ li:hover .taskboard-hidden-property {
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	background-color: var(--background-secondary);
-	color: var(--text-normal);
+	color: white;
 }
 
 /* Color value input */
@@ -7384,7 +7384,7 @@ li[data-task=“]>p>input:checked {
 input[data-task="-"]:checked,
 li[data-task="-"]>input:checked,
 li[data-task="-"]>p>input:checked {
-	color: var(--color-red);
+	color: var(--color-red) !important;
 	transform: scale(1.6) !important;
 	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z' clip-rule='evenodd' /%3E%3C/svg%3E")
 }

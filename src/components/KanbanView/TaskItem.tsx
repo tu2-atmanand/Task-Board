@@ -980,9 +980,10 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 									{task.tags.map((tag: string) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
+										const taskTag = tag.replace('#', '').toLowerCase();
+										const columnTag = columnData?.coltag?.replace('#', '').toLowerCase();
 
-										const tagName = tag.replace('#', '');
-										const customTag = isCardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name.replace('#', '') === tagName);
+										const customTag = isCardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name.replace('#', '').toLowerCase() === taskTag);
 
 										const tagColor = customTag?.color;
 										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : undefined; // 10% opacity background
@@ -993,7 +994,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&
 											columnData?.colType === colTypeNames.namedTag &&
-											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+											taskTag === columnTag
 										) {
 											return null;
 										}
@@ -1305,7 +1306,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.globalSettings.showFooter, task.completion, universalDate, task.time]);
 
 	// ========================================
-	// RETURN STATEMENT (UPDATED)
+	// RETURN STATEMENT
 	// ========================================
 	return (
 		<div className='taskItemContainer'>
