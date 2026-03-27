@@ -7,9 +7,9 @@
 - **Operating system**: Windows 10 Home Single Language 10.0.19045
 - **Use [[Wikilinks]]**: true
 - **Base color scheme**: dark
-- **Community theme**: none
+- **Community theme**: Minimal v8.1.7
 - **Snippets enabled**: 2
-- **Plugins installed**: 53
+- **Plugins installed**: 54
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
@@ -19,147 +19,173 @@
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
   - Calendar v1.5.10
+  - Minimal Theme Settings v8.2.1
 
 ## Recent Bug Reports
 
-Timestamp : 2026-03-14T23:47:28
+Timestamp : undefined
 ID : 91
-Message : 
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 17
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 91
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 141
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : 2026-03-26T11:27:54
+ID : 26
+Message : Child task not found
 Context : undefined
 Version : 1.9.7
 
 #### Bug Content
 ```log
-Column data : undefined
+The child task with ID 381 was not found in pending tasks.
 ```
 
 -------------
 
-Timestamp : 2026-03-15T00:09:46
+Timestamp : 2026-03-26T11:31:01
 ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "620". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : undefined
+Message : Following duplicate IDs has been found for tasks with IDs: "387". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
 Version : 1.9.7
 
 #### Bug Content
 ```log
 ERROR: Same id is present on two tasks
-```
-
--------------
-
-Timestamp : 2026-03-15T12:52:43
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-03-15T14:34:25
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-03-15T17:07:32
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-03-15T17:15:06
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-03-15T17:21:40
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-03-15T17:21:42
-ID : 91
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-Column data : undefined
-```
-
--------------
-
-Timestamp : 2026-03-15T17:41:45
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-03-15T18:31:33
-ID : 142
-Message : 
-Context : undefined
-Version : 1.9.7
-
-#### Bug Content
-```log
-No current drag data available for drop operation.currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-03-15T21:48:48
-ID : 141
-Message : 
-Context : DragDropTasksManager.ts/handleColumnDragOverEvent
-Version : 1.9.7
-
-#### Bug Content
-```log
-No source column data available for dragover.
-SourceColumn=null
 ```
