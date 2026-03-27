@@ -59,7 +59,7 @@ export class AddOrEditTaskView extends ItemView {
 	}
 
 	getDisplayText() {
-		return this.taskExists ? t("edit-task") + this.task.id : t("add-new-task");
+		return this.taskExists ? t("edit-task") + " - " + this.task.id : t("add-new-task");
 	}
 
 	async onOpen() {

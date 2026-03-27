@@ -2922,6 +2922,7 @@ li:hover .taskboard-hidden-property {
 
 .import-from-tasks-plugin-btn {
 	background-color: var(--background-modifier-border) !important;
+	color: var(--text-color) !important;
 }
 
 /* Tag Colors Container */
@@ -6893,7 +6894,7 @@ Date picker modal styles
 
 .date-picker-root-container .calendar-day.today {
 	border: 2px solid var(--interactive-accent-hover);
-	color: var(--text-on-accent);
+	color: var(--interactive-accent-hover);
 	font-weight: var(--font-bold);
 }
 
