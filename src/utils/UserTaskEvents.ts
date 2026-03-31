@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { WorkspaceLeaf, TFile } from "obsidian";
+import { WorkspaceLeaf, TFile, Notice } from "obsidian";
 import {
 	EditButtonMode,
 	statusTypeNames,
@@ -32,6 +32,8 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer";
+import { t } from "./lang/helper";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -199,7 +201,7 @@ export const openFileAndHighlightTask = async (
 
 /**
  * @description This function updates the status of a task item and triggers an event to update the real-time data.
- * If the task item is a note, it will update the frontmatter of the file first and then trigger the event to update the view.
+ * If the task item is a task-note, it will update the frontmatter of the file first and then trigger the event to update the view.
  * If the task item is an inline-task, it will directly update the file and then trigger the event to update the view.
  *
  * @param plugin - Taskboard plugin instance
@@ -208,7 +210,7 @@ export const openFileAndHighlightTask = async (
  * @param newStatus - New status symbol of the task item
  * @returns void
  */
-export const updateTaskItemStatus = (
+export const updateTaskItemStatus = async (
 	plugin: TaskBoard,
 	taskOld: taskItem,
 	taskUpdated: taskItem,
@@ -216,6 +218,24 @@ export const updateTaskItemStatus = (
 ) => {
 	let newTask = { ...taskUpdated };
 	newTask.status = newStatus;
+
+	const statusConfig =
+		plugin.settings.data.globalSettings.customStatuses.find(
+			(status) => status.symbol === newStatus,
+		);
+	const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
+
+	if (statusType === statusTypeNames.DONE) {
+		const allowed = await verifySubtasksAndChildtasksAreComplete(
+			plugin,
+			taskUpdated,
+		);
+
+		if (!allowed) {
+			new Notice(t("verifySubtasksAndChildtasksAreComplete-false-message"));
+			return;
+		}
+	}
 
 	let eventData: UpdateTaskEventData = {
 		taskID: taskOld.id,
@@ -239,15 +259,11 @@ export const updateTaskItemStatus = (
 			});
 		});
 	} else {
-		const newStatusType =
-			plugin.settings.data.globalSettings.customStatuses.find(
-				(status) => status.symbol === newStatus,
-			)?.type ?? statusTypeNames.TODO;
 		newTask.title = sanitizeStatus(
 			plugin.settings.data.globalSettings,
 			newTask.title,
 			newStatus,
-			newStatusType,
+			statusType,
 		);
 		updateTaskInFile(plugin, newTask, taskOld).then((newId) => {
 			plugin.realTimeScanner.processAllUpdatedFiles(

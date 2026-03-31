@@ -30,6 +30,7 @@ import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { verifySubtasksAndChildtasksAreComplete } from "src/utils/algorithms/ScanningFilterer";
 
 export interface filterOptions {
 	value: string;
@@ -162,7 +163,7 @@ export const AddOrEditTaskRC: React.FC<{
 	// 	setIsEdited(true);
 	// };
 
-	const handleStatusChange = (symbol: string) => {
+	const handleStatusChange = async (symbol: string) => {
 		setStatus(symbol);
 		setIsEdited(true);
 
@@ -171,6 +172,16 @@ export const AddOrEditTaskRC: React.FC<{
 				(status) => status.symbol === symbol
 			);
 		const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
+
+		if (statusType === statusTypeNames.DONE) {
+			const allowed = await verifySubtasksAndChildtasksAreComplete(plugin, task);
+
+			if (!allowed) {
+				new Notice(t("verifySubtasksAndChildtasksAreComplete-false-message"));
+				return;
+			}
+		}
+
 		// if (statusType === statusTypeNames.DONE) {
 		// 	const globalSettings = plugin.settings.data.globalSettings;
 		// 	const moment = _moment as unknown as typeof _moment.default;
