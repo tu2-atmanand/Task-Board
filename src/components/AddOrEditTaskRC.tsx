@@ -164,9 +164,6 @@ export const AddOrEditTaskRC: React.FC<{
 	// };
 
 	const handleStatusChange = async (symbol: string) => {
-		setStatus(symbol);
-		setIsEdited(true);
-
 		const statusConfig =
 			plugin.settings.data.globalSettings.customStatuses.find(
 				(status) => status.symbol === symbol
@@ -181,6 +178,8 @@ export const AddOrEditTaskRC: React.FC<{
 				return;
 			}
 		}
+
+		setStatus(symbol);
 
 		// if (statusType === statusTypeNames.DONE) {
 		// 	const globalSettings = plugin.settings.data.globalSettings;
@@ -214,10 +213,13 @@ export const AddOrEditTaskRC: React.FC<{
 		// 	setTitle(newTitle);
 		// }
 
-		const globalSettings = plugin.settings.data.globalSettings;
-		const newTitle = sanitizeStatus(globalSettings, title, symbol, statusType);
-		setTitle(newTitle);
+		if (!isTaskNote) {
+			const globalSettings = plugin.settings.data.globalSettings;
+			const newTitle = sanitizeStatus(globalSettings, title, symbol, statusType);
+			setTitle(newTitle);
+		}
 
+		setIsEdited(true);
 		setIsEditorContentChanged(true);
 	}
 
