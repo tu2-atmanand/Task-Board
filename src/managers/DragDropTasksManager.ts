@@ -32,7 +32,7 @@ export interface currentDragDataPayload {
 	taskIndex: string;
 	sourceColumnData: ColumnData;
 	currentBoardIndex: number;
-	swimlaneData: swimlaneDataProp | null | undefined;
+	swimlaneData: swimlaneDataProp | undefined;
 }
 
 /**
@@ -1105,26 +1105,29 @@ class DragDropTasksManager {
 	 */
 	updateTaskItemOnSwimlaneChange = async (
 		task: taskItem,
-		sourceColumnSwimlaneData: swimlaneDataProp,
-		targetColumnSwimlaneData: swimlaneDataProp,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 		globalSettings: globalSettingsData,
 	): Promise<taskItem> => {
-		const property = sourceColumnSwimlaneData.property;
-		const oldValue = sourceColumnSwimlaneData.value;
-		const newValue = targetColumnSwimlaneData.value;
+		if (!targetColumnSwimlaneData) return task;
 
+		const property = targetColumnSwimlaneData.property;
+		const newValue = targetColumnSwimlaneData.value;
 		let newTask: taskItem = { ...task };
 
 		if (property === "tags") {
 			const oldTags = task.tags ?? [];
 			let newTags: string[] = oldTags;
 			// Remove old tag of source swimlane
-			if (oldValue !== "All rest") {
-				newTags = newTags.filter(
-					(tag) =>
-						tag.replace("#", "").toLowerCase() !==
-						oldValue.replace("#", "").toLowerCase(),
-				);
+			if (sourceColumnSwimlaneData) {
+				const oldValue = sourceColumnSwimlaneData.value;
+				if (oldValue !== "All rest") {
+					newTags = newTags.filter(
+						(tag) =>
+							tag.replace("#", "").toLowerCase() !==
+							oldValue.replace("#", "").toLowerCase(),
+					);
+				}
 			}
 
 			// Add new tag of target swimlane
@@ -1142,13 +1145,19 @@ class DragDropTasksManager {
 				newTags,
 			);
 		} else {
-			newTask = await updateTaskItemProperty(
-				newTask,
-				globalSettings,
-				property,
-				oldValue,
-				newValue,
-			);
+			if (sourceColumnSwimlaneData) {
+				const oldValue =
+					sourceColumnSwimlaneData.value !== "All rest"
+						? sourceColumnSwimlaneData.value
+						: "";
+				newTask = await updateTaskItemProperty(
+					newTask,
+					globalSettings,
+					property,
+					oldValue,
+					newValue,
+				);
+			}
 		}
 
 		return newTask;
