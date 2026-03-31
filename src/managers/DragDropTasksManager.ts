@@ -858,7 +858,7 @@ class DragDropTasksManager {
 		}
 
 		// STEP 3 - Add the target column tag if it doesn't already exist
-		let newTags = oldTask.tags ?? [];
+		let newTags = newTask.tags ?? [];
 		if (targetColumn.coltag) {
 			const targetTag = targetColumn.coltag.startsWith("#")
 				? targetColumn.coltag
