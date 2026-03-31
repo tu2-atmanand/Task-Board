@@ -107,7 +107,7 @@
         },
         "taskCount": {
           "pending": 95,
-          "completed": 16
+          "completed": 15
         }
       },
       {
@@ -118,7 +118,16 @@
             "active": true,
             "collapsed": false,
             "name": "Backlogs",
-            "index": 1
+            "index": 1,
+            "swimlaneEnabled": false
+          },
+          {
+            "id": 4070560945,
+            "index": 2,
+            "colType": "otherTags",
+            "active": true,
+            "collapsed": false,
+            "name": "All other tags"
           },
           {
             "id": 3022682028,
@@ -126,7 +135,7 @@
             "active": true,
             "collapsed": false,
             "name": "Important",
-            "index": 2,
+            "index": 3,
             "coltag": "important"
           },
           {
@@ -135,7 +144,7 @@
             "active": true,
             "collapsed": false,
             "name": "WIP",
-            "index": 3,
+            "index": 4,
             "coltag": "wip"
           },
           {
@@ -167,17 +176,28 @@
           "filterGroups": []
         },
         "swimlanes": {
-          "enabled": false,
+          "enabled": true,
           "hideEmptySwimlanes": false,
           "property": "tags",
-          "sortCriteria": "asc",
-          "minimized": [],
           "maxHeight": "300px",
-          "headerUIType": "hor"
+          "sortCriteria": "custom",
+          "customSortOrder": [
+            {
+              "value": "first",
+              "index": 1
+            },
+            {
+              "value": "second",
+              "index": 2
+            }
+          ],
+          "groupAllRest": true,
+          "headerUIType": "hor",
+          "minimized": []
         },
         "taskCount": {
-          "pending": 68,
-          "completed": 14
+          "pending": 95,
+          "completed": 15
         }
       },
       {
@@ -264,7 +284,7 @@
           "headerUIType": "hor"
         },
         "taskCount": {
-          "pending": 96,
+          "pending": 95,
           "completed": 15
         }
       },
@@ -712,7 +732,7 @@
       "safeGuardFeature": true,
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 0,
+        "boardIndex": 1,
         "settingTab": 6,
         "taskId": ""
       },
