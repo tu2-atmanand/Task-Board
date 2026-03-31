@@ -215,7 +215,7 @@ export const AddOrEditTaskRC: React.FC<{
 		// }
 
 		const globalSettings = plugin.settings.data.globalSettings;
-		const newTitle = sanitizeStatus(globalSettings, task.title, symbol, statusType);
+		const newTitle = sanitizeStatus(globalSettings, title, symbol, statusType);
 		setTitle(newTitle);
 
 		setIsEditorContentChanged(true);
