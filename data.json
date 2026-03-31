@@ -76,7 +76,15 @@
             "collapsed": false,
             "limit": 20,
             "name": "Completed",
-            "index": 6
+            "index": 6,
+            "sortCriteria": [
+              {
+                "criteria": "completedDate",
+                "order": "desc",
+                "priority": 1,
+                "uid": "534247063"
+              }
+            ]
           }
         ],
         "name": "Time Based Workflow",
@@ -98,8 +106,8 @@
           "headerUIType": "hor"
         },
         "taskCount": {
-          "pending": 68,
-          "completed": 14
+          "pending": 95,
+          "completed": 16
         }
       },
       {
@@ -704,11 +712,11 @@
       "safeGuardFeature": true,
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 3,
-        "settingTab": 2,
+        "boardIndex": 0,
+        "settingTab": 6,
         "taskId": ""
       },
-      "boundTaskCompletionToChildTasks": false,
+      "boundTaskCompletionToChildTasks": true,
       "mapView": {
         "background": "none",
         "mapOrientation": "hor",
