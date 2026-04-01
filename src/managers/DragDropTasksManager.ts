@@ -1521,8 +1521,6 @@ class DragDropTasksManager {
 	): void {
 		e.preventDefault();
 
-		debugger;
-
 		// All checks before proceeding with the calculations...
 		if (!this.currentDragData) {
 			bugReporterManagerInsatance.addToLogs(

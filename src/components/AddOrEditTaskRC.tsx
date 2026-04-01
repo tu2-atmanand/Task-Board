@@ -397,7 +397,7 @@ export const AddOrEditTaskRC: React.FC<{
 			const newTagsList = tags.concat(input);
 
 			if (!isTaskNote) {
-				const newTitle = sanitizeTags(title, tags, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(title, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -429,7 +429,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			if (!isTaskNote) {
 				const newTagsList = currentTags.concat(choice);
-				const newTitle = sanitizeTags(currentTitle, currentTags, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(currentTitle, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -453,7 +453,7 @@ export const AddOrEditTaskRC: React.FC<{
 		const newTags = tags.filter(tag => tag !== tagToRemove);
 
 		if (!isTaskNote) {
-			const newTitle = sanitizeTags(title, tags, newTags, cursorLocationRef.current ?? undefined);
+			const newTitle = sanitizeTags(title, newTags, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 		}
 		setTags(newTags);
