@@ -222,11 +222,7 @@ export const getSanitizedTaskContent = (
 		updatedTask.due,
 	);
 
-	updatedTitle = sanitizeTags(
-		updatedTitle,
-		updatedTask.tags,
-		updatedTask.tags || [],
-	);
+	updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
 
 	updatedTitle = sanitizeReminder(
 		globalSettings,
@@ -980,14 +976,12 @@ export const sanitizePriority = (
 /**
  * Function to sanitize tags inside the task title.
  * @param title - The title of the task.
- * @param oldTagsList - The list of old tags currently present (with #).
  * @param newTagsList - The updated list of tags that should exist (with #).
  * @param cursorLocation - (Optional) Cursor location for insertion.
  * @returns The sanitized title with correct tags.
  */
 export const sanitizeTags = (
 	title: string,
-	oldTagsList: string[],
 	newTagsList: string[],
 	cursorLocation?: cursorLocation,
 ): string => {

@@ -232,7 +232,9 @@ export const updateTaskItemStatus = async (
 		);
 
 		if (!allowed) {
-			new Notice(t("verifySubtasksAndChildtasksAreComplete-false-message"));
+			new Notice(
+				t("verifySubtasksAndChildtasksAreComplete-false-message"),
+			);
 			return;
 		}
 	}
@@ -510,7 +512,7 @@ export const updateTaskItemTags = (
 			});
 		});
 	} else {
-		newTask.title = sanitizeTags(newTask.title, taskOld.tags, newTags);
+		newTask.title = sanitizeTags(newTask.title, newTags);
 		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				taskOld.filePath,
@@ -528,7 +530,6 @@ export const updateTaskItemTags = (
  * @param {taskItem} task - The task item to update.
  * @param {globalSettingsData} globalSettings - The global settings data of the Taskboard plugin.
  * @param {string} property - The property of the task item to update.
- * @param {string | number | string[]} oldValue - The old value of the property to update.
  * @param {string | number | string[]} newValue - The new value of the property to update.
  * @returns {taskItem} The updated task item.
  */
@@ -536,7 +537,6 @@ export const updateTaskItemProperty = async (
 	task: taskItem,
 	globalSettings: globalSettingsData,
 	property: string,
-	oldValue: string | number | string[],
 	newValue: string | number | string[],
 ): Promise<taskItem> => {
 	const updatedTask: taskItem = { ...task };
@@ -551,7 +551,6 @@ export const updateTaskItemProperty = async (
 			if (!isThisTaskNote) {
 				updatedTask.title = sanitizeTags(
 					task.title,
-					oldValue as string[],
 					newValue as string[],
 				);
 			}
