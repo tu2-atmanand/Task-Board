@@ -55,7 +55,7 @@
 	"confirm-delete": "Bekræft slet",
 	"confirm-task-delete-description": "Er du sikker på, at du vil slette denne opgave?",
 	"vault-scanning-complete": "Vault -scanning komplet.",
-	"scan-tasks-from-the-vault": "Scanningsopgaver fra hvælvingen",
+	"vault-scanner": "Scanningsopgaver fra hvælvingen",
 	"scan-tasks-from-the-vault-description-1": "Kør kun denne funktion, hvis dine opgaver ikke er blevet registreret korrekt/scannet, eller bestyrelsen handler, når du handler.",
 	"scan-tasks-from-the-vault-description-2": "Du behøver ikke at køre denne funktion ofte, plugin vil automatisk registrere nyligt tilføjede/redigerede opgaver.",
 	"scan-tasks-from-the-vault-description-3": "Bemærk: Kontroller dine 'filtre for scanning' fra pluginindstillingerne først, hvis du scanner for at registrere uopdagede opgaver.",

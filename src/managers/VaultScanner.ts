@@ -6,7 +6,7 @@ import {
 	TAbstractFile,
 	TFile,
 	TFolder,
-	moment as _moment,
+	// moment as _moment,
 } from "obsidian";
 import {
 	extractCheckboxSymbol,
@@ -48,6 +48,7 @@ import {
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import { bugReporterManagerInsatance } from "./BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import { parse } from "date-fns/parse";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -61,6 +62,8 @@ export default class VaultScanner {
 	tasksCache: jsonCacheData;
 	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
+	testDate: Date;
+	supportedChecklistSymbols: string[];
 
 	constructor(app: App, plugin: TaskBoard) {
 		this.app = app;
@@ -72,7 +75,16 @@ export default class VaultScanner {
 			Completed: {},
 		}; // Reset task structure
 		this.tasksDetectedOrUpdated = false;
+
+		// Some recursively used constants
 		this.indentationString = getObsidianIndentationSetting(plugin);
+		this.testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
+		this.supportedChecklistSymbols = [];
+		this.plugin.settings.data.globalSettings.customStatuses.forEach(
+			(status) => {
+				this.supportedChecklistSymbols.push(status.symbol);
+			},
+		);
 	}
 
 	async initializeTasksCache() {
@@ -295,15 +307,29 @@ export default class VaultScanner {
 
 				return "true";
 			} else {
-				// Else, proceed with normal task line detection inside the file content.
+				// Else, proceed with inline-tasks(checklists) detection inside the file content.
 				for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
 					const line = lines[lineIndex];
 					if (isTaskLine(line)) {
+						const taskStatus = extractCheckboxSymbol(line);
+
+						// Since v1.10.0 - Read this ticket : https://github.com/tu2-atmanand/Task-Board/issues/737
+						if (
+							!this.supportedChecklistSymbols.includes(taskStatus)
+						) {
+							const bodyLines = extractBody(
+								lines,
+								lineIndex + 1,
+								this.indentationString,
+							);
+							lineIndex = lineIndex + bodyLines.length;
+							continue; // We will going to skip storing this task inside the cache.
+						}
+
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
 							this.tasksDetectedOrUpdated = true;
 							const legacyId = extractTaskId(line);
-							const taskStatus = extractCheckboxSymbol(line);
 							const isThisCompletedTask = isTaskCompleted(
 								line,
 								false,
@@ -311,15 +337,17 @@ export default class VaultScanner {
 							);
 							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
 							const time = extractTime(line);
-							const createdDate = extractCreatedDate(line);
+							const createdDate =
+								extractCreatedDate(line)?.[1] ?? "";
 							let startDate: RegExpMatchArray | null | string =
-								extractStartDate(line);
+								extractStartDate(line)?.[1] ?? "";
 							let scheduledDate:
 								| RegExpMatchArray
 								| null
-								| string = extractScheduledDate(line);
+								| string =
+								extractScheduledDate(line)?.[1] ?? "";
 							let dueDate: RegExpMatchArray | null | string =
-								extractDueDate(line);
+								extractDueDate(line)?.[1] ?? "";
 							const priority = extractPriority(line);
 							const dependsOn = extractDependsOn(line);
 							const reminder = extractReminder(
@@ -328,8 +356,10 @@ export default class VaultScanner {
 								scheduledDate ? scheduledDate[1] : "",
 								dueDate ? dueDate[1] : "",
 							);
-							const completionDate = extractCompletionDate(line);
-							const cancelledDate = extractCancelledDate(line);
+							const completionDate =
+								extractCompletionDate(line)?.[1] ?? "";
+							const cancelledDate =
+								extractCancelledDate(line)?.[1] ?? "";
 							const bodyLines = extractBody(
 								lines,
 								lineIndex + 1,
@@ -348,16 +378,13 @@ export default class VaultScanner {
 										.universalDate;
 								const basename = file.basename;
 
-								// Check if the basename matches the dueFormat using moment
-								const moment =
-									_moment as unknown as typeof _moment.default;
-								if (
-									moment(
-										basename,
-										universalDateFormat,
-										true,
-									).isValid()
-								) {
+								// Check if the basename matches the date format
+								const parsed = parse(
+									basename,
+									universalDateFormat,
+									this.testDate,
+								);
+								if (parsed) {
 									if (
 										universalDateConfig ===
 											UniversalDateOptions.dueDate &&
@@ -399,12 +426,12 @@ export default class VaultScanner {
 								title: title,
 								body: bodyLines,
 								time: time ? time[1] : "",
-								createdDate: createdDate ? createdDate[1] : "",
-								startDate: startDate ? startDate[1] : "",
+								createdDate: createdDate ? createdDate : "",
+								startDate: startDate ? startDate : "",
 								scheduledDate: scheduledDate
-									? scheduledDate[1]
+									? scheduledDate
 									: "",
-								due: dueDate ? dueDate[1] : "",
+								due: dueDate ? dueDate : "",
 								tags: tags,
 								frontmatterTags: frontmatterTags,
 								priority: priority.value,
@@ -425,10 +452,10 @@ export default class VaultScanner {
 											: line.length,
 								},
 								completion: completionDate
-									? completionDate[1]
+									? completionDate
 									: "",
 								cancelledDate: cancelledDate
-									? cancelledDate[1]
+									? cancelledDate
 									: "",
 								reminder: reminder.value,
 							};
@@ -689,7 +716,11 @@ export function fileTypeAllowedForScanning(
 	file: TFile | TAbstractFile,
 ): boolean {
 	const filePath = file.path.toLocaleLowerCase();
-	const isFileInArchivedTaskNotesFolder = globalSettings.archivedTBNotesFolderPath.trim() !== "" && filePath.startsWith(globalSettings.archivedTBNotesFolderPath.toLowerCase());
+	const isFileInArchivedTaskNotesFolder =
+		globalSettings.archivedTBNotesFolderPath.trim() !== "" &&
+		filePath.startsWith(
+			globalSettings.archivedTBNotesFolderPath.toLowerCase(),
+		);
 
 	if (
 		file instanceof TFolder ||
@@ -780,9 +811,9 @@ export function extractTitle(text: string): string {
 
 /**
  * Extracts the task id from a task string by matching the id regex.
- * Supports both plugin and Dataview id formats.
+ * Supports both Task's plugin and Dataview plugin id formats.
  * @param {string} text - The task string.
- * @returns {string} The task id.
+ * @returns {RegExpMatchArray} A regular expression array, where [0] is the extracted string and [1] is the value of the id.
  */
 export function extractTaskId(text: string): RegExpMatchArray | null {
 	// const combinedIdRegex = new RegExp(

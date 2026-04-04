@@ -93,15 +93,13 @@ export class RealTimeScanner {
 			);
 		}
 
-		if (result) {
-			// Clear the stack to avoid re-processing during this run.
-			this.taskBoardFileStack = [];
-			// Save updated stack (which should now be empty)
-			this.saveStack();
+		// Clear the stack to avoid re-processing during this run.
+		this.taskBoardFileStack = [];
+		// Save updated stack (which should now be empty)
+		this.saveStack();
 
-			// Reset the editorModified flag after the scan.
-			this.plugin.editorModified = false;
-		}
+		// Reset the editorModified flag after the scan.
+		this.plugin.editorModified = false;
 
 		setTimeout(() => {
 			// This event emmitter will stop any loading animation of ongoing task-card.

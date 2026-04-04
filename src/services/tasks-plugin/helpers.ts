@@ -82,8 +82,9 @@ export async function fetchTasksPluginCustomStatuses(
 			}
 		}
 	} catch (error) {
-		bugReporterManagerInsatance.addToLogs(
+		bugReporterManagerInsatance.showNotice(
 			100,
+			"There was an issue while importing the custom statuses configs from the Tasks plugin. See the below details to get more info. If required, please report this issue to the developer.",
 			String(error),
 			"tasks-plugin/helper.ts/fetchTasksPluginCustomStatuses",
 		);

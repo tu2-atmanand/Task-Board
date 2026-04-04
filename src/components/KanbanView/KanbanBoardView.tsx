@@ -1,7 +1,7 @@
 // src/components/KanbanBoard.tsx
 
 import { Board, ColumnData } from "../../interfaces/BoardConfigs";
-import React, { memo, useEffect, useMemo, useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
 
 import { App } from "obsidian";
@@ -22,77 +22,104 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSearchedTasks, freshInstall }) => {
 	const [loading, setLoading] = useState(true);
 
-	// Check if lazy loading is enabled
-	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn;
 
-	// Second memo: Segregate filtered tasks by column (for Kanban view only)
+	// Segregate filtered tasks by column (for Kanban view only)
 	const allTasksArrangedPerColumn = useMemo(() => {
 		if (board && filteredAndSearchedTasks) {
-			return board.columns
+			const finalArrangedTasks = board.columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
 					columnSegregator(plugin.settings, board.index, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
 						plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
 					})
 				);
+
+			setLoading(false);
+			return finalArrangedTasks;
 		}
+
+		setLoading(false);
 		return [];
 	}, [filteredAndSearchedTasks, board]);
 
-	useEffect(() => {
-		if (allTasksArrangedPerColumn.flat().length > 0) {
-			setLoading(false);
+	const renderColumns = (columns: ColumnData[], tasks: taskItem[][]) => {
+		return columns.map((column, index) => (
+			<MemoizedColumn
+				key={`${column.id}-${index}`}
+				plugin={plugin}
+				columnIndex={column.index}
+				activeBoardData={board}
+				columnData={column}
+				tasksForThisColumn={tasks[index] || []}
+				Component={ColumnComponent}
+			/>
+		));
+	};
+
+	const renderLoadingOrEmpty = useMemo(() => {
+		if (loading) {
+			return (
+				<div className="loadingContainer">
+					<div className="spinner"></div>
+					<p>{t("loading-tasks")}</p>
+				</div>
+			);
 		}
-	}, [allTasksArrangedPerColumn]);
+
+		if (board?.columns?.length === 0) {
+			return (
+				<div className="emptyBoardMessage">
+					{t("no-columns-message")}
+				</div>
+			);
+		}
+
+		return null;
+	}, [loading]);
+
+	const renderFreshInstallMessage = useMemo(() => {
+		if (freshInstall) {
+			return (
+				<div className="loadingContainer">
+					<h2 className="initializationMessage">
+						{t("fresh-install-1")}
+						<br />
+						<br />
+						{t("fresh-install-2")}
+						<br />
+						<br />
+						{t("fresh-install-3")}
+					</h2>
+				</div>
+			);
+		}
+
+		return null;
+	}, [freshInstall]);
+
+	const isSwimlanesEnabled = board?.swimlanes?.enabled === true;
 
 	return (
 		<div className="kanbanBoard">
-			<div className="columnsContainer">
-				{loading ? (
-					<div className="loadingContainer">
-						{freshInstall ? (
-							<h2 className="initializationMessage">
-								{t("fresh-install-1")}
-								<br />
-								<br />
-								{t("fresh-install-2")}
-								<br />
-								<br />
-								{t("fresh-install-3")}
-							</h2>
-						) : (
-							<>
-								<div className="spinner"></div>
-								<p>{t("loading-tasks")}</p>
-							</>
-						)}
-					</div>
-				) : board?.columns?.length === 0 ? (
-					<div className="emptyBoardMessage">
-						Create columns on this board using the board config modal from top right corner button.
-					</div>
-				) : board?.swimlanes?.enabled ? (
-					<KanbanSwimlanesContainer
-						plugin={plugin}
-						board={board}
-						tasksPerColumn={allTasksArrangedPerColumn}
-					/>
-				) : (
-					board?.columns
-						.filter((column) => column.active)
-						.map((column, index) => (
-							<MemoizedColumn
-								key={index}
-								plugin={plugin}
-								columnIndex={column.index}
-								activeBoardData={board}
-								columnData={column}
-								tasksForThisColumn={allTasksArrangedPerColumn[index]}
-								Component={ColumnComponent}
-							/>
-						))
-				)}
-			</div>
+			{renderLoadingOrEmpty || renderFreshInstallMessage || (
+				<>
+					{isSwimlanesEnabled ? (
+						<KanbanSwimlanesContainer
+							plugin={plugin}
+							board={board}
+							tasksPerColumn={allTasksArrangedPerColumn}
+						/>
+					) : (
+						<div className="columnsContainer">
+							{renderColumns(
+								board?.columns?.filter((column) => column.active) || [],
+								allTasksArrangedPerColumn
+							)}
+						</div>
+					)}
+				</>
+			)}
 		</div>
 	);
 };

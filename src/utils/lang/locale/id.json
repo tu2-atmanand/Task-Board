@@ -55,7 +55,7 @@
 	"confirm-delete": "Konfirmasi hapus",
 	"confirm-task-delete-description": "Apakah Anda yakin ingin menghapus tugas ini?",
 	"vault-scanning-complete": "Pemindaian Vault Lengkap.",
-	"scan-tasks-from-the-vault": "Pindai tugas dari lemari besi",
+	"vault-scanner": "Pindai tugas dari lemari besi",
 	"scan-tasks-from-the-vault-description-1": "Jalankan fitur ini hanya jika tugas Anda belum terdeteksi/dipindai dengan benar atau dewan bertindak weired.",
 	"scan-tasks-from-the-vault-description-2": "Anda tidak perlu sering menjalankan fitur ini, plugin akan secara otomatis mendeteksi tugas yang baru ditambahkan/diedit.",
 	"scan-tasks-from-the-vault-description-3": "Catatan: Silakan periksa 'filter untuk pemindaian' Anda dari pengaturan plugin terlebih dahulu, jika Anda memindai untuk mendeteksi tugas yang tidak terdeteksi.",

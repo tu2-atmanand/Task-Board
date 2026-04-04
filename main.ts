@@ -56,8 +56,8 @@ export default class TaskBoard extends Plugin {
 	plugin: TaskBoard;
 	view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
-	vaultScanner: VaultScanner;
-	realTimeScanner: RealTimeScanner;
+	vaultScanner!: VaultScanner;
+	realTimeScanner!: RealTimeScanner;
 	// taskBoardFileStack: string[] = [];
 	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
@@ -97,12 +97,6 @@ export default class TaskBoard extends Plugin {
 		this.app = this.plugin.app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.vaultScanner = new VaultScanner(this.app, this.plugin);
-		this.realTimeScanner = new RealTimeScanner(
-			this.app,
-			this.plugin,
-			this.vaultScanner,
-		);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -118,13 +112,20 @@ export default class TaskBoard extends Plugin {
 
 	async onload() {
 		console.log("Task Board : Loading...");
+		// Loads settings data and creating the Settings Tab in main Setting
+		await this.loadSettings();
+
+		this.vaultScanner = new VaultScanner(this.app, this.plugin);
+		this.realTimeScanner = new RealTimeScanner(
+			this.app,
+			this.plugin,
+			this.vaultScanner,
+		);
 
 		// NOTE : I feel, if these singleton instances needs the latest version of 'this', then they might show some unexpected behavior as I am not updating the 'this' inside those singleton instances latest during the plugin life-cycle.
 		dragDropTasksManagerInsatance.setPlugin(this);
 		bugReporterManagerInsatance.setPlugin(this);
 
-		// Loads settings data and creating the Settings Tab in main Setting
-		await this.loadSettings();
 		this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
@@ -133,6 +134,9 @@ export default class TaskBoard extends Plugin {
 		await loadTranslationsOnStartup(this);
 
 		await this.vaultScanner.initializeTasksCache();
+
+		// Register the Kanban view
+		this.registerTaskBoardView();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -149,9 +153,6 @@ export default class TaskBoard extends Plugin {
 
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
-
-			// Register the Kanban view
-			this.registerTaskBoardView();
 
 			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
@@ -179,7 +180,15 @@ export default class TaskBoard extends Plugin {
 
 	async activateView(leafLayout: string) {
 		let leaf: WorkspaceLeaf | null = null;
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+		let leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+
+		if (leaves.length === 0) {
+			this.app.workspace.iterateAllLeaves((leaf) => {
+				if (leaf.view instanceof TaskBoardView) {
+					leaves.push(leaf);
+				}
+			});
+		}
 
 		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
 			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
@@ -192,21 +201,12 @@ export default class TaskBoard extends Plugin {
 			(leaf) => !isFromMainWindow(leaf),
 		);
 
-		if (leafLayout === "icon") {
+		if (leafLayout === "icon" || leafLayout === "tab") {
 			// Focus on any existing leaf, prioritizing MainWindow
 			leaf =
 				mainWindowLeaf ||
 				separateWindowLeaf ||
 				this.app.workspace.getLeaf("tab");
-		} else if (leafLayout === "tab") {
-			// Check if a leaf exists in MainWindow
-			if (mainWindowLeaf) {
-				// Prevent duplicate in MainWindow
-				leaf = mainWindowLeaf;
-			} else {
-				// Allow opening a new leaf in MainWindow
-				leaf = this.app.workspace.getLeaf("tab");
-			}
 		} else if (leafLayout === "window") {
 			// Check if a leaf exists in SeparateWindow
 			if (separateWindowLeaf) {

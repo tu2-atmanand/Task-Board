@@ -6,7 +6,7 @@ import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
 import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
-import { moment as _moment } from "obsidian";
+// import { moment as _moment } from "obsidian";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
@@ -30,6 +30,7 @@ import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { verifySubtasksAndChildtasksAreComplete } from "src/utils/algorithms/ScanningFilterer";
 
 export interface filterOptions {
 	value: string;
@@ -162,15 +163,24 @@ export const AddOrEditTaskRC: React.FC<{
 	// 	setIsEdited(true);
 	// };
 
-	const handleStatusChange = (symbol: string) => {
-		setStatus(symbol);
-		setIsEdited(true);
-
+	const handleStatusChange = async (symbol: string) => {
 		const statusConfig =
 			plugin.settings.data.globalSettings.customStatuses.find(
 				(status) => status.symbol === symbol
 			);
 		const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
+
+		if (statusType === statusTypeNames.DONE) {
+			const allowed = await verifySubtasksAndChildtasksAreComplete(plugin, task);
+
+			if (!allowed) {
+				new Notice(t("verifySubtasksAndChildtasksAreComplete-false-message"));
+				return;
+			}
+		}
+
+		setStatus(symbol);
+
 		// if (statusType === statusTypeNames.DONE) {
 		// 	const globalSettings = plugin.settings.data.globalSettings;
 		// 	const moment = _moment as unknown as typeof _moment.default;
@@ -203,10 +213,13 @@ export const AddOrEditTaskRC: React.FC<{
 		// 	setTitle(newTitle);
 		// }
 
-		const globalSettings = plugin.settings.data.globalSettings;
-		const newTitle = sanitizeStatus(globalSettings, task.title, symbol, statusType);
-		setTitle(newTitle);
+		if (!isTaskNote) {
+			const globalSettings = plugin.settings.data.globalSettings;
+			const newTitle = sanitizeStatus(globalSettings, title, symbol, statusType);
+			setTitle(newTitle);
+		}
 
+		setIsEdited(true);
 		setIsEditorContentChanged(true);
 	}
 
@@ -384,7 +397,7 @@ export const AddOrEditTaskRC: React.FC<{
 			const newTagsList = tags.concat(input);
 
 			if (!isTaskNote) {
-				const newTitle = sanitizeTags(title, tags, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(title, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -416,7 +429,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			if (!isTaskNote) {
 				const newTagsList = currentTags.concat(choice);
-				const newTitle = sanitizeTags(currentTitle, currentTags, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(currentTitle, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -440,7 +453,7 @@ export const AddOrEditTaskRC: React.FC<{
 		const newTags = tags.filter(tag => tag !== tagToRemove);
 
 		if (!isTaskNote) {
-			const newTitle = sanitizeTags(title, tags, newTags, cursorLocationRef.current ?? undefined);
+			const newTitle = sanitizeTags(title, newTags, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 		}
 		setTags(newTags);
@@ -625,11 +638,6 @@ export const AddOrEditTaskRC: React.FC<{
 	}, [plugin.app]);
 
 	const handleOpenTaskInMapView = () => {
-		// if (!globalSettings.experimentalFeatures) {
-		// 	new Notice(t("enable-experimental-features-message"));
-		// 	return;
-		// }
-
 		applyIdToTaskItem(plugin, task).then((newId) => {
 			globalSettings.lastViewHistory.viewedType = 'map';
 			globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
@@ -1096,7 +1104,7 @@ export const AddOrEditTaskRC: React.FC<{
 				event.ctrlKey = false;
 				break;
 			case EditButtonMode.Modal:
-			case EditButtonMode.View:
+			case EditButtonMode.ViewInWindow:
 			case EditButtonMode.TasksPluginModal:
 			default:
 				const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);

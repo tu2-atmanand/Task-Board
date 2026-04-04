@@ -440,6 +440,28 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			});
 		}
 
+		// Show swimlane toggle option only when swimlanes are enabled
+		const isSwimlanesEnabled = activeBoardData?.swimlanes?.enabled;
+		if (isSwimlanesEnabled) {
+			columnMenu.addSeparator();
+			columnMenu.addItem((item) => {
+				const isSwimlaneEnabled = columnData.swimlaneEnabled !== false;
+				item.setTitle(isSwimlaneEnabled ? t("exclude-from-swimlanes") : t("include-in-swimlanes"));
+				item.setIcon(isSwimlaneEnabled ? "layout-panel-left" : "rows-3");
+				item.onClick(async () => {
+					const boardIndex = activeBoardData.index;
+					if (boardIndex !== -1) {
+						const columnIndex = columnData.index - 1;
+						if (columnIndex !== -1) {
+							plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].swimlaneEnabled = !isSwimlaneEnabled;
+							await plugin.saveSettings();
+							eventEmitter.emit('REFRESH_BOARD');
+						}
+					}
+				});
+			});
+		}
+
 		// Use native event if available (React event has nativeEvent property)
 		columnMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)

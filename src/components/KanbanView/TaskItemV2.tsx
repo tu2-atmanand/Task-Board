@@ -17,7 +17,7 @@ import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regula
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { openDateInputModal } from 'src/services/OpenModals';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
-import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType } from 'src/interfaces/Enums';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType, UniversalDateOptions } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
@@ -25,12 +25,13 @@ import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/
 import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
 import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { startOfDay, isToday, compareAsc, isAfter, isBefore } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from 'src/interfaces/Constants';
 import { showTextInputModal } from 'src/modals/TextInputModal';
+import { DateTimePickerModal } from 'src/modals/date_time_picker/DateTimePickerModal';
 
 export interface swimlaneDataProp {
 	property: string;
@@ -483,18 +484,18 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				}
 			}
 
-			const getOpacityValue = (color: string): number => {
-				const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
-				if (rgbaMatch) {
-					const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
-					return opacity;
-				}
-				return 1;
-			};
+			// const getOpacityValue = (color: string): number => {
+			// 	const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+			// 	if (rgbaMatch) {
+			// 		const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+			// 		return opacity;
+			// 	}
+			// 	return 1;
+			// };
 
-			if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-				return updateRGBAOpacity(highestPriorityTag.color, 0.2);
-			}
+			// if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+			// 	return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+			// }
 
 			return highestPriorityTag?.color;
 		}
@@ -675,8 +676,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	const handleMenuButtonClicked = (event: React.MouseEvent) => {
 		event.stopPropagation();
 
-		if (!globalSettings.experimentalFeatures) return;
-
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
@@ -691,7 +690,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.globalSettings.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
-					const itemDocFragment = MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} (**[${status.value}]**)`, item.titleEl, '', null);
+					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} **[${status.value}]**`, item.titleEl, '', null);
 					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
@@ -733,27 +732,27 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			it.setIcon("calendar-plus")
 			it.setTitle(t("start-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'startDate', newDate);
-				})
+				openDateInputModal(plugin, t("start"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
+				}, task.startDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar-clock")
 			it.setTitle(t("scheduled-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'scheduledDate', newDate);
-				})
+				openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
+				}, task.scheduledDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar")
 			it.setTitle(t("due-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, 'due', newDate);
-				})
+				openDateInputModal(plugin, t("due"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
+				}, task.due)
 			});
 		});
 
@@ -762,14 +761,18 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 			item.setIcon("clock");
 			item.setTitle(t("reminder"));
 			item.onClick(async () => {
-				// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
+				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
+					updateTaskItemReminder(plugin, task, task, dateTime);
+				};
+				modal.open();
 			});
 		});
 
 		taskItemMenu.addSeparator();
 
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("quick-actions"));
+			item.setTitle(t("task-actions"));
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
@@ -783,6 +786,36 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					new Notice(t("copy-task-title-unsuccessful"));
 				}
 			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor"));
+			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.Modal);
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor-in"));
+			const taskEditorMenu = item.setSubmenu();
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("columns-2");
+				subItem.setTitle(t("right-split"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
+			});
+
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("picture-in-picture-2");
+				subItem.setTitle(t("new-window"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("note-actions"));
+			item.setIsLabel(true);
 		});
 
 		taskItemMenu.addItem((item) => {
@@ -803,7 +836,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
 			item.setIcon("file-text");
-			item.setTitle(t("note-actions"));
+			item.setTitle(t("more-note-actions"));
 
 			const submenu = (item as any).setSubmenu();
 
@@ -948,12 +981,14 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
+										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
+										const taskTag = tag.replace('#', '').toLowerCase();
+										const columnTag = columnData?.coltag?.replace('#', '').toLowerCase();
 
-										const tagName = tag.replace('#', '');
-										const customTag = plugin.settings.data.globalSettings.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name === tagName);
+										const customTag = isCardBg ? undefined : plugin.settings.data.globalSettings.tagColors.find(t => t.name.replace('#', '').toLowerCase() === taskTag);
 
-										const tagColor = customTag?.color || `var(--tag-color)`;
-										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										const tagColor = customTag?.color;
+										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : undefined; // 10% opacity background
 										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
@@ -961,7 +996,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 											(!activeBoardSettings?.showColumnTags) &&
 											columnData &&
 											columnData?.colType === colTypeNames.namedTag &&
-											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+											taskTag === columnTag
 										) {
 											return null;
 										}
@@ -1300,26 +1335,22 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 					{memoizedRenderHeader}
 
 					{/* Drag Handle and Task Menu button */}
-					{plugin.settings.data.globalSettings.experimentalFeatures && (
-						<>
-							{
-								Platform.isDesktopApp ? (
-									<>
-										{/* Drag Handle */}
-										{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
-											<div className="taskItemDragBtn">
-												<Grip size={18} enableBackground={0} opacity={0.4} />
-											</div>
-										)}
-									</>
-								) : (
-									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-									</>
-								)
-							}
-						</>
-					)}
+					{
+						Platform.isDesktopApp ? (
+							<>
+								{/* Drag Handle */}
+								{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (
+									<div className="taskItemDragBtn">
+										<Grip size={18} enableBackground={0} opacity={0.4} />
+									</div>
+								)}
+							</>
+						) : (
+							<>
+								<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+							</>
+						)
+					}
 
 					{/* Task Content */}
 					<div className="taskItemMainBody">
@@ -1328,9 +1359,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								<input
 									id={`${task.id}-checkbox`}
 									type="checkbox"
-									checked={false}
+									checked={task.status === " " ? false : true}
 									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
-									data-task={task.status}
+									data-task={cardLoadingAnimation ? 'x' : task.status}
 									dir='auto'
 									onChange={handleMainCheckBoxClick}
 									onClick={(e) => {

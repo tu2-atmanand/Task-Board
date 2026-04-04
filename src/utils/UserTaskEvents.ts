@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { WorkspaceLeaf, TFile } from "obsidian";
+import { WorkspaceLeaf, TFile, Notice } from "obsidian";
 import {
 	EditButtonMode,
 	statusTypeNames,
@@ -21,6 +21,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 import {
 	sanitizeDueDate,
 	sanitizePriority,
+	sanitizeReminder,
 	sanitizeScheduledDate,
 	sanitizeStartDate,
 	sanitizeStatus,
@@ -31,6 +32,8 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer";
+import { t } from "./lang/helper";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -57,7 +60,18 @@ export const handleEditTask = (
 				openEditTaskModal(plugin, task);
 			}
 			break;
-		case EditButtonMode.View:
+		case EditButtonMode.ViewInSplitTab:
+			openEditTaskView(
+				plugin,
+				isThisATaskNote,
+				false,
+				true,
+				task,
+				task.filePath,
+				"split",
+			);
+			break;
+		case EditButtonMode.ViewInWindow:
 			openEditTaskView(
 				plugin,
 				isThisATaskNote,
@@ -187,7 +201,7 @@ export const openFileAndHighlightTask = async (
 
 /**
  * @description This function updates the status of a task item and triggers an event to update the real-time data.
- * If the task item is a note, it will update the frontmatter of the file first and then trigger the event to update the view.
+ * If the task item is a task-note, it will update the frontmatter of the file first and then trigger the event to update the view.
  * If the task item is an inline-task, it will directly update the file and then trigger the event to update the view.
  *
  * @param plugin - Taskboard plugin instance
@@ -196,7 +210,7 @@ export const openFileAndHighlightTask = async (
  * @param newStatus - New status symbol of the task item
  * @returns void
  */
-export const updateTaskItemStatus = (
+export const updateTaskItemStatus = async (
 	plugin: TaskBoard,
 	taskOld: taskItem,
 	taskUpdated: taskItem,
@@ -204,6 +218,26 @@ export const updateTaskItemStatus = (
 ) => {
 	let newTask = { ...taskUpdated };
 	newTask.status = newStatus;
+
+	const statusConfig =
+		plugin.settings.data.globalSettings.customStatuses.find(
+			(status) => status.symbol === newStatus,
+		);
+	const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
+
+	if (statusType === statusTypeNames.DONE) {
+		const allowed = await verifySubtasksAndChildtasksAreComplete(
+			plugin,
+			taskUpdated,
+		);
+
+		if (!allowed) {
+			new Notice(
+				t("verifySubtasksAndChildtasksAreComplete-false-message"),
+			);
+			return;
+		}
+	}
 
 	let eventData: UpdateTaskEventData = {
 		taskID: taskOld.id,
@@ -227,15 +261,11 @@ export const updateTaskItemStatus = (
 			});
 		});
 	} else {
-		const newStatusType =
-			plugin.settings.data.globalSettings.customStatuses.find(
-				(status) => status.symbol === newStatus,
-			)?.type ?? statusTypeNames.TODO;
 		newTask.title = sanitizeStatus(
 			plugin.settings.data.globalSettings,
 			newTask.title,
 			newStatus,
-			newStatusType,
+			statusType,
 		);
 		updateTaskInFile(plugin, newTask, taskOld).then((newId) => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
@@ -317,7 +347,7 @@ export const updateTaskItemDate = (
 	plugin: TaskBoard,
 	taskOld: taskItem,
 	taskUpdated: taskItem,
-	dateType: "startDate" | "scheduledDate" | "due",
+	dateType: string,
 	newDate: string,
 ): void => {
 	let newTask = { ...taskUpdated } as taskItem;
@@ -432,6 +462,11 @@ export const updateTaskItemReminder = (
 			});
 		});
 	} else {
+		newTask.title = sanitizeReminder(
+			plugin.settings.data.globalSettings,
+			taskOld.title,
+			newReminder,
+		);
 		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				taskOld.filePath,
@@ -477,7 +512,7 @@ export const updateTaskItemTags = (
 			});
 		});
 	} else {
-		newTask.title = sanitizeTags(newTask.title, taskOld.tags, newTags);
+		newTask.title = sanitizeTags(newTask.title, newTags);
 		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				taskOld.filePath,
@@ -495,7 +530,6 @@ export const updateTaskItemTags = (
  * @param {taskItem} task - The task item to update.
  * @param {globalSettingsData} globalSettings - The global settings data of the Taskboard plugin.
  * @param {string} property - The property of the task item to update.
- * @param {string | number | string[]} oldValue - The old value of the property to update.
  * @param {string | number | string[]} newValue - The new value of the property to update.
  * @returns {taskItem} The updated task item.
  */
@@ -503,7 +537,6 @@ export const updateTaskItemProperty = async (
 	task: taskItem,
 	globalSettings: globalSettingsData,
 	property: string,
-	oldValue: string | number | string[],
 	newValue: string | number | string[],
 ): Promise<taskItem> => {
 	const updatedTask: taskItem = { ...task };
@@ -518,7 +551,6 @@ export const updateTaskItemProperty = async (
 			if (!isThisTaskNote) {
 				updatedTask.title = sanitizeTags(
 					task.title,
-					oldValue as string[],
 					newValue as string[],
 				);
 			}

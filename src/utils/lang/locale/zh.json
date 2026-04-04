@@ -39,7 +39,7 @@
 	"confirm-delete": "确认删除",
 	"confirm-task-delete-description": "确定要删除此任务吗?",
 	"vault-scanning-complete": "Obsidian仓库扫描完成",
-	"scan-tasks-from-the-vault": "扫描Obsidian仓库中的任务",
+	"vault-scanner": "扫描Obsidian仓库中的任务",
 	"scan-tasks-from-the-vault-description-1": "仅当任务未被正确检测或看板显示异常时才需要运行此功能",
 	"scan-tasks-from-the-vault-description-2": "无需经常运行此功能,插件会自动检测新添加或编辑的任务",
 	"scan-tasks-from-the-vault-description-3": "注意:如果要扫描未检测到的任务,请先在插件设置中检查'扫描筛选器'",

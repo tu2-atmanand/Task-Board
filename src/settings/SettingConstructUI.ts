@@ -702,59 +702,59 @@ export class SettingsManager {
 				}),
 			);
 
-		new Setting(contentEl)
-			.setName(t("enable-experimental-features"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("enable-experimental-features-info-1") +
-						"<br/>" +
-						"<br/>" +
-						"<br/>" +
-						t("enable-experimental-features-info-2") +
-						"<br/>" +
-						"<br/>" +
-						"<ul>" +
-						"<li>" +
-						"<b>" +
-						t("drag-and-drop") +
-						" : " +
-						"</b>" +
-						t("drag-and-drop-feature-info") +
-						"</li>" +
-						"<li>" +
-						"<b>" +
-						t("kanban-swimlanes") +
-						" : " +
-						"</b>" +
-						t("kanban-swimlanes-feature-info") +
-						"</li>" +
-						"<li>" +
-						"<b>" +
-						t("manual-sorting") +
-						" : " +
-						"</b>" +
-						t("manual-sorting-feature-info") +
-						"</li>" +
-						"<li>" +
-						"<b>" +
-						"Task card menu" +
-						" : " +
-						"</b>" +
-						"Easily change various properties of tasks and access quick actions through the menu. Specially useful on mobile as an alternative to drag and drop feature." +
-						"</li>" +
-						"</ul>",
-				),
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(experimentalFeatures)
-					.onChange(async (value) => {
-						this.globalSettings!.experimentalFeatures = value;
-						await this.saveSettings();
+		// new Setting(contentEl)
+		// 	.setName(t("enable-experimental-features"))
+		// 	.setDesc(
+		// 		createFragmentWithHTML(
+		// 			t("enable-experimental-features-info-1") +
+		// 				"<br/>" +
+		// 				"<br/>" +
+		// 				"<br/>" +
+		// 				t("enable-experimental-features-info-2") +
+		// 				"<br/>" +
+		// 				"<br/>" +
+		// 				"<ul>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				t("drag-and-drop") +
+		// 				" : " +
+		// 				"</b>" +
+		// 				t("drag-and-drop-feature-info") +
+		// 				"</li>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				t("kanban-swimlanes") +
+		// 				" : " +
+		// 				"</b>" +
+		// 				t("kanban-swimlanes-feature-info") +
+		// 				"</li>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				t("manual-sorting") +
+		// 				" : " +
+		// 				"</b>" +
+		// 				t("manual-sorting-feature-info") +
+		// 				"</li>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				"Task card menu" +
+		// 				" : " +
+		// 				"</b>" +
+		// 				"Easily change various properties of tasks and access quick actions through the menu. Specially useful on mobile as an alternative to drag and drop feature." +
+		// 				"</li>" +
+		// 				"</ul>",
+		// 		),
+		// 	)
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(experimentalFeatures)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.experimentalFeatures = value;
+		// 				await this.saveSettings();
 
-						this.openReloadNoticeIfNeeded();
-					}),
-			);
+		// 				this.openReloadNoticeIfNeeded();
+		// 			}),
+		// 	);
 
 		// // Helper to add filter rows
 		// const addFilterRow = (
@@ -1094,7 +1094,7 @@ export class SettingsManager {
 									this.globalSettings!.tagColorsType ===
 									TagColorType.TagText
 										? tag.color
-										: "",
+										: "white",
 								border:
 									this.globalSettings!.tagColorsType ===
 									TagColorType.TagText
@@ -1435,7 +1435,11 @@ export class SettingsManager {
 						status.type === statusTypeNames.CANCELLED
 							? " cancelled"
 							: ""
-					}`,
+					}${
+						status.type === statusTypeNames.IN_PROGRESS
+							? " wip"
+							: ""
+					}${status.type === statusTypeNames.ON_HOLD ? " hold" : ""}`,
 					text: status.type,
 				});
 
@@ -1476,6 +1480,7 @@ export class SettingsManager {
 							] = customStatus;
 							await this.saveSettings();
 							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
 						}
 					};
 					modal.open();
@@ -1492,6 +1497,7 @@ export class SettingsManager {
 					this.globalSettings!.customStatuses.splice(index, 1);
 					await this.saveSettings();
 					renderCustomStatuses();
+					this.openReloadNoticeIfNeeded();
 				};
 			});
 		};
@@ -1515,6 +1521,7 @@ export class SettingsManager {
 						);
 						if (flag) {
 							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
 						}
 					})
 					.setDisabled(!isTasksPluginEnabled),
@@ -1557,6 +1564,8 @@ export class SettingsManager {
 								);
 								await this.saveSettings();
 								renderCustomStatuses();
+
+								this.openReloadNoticeIfNeeded();
 							}
 						};
 
@@ -2261,7 +2270,8 @@ export class SettingsManager {
 						[EditButtonMode.Modal]: t(
 							"use-edit-task-modal-feature",
 						),
-						[EditButtonMode.View]: t(
+						[EditButtonMode.ViewInSplitTab]: t("task-editor-tab"),
+						[EditButtonMode.ViewInWindow]: t(
 							"use-edit-task-window-feature",
 						),
 						[EditButtonMode.TasksPluginModal]:

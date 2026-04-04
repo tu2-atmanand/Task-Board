@@ -55,7 +55,7 @@
 	"confirm-delete": "Bestätigen Sie löschen",
 	"confirm-task-delete-description": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?",
 	"vault-scanning-complete": "Vault -Scannen vollständig.",
-	"scan-tasks-from-the-vault": "Scannen Sie Aufgaben aus dem Tresor",
+	"vault-scanner": "Scannen Sie Aufgaben aus dem Tresor",
 	"scan-tasks-from-the-vault-description-1": "Führen Sie diese Funktion nur aus, wenn Ihre Aufgaben nicht ordnungsgemäß erkannt/gescannt wurden oder das Board verdrängt wird.",
 	"scan-tasks-from-the-vault-description-2": "Sie müssen diese Funktion nicht oft ausführen, das Plugin erfasst automatische neu hinzugefügte/bearbeitete Aufgaben.",
 	"scan-tasks-from-the-vault-description-3": "Hinweis: Bitte überprüfen Sie zuerst Ihre 'Filter zum Scannen' aus den Plugin -Einstellungen, wenn Sie scannen, um unentdeckte Aufgaben zu erkennen.",

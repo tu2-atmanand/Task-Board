@@ -8,8 +8,8 @@
 - **Use [[Wikilinks]]**: true
 - **Base color scheme**: dark
 - **Community theme**: none
-- **Snippets enabled**: 2
-- **Plugins installed**: 53
+- **Snippets enabled**: 1
+- **Plugins installed**: 54
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
   - Advanced Debug Mode v1.9.1
@@ -17,17 +17,222 @@
   - Tasks v7.22.0
   - Hover Editor v0.11.28
   - Excalidraw v2.18.3
-  - Task Board v1.9.6
+  - Calendar v1.5.10
+  - Minimal Theme Settings v8.2.1
+  - Task Board v1.9.7
 
 ## Recent Bug Reports
 
-Timestamp : 2026-03-02T10:50:54
+Timestamp : undefined
+ID : 91
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 17
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 91
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 141
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : 2026-03-26T11:27:54
+ID : 26
+Message : Child task not found
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+The child task with ID 381 was not found in pending tasks.
+```
+
+-------------
+
+Timestamp : 2026-03-26T11:31:01
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "387". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-03-31T12:25:22
 ID : 142
 Message : 
-Context : DragDropTasksManager.ts/handleDropEvent
-Version : 1.9.6
+Context : undefined
+Version : 1.9.7
 
 #### Bug Content
 ```log
 No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-03-31T12:29:20
+ID : 106
+Message : 
+Context : undefined
+Version : 1.9.7
+
+#### Bug Content
+```log
+Status symbol not found in the following oldTtitle : This is a nice ticket.
+```
+
+-------------
+
+Timestamp : 2026-03-31T12:31:07
+ID : 62
+Message : Task board couldnt able to find the task which you are trying to edit inside the file A renamed folder/x/y/Second Note in Y.md at the line number : 9 . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.
+
+This was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.
+Context : TaskItemUtils.ts/replaceOldTaskWithNewTask
+Version : 1.9.7
+
+#### Bug Content
+```log
+
+
+OldTask location :{"startLine":9,"startCharIndex":0,"endLine":9,"endCharIndex":114}
+
+OldTask content inside task-board-cache :- [ ] This is a task with Obsidian's native properties. ⏳ 2026-03-25 📅 2026-03-25 [id:: 387] #Test 🔁 every month
+
+At present the content inside file at line number 9 is: - [/] This is a task with Obsidian's native properties. ⏳ 2026-03-25 📅 2026-03-25 [id:: 387] #Test 🔁 every month
 ```

@@ -9,8 +9,8 @@ import {
 import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
 import { generateTaskId } from "../TaskItemUtils";
 import { statusTypeNames } from "src/interfaces/Enums";
-import { moment as _moment } from "obsidian";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { formatToday } from "../DateTimeCalculations";
 
 /**
  * Extract frontmatter from file content
@@ -471,10 +471,11 @@ export function updateFrontmatterProperties(
 			tempUpdates[cancelledDateKey] = task.cancelledDate;
 		} else {
 			const globalSettings = plugin.settings.data.globalSettings;
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.dateTimeFormat,
-			);
+			// const moment = _moment as unknown as typeof _moment.default;
+			// const currentDateValue = moment().format(
+			// 	globalSettings?.dateTimeFormat,
+			// );
+			const currentDateValue = formatToday(globalSettings.dateFormat);
 
 			tempUpdates[cancelledDateKey] = currentDateValue;
 		}
@@ -492,10 +493,11 @@ export function updateFrontmatterProperties(
 			tempUpdates[completionKey] = task.completion;
 		} else {
 			const globalSettings = plugin.settings.data.globalSettings;
-			const moment = _moment as unknown as typeof _moment.default;
-			const currentDateValue = moment().format(
-				globalSettings?.dateTimeFormat,
-			);
+			// const moment = _moment as unknown as typeof _moment.default;
+			// const currentDateValue = moment().format(
+			// 	globalSettings?.dateTimeFormat,
+			// );
+			const currentDateValue = formatToday(globalSettings.dateFormat);
 
 			tempUpdates[completionKey] = currentDateValue;
 		}

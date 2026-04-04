@@ -34,7 +34,7 @@ export function checkboxStateSwitcher(
 	}
 
 	new Notice(
-		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior.",
+		"Custom statuses are not available or empty. Please check your settings. Falling back to default behavior.",
 	);
 	// Default fallback behavior
 	return symbol === "x" || symbol === "X"

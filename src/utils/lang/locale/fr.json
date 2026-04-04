@@ -55,7 +55,7 @@
 	"confirm-delete": "Confirmer la suppression",
 	"confirm-task-delete-description": "Êtes-vous sûr de vouloir supprimer cette tâche?",
 	"vault-scanning-complete": "Vault Scanning complet.",
-	"scan-tasks-from-the-vault": "Scanner les tâches du coffre-fort",
+	"vault-scanner": "Scanner les tâches du coffre-fort",
 	"scan-tasks-from-the-vault-description-1": "Exécutez cette fonctionnalité uniquement si vos tâches n'ont pas été correctement détectées / numérisées ou si la carte agit.",
 	"scan-tasks-from-the-vault-description-2": "Vous n'avez pas à exécuter cette fonctionnalité souvent, le plugin détectera automatiquement les tâches nouvellement ajoutées / éditées.",
 	"scan-tasks-from-the-vault-description-3": "Remarque: veuillez vérifier d'abord vos «filtres pour la numérisation» à partir des paramètres du plugin, si vous numérisez pour détecter les tâches non détectées.",

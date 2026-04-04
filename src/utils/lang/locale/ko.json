@@ -55,7 +55,7 @@
 	"confirm-delete": "삭제를 확인하십시오",
 	"confirm-task-delete-description": "이 작업을 삭제 하시겠습니까?",
 	"vault-scanning-complete": "금고 스캐닝 완료.",
-	"scan-tasks-from-the-vault": "금고에서 작업을 스캔합니다",
+	"vault-scanner": "금고에서 작업을 스캔합니다",
 	"scan-tasks-from-the-vault-description-1": "작업이 제대로 감지/스캔되지 않았거나 보드가 Weired를 연기하는 경우에만이 기능을 실행하십시오.",
 	"scan-tasks-from-the-vault-description-2": "이 기능을 자주 실행할 필요가 없으며 플러그인은 새로 추가 된/편집 작업을 자동으로 감지합니다.",
 	"scan-tasks-from-the-vault-description-3": "참고 : 감지되지 않은 작업을 감지하기 위해 스캔하는 경우 먼저 플러그인 설정에서 '필터를 스캔하기'를 확인하십시오.",
