@@ -1,6 +1,6 @@
 // src/components/TaskBoardViewContent.tsx
 
-import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
+import { Board, RootFilterState } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadBoardsData, loadTasksAndMerge } from "src/utils/JsonFileOperations";
@@ -11,7 +11,6 @@ import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
 import { handleUpdateBoards } from "../utils/BoardOperations";
 import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal } from "../services/OpenModals";
-import { columnSegregator } from 'src/utils/algorithms/ColumnSegregator';
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";

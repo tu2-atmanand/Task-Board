@@ -1,4 +1,4 @@
-import { Component, App } from "obsidian";
+import { App } from "obsidian";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { DatePickerComponent } from "../date_picker/DatePickerComponent";
@@ -176,7 +176,7 @@ export class DateTimePickerComponent {
 			this.plugin,
 			this.dateTimeName,
 			this.selectedDate || undefined,
-			"📅"
+			"📅",
 		);
 
 		this.datePickerComponent.onload();

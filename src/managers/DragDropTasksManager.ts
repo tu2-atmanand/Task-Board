@@ -1,11 +1,7 @@
 import TaskBoard from "main";
 import { Notice } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
-import {
-	colTypeNames,
-	statusTypeNames,
-	UniversalDateOptions,
-} from "src/interfaces/Enums";
+import { colTypeNames, statusTypeNames } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
 	updateTaskItemProperty,
@@ -17,10 +13,7 @@ import {
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,
 } from "src/utils/taskNote/TaskNoteUtils";
-import {
-	sanitizeStatus,
-	sanitizeTags,
-} from "src/utils/taskLine/TaskContentFormatter";
+import { sanitizeStatus } from "src/utils/taskLine/TaskContentFormatter";
 import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
 import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";

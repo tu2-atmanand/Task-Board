@@ -27,10 +27,7 @@ import {
 	sanitizeStatus,
 	sanitizeTags,
 } from "./taskLine/TaskContentFormatter";
-import {
-	globalSettingsData,
-	PluginDataJson,
-} from "src/interfaces/GlobalSettings";
+import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer";
 import { t } from "./lang/helper";

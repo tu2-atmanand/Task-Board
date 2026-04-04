@@ -12,8 +12,6 @@ import {
 	endOfMonth,
 	startOfWeek,
 	endOfWeek,
-	isBefore,
-	isSameDay,
 	isSameMonth,
 	eachDayOfInterval,
 	isToday as isTodayDateFns,
@@ -54,7 +52,8 @@ export class DatePickerComponent extends Component {
 		this.currentViewDate = initialDate
 			? robustDateParser(
 					initialDate,
-					plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT,
+					plugin.settings.data.globalSettings.dateFormat ||
+						DEFAULT_DATE_FORMAT,
 				) || new Date()
 			: new Date();
 	}
@@ -159,7 +158,8 @@ export class DatePickerComponent extends Component {
 			}
 
 			const usersDateFormat =
-				this.plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT;
+				this.plugin.settings.data.globalSettings.dateFormat ||
+				DEFAULT_DATE_FORMAT;
 			const formattedDate = format(date, usersDateFormat);
 
 			optionEl.createSpan({
@@ -274,7 +274,8 @@ export class DatePickerComponent extends Component {
 			});
 
 			const usersDateFormat =
-				this.plugin.settings.data.globalSettings.dateFormat || DEFAULT_DATE_FORMAT;
+				this.plugin.settings.data.globalSettings.dateFormat ||
+				DEFAULT_DATE_FORMAT;
 			const dateStr = format(day, usersDateFormat);
 
 			// Store the full date string for easy comparison later
