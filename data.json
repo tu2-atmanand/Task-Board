@@ -399,7 +399,6 @@
       "scanMode": "automatic",
       "columnWidth": "300px",
       "visiblePropertiesList": [
-        "checkbox",
         "id",
         "title",
         "status",
@@ -414,10 +413,9 @@
         "completionDate",
         "cancelledDate",
         "dependsOn",
-        "filePath",
-        "subTasks"
+        "filePathInHeader"
       ],
-      "taskCardStyle": "emoji",
+      "taskCardStyle": "bases",
       "showVerticalScroll": true,
       "dragAutoScrollEdgePercent": 20,
       "tagColors": [
@@ -733,7 +731,7 @@
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 1,
-        "settingTab": 6,
+        "settingTab": 1,
         "taskId": ""
       },
       "boundTaskCompletionToChildTasks": true,
