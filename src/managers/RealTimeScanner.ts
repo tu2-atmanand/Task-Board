@@ -228,7 +228,8 @@ export class RealTimeScanner {
 	}
 
 	/**
-	 * This function is called when a file is deleted. It removes the file from the taskBoardFileStack and the tasks cache.
+	 * This function is called when a file is deleted. 
+	 * It removes the file from the taskBoardFileStack and the tasks cache.
 	 * @param file - The file that was deleted (TAbstractFile)
 	 */
 	onFileDeleted(file: TAbstractFile) {

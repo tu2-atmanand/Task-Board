@@ -49,6 +49,7 @@ import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import { bugReporterManagerInsatance } from "./BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { parse } from "date-fns/parse";
+import { isValid } from "date-fns";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -373,9 +374,6 @@ export default class VaultScanner {
 								const universalDateFormat =
 									this.plugin.settings.data.globalSettings
 										.dateFormat;
-								const universalDateConfig =
-									this.plugin.settings.data.globalSettings
-										.universalDate;
 								const basename = file.basename;
 
 								// Check if the basename matches the date format
@@ -384,7 +382,11 @@ export default class VaultScanner {
 									universalDateFormat,
 									this.testDate,
 								);
-								if (parsed) {
+								if (isValid(parsed)) {
+									const universalDateConfig =
+										this.plugin.settings.data.globalSettings
+											.universalDate;
+
 									if (
 										universalDateConfig ===
 											UniversalDateOptions.dueDate &&
