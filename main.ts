@@ -1419,9 +1419,13 @@ export default class TaskBoard extends Plugin {
 				customMessageContainer.createEl("p", {
 					text: "Read the release notes for all the changes : ",
 				});
+				// customMessageContainer.createEl("a", {
+				// 	text: `Task Board v${currentVersion}`,
+				// 	href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${currentVersion}`,
+				// });
 				customMessageContainer.createEl("a", {
-					text: `Task Board v${newReleaseVersion}`,
-					href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
+					text: `Task Board v1.10.0`,
+					href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/1.10.0`,
 				});
 			}
 
