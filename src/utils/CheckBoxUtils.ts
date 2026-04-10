@@ -125,11 +125,11 @@ export function isTaskCompleted(
 export function isTaskLine(line: string): boolean {
 	line = line.trim();
 	const regexMatch = line.match(TaskRegularExpressions.taskRegex);
-	// return /^- \[[^\]]\]\s+.*\S/.test(line);
+
 	return (
 		regexMatch !== null &&
-		regexMatch.length > 0 &&
-		regexMatch[0].trim().length > 0
+		regexMatch.length === 5 &&
+		regexMatch[4].trim().length > 0
 	);
 }
 
