@@ -1298,60 +1298,6 @@ export class SettingsManager {
 		// 		});
 		// 	});
 
-		const { hiddenTaskProperties } = this.globalSettings!;
-
-		// Setting for hiding specific task properties in Live Editor and Reading mode
-		new Setting(contentEl)
-			.setName(t("hide-specific-properties-in-notes"))
-			.setDesc(t("hide-specific-properties-in-notes-description"))
-			.setClass("taskboard-hidden-properties-setting");
-
-		// Create a container for checkboxes
-		const checkboxContainer = contentEl.createDiv(
-			"taskboard-hidden-properties-container",
-		);
-
-		// Create checkboxes for each hideable property
-		Object.values(taskPropertiesNames).forEach((property) => {
-			const displayName = this.getPropertyDisplayName(property);
-
-			if (displayName) {
-				const checkboxSetting = new Setting(checkboxContainer)
-					.setName(displayName)
-					.setClass("taskboard-property-checkbox-setting")
-					.addToggle((toggle) => {
-						const isSelected =
-							hiddenTaskProperties.includes(property);
-						toggle.setValue(isSelected).onChange(async (value) => {
-							if (value) {
-								// Add property if not already included
-								if (
-									!this.globalSettings!.hiddenTaskProperties.includes(
-										property,
-									)
-								) {
-									this.globalSettings!.hiddenTaskProperties.push(
-										property,
-									);
-								}
-							} else {
-								// Remove property
-								this.globalSettings!.hiddenTaskProperties =
-									this.globalSettings!.hiddenTaskProperties.filter(
-										(p) => p !== property,
-									);
-							}
-							await this.saveSettings();
-
-							this.openReloadNoticeIfNeeded();
-						});
-					});
-
-				// Style the checkbox setting to be more compact
-				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
-			}
-		});
-
 		new Setting(contentEl)
 			.setName(t("custom-statuses"))
 			.setDesc(t("custom-statuses-info"));
@@ -1586,6 +1532,7 @@ export class SettingsManager {
 			preDefinedNote,
 			archivedTasksFilePath,
 			showFrontmatterTagsOnCards,
+			hiddenTaskProperties,
 		} = this.globalSettings!;
 
 		// Create the live preview element
@@ -1817,6 +1764,58 @@ export class SettingsManager {
 						await this.saveSettings();
 					}),
 			);
+
+		// Setting for hiding specific task properties in Live Editor and Reading mode
+		new Setting(contentEl)
+			.setName(t("hide-specific-properties-in-notes"))
+			.setDesc(t("hide-specific-properties-in-notes-description"))
+			.setClass("taskboard-hidden-properties-setting");
+
+		// Create a container for checkboxes
+		const checkboxContainer = contentEl.createDiv(
+			"taskboard-hidden-properties-container",
+		);
+
+		// Create checkboxes for each hideable property
+		Object.values(taskPropertiesNames).forEach((property) => {
+			const displayName = this.getPropertyDisplayName(property);
+
+			if (displayName) {
+				const checkboxSetting = new Setting(checkboxContainer)
+					.setName(displayName)
+					.setClass("taskboard-property-checkbox-setting")
+					.addToggle((toggle) => {
+						const isSelected =
+							hiddenTaskProperties.includes(property);
+						toggle.setValue(isSelected).onChange(async (value) => {
+							if (value) {
+								// Add property if not already included
+								if (
+									!this.globalSettings!.hiddenTaskProperties.includes(
+										property,
+									)
+								) {
+									this.globalSettings!.hiddenTaskProperties.push(
+										property,
+									);
+								}
+							} else {
+								// Remove property
+								this.globalSettings!.hiddenTaskProperties =
+									this.globalSettings!.hiddenTaskProperties.filter(
+										(p) => p !== property,
+									);
+							}
+							await this.saveSettings();
+
+							this.openReloadNoticeIfNeeded();
+						});
+					});
+
+				// Style the checkbox setting to be more compact
+				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+			}
+		});
 	}
 
 	private renderTBNoteTabSettings(contentEl: HTMLElement) {
