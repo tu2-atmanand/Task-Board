@@ -52,13 +52,13 @@ Join the forum top to share your thoughts, ideas or requests and hear from other
 
 ## How to start ?
 
-**Step 1 :** Install and Enable the plugin : [How to install Task Board](https://tu2-atmanand.github.io/task-board-docs/docs/Installation/).
+**Step 1 :** Install and Enable the plugin : [How to install Task Board](https://tu2-atmanand.github.io/task-board-docs/docs/3_Installation/).
 
 **Step 2 :** Open Task Board using the Icon from the right side Ribbon Icon Bar. There is also a command in the Command Pallet.
 
-**Step 3 :** Click on the **Scan vault modal** button from the top-right corner in the Task Board view header. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters](https://tu2-atmanand.github.io/task-board-docs/docs/Features/Filters_for_Scanning/) to exclude certain files from scanning.
+**Step 3 :** Click on the **Scan vault modal** button from the top-right corner in the Task Board view header. Then click on the run button and it will scan all your files to look for tasks. If your vault contains thousands of notes, you can apply [scanning filters](https://tu2-atmanand.github.io/task-board-docs/docs/6_Features/10_Filters_for_Scanning/) to exclude certain files from scanning.
 
-**Step 4 :** There are already three predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToCreateNewBoard/) from the [Board configure modal](https://tu2-atmanand.github.io/task-board-docs/docs/How_To/HowToUseBoardSettings/).
+**Step 4 :** There are already three predefined board for your convenience as an example. Feel free to delete or edit the boards and [create your own boards](https://tu2-atmanand.github.io/task-board-docs/docs/5_How_To/4_HowToCreateNewBoard/) from the [Board configure modal](https://tu2-atmanand.github.io/task-board-docs/docs/5_How_To/6_HowToUseBoardSettings/).
 
 Enjoy !
 
@@ -131,11 +131,13 @@ This advanced and dynamic filters will help you to use boards as separate projec
 
 You can contribute to this project by :
 
-**1. Requesting a new feature, suggesting an improvement or reporting a Bug :** [How to create a new request](https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/HowToCreateRequest).
+**1. Requesting a new feature, suggesting an improvement or reporting a Bug :** [How to create a new request](https://tu2-atmanand.github.io/task-board-docs/docs/10_Advanced/2_HowToCreateRequest/).
 
-**2. Improving the translated languages or add a new language :** [How to Contribute for Language Translation](https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages).
+**2. Improving the translated languages or add a new language :** [How to Contribute for Language Translation](https://tu2-atmanand.github.io/task-board-docs/docs/10_Advanced/3_How_To_Contribute/2_HowToContributeToTranslations/).
 
-**3. Contribute to the Development of the plugin Code :** : [How to join the plugin development](https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/HowToJoinDevelopment).
+**3. Improve the documentation :** [How to Contribute for improvement of the documentation](https://tu2-atmanand.github.io/task-board-docs/docs/10_Advanced/3_How_To_Contribute/1_HowToContributeToDocs/).
+
+**4. Contribute to the Development of the plugin Code :** : [How to join the plugin development](https://tu2-atmanand.github.io/task-board-docs/docs/10_Advanced/3_How_To_Contribute/4_HowToJoinDevelopment/).
 
 
 ## Motivation for the Project
@@ -143,6 +145,11 @@ You can contribute to this project by :
 I always used the [Kanban Plugin](https://github.com/mgmeyers/obsidian-kanban) to manage my tasks. And it use to work nice for me with all the amazing features. But as soon as I came across the [CardBoard plugin](https://github.com/roovo/obsidian-card-board), everything changed. The idea of adding tasks anywhere in your vault and managing them from a single board amazed me. While using Kanban plugin the only issue I had was to open the board and then add a new task in that board/file. This sometimes use to become a little distracting for me to navigate to the specific board, search for the task and to edit it, etc.. I immediately switched to the CardBoard plugin after I came across it. But after using it for few days, I realized there are few important features this plugin is lacking and it's development has been on halt from a long time. So I went to first contribute to the main project, but I wasn't familiar with the elm files, hence decided to start my own plugin.
 
 While development I took inspirations from CardBoard and Kanban plugin as well as many feature ideas from [GitHub Project Kanban board](https://docs.github.com/en/issues/planning-and-tracking-with-projects/customizing-views-in-your-project/changing-the-layout-of-a-view#about-the-board-layout). I hope I am able to give the best of all this three plugins into one, and will be improving this further.
+
+## Vision
+
+This plugin have a strong vision and it is on track to achive that vision soon. Read more about it here : [Vision of the Task Board plugin](https://tu2-atmanand.github.io/task-board-docs/docs/2_Vision/).
+
 
 ## Support
 
