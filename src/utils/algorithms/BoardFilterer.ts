@@ -39,7 +39,17 @@ export function advancedFilterer(
 	const filterGroups = filterState.filterGroups;
 
 	return tasks.filter((task) => {
-		const groupResults = filterGroups.map((group) =>
+		// Filter out null/undefined/invalid filter groups before processing
+		const validGroups = filterGroups.filter(
+			(group) => group && typeof group === "object" && group.groupCondition
+		);
+
+		// If no valid groups after filtering, return true (no filtering applied)
+		if (validGroups.length === 0) {
+			return true;
+		}
+
+		const groupResults = validGroups.map((group) =>
 			evaluateFilterGroup(task, group, dateFormat),
 		);
 
@@ -65,6 +75,11 @@ function evaluateFilterGroup(
 	group: FilterGroup,
 	dateFormat: string,
 ): boolean {
+	// Safety check: validate group structure
+	if (!group || !group.groupCondition) {
+		return true; // Invalid group, skip it
+	}
+
 	const { groupCondition, filters } = group;
 
 	if (!filters || filters.length === 0) {
