@@ -958,6 +958,8 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 
 	const renderHeader = () => {
 		try {
+			debugger;
+			console.log("Task tags : ", task.tags, "\nFrontmatter tags :", task.frontmatterTags);
 			return (
 				<div className="taskItemHeader">
 					{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
@@ -974,7 +976,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 							)}
 
 							{/* Render tags individually */}
-							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && (task.tags.length > 0 || task.frontmatterTags.length > 0) && (
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
@@ -1024,7 +1026,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 											<div
 												key={tagKey}
 												className="taskItemTagFrontmatter"
-												title="Tag from note frontmatter (read-only)"
+												title="Tag from note's frontmatter (read-only)"
 											>
 												{tag}
 											</div>
