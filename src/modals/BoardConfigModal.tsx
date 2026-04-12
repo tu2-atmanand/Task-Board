@@ -52,6 +52,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
 	const [inputValues, setInputValues] = useState<Record<string, string | undefined>>({});;
+	const getInputKey = (boardIdx: number, colIdx: number, suffix: string) => `${boardIdx}-${colIdx}-${suffix}`;
+	const getInputValue = (key: string, fallback: number) => inputValues[key] ?? fallback;
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -605,16 +607,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												type="number"
 												placeholder={t("work-limit")}
 												aria-label={t("work-limit-info")}
-												value={inputValues[`${boardIndex}-${columnIndex}-workLimit`] ?? (column.workLimit ?? 0)}
+												value={getInputValue(getInputKey(boardIndex, columnIndex, "workLimit"), column.workLimit ?? 0)}
 												onChange={(e) => {
-													setInputValues({
-														...inputValues,
-														[`${boardIndex}-${columnIndex}-workLimit`]: e.target.value
-													});
+													setInputValues(prev => ({
+														...prev,
+														[getInputKey(boardIndex, columnIndex, "workLimit")]: e.target.value
+													}));
 												}}
 												onBlur={(e) => {
 													const value = e.target.value;
-													const key = `${boardIndex}-${columnIndex}-workLimit`;
+													const key = getInputKey(boardIndex, columnIndex, "workLimit");
 													setInputValues({
 														...inputValues,
 														[key]: undefined
@@ -652,16 +654,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("work-limit")}
 													aria-label={t("work-limit-info")}
-													value={inputValues[`${boardIndex}-${columnIndex}-namedTag-workLimit`] ?? (column.workLimit || 0)}
+													value={getInputValue(getInputKey(boardIndex, columnIndex, "namedTag-workLimit"), column.workLimit || 0)}
 													onChange={(e) => {
-														setInputValues({
-															...inputValues,
-															[`${boardIndex}-${columnIndex}-namedTag-workLimit`]: e.target.value
-														});
+														setInputValues(prev => ({
+															...prev,
+															[getInputKey(boardIndex, columnIndex, "namedTag-workLimit")]: e.target.value
+														}));
 													}}
 													onBlur={(e) => {
 														const value = e.target.value;
-														const key = `${boardIndex}-${columnIndex}-namedTag-workLimit`;
+														const key = getInputKey(boardIndex, columnIndex, "namedTag-workLimit");
 														setInputValues({
 															...inputValues,
 															[key]: undefined
@@ -698,16 +700,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("work-limit")}
 													aria-label={t("work-limit-info")}
-													value={inputValues[`${boardIndex}-${columnIndex}-taskStatus-workLimit`] ?? (column.workLimit || 0)}
+													value={getInputValue(getInputKey(boardIndex, columnIndex, "taskStatus-workLimit"), column.workLimit || 0)}
 													onChange={(e) => {
-														setInputValues({
-															...inputValues,
-															[`${boardIndex}-${columnIndex}-taskStatus-workLimit`]: e.target.value
-														});
+														setInputValues(prev => ({
+															...prev,
+															[getInputKey(boardIndex, columnIndex, "taskStatus-workLimit")]: e.target.value
+														}));
 													}}
 													onBlur={(e) => {
 														const value = e.target.value;
-														const key = `${boardIndex}-${columnIndex}-taskStatus-workLimit`;
+														const key = getInputKey(boardIndex, columnIndex, "taskStatus-workLimit");
 														setInputValues({
 															...inputValues,
 															[key]: undefined
@@ -746,16 +748,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("work-limit")}
 													aria-label={t("work-limit-info")}
-													value={inputValues[`${boardIndex}-${columnIndex}-taskPriority-workLimit`] ?? (column.workLimit || 0)}
+													value={getInputValue(getInputKey(boardIndex, columnIndex, "taskPriority-workLimit"), column.workLimit || 0)}
 													onChange={(e) => {
-														setInputValues({
-															...inputValues,
-															[`${boardIndex}-${columnIndex}-taskPriority-workLimit`]: e.target.value
-														});
+														setInputValues(prev => ({
+															...prev,
+															[getInputKey(boardIndex, columnIndex, "taskPriority-workLimit")]: e.target.value
+														}));
 													}}
 													onBlur={(e) => {
 														const value = e.target.value;
-														const key = `${boardIndex}-${columnIndex}-taskPriority-workLimit`;
+														const key = getInputKey(boardIndex, columnIndex, "taskPriority-workLimit");
 														setInputValues({
 															...inputValues,
 															[key]: undefined
@@ -775,16 +777,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<input
 												type="number"
 												placeholder={t("max-items")}
-												value={inputValues[`${boardIndex}-${columnIndex}-limit`] ?? (column.limit || "")}
+												value={getInputValue(getInputKey(boardIndex, columnIndex, "limit"), column.limit || 0)}
 												onChange={(e) => {
-													setInputValues({
-														...inputValues,
-														[`${boardIndex}-${columnIndex}-limit`]: e.target.value
-													});
+													setInputValues(prev => ({
+														...prev,
+														[getInputKey(boardIndex, columnIndex, "limit")]: e.target.value
+													}));
 												}}
 												onBlur={(e) => {
 													const value = e.target.value;
-													const key = `${boardIndex}-${columnIndex}-limit`;
+													const key = getInputKey(boardIndex, columnIndex, "limit");
 													setInputValues({
 														...inputValues,
 														[key]: undefined
