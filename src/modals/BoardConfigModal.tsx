@@ -51,6 +51,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [inputValues, setInputValues] = useState<Record<string, string | undefined>>({});;
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -604,15 +605,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												type="number"
 												placeholder={t("work-limit")}
 												aria-label={t("work-limit-info")}
-												value={column.workLimit ?? 0}
-												onChange={(e) =>
+												value={inputValues[`${boardIndex}-${columnIndex}-workLimit`] ?? (column.workLimit ?? 0)}
+												onChange={(e) => {
+													setInputValues({
+														...inputValues,
+														[`${boardIndex}-${columnIndex}-workLimit`]: e.target.value
+													});
+												}}
+												onBlur={(e) => {
+													const value = e.target.value;
+													const key = `${boardIndex}-${columnIndex}-workLimit`;
+													setInputValues({
+														...inputValues,
+														[key]: undefined
+													});
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
 														"workLimit",
-														Number(e.target.value)
-													)
-												}
+														value === "" ? 0 : Number(value),
+													);
+												}}
 												className="boardConfigModalColumnRowContentColName"
 											/>
 										)}
@@ -639,15 +652,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("work-limit")}
 													aria-label={t("work-limit-info")}
-													value={column.workLimit || 0}
-													onChange={(e) =>
+													value={inputValues[`${boardIndex}-${columnIndex}-namedTag-workLimit`] ?? (column.workLimit || 0)}
+													onChange={(e) => {
+														setInputValues({
+															...inputValues,
+															[`${boardIndex}-${columnIndex}-namedTag-workLimit`]: e.target.value
+														});
+													}}
+													onBlur={(e) => {
+														const value = e.target.value;
+														const key = `${boardIndex}-${columnIndex}-namedTag-workLimit`;
+														setInputValues({
+															...inputValues,
+															[key]: undefined
+														});
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
 															"workLimit",
-															Number(e.target.value)
-														)
-													}
+															value === "" ? 0 : Number(value)
+														);
+													}}
 													className="boardConfigModalColumnRowContentColName"
 												/>
 											</>
@@ -673,15 +698,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("work-limit")}
 													aria-label={t("work-limit-info")}
-													value={column.workLimit || 0}
-													onChange={(e) =>
+													value={inputValues[`${boardIndex}-${columnIndex}-taskStatus-workLimit`] ?? (column.workLimit || 0)}
+													onChange={(e) => {
+														setInputValues({
+															...inputValues,
+															[`${boardIndex}-${columnIndex}-taskStatus-workLimit`]: e.target.value
+														});
+													}}
+													onBlur={(e) => {
+														const value = e.target.value;
+														const key = `${boardIndex}-${columnIndex}-taskStatus-workLimit`;
+														setInputValues({
+															...inputValues,
+															[key]: undefined
+														});
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
 															"workLimit",
-															Number(e.target.value)
-														)
-													}
+															value === "" ? 0 : Number(value),
+														);
+													}}
 													className="boardConfigModalColumnRowContentColName"
 												/>
 											</>
@@ -709,15 +746,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("work-limit")}
 													aria-label={t("work-limit-info")}
-													value={column.workLimit || 0}
-													onChange={(e) =>
+													value={inputValues[`${boardIndex}-${columnIndex}-taskPriority-workLimit`] ?? (column.workLimit || 0)}
+													onChange={(e) => {
+														setInputValues({
+															...inputValues,
+															[`${boardIndex}-${columnIndex}-taskPriority-workLimit`]: e.target.value
+														});
+													}}
+													onBlur={(e) => {
+														const value = e.target.value;
+														const key = `${boardIndex}-${columnIndex}-taskPriority-workLimit`;
+														setInputValues({
+															...inputValues,
+															[key]: undefined
+														});
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
 															"workLimit",
-															Number(e.target.value)
-														)
-													}
+															value === "" ? 0 : Number(value),
+														);
+													}}
 													className="boardConfigModalColumnRowContentColName"
 												/>
 											</>
@@ -726,15 +775,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<input
 												type="number"
 												placeholder={t("max-items")}
-												value={column.limit || ""}
-												onChange={(e) =>
+												value={inputValues[`${boardIndex}-${columnIndex}-limit`] ?? (column.limit || "")}
+												onChange={(e) => {
+													setInputValues({
+														...inputValues,
+														[`${boardIndex}-${columnIndex}-limit`]: e.target.value
+													});
+												}}
+												onBlur={(e) => {
+													const value = e.target.value;
+													const key = `${boardIndex}-${columnIndex}-limit`;
+													setInputValues({
+														...inputValues,
+														[key]: undefined
+													});
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
 														"limit",
-														Number(e.target.value)
-													)
-												}
+														value === "" ? 0 : Number(value),
+													);
+												}}
 												className="boardConfigModalColumnRowContentColDatedVal"
 											/>
 										)}
@@ -763,36 +824,60 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("from")}
 													aria-label={t("from")}
-													value={column.datedBasedColumn?.from || 0}
-													onChange={(e) =>
+													value={inputValues[`${boardIndex}-${columnIndex}-from`] ?? (column.datedBasedColumn?.from || 0)}
+													onChange={(e) => {
+														setInputValues({
+															...inputValues,
+															[`${boardIndex}-${columnIndex}-from`]: e.target.value
+														});
+													}}
+													onBlur={(e) => {
+														const value = e.target.value;
+														const key = `${boardIndex}-${columnIndex}-from`;
+														setInputValues({
+															...inputValues,
+															[key]: undefined
+														});
 														handleColumnChange(
-															boardIndex,
-															columnIndex,
-															"datedBasedColumn",
-															{
-																...column.datedBasedColumn,
-																from: Number(e.target.value),
-															}
-														)
-													}
+																boardIndex,
+																columnIndex,
+																"datedBasedColumn",
+																{
+																	...column.datedBasedColumn,
+																	from: value === "" ? 0 : Number(value),
+																}
+															);
+													}}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												/>
 												<input
 													type="number"
 													placeholder={t("to")}
 													aria-label={t("to")}
-													value={column.datedBasedColumn?.to || 0}
-													onChange={(e) =>
+													value={inputValues[`${boardIndex}-${columnIndex}-to`] ?? (column.datedBasedColumn?.to || 0)}
+													onChange={(e) => {
+														setInputValues({
+															...inputValues,
+															[`${boardIndex}-${columnIndex}-to`]: e.target.value
+														});
+													}}
+													onBlur={(e) => {
+														const value = e.target.value;
+														const key = `${boardIndex}-${columnIndex}-to`;
+														setInputValues({
+															...inputValues,
+															[key]: undefined
+														});
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
 															"datedBasedColumn",
 															{
 																...column.datedBasedColumn,
-																to: Number(e.target.value),
+																to: value === "" ? 0 : Number(value),
 															}
-														)
-													}
+														);
+													}}
 													className="boardConfigModalColumnRowContentColDatedVal"
 												/>
 												<select
@@ -819,15 +904,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													type="number"
 													placeholder={t("work-limit")}
 													aria-label={t("work-limit-info")}
-													value={column.workLimit || 0}
-													onChange={(e) =>
+													value={inputValues[`${boardIndex}-${columnIndex}-dated-workLimit`] ?? (column.workLimit || 0)}
+													onChange={(e) => {
+														setInputValues({
+															...inputValues,
+															[`${boardIndex}-${columnIndex}-dated-workLimit`]: e.target.value
+														});
+													}}
+													onBlur={(e) => {
+														const value = e.target.value;
+														const key = `${boardIndex}-${columnIndex}-dated-workLimit`;
+														setInputValues({
+															...inputValues,
+															[key]: undefined
+														});
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
 															"workLimit",
-															Number(e.target.value)
-														)
-													}
+															value === "" ? 0 : Number(value),
+														);
+													}}
 													className="boardConfigModalColumnRowContentColName"
 												/>
 											</>
