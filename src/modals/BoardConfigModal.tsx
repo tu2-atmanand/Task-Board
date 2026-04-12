@@ -657,6 +657,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="text"
 													placeholder={t("enter-status-placeholder")}
+													aria-label={t("task-status")}
 													value={column.taskStatus || ""}
 													onChange={(e) =>
 														handleColumnChange(
@@ -761,6 +762,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("from")}
+													aria-label={t("from")}
 													value={column.datedBasedColumn?.from || 0}
 													onChange={(e) =>
 														handleColumnChange(
@@ -778,6 +780,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<input
 													type="number"
 													placeholder={t("to")}
+													aria-label={t("to")}
 													value={column.datedBasedColumn?.to || 0}
 													onChange={(e) =>
 														handleColumnChange(
