@@ -591,6 +591,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
 										<input
 											type="text"
+											placeholder={t("enter-column-name")}
+											aria-label={t("column-name")}
 											value={column.name || ""}
 											onChange={(e) =>
 												handleColumnChange(
