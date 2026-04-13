@@ -134,7 +134,7 @@ export class DiffContentCompareModal extends Modal {
 				cls: "taskboard-diff-content-compare-modal-side",
 			});
 		debuInfoComparisonContainerLefttDiv.createEl("h3", {
-			text: "Task Board Cache",
+			text: "Current content in your note",
 		});
 		const debuInfoComparisonContainerLefttDivContent =
 			debuInfoComparisonContainerLefttDiv.createDiv({
@@ -152,7 +152,7 @@ export class DiffContentCompareModal extends Modal {
 				cls: "taskboard-diff-content-compare-modal-side",
 			});
 		debuInfoComparisonContainerRightDiv.createEl("h3", {
-			text: "Current content in your note",
+			text: "Task Board Cache",
 		});
 		const debuInfoComparisonContainerRightDivContent =
 			debuInfoComparisonContainerRightDiv.createDiv({
