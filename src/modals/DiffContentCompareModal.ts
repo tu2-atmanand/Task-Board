@@ -166,7 +166,7 @@ export class DiffContentCompareModal extends Modal {
 			);
 
 		contentEl.createEl("p", {
-			text: "This is temporary, this section will be removed once I get enough feedback that this modal is not shown unnecessarily.",
+			text: "This 'Debug info' section is just provided to find out whether the Safe Guard genuinely captured the difference correctly or whether this was a false alarm. Will remove this section in the future, if this safe guard feature is working as expected.",
 		});
 	}
 
