@@ -1,11 +1,11 @@
 {
-  "version": "1.10.0",
+  "version": "1.10.1",
   "data": {
     "boardConfigs": [
       {
         "columns": [
           {
-            "id": 3866331674,
+            "id": 2941763530,
             "colType": "undated",
             "active": true,
             "collapsed": false,
@@ -18,7 +18,7 @@
             }
           },
           {
-            "id": 2265611381,
+            "id": 1145633818,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -31,7 +31,7 @@
             }
           },
           {
-            "id": 2259512204,
+            "id": 2942770030,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -44,7 +44,7 @@
             }
           },
           {
-            "id": 2620568467,
+            "id": 1065454935,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -57,7 +57,7 @@
             }
           },
           {
-            "id": 483858129,
+            "id": 2140180437,
             "colType": "dated",
             "active": true,
             "collapsed": false,
@@ -70,7 +70,7 @@
             }
           },
           {
-            "id": 2874456830,
+            "id": 4071273374,
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -113,7 +113,7 @@
       {
         "columns": [
           {
-            "id": 3172967963,
+            "id": 868415165,
             "colType": "untagged",
             "active": true,
             "collapsed": false,
@@ -122,7 +122,7 @@
             "swimlaneEnabled": false
           },
           {
-            "id": 964863401,
+            "id": 809264810,
             "index": 2,
             "colType": "otherTags",
             "active": true,
@@ -130,7 +130,7 @@
             "name": "All other tags"
           },
           {
-            "id": 1023737019,
+            "id": 3403395238,
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
@@ -139,7 +139,7 @@
             "coltag": "important"
           },
           {
-            "id": 1111210748,
+            "id": 393285997,
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
@@ -148,7 +148,7 @@
             "coltag": "wip"
           },
           {
-            "id": 3765416162,
+            "id": 391562267,
             "colType": "namedTag",
             "active": true,
             "collapsed": false,
@@ -157,7 +157,7 @@
             "coltag": "review"
           },
           {
-            "id": 2683786662,
+            "id": 3427618279,
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -203,7 +203,7 @@
       {
         "columns": [
           {
-            "id": 2742486804,
+            "id": 1765722026,
             "colType": "taskStatus",
             "taskStatus": " ",
             "active": true,
@@ -212,7 +212,7 @@
             "index": 1
           },
           {
-            "id": 3706864634,
+            "id": 615166705,
             "colType": "taskStatus",
             "taskStatus": "<",
             "active": true,
@@ -221,7 +221,7 @@
             "index": 2
           },
           {
-            "id": 557580333,
+            "id": 571269311,
             "colType": "taskStatus",
             "taskStatus": "/",
             "active": true,
@@ -230,7 +230,7 @@
             "index": 3
           },
           {
-            "id": 4127293717,
+            "id": 1887493649,
             "colType": "taskStatus",
             "taskStatus": "?",
             "active": true,
@@ -239,7 +239,7 @@
             "index": 5
           },
           {
-            "id": 1627511745,
+            "id": 2613918298,
             "colType": "completed",
             "active": true,
             "collapsed": false,
@@ -256,7 +256,7 @@
             ]
           },
           {
-            "id": 4119432838,
+            "id": 1297953780,
             "colType": "taskStatus",
             "taskStatus": "-",
             "active": true,
@@ -293,7 +293,7 @@
         "index": 3,
         "columns": [
           {
-            "id": 1223078386,
+            "id": 3108274220,
             "index": 1,
             "colType": "pathFiltered",
             "active": false,
@@ -302,7 +302,7 @@
             "filePaths": "Alternate Checkboxes.md"
           },
           {
-            "id": 956366631,
+            "id": 247290382,
             "index": 2,
             "colType": "pathFiltered",
             "active": false,
@@ -311,7 +311,7 @@
             "filePaths": "Alternate Checkboxes.md"
           },
           {
-            "id": 606320003,
+            "id": 4133194167,
             "index": 3,
             "colType": "pathFiltered",
             "active": false,
@@ -320,7 +320,7 @@
             "filePaths": "Alternate Checkboxes.md"
           },
           {
-            "id": 1556083341,
+            "id": 2335815588,
             "index": 4,
             "colType": "taskStatus",
             "active": false,
@@ -329,7 +329,7 @@
             "taskStatus": "-"
           },
           {
-            "id": 1303027247,
+            "id": 1712512928,
             "index": 5,
             "colType": "completed",
             "active": false,
@@ -338,7 +338,7 @@
             "limit": 20
           },
           {
-            "id": 2197390981,
+            "id": 4141218747,
             "index": 6,
             "colType": "pathFiltered",
             "active": true,
@@ -364,7 +364,7 @@
           "headerUIType": "hor"
         },
         "taskCount": {
-          "pending": 95,
+          "pending": 75,
           "completed": 15
         }
       }
@@ -408,7 +408,6 @@
       "scanMode": "automatic",
       "columnWidth": "300px",
       "visiblePropertiesList": [
-        "id",
         "title",
         "status",
         "tags",
@@ -421,9 +420,10 @@
         "dueDate",
         "completionDate",
         "cancelledDate",
-        "dependsOn"
+        "dependsOn",
+        "id"
       ],
-      "taskCardStyle": "bases",
+      "taskCardStyle": "emoji",
       "showVerticalScroll": true,
       "dragAutoScrollEdgePercent": 20,
       "tagColors": [
@@ -501,13 +501,6 @@
           "nextStatusSymbol": "x",
           "availableAsCommand": true,
           "type": "CANCELLED"
-        },
-        {
-          "symbol": "*",
-          "name": "Important",
-          "nextStatusSymbol": "/",
-          "availableAsCommand": false,
-          "type": "TODO"
         }
       ],
       "compatiblePlugins": {
@@ -608,7 +601,7 @@
           "taskItemKey": "completionDate"
         }
       ],
-      "showFrontmatterTagsOnCards": false,
+      "showFrontmatterTagsOnCards": true,
       "tasksCacheFilePath": "",
       "notificationService": "none",
       "actions": [
@@ -627,7 +620,7 @@
       "lastViewHistory": {
         "viewedType": "kanban",
         "boardIndex": 3,
-        "settingTab": 6,
+        "settingTab": 1,
         "taskId": ""
       },
       "boundTaskCompletionToChildTasks": true,
