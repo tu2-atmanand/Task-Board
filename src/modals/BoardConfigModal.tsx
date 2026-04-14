@@ -51,9 +51,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	});
 	const [selectedBoardIndex, setSelectedBoardIndex] = useState<number>(activeBoardIndex);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
-	const [inputValues, setInputValues] = useState<Record<string, string | undefined>>({});;
+	const [inputValues, setInputValues] = useState<Record<string, string>>({});;
 	const getInputKey = (columnID: number, suffix: string) => `${columnID}-${suffix}`;
-	const getInputValue = (key: string, fallback: number) => inputValues[key] ?? fallback;
+	const getInputValue = (key: string, fallback: number | "" = "") => inputValues[key] ?? fallback;
+	const isDatedInputUndefined = (key: string, fallback: number) => inputValues[key] === "" && fallback === 0;
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -179,7 +180,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	const handleAddColumn = (boardIndex: number, columnData: ColumnData) => {
-		const updatedBoards = [...localBoards];
+		const updatedBoards: any = [...localBoards];
 		updatedBoards[boardIndex].columns.push({
 			id: columnData.id,
 			index: updatedBoards[boardIndex].columns.length + 1,
@@ -188,7 +189,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			collapsed: false,
 			name: columnData.name,
 			coltag: columnData.coltag,
-			datedBasedColumn: columnData.datedBasedColumn,
+			datedBasedColumn: {
+				dateType: plugin.settings.data.globalSettings.universalDate,
+				from: "",
+				to: ""
+			},
 			taskStatus: columnData.taskStatus,
 			taskPriority: columnData.taskPriority,
 			limit: columnData.limit,
@@ -319,7 +324,26 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Function to save changes
 	const handleSave = () => {
-		onSave(localBoards);
+		// Validate and convert undefined dated column values to 0
+		const validatedBoards = localBoards.map(board => ({
+			...board,
+			columns: board.columns.map(column => {
+				if (column.colType === colTypeNames.dated && column.datedBasedColumn) {
+					const fromKey = getInputKey(column.id, "from");
+					const toKey = getInputKey(column.id, "to");
+					return {
+						...column,
+						datedBasedColumn: {
+							...column.datedBasedColumn,
+							from: inputValues[fromKey] === "" ? 0 : column.datedBasedColumn.from ?? 0,
+							to: inputValues[toKey] === "" ? 0 : column.datedBasedColumn.to ?? 0,
+						}
+					};
+				}
+				return column;
+			})
+		}));
+		onSave(validatedBoards);
 		// onClose();
 	};
 
@@ -621,7 +645,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													const key = getInputKey(column.id, "workLimit");
 													setInputValues(prev => ({
 														...prev,
-														[key]: undefined
+														[key]: value
 													}));
 													handleColumnChange(
 														boardIndex,
@@ -668,7 +692,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														const key = getInputKey(column.id, "namedTag-workLimit");
 														setInputValues(prev => ({
 															...prev,
-															[key]: undefined
+															[key]: value
 														}));
 														handleColumnChange(
 															boardIndex,
@@ -710,11 +734,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														}));
 													}}
 													onBlur={(e) => {
-														const value = e.target.value;
+														const value = e.target.value.trim();
 														const key = getInputKey(column.id, "taskStatus-workLimit");
 														setInputValues(prev => ({
 															...prev,
-															[key]: undefined
+															[key]: value
 														}));
 														handleColumnChange(
 															boardIndex,
@@ -762,7 +786,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														const key = getInputKey(column.id, "taskPriority-workLimit");
 														setInputValues(prev => ({
 															...prev,
-															[key]: undefined
+															[key]: value
 														}));
 														handleColumnChange(
 															boardIndex,
@@ -779,7 +803,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<input
 												type="number"
 												placeholder={t("max-items")}
-												value={getInputValue(getInputKey(column.id, "limit"), column.limit || 0)}
+												value={getInputValue(getInputKey(column.id, "limit"), column.limit || 20)}
 												onChange={(e) => {
 													setInputValues(prev => ({
 														...prev,
@@ -791,7 +815,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													const key = getInputKey(column.id, "limit");
 													setInputValues(prev => ({
 														...prev,
-														[key]: undefined
+														[key]: value
 													}));
 													handleColumnChange(
 														boardIndex,
@@ -826,9 +850,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<>
 												<input
 													type="number"
-													placeholder={t("from") + "  Eg.: -365"}
+													placeholder={t("from") + "  Eg = -365"}
 													aria-label={t("from-tooltip")}
-													value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from || 0)}
+													value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from || 0) ?? ""}
 													onChange={(e) => {
 														setInputValues(prev => ({
 															...prev,
@@ -837,28 +861,35 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													}}
 													onBlur={(e) => {
 														const value = e.target.value;
-														const key = getInputKey(column.id, "from")
-														setInputValues(prev => ({
-															...prev,
-															[key]: undefined
-														}));
-														handleColumnChange(
-															boardIndex,
-															columnIndex,
-															"datedBasedColumn",
-															{
-																...column.datedBasedColumn,
-																from: value === "" ? 0 : Number(value),
-															}
-														);
+														const key = getInputKey(column.id, "from");
+														if (value === "") {
+															setInputValues(prev => ({
+																...prev,
+																[key]: ""
+															}));
+														} else {
+															setInputValues(prev => ({
+																...prev,
+																[key]: value
+															}));
+															handleColumnChange(
+																boardIndex,
+																columnIndex,
+																"datedBasedColumn",
+																{
+																	...column.datedBasedColumn,
+																	from: Number(value),
+																}
+															);
+														}
 													}}
-													className="boardConfigModalColumnRowContentColDatedVal"
+													className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "from"), 0) ? " border-red" : ""}`}
 												/>
 												<input
 													type="number"
-													placeholder={t("to") + "  Eg.: 365"}
+													placeholder={t("to") + "  Eg = 365"}
 													aria-label={t("to-tooltip")}
-													value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to || 0)}
+													value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to || 0) ?? ""}
 													onChange={(e) => {
 														setInputValues(prev => ({
 															...prev,
@@ -868,21 +899,28 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													onBlur={(e) => {
 														const value = e.target.value;
 														const key = getInputKey(column.id, "to");
-														setInputValues(prev => ({
-															...prev,
-															[key]: undefined
-														}));
-														handleColumnChange(
-															boardIndex,
-															columnIndex,
-															"datedBasedColumn",
-															{
-																...column.datedBasedColumn,
-																to: value === "" ? 0 : Number(value),
-															}
-														);
+														if (value === "") {
+															setInputValues(prev => ({
+																...prev,
+																[key]: ""
+															}));
+														} else {
+															setInputValues(prev => ({
+																...prev,
+																[key]: value
+															}));
+															handleColumnChange(
+																boardIndex,
+																columnIndex,
+																"datedBasedColumn",
+																{
+																	...column.datedBasedColumn,
+																	to: Number(value),
+																}
+															);
+														}
 													}}
-													className="boardConfigModalColumnRowContentColDatedVal"
+													className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "to"), 0) ? " border-red" : ""}`}
 												/>
 												<select
 													aria-label="Select date type"
@@ -920,7 +958,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														const key = getInputKey(column.id, "dated-workLimit");
 														setInputValues(prev => ({
 															...prev,
-															[key]: undefined
+															[key]: value
 														}));
 														handleColumnChange(
 															boardIndex,

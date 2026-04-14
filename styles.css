@@ -2392,6 +2392,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-width: 111px;
 }
 
+.boardConfigModalColumnRowContentColDatedVal.border-red {
+	border-color: red;
+	border-width: 2px;
+}
+
 .boardConfigModalColumnRowContentPriorityDropdown {
 	min-width: 120px;
 	max-width: 130px;
