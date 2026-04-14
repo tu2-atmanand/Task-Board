@@ -619,10 +619,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												onBlur={(e) => {
 													const value = e.target.value;
 													const key = getInputKey(column.id, "workLimit");
-													setInputValues({
-														...inputValues,
+													setInputValues(prev => ({
+														...prev,
 														[key]: undefined
-													});
+													}));
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
@@ -666,10 +666,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													onBlur={(e) => {
 														const value = e.target.value;
 														const key = getInputKey(column.id, "namedTag-workLimit");
-														setInputValues({
-															...inputValues,
+														setInputValues(prev => ({
+															...prev,
 															[key]: undefined
-														});
+														}));
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
@@ -712,10 +712,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													onBlur={(e) => {
 														const value = e.target.value;
 														const key = getInputKey(column.id, "taskStatus-workLimit");
-														setInputValues({
-															...inputValues,
+														setInputValues(prev => ({
+															...prev,
 															[key]: undefined
-														});
+														}));
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
@@ -760,10 +760,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													onBlur={(e) => {
 														const value = e.target.value;
 														const key = getInputKey(column.id, "taskPriority-workLimit");
-														setInputValues({
-															...inputValues,
+														setInputValues(prev => ({
+															...prev,
 															[key]: undefined
-														});
+														}));
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
@@ -789,10 +789,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												onBlur={(e) => {
 													const value = e.target.value;
 													const key = getInputKey(column.id, "limit");
-													setInputValues({
-														...inputValues,
+													setInputValues(prev => ({
+														...prev,
 														[key]: undefined
-													});
+													}));
 													handleColumnChange(
 														boardIndex,
 														columnIndex,
@@ -838,10 +838,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													onBlur={(e) => {
 														const value = e.target.value;
 														const key = getInputKey(column.id, "from")
-														setInputValues({
-															...inputValues,
+														setInputValues(prev => ({
+															...prev,
 															[key]: undefined
-														});
+														}));
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
@@ -868,10 +868,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													onBlur={(e) => {
 														const value = e.target.value;
 														const key = getInputKey(column.id, "to");
-														setInputValues({
-															...inputValues,
+														setInputValues(prev => ({
+															...prev,
 															[key]: undefined
-														});
+														}));
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
@@ -918,10 +918,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													onBlur={(e) => {
 														const value = e.target.value;
 														const key = getInputKey(column.id, "dated-workLimit");
-														setInputValues({
-															...inputValues,
+														setInputValues(prev => ({
+															...prev,
 															[key]: undefined
-														});
+														}));
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
