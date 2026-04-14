@@ -826,8 +826,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											<>
 												<input
 													type="number"
-													placeholder={t("from")}
-													aria-label={t("from")}
+													placeholder={t("from") + "  Eg.: -365"}
+													aria-label={t("from-tooltip")}
 													value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from || 0)}
 													onChange={(e) => {
 														setInputValues(prev => ({
@@ -856,8 +856,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												/>
 												<input
 													type="number"
-													placeholder={t("to")}
-													aria-label={t("to")}
+													placeholder={t("to") + "  Eg.: 365"}
+													aria-label={t("to-tooltip")}
 													value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to || 0)}
 													onChange={(e) => {
 														setInputValues(prev => ({

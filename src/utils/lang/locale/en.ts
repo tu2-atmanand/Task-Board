@@ -617,7 +617,9 @@ const en: Lang = {
 	"night": "Night",
 	"apply": "Apply",
 	"no-columns-message": "Create columns in this kanban view using the view configuration button from top right corner.",
-	"verifySubtasksAndChildtasksAreComplete-false-message": "You have set not to mark any task as complete until all its sub-tasks and child-tasks are completed in the setting. Please complete all the dependent items first."
+	"verifySubtasksAndChildtasksAreComplete-false-message": "You have set not to mark any task as complete until all its sub-tasks and child-tasks are completed in the setting. Please complete all the dependent items first.",
+	"from-tooltip": "from - The start value of the relative date range. Eg.: -7 to see tasks from past 7 days.",
+	"to-tooltip": "to - The end value of the relative date range. Eg.: 7 to see tasks for next seven days."
 };
 
 export default en;
