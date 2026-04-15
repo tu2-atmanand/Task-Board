@@ -24,7 +24,7 @@ import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
-import { getTaskFromId } from 'src/utils/TaskItemUtils';
+import { getAllTaskTags, getTaskFromId } from 'src/utils/TaskItemUtils';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
@@ -448,7 +448,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	}, [universalDate, task.time, plugin.settings.data.globalSettings.dateFormat]);
 
 	// Function to get the card background color based on tags
-	function getCardBgBasedOnTag(tags: string[]): string | undefined {
+	function getCardBgBasedOnTag(): string | undefined {
+		const allTags = getAllTaskTags(task);
+
 		if (globalSettings.tagColorsType === TagColorType.CardBg) {
 
 			const tagColors = plugin.settings.data.globalSettings.tagColors;
@@ -462,7 +464,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 			let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
 
-			for (const rawTag of tags) {
+			for (const rawTag of allTags) {
 				const tagName = rawTag.replace('#', '');
 				let tagData = tagColorMap.get(tagName);
 
@@ -1322,7 +1324,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				ref={taskItemRef}
 				className={`taskItem${isThistaskCompleted ? ' completed' : ''}`}
 				key={taskIdKey}
-				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+				style={{ backgroundColor: getCardBgBasedOnTag() }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
 				draggable={Platform.isDesktopApp}
