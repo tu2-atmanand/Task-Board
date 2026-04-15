@@ -199,6 +199,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			limit: columnData.limit,
 			filePaths: columnData.filePaths,
 		});
+
+		// This is required to get the red border indicator to enter these values.
+		let fromKey = getInputKey(columnData.id, "from");
+		let toKey = getInputKey(columnData.id, "to");
+		setInputValues(prev => ({
+			...prev,
+			[fromKey]: "",
+			[toKey]: ""
+		}));
+
 		setLocalBoards(updatedBoards);
 		handleCloseAddColumnModal();
 		setIsEdited(true);
@@ -325,25 +335,28 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// Function to save changes
 	const handleSave = () => {
 		// Validate and convert undefined dated column values to 0
-		const validatedBoards = localBoards.map(board => ({
-			...board,
-			columns: board.columns.map(column => {
-				if (column.colType === colTypeNames.dated && column.datedBasedColumn) {
-					const fromKey = getInputKey(column.id, "from");
-					const toKey = getInputKey(column.id, "to");
-					return {
-						...column,
-						datedBasedColumn: {
-							...column.datedBasedColumn,
-							from: inputValues[fromKey] === "" ? 0 : column.datedBasedColumn.from ?? 0,
-							to: inputValues[toKey] === "" ? 0 : column.datedBasedColumn.to ?? 0,
-						}
-					};
-				}
-				return column;
-			})
-		}));
-		onSave(validatedBoards);
+		// const validatedBoards = localBoards.map(board => ({
+		// 	...board,
+		// 	columns: board.columns.map(column => {
+		// 		if (column.colType === colTypeNames.dated && column.datedBasedColumn) {
+		// 			const fromKey = getInputKey(column.id, "from");
+		// 			const toKey = getInputKey(column.id, "to");
+		// 			return {
+		// 				...column,
+		// 				datedBasedColumn: {
+		// 					...column.datedBasedColumn,
+		// 					from: inputValues[fromKey] === "" ? 0 : column.datedBasedColumn.from ?? 0,
+		// 					to: inputValues[toKey] === "" ? 0 : column.datedBasedColumn.to ?? 0,
+		// 				}
+		// 			};
+		// 		}
+		// 		return column;
+		// 	})
+		// }));
+		// onSave(validatedBoards);
+
+		onSave(localBoards);
+
 		// onClose();
 	};
 
@@ -849,10 +862,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										{column.colType === colTypeNames.dated && (
 											<>
 												<input
+													required={true}
 													type="number"
-													placeholder={t("from") + "  Eg = -365"}
+													placeholder={t("from") + "  (eg. = -365)"}
 													aria-label={t("from-tooltip")}
-													value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from || 0) ?? ""}
+													value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from ?? 0) ?? ""}
 													onChange={(e) => {
 														setInputValues(prev => ({
 															...prev,
@@ -887,9 +901,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												/>
 												<input
 													type="number"
-													placeholder={t("to") + "  Eg = 365"}
+													placeholder={t("to") + "  (eg. = 365)"}
 													aria-label={t("to-tooltip")}
-													value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to || 0) ?? ""}
+													value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to ?? 0) ?? ""}
 													onChange={(e) => {
 														setInputValues(prev => ({
 															...prev,
