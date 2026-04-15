@@ -106,8 +106,8 @@
           "headerUIType": "hor"
         },
         "taskCount": {
-          "pending": 95,
-          "completed": 15
+          "pending": 82,
+          "completed": 10
         }
       },
       {
@@ -196,8 +196,8 @@
           "minimized": []
         },
         "taskCount": {
-          "pending": 95,
-          "completed": 15
+          "pending": 82,
+          "completed": 10
         }
       },
       {
@@ -284,8 +284,8 @@
           "headerUIType": "hor"
         },
         "taskCount": {
-          "pending": 95,
-          "completed": 15
+          "pending": 82,
+          "completed": 10
         }
       },
       {
@@ -364,8 +364,8 @@
           "headerUIType": "hor"
         },
         "taskCount": {
-          "pending": 75,
-          "completed": 15
+          "pending": 82,
+          "completed": 10
         }
       }
     ],
@@ -421,7 +421,8 @@
         "completionDate",
         "cancelledDate",
         "dependsOn",
-        "id"
+        "id",
+        "subTasks"
       ],
       "taskCardStyle": "emoji",
       "showVerticalScroll": true,
@@ -439,7 +440,7 @@
         },
         {
           "name": "wip",
-          "color": "rgba(0, 255, 0, 0.53)",
+          "color": "rgba(8, 110, 8, 0.53)",
           "priority": 2
         },
         {
@@ -451,7 +452,7 @@
       "editButtonAction": "popUp",
       "doubleClickCardToEdit": "none",
       "universalDate": "due",
-      "tagColorsType": "text",
+      "tagColorsType": "background",
       "customStatuses": [
         {
           "symbol": " ",
@@ -619,7 +620,7 @@
       "safeGuardFeature": true,
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 3,
+        "boardIndex": 0,
         "settingTab": 1,
         "taskId": ""
       },
