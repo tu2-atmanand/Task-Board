@@ -1019,7 +1019,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 									})}
 
 									{/* Render frontmatter tags (read-only) */}
-									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+									{task.frontmatterTags.map((tag: string) => {
 										const tagKey = `${task.id}-fm-${tag}`;
 										// Render frontmatter tags with different styling
 										return (
