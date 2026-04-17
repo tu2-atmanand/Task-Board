@@ -1117,7 +1117,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								<div
 									className="taskItemBodySubtaskItem"
 									key={uniqueKey}
-									style={{ paddingLeft }}
+									style={{ paddingInlineStart: paddingLeft }}
 									id={uniqueKey} // Assign a unique ID for each subtask element
 								>
 									<input
