@@ -1108,7 +1108,8 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 							const tabMatchInTitle = task.title.match(new RegExp(`^(${tabString})+`));
 							const titleTabs = tabMatchInTitle && tabMatchInTitle[0] ? tabMatchInTitle[0].length / tabString.length : 0;
 							const numTabs = tabMatch && tabMatch[0] ? tabMatch[0].length / tabString.length : 0;
-							const paddingLeft = numTabs > 1 ? `${(numTabs - titleTabs - 1) * 15}px` : '0px';
+							const numOfTabs = isTaskNote ? numTabs + 1 : numTabs;
+							const paddingLeft = numOfTabs > 1 ? `${(numOfTabs - titleTabs - 1) * 15}px` : '0px';
 
 							// Create a unique key for this subtask based on task.id and index
 							const uniqueKey = `${task.id}-${index}`;
