@@ -173,9 +173,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				if (swimlaneItem.value === 'All rest') {
 					if (!remainingValuesForAllRest || remainingValuesForAllRest.length === 0) return [];
 					return columnTasks.filter((task: taskItem) => {
-						const values = getPropertyValues(task, property, customValue);
+						let values = getPropertyValues(task, property, customValue);
 						if (property === "tags") {
-							values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
+							values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
 							const doesValuesHaveCustomValues = values.some((v: string) => customValues.has(v));
 							return values.some((v: string) => remainingValuesForAllRest.includes(v) && !doesValuesHaveCustomValues) || values.length === 0;
 						}
@@ -186,9 +186,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 				// Default behavior: filter tasks that include the exact swimlane value
 				return columnTasks.filter((task) => {
-					const values = getPropertyValues(task, property, customValue);
+					let values = getPropertyValues(task, property, customValue);
 					if (property === "tags") {
-						values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
+						values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
 						return values.includes(swimlaneItem.value.replace('#', '').toLocaleLowerCase());
 					}
 
