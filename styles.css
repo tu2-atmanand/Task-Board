@@ -829,9 +829,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemTitle {
 	padding: 0;
 	padding-inline-start: 0.4em;
-	font-weight: 400;
-	font-size: 0.875 rem;
-	font-size: 0.875rem;
+	font-weight: 500;
+	font-size: 0.88rem;
 	word-wrap: break-word;
 	word-break: break-word;
 	white-space: normal;
