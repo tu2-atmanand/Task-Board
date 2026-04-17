@@ -106,7 +106,7 @@
           "headerUIType": "hor"
         },
         "taskCount": {
-          "pending": 82,
+          "pending": 80,
           "completed": 10
         }
       },
@@ -119,7 +119,8 @@
             "collapsed": false,
             "name": "Backlogs",
             "index": 1,
-            "swimlaneEnabled": false
+            "swimlaneEnabled": false,
+            "minimized": true
           },
           {
             "id": 809264810,
@@ -168,7 +169,7 @@
         ],
         "name": "Tag Based Workflow",
         "index": 1,
-        "showColumnTags": false,
+        "showColumnTags": true,
         "showFilteredTags": true,
         "hideEmptyColumns": false,
         "boardFilter": {
@@ -176,7 +177,7 @@
           "filterGroups": []
         },
         "swimlanes": {
-          "enabled": true,
+          "enabled": false,
           "hideEmptySwimlanes": false,
           "property": "tags",
           "maxHeight": "300px",
@@ -422,7 +423,9 @@
         "cancelledDate",
         "dependsOn",
         "id",
-        "subTasks"
+        "subTasks",
+        "description",
+        "checkbox"
       ],
       "taskCardStyle": "emoji",
       "showVerticalScroll": true,
@@ -452,7 +455,7 @@
       "editButtonAction": "popUp",
       "doubleClickCardToEdit": "none",
       "universalDate": "due",
-      "tagColorsType": "background",
+      "tagColorsType": "tagBg",
       "customStatuses": [
         {
           "symbol": " ",
@@ -511,7 +514,7 @@
         "reminderPlugin": false,
         "quickAddPlugin": false
       },
-      "taskNoteIdentifierTag": "taskNote",
+      "taskNoteIdentifierTag": "task",
       "preDefinedNote": "Meta/Task_Board/New_Tasks.md",
       "archivedTasksFilePath": "",
       "taskNoteDefaultLocation": "Meta/Task_Board/Task_Notes",
@@ -620,7 +623,7 @@
       "safeGuardFeature": true,
       "lastViewHistory": {
         "viewedType": "kanban",
-        "boardIndex": 0,
+        "boardIndex": 1,
         "settingTab": 1,
         "taskId": ""
       },
