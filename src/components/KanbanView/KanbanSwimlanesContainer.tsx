@@ -10,6 +10,7 @@ import { ChevronDown, ChevronRight, TableCellsSplit } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { HeaderUITypeOptions } from 'src/interfaces/Enums';
+import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -172,9 +173,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				if (swimlaneItem.value === 'All rest') {
 					if (!remainingValuesForAllRest || remainingValuesForAllRest.length === 0) return [];
 					return columnTasks.filter((task: taskItem) => {
-						const values = getPropertyValues(task, property, customValue);
+						let values = getPropertyValues(task, property, customValue);
 						if (property === "tags") {
-							values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
+							values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
 							const doesValuesHaveCustomValues = values.some((v: string) => customValues.has(v));
 							return values.some((v: string) => remainingValuesForAllRest.includes(v) && !doesValuesHaveCustomValues) || values.length === 0;
 						}
@@ -185,9 +186,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 				// Default behavior: filter tasks that include the exact swimlane value
 				return columnTasks.filter((task) => {
-					const values = getPropertyValues(task, property, customValue);
+					let values = getPropertyValues(task, property, customValue);
 					if (property === "tags") {
-						values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
+						values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
 						return values.includes(swimlaneItem.value.replace('#', '').toLocaleLowerCase());
 					}
 
@@ -308,117 +309,117 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 			{/* Swimlane Rows */}
 			{hasSwimlaneColumns && swimlaneBoard && (
-			<div className="swimlanesContainer">
-				{/* Top header showing column headers and counts */}
-				<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
-					{/* A small Icon at the top right corner inside the swimlanes container */}
-					{headerUIType === HeaderUITypeOptions.vertical && (
-						<TableCellsSplit strokeWidth={1.5} size={32} className='swimlanesContainerIcon' />
-					)}
-
-					<div className="swimlanesHeaderRow">
-						{activeColumns.map((column, colIndex) => (
-							<MemoizedSwimlanColumn
-								key={`header-${column.id}`}
-								plugin={plugin}
-								columnIndex={column.index}
-								activeBoardData={swimlaneBoard}
-								columnData={column}
-								tasksForThisColumn={swimlaneColumnTasks?.[colIndex] || []}
-								Component={ColumnComponent}
-								headerOnly={true}
-							/>
-						))}
-					</div>
-				</div>
-				{swimlanes.map((swimlane, rowIndex) => (
-					<React.Fragment key={swimlane.swimlaneValue}>
-						{headerUIType === HeaderUITypeOptions.vertical ? (
-							<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`}>
-								{/* Swimlane Label */}
-								<div className='swimlaneHeaderContainer-vertical'>
-									<div className='swimlaneHeader-vertical'>
-										<div className='swimlaneHeaderSwimlaneCount-vertical'>
-											{swimlane.tasks.flat().length ?? 0}
-										</div>
-										<div className="swimlaneLabel-vertical" title={swimlane.swimlaneName}>
-											{swimlane.swimlaneName}
-										</div>
-										<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
-											{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
-										</div>
-									</div>
-								</div>
-
-								{/* Columns for this Swimlane */}
-								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
-									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
-										const swimlaneData = {
-											property: board.swimlanes.property,
-											value: swimlane.swimlaneValue,
-										};
-
-										return (
-											<MemoizedSwimlanColumn
-												key={`${swimlane.swimlaneValue}-${column.id}`}
-												plugin={plugin}
-												columnIndex={column.index}
-												activeBoardData={board}
-												columnData={column}
-												tasksForThisColumn={swimlane.tasks[colIndex] || []}
-												Component={ColumnComponent}
-												swimlaneData={swimlaneData}
-												hideColumnHeader={true}
-											/>
-										);
-									})}
-								</div>
-							</div>
-						) : (
-							<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`}>
-								{/* Swimlane Label */}
-								<div className='swimlaneHeaderContainer'>
-									<div className='swimlaneHeader'>
-										<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
-											{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
-										</div>
-										<div className="swimlaneLabel" title={swimlane.swimlaneName}>
-											{swimlane.swimlaneName}
-										</div>
-										<div className='swimlaneHeaderSwimlaneCount'>
-											{swimlane.tasks.flat().length ?? 0}
-										</div>
-									</div>
-								</div>
-
-								{/* Columns for this Swimlane */}
-								<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
-									{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
-										const swimlaneData = {
-											property: board.swimlanes.property,
-											value: swimlane.swimlaneValue,
-										};
-
-										return (
-											<MemoizedSwimlanColumn
-												key={`${swimlane.swimlaneValue}-${column.id}`}
-												plugin={plugin}
-												columnIndex={column.index}
-												activeBoardData={board}
-												columnData={column}
-												tasksForThisColumn={swimlane.tasks[colIndex] || []}
-												Component={ColumnComponent}
-												hideColumnHeader={true}
-												swimlaneData={swimlaneData}
-											/>
-										);
-									})}
-								</div>
-							</div>
+				<div className="swimlanesContainer">
+					{/* Top header showing column headers and counts */}
+					<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
+						{/* A small Icon at the top right corner inside the swimlanes container */}
+						{headerUIType === HeaderUITypeOptions.vertical && (
+							<TableCellsSplit strokeWidth={1.5} size={32} className='swimlanesContainerIcon' />
 						)}
-					</React.Fragment>
-				))}
-			</div>
+
+						<div className="swimlanesHeaderRow">
+							{activeColumns.map((column, colIndex) => (
+								<MemoizedSwimlanColumn
+									key={`header-${column.id}`}
+									plugin={plugin}
+									columnIndex={column.index}
+									activeBoardData={swimlaneBoard}
+									columnData={column}
+									tasksForThisColumn={swimlaneColumnTasks?.[colIndex] || []}
+									Component={ColumnComponent}
+									headerOnly={true}
+								/>
+							))}
+						</div>
+					</div>
+					{swimlanes.map((swimlane, rowIndex) => (
+						<React.Fragment key={swimlane.swimlaneValue}>
+							{headerUIType === HeaderUITypeOptions.vertical ? (
+								<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`}>
+									{/* Swimlane Label */}
+									<div className='swimlaneHeaderContainer-vertical'>
+										<div className='swimlaneHeader-vertical'>
+											<div className='swimlaneHeaderSwimlaneCount-vertical'>
+												{swimlane.tasks.flat().length ?? 0}
+											</div>
+											<div className="swimlaneLabel-vertical" title={swimlane.swimlaneName}>
+												{swimlane.swimlaneName}
+											</div>
+											<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
+												{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
+											</div>
+										</div>
+									</div>
+
+									{/* Columns for this Swimlane */}
+									<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+										{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
+											const swimlaneData = {
+												property: board.swimlanes.property,
+												value: swimlane.swimlaneValue,
+											};
+
+											return (
+												<MemoizedSwimlanColumn
+													key={`${swimlane.swimlaneValue}-${column.id}`}
+													plugin={plugin}
+													columnIndex={column.index}
+													activeBoardData={board}
+													columnData={column}
+													tasksForThisColumn={swimlane.tasks[colIndex] || []}
+													Component={ColumnComponent}
+													swimlaneData={swimlaneData}
+													hideColumnHeader={true}
+												/>
+											);
+										})}
+									</div>
+								</div>
+							) : (
+								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`}>
+									{/* Swimlane Label */}
+									<div className='swimlaneHeaderContainer'>
+										<div className='swimlaneHeader'>
+											<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
+												{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
+											</div>
+											<div className="swimlaneLabel" title={swimlane.swimlaneName}>
+												{swimlane.swimlaneName}
+											</div>
+											<div className='swimlaneHeaderSwimlaneCount'>
+												{swimlane.tasks.flat().length ?? 0}
+											</div>
+										</div>
+									</div>
+
+									{/* Columns for this Swimlane */}
+									<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+										{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
+											const swimlaneData = {
+												property: board.swimlanes.property,
+												value: swimlane.swimlaneValue,
+											};
+
+											return (
+												<MemoizedSwimlanColumn
+													key={`${swimlane.swimlaneValue}-${column.id}`}
+													plugin={plugin}
+													columnIndex={column.index}
+													activeBoardData={board}
+													columnData={column}
+													tasksForThisColumn={swimlane.tasks[colIndex] || []}
+													Component={ColumnComponent}
+													hideColumnHeader={true}
+													swimlaneData={swimlaneData}
+												/>
+											);
+										})}
+									</div>
+								</div>
+							)}
+						</React.Fragment>
+					))}
+				</div>
 			)}
 		</div>
 	);
@@ -458,8 +459,9 @@ function getPropertyValues(
 
 	switch (property) {
 		case 'tags':
-			if (task.tags && Array.isArray(task.tags)) {
-				values = task.tags.map((tag: string) => {
+			const allTags = getAllTaskTags(task);
+			if (allTags && allTags.length > 0) {
+				values = allTags.map((tag: string) => {
 					if (typeof tag === 'string') return tag.replace('#', '');
 					return '';
 				}).filter((v: string) => v);

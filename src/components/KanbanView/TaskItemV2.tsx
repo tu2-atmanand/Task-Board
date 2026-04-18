@@ -24,7 +24,7 @@ import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
-import { getTaskFromId } from 'src/utils/TaskItemUtils';
+import { getAllTaskTags, getTaskFromId } from 'src/utils/TaskItemUtils';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
@@ -448,7 +448,9 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	}, [universalDate, task.time, plugin.settings.data.globalSettings.dateFormat]);
 
 	// Function to get the card background color based on tags
-	function getCardBgBasedOnTag(tags: string[]): string | undefined {
+	function getCardBgBasedOnTag(): string | undefined {
+		const allTags = getAllTaskTags(task);
+
 		if (globalSettings.tagColorsType === TagColorType.CardBg) {
 
 			const tagColors = plugin.settings.data.globalSettings.tagColors;
@@ -462,7 +464,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 			let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
 
-			for (const rawTag of tags) {
+			for (const rawTag of allTags) {
 				const tagName = rawTag.replace('#', '');
 				let tagData = tagColorMap.get(tagName);
 
@@ -1019,7 +1021,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 									})}
 
 									{/* Render frontmatter tags (read-only) */}
-									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+									{task.frontmatterTags.map((tag: string) => {
 										const tagKey = `${task.id}-fm-${tag}`;
 										// Render frontmatter tags with different styling
 										return (
@@ -1105,7 +1107,8 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 							const tabMatchInTitle = task.title.match(new RegExp(`^(${tabString})+`));
 							const titleTabs = tabMatchInTitle && tabMatchInTitle[0] ? tabMatchInTitle[0].length / tabString.length : 0;
 							const numTabs = tabMatch && tabMatch[0] ? tabMatch[0].length / tabString.length : 0;
-							const paddingLeft = numTabs > 1 ? `${(numTabs - titleTabs - 1) * 15}px` : '0px';
+							const numOfTabs = isTaskNote ? numTabs + 1 : numTabs;
+							const paddingLeft = numOfTabs > 1 ? `${(numOfTabs - titleTabs - 1) * 15}px` : '0px';
 
 							// Create a unique key for this subtask based on task.id and index
 							const uniqueKey = `${task.id}-${index}`;
@@ -1114,7 +1117,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 								<div
 									className="taskItemBodySubtaskItem"
 									key={uniqueKey}
-									style={{ paddingLeft }}
+									style={{ paddingInlineStart: paddingLeft }}
 									id={uniqueKey} // Assign a unique ID for each subtask element
 								>
 									<input
@@ -1322,7 +1325,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				ref={taskItemRef}
 				className={`taskItem${isThistaskCompleted ? ' completed' : ''}`}
 				key={taskIdKey}
-				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+				style={{ backgroundColor: getCardBgBasedOnTag() }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
 				draggable={Platform.isDesktopApp}
