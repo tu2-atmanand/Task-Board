@@ -1,7 +1,7 @@
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
 import {
 	colTypeNames,
 	defaultTaskStatuses,
+	HeaderUITypeOptions,
 	viewsPanelPropertiesToShow,
 	viewTypeNames,
 } from "./Enums";
@@ -75,6 +75,7 @@ export type ColumnData = {
 	active: boolean;
 	collapsed?: boolean;
 	minimized?: boolean;
+	swimlaneEnabled?: boolean;
 	name: string;
 	coltag?: string;
 	filePaths?: string;
@@ -116,7 +117,7 @@ export interface FilterConfigSettings {
 	savedConfigs: SavedFilterConfig[];
 }
 
-export interface swimlaneConfigs {
+export type swimlaneConfigs = {
 	enabled: boolean;
 	hideEmptySwimlanes: boolean;
 	maxHeight: string;
@@ -128,9 +129,9 @@ export interface swimlaneConfigs {
 		index: number;
 	}[]; // This is only if user selects "custom" as the sort criteria.
 	groupAllRest?: boolean; // This will be only visible for customSortOrder. It will help user to decide if they want to group all the rest of the task below the custom sort order.
-	verticalHeaderUI: boolean; // This is a temporary setting for user telemetry. Later will remove it based on user feedback.
+	headerUIType: string;
 	minimized: string[]; // This will store the names of the minimized swimlanes.
-}
+};
 
 export type viewPortType = {
 	x: number;
@@ -148,10 +149,22 @@ export type nodeDataType = {
 	[taskID: string]: nodePositionWidth;
 };
 
+export interface KanbanView {
+	columns: ColumnData[];
+	showColumnTags: boolean;
+	hideEmptyColumns: boolean;
+	swimlanes: swimlaneConfigs;
+}
+
+export interface MapView {
+	viewPortData: viewPortType;
+	nodesData: nodeDataType;
+}
+
 /**
  * Interface for the Task Board view. It will store the data specific to a particular view created by user inside the board.
  */
-export interface View {
+export interface TaskBoardView {
 	viewId: string;
 	viewName: string;
 	viewType: string;
@@ -164,30 +177,22 @@ export interface View {
 	};
 
 	// All configurations specific to the kanban view
-	kanbanView?: {
-		columns: ColumnData[];
-		showColumnTags: boolean;
-		hideEmptyColumns: boolean;
-		swimlanes: swimlaneConfigs;
-	};
+	kanbanView?: KanbanView;
 
 	// All configurations specific to the map view
-	mapView?: {
-		viewPortData: viewPortType;
-		nodesData: nodeDataType;
-	};
+	mapView?: MapView;
 
 	// More views will be added in the future
 }
 
-export interface Board {
+export type Board = {
 	id: string;
 	pluginVersion: string; // This property will help us to manage the migrations in future when we will be adding new properties to the board or view data structure. Whenever there will be a breaking change in the data structure, we will update this pluginVersion and during the loading of the board data, we can check this version and can decide if we need to run any migration function to update the data structure to the latest one.
 	name: string;
 	description?: string;
 	filterConfig?: FilterConfigSettings;
 
-	views: View[];
+	views: TaskBoardView[];
 	lastViewId: string;
 	viewsPanel: {
 		isOpen: boolean;
@@ -198,7 +203,7 @@ export interface Board {
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
 	filterPolarity?: string;
-}
+};
 
 // A single board is a single project, inside a board user will create multiple types of views to visualize their tasks in different ways. Hence, when user will install this plugin for the first time, will only going to have a single board to which will be enought show the capabilities of this plugin and later user can easily create more boards.
 export const DEFAULT_BOARD: Board = {
@@ -308,7 +313,7 @@ export const DEFAULT_BOARD: Board = {
 					sortCriteria: "asc",
 					minimized: [],
 					maxHeight: "300px",
-					verticalHeaderUI: false,
+					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
 		},
@@ -381,7 +386,7 @@ export const DEFAULT_BOARD: Board = {
 					sortCriteria: "asc",
 					minimized: [],
 					maxHeight: "300px",
-					verticalHeaderUI: false,
+					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
 		},
@@ -464,7 +469,7 @@ export const DEFAULT_BOARD: Board = {
 					sortCriteria: "asc",
 					minimized: [],
 					maxHeight: "300px",
-					verticalHeaderUI: false,
+					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
 		},

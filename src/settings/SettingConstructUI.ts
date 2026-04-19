@@ -321,7 +321,7 @@ export class SettingsManager {
 				),
 			);
 
-		["files", "folders", "frontmatter", "tags"].forEach((type) => {
+		["tags", "frontmatter", "files", "folders"].forEach((type) => {
 			const filterType = type as keyof typeof scanFilters;
 			const filter = scanFilters[filterType];
 
@@ -711,59 +711,59 @@ export class SettingsManager {
 				}),
 			);
 
-		new Setting(contentEl)
-			.setName(t("enable-experimental-features"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("enable-experimental-features-info-1") +
-						"<br/>" +
-						"<br/>" +
-						"<br/>" +
-						t("enable-experimental-features-info-2") +
-						"<br/>" +
-						"<br/>" +
-						"<ul>" +
-						"<li>" +
-						"<b>" +
-						t("drag-and-drop") +
-						" : " +
-						"</b>" +
-						t("drag-and-drop-feature-info") +
-						"</li>" +
-						"<li>" +
-						"<b>" +
-						t("kanban-swimlanes") +
-						" : " +
-						"</b>" +
-						t("kanban-swimlanes-feature-info") +
-						"</li>" +
-						"<li>" +
-						"<b>" +
-						t("manual-sorting") +
-						" : " +
-						"</b>" +
-						t("manual-sorting-feature-info") +
-						"</li>" +
-						"<li>" +
-						"<b>" +
-						"Task card menu" +
-						" : " +
-						"</b>" +
-						"Easily change various properties of tasks and access quick actions through the menu. Specially useful on mobile as an alternative to drag and drop feature." +
-						"</li>" +
-						"</ul>",
-				),
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(experimentalFeatures)
-					.onChange(async (value) => {
-						this.globalSettings!.experimentalFeatures = value;
-						await this.saveSettings();
+		// new Setting(contentEl)
+		// 	.setName(t("enable-experimental-features"))
+		// 	.setDesc(
+		// 		createFragmentWithHTML(
+		// 			t("enable-experimental-features-info-1") +
+		// 				"<br/>" +
+		// 				"<br/>" +
+		// 				"<br/>" +
+		// 				t("enable-experimental-features-info-2") +
+		// 				"<br/>" +
+		// 				"<br/>" +
+		// 				"<ul>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				t("drag-and-drop") +
+		// 				" : " +
+		// 				"</b>" +
+		// 				t("drag-and-drop-feature-info") +
+		// 				"</li>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				t("kanban-swimlanes") +
+		// 				" : " +
+		// 				"</b>" +
+		// 				t("kanban-swimlanes-feature-info") +
+		// 				"</li>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				t("manual-sorting") +
+		// 				" : " +
+		// 				"</b>" +
+		// 				t("manual-sorting-feature-info") +
+		// 				"</li>" +
+		// 				"<li>" +
+		// 				"<b>" +
+		// 				"Task card menu" +
+		// 				" : " +
+		// 				"</b>" +
+		// 				"Easily change various properties of tasks and access quick actions through the menu. Specially useful on mobile as an alternative to drag and drop feature." +
+		// 				"</li>" +
+		// 				"</ul>",
+		// 		),
+		// 	)
+		// 	.addToggle((toggle) =>
+		// 		toggle
+		// 			.setValue(experimentalFeatures)
+		// 			.onChange(async (value) => {
+		// 				this.globalSettings!.experimentalFeatures = value;
+		// 				await this.saveSettings();
 
-						this.openReloadNoticeIfNeeded();
-					}),
-			);
+		// 				this.openReloadNoticeIfNeeded();
+		// 			}),
+		// 	);
 
 		// // Helper to add filter rows
 		// const addFilterRow = (
@@ -1307,60 +1307,6 @@ export class SettingsManager {
 		// 		});
 		// 	});
 
-		const { hiddenTaskProperties } = this.globalSettings!;
-
-		// Setting for hiding specific task properties in Live Editor and Reading mode
-		new Setting(contentEl)
-			.setName(t("hide-specific-properties-in-notes"))
-			.setDesc(t("hide-specific-properties-in-notes-description"))
-			.setClass("taskboard-hidden-properties-setting");
-
-		// Create a container for checkboxes
-		const checkboxContainer = contentEl.createDiv(
-			"taskboard-hidden-properties-container",
-		);
-
-		// Create checkboxes for each hideable property
-		Object.values(taskPropertiesNames).forEach((property) => {
-			const displayName = this.getPropertyDisplayName(property);
-
-			if (displayName) {
-				const checkboxSetting = new Setting(checkboxContainer)
-					.setName(displayName)
-					.setClass("taskboard-property-checkbox-setting")
-					.addToggle((toggle) => {
-						const isSelected =
-							hiddenTaskProperties.includes(property);
-						toggle.setValue(isSelected).onChange(async (value) => {
-							if (value) {
-								// Add property if not already included
-								if (
-									!this.globalSettings!.hiddenTaskProperties.includes(
-										property,
-									)
-								) {
-									this.globalSettings!.hiddenTaskProperties.push(
-										property,
-									);
-								}
-							} else {
-								// Remove property
-								this.globalSettings!.hiddenTaskProperties =
-									this.globalSettings!.hiddenTaskProperties.filter(
-										(p) => p !== property,
-									);
-							}
-							await this.saveSettings();
-
-							this.openReloadNoticeIfNeeded();
-						});
-					});
-
-				// Style the checkbox setting to be more compact
-				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
-			}
-		});
-
 		new Setting(contentEl)
 			.setName(t("custom-statuses"))
 			.setDesc(t("custom-statuses-info"));
@@ -1443,7 +1389,11 @@ export class SettingsManager {
 						status.type === statusTypeNames.CANCELLED
 							? " cancelled"
 							: ""
-					}`,
+					}${
+						status.type === statusTypeNames.IN_PROGRESS
+							? " wip"
+							: ""
+					}${status.type === statusTypeNames.ON_HOLD ? " hold" : ""}`,
 					text: status.type,
 				});
 
@@ -1483,6 +1433,7 @@ export class SettingsManager {
 								customStatus;
 							await this.saveSettings();
 							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
 						}
 					};
 					modal.open();
@@ -1499,6 +1450,7 @@ export class SettingsManager {
 					this.globalSettings!.customStatuses.splice(index, 1);
 					await this.saveSettings();
 					renderCustomStatuses();
+					this.openReloadNoticeIfNeeded();
 				};
 			});
 		};
@@ -1521,6 +1473,7 @@ export class SettingsManager {
 						);
 						if (flag) {
 							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
 						}
 					})
 					.setDisabled(!isTasksPluginEnabled),
@@ -1563,6 +1516,7 @@ export class SettingsManager {
 								);
 								await this.saveSettings();
 								renderCustomStatuses();
+								this.openReloadNoticeIfNeeded();
 							}
 						};
 
@@ -1583,6 +1537,7 @@ export class SettingsManager {
 			preDefinedNote,
 			archivedTasksFilePath,
 			showFrontmatterTagsOnCards,
+			hiddenTaskProperties,
 		} = this.globalSettings!;
 
 		// Create the live preview element
@@ -1814,6 +1769,58 @@ export class SettingsManager {
 						await this.saveSettings();
 					}),
 			);
+
+		// Setting for hiding specific task properties in Live Editor and Reading mode
+		new Setting(contentEl)
+			.setName(t("hide-specific-properties-in-notes"))
+			.setDesc(t("hide-specific-properties-in-notes-description"))
+			.setClass("taskboard-hidden-properties-setting");
+
+		// Create a container for checkboxes
+		const checkboxContainer = contentEl.createDiv(
+			"taskboard-hidden-properties-container",
+		);
+
+		// Create checkboxes for each hideable property
+		Object.values(taskPropertiesNames).forEach((property) => {
+			const displayName = this.getPropertyDisplayName(property);
+
+			if (displayName) {
+				const checkboxSetting = new Setting(checkboxContainer)
+					.setName(displayName)
+					.setClass("taskboard-property-checkbox-setting")
+					.addToggle((toggle) => {
+						const isSelected =
+							hiddenTaskProperties.includes(property);
+						toggle.setValue(isSelected).onChange(async (value) => {
+							if (value) {
+								// Add property if not already included
+								if (
+									!this.globalSettings!.hiddenTaskProperties.includes(
+										property,
+									)
+								) {
+									this.globalSettings!.hiddenTaskProperties.push(
+										property,
+									);
+								}
+							} else {
+								// Remove property
+								this.globalSettings!.hiddenTaskProperties =
+									this.globalSettings!.hiddenTaskProperties.filter(
+										(p) => p !== property,
+									);
+							}
+							await this.saveSettings();
+
+							this.openReloadNoticeIfNeeded();
+						});
+					});
+
+				// Style the checkbox setting to be more compact
+				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
+			}
+		});
 	}
 
 	private renderTBNoteTabSettings(contentEl: HTMLElement) {
@@ -2266,9 +2273,7 @@ export class SettingsManager {
 						[EditButtonMode.Modal]: t(
 							"use-edit-task-modal-feature",
 						),
-						[EditButtonMode.View]: t(
-							"use-edit-task-window-feature",
-						),
+						[EditButtonMode.ViewInSplitTab]: t("task-editor-tab"),
 						[EditButtonMode.TasksPluginModal]:
 							t("tasks-plugin-modal"),
 						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
@@ -2547,6 +2552,7 @@ export class SettingsManager {
 
 		// Text input for the dateFormat
 		new Setting(contentEl)
+			.setClass("taskBoard-settings-wide-input")
 			.setName(t("date-format"))
 			.setDesc(
 				createFragmentWithHTML(
@@ -2556,12 +2562,9 @@ export class SettingsManager {
 						"<b>" +
 						t("note") +
 						" :</b> " +
-						t(
-							"If you are using inline-tasks, then please note that, this plugin dont scan all kinds of format at present. For example, if there are spaces as a seperater (2026 01 01), then this plugin might fail to scan the value, even if its able to apply the date.",
-						) +
-						"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
-						"date-fns library formatting guide." +
-						"</a>" +
+						t("date-format-info-note") +
+						"<br/>" +
+						"<br/>" +
 						"<b>" +
 						t("note") +
 						" :</b> " +
@@ -2581,7 +2584,7 @@ export class SettingsManager {
 					.setPlaceholder("yyyy-MM-dd"),
 			)
 			.addButton((btn) => {
-				btn.setButtonText(t("verify"));
+				btn.setButtonText(t("validate"));
 				btn.onClick(() => {
 					try {
 						const testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
@@ -2606,6 +2609,7 @@ export class SettingsManager {
 						if (!isValid(parsed)) {
 							new Notice(
 								"❌ Invalid date format. Parsing failed.",
+								0,
 							);
 							return;
 						}
@@ -2622,6 +2626,7 @@ export class SettingsManager {
 									", expected: " +
 									testDate.toDateString() +
 									"). Please verify.",
+								0,
 							);
 							return;
 						}
@@ -2637,6 +2642,7 @@ export class SettingsManager {
 								(error instanceof Error
 									? error.message
 									: String(error)),
+							0,
 						);
 					}
 				});
@@ -2644,6 +2650,7 @@ export class SettingsManager {
 
 		// Text input for the dateTimeFormat
 		new Setting(contentEl)
+			.setClass("taskBoard-settings-wide-input")
 			.setName(t("date-time-format"))
 			.setDesc(
 				createFragmentWithHTML(
@@ -2669,7 +2676,7 @@ export class SettingsManager {
 					.setPlaceholder("yyyy-MM-dd/HH:mm"),
 			)
 			.addButton((btn) => {
-				btn.setButtonText(t("verify"));
+				btn.setButtonText(t("validate"));
 				btn.onClick(() => {
 					try {
 						const testDate = new Date(2026, 1, 18, 14, 30, 45); // Fixed reference date: Feb 18, 2026, 14:30:45
@@ -2694,6 +2701,7 @@ export class SettingsManager {
 						if (!isValid(parsed)) {
 							new Notice(
 								"❌ Invalid date-time format. Parsing failed.",
+								0,
 							);
 							return;
 						}
@@ -2710,6 +2718,7 @@ export class SettingsManager {
 									", expected: " +
 									testDate.toISOString() +
 									"). Please verify.",
+								0,
 							);
 							return;
 						}
@@ -2725,6 +2734,7 @@ export class SettingsManager {
 								(error instanceof Error
 									? error.message
 									: String(error)),
+							0,
 						);
 					}
 				});

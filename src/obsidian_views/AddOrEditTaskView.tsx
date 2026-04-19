@@ -59,7 +59,7 @@ export class AddOrEditTaskView extends ItemView {
 	}
 
 	getDisplayText() {
-		return this.taskExists ? t("edit-task") + this.task.id : t("add-new-task");
+		return this.taskExists ? t("edit-task") + " - " + this.task.id : t("add-new-task");
 	}
 
 	async onOpen() {
@@ -67,7 +67,7 @@ export class AddOrEditTaskView extends ItemView {
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
-		if (!this.isTaskNote && this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
 			this.task.legacyId = this.task.id;
 		}

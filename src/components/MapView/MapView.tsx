@@ -25,19 +25,19 @@ import { debounce, Menu, Notice, Platform } from 'obsidian';
 import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
 import { t } from 'src/utils/lang/helper';
 import { MapViewMinimap } from './MapViewMinimap';
-import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction } from 'src/interfaces/Enums';
+import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction, viewTypeNames } from 'src/interfaces/Enums';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { PanelLeftOpenIcon } from 'lucide-react';
 import { TasksImporterPanel } from './TasksImporterPanel';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
 import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { Board, View, nodeDataType, nodePositionWidth, viewPortType } from 'src/interfaces/BoardConfigs';
+import { Board,  nodeDataType, nodePositionWidth, TaskBoardView, viewPortType } from 'src/interfaces/BoardConfigs';
 
 type MapViewProps = {
 	plugin: TaskBoard;
 	activeBoardData: Board;
-	currentView: View;
+	currentView: TaskBoardView;
 	currentViewIndex: number;
 	filteredTasks: taskJsonMerged;
 	focusOnTaskId?: string;
@@ -281,7 +281,7 @@ const MapView: React.FC<MapViewProps> = ({
 							dataAttributeIndex={0}
 							plugin={plugin}
 							task={task}
-							activeViewData={currentView}
+							activeViewType={viewTypeNames.map}
 							activeViewIndex={currentViewIndex}
 						/>
 					},

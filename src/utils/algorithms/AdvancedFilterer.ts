@@ -39,7 +39,18 @@ export function advancedFilterer(
 	const filterGroups = filterState.filterGroups;
 
 	return tasks.filter((task) => {
-		const groupResults = filterGroups.map((group) =>
+		// Filter out null/undefined/invalid filter groups before processing
+		const validGroups = filterGroups.filter(
+			(group) =>
+				group && typeof group === "object" && group.groupCondition,
+		);
+
+		// If no valid groups after filtering, return true (no filtering applied)
+		if (validGroups.length === 0) {
+			return true;
+		}
+
+		const groupResults = validGroups.map((group) =>
 			evaluateFilterGroup(task, group, dateFormat),
 		);
 
@@ -60,14 +71,25 @@ export function advancedFilterer(
 /**
  * Evaluates a single filter group against a task
  */
-function evaluateFilterGroup(task: taskItem, group: FilterGroup, dateFormat: string): boolean {
+function evaluateFilterGroup(
+	task: taskItem,
+	group: FilterGroup,
+	dateFormat: string,
+): boolean {
+	// Safety check: validate group structure
+	if (!group || !group.groupCondition) {
+		return true; // Invalid group, skip it
+	}
+
 	const { groupCondition, filters } = group;
 
 	if (!filters || filters.length === 0) {
 		return true;
 	}
 
-	const filterResults = filters.map((filter) => evaluateFilter(task, filter, dateFormat));
+	const filterResults = filters.map((filter) =>
+		evaluateFilter(task, filter, dateFormat),
+	);
 
 	// Combine filter results based on group condition
 	switch (groupCondition) {
@@ -85,7 +107,11 @@ function evaluateFilterGroup(task: taskItem, group: FilterGroup, dateFormat: str
 /**
  * Evaluates a single filter against a task
  */
-function evaluateFilter(task: taskItem, filter: Filter, dateFormat: string): boolean {
+function evaluateFilter(
+	task: taskItem,
+	filter: Filter,
+	dateFormat: string,
+): boolean {
 	const { property, condition, value } = filter;
 
 	// Get the property value from the task
@@ -138,7 +164,7 @@ function evaluateFilter(task: taskItem, filter: Filter, dateFormat: string): boo
 					String(item)
 						.replace("#", "")
 						.toLowerCase()
-						.includes(String(value).replace("#", "").toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase()),
 				);
 			}
 			return false;
@@ -153,7 +179,7 @@ function evaluateFilter(task: taskItem, filter: Filter, dateFormat: string): boo
 					String(item)
 						.replace("#", "")
 						.toLowerCase()
-						.includes(String(value).replace("#", "").toLowerCase())
+						.includes(String(value).replace("#", "").toLowerCase()),
 				);
 			}
 			return true;
@@ -196,7 +222,7 @@ function evaluateFilter(task: taskItem, filter: Filter, dateFormat: string): boo
 				return taskValue.some(
 					(tag) =>
 						String(tag).toLowerCase() ===
-						String(value).toLowerCase()
+						String(value).toLowerCase(),
 				);
 			}
 			return false;
@@ -205,7 +231,7 @@ function evaluateFilter(task: taskItem, filter: Filter, dateFormat: string): boo
 				return !taskValue.some(
 					(tag) =>
 						String(tag).toLowerCase() ===
-						String(value).toLowerCase()
+						String(value).toLowerCase(),
 				);
 			}
 			return true;
@@ -268,7 +294,7 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 			if (property.startsWith("tags.")) {
 				const tagName = property.substring(5);
 				return task.tags.some(
-					(tag) => tag.toLowerCase() === tagName.toLowerCase()
+					(tag) => tag.toLowerCase() === tagName.toLowerCase(),
 				);
 			}
 			return undefined;
@@ -305,7 +331,7 @@ function compareDates(date1: any, date2: any, dateFormat: string): number {
  * @returns true if empty, false otherwise
  */
 export function isRootFilterStateEmpty(
-	filterState: RootFilterState | undefined
+	filterState: RootFilterState | undefined,
 ): boolean {
 	if (!filterState) return true;
 	if (!filterState.filterGroups || filterState.filterGroups.length === 0)

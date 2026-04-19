@@ -144,16 +144,10 @@ export class ConfigureColumnSortingModal extends Modal {
 								),
 						)
 						.addDropdown((dropdown) => {
-							if (
-								this.plugin.settings.data
-									.experimentalFeatures
-							) {
-								dropdown.addOption(
-									"manualOrder",
-									t("manual-order"),
-								);
-							}
-
+							dropdown.addOption(
+								"manualOrder",
+								t("manual-order"),
+							);
 							dropdown
 								.addOption("content", t("title"))
 								.addOption("id", t("id"))

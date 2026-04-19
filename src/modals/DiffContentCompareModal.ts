@@ -16,7 +16,7 @@ export class DiffContentCompareModal extends Modal {
 		cachedTaskContent: string,
 		EditedTaskContent: string,
 		taskContentFromFile: string,
-		onSelect: (sel: DiffSelection) => void
+		onSelect: (sel: DiffSelection) => void,
 	) {
 		super(plugin.app);
 		this.cachedTaskContent = cachedTaskContent;
@@ -31,7 +31,7 @@ export class DiffContentCompareModal extends Modal {
 
 		this.modalEl.setAttribute(
 			"data-type",
-			"task-board-diff-content-compare"
+			"task-board-diff-content-compare",
 		);
 		this.setTitle("Task Board Safe Guard");
 
@@ -56,7 +56,7 @@ export class DiffContentCompareModal extends Modal {
 		newContentDiv.innerHTML = this.getHighlightedDiff(
 			this.cachedTaskContent,
 			this.taskContentFromFile,
-			"left"
+			"left",
 		);
 		new ButtonComponent(rightDiv)
 			.setButtonText("Keep this as it is")
@@ -74,9 +74,9 @@ export class DiffContentCompareModal extends Modal {
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
 		oldContentDiv.innerHTML = this.getHighlightedDiff(
-			this.taskContentFromFile,
+			this.cachedTaskContent,
 			this.EditedTaskContent,
-			"right"
+			"right",
 		);
 		new ButtonComponent(leftDiv)
 			.setButtonText("Use this")
@@ -99,7 +99,7 @@ export class DiffContentCompareModal extends Modal {
 				text: "Red highlighted content indicates the characters which are different by comparing the task-board-cache content and the current content in your note.",
 			});
 			ul.createEl("li", {
-				text: "Green highlighted content indicates the characters which are different by comparing the content you just now edited and the current content in your note.",
+				text: "Green highlighted content indicates the characters which are different by comparing the content you just now edited and the content from the task-board-cache..",
 			});
 			ul.createEl("li", {
 				text: "Select the version of content you want Task Board to write in your note.",
@@ -134,7 +134,7 @@ export class DiffContentCompareModal extends Modal {
 				cls: "taskboard-diff-content-compare-modal-side",
 			});
 		debuInfoComparisonContainerLefttDiv.createEl("h3", {
-			text: "Task Board Cache",
+			text: "Current content in your note",
 		});
 		const debuInfoComparisonContainerLefttDivContent =
 			debuInfoComparisonContainerLefttDiv.createDiv({
@@ -144,7 +144,7 @@ export class DiffContentCompareModal extends Modal {
 			this.getHighlightedDiff(
 				this.cachedTaskContent,
 				this.taskContentFromFile,
-				"left"
+				"left",
 			);
 
 		const debuInfoComparisonContainerRightDiv =
@@ -152,7 +152,7 @@ export class DiffContentCompareModal extends Modal {
 				cls: "taskboard-diff-content-compare-modal-side",
 			});
 		debuInfoComparisonContainerRightDiv.createEl("h3", {
-			text: "Current content in your note",
+			text: "Task Board Cache",
 		});
 		const debuInfoComparisonContainerRightDivContent =
 			debuInfoComparisonContainerRightDiv.createDiv({
@@ -162,11 +162,11 @@ export class DiffContentCompareModal extends Modal {
 			this.getHighlightedDiff(
 				this.taskContentFromFile,
 				this.cachedTaskContent,
-				"right"
+				"right",
 			);
 
 		contentEl.createEl("p", {
-			text: "This is temporary, this section will be removed once I get enough feedback that this modal is not shown unnecessarily.",
+			text: "This 'Debug info' section is just provided to find out whether the Safe Guard genuinely captured the difference correctly or whether this was a false alarm. Will remove this section in the future, if this safe guard feature is working as expected.",
 		});
 	}
 
@@ -184,7 +184,7 @@ export class DiffContentCompareModal extends Modal {
 	getHighlightedDiff(
 		oldContent: string,
 		newContent: string,
-		side: "left" | "right"
+		side: "left" | "right",
 	): string {
 		const oldLines = oldContent.split("\n");
 		const newLines = newContent.split("\n");
@@ -198,8 +198,8 @@ export class DiffContentCompareModal extends Modal {
 			if (oldLine === newLine) {
 				lines.push(
 					`<div>${this.escapeHtml(
-						side === "left" ? oldLine : newLine
-					)}</div>`
+						side === "left" ? oldLine : newLine,
+					)}</div>`,
 				);
 			} else {
 				const charsOld = oldLine.split("");
@@ -213,21 +213,21 @@ export class DiffContentCompareModal extends Modal {
 
 					if (charOld === charNew) {
 						const char = this.escapeHtml(
-							side === "left" ? charOld : charNew
+							side === "left" ? charOld : charNew,
 						);
 						highlightedChars.push(char);
 					} else {
 						if (side === "left") {
 							highlightedChars.push(
 								`<span style="background-color:#ff5858c0;">${this.escapeHtml(
-									charNew
-								)}</span>`
+									charNew,
+								)}</span>`,
 							);
 						} else {
 							highlightedChars.push(
 								`<span style="background-color:#26bb26c9;">${this.escapeHtml(
-									charNew
-								)}</span>`
+									charNew,
+								)}</span>`,
 							);
 						}
 					}
@@ -236,7 +236,7 @@ export class DiffContentCompareModal extends Modal {
 				const fullLine = highlightedChars.join("");
 				const bgColor = side === "left" ? "#ff585825" : "#36ff3625";
 				lines.push(
-					`<div style="background-color:${bgColor};">${fullLine}</div>`
+					`<div style="background-color:${bgColor};">${fullLine}</div>`,
 				);
 			}
 		}
@@ -266,7 +266,7 @@ export class DiffContentCompareModal extends Modal {
  */
 export function isTheContentDiffAreOnlySpaces(
 	oldContent: string,
-	newContent: string
+	newContent: string,
 ): boolean {
 	const normalizeSpaces = (content: string) => content.replace(/ +/g, " ");
 	const updatedOldContent = normalizeSpaces(oldContent);
@@ -274,7 +274,7 @@ export function isTheContentDiffAreOnlySpaces(
 
 	const maxLength = Math.max(
 		updatedOldContent.length,
-		updatedNewContent.length
+		updatedNewContent.length,
 	);
 	for (let i = 0; i < maxLength; i++) {
 		const charOld = updatedOldContent[i] || "";
@@ -295,7 +295,7 @@ export function isTheContentDiffAreOnlySpaces(
  */
 export function isTheContentDiffAreOnlySpaces_V2(
 	oldContent: string,
-	newContent: string
+	newContent: string,
 ): boolean {
 	const removeSpacesAndNewLines = (content: string) =>
 		content.replace(/[\s\n\t]+/g, "");

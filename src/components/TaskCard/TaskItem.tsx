@@ -14,15 +14,15 @@ import { t } from 'src/utils/lang/helper';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from 'src/regularExpressions/TasksPluginRegularExpr';
 import { getStatusNameFromStatusSymbol, isTaskNotePresentInTags } from 'src/utils/taskNote/TaskNoteUtils';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
-import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType } from 'src/interfaces/Enums';
+import { EditButtonMode, viewTypeNames, colTypeNames, taskPropertiesNames, TagColorType, UniversalDateOptions } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, priorityEmojis } from 'src/interfaces/Mapping';
 import { taskItem, UpdateTaskEventData } from 'src/interfaces/TaskItem';
 import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from 'src/utils/algorithms/ScanningFilterer';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from 'src/utils/taskNote/TaskNoteEventHandlers';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { getUniversalDateFromTask, robustDateParser } from 'src/utils/DateTimeCalculations';
-import { getTaskFromId } from 'src/utils/TaskItemUtils';
-import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate } from 'src/utils/UserTaskEvents';
+import { getAllTaskTags, getTaskFromId } from 'src/utils/TaskItemUtils';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from 'src/utils/UserTaskEvents';
 import { dragDropTasksManagerInsatance, currentDragDataPayload } from 'src/managers/DragDropTasksManager';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 import { openDateInputModal } from 'src/services/OpenModals';
@@ -30,18 +30,19 @@ import { showTextInputModal } from 'src/modals/TextInputModal';
 import { TaskCardProps } from './TaskItemV2';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from 'src/interfaces/Constants';
+import { DateTimePickerModal } from 'src/modals/date_time_picker/DateTimePickerModal';
 
 export interface swimlaneDataProp {
 	property: string;
 	value: string;
 }
 
-const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeViewData, activeViewIndex, columnIndex, swimlaneData }) => {
+const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeViewType, activeViewIndex, kanbanViewData, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
-	const columnData = columnIndex !== undefined ? activeViewData.kanbanView!.columns[columnIndex - 1] : undefined;
+	const columnData = columnIndex !== undefined && kanbanViewData ? kanbanViewData.columns[columnIndex - 1] : undefined;
 	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
@@ -56,9 +57,9 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 		}
 	}, [plugin.settings.data]);
 
-	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, plugin));
+	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
-		setUniversalDate(getUniversalDateFromTask(task, plugin));
+		setUniversalDate(getUniversalDateFromTask(task, globalSettings.universalDate));
 	}, [task.due, task.startDate, task.scheduledDate]);
 
 
@@ -437,7 +438,9 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	}, [universalDate, task.time, plugin.settings.data.dateFormat]);
 
 	// Function to get the card background color based on tags
-	function getCardBgBasedOnTag(tags: string[]): string | undefined {
+	function getCardBgBasedOnTag(): string | undefined {
+		const allTags = getAllTaskTags(task);
+
 		if (globalSettings.tagColorsType === TagColorType.CardBg) {
 
 			const tagColors = plugin.settings.data.tagColors;
@@ -451,7 +454,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 
 			let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
 
-			for (const rawTag of tags) {
+			for (const rawTag of allTags) {
 				const tagName = rawTag.replace('#', '');
 				let tagData = tagColorMap.get(tagName);
 
@@ -473,18 +476,18 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 				}
 			}
 
-			const getOpacityValue = (color: string): number => {
-				const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
-				if (rgbaMatch) {
-					const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
-					return opacity;
-				}
-				return 1;
-			};
+			// const getOpacityValue = (color: string): number => {
+			// 	const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+			// 	if (rgbaMatch) {
+			// 		const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+			// 		return opacity;
+			// 	}
+			// 	return 1;
+			// };
 
-			if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
-				return updateRGBAOpacity(highestPriorityTag.color, 0.2);
-			}
+			// if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+			// 	return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+			// }
 
 			return highestPriorityTag?.color;
 		}
@@ -665,8 +668,6 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	const handleMenuButtonClicked = (event: React.MouseEvent) => {
 		event.stopPropagation();
 
-		if (!globalSettings.experimentalFeatures) return;
-
 		const taskItemMenu = new Menu();
 
 		taskItemMenu.addItem((item) => {
@@ -681,11 +682,11 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.customStatuses);
 			customStatues.forEach((status) => {
 				statusMenu.addItem((item) => {
-					const itemDocFragment = MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} (**[${status.value}]**)`, item.titleEl, '', null);
+					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} **[${status.value}]**`, item.titleEl, '', null);
 					// item.setTitle(status.text);
 					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
 					item.onClick(() => {
-						updateTaskItemStatus(plugin, task, status.value);
+						updateTaskItemStatus(plugin, task, task, status.value);
 					})
 				});
 			})
@@ -700,7 +701,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 			priorityOptions.forEach((p) => {
 				priMenu.addItem((it) => {
 					it.setTitle(p.text);
-					it.onClick(() => updateTaskItemPriority(plugin, task, p.value));
+					it.onClick(() => updateTaskItemPriority(plugin, task, task, p.value));
 				});
 			});
 		});
@@ -723,27 +724,27 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 			it.setIcon("calendar-plus")
 			it.setTitle(t("start-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("start"), task.startDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'startDate', newDate);
-				})
+				openDateInputModal(plugin, t("start"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
+				}, task.startDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar-clock")
 			it.setTitle(t("scheduled-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("scheduled"), task.scheduledDate, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'scheduledDate', newDate);
-				})
+				openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
+				}, task.scheduledDate)
 			});
 		});
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar")
 			it.setTitle(t("due-date"));
 			it.onClick(async () => {
-				openDateInputModal(plugin, t("due"), task.due, (newDate: string) => {
-					updateTaskItemDate(plugin, task, 'due', newDate);
-				})
+				openDateInputModal(plugin, t("due"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
+				}, task.due)
 			});
 		});
 
@@ -752,14 +753,18 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 			item.setIcon("clock");
 			item.setTitle(t("reminder"));
 			item.onClick(async () => {
-				// if (newReminder) updateTaskItemReminder(plugin, task, newReminder);
+				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
+				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
+					updateTaskItemReminder(plugin, task, task, dateTime);
+				};
+				modal.open();
 			});
 		});
 
 		taskItemMenu.addSeparator();
 
 		taskItemMenu.addItem((item) => {
-			item.setTitle(t("quick-actions"));
+			item.setTitle(t("task-actions"));
 			item.setIsLabel(true);
 		});
 		taskItemMenu.addItem((item) => {
@@ -773,6 +778,36 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 					new Notice(t("copy-task-title-unsuccessful"));
 				}
 			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor"));
+			item.onClick(async () => {
+				handleEditTask(plugin, task, EditButtonMode.Modal);
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor-in"));
+			const taskEditorMenu = item.setSubmenu();
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("columns-2");
+				subItem.setTitle(t("right-split"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
+			});
+
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("picture-in-picture-2");
+				subItem.setTitle(t("new-window"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("note-actions"));
+			item.setIsLabel(true);
 		});
 
 		taskItemMenu.addItem((item) => {
@@ -793,7 +828,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
 			item.setIcon("file-text");
-			item.setTitle(t("note-actions"));
+			item.setTitle(t("more-note-actions"));
 
 			const submenu = (item as any).setSubmenu();
 
@@ -870,47 +905,19 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 
 	// Handlers for drag and drop
 	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// prevent column drag from also starting
+		e.stopPropagation();
+
 		if (!columnData) {
 			e.preventDefault();
 			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskItem.tsx/handleDragStart");
 			return;
 		}
-
-		// Delegate to manager for standardized behavior (sets current payload and dims element)
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
-			const payload: currentDragDataPayload = {
-				task,
-				taskIndex: String(dataAttributeIndex),
-				sourceColumnData: columnData,
-				currentViewIndex: activeViewIndex,
-				swimlaneData: swimlaneData
-			};
-			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload, 0);
-
-			// Add dragging class after a small delay to not affect the drag image
-			// const clone = el.cloneNode(true) as HTMLDivElement;
-			// requestAnimationFrame(() => {
-			// 	e.dataTransfer?.setDragImage(clone, 0, 0);
-			// });
-			// clone.classList.add("task-item-dragging");
-
-			// Also set a drag image from the whole task element so the preview is the full card
-			// TODO : The drag image is taking too much width and also its still in its default state, like very dimmed opacity. Improve it to get a nice border and increase the opacity so it looks more real.
-			// if (taskItemRef.current && e.dataTransfer) {
-			// 	console.log("TaskItemRef.current", taskItemRef.current);
-			// 	const clone = taskItemRef.current.cloneNode(true) as HTMLElement;
-			// 	// clone.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
-			// 	clone.style.opacity = '0.5';
-			// 	clone.style.position = 'absolute';
-			// 	// clone.style.top = '-9999px';
-			// 	// document.body.appendChild(clone);
-			// 	const rect = taskItemRef.current.getBoundingClientRect();
-			// 	e.dataTransfer.setDragImage(clone, rect.width, rect.height);
-			// 	setTimeout(() => {
-			// 		try { document.body.removeChild(clone); } catch { }
-			// 	}, 0);
-			// }
+			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentViewIndex: activeViewIndex, swimlaneData: swimlaneData };
+			// Delegate to manager for standardized behavior (sets current payload and dims element)
+			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload);
 		} catch (err) {
 			// fallback minimal behavior
 			// try {
@@ -959,26 +966,29 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 							)}
 
 							{/* Render tags individually */}
-							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && task.tags.length > 0 && (
+							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && (task.tags.length > 0 || task.frontmatterTags.length > 0) && (
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
+										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
+										const taskTag = tag.replace('#', '').toLowerCase();
+										const columnTag = columnData?.coltag?.replace('#', '').toLowerCase();
 
-										const tagName = tag.replace('#', '');
-										const customTag = plugin.settings.data.tagColorsType === TagColorType.CardBg ? undefined : plugin.settings.data.tagColors.find(t => t.name === tagName);
+										const customTag = isCardBg ? undefined : plugin.settings.data.tagColors.find(t => t.name.replace('#', '').toLowerCase() === taskTag);
 
 										const tagColor = customTag?.color;
-										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : `var(--tag-background)`; // 10% opacity background
+										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : undefined; // 10% opacity background
 										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
 										if (
-											activeViewData.viewType === viewTypeNames.kanban &&
-											activeViewData.kanbanView!.showColumnTags &&
+											activeViewType === viewTypeNames.kanban &&
+											kanbanViewData &&
+											kanbanViewData.showColumnTags &&
 											columnData &&
 											columnData?.colType === colTypeNames.namedTag &&
-											tagName.replace('#', '') === columnData?.coltag?.replace('#', '')
+											taskTag === columnTag
 										) {
 											return null;
 										}
@@ -1001,14 +1011,14 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 									})}
 
 									{/* Render frontmatter tags (read-only) */}
-									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+									{task.frontmatterTags.map((tag: string) => {
 										const tagKey = `${task.id}-fm-${tag}`;
 										// Render frontmatter tags with different styling
 										return (
 											<div
 												key={tagKey}
 												className="taskItemTagFrontmatter"
-												title="Tag from note frontmatter (read-only)"
+												title="Tag from note's frontmatter (read-only)"
 											>
 												{tag}
 											</div>
@@ -1088,7 +1098,8 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 							const tabMatchInTitle = task.title.match(new RegExp(`^(${tabString})+`));
 							const titleTabs = tabMatchInTitle && tabMatchInTitle[0] ? tabMatchInTitle[0].length / tabString.length : 0;
 							const numTabs = tabMatch && tabMatch[0] ? tabMatch[0].length / tabString.length : 0;
-							const paddingLeft = numTabs > 1 ? `${(numTabs - titleTabs - 1) * 15}px` : '0px';
+							const numOfTabs = isTaskNote ? numTabs + 1 : numTabs;
+							const paddingLeft = numOfTabs > 1 ? `${(numOfTabs - titleTabs - 1) * 15}px` : '0px';
 
 							// Create a unique key for this subtask based on task.id and index
 							const uniqueKey = `${task.id}-${index}`;
@@ -1097,7 +1108,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 								<div
 									className="taskItemBodySubtaskItem"
 									key={uniqueKey}
-									style={{ paddingLeft }}
+									style={{ paddingInlineStart: paddingLeft }}
 									id={uniqueKey} // Assign a unique ID for each subtask element
 								>
 									<input
@@ -1243,7 +1254,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	const renderChildTasks = () => {
 		try {
 			// Render only if the last viewed history is Kanban and there are child tasks
-			if (activeViewData.viewType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
+			if (activeViewType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
 				return (
 					<div className="taskItemChildTasksSection">
 						{/* Placeholder for future child tasks rendering */}
@@ -1283,13 +1294,13 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.visiblePropertiesList, task.priority, task.tags, activeViewData]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.visiblePropertiesList, task.priority, task.tags, columnData]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.visiblePropertiesList, task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
 
 	// ========================================
-	// RETURN STATEMENT (UPDATED)
+	// RETURN STATEMENT
 	// ========================================
 	return (
 		<div className='taskItemContainer'>
@@ -1297,10 +1308,10 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 				ref={taskItemRef}
 				className={`taskItem ${isThistaskCompleted ? 'completed' : ''}`}
 				key={taskIdKey}
-				style={{ backgroundColor: getCardBgBasedOnTag(task.tags) }}
+				style={{ backgroundColor: getCardBgBasedOnTag() }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
-				draggable={true}
+				draggable={Platform.isDesktopApp && activeViewType === viewTypeNames.kanban}
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>
@@ -1310,31 +1321,15 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 					{memoizedRenderHeader}
 
 					{/* Drag Handle and Task Menu button */}
-					{plugin.settings.data.experimentalFeatures && (
-						<>
-							{
-								Platform.isPhone || activeViewData.viewType === viewTypeNames.map ? (
-									<>
-										<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-									</>
-								) : (
-									<>
-										{/* Drag Handle */}
-										{columnData?.colType !== colTypeNames.allPending && (
-											<div className="taskItemDragBtn"
-											// aria-label={t("drag-task-card")}
-											// draggable={true}
-											// onDragStart={handleDragStart}
-											// onDragEnd={handleDragEnd}
-											>
-												<Grip size={18} enableBackground={0} opacity={0.4} />
-											</div>
-										)}
-									</>
-								)
-							}
-						</>
-					)}
+					{
+						Platform.isDesktopApp && activeViewType !== viewTypeNames.map ? (
+							<div className="taskItemDragBtn">
+								<Grip size={18} enableBackground={0} opacity={0.4} />
+							</div>
+						) : (
+							<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+						)
+					}
 
 					{/* Task Content */}
 					<div className="taskItemMainBody">
@@ -1343,9 +1338,9 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 								<input
 									id={`${task.id}-checkbox`}
 									type="checkbox"
-									checked={false}
+									checked={task.status === " " ? false : true}
 									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
-									data-task={task.status}
+									data-task={cardLoadingAnimation ? 'x' : task.status}
 									dir='auto'
 									onChange={handleMainCheckBoxClick}
 									onClick={(e) => {

@@ -1,6 +1,6 @@
 // src/components/TaskBoardViewContainer.tsx
 
-import { Board, ColumnData, DEFAULT_BOARD, RootFilterState, View } from "../interfaces/BoardConfigs";
+import { Board, ColumnData, DEFAULT_BOARD, RootFilterState, TaskBoardView } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban, Save, LayoutGridIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
@@ -9,7 +9,7 @@ import { taskJsonMerged } from "src/interfaces/TaskItem";
 import { App, debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openBoardsExplorerModal } from "../services/OpenModals";
+import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
@@ -29,7 +29,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
 	// Track current view by ID. Initialize to the first view if available
 	const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
-	const [currentView, setCurrentView] = useState<View | null>(() => {
+	const [currentView, setCurrentView] = useState<TaskBoardView | null>(() => {
 		const initialBoard = currentBoardData;
 		if (initialBoard?.views?.length > 0) {
 			const lastViewIndex = getViewIndex(initialBoard, initialBoard.lastViewId);
@@ -188,9 +188,11 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
 				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+				// setLoading(false);
 				return searchFiltered || boardFilteredTasks;
 			}
 
+			// setLoading(false);
 			return boardFilteredTasks;
 		}
 		return { Pending: [], Completed: [] };
@@ -610,30 +612,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 			})
 			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("file-name-in-header"));
-			item.onClick(async () => {
-				togglePropertyNameInSettings(taskPropertiesNames.FilePathInHeader);
-
-			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("parent-folder"));
-			item.onClick(async () => {
-				togglePropertyNameInSettings(taskPropertiesNames.ParentFolder);
-
-			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("full-path"));
-			item.onClick(async () => {
-				togglePropertyNameInSettings(taskPropertiesNames.FullPath);
-
-			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("file-name-in-header"));
@@ -1300,12 +1278,15 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 							) : (
 								<div className="emptyBoardMessage">
 									{/* Placeholder for other view types */}
-									{"Unknown view type: " + currentView.viewType}
+									{currentView.viewType === viewTypeNames.list && "List view coming soon."}
+									{currentView.viewType === viewTypeNames.table && "Table view coming soon."}
+									{currentView.viewType === viewTypeNames.inbox && "Inbox view coming soon."}
+									{currentView.viewType === viewTypeNames.gantt && "Gantt chart view coming soon."}
 								</div>
 							)
 						) : (
 							<div className="emptyBoardMessage">
-								{boardData && boardData.views?.length === 0 ? "No views available in this board." : "Select or create a board to get started."}
+								{boardData && boardData.views?.length === 0 ? "No views available in this board." : "Select or create a new view to get started."}
 							</div>
 						)}
 					</div>

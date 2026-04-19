@@ -48,6 +48,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
 	const [progress, setProgress] = useState(0);
+	const [scannedFilesCount, setScannedFilesCount] = useState<number>();
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
 		VaultName: app.vault.getName(),
@@ -58,6 +59,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 	const runScan = async () => {
 		setIsRunning(true);
+		let totalScannedFilesCount = 0;
 
 		// Reset terminal output and collected tasks
 		vaultScanner.tasksCache.Pending = {};
@@ -77,6 +79,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 					await vaultScanner.extractTasksFromFile(file, scanFilters);
+					totalScannedFilesCount++;
 				}
 			}
 
@@ -85,6 +88,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		// setIsRunning(false);
 		setCollectedTasks(vaultScanner.tasksCache);
+		setScannedFilesCount(totalScannedFilesCount);
 		new Notice(t("vault-scanning-complete"));
 
 		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
@@ -156,7 +160,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 	return (
 		<div className="scanVaultModalHome">
-			<h2>{t("scan-tasks-from-the-vault")}</h2>
+			<h2>{t("vault-scanner")}</h2>
 			{localStorage.getItem(MANDATORY_SCAN_KEY) === "true" ?
 				(<>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
@@ -179,6 +183,12 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 					{isRunning ? progress.toFixed(0) : t("run")}
 				</button>
 			</div>
+
+			{progress === 100 && (
+				<div className="scanVaultModalHomeScannedFilesCountSection">
+					Total files scanned : {scannedFilesCount}
+				</div>
+			)}
 
 			<div className="scanVaultModalHomeThirdSection">
 				<div className={`scanVaultModalHomeTerminal ${showCollectedTasks ? 'scanVaultModalHomeTerminalSlideOut' : 'scanVaultModalHomeTerminalSlideIn'}`}>

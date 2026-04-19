@@ -26,13 +26,14 @@ import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
 import { DatePickerModal } from "src/modals/date_picker";
 import { bugReporterManagerInsatance } from "./BugReporter";
+import { openDateInputModal } from "src/services/OpenModals";
 
 export interface currentDragDataPayload {
 	task: taskItem;
 	taskIndex: string;
 	sourceColumnData: ColumnData;
 	currentViewIndex: number;
-	swimlaneData: swimlaneDataProp | null | undefined;
+	swimlaneData: swimlaneDataProp | undefined;
 }
 
 /**
@@ -41,12 +42,17 @@ export interface currentDragDataPayload {
  */
 class DragDropTasksManager {
 	private static instance: DragDropTasksManager;
+	private plugin: TaskBoard | null = null;
 
 	// Hold the current drag payload so dragover handlers can access it reliably
 	private currentDragData: currentDragDataPayload | null = null;
 	private desiredDropIndex: number | null = null;
+	// private clonedDraggedElement: HTMLElement | null = null;
 	// private dropIndicator: HTMLElement | null = null; // deprecated
-	private plugin: TaskBoard | null = null;
+
+	// Auto-scroll state
+	private scrollIntervalId: number | null = null;
+	private isAutoScrolling: boolean = false;
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -106,6 +112,129 @@ class DragDropTasksManager {
 	 */
 	clearCurrentDragData() {
 		this.currentDragData = null;
+		this.stopAutoScroll();
+		// if (this.clonedDraggedElement) {
+		// 	document.body.removeChild(this.clonedDraggedElement);
+		// 	this.clonedDraggedElement = null;
+		// }
+	}
+
+	// --------------------------------------
+	// Auto-scroll functionality for horizontal panning during drag
+	// --------------------------------------
+
+	/**
+	 * Start auto-scroll monitoring during drag
+	 * Called from dragstart event handler
+	 */
+	startAutoScroll(): void {
+		if (this.isAutoScrolling) return;
+
+		this.isAutoScrolling = true;
+
+		const handleDragOver = (e: Event) => {
+			this.handleAutoScroll(e as DragEvent);
+		};
+
+		const handleDragEnd = () => {
+			this.stopAutoScroll();
+			document.removeEventListener("dragover", handleDragOver);
+			document.removeEventListener("dragend", handleDragEnd);
+		};
+
+		document.addEventListener("dragover", handleDragOver);
+		document.addEventListener("dragend", handleDragEnd);
+	}
+
+	/**
+	 * Handle auto-scroll based on mouse position during drag
+	 * @param e - The drag event
+	 */
+	private handleAutoScroll(e: DragEvent): void {
+		if (!this.plugin) return;
+
+		const edgePercent =
+			this.plugin.settings.data.dragAutoScrollEdgePercent || 20;
+		const scrollSpeed = 10;
+		const taskBoardViewSection = document.querySelector(
+			".taskBoardViewSection",
+		);
+		const viewportWidth =
+			taskBoardViewSection?.clientWidth ?? window.innerWidth;
+		const viewportHeight =
+			taskBoardViewSection?.clientHeight ?? window.innerHeight;
+		const horizontalEdgeThreshold = (viewportWidth * edgePercent) / 100;
+		const verticalEdgeThreshold = (viewportHeight * edgePercent) / 100;
+
+		const clientX = e.clientX;
+		const clientY = e.clientY;
+
+		// Try to find the horizontal scroll container (works for both normal kanban and swimlanes)
+		const horizontalContainer = document.querySelector(
+			".columnsContainer, .swimlanesContainer",
+		) as HTMLElement;
+		if (horizontalContainer) {
+			// Horizontal scroll (left/right)
+			if (clientX < horizontalEdgeThreshold) {
+				const scrollLeft = horizontalContainer.scrollLeft;
+				if (scrollLeft > 0) {
+					horizontalContainer.scrollLeft = Math.max(
+						0,
+						scrollLeft - scrollSpeed,
+					);
+				}
+			} else if (clientX > viewportWidth - horizontalEdgeThreshold) {
+				const scrollLeft = horizontalContainer.scrollLeft;
+				const maxScrollLeft =
+					horizontalContainer.scrollWidth -
+					horizontalContainer.clientWidth;
+				if (scrollLeft < maxScrollLeft) {
+					horizontalContainer.scrollLeft = Math.min(
+						maxScrollLeft,
+						scrollLeft + scrollSpeed,
+					);
+				}
+			}
+		}
+
+		// Vertical scroll for swimlanes (top/bottom)
+		// Find the swimlanes container for vertical scrolling
+		const swimlanesContainer = document.querySelector(
+			".swimlanesContainer",
+		) as HTMLElement;
+		if (swimlanesContainer) {
+			if (clientY < verticalEdgeThreshold) {
+				const scrollTop = swimlanesContainer.scrollTop;
+				if (scrollTop > 0) {
+					swimlanesContainer.scrollTop = Math.max(
+						0,
+						scrollTop - scrollSpeed,
+					);
+				}
+			} else if (clientY > viewportHeight - verticalEdgeThreshold) {
+				const scrollTop = swimlanesContainer.scrollTop;
+				const maxScrollTop =
+					swimlanesContainer.scrollHeight -
+					swimlanesContainer.clientHeight;
+				if (scrollTop < maxScrollTop) {
+					swimlanesContainer.scrollTop = Math.min(
+						maxScrollTop,
+						scrollTop + scrollSpeed,
+					);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Stop auto-scroll monitoring
+	 */
+	stopAutoScroll(): void {
+		this.isAutoScrolling = false;
+		if (this.scrollIntervalId !== null) {
+			clearInterval(this.scrollIntervalId);
+			this.scrollIntervalId = null;
+		}
 	}
 
 	// --------------------------------------
@@ -127,8 +256,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumnData: ColumnData,
 		targetColumnData: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		// This means, user either wants to change the order of the taskItems within the column or is changing the swimlanes.
 		this.handleTasksOrderChange(
@@ -171,11 +300,6 @@ class DragDropTasksManager {
 					});
 				});
 			} else {
-				newTask.title = sanitizeTags(
-					newTask.title,
-					oldTask.tags,
-					newTask.tags,
-				);
 				updateTaskInFile(plugin, newTask, oldTask).then(() => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
 						oldTask.filePath,
@@ -205,8 +329,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (
 			sourceColumn.coltag == undefined ||
@@ -237,14 +361,12 @@ class DragDropTasksManager {
 		// -----------------------------------------------
 		// STEP 2 - Update the task properties so that it moves from source swimlane to target swilane
 		// -----------------------------------------------
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		// -----------------------------------------------
 		// STEP 3 - Will first update the properties of the task which should make it move from source column to target column.
@@ -325,8 +447,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!currentDragData || !targetColumn.datedBasedColumn) {
 			bugReporterManagerInsatance.addToLogs(
@@ -349,14 +471,12 @@ class DragDropTasksManager {
 			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (
 			targetColumn.datedBasedColumn &&
@@ -364,14 +484,8 @@ class DragDropTasksManager {
 				targetColumn.datedBasedColumn.to
 		) {
 			// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
-
-			const oldDateValueOfTheTask = newTask[dateType] || "";
+			const dateType = targetColumn.datedBasedColumn.dateType;
+			// const oldDateValueOfTheTask = newTask[dateType] || "";
 
 			const newDateValue = getAllDatesInRelativeRange(
 				targetColumn.datedBasedColumn?.from,
@@ -380,34 +494,47 @@ class DragDropTasksManager {
 
 			// newTask[dateType] = newDateValue;
 
-			updateTaskItemDate(plugin, newTask, dateType, newDateValue);
+			updateTaskItemDate(
+				plugin,
+				oldTask,
+				newTask,
+				dateType,
+				newDateValue,
+			);
 		} else if (
 			targetColumn.datedBasedColumn &&
 			targetColumn.datedBasedColumn.from <=
 				targetColumn.datedBasedColumn.to
 		) {
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn.dateType;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin);
-			datePicker.onDateSelected = async (date: string | null) => {
-				if (date) {
-					// newTask[dateType] = date;
-					updateTaskItemDate(plugin, newTask, dateType, date);
-				}
-			};
+			// const datePicker = new DatePickerModal(plugin, dateType);
+			// datePicker.onDateSelected = async (date: string | null) => {};
 
-			datePicker.open();
+			openDateInputModal(
+				plugin,
+				dateType,
+				async (date: string | null) => {
+					if (date) {
+						// newTask[dateType] = date;
+						updateTaskItemDate(
+							plugin,
+							oldTask,
+							newTask,
+							dateType,
+							date,
+						);
+					}
+				},
+			);
+
+			// datePicker.open();
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
 				30,
-				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
+				"The column configurations are currupted. Configurations are not valid for this operation. The value of 'from' should be always lower or equal to value of 'to'. Kindly verify the column configuration in which you just dropped the task.",
 				`Column configuration :	${JSON.stringify(targetColumn)}`,
 				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated",
 			);
@@ -428,8 +555,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskPriority) {
 			bugReporterManagerInsatance.addToLogs(
@@ -453,19 +580,17 @@ class DragDropTasksManager {
 			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		// Extract the priority value from the source column
 		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
 
-		updateTaskItemPriority(plugin, newTask, targetColumnPrioirty);
+		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
 
 	/**
@@ -482,8 +607,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskStatus) {
 			bugReporterManagerInsatance.addToLogs(
@@ -507,20 +632,18 @@ class DragDropTasksManager {
 			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		// Extract the status value from the source column
 		const targetColumnStatusValue =
 			(targetColumn.taskStatus as string) || "";
 
-		updateTaskItemStatus(plugin, newTask, targetColumnStatusValue);
+		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
 	};
 
 	handleTaskMove_DONE_to_TODO = (
@@ -563,8 +686,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!currentDragData || !targetColumn.datedBasedColumn) {
 			bugReporterManagerInsatance.addToLogs(
@@ -587,14 +710,12 @@ class DragDropTasksManager {
 			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
@@ -606,12 +727,7 @@ class DragDropTasksManager {
 				targetColumn.datedBasedColumn.to
 		) {
 			// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn?.dateType;
 
 			const newDateValue = getAllDatesInRelativeRange(
 				targetColumn.datedBasedColumn?.from,
@@ -620,29 +736,52 @@ class DragDropTasksManager {
 
 			// newTask[dateType] = newDateValue;
 
-			updateTaskItemDate(plugin, newTask, dateType, newDateValue);
+			updateTaskItemDate(
+				plugin,
+				oldTask,
+				newTask,
+				dateType,
+				newDateValue,
+			);
 		} else if (
 			targetColumn.datedBasedColumn &&
 			targetColumn.datedBasedColumn.from <=
 				targetColumn.datedBasedColumn.to
 		) {
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn?.dateType;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin);
-			datePicker.onDateSelected = async (date: string | null) => {
-				if (date) {
-					// newTask[dateType] = date;
-					updateTaskItemDate(plugin, newTask, dateType, date);
-				}
-			};
+			// const datePicker = new DatePickerModal(plugin, dateType);
+			// datePicker.onDateSelected = async (date: string | null) => {
+			// 	if (date) {
+			// 		// newTask[dateType] = date;
+			// 		updateTaskItemDate(
+			// 			plugin,
+			// 			oldTask,
+			// 			newTask,
+			// 			dateType,
+			// 			date,
+			// 		);
+			// 	}
+			// };
+			// datePicker.open();
 
-			datePicker.open();
+			openDateInputModal(
+				plugin,
+				dateType,
+				async (date: string | null) => {
+					if (date) {
+						// newTask[dateType] = date;
+						updateTaskItemDate(
+							plugin,
+							oldTask,
+							newTask,
+							dateType,
+							date,
+						);
+					}
+				},
+			);
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
@@ -666,8 +805,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn?.coltag) {
 			bugReporterManagerInsatance.addToLogs(
@@ -690,21 +829,19 @@ class DragDropTasksManager {
 		);
 
 		// STEP 2 - Check if swimlanes are enabled and if user is moving from one swimlane to another.
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
 		}
 
 		// STEP 3 - Add the target column tag if it doesn't already exist
-		let newTags = oldTask.tags ?? [];
+		let newTags = newTask.tags ?? [];
 		if (targetColumn.coltag) {
 			const targetTag = targetColumn.coltag.startsWith("#")
 				? targetColumn.coltag
@@ -731,8 +868,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskPriority) {
 			bugReporterManagerInsatance.addToLogs(
@@ -756,14 +893,12 @@ class DragDropTasksManager {
 			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
@@ -772,7 +907,7 @@ class DragDropTasksManager {
 		// Extract the priority value from the source column
 		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
 
-		updateTaskItemPriority(plugin, newTask, targetColumnPrioirty);
+		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
 
 	/**
@@ -787,8 +922,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskStatus) {
 			bugReporterManagerInsatance.addToLogs(
@@ -812,14 +947,12 @@ class DragDropTasksManager {
 			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
@@ -829,7 +962,7 @@ class DragDropTasksManager {
 		const targetColumnStatusValue =
 			(targetColumn.taskStatus as string) || "";
 
-		updateTaskItemStatus(plugin, newTask, targetColumnStatusValue);
+		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
 	};
 
 	/**
@@ -844,8 +977,8 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		const { updateTaskItemStatus } =
 			await import("src/utils/UserTaskEvents");
@@ -862,21 +995,24 @@ class DragDropTasksManager {
 		);
 
 		// STEP 2 - Check if swimlanes are enabled and if user is moving from one swimlane to another.
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data,
-			);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		const newStatus = plugin.settings.data.customStatuses.find(
 			(status) => status.type === statusTypeNames.DONE,
 		);
 
 		// FINALLY - Update the task in the note.
-		updateTaskItemStatus(plugin, newTask, newStatus?.symbol ?? "x");
+		updateTaskItemStatus(
+			plugin,
+			oldTask,
+			newTask,
+			newStatus?.symbol ?? "x",
+		);
 	};
 
 	/**
@@ -944,33 +1080,35 @@ class DragDropTasksManager {
 
 	/**
 	 * Handles reordering of tasks within the same column with swimlane sorting
-	 * @param plugin TaskBoard plugin instance
 	 * @param task The task being moved
 	 * @param targetColumnData The column data with swimlane sorting
 	 * @param desiredIndex The desired index to insert the task at
 	 */
 	updateTaskItemOnSwimlaneChange = async (
 		task: taskItem,
-		sourceColumnSwimlaneData: swimlaneDataProp,
-		targetColumnSwimlaneData: swimlaneDataProp,
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 		globalSettings: globalSettingsData,
 	): Promise<taskItem> => {
-		const property = sourceColumnSwimlaneData.property;
-		const oldValue = sourceColumnSwimlaneData.value;
-		const newValue = targetColumnSwimlaneData.value;
+		if (!targetColumnSwimlaneData) return task;
 
+		const property = targetColumnSwimlaneData.property;
+		const newValue = targetColumnSwimlaneData.value;
 		let newTask: taskItem = { ...task };
 
 		if (property === "tags") {
 			const oldTags = task.tags ?? [];
 			let newTags: string[] = oldTags;
 			// Remove old tag of source swimlane
-			if (oldValue !== "All rest") {
-				newTags = newTags.filter(
-					(tag) =>
-						tag.replace("#", "").toLowerCase() !==
-						oldValue.replace("#", "").toLowerCase(),
-				);
+			if (sourceColumnSwimlaneData) {
+				const oldValue = sourceColumnSwimlaneData.value;
+				if (oldValue !== "All rest") {
+					newTags = newTags.filter(
+						(tag) =>
+							tag.replace("#", "").toLowerCase() !==
+							oldValue.replace("#", "").toLowerCase(),
+					);
+				}
 			}
 
 			// Add new tag of target swimlane
@@ -984,7 +1122,6 @@ class DragDropTasksManager {
 				newTask,
 				globalSettings,
 				property,
-				oldTags,
 				newTags,
 			);
 		} else {
@@ -992,7 +1129,6 @@ class DragDropTasksManager {
 				newTask,
 				globalSettings,
 				property,
-				oldValue,
 				newValue,
 			);
 		}
@@ -1178,23 +1314,32 @@ class DragDropTasksManager {
 	 * @param {DragEvent} e - The drag event.
 	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element.
 	 * @param {currentDragDataPayload} currentDragData - The current drag data payload.
-	 * @param {number} dragIndex (Optional) - The index of the task item being dragged.
-	 *
 	 */
 	public handleDragStartEvent(
 		e: DragEvent,
 		draggedTaskItem: HTMLDivElement,
 		currentDragData: currentDragDataPayload,
-		dragIndex: number,
 	): void {
 		if (!e.dataTransfer) return;
 
-		// prevent column drag from also starting
-		e.stopPropagation();
-
 		this.setCurrentDragData(currentDragData);
 
+		this.startAutoScroll();
+
 		e.dataTransfer.effectAllowed = "move";
+
+		// Set a drag image from the whole task element so the preview is the full card
+		// NOTE : The below code worked and then it just stopped working. Also, a long back it worked during screen recording then stopped working. So, its not dependent on the code, but the platform and some other unknown factor.
+		// const clone = e.targetNode?.parentNode?.cloneNode(true) as HTMLElement;
+		// clone.setAttribute(
+		// 	"style",
+		// 	"position: absolute; left: 0px; top: 0px; z-index: -1",
+		// );
+		// console.log(clone);
+		// document.body.appendChild(clone);
+		// this.clonedDraggedElement = clone;
+		// const rectangle = clone.getBoundingClientRect();
+		// e.dataTransfer.setDragImage(clone, rectangle.width/2, rectangle.height/2);
 
 		// TODO : I probably wont need this anymore since I am using the singleton manager to hold the current drag data.
 		// provide a JSON payload so drop handlers can inspect
@@ -1221,7 +1366,6 @@ class DragDropTasksManager {
 
 		// Visual dim / dragging class
 		this.dimDraggedTaskItem(draggedTaskItem);
-		// draggedTaskItem.classList.add('task-item-dragging');
 	}
 
 	/**
@@ -1378,9 +1522,8 @@ class DragDropTasksManager {
 		e: DragEvent,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): void {
-		console.log("handleDropEvent...");
 		e.preventDefault();
 
 		// All checks before proceeding with the calculations...

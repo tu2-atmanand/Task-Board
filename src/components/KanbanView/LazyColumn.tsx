@@ -6,7 +6,7 @@ import { CSSProperties } from 'react';
 import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem';
 import { t } from 'src/utils/lang/helper';
 import TaskBoard from 'main';
-import { Board, ColumnData, RootFilterState, View } from 'src/interfaces/BoardConfigs';
+import { Board, ColumnData, KanbanView, RootFilterState } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
 import { TaskFilterPopover } from 'src/components/AdvancedFilterer/TaskFilterPopover';
@@ -20,6 +20,7 @@ import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
 import TaskItemV2 from '../TaskCard/TaskItemV2';
 import { AlertOctagon } from 'lucide-react';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
+import { viewTypeNames } from 'src/interfaces/Enums';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -28,8 +29,8 @@ type CustomCSSProperties = CSSProperties & {
 export interface LazyColumnProps {
 	plugin: TaskBoard;
 	activeBoardData: Board;
-	currentView: View;
 	currentViewIndex: number;
+	kanbanViewData: KanbanView;
 	columnData: ColumnData;
 	// columnIndex: number;
 	tasksForThisColumn: taskItem[];
@@ -42,8 +43,8 @@ export interface LazyColumnProps {
 const LazyColumn: React.FC<LazyColumnProps> = ({
 	plugin,
 	activeBoardData,
-	currentView,
 	currentViewIndex,
+	kanbanViewData,
 	columnData,
 	tasksForThisColumn,
 	swimlaneData,
@@ -51,7 +52,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	headerOnly = false,
 }) => {
 	// console.log("Column Data :", columnData);
-	if (!headerOnly && currentView.kanbanView && currentView.kanbanView.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
+	if (!headerOnly && tasksForThisColumn?.length === 0) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 
@@ -60,7 +61,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	const loadMoreCount = 10;
 	const scrollThresholdPercent = 80;
 
-	const [currentViewData, setCurrentViewData] = useState(currentView);
+	const [currentViewData, setCurrentViewData] = useState(kanbanViewData);
 
 	// State for managing visible tasks
 	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);
@@ -440,6 +441,37 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			});
 		}
 
+		// Show swimlane toggle option only when swimlanes are enabled
+		const isSwimlanesEnabled = kanbanViewData.swimlanes.enabled;
+		if (isSwimlanesEnabled) {
+			columnMenu.addSeparator();
+			columnMenu.addItem((item) => {
+				const isSwimlaneEnabled = columnData.swimlaneEnabled;
+				item.setTitle(isSwimlaneEnabled ? t("exclude-from-swimlanes") : t("include-in-swimlanes"));
+				item.setIcon(isSwimlaneEnabled ? "layout-panel-left" : "rows-3");
+				item.onClick(async () => {
+					let updatedViewData = { ...kanbanViewData };
+					updatedViewData.columns[columnData.index - 1].swimlaneEnabled = !isSwimlaneEnabled;
+
+					let updatedBoardData = { ...activeBoardData };
+					if (updatedBoardData.views[currentViewIndex].kanbanView) {
+						updatedBoardData.views[currentViewIndex].kanbanView = updatedViewData;
+						plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+					}
+
+					// const boardIndex = activeBoardData.index;
+					// if (boardIndex !== -1) {
+					// 	const columnIndex = columnData.index - 1;
+					// 	if (columnIndex !== -1) {
+					// 		plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].swimlaneEnabled = !isSwimlaneEnabled;
+					// 		await plugin.saveSettings();
+					// 		eventEmitter.emit('REFRESH_BOARD');
+					// 	}
+					// }
+				});
+			});
+		}
+
 		// Use native event if available (React event has nativeEvent property)
 		columnMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)
@@ -658,45 +690,55 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		setIsDragOver(false);
 		setInsertIndex(null);
 
-		const targetColumnContainer = tasksContainerRef.current;
-		if (!targetColumnContainer) {
-			return;
-		}
+		try {
 
-		// We are basically doing same thing from the handleDrop function below.
-		dragDropTasksManagerInsatance.handleDropEvent(
-			e.nativeEvent,
-			columnData,
-			targetColumnContainer,
-			swimlaneData
-		);
+			const targetColumnContainer = tasksContainerRef.current;
+			if (!targetColumnContainer) {
+				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
+			}
 
-		// Clear manager payload (drag finished)
-		dragDropTasksManagerInsatance.clearCurrentDragData();
-		dragDropTasksManagerInsatance.clearDesiredDropIndex();
+			// We are basically doing same thing from the handleDrop function below.
+			dragDropTasksManagerInsatance.handleDropEvent(
+				e.nativeEvent,
+				columnData,
+				targetColumnContainer,
+				swimlaneData
+			);
 
-		// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-		// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
-		// const updated = [...localTasks];
-		// const [moved] = updated.splice(dragIndex, 1);
-		// updated.splice(dropIndex, 0, moved);
-		// setLocalTasks(updated);
-		// // If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
-		// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-		// if (hasManualOrder) {
-		// 	columnData.tasksIdManualOrder = updated.map(t => t.id);
-		// }
+			// Clear manager payload (drag finished)
+			dragDropTasksManagerInsatance.clearCurrentDragData();
+			dragDropTasksManagerInsatance.clearDesiredDropIndex();
 
-		// clear any pending raf
-		if (rafRef.current) {
-			cancelAnimationFrame(rafRef.current);
-			rafRef.current = null;
+			// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+			// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+			// const updated = [...localTasks];
+			// const [moved] = updated.splice(dragIndex, 1);
+			// updated.splice(dropIndex, 0, moved);
+			// setLocalTasks(updated);
+			// // If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
+			// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			// if (hasManualOrder) {
+			// 	columnData.tasksIdManualOrder = updated.map(t => t.id);
+			// }
+
+			// clear any pending raf
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				188,
+				String(error),
+				"Column.tsx/handleTaskDrop",
+			);
 		}
 	};
 
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(false);
+		setInsertIndex(null);
 
 		try {
 			// Get the data of the dragged task -- No need anymore, since its already stored in the dragdropmanager.
@@ -709,6 +751,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 			// Get the target column container
 			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+			if (!targetColumnContainer) {
+				throw `e.currentTarget not found : ${JSON.stringify(targetColumnContainer)}`;
+			}
 
 
 			// Try to locate the source container by stable column id first (works for all colTypes) -- No need to find this anymore, since I am not making use of sourceColumnContainer in dragdropmanager.
@@ -885,8 +930,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																dataAttributeIndex={i}
 																plugin={plugin}
 																task={task}
-																activeViewData={currentViewData}
+																activeViewType={viewTypeNames.kanban} // Since this Column component will be always rendered inside a Kanban view.
 																activeViewIndex={currentViewIndex}
+																kanbanViewData={currentViewData}
 																columnIndex={columnData.index}
 																swimlaneData={swimlaneData}
 															/>
@@ -931,8 +977,9 @@ const MemoizedTaskItem = memo<{
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
-	activeViewData: View;
+	activeViewType: string;
 	activeViewIndex: number;
+	kanbanViewData: KanbanView;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
 }>(({ Component, ...props }) => {
@@ -941,8 +988,9 @@ const MemoizedTaskItem = memo<{
 	return (
 		prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
 		prevProps.task === nextProps.task &&
-		prevProps.activeViewData === nextProps.activeViewData &&
+		prevProps.activeViewType === nextProps.activeViewType &&
 		prevProps.activeViewIndex === nextProps.activeViewIndex &&
+		prevProps.kanbanViewData === nextProps.kanbanViewData &&
 		prevProps.columnIndex === nextProps.columnIndex &&
 		prevProps.swimlaneData === nextProps.swimlaneData
 	);

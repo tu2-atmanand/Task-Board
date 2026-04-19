@@ -29,6 +29,7 @@ import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
 import { handleEditTask } from "src/utils/UserTaskEvents";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { verifySubtasksAndChildtasksAreComplete } from "src/utils/algorithms/ScanningFilterer";
 
 export interface filterOptions {
 	value: string;
@@ -161,19 +162,62 @@ export const AddOrEditTaskRC: React.FC<{
 	// 	setIsEdited(true);
 	// };
 
-	const handleStatusChange = (symbol: string) => {
-		setStatus(symbol);
-		setIsEdited(true);
-
+	const handleStatusChange = async (symbol: string) => {
 		const statusConfig =
-			plugin.settings.data.customStatuses.find(
+			globalSettings.customStatuses.find(
 				(status) => status.symbol === symbol
 			);
 		const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
-		const globalSettings = plugin.settings.data;
-		const newTitle = sanitizeStatus(globalSettings, task.title, symbol, statusType);
-		setTitle(newTitle);
 
+		if (statusType === statusTypeNames.DONE) {
+			const allowed = await verifySubtasksAndChildtasksAreComplete(plugin, task);
+
+			if (!allowed) {
+				new Notice(t("verifySubtasksAndChildtasksAreComplete-false-message"));
+				return;
+			}
+		}
+
+		setStatus(symbol);
+
+		// if (statusType === statusTypeNames.DONE) {
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	const moment = _moment as unknown as typeof _moment.default;
+		// 	const currentDateValue = moment().format(
+		// 		globalSettings?.dateTimeFormat
+		// 	);
+		// 	const newTitle = sanitizeCompletionDate(
+		// 		globalSettings,
+		// 		task.title,
+		// 		currentDateValue
+		// 	);
+		// 	setTitle(newTitle);
+		// } else if (statusType === statusTypeNames.CANCELLED) {
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	const moment = _moment as unknown as typeof _moment.default;
+		// 	const currentDateValue = moment().format(
+		// 		globalSettings?.dateTimeFormat
+		// 	);
+		// 	const newTitle = sanitizeCancelledDate(
+		// 		globalSettings,
+		// 		task.title,
+		// 		currentDateValue
+		// 	);
+		// 	setTitle(newTitle);
+		// } else {
+		// 	let newTitle = task.title;
+		// 	const globalSettings = plugin.settings.data.globalSettings;
+		// 	newTitle = sanitizeCancelledDate(globalSettings, newTitle, "");
+		// 	newTitle = sanitizeCompletionDate(globalSettings, newTitle, "");
+		// 	setTitle(newTitle);
+		// }
+
+		if (!isTaskNote) {
+			const newTitle = sanitizeStatus(globalSettings, title, symbol, statusType);
+			setTitle(newTitle);
+		}
+
+		setIsEdited(true);
 		setIsEditorContentChanged(true);
 	}
 
@@ -351,7 +395,7 @@ export const AddOrEditTaskRC: React.FC<{
 			const newTagsList = tags.concat(input);
 
 			if (!isTaskNote) {
-				const newTitle = sanitizeTags(title, tags, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(title, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -383,7 +427,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			if (!isTaskNote) {
 				const newTagsList = currentTags.concat(choice);
-				const newTitle = sanitizeTags(currentTitle, currentTags, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(currentTitle, newTagsList, cursorLocationRef.current ?? undefined);
 				setTitle(newTitle);
 			}
 
@@ -407,7 +451,7 @@ export const AddOrEditTaskRC: React.FC<{
 		const newTags = tags.filter(tag => tag !== tagToRemove);
 
 		if (!isTaskNote) {
-			const newTitle = sanitizeTags(title, tags, newTags, cursorLocationRef.current ?? undefined);
+			const newTitle = sanitizeTags(title, newTags, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
 		}
 		setTags(newTags);
@@ -1062,7 +1106,7 @@ export const AddOrEditTaskRC: React.FC<{
 				event.ctrlKey = false;
 				break;
 			case EditButtonMode.Modal:
-			case EditButtonMode.View:
+			case EditButtonMode.ViewInWindow:
 			case EditButtonMode.TasksPluginModal:
 			default:
 				const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);

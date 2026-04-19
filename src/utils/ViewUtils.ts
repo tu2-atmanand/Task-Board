@@ -4,10 +4,10 @@
  * Utility functions for managing multiple views within a board
  */
 
-import { Board, View } from "src/interfaces/BoardConfigs";
+import { Board, TaskBoardView } from "src/interfaces/BoardConfigs";
 import {
 	colTypeNames,
-	defaultTaskStatuses,
+	HeaderUITypeOptions,
 	viewTypeNames,
 } from "src/interfaces/Enums";
 import { generateRandomTempTaskId } from "./TaskItemUtils";
@@ -28,7 +28,7 @@ export function getViewIndex(board: Board, viewId: string): number {
  * @param viewId The viewId to retrieve
  * @returns The view object, or undefined if not found
  */
-export function getViewById(board: Board, viewId: string): View | undefined {
+export function getViewById(board: Board, viewId: string): TaskBoardView | undefined {
 	return board.views.find((v) => v.viewId === viewId);
 }
 
@@ -41,7 +41,7 @@ export function getViewById(board: Board, viewId: string): View | undefined {
 export function getViewByType(
 	board: Board,
 	viewType: string,
-): View | undefined {
+): TaskBoardView | undefined {
 	return board.views.find((v) => v.viewType === viewType);
 }
 
@@ -51,7 +51,7 @@ export function getViewByType(
  * @param viewType The type of views to find
  * @returns Array of views matching the type
  */
-export function getViewsByType(board: Board, viewType: string): View[] {
+export function getViewsByType(board: Board, viewType: string): TaskBoardView[] {
 	return board.views.filter((v) => v.viewType === viewType);
 }
 
@@ -70,7 +70,7 @@ export function addViewToBoard(
 	const newViewId = generateRandomTempTaskId();
 
 	// Create base view structure
-	const newView: View = {
+	const newView: TaskBoardView = {
 		viewId: newViewId,
 		viewName: viewName,
 		viewType: viewType,
@@ -98,7 +98,7 @@ export function addViewToBoard(
 				sortCriteria: "asc",
 				minimized: [],
 				maxHeight: "300px",
-				verticalHeaderUI: false,
+				headerUIType: HeaderUITypeOptions.horizontal,
 			},
 		};
 	} else if (viewType === viewTypeNames.map) {
@@ -142,7 +142,7 @@ export function duplicateViewInBoard(board: Board, viewIndex: number): boolean {
 	}
 
 	const originalView = board.views[viewIndex];
-	const newView: View = JSON.parse(JSON.stringify(originalView));
+	const newView: TaskBoardView = JSON.parse(JSON.stringify(originalView));
 
 	// Generate new view ID
 	newView.viewId = generateRandomTempTaskId();
@@ -189,7 +189,7 @@ export function reorderViews(
 export function updateView(
 	board: Board,
 	viewIndex: number,
-	updates: Partial<View>,
+	updates: Partial<TaskBoardView>,
 ): boolean {
 	if (viewIndex < 0 || viewIndex >= board.views.length) {
 		return false;

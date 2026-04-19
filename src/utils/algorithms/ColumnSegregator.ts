@@ -1,7 +1,7 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import { Board, ColumnData, View } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, TaskBoardView } from "src/interfaces/BoardConfigs";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
@@ -26,10 +26,10 @@ import { robustDateParser } from "../DateTimeCalculations";
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
-	activeViewData: View,
+	activeViewData: TaskBoardView,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged | null,
-	onBoardDataChange?: (updatedViewData: View) => void,
+	onBoardDataChange?: (updatedViewData: TaskBoardView) => void,
 ): taskItem[] => {
 	if (!allTasks || !activeViewData || !activeViewData.kanbanView) return [];
 
@@ -137,7 +137,17 @@ export const columnSegregator = (
 
 				// const diffDays = daysBetween(formatDate(today), taskUniversalDate);
 
-				//  ---------- METHOD 3 -------------
+				// //  ---------- METHOD 3 -------------
+				// const today = new Date();
+				// today.setHours(0, 0, 0, 0);
+
+				// const moment = _moment as unknown as typeof _moment.default;
+				// const diffDays = moment(taskUniversalDate).diff(
+				// 	moment(today),
+				// 	"days",
+				// );
+
+				//  ---------- METHOD 4 -------------
 				// Parse the task's universal date using robust parser
 				const universalDateFormat =
 					settings.data.dateFormat || DEFAULT_DATE_FORMAT;
@@ -231,19 +241,16 @@ export const columnSegregator = (
 			}
 			break;
 		case colTypeNames.otherTags:
+			const TaggedColumns = activeViewData.kanbanView.columns.filter(
+				(col: ColumnData) =>
+					col.colType === colTypeNames.namedTag && col.coltag,
+			);
 			const namedTags =
-				activeViewData.kanbanView.columns
-					.filter(
-						(col: ColumnData) =>
-							col.colType === colTypeNames.namedTag && col.coltag,
-					)
-					.map((col: ColumnData) =>
-						col.coltag?.toLowerCase().replace(`#`, ""),
-					)
-					.filter(
-						(tag): tag is string =>
-							typeof tag === "string" && tag.length > 0,
-					) || [];
+				TaggedColumns.map((col: ColumnData) => {
+					if (col.coltag)
+						return col.coltag.toLowerCase().replace(`#`, "");
+					else return "";
+				}) || [];
 
 			// 3. Now filter tasks
 			tasksToDisplay = pendingTasks.filter((task) => {
@@ -259,19 +266,12 @@ export const columnSegregator = (
 			});
 			break;
 		case colTypeNames.completed:
-			const tasksLimit = columnData?.limit;
+			// NOTE : to apply the sorting algorithm properly, we have to take all the completed tasks.
+			// Here we are taking around 1000 which should be enough.
+			// After applying the filtering and sorting algorithms, we will slice as per the configs limit.
+			// A better approach is under discussion. See this : https://github.com/tu2-atmanand/Task-Board/issues/68
 
-			// This sorting will be done through the columnData.sortCriteria for this column if its configured
-			// const sortedCompletedTasks = completedTasks.sort((a, b): number => {
-			// 	if (a.completion && b.completion) {
-			// 		const dateA = new Date(a.completion).getTime();
-			// 		const dateB = new Date(b.completion).getTime();
-			// 		return dateB - dateA;
-			// 	}
-			// 	return 0;
-			// });
-
-			tasksToDisplay = completedTasks.slice(0, tasksLimit);
+			tasksToDisplay = completedTasks.slice(0, 1000);
 			break;
 		case colTypeNames.taskPriority:
 			tasksToDisplay = pendingTasks.filter(
@@ -375,6 +375,10 @@ export const columnSegregator = (
 				columnData.sortCriteria,
 			);
 		}
+	}
+
+	if (columnData.colType === colTypeNames.completed) {
+		tasksToDisplay = tasksToDisplay.slice(0, columnData?.limit ?? 20);
 	}
 
 	return tasksToDisplay;

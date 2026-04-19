@@ -1,7 +1,7 @@
 // /src/modals/AddViewModal.ts
 
 import { App, Modal } from "obsidian";
-import { Board, View } from "src/interfaces/BoardConfigs";
+import { Board } from "src/interfaces/BoardConfigs";
 import { viewTypeNames } from "src/interfaces/Enums";
 import { t } from "src/utils/lang/helper";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";

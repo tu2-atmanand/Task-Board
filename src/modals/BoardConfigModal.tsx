@@ -15,7 +15,7 @@ import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colTypeNames, UniversalDateOptions, viewTypeNames } from "src/interfaces/Enums";
-import { Board, ColumnData, swimlaneConfigs, View } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, swimlaneConfigs, TaskBoardView } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { AddColumnModal } from "./AddColumnModal";
 import { AddViewModal } from "./AddViewModal";
@@ -42,7 +42,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	onClose,
 	setIsEdited,
 }) => {
-	const [allViewsData, setAllViewsData] = useState<View[]>(() => {
+	const [allViewsData, setAllViewsData] = useState<TaskBoardView[]>(() => {
 		try {
 			return currentBoardData.views ? JSON.parse(JSON.stringify(currentBoardData.views)) : [];
 		} catch (e) {
@@ -53,6 +53,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const [selectedViewIndex, setSelectedViewIndex] = useState<number>(currentViewIndex);
 	const [activeBoardData, setActiveBoardData] = useState<Board>(currentBoardData);
 	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [inputValues, setInputValues] = useState<Record<string, string>>({});;
+	const getInputKey = (columnID: number, suffix: string) => `${columnID}-${suffix}`;
+	const getInputValue = (key: string, fallback: number | "" = "") => inputValues[key] ?? fallback;
+	const isDatedInputUndefined = (key: string, fallback: number) => inputValues[key] === "" && fallback === 0;
 
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
@@ -133,7 +137,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Kanban Column - Function to handle adding a new column to the selected Kanban specific view using the data submitted from the add column modal
 	const handleAddColumn = (viewIndex: number, columnData: ColumnData) => {
-		const updatedViewsData = [...allViewsData];
+		const updatedViewsData: any = [...allViewsData];
 		updatedViewsData[viewIndex].kanbanView!.columns.push({
 			id: columnData.id,
 			index: updatedViewsData[viewIndex].kanbanView!.columns.length + 1,
@@ -142,12 +146,26 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			collapsed: false,
 			name: columnData.name,
 			coltag: columnData.coltag,
-			datedBasedColumn: columnData.datedBasedColumn,
+			datedBasedColumn: {
+				dateType: plugin.settings.data.universalDate,
+				from: "",
+				to: ""
+			},
 			taskStatus: columnData.taskStatus,
 			taskPriority: columnData.taskPriority,
 			limit: columnData.limit,
 			filePaths: columnData.filePaths,
 		});
+
+		// This is required to get the red border indicator to enter these values.
+		let fromKey = getInputKey(columnData.id, "from");
+		let toKey = getInputKey(columnData.id, "to");
+		setInputValues(prev => ({
+			...prev,
+			[fromKey]: "",
+			[toKey]: ""
+		}));
+
 		setAllViewsData(updatedViewsData);
 		handleCloseAddColumnModal();
 		setIsEdited(true);
@@ -308,20 +326,21 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				updatedViewsData[selectedViewIndex].kanbanView!.swimlanes = updatedConfig;
 				setAllViewsData(updatedViewsData);
 				setIsEdited(true);
-			}
+			},
+			() => {}
 		);
 
 		swimlaneModal.open();
 	};
 
-	// View Management - Function to handle duplicating the currently selected view in the board configuration modal by creating a copy of the view data with a new name and adding it to the list of views in the state
+	// TaskBoardView Management - Function to handle duplicating the currently selected view in the board configuration modal by creating a copy of the view data with a new name and adding it to the list of views in the state
 	const handleDuplicateCurrentView = async () => {
 		if (selectedViewIndex === -1) {
 			new Notice(t("no-view-selected-to-duplicate"));
 			return;
 		}
 		const viewToDuplicate = allViewsData[selectedViewIndex];
-		const duplicatedView: View = {
+		const duplicatedView: TaskBoardView = {
 			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
 			viewId: generateRandomTempTaskId(),
 			viewName: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
@@ -329,7 +348,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 		// Regenerate IDs for all columns to ensure uniqueness
 		if (duplicatedView?.kanbanView && duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
-			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column) => ({
+			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column: ColumnData) => ({
 				...column,
 				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
 			}));
@@ -341,7 +360,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setIsEdited(true);
 	}
 
-	// View Management - Function to handle opening the add view modal when the "Add View" button is clicked in the sidebar of the board configuration modal
+	// TaskBoardView Management - Function to handle opening the add view modal when the "Add View" button is clicked in the sidebar of the board configuration modal
 	const handleAddNewView = () => {
 		const app = plugin.app;
 		const modal = new AddViewModal(
@@ -362,7 +381,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		modal.open();
 	};
 
-	// View Management - Function to handle deleting the currently selected view from the board configuration after confirming the action in a confirmation modal
+	// TaskBoardView Management - Function to handle deleting the currently selected view from the board configuration after confirming the action in a confirmation modal
 	const handleDeleteCurrentView = () => {
 		const app = plugin.app;
 		const mssg = t("view-delete-confirmation-message");
@@ -416,7 +435,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
 			id: generateRandomTempTaskId(),
 			name: `${activeBoardData.name} ${t("copy-suffix")}`,
-			views: activeBoardData.views ? activeBoardData.views.map((view: View) => ({
+			views: activeBoardData.views ? activeBoardData.views.map((view: TaskBoardView) => ({
 				...view,
 				viewId: generateRandomTempTaskId(), // New unique ID for each view
 			})) : [],
@@ -598,7 +617,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			globalSettingsHTMLSection.current.empty();
 		}
 
-		let view: View | undefined;
+		let view: TaskBoardView | undefined;
 		if (allViewsData && allViewsData.length > 0)
 			view = allViewsData[viewIndex];
 		if (!view) view = allViewsData[0];
@@ -682,7 +701,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 									ref={columnListRef}
 									className="boardConfigModalMainContent-Active-BodyColumnsList"
 								>
-									{view.kanbanView!.columns.map((column, columnIndex) => (
+									{view.kanbanView!.columns.map((column: ColumnData, columnIndex: number) => (
 										<div key={column.id} className={`boardConfigModalColumnRow${column.active ? "" : " Hidden"}`}>
 											<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
 											{column.active ? (
@@ -700,6 +719,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
 												<input
 													type="text"
+													placeholder={t("enter-column-name")}
+													aria-label={t("column-name")}
 													value={column.name || ""}
 													onChange={(e) =>
 														handleColumnChange(
@@ -716,15 +737,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														type="number"
 														placeholder={t("work-limit")}
 														aria-label={t("work-limit-info")}
-														value={column.workLimit ?? 0}
-														onChange={(e) =>
+														value={getInputValue(getInputKey(column.id, "workLimit"), column.workLimit ?? 0)}
+														onChange={(e) => {
+															setInputValues(prev => ({
+																...prev,
+																[getInputKey(column.id, "workLimit")]: e.target.value
+															}));
+														}}
+														onBlur={(e) => {
+															const value = e.target.value;
+															const key = getInputKey(column.id, "workLimit");
+															setInputValues(prev => ({
+																...prev,
+																[key]: value
+															}));
 															handleColumnChange(
 																viewIndex,
 																columnIndex,
 																"workLimit",
-																Number(e.target.value)
-															)
-														}
+																value === "" ? 0 : Number(value),
+															);
+														}}
 														className="boardConfigModalColumnRowContentColName"
 													/>
 												)}
@@ -751,15 +784,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															type="number"
 															placeholder={t("work-limit")}
 															aria-label={t("work-limit-info")}
-															value={column.workLimit || 0}
-															onChange={(e) =>
+															value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "namedTag-workLimit");
+																setInputValues(prev => ({
+																	...prev,
+																	[key]: value
+																}));
 																handleColumnChange(
 																	viewIndex,
 																	columnIndex,
 																	"workLimit",
-																	Number(e.target.value)
-																)
-															}
+																	value === "" ? 0 : Number(value)
+																);
+															}}
 															className="boardConfigModalColumnRowContentColName"
 														/>
 													</>
@@ -769,6 +814,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														<input
 															type="text"
 															placeholder={t("enter-status-placeholder")}
+															aria-label={t("task-status")}
 															value={column.taskStatus || ""}
 															onChange={(e) =>
 																handleColumnChange(
@@ -784,15 +830,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															type="number"
 															placeholder={t("work-limit")}
 															aria-label={t("work-limit-info")}
-															value={column.workLimit || 0}
-															onChange={(e) =>
+															value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "namedTag-workLimit");
+																setInputValues(prev => ({
+																	...prev,
+																	[key]: value
+																}));
 																handleColumnChange(
 																	viewIndex,
 																	columnIndex,
 																	"workLimit",
-																	Number(e.target.value)
-																)
-															}
+																	value === "" ? 0 : Number(value)
+																);
+															}}
 															className="boardConfigModalColumnRowContentColName"
 														/>
 													</>
@@ -820,15 +878,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															type="number"
 															placeholder={t("work-limit")}
 															aria-label={t("work-limit-info")}
-															value={column.workLimit || 0}
-															onChange={(e) =>
+															value={getInputValue(getInputKey(column.id, "taskPriority-workLimit"), column.workLimit || 0)}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "taskPriority-workLimit")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "taskPriority-workLimit");
+																setInputValues(prev => ({
+																	...prev,
+																	[key]: value
+																}));
 																handleColumnChange(
 																	viewIndex,
 																	columnIndex,
 																	"workLimit",
-																	Number(e.target.value)
-																)
-															}
+																	value === "" ? 0 : Number(value),
+																);
+															}}
 															className="boardConfigModalColumnRowContentColName"
 														/>
 													</>
@@ -837,15 +907,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													<input
 														type="number"
 														placeholder={t("max-items")}
-														value={column.limit || ""}
-														onChange={(e) =>
+														value={getInputValue(getInputKey(column.id, "limit"), column.limit || 20)}
+														onChange={(e) => {
+															setInputValues(prev => ({
+																...prev,
+																[getInputKey(column.id, "limit")]: e.target.value
+															}));
+														}}
+														onBlur={(e) => {
+															const value = e.target.value;
+															const key = getInputKey(column.id, "limit");
+															setInputValues(prev => ({
+																...prev,
+																[key]: value
+															}));
 															handleColumnChange(
 																viewIndex,
 																columnIndex,
 																"limit",
-																Number(e.target.value)
-															)
-														}
+																value === "" ? 0 : Number(value),
+															);
+														}}
 														className="boardConfigModalColumnRowContentColDatedVal"
 													/>
 												)}
@@ -871,38 +953,79 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 												{column.colType === colTypeNames.dated && (
 													<>
 														<input
+															required={true}
 															type="number"
-															placeholder={t("from")}
-															value={column.datedBasedColumn?.from || 0}
-															onChange={(e) =>
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"datedBasedColumn",
-																	{
-																		...column.datedBasedColumn,
-																		from: Number(e.target.value),
-																	}
-																)
-															}
-															className="boardConfigModalColumnRowContentColDatedVal"
+															placeholder={t("from") + "  (eg. = -365)"}
+															aria-label={t("from-tooltip")}
+															value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from ?? 0) ?? ""}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "from")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "from");
+																if (value === "") {
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: ""
+																	}));
+																} else {
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: value
+																	}));
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"datedBasedColumn",
+																		{
+																			...column.datedBasedColumn,
+																			from: Number(value),
+																		}
+																	);
+																}
+															}}
+															className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "from"), 0) ? " border-red" : ""}`}
 														/>
 														<input
 															type="number"
-															placeholder={t("to")}
-															value={column.datedBasedColumn?.to || 0}
-															onChange={(e) =>
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"datedBasedColumn",
-																	{
-																		...column.datedBasedColumn,
-																		to: Number(e.target.value),
-																	}
-																)
-															}
-															className="boardConfigModalColumnRowContentColDatedVal"
+															placeholder={t("to") + "  (eg. = 365)"}
+															aria-label={t("to-tooltip")}
+															value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to ?? 0) ?? ""}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "to")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "to");
+																if (value === "") {
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: ""
+																	}));
+																} else {
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: value
+																	}));
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"datedBasedColumn",
+																		{
+																			...column.datedBasedColumn,
+																			to: Number(value),
+																		}
+																	);
+																}
+															}}
+															className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "to"), 0) ? " border-red" : ""}`}
 														/>
 														<select
 															aria-label="Select date type"
@@ -928,15 +1051,27 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															type="number"
 															placeholder={t("work-limit")}
 															aria-label={t("work-limit-info")}
-															value={column.workLimit || 0}
-															onChange={(e) =>
+															value={getInputValue(getInputKey(column.id, "dated-workLimit"), column.workLimit || 0)}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "dated-workLimit")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "dated-workLimit");
+																setInputValues(prev => ({
+																	...prev,
+																	[key]: value
+																}));
 																handleColumnChange(
 																	viewIndex,
 																	columnIndex,
 																	"workLimit",
-																	Number(e.target.value)
-																)
-															}
+																	value === "" ? 0 : Number(value),
+																);
+															}}
 															className="boardConfigModalColumnRowContentColName"
 														/>
 													</>

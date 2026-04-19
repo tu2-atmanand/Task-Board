@@ -100,6 +100,7 @@ export interface globalSettingsData {
 	visiblePropertiesList: string[];
 	taskCardStyle: string;
 	showVerticalScroll: boolean;
+	dragAutoScrollEdgePercent: number;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
@@ -225,6 +226,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		],
 		taskCardStyle: taskCardStyleNames.EMOJI,
 		showVerticalScroll: true,
+		dragAutoScrollEdgePercent: 20,
 		tagColors: [
 			{
 				name: "bug",
@@ -456,8 +458,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		taskBoardFilesRegistry: {
 			"3103563481": {
 				boardId: "3103563481",
-				filePath:
-					"Meta/Task_Board/Boards/My Project Board.taskboard",
+				filePath: "Meta/Task_Board/Boards/My Project Board.taskboard",
 				boardName: "Time Based Workflow",
 				boardDescription:
 					"This board contains dated type columns for managing time critical scheduled tasks.",
