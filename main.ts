@@ -3,6 +3,7 @@
 import { around } from "monkey-around";
 import {
 	App,
+	debounce,
 	normalizePath,
 	Notice,
 	Plugin,
@@ -20,10 +21,11 @@ import {
 	openAddNewTaskInCurrentFileModal,
 	openAddNewTaskModal,
 	openAddNewTaskNoteModal,
+	openBoardsExplorerModal,
 	openScanVaultModal,
 } from "src/services/OpenModals";
 
-import { TaskBoardView } from "./src/views/TaskBoardView";
+import { TaskBoardView } from "./src/obsidian_views/TaskBoardView";
 import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import VaultScanner, {
 	fileTypeAllowedForScanning,
@@ -33,6 +35,7 @@ import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
 import {
+	MANDATORY_SCAN_KEY,
 	newReleaseVersion,
 	OBSIDIAN_CLOSED_TIME_KEY,
 	VIEW_TYPE_TASKBOARD,
@@ -136,8 +139,12 @@ export default class TaskBoard extends Plugin {
 
 		await loadTranslationsOnStartup(this);
 
+		// Register the Kanban view
+		this.registerTaskBoardView();
+
 		await this.vaultScanner.initializeTasksCache();
 
+		// TODO : Remove the loadAllBoards entirely
 		if (this.settings.data.loadAllBoards)
 			await this.taskBoardFileManager.loadAllBoards();
 		// console.log(
@@ -158,11 +165,10 @@ export default class TaskBoard extends Plugin {
 			// Register few commands
 			this.registerCommands();
 
+			this.taskBoardFileManager.validateBoardFiles();
+
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
-
-			// Register the Kanban view
-			this.registerTaskBoardView();
 
 			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
@@ -188,11 +194,37 @@ export default class TaskBoard extends Plugin {
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
-	async activateView(leafLayout: string) {
+	/**
+	 * Opens the Task Board view using either the last viewed board file or opens the board file
+	 * whose filePath has been passed. Most of the time, this function will try to find an existing
+	 * leaf for the specific board file. If user specifically wants to have a duplicate leaf, pass
+	 * the {@link duplicate} as true.
+	 *
+	 * @param leafLayout - Where to open the board leaf/tab. New tab or new window.
+	 * @param duplicate - Whether to re-use already opened leaf or create a new one.
+	 * This will be true in only special cases, when user wants to specifical open a duplicate.
+	 * @param filePath (OPTIONAL) - The file path of the board to open. If no filePath has been
+	 * provided then will open the last viewed board.
+	 */
+	async activateView(
+		leafLayout: string,
+		duplicate: boolean,
+		filePath?: string,
+	) {
 		let leaf: WorkspaceLeaf | null = null;
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 
 		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
+			if (filePath) {
+				const state = leaf.getViewState();
+				if (
+					state?.state?.filePath &&
+					state?.state?.filePath !== filePath
+				) {
+					return false;
+				}
+			}
+
 			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
 			return "Notice" in leaf.view.containerEl.ownerDocument.defaultView;
 		}
@@ -211,7 +243,7 @@ export default class TaskBoard extends Plugin {
 				this.app.workspace.getLeaf("tab");
 		} else if (leafLayout === "tab") {
 			// Check if a leaf exists in MainWindow
-			if (mainWindowLeaf) {
+			if (mainWindowLeaf && !duplicate) {
 				// Prevent duplicate in MainWindow
 				leaf = mainWindowLeaf;
 			} else {
@@ -235,10 +267,16 @@ export default class TaskBoard extends Plugin {
 		// Open or focus the leaf
 		if (leaf) {
 			this.leafIsActive = true;
+			leaf.setEphemeralState({ taskboardFilePath: filePath ?? "" });
+
 			await leaf.setViewState({
 				type: VIEW_TYPE_TASKBOARD,
 				active: true,
+				state: {
+					filePath: filePath ?? "",
+				},
 			});
+
 			this.app.workspace.revealLeaf(leaf);
 		}
 	}
@@ -249,7 +287,7 @@ export default class TaskBoard extends Plugin {
 			TaskBoardIcon,
 			t("open-task-board") ?? "Open task board",
 			() => {
-				this.activateView("icon");
+				this.activateView("icon", false);
 
 				// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
 				// 	active: true,
@@ -619,7 +657,7 @@ export default class TaskBoard extends Plugin {
 	openAtStartup() {
 		if (!this.settings.data.openOnStartup) return;
 
-		this.activateView("icon");
+		this.activateView("icon", false);
 	}
 
 	registerTaskBoardStatusBar() {
@@ -670,14 +708,21 @@ export default class TaskBoard extends Plugin {
 			id: "open-task-board",
 			name: t("open-task-board"),
 			callback: () => {
-				this.activateView("tab");
+				this.activateView("tab", false);
 			},
 		});
 		this.addCommand({
 			id: "open-task-board-new-window",
 			name: t("open-task-board-in-new-window"),
 			callback: () => {
-				this.activateView("window");
+				this.activateView("window", false);
+			},
+		});
+		this.addCommand({
+			id: "open-task-boards-explorer",
+			name: t("open-task-boards-explorer"),
+			callback: () => {
+				openBoardsExplorerModal(this);
 			},
 		});
 		this.addCommand({
@@ -1393,6 +1438,21 @@ export default class TaskBoard extends Plugin {
 		// 		}
 		// 	})
 		// );
+
+		const openBoardCallback = (data: {
+			layout: string;
+			filePath: string;
+			duplicate: boolean;
+		}) => {
+			try {
+				this.activateView(data.layout, data.duplicate, data.filePath);
+			} catch (error) {
+				console.error(error);
+			}
+		};
+
+		eventEmitter.on("OPEN_BOARD", openBoardCallback);
+		return () => eventEmitter.off("OPEN_BOARD", openBoardCallback);
 	}
 
 	async onFileModifiedAndLostFocus() {
@@ -1461,9 +1521,15 @@ export default class TaskBoard extends Plugin {
 			// new Notice(smallMessage, 0);
 			// }
 
+			// This will run only on a fresh plugin install
+			if (previousVersion === "") {
+				// creates the DEFAULT_BOARD file if it doesnt exists.
+				await this.createTemplateBoard();
+			}
+
 			// make the localStorage flag, 'manadatoryScan' to True
 			if (previousVersion === "" || runMandatoryScan) {
-				localStorage.setItem("manadatoryScan", "true");
+				localStorage.setItem(MANDATORY_SCAN_KEY, "true");
 			}
 
 			this.settings.version = currentVersion;
@@ -1480,56 +1546,36 @@ export default class TaskBoard extends Plugin {
 			// 	})
 			// );
 		}
-
-		// Check if .taskboard files exist and create missing ones
-		await this.checkAndCreateBoardFiles();
 	}
 
 	/**
-	 * Check if configured board files exist, and create missing default board files
-	 * This is called during plugin initialization
+	 * This function only runs during the plugin installation time and
+	 * creates the template board(DEFAULT_BOARD) for user to use for the
+	 * first time.
 	 */
-	private async checkAndCreateBoardFiles() {
+	private async createTemplateBoard() {
 		try {
-			console.log("Task Board: Checking for configured board files...");
+			// Import DEFAULT_BOARDS from BoardConfigs
+			const { DEFAULT_BOARD } =
+				await import("src/interfaces/BoardConfigs");
+			const DEFAULT_BOARD_REGISTRY_ITEM = Object.values(
+				DEFAULT_SETTINGS.data.taskBoardFilesRegistry,
+			)[0];
 
-			// Get the missing board files
-			const missingFiles =
-				await this.taskBoardFileManager.validateBoardFiles();
+			const success = await this.taskBoardFileManager.createNewBoardFile(
+				DEFAULT_BOARD_REGISTRY_ITEM.filePath,
+				DEFAULT_BOARD,
+			);
 
-			if (missingFiles.length > 0) {
-				console.log(
-					`Task Board: Found ${missingFiles.length} missing board file(s)`,
-					missingFiles,
+			if (success) {
+				new Notice(
+					`Task Board: Created the template board file to help you start using the plugin quickly.\n\nBoard Path : ${DEFAULT_BOARD_REGISTRY_ITEM.filePath}`,
+					0,
 				);
-
-				// Import DEFAULT_BOARDS from BoardConfigs
-				const { DEFAULT_BOARDS } =
-					await import("src/interfaces/BoardConfigs");
-
-				// Try to create missing default board files
-				const createdCount =
-					await this.taskBoardFileManager.createMissingDefaultBoardFiles(
-						DEFAULT_BOARDS,
-					);
-
-				if (createdCount > 0) {
-					new Notice(
-						`Task Board: Created ${createdCount} missing board file(s). Please restart the plugin or reload Obsidian to load the new boards.`,
-						5000,
-					);
-					console.log(
-						`Task Board: Successfully created ${createdCount} board file(s)`,
-					);
-				}
 			} else {
-				console.log("Task Board: All configured board files exist.");
+				throw "Task Board: There was an issue while creating the template board file. Please check the logs.";
 			}
 		} catch (error) {
-			console.error(
-				"Task Board: Error checking or creating board files:",
-				error,
-			);
 			bugReporterManagerInsatance.showNotice(
 				34,
 				"Error checking or creating board files",
@@ -1538,6 +1584,63 @@ export default class TaskBoard extends Plugin {
 			);
 		}
 	}
+
+	// /**
+	//  * @deprecated - In the new design, we will not going to create multiple board files,
+	//  * instead there will be a single bord file. Please use the {@link createTemplateBoard()} function.
+	//  *
+	//  * Check if configured board files exist, and create missing default board files
+	//  * This is called during plugin initialization
+	//  */
+	// private async checkAndCreateBoardFiles() {
+	// 	try {
+	// 		console.log("Task Board: Checking for configured board files...");
+
+	// 		// Get the missing board files
+	// 		const missingFiles =
+	// 			await this.taskBoardFileManager.validateBoardFiles();
+
+	// 		if (missingFiles.length > 0) {
+	// 			console.log(
+	// 				`Task Board: Found ${missingFiles.length} missing board file(s)`,
+	// 				missingFiles,
+	// 			);
+
+	// 			// Import DEFAULT_BOARDS from BoardConfigs
+	// 			const { DEFAULT_BOARD } =
+	// 				await import("src/interfaces/BoardConfigs");
+
+	// 			// Try to create missing default board files
+	// 			const createdCount =
+	// 				await this.taskBoardFileManager.createMissingDefaultBoardFiles(
+	// 					[DEFAULT_BOARD],
+	// 				);
+
+	// 			if (createdCount > 0) {
+	// 				new Notice(
+	// 					`Task Board: Created ${createdCount} missing board file(s). Please restart the plugin or reload Obsidian to load the new boards.`,
+	// 					5000,
+	// 				);
+	// 				console.log(
+	// 					`Task Board: Successfully created ${createdCount} board file(s)`,
+	// 				);
+	// 			}
+	// 		} else {
+	// 			console.log("Task Board: All configured board files exist.");
+	// 		}
+	// 	} catch (error) {
+	// 		console.error(
+	// 			"Task Board: Error checking or creating board files:",
+	// 			error,
+	// 		);
+	// 		bugReporterManagerInsatance.showNotice(
+	// 			34,
+	// 			"Error checking or creating board files",
+	// 			error as string,
+	// 			"main.ts/checkAndCreateBoardFiles",
+	// 		);
+	// 	}
+	// }
 
 	async fileExists(filePath: string): Promise<boolean> {
 		return await this.app.vault.adapter.exists(filePath);

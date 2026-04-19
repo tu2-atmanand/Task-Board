@@ -5,7 +5,7 @@ import {
 	addTaskInNote,
 	updateTaskInFile,
 } from "src/utils/taskLine/TaskLineUtils";
-import { AddOrEditTaskView } from "src/views/AddOrEditTaskView";
+import { AddOrEditTaskView } from "src/obsidian_views/AddOrEditTaskView";
 import { Board } from "../interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { eventEmitter } from "./EventEmitter";
@@ -26,7 +26,6 @@ import { BugReporterModal } from "src/modals/BugReporterModal";
 import { DiffContentCompareModal } from "src/modals/DiffContentCompareModal";
 import { ScanFilterModal } from "src/modals/ScanFilterModal";
 import { ScanVaultModal } from "src/modals/ScanVaultModal";
-import { TaskBoardActionsModal } from "src/modals/TaskBoardActionsModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { DatePickerModal } from "src/modals/date_picker";
 import { scanFilters } from "src/interfaces/GlobalSettings";
@@ -36,9 +35,15 @@ import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 export const openBoardConfigModal = (
 	plugin: TaskBoard,
 	currentBoardData: Board,
+	currentViewIndex: number,
 	onSave: (updatedBoard: Board) => void,
 ) => {
-	new BoardConfigureModal(plugin, currentBoardData, onSave).open();
+	new BoardConfigureModal(
+		plugin,
+		currentBoardData,
+		currentViewIndex,
+		onSave,
+	).open();
 };
 
 // Function to open the ScanVaultModal
@@ -50,11 +55,12 @@ export const openScanVaultModal = (plugin: TaskBoard) => {
 export const openBoardsExplorerModal = (plugin: TaskBoard) => {
 	const boardsRegistry = plugin.settings.data.taskBoardFilesRegistry || {};
 
-	const onBoardSelect = (boardId: string, boardName: string) => {
-		// When a board is selected, you can perform any action here
-		// For now, we just emit an event to switch to that board
-		console.log(`Board selected: ${boardName} (ID: ${boardId})`);
-		eventEmitter.emit("BOARD_SELECTED", { boardId, boardName });
+	const onBoardSelect = (boardId: string, filePath: string) => {
+		eventEmitter.emit("OPEN_BOARD", {
+			layout: "tab",
+			filePath: filePath,
+			duplicate: false,
+		});
 	};
 
 	new BoardsExplorerModal(plugin, boardsRegistry, onBoardSelect).open();
@@ -526,16 +532,16 @@ export const openDiffContentCompareModal = (
 	});
 };
 
-export const openTaskBoardActionsModal = (
-	plugin: TaskBoard,
-	activeBoardData: Board,
-) => {
-	const actionModal = new TaskBoardActionsModal(
-		plugin,
-		activeBoardData.columns,
-	);
-	actionModal.open();
-};
+// export const openTaskBoardActionsModal = (
+// 	plugin: TaskBoard,
+// 	activeBoardData: Board,
+// ) => {
+// 	const actionModal = new TaskBoardActionsModal(
+// 		plugin,
+// 		activeBoardData.columns,
+// 	);
+// 	actionModal.open();
+// };
 
 export const openScanFiltersModal = (
 	plugin: TaskBoard,
@@ -808,8 +814,8 @@ export const openEditTaskView = async (
 export const openDateInputModal = async (
 	plugin: TaskBoard,
 	dateName: string,
-	initialValue: string,
 	onSelect: (newDate: string) => void,
+	initialValue?: string,
 ) => {
 	const datePicker = new DatePickerModal(plugin, dateName, initialValue);
 	datePicker.onDateSelected = async (date: string) => {

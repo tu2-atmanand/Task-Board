@@ -76,7 +76,6 @@ export class TaskFilterComponent extends Component {
 		plugin: TaskBoard,
 		app: App,
 		private leafId?: string | undefined,
-		activeBoardIndex?: number,
 		private initialFilterState?: RootFilterState,
 	) {
 		super();
@@ -84,13 +83,27 @@ export class TaskFilterComponent extends Component {
 		this.plugin = plugin;
 		this.app = app;
 		this.pluginSettings = plugin.settings;
-		this.activeBoardIndex = activeBoardIndex;
 	}
 
 	onload() {
 		// If initial filter state is provided (for column filters), use it
 		if (this.initialFilterState) {
 			this.rootFilterState = this.initialFilterState;
+
+			// Clean up any invalid filter groups in the initial state
+			if (
+				this.rootFilterState.filterGroups &&
+				Array.isArray(this.rootFilterState.filterGroups)
+			) {
+				this.rootFilterState.filterGroups =
+					this.rootFilterState.filterGroups.filter(
+						(groupData) =>
+							groupData &&
+							typeof groupData === "object" &&
+							groupData.groupCondition &&
+							Array.isArray(groupData.filters),
+					);
+			}
 		} else {
 			/**
 			 * Otherwise, load from localStorage (for board filters)
@@ -294,7 +307,25 @@ export class TaskFilterComponent extends Component {
 		}
 
 		// Re-populate filter groups from state
-		this.rootFilterState.filterGroups.forEach((groupData) => {
+		// Filter out null/undefined/invalid filter groups to prevent corruption issues
+		const validFilterGroups = this.rootFilterState.filterGroups.filter(
+			(groupData) =>
+				groupData &&
+				typeof groupData === "object" &&
+				groupData.groupCondition &&
+				Array.isArray(groupData.filters),
+		);
+
+		// If invalid groups were found, update the state to remove them
+		if (
+			validFilterGroups.length !==
+			this.rootFilterState.filterGroups.length
+		) {
+			this.rootFilterState.filterGroups = validFilterGroups;
+			this.saveStateToLocalStorage();
+		}
+
+		validFilterGroups.forEach((groupData) => {
 			const groupElement = this.createFilterGroupElement(groupData);
 			this.filterGroupsContainerEl.appendChild(groupElement);
 		});
@@ -1478,6 +1509,22 @@ export class TaskFilterComponent extends Component {
 			});
 
 		this.rootFilterState = JSON.parse(JSON.stringify(state));
+
+		// Clean up any invalid filter groups that might exist in loaded state
+		if (
+			this.rootFilterState.filterGroups &&
+			Array.isArray(this.rootFilterState.filterGroups)
+		) {
+			this.rootFilterState.filterGroups =
+				this.rootFilterState.filterGroups.filter(
+					(groupData) =>
+						groupData &&
+						typeof groupData === "object" &&
+						groupData.groupCondition &&
+						Array.isArray(groupData.filters),
+				);
+		}
+
 		this.saveStateToLocalStorage();
 
 		this.render();

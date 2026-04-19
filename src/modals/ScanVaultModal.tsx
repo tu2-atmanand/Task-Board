@@ -10,7 +10,7 @@ import VaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScan
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
+import { MANDATORY_SCAN_KEY, newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
@@ -48,6 +48,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [isRunning, setIsRunning] = useState(false);
 	const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
 	const [progress, setProgress] = useState(0);
+	const [scannedFilesCount, setScannedFilesCount] = useState<number>();
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
 		VaultName: app.vault.getName(),
@@ -58,6 +59,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 	const runScan = async () => {
 		setIsRunning(true);
+		let totalScannedFilesCount = 0;
 
 		// Reset terminal output and collected tasks
 		vaultScanner.tasksCache.Pending = {};
@@ -77,6 +79,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 				if (scanFilterForFilesNFoldersNFrontmatter(plugin, file, scanFilters)) {
 					setTerminalOutput((prev) => [...prev, `Scanning file: ${file.path}`]);
 					await vaultScanner.extractTasksFromFile(file, scanFilters);
+					totalScannedFilesCount++;
 				}
 			}
 
@@ -85,6 +88,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		// setIsRunning(false);
 		setCollectedTasks(vaultScanner.tasksCache);
+		setScannedFilesCount(totalScannedFilesCount);
 		new Notice(t("vault-scanning-complete"));
 
 		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
@@ -92,8 +96,9 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		findMaxIdCounterAndUpdateSettings(plugin);
 
-		if (localStorage.getItem("manadatoryScan") === "true") {
-			localStorage.setItem("manadatoryScan", "false");
+		// If mandatory scan, close all existing Task Board views to force re-opening with the newly scanned data. Else, just emit REFRESH_BOARD event to update the existing board(s) with the newly scanned data.
+		if (localStorage.getItem(MANDATORY_SCAN_KEY) === "true") {
+			localStorage.setItem(MANDATORY_SCAN_KEY, "false");
 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD).forEach((leaf) => {
 				leaf.detach();
 			});
@@ -155,8 +160,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 	return (
 		<div className="scanVaultModalHome">
-			<h2>{t("scan-tasks-from-the-vault")}</h2>
-			{localStorage.getItem("manadatoryScan") === "true" ?
+			<h2>{t("vault-scanner")}</h2>
+			{localStorage.getItem(MANDATORY_SCAN_KEY) === "true" ?
 				(<>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
@@ -178,6 +183,12 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 					{isRunning ? progress.toFixed(0) : t("run")}
 				</button>
 			</div>
+
+			{progress === 100 && (
+				<div className="scanVaultModalHomeScannedFilesCountSection">
+					Total files scanned : {scannedFilesCount}
+				</div>
+			)}
 
 			<div className="scanVaultModalHomeThirdSection">
 				<div className={`scanVaultModalHomeTerminal ${showCollectedTasks ? 'scanVaultModalHomeTerminalSlideOut' : 'scanVaultModalHomeTerminalSlideIn'}`}>

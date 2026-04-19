@@ -1,5 +1,5 @@
 import TaskBoard from "main";
-import { WorkspaceLeaf, TFile } from "obsidian";
+import { WorkspaceLeaf, TFile, Notice } from "obsidian";
 import {
 	EditButtonMode,
 	statusTypeNames,
@@ -22,6 +22,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 import {
 	sanitizeDueDate,
 	sanitizePriority,
+	sanitizeReminder,
 	sanitizeScheduledDate,
 	sanitizeStartDate,
 	sanitizeStatus,
@@ -32,6 +33,8 @@ import {
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer";
+import { t } from "./lang/helper";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -44,8 +47,7 @@ export const handleEditTask = (
 	task: taskItem,
 	settingOption: string,
 ) => {
-	const taskNoteIdentifierTag =
-		plugin.settings.data.taskNoteIdentifierTag;
+	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isThisATaskNote = isTaskNotePresentInTags(
 		taskNoteIdentifierTag,
 		task.tags,
@@ -58,7 +60,18 @@ export const handleEditTask = (
 				openEditTaskModal(plugin, task);
 			}
 			break;
-		case EditButtonMode.View:
+		case EditButtonMode.ViewInSplitTab:
+			openEditTaskView(
+				plugin,
+				isThisATaskNote,
+				false,
+				true,
+				task,
+				task.filePath,
+				"split",
+			);
+			break;
+		case EditButtonMode.ViewInWindow:
 			openEditTaskView(
 				plugin,
 				isThisATaskNote,
@@ -189,30 +202,51 @@ export const openFileAndHighlightTask = async (
 /**
  * Update the status of a task item.
  * @param plugin - Taskboard plugin instance
- * @param oldTask - Task item with old properties
+ * @param taskOld - Task item with old properties, directly fetched from the cache.
+ * @param taskUpdated - Task which might have been updated before sending to this function. Or it can be same as taskOld if no changes has been made.
  * @param newStatus - New status symbol of the task item
  * @returns void
  * @description This function updates the status of a task item and triggers an event to update the real-time data.
  * If the task item is a note, it will update the frontmatter of the file first and then trigger the event to update the view.
  * If the task item is an inline-task, it will directly update the file and then trigger the event to update the view.
  */
-export const updateTaskItemStatus = (
+export const updateTaskItemStatus = async (
 	plugin: TaskBoard,
-	oldTask: taskItem,
+	taskOld: taskItem,
+	taskUpdated: taskItem,
 	newStatus: string,
 ) => {
-	let newTask = { ...oldTask };
+	let newTask = { ...taskUpdated };
 	newTask.status = newStatus;
 
+	const statusConfig = plugin.settings.data.customStatuses.find(
+		(status) => status.symbol === newStatus,
+	);
+	const statusType = statusConfig ? statusConfig.type : statusTypeNames.TODO;
+
+	if (statusType === statusTypeNames.DONE) {
+		const allowed = await verifySubtasksAndChildtasksAreComplete(
+			plugin,
+			taskUpdated,
+		);
+
+		if (!allowed) {
+			new Notice(
+				t("verifySubtasksAndChildtasksAreComplete-false-message"),
+			);
+			return;
+		}
+	}
+
 	let eventData: UpdateTaskEventData = {
-		taskID: oldTask.id,
+		taskID: taskOld.id,
 		state: true,
 	};
 	eventEmitter.emit("UPDATE_TASK", eventData);
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		oldTask.tags
+		taskOld.tags,
 	);
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
@@ -220,26 +254,22 @@ export const updateTaskItemStatus = (
 				// TODO : Is 1 sec really required ?
 				// This is required to rescan the updated file and refresh the board.
 				plugin.realTimeScanner.processAllUpdatedFiles(
-					oldTask.filePath,
-					oldTask.id,
+					taskOld.filePath,
+					taskOld.id,
 				);
 			});
 		});
 	} else {
-		const newStatusType =
-			plugin.settings.data.customStatuses.find(
-				(status) => status.symbol === newStatus
-			)?.type ?? statusTypeNames.TODO;
 		newTask.title = sanitizeStatus(
 			plugin.settings.data,
 			newTask.title,
 			newStatus,
-			newStatusType,
+			statusType,
 		);
-		updateTaskInFile(plugin, newTask, oldTask).then((newId) => {
+		updateTaskInFile(plugin, newTask, taskOld).then((newId) => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
-				oldTask.filePath,
-				oldTask.id,
+				taskOld.filePath,
+				taskOld.id,
 			);
 		});
 	}
@@ -248,7 +278,8 @@ export const updateTaskItemStatus = (
 /**
  * Update the priority of a task item.
  * @param plugin - Taskboard plugin instance
- * @param oldTask - Task item with old properties
+ * @param taskOld - Task item with old properties, directly fetched from the cache.
+ * @param taskUpdated - Task which might have been updated before sending to this function. Or it can be same as taskOld if no changes has been made.
  * @param newPriority - New priority value of the task item
  * @returns void
  * @description This function updates the priority of a task item and triggers an event to update the real-time data.
@@ -257,29 +288,30 @@ export const updateTaskItemStatus = (
  */
 export const updateTaskItemPriority = (
 	plugin: TaskBoard,
-	oldTask: taskItem,
+	taskOld: taskItem,
+	taskUpdated: taskItem,
 	newPriority: number,
 ) => {
-	let newTask = { ...oldTask } as taskItem;
+	let newTask = { ...taskUpdated } as taskItem;
 	newTask.priority = newPriority;
 
 	let eventData = {
-		taskID: oldTask.id,
+		taskID: taskOld.id,
 		state: true,
 	} as UpdateTaskEventData;
 	eventEmitter.emit("UPDATE_TASK", eventData);
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		oldTask.tags
+		taskOld.tags,
 	);
 
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
-					oldTask.filePath,
-					oldTask.id,
+					taskOld.filePath,
+					taskOld.id,
 				);
 			});
 		});
@@ -289,10 +321,10 @@ export const updateTaskItemPriority = (
 			newTask.title,
 			newPriority,
 		);
-		updateTaskInFile(plugin, newTask, oldTask).then(() => {
+		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
-				oldTask.filePath,
-				oldTask.id,
+				taskOld.filePath,
+				taskOld.id,
 			);
 		});
 	}
@@ -301,7 +333,8 @@ export const updateTaskItemPriority = (
 /**
  * Update the date of a task item.
  * @param plugin - Taskboard plugin instance
- * @param oldTask - Task item with old properties
+ * @param taskOld - Task item with old properties, directly fetched from the cache.
+ * @param taskUpdated - Task which might have been updated before sending to this function. Or it can be same as taskOld if no changes has been made.
  * @param dateType - Type of date to update (startDate, scheduledDate, due)
  * @param newDate - New date value of the task item
  * @returns void
@@ -311,11 +344,12 @@ export const updateTaskItemPriority = (
  */
 export const updateTaskItemDate = (
 	plugin: TaskBoard,
-	oldTask: taskItem,
-	dateType: "startDate" | "scheduledDate" | "due",
+	taskOld: taskItem,
+	taskUpdated: taskItem,
+	dateType: string,
 	newDate: string,
 ): void => {
-	let newTask = { ...oldTask } as taskItem;
+	let newTask = { ...taskUpdated } as taskItem;
 	switch (dateType) {
 		case UniversalDateOptions.startDate:
 			newTask.startDate = newDate;
@@ -334,19 +368,19 @@ export const updateTaskItemDate = (
 			);
 	}
 
-	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
+	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld.id, state: true });
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		oldTask.tags
+		taskOld.tags,
 	);
 
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
-					oldTask.filePath,
-					oldTask.id,
+					taskOld.filePath,
+					taskOld.id,
 				);
 			});
 		});
@@ -381,10 +415,10 @@ export const updateTaskItemDate = (
 				);
 		}
 
-		updateTaskInFile(plugin, newTask, oldTask).then(() => {
+		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
-				oldTask.filePath,
-				oldTask.id,
+				taskOld.filePath,
+				taskOld.id,
 			);
 		});
 	}
@@ -393,7 +427,8 @@ export const updateTaskItemDate = (
 /**
  * Update the reminder of a task item.
  * @param plugin - Taskboard plugin instance
- * @param oldTask - Task item with old properties
+ * @param taskOld - Task item with old properties, directly fetched from the cache.
+ * @param taskUpdated - Task which might have been updated before sending to this function. Or it can be same as taskOld if no changes has been made.
  * @param newReminder - New reminder value of the task item
  * @returns void
  * @description This function updates the reminder of a task item and triggers an event to update the real-time data.
@@ -402,33 +437,39 @@ export const updateTaskItemDate = (
  */
 export const updateTaskItemReminder = (
 	plugin: TaskBoard,
-	oldTask: taskItem,
+	taskOld: taskItem,
+	taskUpdated: taskItem,
 	newReminder: string,
 ) => {
-	const newTask = { ...oldTask } as taskItem;
+	const newTask = { ...taskUpdated } as taskItem;
 	newTask.reminder = newReminder;
 
-	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
+	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld.id, state: true });
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		oldTask.tags
+		taskOld.tags,
 	);
 
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
-					oldTask.filePath,
-					oldTask.id,
+					taskOld.filePath,
+					taskOld.id,
 				);
 			});
 		});
 	} else {
-		updateTaskInFile(plugin, newTask, oldTask).then(() => {
+		newTask.title = sanitizeReminder(
+			plugin.settings.data,
+			taskOld.title,
+			newReminder,
+		);
+		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
-				oldTask.filePath,
-				oldTask.id,
+				taskOld.filePath,
+				taskOld.id,
 			);
 		});
 	}
@@ -436,8 +477,8 @@ export const updateTaskItemReminder = (
 
 /** * Update the tags of a task item.
  * @param plugin - Taskboard plugin instance
- * @param oldTask - Task item with old properties
- * @param newTask - This task may have other properties updated or it may be exact same copy of oldTask.
+ * @param taskOld - Task item with old properties, directly fetched from the cache.
+ * @param taskUpdated - Task which might have been updated before sending to this function. Or it can be same as taskOld if no changes has been made.
  * @param newTags - New tags array of the task item
  * @returns void
  * @description This function updates the tags of a task item and triggers an event to update the real-time data.
@@ -446,46 +487,48 @@ export const updateTaskItemReminder = (
  */
 export const updateTaskItemTags = (
 	plugin: TaskBoard,
-	oldTask: taskItem,
-	newTask: taskItem,
+	taskOld: taskItem,
+	taskUpdated: taskItem,
 	newTags: string[],
 ) => {
-	// let newTask = { ...oldTask };
+	let newTask = { ...taskUpdated };
 	newTask.tags = newTags;
 
-	eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
+	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld.id, state: true });
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		oldTask.tags
+		taskOld.tags,
 	);
 
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			sleep(1000).then(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
-					oldTask.filePath,
-					oldTask.id,
+					taskOld.filePath,
+					taskOld.id,
 				);
 			});
 		});
 	} else {
-		newTask.title = sanitizeTags(newTask.title, oldTask.tags, newTags);
-		updateTaskInFile(plugin, newTask, oldTask).then(() => {
+		newTask.title = sanitizeTags(newTask.title, newTags);
+		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
-				oldTask.filePath,
-				oldTask.id,
+				taskOld.filePath,
+				taskOld.id,
 			);
 		});
 	}
 };
 
 /**
- * Updates a property of a task item and returns the updated task item.
+ * Updates the old property with the new property of a task item.
+ * Also, for inline-task, sanitizes the title to update the value in title.
+ * And returns the updated task item.
+ *
  * @param {taskItem} task - The task item to update.
  * @param {globalSettingsData} globalSettings - The global settings data of the Taskboard plugin.
  * @param {string} property - The property of the task item to update.
- * @param {string | number | string[]} oldValue - The old value of the property to update.
  * @param {string | number | string[]} newValue - The new value of the property to update.
  * @returns {taskItem} The updated task item.
  */
@@ -493,7 +536,6 @@ export const updateTaskItemProperty = async (
 	task: taskItem,
 	globalSettings: globalSettingsData,
 	property: string,
-	oldValue: string | number | string[],
 	newValue: string | number | string[],
 ): Promise<taskItem> => {
 	const updatedTask: taskItem = { ...task };
@@ -508,7 +550,6 @@ export const updateTaskItemProperty = async (
 			if (!isThisTaskNote) {
 				updatedTask.title = sanitizeTags(
 					task.title,
-					oldValue as string[],
 					newValue as string[],
 				);
 			}

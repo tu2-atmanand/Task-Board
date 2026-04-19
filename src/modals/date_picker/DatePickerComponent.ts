@@ -91,10 +91,10 @@ export class DatePickerComponent extends Component {
 			cls: "date-picker-container",
 		});
 
-		const heading = datePickerContainer.createEl("h2", {
-			cls: "date-picker-heading",
-			text: "Change " + this.dateName + " Date",
-		});
+		// const heading = datePickerContainer.createEl("h2", {
+		// 	cls: "date-picker-heading",
+		// 	text: "Change " + this.dateName + " Date",
+		// });
 
 		const mainPanel = datePickerContainer.createDiv({
 			cls: "date-picker-main-panel",

@@ -18,7 +18,6 @@ import {
 	scanModeOptions,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
-import { DEFAULT_BOARDS } from "./BoardConfigs";
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants";
 
 export interface scanFilters {
@@ -101,6 +100,7 @@ export interface globalSettingsData {
 	visiblePropertiesList: string[];
 	taskCardStyle: string;
 	showVerticalScroll: boolean;
+	dragAutoScrollEdgePercent: number;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
@@ -135,8 +135,6 @@ export interface globalSettingsData {
 	taskBoardFilesRegistry: taskBoardFilesRegistryType;
 	lastViewHistory: {
 		boardFilePath: string;
-		viewedType: string;
-		boardIndex: number;
 		settingTab: number;
 		taskId?: string;
 	};
@@ -228,6 +226,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		],
 		taskCardStyle: taskCardStyleNames.EMOJI,
 		showVerticalScroll: true,
+		dragAutoScrollEdgePercent: 20,
 		tagColors: [
 			{
 				name: "bug",
@@ -440,9 +439,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		experimentalFeatures: false,
 		safeGuardFeature: true,
 		lastViewHistory: {
-			boardFilePath: "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-			viewedType: "kanban",
-			boardIndex: 0,
+			boardFilePath:
+				"Meta/Task_Board/Boards/Time Based Workflow.taskboard",
 			settingTab: 0,
 		},
 		boundTaskCompletionToChildTasks: false,
@@ -460,23 +458,10 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		taskBoardFilesRegistry: {
 			"3103563481": {
 				boardId: "3103563481",
-				filePath:
-					"Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+				filePath: "Meta/Task_Board/Boards/My Project Board.taskboard",
 				boardName: "Time Based Workflow",
-				boardDescription: "This board contains dated type columns for managing time critical scheduled tasks.",
-			},
-			"2957159294": {
-				boardId: "2957159294",
-				filePath: "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
-				boardName: "Tag Based Workflow",
-				boardDescription: "This board contains tagged type columns for custom kanban workflow.",
-			},
-			"4271106430": {
-				boardId: "4271106430",
-				filePath:
-					"Meta/Task_Board/Boards/Status Based Workflow.taskboard",
-				boardName: "Status Based Workflow",
-				boardDescription: "This board contains status type columns for a cyclic workflow to move tasks from one stage to another using just the checkbox.",
+				boardDescription:
+					"This board contains dated type columns for managing time critical scheduled tasks.",
 			},
 		},
 		loadAllBoards: false,

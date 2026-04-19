@@ -16,7 +16,7 @@ export class TaskRegularExpressions {
 		TaskRegularExpressions.indentationRegex.source +
 			TaskRegularExpressions.listMarkerRegex.source +
 			" +" +
-			TaskRegularExpressions.checkboxRegex.source
+			TaskRegularExpressions.checkboxRegex.source,
 	);
 
 	// Main regex for parsing a line. It matches the following:
@@ -32,7 +32,7 @@ export class TaskRegularExpressions {
 			" +" +
 			TaskRegularExpressions.checkboxRegex.source +
 			TaskRegularExpressions.afterCheckboxRegex.source,
-		"u"
+		"u",
 	);
 
 	// Used with the "Create or Edit Task" command to parse indentation and status if present
@@ -49,13 +49,13 @@ export class TaskRegularExpressions {
 			TaskRegularExpressions.checkboxRegex.source +
 			")?" +
 			TaskRegularExpressions.afterCheckboxRegex.source,
-		"u"
+		"u",
 	);
 
 	// Used with "Toggle Done" command to detect a list item that can get a checkbox added to it.
 	public static readonly listItemRegex = new RegExp(
 		TaskRegularExpressions.indentationRegex.source +
-			TaskRegularExpressions.listMarkerRegex.source
+			TaskRegularExpressions.listMarkerRegex.source,
 	);
 
 	// Match on block link at end.
@@ -73,7 +73,7 @@ export class TaskRegularExpressions {
 	public static readonly hashTagsRegex = /(^|\s)#[^ !@#$%^&*(),.?":{}|<>]+/g;
 	public static readonly hashTag = new RegExp(this.hashTagsRegex.source);
 	public static readonly hashTagsFromEnd = new RegExp(
-		this.hashTagsRegex.source + "$"
+		this.hashTagsRegex.source + "$",
 	);
 
 	// The allowed characters in a single task id:
@@ -81,7 +81,7 @@ export class TaskRegularExpressions {
 
 	// The allowed characters in a comma-separated sequence of task ids:
 	public static readonly taskIdSequenceRegex = new RegExp(
-		this.taskIdRegex.source + "( *, *" + this.taskIdRegex.source + " *)*"
+		this.taskIdRegex.source + "( *, *" + this.taskIdRegex.source + " *)*",
 	);
 }
 

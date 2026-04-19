@@ -33,8 +33,7 @@ export async function fetchTasksPluginCustomStatuses(
 		const tasksPluginO = new TasksPluginApi(plugin);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
-			plugin.settings.data.compatiblePlugins.tasksPlugin =
-				true;
+			plugin.settings.data.compatiblePlugins.tasksPlugin = true;
 
 			// Define the path to the tasks plugin data.json file
 			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
@@ -74,17 +73,17 @@ export async function fetchTasksPluginCustomStatuses(
 
 			// Store it in the plugin settings if there is a difference
 			if (
-				JSON.stringify(
-					plugin.settings.data.customStatuses
-				) !== JSON.stringify(statuses)
+				JSON.stringify(plugin.settings.data.customStatuses) !==
+				JSON.stringify(statuses)
 			) {
 				plugin.settings.data.customStatuses = statuses;
 				await plugin.saveSettings(plugin.settings);
 			}
 		}
 	} catch (error) {
-		bugReporterManagerInsatance.addToLogs(
+		bugReporterManagerInsatance.showNotice(
 			100,
+			"There was an issue while importing the custom statuses configs from the Tasks plugin. See the below details to get more info. If required, please report this issue to the developer.",
 			String(error),
 			"tasks-plugin/helper.ts/fetchTasksPluginCustomStatuses",
 		);

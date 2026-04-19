@@ -5,50 +5,62 @@ import { taskItem } from "src/interfaces/TaskItem";
 import { isTaskCompleted, isTaskLine } from "../CheckBoxUtils";
 import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
 import { getTaskFromId } from "../TaskItemUtils";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
+/**
+ * Checks whether the file is mentioned in the "Files" filter or not and based on the logic returns a truth array to specify if the file is explicitely mentioned inside the filter and whether its allowed for scanning or not.
+ *
+ * @param fileName Full path of the file along with extension.
+ * @param scanFilters All scanning filters.
+ * @returns [explicitelyMentioned: boolean, isAllowedToScan: boolean] - An truth array where the first element specifies, whether the file is explicitely mentioned inside the filters or not. The second element specifies whether algorithm-wise the file should be scanned or not.
+ */
 export function checkFileFilters(
 	fileName: string,
-	scanFilters: scanFilters
-): boolean | undefined {
+	scanFilters: scanFilters,
+): boolean[] | undefined {
 	// const fileInFilters = scanFilters.files.values.includes(fileName);
 	const fileInFilters = scanFilters.files.values.some((value) => {
-		if (value.startsWith("/") && value.endsWith("/")) {
-			// Try to create a RegExp from the pattern
+		// Check if value is in regex format: /pattern/flags
+		// Parse /pattern/flags using regex (handles escaped slashes in pattern)
+		const match = value.trim().match(/^\/(.*?)\/([gimsuy]*)$/);
+		if (match && match[1]) {
 			try {
-				const pattern = value.slice(1, -1);
-				const regex = new RegExp(pattern);
+				const [, pattern, flags] = match;
+				const regex = new RegExp(pattern, flags);
 				return regex.test(fileName);
-			} catch {
-				// Invalid regex, skip this value
-				return false;
+			} catch (error) {
+				bugReporterManagerInsatance.addToLogs(
+					189,
+					JSON.stringify(error),
+					"ScanningFileterer.ts/checkFileFilters",
+				);
+				return false; // Skip invalid patterns
 			}
 		} else {
 			return value === fileName;
 		}
 	});
 
-	if (fileInFilters && scanFilters.files.polarity === 1) {
-		return true;
-	} else if (fileInFilters && scanFilters.files.polarity === 2) {
-		return false;
-	}
-	// else if (!fileInFilters && scanFilters.files.polarity === 1) {
-	// 	return false;
-	// } else if (!fileInFilters && scanFilters.files.polarity === 2) {
-	// 	return true;
-	// }
-	// else {
-	// 	return false;
-	// }
-
-	// return true;
+	if (fileInFilters && scanFilters.files.polarity === 1) return [true, true];
+	if (fileInFilters && scanFilters.files.polarity === 2) return [true, false];
+	if (!fileInFilters && scanFilters.files.polarity === 1)
+		return [false, false];
+	if (!fileInFilters && scanFilters.files.polarity === 2)
+		return [false, true];
 }
 
+/**
+ * Checks whether the frontmatter is mentioned in the "Frontmatter" filter or not and based on the logic returns a truth array to specify if the frontmatter is explicitely mentioned inside the filter and whether the file is allowed for scanning or not.
+ *
+ * @param fileName Full path of the file along with extension.
+ * @param scanFilters All scanning filters.
+ * @returns [explicitelyMentioned: boolean, isAllowedToScan: boolean] - An truth array where the first element specifies, whether the frontmatter is explicitely mentioned inside the filters or not. The second element specifies whether algorithm-wise the file should be scanned or not.
+ */
 export function checkFrontMatterFilters(
 	plugin: TaskBoard,
 	file: TFile,
-	scanFilters: scanFilters
-): boolean | undefined {
+	scanFilters: scanFilters,
+): boolean[] | undefined {
 	const frontmatter = extractFrontmatterFromFile(plugin, file);
 
 	if (!frontmatter) {
@@ -56,7 +68,7 @@ export function checkFrontMatterFilters(
 	}
 	const frontMatterInFilters = Object.keys(frontmatter).some((key) => {
 		const filterString = scanFilters.frontmatter.values.find(
-			(filter: string) => filter.includes(`"${key}":`)
+			(filter: string) => filter.includes(`"${key}":`),
 		);
 		if (filterString) {
 			const valueMatch = filterString.match(/"[^"]+":\s*([^,\]]+)/);
@@ -73,29 +85,52 @@ export function checkFrontMatterFilters(
 		return false;
 	});
 	if (frontMatterInFilters && scanFilters.frontmatter.polarity === 1) {
-		return true;
+		return [true, true];
 	} else if (frontMatterInFilters && scanFilters.frontmatter.polarity === 2) {
-		return false;
+		return [true, false];
+	} else if (
+		!frontMatterInFilters &&
+		scanFilters.frontmatter.polarity === 1
+	) {
+		return [false, false];
+	} else if (
+		!frontMatterInFilters &&
+		scanFilters.frontmatter.polarity === 2
+	) {
+		return [false, true];
 	}
 }
 
+/**
+ * Checks whether the folder is mentioned in the "Folder" filter or not and based on the logic returns a truth array to specify if the folder is explicitely mentioned inside the filter and whether the file is allowed for scanning or not.
+ *
+ * @param fileName Full path of the file along with extension.
+ * @param scanFilters All scanning filters.
+ * @returns [explicitelyMentioned: boolean, isAllowedToScan: boolean] -  An truth array where the first element specifies, whether the frontmatter is explicitely mentioned inside the filters or not. The second element specifies whether algorithm-wise the file should be scanned or not.
+ */
 export function checkFolderFilters(
 	parentFolder: string,
-	scanFilters: scanFilters
-): boolean {
+	scanFilters: scanFilters,
+): boolean[] | undefined {
 	let folderInFilters = scanFilters.folders.values.includes(parentFolder);
 
 	if (!folderInFilters && parentFolder !== "") {
 		folderInFilters = scanFilters.folders.values.some((filter: string) => {
-			if (filter.startsWith("/") && filter.endsWith("/")) {
-				// Try to create a RegExp from the pattern
+			// Check if filter is in regex format: /pattern/flags
+			// Parse /pattern/flags using regex (handles escaped slashes in pattern)
+			const match = filter.trim().match(/^\/(.*?)\/([gimsuy]*)$/);
+			if (match && match[1]) {
 				try {
-					const pattern = filter.slice(1, -1);
-					const regex = new RegExp(pattern);
+					const [, pattern, flags] = match;
+					const regex = new RegExp(pattern, flags);
 					return regex.test(parentFolder);
-				} catch {
-					// Invalid regex, skip this value
-					return false;
+				} catch (error) {
+					bugReporterManagerInsatance.addToLogs(
+						190,
+						JSON.stringify(error),
+						"ScanningFileterer.ts/checkFileFilters",
+					);
+					return false; // Skip invalid patterns
 				}
 			} else {
 				// Check if parentFolder is exactly the filter OR is a subfolder of the filter
@@ -107,48 +142,45 @@ export function checkFolderFilters(
 		});
 	}
 
-	if (scanFilters.folders.polarity === 1) {
-		if (folderInFilters) {
-			return true;
-		} else {
-			return false;
-		}
-	} else if (scanFilters.folders.polarity === 2) {
-		if (folderInFilters) {
-			return false;
-		} else {
-			return true;
-		}
-	} else {
-		// This else body will never run because this function is only called if the scanFilters.folders.polarity !== 3.
-		if (
-			scanFilters.files.polarity === 1 &&
-			scanFilters.folders.polarity === 1 &&
-			scanFilters.frontmatter.polarity === 1
-		) {
-			return false;
-		} else if (
-			scanFilters.files.polarity === 2 &&
-			scanFilters.folders.polarity === 2 &&
-			scanFilters.frontmatter.polarity === 2
-		) {
-			return true;
-		} else if (
-			scanFilters.files.polarity === 1 ||
-			scanFilters.folders.polarity === 1 ||
-			scanFilters.frontmatter.polarity === 1
-		) {
-			return true;
-		} else if (
-			scanFilters.files.polarity === 2 ||
-			scanFilters.folders.polarity === 2 ||
-			scanFilters.frontmatter.polarity === 2
-		) {
-			return true;
-		}
-
-		return true;
+	if (folderInFilters && scanFilters.folders.polarity === 1) {
+		return [true, true];
+	} else if (folderInFilters && scanFilters.folders.polarity === 2) {
+		return [true, false];
+	} else if (!folderInFilters && scanFilters.folders.polarity === 1) {
+		return [false, false];
+	} else if (!folderInFilters && scanFilters.folders.polarity === 2) {
+		return [false, true];
 	}
+	// else {
+	// 	// This else body will never run because this function is only called if the scanFilters.folders.polarity !== 3.
+	// 	if (
+	// 		scanFilters.files.polarity === 1 &&
+	// 		scanFilters.folders.polarity === 1 &&
+	// 		scanFilters.frontmatter.polarity === 1
+	// 	) {
+	// 		return false;
+	// 	} else if (
+	// 		scanFilters.files.polarity === 2 &&
+	// 		scanFilters.folders.polarity === 2 &&
+	// 		scanFilters.frontmatter.polarity === 2
+	// 	) {
+	// 		return true;
+	// 	} else if (
+	// 		scanFilters.files.polarity === 1 ||
+	// 		scanFilters.folders.polarity === 1 ||
+	// 		scanFilters.frontmatter.polarity === 1
+	// 	) {
+	// 		return true;
+	// 	} else if (
+	// 		scanFilters.files.polarity === 2 ||
+	// 		scanFilters.folders.polarity === 2 ||
+	// 		scanFilters.frontmatter.polarity === 2
+	// 	) {
+	// 		return true;
+	// 	}
+
+	// 	return true;
+	// }
 }
 
 /**
@@ -161,12 +193,8 @@ export function checkFolderFilters(
 export function scanFilterForFilesNFoldersNFrontmatter(
 	plugin: TaskBoard,
 	file: TFile,
-	scanFilters: scanFilters
+	scanFilters: scanFilters,
 ): boolean {
-	// if (allowedFileExtensionsRegEx.test(file.path) === false) {
-	// 	return false; // Only process markdown files
-	// }
-
 	if (
 		scanFilters.files.polarity === 3 &&
 		scanFilters.frontmatter.polarity === 3 &&
@@ -177,47 +205,43 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 
 	const fileName = file.path; // Extract file name along with the path
 	const parentFolder = file.parent?.path || "";
+	let fileRes: boolean[] | undefined;
+	let fmRes: boolean[] | undefined;
+	let folderRes: boolean[] | undefined;
 
 	if (
 		scanFilters.files.polarity !== 3 &&
 		scanFilters.files.values.length > 0
 	) {
-		const result = checkFileFilters(fileName, scanFilters);
-		if (result !== undefined) {
-			return result;
-		} else {
-			// console.log("This comment should not run");
-			// return false; // If no specific filter matches, default to true
-		}
+		fileRes = checkFileFilters(fileName, scanFilters);
 	}
+	// Explicit mention precedence
+	if (fileRes?.[0]) return fileRes[1];
 
 	if (
 		scanFilters.frontmatter.polarity !== 3 &&
 		scanFilters.frontmatter.values.length > 0
 	) {
-		const result = checkFrontMatterFilters(plugin, file, scanFilters);
-		if (result !== undefined) {
-			return result;
-		} else {
-			// console.log("This comment should not run");
-			// return false; // If no specific filter matches, default to true
-		}
+		fmRes = checkFrontMatterFilters(plugin, file, scanFilters);
 	}
+	if (fmRes?.[0]) return fmRes[1];
 
 	if (
 		scanFilters.folders.polarity !== 3 &&
 		scanFilters.folders.values.length > 0
 	) {
-		const result = checkFolderFilters(parentFolder, scanFilters);
-		if (result !== undefined) {
-			return result;
-		} else {
-			// console.log("This comment should not run");
-			// return false; // If no specific filter matches, default to true
-		}
+		folderRes = checkFolderFilters(parentFolder, scanFilters);
 	}
+	if (folderRes?.[0]) return folderRes[1];
 
-	return true;
+	// Otherwise combine enabled filters deterministically (AND across enabled filters)
+	let allowed = true;
+	if (fileRes) allowed = allowed && fileRes[1];
+	if (fmRes) allowed = allowed && fmRes[1];
+	if (folderRes) allowed = allowed && folderRes[1];
+
+	// If no enabled filter produced a result, default allow
+	return fileRes || fmRes || folderRes ? allowed : true;
 }
 
 /**
@@ -260,7 +284,7 @@ export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
  */
 export function matchTagsWithWildcards(
 	settingsTags: string | string[],
-	userInputTags: string | string[]
+	userInputTags: string | string[],
 ): string[] | null {
 	if (!settingsTags || !userInputTags) return null;
 
@@ -292,8 +316,8 @@ export function matchTagsWithWildcards(
 	// Find matches
 	const matches = userArr.filter((userTag) =>
 		patterns.some((regex) =>
-			regex.test(userTag.toLowerCase().replace("#", ""))
-		)
+			regex.test(userTag.toLowerCase().replace("#", "")),
+		),
 	);
 
 	return matches.length > 0 ? matches : null;
@@ -308,10 +332,9 @@ export function matchTagsWithWildcards(
  */
 export async function verifySubtasksAndChildtasksAreComplete(
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ): Promise<boolean> {
-	if (!plugin.settings.data.boundTaskCompletionToChildTasks)
-		return true;
+	if (!plugin.settings.data.boundTaskCompletionToChildTasks) return true;
 
 	let flag = true;
 
@@ -320,7 +343,7 @@ export async function verifySubtasksAndChildtasksAreComplete(
 	if (subTasks.length > 0) {
 		// Check if all sub-tasks are completed
 		const allSubTasksCompleted = subTasks.every((line) =>
-			isTaskCompleted(line, false, plugin.settings)
+			isTaskCompleted(line, false, plugin.settings),
 		);
 		if (!allSubTasksCompleted) flag = false;
 	}

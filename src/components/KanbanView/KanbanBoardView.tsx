@@ -1,102 +1,142 @@
 // src/components/KanbanBoard.tsx
 
-import { Board, ColumnData } from "../../interfaces/BoardConfigs";
+import { Board, ColumnData, KanbanView, TaskBoardView } from "../../interfaces/BoardConfigs";
 import React, { memo, useEffect, useMemo, useState } from "react";
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-
-import { App } from "obsidian";
 import LazyColumn from "./LazyColumn";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { columnSegregator } from "src/utils/algorithms/ColumnSegregator";
+import { viewTypeNames } from "src/interfaces/Enums";
 
 interface KanbanBoardProps {
 	plugin: TaskBoard;
 	currentBoardData: Board;
-	currentBoardIndex: number;
+	currentView: TaskBoardView;
+	currentViewIndex: number;
 	filteredAndSearchedTasks: taskJsonMerged;
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentBoardIndex, filteredAndSearchedTasks, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
+	if (!currentView?.kanbanView) {
+		return (
+			<div className="emptyBoardMessage">
+				{t("Looks like the view data has been currupted. Please try duplicating this view or create a fresh new view.")}
+			</div>
+		)
+	}
+
 	const [loading, setLoading] = useState(true);
 
-	// Check if lazy loading is enabled
 	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	const columns = currentView?.kanbanView?.columns || [];
 
 	// Second memo: Segregate filtered tasks by column (for Kanban view only)
 	const allTasksArrangedPerColumn = useMemo(() => {
-		if (currentBoardData && filteredAndSearchedTasks) {
-			return currentBoardData.columns
+		if (currentBoardData && currentView && filteredAndSearchedTasks) {
+			const finalArrangedTasks = columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, currentBoardData, column, filteredAndSearchedTasks, (updatedBoardData: Board) => {
+					columnSegregator(plugin.settings, currentView, column, filteredAndSearchedTasks, (updatedViewData: TaskBoardView) => {
 						// plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
+						let updatedBoardData = { ...currentBoardData };
+						if (updatedBoardData.views) {
+							updatedBoardData.views[currentViewIndex] = updatedViewData;
+						}
 
-						// TODO Add a debounce here, as this callback will be called at high rate.
-						plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+						// Using the plugin's debounced save function to update the board data with the new view configuration
+						plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoardData);
 					})
 				);
+
+			setLoading(false);
+			return finalArrangedTasks;
 		}
 		return [];
-	}, [filteredAndSearchedTasks, currentBoardData]);
+	}, [filteredAndSearchedTasks, currentBoardData, currentView]);
 
-	useEffect(() => {
-		if (allTasksArrangedPerColumn.flat().length > 0) {
-			setLoading(false);
+	const renderColumns = (columns: ColumnData[], tasks: taskItem[][]) => {
+		return columns.map((column, index) => (
+			<MemoizedColumn
+				key={`${column.id}-${index}`}
+				plugin={plugin}
+				activeBoardData={currentBoardData}
+				kanbanViewData={currentView.kanbanView!}
+				currentViewIndex={currentViewIndex}
+				columnData={column}
+				tasksForThisColumn={tasks[index] || []}
+				Component={ColumnComponent}
+			/>
+		));
+	};
+
+	const renderLoadingOrEmpty = useMemo(() => {
+		if (loading) {
+			return (
+				<div className="loadingContainer">
+					<div className="spinner"></div>
+					<p>{t("loading-tasks")}</p>
+				</div>
+			);
 		}
-	}, [allTasksArrangedPerColumn]);
+
+		if (currentView.kanbanView!.columns?.length === 0) {
+			return (
+				<div className="emptyBoardMessage">
+					{t("no-columns-message")}
+				</div>
+			);
+		}
+
+		return null;
+	}, [loading]);
+
+	const renderFreshInstallMessage = useMemo(() => {
+		if (freshInstall) {
+			return (
+				<div className="loadingContainer">
+					<h2 className="initializationMessage">
+						{t("fresh-install-1")}
+						<br />
+						<br />
+						{t("fresh-install-2")}
+						<br />
+						<br />
+						{t("fresh-install-3")}
+					</h2>
+				</div>
+			);
+		}
+
+		return null;
+	}, [freshInstall]);
+
+	const isSwimlanesEnabled = currentView.kanbanView!.swimlanes?.enabled === true;
 
 	return (
 		<div className="kanbanBoard">
-			<div className="columnsContainer">
-				{loading ? (
-					<div className="loadingContainer">
-						{freshInstall ? (
-							<h2 className="initializationMessage">
-								{t("fresh-install-1")}
-								<br />
-								<br />
-								{t("fresh-install-2")}
-								<br />
-								<br />
-								{t("fresh-install-3")}
-							</h2>
-						) : (
-							<>
-								<div className="spinner"></div>
-								<p>{t("loading-tasks")}</p>
-							</>
-						)}
-					</div>
-				) : currentBoardData?.columns?.length === 0 ? (
-					<div className="emptyBoardMessage">
-						Create columns on this board using the board config modal from top right corner button.
-					</div>
-				) : currentBoardData?.swimlanes?.enabled ? (
-					<KanbanSwimlanesContainer
-						plugin={plugin}
-						currentBoardData={currentBoardData}
-						currentBoardIndex={currentBoardIndex}
-						tasksPerColumn={allTasksArrangedPerColumn}
-					/>
-				) : (
-					currentBoardData?.columns
-						.filter((column) => column.active)
-						.map((column, index) => (
-							<MemoizedColumn
-								key={index}
-								plugin={plugin}
-								activeBoardData={currentBoardData}
-								columnData={column}
-								activeBoardIndex={currentBoardIndex}
-								tasksForThisColumn={allTasksArrangedPerColumn[index]}
-								Component={ColumnComponent}
-							/>
-						))
-				)}
-			</div>
+			{renderLoadingOrEmpty || renderFreshInstallMessage || (
+				<>
+					{isSwimlanesEnabled ? (
+						<KanbanSwimlanesContainer
+							plugin={plugin}
+							currentBoardData={currentBoardData}
+							currentViewIndex={currentViewIndex}
+							kanbanViewData={currentView!.kanbanView}
+							tasksPerColumn={allTasksArrangedPerColumn}
+						/>
+					) : (
+						<div className="columnsContainer">
+							{renderColumns(
+								currentView.kanbanView!.columns?.filter((column) => column.active) || [],
+								allTasksArrangedPerColumn
+							)}
+						</div>
+					)}
+				</>
+			)}
 		</div>
 	);
 };
@@ -104,8 +144,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 const MemoizedColumn = memo<{
 	plugin: TaskBoard;
 	activeBoardData: Board;
+	currentViewIndex: number;
+	kanbanViewData: KanbanView;
 	columnData: ColumnData;
-	activeBoardIndex: number;
 	tasksForThisColumn: taskItem[];
 	Component: typeof LazyColumn;
 }>(({ Component, ...props }) => {
@@ -113,6 +154,8 @@ const MemoizedColumn = memo<{
 }, (prevProps, nextProps) => {
 	return (
 		prevProps.activeBoardData === nextProps.activeBoardData &&
+		prevProps.currentViewIndex === nextProps.currentViewIndex &&
+		prevProps.kanbanViewData === nextProps.kanbanViewData &&
 		prevProps.columnData === nextProps.columnData &&
 		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
 		prevProps.Component === nextProps.Component

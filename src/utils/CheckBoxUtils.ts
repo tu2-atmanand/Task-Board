@@ -34,7 +34,7 @@ export function checkboxStateSwitcher(
 	}
 
 	new Notice(
-		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior.",
+		"customStatuses are not available or empty. Please check your settings. Falling back to default behavior.",
 	);
 	// Default fallback behavior
 	return symbol === "x" || symbol === "X"
@@ -84,8 +84,7 @@ export function isTaskCompleted(
 		// 	symbol === defaultTaskStatuses.dropped
 		// );
 
-		const tasksPluginStatusConfigs =
-			settings.data.customStatuses;
+		const tasksPluginStatusConfigs = settings.data.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
@@ -100,8 +99,7 @@ export function isTaskCompleted(
 		});
 		return flag;
 	} else {
-		const tasksPluginStatusConfigs =
-			settings.data.customStatuses;
+		const tasksPluginStatusConfigs = settings.data.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (
@@ -128,8 +126,8 @@ export function isTaskLine(line: string): boolean {
 	// return /^- \[[^\]]\]\s+.*\S/.test(line);
 	return (
 		regexMatch !== null &&
-		regexMatch.length > 0 &&
-		regexMatch[0].trim().length > 0
+		regexMatch.length === 5 &&
+		regexMatch[4].trim().length > 0
 	);
 }
 
@@ -153,9 +151,16 @@ export function extractCheckboxSymbol(task: string): string {
 export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 	try {
 		if (plugin.app.vault.config) {
-			plugin.app;
-			const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
-			return plugin.app.vault.config.useTab ? `\t` : " ".repeat(tabSize);
+			if (plugin.app.vault.config.useTab === undefined) {
+				// Obsidian has not initialized any settings, hence they will be undefined
+				// So return the following default settings of Obsidian.
+				return `\t`;
+			} else {
+				const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
+				return plugin.app.vault.config.useTab
+					? `\t`
+					: " ".repeat(tabSize);
+			}
 		}
 		return `\t`; // Default indentation value
 	} catch {
@@ -164,9 +169,18 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 			const path = `${plugin.app.vault.configDir}/app.json`;
 			plugin.app.vault.adapter.read(path).then((content: string) => {
 				const parsed = JSON.parse(content || "{}");
-				const tabSize =
-					typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
-				return parsed?.useTab ? `\t` : " ".repeat(tabSize);
+				if (parsed?.useTab === undefined) {
+					// Obsidian has not initialized any settings, hence they will be undefined
+					// So return the following default settings of Obsidian.
+					return `\t`;
+				} else {
+					if (typeof parsed?.tabSize === "number") {
+						const tabSize = parsed.tabSize;
+						return parsed?.useTab ? `\t` : " ".repeat(tabSize);
+					}
+
+					return `\t`;
+				}
 			});
 			return `\t`; // Default indentation while async read happens
 		} catch (err) {

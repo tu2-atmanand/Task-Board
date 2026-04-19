@@ -7,7 +7,7 @@ import {
 } from "src/interfaces/GlobalSettings";
 import { t } from "src/utils/lang/helper";
 import { Board, ColumnData } from "src/interfaces/BoardConfigs";
-import { generateIdForFilters } from "src/components/BoardFilters/ViewTaskFilter";
+import { generateIdForFilters } from "src/components/AdvancedFilterer/TaskFilterComponent";
 import { colTypeNames } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { generateRandomNumber } from "src/utils/TaskItemUtils";
@@ -16,8 +16,8 @@ import { newReleaseVersion } from "src/interfaces/Constants";
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
  * Also handles specific migrations for certain fields.
- * @param defaults - The default settings object
- * @param settings - The current settings object to migrate
+ * @param defaults - The default settings object. This will contain changes for new versions.
+ * @param settings - The current settings object to migrate. Values from this object should be to the new objects.
  * @returns The migrated settings object
  */
 export function migrateSettings(defaults: any, settings: any): PluginDataJson {

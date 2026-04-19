@@ -84,7 +84,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 		// 	const globalSettings = plugin.settings.data.globalSettings;
 		// 	const moment = _moment as unknown as typeof _moment.default;
 		// 	const currentDateValue = moment().format(
-		// 		globalSettings?.taskCompletionDateTimePattern
+		// 		globalSettings?.dateTimeFormat
 		// 	);
 		// 	let newTitle = "";
 		// 	if (newStatus.type === statusTypeNames.DONE) {

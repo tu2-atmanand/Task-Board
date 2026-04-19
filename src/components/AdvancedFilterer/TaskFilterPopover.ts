@@ -1,4 +1,4 @@
-// /src/components/BoardFilters/ViewTaskFilterPopover.ts
+// /src/components/BoardFilters/TaskFilterPopover.ts
 
 import { App } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
@@ -6,10 +6,10 @@ import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { RootFilterState } from "src/interfaces/BoardConfigs";
-import { TaskFilterComponent } from "./ViewTaskFilter";
+import { TaskFilterComponent } from "./TaskFilterComponent";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
-export class ViewTaskFilterPopover
+export class TaskFilterPopover
 	extends Component
 	implements CloseableComponent
 {
@@ -22,7 +22,6 @@ export class ViewTaskFilterPopover
 	private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
 	public onClose: ((filterState?: RootFilterState) => void) | null = null;
-	private activeBoardIndex?: number;
 	private columnOrBoardName?: string;
 	private initialFilterState?: RootFilterState;
 
@@ -30,7 +29,6 @@ export class ViewTaskFilterPopover
 		plugin: TaskBoard,
 		forColumn: boolean,
 		private leafId?: string | undefined,
-		activeBoardIndex?: number,
 		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState,
 	) {
@@ -38,7 +36,6 @@ export class ViewTaskFilterPopover
 		this.plugin = plugin;
 		this.app = plugin.app;
 		this.forColumn = forColumn;
-		this.activeBoardIndex = activeBoardIndex;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
 		this.win = plugin.app.workspace.containerEl.win || window;
@@ -90,7 +87,6 @@ export class ViewTaskFilterPopover
 			this.plugin,
 			this.app,
 			this.leafId,
-			this.activeBoardIndex,
 			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded
@@ -225,7 +221,7 @@ export class ViewTaskFilterPopover
 				bugReporterManagerInsatance.addToLogs(
 					116,
 					String(error),
-					"ViewTaskFilterPopover.ts/close",
+					"TaskFilterPopover.ts/close",
 				);
 			}
 		}
@@ -253,7 +249,7 @@ export class ViewTaskFilterPopover
 				bugReporterManagerInsatance.addToLogs(
 					117,
 					String(error),
-					"ViewTaskFilterPopover.ts/close",
+					"TaskFilterPopover.ts/close",
 				);
 			}
 		}

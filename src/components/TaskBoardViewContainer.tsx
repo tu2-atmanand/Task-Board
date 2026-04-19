@@ -1,6 +1,6 @@
-// src/components/TaskBoardViewContent.tsx
+// src/components/TaskBoardViewContainer.tsx
 
-import { Board, ColumnData, RootFilterState } from "../interfaces/BoardConfigs";
+import { Board, ColumnData, DEFAULT_BOARD, RootFilterState, TaskBoardView } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Menu as MenuICon, Settings, EllipsisVertical, List, KanbanSquareIcon, Network, BrickWall, KanbanSquare, SquareKanban, Save, LayoutGridIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
@@ -9,26 +9,64 @@ import { taskJsonMerged } from "src/interfaces/TaskItem";
 import { App, debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
 import type TaskBoard from "main";
 import { eventEmitter } from "src/services/EventEmitter";
-import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal, openTaskBoardActionsModal, openBoardsExplorerModal } from "../services/OpenModals";
+import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal } from "../services/OpenModals";
 import { t } from "src/utils/lang/helper";
 import KanbanBoard from "./KanbanView/KanbanBoardView";
 import MapView from "./MapView/MapView";
-import { DEFAULT_DATE_FORMAT, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { ViewTaskFilterPopover } from "./BoardFilters/ViewTaskFilterPopover";
-import { advancedFilterer } from "src/utils/algorithms/BoardFilterer";
-import { ViewTaskFilterModal } from 'src/components/BoardFilters';
-import { taskPropertiesNames, viewTypeNames } from "src/interfaces/Enums";
+import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
+import { TaskFilterPopover } from "./AdvancedFilterer/TaskFilterPopover";
+import { advancedFilterer } from "src/utils/algorithms/AdvancedFilterer";
+import { TaskFilterModal } from 'src/components/AdvancedFilterer';
+import { taskPropertiesNames, viewsPanelPropertiesToShow, viewTypeNames } from "src/interfaces/Enums";
 import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { getViewById, getViewIndex } from "src/utils/ViewUtils";
 
-const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf, allBoards?: Board[] }> = ({ plugin, currentBoardData, currentLeaf, allBoards }) => {
+const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf }> = ({ plugin, currentBoardData, currentLeaf }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
-	const [activeBoardIndex, setActiveBoardIndex] = useState(plugin.settings.data.lastViewHistory.boardIndex ?? 0);
-	const [boardData, setCurrentBoardData] = useState<Board>();
-	const [allBoardsData, setAllBoardsData] = useState<Board[] | undefined>(allBoards);
+	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
-	const [viewType, setViewType] = useState<string>(plugin.settings.data.lastViewHistory.viewedType || viewTypeNames.kanban);
+	// Track current view by ID. Initialize to the first view if available
+	const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
+	const [currentView, setCurrentView] = useState<TaskBoardView | null>(() => {
+		const initialBoard = currentBoardData;
+		if (initialBoard?.views?.length > 0) {
+			const lastViewIndex = getViewIndex(initialBoard, initialBoard.lastViewId);
+			if (lastViewIndex !== -1) {
+				setCurrentViewIndex(lastViewIndex);
+				return initialBoard.views[lastViewIndex];
+			}
+
+			return initialBoard.views[0];
+		}
+		return null;
+	});
+
+	// Resizable drawer state
+	const [isResizing, setIsResizing] = useState(false);
+	const drawerRef = useRef<HTMLDivElement>(null);
+
+	// Display a message that no views are present inside this board. Stop here only instead of moving with the rest of the code which is dependent on the views.
+	if (!currentView) {
+		return (
+			<div className="taskBoardViewContainer noViews">
+				<div className="noViewsMessage">
+					<p>{t("no-views-in-board")}</p>
+					<button onClick={() => openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
+						setCurrentBoardData(updatedBoard);
+						plugin.taskBoardFileManager.saveBoard(updatedBoard);
+
+						setTimeout(() => {
+							eventEmitter.emit("REFRESH_BOARD");
+						}, 100);
+					})}>
+						{t("add-view")}
+					</button>
+				</div>
+			</div>
+		);
+	}
 
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [loading, setLoading] = useState(true);
@@ -36,15 +74,23 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.searchQuery ? true : false);
 	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
 
-	const filterPopoverRef = useRef<ViewTaskFilterPopover | null>(null);
+	const filterPopoverRef = useRef<TaskFilterPopover | null>(null);
 	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
 
 	const [viewWidth, setviewWidth] = useState<number>(currentLeaf.width);
 	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
 	const [isMobileView, setIsMobileView] = useState(false); // show elements for screens smaller than 800px
-	const [showBoardSidebar, setShowBoardSidebar] = useState(false);
+	const [showViewsPanel, setshowViewsPanel] = useState(boardData.viewsPanel.isOpen);
 	const [sidebarAnimating, setSidebarAnimating] = useState(false);
 	const [editorModified, setEditorModified] = useState(plugin.editorModified);
+
+	// // Derive current view from board data and currentViewId
+	// const currentView: View | undefined = useMemo(() => {
+	// 	if (boardData) {
+	// 		return getViewById(boardData, currentViewId);
+	// 	}
+	// 	return undefined;
+	// }, [boardData, currentViewId]);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -66,6 +112,14 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 		setIsMobileView(viewWidth <= 800); // For even little bigger screen smartphones, let go with 800
 	}, [viewWidth]);
 
+	// Update currentView when currentViewIndex or boardData changes
+	useEffect(() => {
+		if (boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
+			const newView = boardData.views[currentViewIndex];
+			setCurrentView(newView);
+		}
+	}, [currentViewIndex, boardData?.views]);
+
 	useEffect(() => {
 		const fetchData = async () => {
 			console.log("TASK BOARD : Does this run while switching boards...");
@@ -73,9 +127,16 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				// if (currentBoardData) {
 				setCurrentBoardData(currentBoardData);
 
-				// Get index of the new board from the registry based on the board id.
-				const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(currentBoardData.id);;
-				const registryLength = Object.keys(plugin.settings.data.taskBoardFilesRegistry || {}).length; setActiveBoardIndex(indexOfNewBoard ?? registryLength);
+				// // Get index of the new board from the registry based on the board id.
+				// const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(currentBoardData.id);;
+				// const registryLength = Object.keys(plugin.settings.data.taskBoardFilesRegistry || {}).length; setActiveBoardIndex(indexOfNewBoard ?? registryLength);
+
+				// // When board changes, automatically select the first view if available
+				// if (currentBoardData?.views?.length > 0) {
+				// 	const firstViewId = currentBoardData.views[0].viewId;
+				// 	setCurrentViewId(firstViewId);
+				// 	plugin.settings.data.lastViewHistory.currentViewId = firstViewId;
+				// }
 				// } else {
 				// 	const data = await plugin.taskBoardFileManager.loadBoardUsingIndex(activeBoardIndex);
 				// 	if (!data) throw "Board data not found.";
@@ -92,7 +153,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				bugReporterManagerInsatance.addToLogs(
 					131,
 					`No need to worry about this bug, if its appearing on the fresh install.\n${String(error)}`,
-					"TaskBoardViewContent.tsx/loading boards and tasks useEffect",
+					"TaskBoardViewContainer.tsx/loading boards and tasks useEffect",
 				);
 				setFreshInstall(true);
 			}
@@ -105,19 +166,19 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	const filteredAndSearchedTasks = useMemo(() => {
 		if (allTasks && boardData) {
 			const currentBoard = boardData;
-			const boardFilter = currentBoard.boardFilter;
+			const viewFilter = currentBoard.views?.find((view) => view.viewId === currentView.viewId)?.viewFilter;
 			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: advancedFilterer(allTasks.Pending, boardFilter, dateFormat),
-				Completed: advancedFilterer(allTasks.Completed, boardFilter, dateFormat),
+				Pending: advancedFilterer(allTasks.Pending, viewFilter, dateFormat),
+				Completed: advancedFilterer(allTasks.Completed, viewFilter, dateFormat),
 			};
 
 			let newBoardData = currentBoard;
 			// Update task count in settings
-			newBoardData.taskCount = {
+			newBoardData.views[currentViewIndex].taskCount = {
 				pending: boardFilteredTasks.Pending.length,
 				completed: boardFilteredTasks.Completed.length,
 			};
@@ -127,9 +188,11 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
 				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+				// setLoading(false);
 				return searchFiltered || boardFilteredTasks;
 			}
 
+			// setLoading(false);
 			return boardFilteredTasks;
 		}
 		return { Pending: [], Completed: [] };
@@ -147,7 +210,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				const allTasks = await loadTasksAndMerge(plugin, false);
 				setAllTasks(allTasks);
 			} catch (error) {
-				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContent.tsx/debouncedRefreshColumn");
+				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContainer.tsx/debouncedRefreshColumn");
 			}
 		}, 500),
 		[plugin]
@@ -177,10 +240,11 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	}, []);
 
 	useEffect(() => {
-		const refreshView = (viewType: string) => {
-			setViewType(viewType);
-			plugin.settings.data.lastViewHistory.viewedType = viewType;
-			plugin.saveSettings();
+		const refreshView = (viewId: string) => {
+			setCurrentView(getViewById(boardData, viewId)!);
+			currentBoardData!.lastViewId = viewId;
+			// plugin.settings.data.lastViewHistory.currentViewId = viewId;
+			// plugin.saveSettings();
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);
 		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
@@ -204,17 +268,17 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 
 		setTimeout(() => {
 			eventEmitter.emit("REFRESH_BOARD");
-		}, 100)
+		}, 100);
 	}, []);
 
 	function handleOpenAddNewTaskModal() {
 		openAddNewTaskModal(plugin);
 	}
 
-	function handleOpenTaskBoardActionsModal() {
-		if (boardData)
-			openTaskBoardActionsModal(plugin, boardData);
-	}
+	// function handleOpenTaskBoardActionsModal() {
+	// 	if (boardData)
+	// 		openTaskBoardActionsModal(plugin, boardData);
+	// }
 
 	function handleSearchButtonClick() {
 		if (showSearchInput) {
@@ -282,17 +346,17 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 			const currentBoardConfig = boardData;
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
-				const filterModal = new ViewTaskFilterModal(
-					plugin, false, undefined, activeBoardIndex, currentBoardConfig!.name
+				const filterModal = new TaskFilterModal(
+					plugin, false, undefined, currentBoardConfig!.name
 				);
 
 				// Set initial filter state
-				if (currentBoardConfig!.boardFilter) {
+				if (currentBoardConfig!.views[currentViewIndex].viewFilter) {
 					setTimeout(() => {
 						// Use type assertion to resolve non-null issues
 						// const filterState = filterModal.liveFilterState as RootFilterState;
 						if (filterModal.taskFilterComponent) {
-							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.boardFilter);
+							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilter);
 						}
 					}, 100);
 				}
@@ -302,11 +366,11 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 					if (filterState) {
 						// Save the filter state to the board
 						const updatedcurrentBoardData = boardData;
-						updatedcurrentBoardData!.boardFilter = filterState;
+						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
 						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						boardData!.boardFilter = filterState;
+						boardData!.views[currentViewIndex].viewFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -334,20 +398,19 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				};
 
 				// Create and show popover
-				const popover = new ViewTaskFilterPopover(
+				const popover = new TaskFilterPopover(
 					plugin,
 					false, // forColumn = false since this is for board-level filter
 					undefined,
-					activeBoardIndex,
 					boardData?.name || "Board",
 				);
 
 				// Load existing filter state if available
-				if (currentBoardConfig!.boardFilter) {
+				if (currentBoardConfig!.views[currentViewIndex].viewFilter) {
 					// Wait for component to be created and loaded
 					setTimeout(() => {
 						if (popover.taskFilterComponent) {
-							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.boardFilter!);
+							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilter!);
 						}
 					}, 100);
 				}
@@ -357,11 +420,11 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 					if (filterState) {
 						// Save the filter state to the board
 						const updatedcurrentBoardData = boardData;
-						updatedcurrentBoardData!.boardFilter = filterState;
+						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
 						setCurrentBoardData(updatedcurrentBoardData);
 
 						// Persist to settings
-						boardData!.boardFilter = filterState;
+						boardData!.views[currentViewIndex].viewFilter = filterState;
 						await plugin.saveSettings();
 
 						// Refresh the board view
@@ -374,7 +437,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 				filterPopoverRef.current = popover;
 			}
 		} catch (error) {
-			bugReporterManagerInsatance.showNotice(29, "Error showing filter popover", String(error), "TaskBoardViewContent.tsx/handleFilterButtonClick");
+			bugReporterManagerInsatance.showNotice(29, "Error showing filter popover", String(error), "TaskBoardViewContainer.tsx/handleFilterButtonClick");
 		}
 	}
 
@@ -574,30 +637,6 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 			})
 			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
 		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("file-name-in-header"));
-			item.onClick(async () => {
-				togglePropertyNameInSettings(taskPropertiesNames.FilePathInHeader);
-
-			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("parent-folder"));
-			item.onClick(async () => {
-				togglePropertyNameInSettings(taskPropertiesNames.ParentFolder);
-
-			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("full-path"));
-			item.onClick(async () => {
-				togglePropertyNameInSettings(taskPropertiesNames.FullPath);
-
-			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
-		});
 
 		propertyMenu.addSeparator();
 
@@ -665,28 +704,30 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 		);
 	}
 
-	function handleBoardSelection(index: number) {
-		if (index !== activeBoardIndex) {
+	function handleViewSelect(index: number) {
+		if (index !== currentViewIndex) {
 			setSearchQuery("");
 			plugin.settings.data.searchQuery = "";
-			plugin.settings.data.lastViewHistory.boardIndex = index;
-			setActiveBoardIndex(index);
+			setCurrentViewIndex(index);
+
+			// Update the board's lastViewId to persist view selection
+			if (boardData?.views && index >= 0 && index < boardData.views.length) {
+				const updatedBoard = { ...boardData };
+				updatedBoard.lastViewId = boardData.views[index].viewId;
+				setCurrentBoardData(updatedBoard);
+				plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoard);
+			}
+
 			setTimeout(() => {
 				eventEmitter.emit("REFRESH_BOARD");
-				plugin.saveSettings();
+				// plugin.saveSettings();
 			}, 100);
-
 		}
-		closeBoardSidebar(); // Close sidebar after selection
+		// closeBoardSidebar(); // Close sidebar after selection
 	}
 
 	function toggleBoardSidebar() {
-		// Only allow opening sidebar if allBoardsData is available
-		if (!allBoardsData || allBoardsData.length === 0) {
-			return;
-		}
-
-		if (showBoardSidebar) {
+		if (showViewsPanel) {
 			closeBoardSidebar();
 		} else {
 			openBoardSidebar();
@@ -694,7 +735,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	}
 
 	function openBoardSidebar() {
-		setShowBoardSidebar(true);
+		setshowViewsPanel(true);
 		setSidebarAnimating(true);
 	}
 
@@ -702,7 +743,7 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 		setSidebarAnimating(false);
 		// Wait for animation to complete before hiding
 		setTimeout(() => {
-			setShowBoardSidebar(false);
+			setshowViewsPanel(false);
 		}, 300); // Match animation duration
 	}
 
@@ -738,10 +779,14 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 			item.setTitle(t("open-board-configuration-modal"));
 			item.setIcon("settings");
 			item.onClick(async () => {
-				openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
+				openBoardConfigModal(plugin, currentBoardData, currentViewIndex, (updatedBoard: Board) => {
 					// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
 					setCurrentBoardData(updatedBoard);
 					plugin.taskBoardFileManager.saveBoard(updatedBoard);
+
+					setTimeout(() => {
+						eventEmitter.emit("REFRESH_BOARD");
+					}, 100);
 				}
 				)
 			});
@@ -780,40 +825,45 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 		);
 	}
 
-	function handleViewChangeDropdownClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-		const viewMenu = new Menu();
+	// DEPRECATED: This function is no longer used since we have moved view switching to the header menu for better discoverability. We can remove this in future iterations.
+	// function handleViewChangeDropdownClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+	// 	const viewMenu = new Menu();
 
-		setTimeout(() => {
-			eventEmitter.emit("SAVE_MAP");
-		}, 200)
+	// 	setTimeout(() => {
+	// 		eventEmitter.emit("SAVE_MAP");
+	// 	}, 200)
 
-		viewMenu.addItem((item) => {
-			item.setTitle(t("kanban-view"));
-			item.setIcon("square-kanban");
-			item.onClick(async () => {
-				const newViewType = viewTypeNames.kanban;
-				setViewType(newViewType);
-				plugin.settings.data.lastViewHistory.viewedType = newViewType;
-				plugin.saveSettings();
-			});
-		});
+	// 	// Show all available views in the current board
+	// 	if (boardData && boardData.views && boardData.views.length > 0) {
+	// 		boardData.views.forEach((view) => {
+	// 			viewMenu.addItem((item) => {
+	// 				item.setTitle(view.viewName);
+	// 				const icon = view.viewType === viewTypeNames.kanban ? "square-kanban" : "network";
+	// 				item.setIcon(icon);
+	// 				item.onClick(async () => {
+	// 					setCurrentViewId(view.viewId);
+	// 					plugin.settings.data.lastViewHistory.currentViewId = view.viewId;
+	// 					plugin.saveSettings();
+	// 					eventEmitter.emit("SWITCH_VIEW", view.viewId);
+	// 				});
+	// 				// Mark current view as checked
+	// 				if (view.viewId === currentViewId) {
+	// 					item.setChecked(true);
+	// 				}
+	// 			});
+	// 		});
+	// 	} else {
+	// 		viewMenu.addItem((item) => {
+	// 			item.setTitle(t("no-views-available"));
+	// 			item.setDisabled(true);
+	// 		});
+	// 	}
 
-		viewMenu.addItem((item) => {
-			item.setTitle(t("map-view"));
-			item.setIcon("network");
-			item.onClick(async () => {
-				const newViewType = viewTypeNames.map;
-				setViewType(newViewType);
-				plugin.settings.data.lastViewHistory.viewedType = newViewType;
-				plugin.saveSettings();
-			});
-		});
-
-		// Use native event if available (React event has nativeEvent property)
-		viewMenu.showAtMouseEvent(
-			(event instanceof MouseEvent ? event : event.nativeEvent)
-		);
-	}
+	// 	// Use native event if available (React event has nativeEvent property)
+	// 	viewMenu.showAtMouseEvent(
+	// 		(event instanceof MouseEvent ? event : event.nativeEvent)
+	// 	);
+	// }
 
 	// useEffect(() => {
 	// 	const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
@@ -825,311 +875,425 @@ const TaskBoardViewContent: React.FC<{ plugin: TaskBoard, currentBoardData: Boar
 	// Close sidebar when clicking outside or pressing escape
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
-			if (event.key === 'Escape' && showBoardSidebar) {
+			if (event.key === 'Escape' && showViewsPanel) {
 				closeBoardSidebar();
 			}
 		}
 
-		if (showBoardSidebar) {
+		if (showViewsPanel) {
 			document.addEventListener('keydown', handleKeyDown);
 			return () => document.removeEventListener('keydown', handleKeyDown);
 		}
-	}, [showBoardSidebar]);
+	}, [showViewsPanel]);
 
-	const viewTypeIconComponent = () => {
+	// Handle drawer resize
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isResizing || !drawerRef.current) return;
+
+			// Get the parent container's position
+			const parentRect = drawerRef.current.parentElement?.getBoundingClientRect();
+			if (!parentRect) return;
+
+			// Calculate new width based on mouse position
+			const newWidth = e.clientX - parentRect.left;
+
+			// Set minimum and maximum width constraints (e.g., 150px to 500px)
+			const minWidth = 150;
+			const maxWidth = 500;
+
+			if (newWidth >= minWidth && newWidth <= maxWidth) {
+				// Update the board data with the new width
+				const updatedBoard = { ...boardData };
+				updatedBoard.viewsPanel.width = newWidth;
+				setCurrentBoardData(updatedBoard);
+			}
+		};
+
+		const handleMouseUp = () => {
+			if (isResizing) {
+				setIsResizing(false);
+				// Save the updated board configuration
+				if (boardData) {
+					plugin.taskBoardFileManager.debouncedSaveBoard(boardData);
+				}
+			}
+		};
+
+		if (isResizing) {
+			document.addEventListener('mousemove', handleMouseMove);
+			document.addEventListener('mouseup', handleMouseUp);
+			return () => {
+				document.removeEventListener('mousemove', handleMouseMove);
+				document.removeEventListener('mouseup', handleMouseUp);
+			};
+		}
+	}, [isResizing, boardData, plugin]);
+
+	const getViewTypeIconComponent = (viewTypeName: string | undefined, size: number) => {
+		let viewType = viewTypeName ?? boardData.views[currentViewIndex].viewType;
 		switch (viewType) {
 			case viewTypeNames.kanban:
-				return <SquareKanban size={20} />;
+				return <SquareKanban size={size} strokeWidth={1.5} />;
 			case viewTypeNames.map:
-				return <Network size={18} />;
+				return <Network size={size - 2} strokeWidth={1.5} />;
 			default:
-				return <BrickWall size={18} />;
+				return <BrickWall size={size - 2} strokeWidth={1.5} />;
 		}
 	}
 
 	return (
 		<div className="taskBoardView">
-			<div className="taskBoardHeader">
-				{/* On Left-side */}
-				{allBoardsData && allBoardsData.length > 0 ? (
-					<>
-						{showAllElements ? (
-							<div className="boardTitles">
-								{allBoardsData.map((board, index) => (
-									<button
-										key={index}
-										className={`boardTitleButton${index === activeBoardIndex ? "Active" : ""}`}
-										onClick={() => handleBoardSelection(index)}
-									>
-										{board.name}
-									</button>
-								))}
+			<button
+				className="taskBoardHeaderPluginIconBtn"
+				onClick={toggleBoardSidebar}
+				aria-label={t("toggle-view-drawer")}
+			>
+				<BrickWall className="taskBoardHeaderPluginIcon" size={24} strokeWidth={1.5} />
+			</button>
+
+			{/* Drawer opened from the left side */}
+			<div
+				ref={drawerRef}
+				className={`boardSidebarDrawer ${showViewsPanel ? 'boardSidebarDrawer--open' : 'boardSidebarDrawer--closed'}`}
+				onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
+				style={{ width: `${showViewsPanel ? boardData.viewsPanel.width : 0}px` }}
+			>
+				<div className="boardSidebar" style={{ width: `${boardData.viewsPanel.width}px` }}>
+					<div className="boardSidebarBoardHeader">
+						<h3>{boardData.name}</h3>
+						<p>{boardData.description}</p>
+					</div>
+
+					<div className="boardSidebarViewHeader">
+						<p>{t("your-views")}</p>
+						<div className="boardSidebarViewHeaderButtons">
+							<button
+								className="boardSidebarViewHeaderViewsOptionsBtn"
+								onClick={(event) => {
+									const propertyMenu = new Menu();
+
+									propertyMenu.addItem((item) => {
+										item.setTitle(t("details"));
+										const detailsSubMenu = item.setSubmenu();
+										detailsSubMenu.addItem((item) => {
+											item.setTitle(t("description"));
+											item.setIcon("");
+											item.setChecked(boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description))
+											item.onClick(async () => {
+												if (boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description)) {
+													boardData.viewsPanel.propertiesToShow = boardData.viewsPanel.propertiesToShow.filter(prop => prop !== viewsPanelPropertiesToShow.Description);
+												} else {
+													boardData.viewsPanel.propertiesToShow.push(viewsPanelPropertiesToShow.Description);
+												}
+												setCurrentBoardData({ ...boardData });
+												plugin.taskBoardFileManager.saveBoard(boardData);
+												setTimeout(() => {
+													eventEmitter.emit("REFRESH_BOARD");
+												}, 100);
+											});
+										});
+										detailsSubMenu.addItem((item) => {
+											item.setTitle(t("progress"));
+											item.setIcon("");
+											item.setChecked(boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.progress))
+											item.onClick(async () => {
+												if (boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.progress)) {
+													boardData.viewsPanel.propertiesToShow = boardData.viewsPanel.propertiesToShow.filter(prop => prop !== viewsPanelPropertiesToShow.progress);
+												} else {
+													boardData.viewsPanel.propertiesToShow.push(viewsPanelPropertiesToShow.progress);
+												}
+												setCurrentBoardData({ ...boardData });
+												plugin.taskBoardFileManager.saveBoard(boardData);
+												setTimeout(() => {
+													eventEmitter.emit("REFRESH_BOARD");
+												}, 100);
+											});
+										});
+
+										// Use native event if available (React event has nativeEvent property)
+										propertyMenu.showAtMouseEvent(
+											(event instanceof MouseEvent ? event : event.nativeEvent));
+									});
+								}}
+								aria-label={t("panel-options")}
+							>
+								<EllipsisVertical size={18} strokeWidth={1.5} />
+							</button>
+						</div>
+					</div>
+
+					<div className="boardSidebarContent">
+						{boardData.views.length === 0 ? (
+							<div className="noViewsMessage">
+								{t("no-views-created-yet")}
 							</div>
 						) : (
-							<div className="mobileBoardHeader">
-								<button
-									className="hamburgerMenuButton"
-									onClick={toggleBoardSidebar}
-									aria-label={t("toggle-board-drawer")}
-								>
-									<MenuICon size={20} />
-								</button>
-								{!showSearchInput && (
-									<span className="currentBoardName">{boardData?.name}</span>
-								)}
-							</div>
-						)}
-					</>
-				) : (
-					<div className="mobileBoardHeader">
-						<button
-							className="boardsExplorerModalButton"
-							onClick={() => openBoardsExplorerModal(plugin)}
-							aria-label={t("boards-explorer-modal")}
-						>
-							<LayoutGridIcon size={20} />
-						</button>
-						{!showSearchInput && (
-							<span className="currentBoardName">{boardData?.name}</span>
-						)}
-					</div>
-				)}
-
-				{/* On Right-side */}
-				<div className="taskBoardHeaderBtns">
-					<div className="taskCountContainer">
-						<div className={`taskCountContainerProgressBar${isMobileView ? "-hidden" : ""}`}>
-							<div
-								className="taskCountContainerProgressBarProgress"
-								style={{
-									width: `${((filteredTasks ? filteredTasks?.Completed.length : 0) / (filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 1)) * 100}%`,
-								}}
-							/>
-						</div>
-						<span className="taskCountContainerTaskCount">
-							{(filteredTasks ? filteredTasks?.Completed.length : 0)} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
-						</span>
-					</div>
-					{showSearchInput && (
-						<input
-							type="text"
-							className="taskBoardSearchInput"
-							placeholder="Search tasks..."
-							aria-label={t("enter-task-content-to-search")}
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") {
-									handleSearchSubmit();
-								}
-							}}
-							ref={input => {
-								if (input && showSearchInput) {
-									input.focus();
-								}
-							}}
-						/>
-					)}
-					<button
-						className="searchTaskBtn"
-						onClick={() => handleSearchButtonClick()}
-					>
-						{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
-					</button>
-
-					<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={handleOpenAddNewTaskModal}>
-						<CirclePlus size={18} />
-					</button>
-
-					<button
-						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						aria-label={t("show-hide-properties")}
-						onClick={handlePropertiesBtnClick}
-					>
-						<List size={18} />
-					</button>
-
-					<button
-						className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						aria-label={t("apply-advanced-board-filters")}
-						onClick={handleFilterButtonClick}
-					>
-						<Filter size={18} />
-					</button>
-
-					<button
-						className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						aria-label={t("board-configure-button")}
-						onClick={() =>
-							openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
-								// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-								setCurrentBoardData(updatedBoard);
-								plugin.taskBoardFileManager.saveBoard(updatedBoard);
-							}
-							)}
-					>
-						<Settings size={18} />
-					</button>
-
-					{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
-						<Bot size={20} />
-					</button> */}
-
-					<div
-						className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-						onClick={(e) => handleViewChangeDropdownClick(e)}
-					>
-						<div className="taskBoardViewDropdownIcon">
-							{viewTypeIconComponent()}
-						</div>
-						<div className="taskBoardViewDropdownName">{t(viewType)}</div>
-					</div>
-
-					{viewType === viewTypeNames.map && (
-						<button
-							className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
-							onClick={(e) => {
-								if (mapViewDataUpdated) {
-									console.log("Emitting SAVE_MAP event...");
-									eventEmitter.emit("SAVE_MAP");
-									setMapViewDataUpdated(false);
-								}
-							}}
-						>
-							<Save size={18} />
-						</button>
-					)}
-
-					<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
-						<RefreshCcw size={18} />
-					</button>
-
-					{(isMobileView || Platform.isMobile) && (
-						<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
-							<EllipsisVertical size={20} />
-						</button>
-					)}
-				</div>
-			</div>
-
-			{/* Mobile board sidebar overlay (only render if allBoardsData is available) */}
-			{
-				allBoardsData && allBoardsData.length > 0 && !showAllElements && showBoardSidebar && (
-					<div className="boardSidebarOverlay" onClick={closeBoardSidebar}>
-						<div
-							className={`boardSidebar ${sidebarAnimating ? 'boardSidebar--slide-in' : 'boardSidebar--slide-out'}`}
-							onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
-						>
-							<div className="boardSidebarHeader">
-								<h3>{t("your-boards")}</h3>
-							</div>
-							<div className="boardSidebarContent">
-								<div className="boardSidebarContentBtnContainer">
-									{allBoardsData.map((board, index) => (
-										<div
-											key={index}
-											className={`boardSidebarCard ${index === activeBoardIndex ? 'boardSidebarCard--active' : ''}`}
-											onClick={() => handleBoardSelection(index)}
-										>
-											<div className="boardSidebarCardTitle" >
-												{board.name}
-											</div>
+							<div className="boardSidebarContentBtnContainer">
+								{boardData.views.map((view, index) => (
+									<div
+										key={index}
+										className={`boardSidebarCard ${index === currentViewIndex ? 'boardSidebarCard--active' : ''}`}
+										onClick={() => handleViewSelect(index)}
+									>
+										<div className="boardSidebarCardTitle" >
+											{getViewTypeIconComponent(view.viewType, 20)}
+											<div className="boardSidebarCardTitleText">{view.viewName}</div>
+										</div>
+										{boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description) && (
 											<div className="boardSidebarCardDescription" >
-												{board?.description}
+												{view?.description}
 											</div>
+										)}
+										{boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.progress) && (
 											<div className="taskCountContainerProgress" >
 												<div className={"taskCountContainerProgressBar"}>
 													<div
 														className="taskCountContainerProgressBarIndicator"
 														style={{
-															width: `${((board?.taskCount ? board.taskCount.completed : 0) / (board?.taskCount ? board?.taskCount.pending + board.taskCount.completed : 1)) * 100}%`,
+															width: `${((view.taskCount.completed) / (view.taskCount.pending + view.taskCount.completed)) * 100}%`,
 														}}
 													/>
 												</div>
 												<span className="taskCountContainerProgressCount">
-													{(board?.taskCount ? board.taskCount.completed : 0)} / {board?.taskCount ? board?.taskCount.pending + board?.taskCount?.completed : 0}
+													{(view.taskCount.completed)} / {view.taskCount.pending + view.taskCount?.completed}
 												</span>
 											</div>
-										</div>
-									))}
-								</div>
-								<div className="boardSidebarFooter">
-									<button
-										className="boardConfigureBtn"
-										onClick={() =>
-											openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
-												// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-												setCurrentBoardData(updatedBoard);
-												plugin.taskBoardFileManager.saveBoard(updatedBoard);
-											}
-											)
-										}
-									>
-										{t("configure-boards")}
-									</button>
-								</div>
+										)}
+									</div>
+								))}
 							</div>
-						</div>
+						)}
 					</div>
-				)
-			}
+				</div>
+			</div>
 
-			<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
-				{boardData ? (
-					viewType === viewTypeNames.kanban ? (
-						<KanbanBoard
-							plugin={plugin}
-							currentBoardData={boardData}
-							currentBoardIndex={activeBoardIndex}
-							filteredAndSearchedTasks={filteredAndSearchedTasks}
-							freshInstall={freshInstall}
-						/>
-					) : viewType === viewTypeNames.map ? (
-						loading ? (
-							<div className="loadingContainer" >
-								{freshInstall ? (
-									<h2 className="initializationMessage" >
-										{t("fresh-install-1")}
-										<br />
-										<br />
-										{t("fresh-install-2")}
-										<br />
-										<br />
-										{t("fresh-install-3")}
-									</h2>
+			{/* Resizable Separator */}
+			{showViewsPanel && (
+				<div
+					className="boardSidebarResizer"
+					onMouseDown={() => setIsResizing(true)}
+					aria-label="Resize drawer"
+				/>
+			)}
+
+			{/* Main content area with smooth transition */}
+			<div className="taskBoardMainContent">
+				<div className="taskBoardHeader">
+					<div className="taskBoardHeaderLeftSec">
+						{boardData.views && boardData.views.length > 0 ? (
+							<>
+								{!showViewsPanel && showAllElements ? (
+									<div className="viewSwitcherBar">
+										{boardData.views.map((view, index) => (
+											<button
+												key={index}
+												className={`viewTitleButton${index === currentViewIndex ? "Active" : ""}`}
+												onClick={() => handleViewSelect(index)}
+											>
+												{getViewTypeIconComponent(view.viewType, 18)}
+												{view.viewName}
+											</button>
+										))}
+									</div>
 								) : (
-									<>
-										<div className="spinner"></div>
-										<p>{t("loading-tasks")}</p>
-									</>
+									<div className="mobileBoardHeader">
+										{!showSearchInput && (
+											<span className="currentViewName">{currentView.viewName}</span>
+										)}
+									</div>
+								)}
+							</>
+						) : (
+							<div className="mobileBoardHeader">
+								{!showSearchInput && (
+									<span className="currentViewName">{t("no-view-created")}</span>
 								)}
 							</div>
-						) : (
-							<MapView
-								plugin={plugin}
-								activeBoardData={boardData}
-								activeBoardIndex={activeBoardIndex}
-								filteredTasks={filteredAndSearchedTasks}
-								focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
-							/>
-						)
-					) : (
-						<div className="emptyBoardMessage">
-							{/* Placeholder for other view types */}
-							{viewType === "list" && "List view coming soon."}
-							{viewType === "table" && "Table view coming soon."}
-							{viewType === "inbox" && "Inbox view coming soon."}
-							{viewType === "gantt" && "Gantt chart view coming soon."}
-						</div>
-					)
-				) : (
-					<div className="emptyBoardMessage">
-						Switch to different board.
+						)}
 					</div>
-				)}
+
+					<div className="taskBoardHeaderRightSec">
+						<div className="taskCountContainer">
+							<div className={`taskCountContainerProgressBar${isMobileView ? "-hidden" : ""}`}>
+								<div
+									className="taskCountContainerProgressBarProgress"
+									style={{
+										width: `${((filteredTasks ? filteredTasks?.Completed.length : 0) / (filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 1)) * 100}%`,
+									}}
+								/>
+							</div>
+							<span className="taskCountContainerTaskCount">
+								{(filteredTasks ? filteredTasks?.Completed.length : 0)} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
+							</span>
+						</div>
+						{showSearchInput && (
+							<input
+								type="text"
+								className="taskBoardSearchInput"
+								placeholder="Search tasks..."
+								aria-label={t("enter-task-content-to-search")}
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") {
+										handleSearchSubmit();
+									}
+								}}
+								ref={input => {
+									if (input && showSearchInput) {
+										input.focus();
+									}
+								}}
+							/>
+						)}
+						<button
+							className="searchTaskBtn"
+							onClick={() => handleSearchButtonClick()}
+						>
+							{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
+						</button>
+
+						<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={handleOpenAddNewTaskModal}>
+							<CirclePlus size={18} />
+						</button>
+
+						<button
+							className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+							aria-label={t("show-hide-properties")}
+							onClick={handlePropertiesBtnClick}
+						>
+							<List size={18} />
+						</button>
+
+						<button
+							className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+							aria-label={t("apply-advanced-board-filters")}
+							onClick={handleFilterButtonClick}
+						>
+							<Filter size={18} />
+						</button>
+
+						<button
+							className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+							aria-label={t("board-configure-button")}
+							onClick={() =>
+								openBoardConfigModal(plugin, currentBoardData, currentViewIndex, (updatedBoard: Board) => {
+									// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+									setCurrentBoardData(updatedBoard);
+									plugin.taskBoardFileManager.saveBoard(updatedBoard);
+
+									setTimeout(() => {
+										eventEmitter.emit("REFRESH_BOARD");
+									}, 100);
+								}
+								)}
+						>
+							<Settings size={18} />
+						</button>
+
+						{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
+						<Bot size={20} />
+					</button> */}
+
+						{/* <div
+						className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+						onClick={(e) => handleViewChangeDropdownClick(e)}
+					>
+						<div className="taskBoardViewDropdownIcon">
+							{getViewTypeIconComponent()}
+						</div>
+						<div className="taskBoardViewDropdownName">{currentView?.viewName || "Unknown"}</div>
+					</div> */}
+
+						{currentView && currentView.viewType === viewTypeNames.map && (
+							<button
+								className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
+								onClick={(e) => {
+									if (mapViewDataUpdated) {
+										console.log("Emitting SAVE_MAP event...");
+										eventEmitter.emit("SAVE_MAP");
+										setMapViewDataUpdated(false);
+									}
+								}}
+							>
+								<Save size={18} />
+							</button>
+						)}
+
+						<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={refreshBoardButton}>
+							<RefreshCcw size={18} />
+						</button>
+
+						{(isMobileView || Platform.isMobile) && (
+							<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
+								<EllipsisVertical size={20} />
+							</button>
+						)}
+					</div>
+				</div>
+
+				<div className={`taskBoardViewSectionWrapper ${showViewsPanel && boardData.views && boardData.views.length > 0 && !showAllElements ? 'taskBoardViewSectionWrapper--shifted' : ''}`}>
+					<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
+						{boardData && currentView ? (
+							currentView.viewType === viewTypeNames.kanban ? (
+								<KanbanBoard
+									plugin={plugin}
+									currentBoardData={boardData}
+									currentView={currentView}
+									currentViewIndex={currentViewIndex}
+									filteredAndSearchedTasks={filteredAndSearchedTasks}
+									freshInstall={freshInstall}
+								/>
+							) : currentView.viewType === viewTypeNames.map ? (
+								loading ? (
+									<div className="loadingContainer" >
+										{freshInstall ? (
+											<h2 className="initializationMessage" >
+												{t("fresh-install-1")}
+												<br />
+												<br />
+												{t("fresh-install-2")}
+												<br />
+												<br />
+												{t("fresh-install-3")}
+											</h2>
+										) : (
+											<>
+												<div className="spinner"></div>
+												<p>{t("loading-tasks")}</p>
+											</>
+										)}
+									</div>
+								) : (
+									<MapView
+										plugin={plugin}
+										activeBoardData={boardData}
+										currentView={currentView}
+										currentViewIndex={currentViewIndex}
+										filteredTasks={filteredAndSearchedTasks}
+										focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
+									/>
+								)
+							) : (
+								<div className="emptyBoardMessage">
+									{/* Placeholder for other view types */}
+									{currentView.viewType === viewTypeNames.list && "List view coming soon."}
+									{currentView.viewType === viewTypeNames.table && "Table view coming soon."}
+									{currentView.viewType === viewTypeNames.inbox && "Inbox view coming soon."}
+									{currentView.viewType === viewTypeNames.gantt && "Gantt chart view coming soon."}
+								</div>
+							)
+						) : (
+							<div className="emptyBoardMessage">
+								{boardData && boardData.views?.length === 0 ? "No views available in this board." : "Select or create a new view to get started."}
+							</div>
+						)}
+					</div>
+				</div>
 			</div>
 		</div >
 	);
 };
 
-export default TaskBoardViewContent;
+export default TaskBoardViewContainer;

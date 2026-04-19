@@ -95,7 +95,7 @@ npm run dev  # Should start watch mode and display "watching for changes..."
 │   │   ├── Column.tsx         # Kanban column component
 │   │   ├── TaskItem.tsx       # Individual task component (26k lines - complex)
 │   │   ├── KanbanBoard.tsx    # Main board component
-│   │   ├── TaskBoardViewContent.tsx # Main board content wrapper
+│   │   ├── TaskBoardViewContainer.tsx # Main board content wrapper
 │   │   └── MapView.tsx     # Map-based view component
 │   ├── interfaces/            # TypeScript interfaces (3 files)
 │   │   ├── TaskItem.ts        # Task data structures

@@ -3,19 +3,21 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 import { taskItem } from 'src/interfaces/TaskItem';
-import TaskItem from '../KanbanView/TaskItem';
+import TaskItem from '../TaskCard/TaskItem';
 import TaskBoard from 'main';
-import { Board } from 'src/interfaces/BoardConfigs';
+import { Board, TaskBoardView } from 'src/interfaces/BoardConfigs';
 import { t } from 'src/utils/lang/helper';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { applyIdToTaskItem } from 'src/utils/TaskItemUtils';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
+import { viewTypeNames } from 'src/interfaces/Enums';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
 	allTasksArranged: taskItem[][];
 	activeBoardSettings: Board;
-	activeBoardIndex: number;
+	activeViewData: TaskBoardView;
+	activeViewIndex: number;
 	isVisible: boolean;
 	onClose: () => void;
 }
@@ -24,7 +26,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 	plugin,
 	allTasksArranged,
 	activeBoardSettings,
-	activeBoardIndex,
+	activeViewData,
+	activeViewIndex,
 	isVisible,
 	onClose
 }) => {
@@ -76,7 +79,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 				sleep(500).then(async () => {
 					await plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 
-					// Emit event to refresh the board
+					// Emit event to refresh the board and notify about the newly imported task
+					eventEmitter.emit('TASK_IMPORTED_TO_MAP', newId);
 					eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with REFRESH_COLUMN only.
 				})
 			}
@@ -217,8 +221,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 											key={task.id}
 											plugin={plugin}
 											task={task}
-											activeBoardSettings={activeBoardSettings}
-											activeBoardIndex={activeBoardIndex}
+											activeViewIndex={activeViewIndex}
+											activeViewType={viewTypeNames.map}
 											dataAttributeIndex={0} // TODO : No need of this data in this case.
 										/>
 									</div>

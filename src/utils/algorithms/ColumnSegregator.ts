@@ -1,12 +1,12 @@
 // src/utils/RenderColumns.ts
 
 import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
+import { Board, ColumnData, TaskBoardView } from "src/interfaces/BoardConfigs";
 import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
 import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
 import { matchTagsWithWildcards } from "./ScanningFilterer";
-import { advancedFilterer } from "./BoardFilterer";
+import { advancedFilterer } from "./AdvancedFilterer";
 import { PluginDataJson } from "src/interfaces/GlobalSettings";
 import { getAllTaskTags } from "../TaskItemUtils";
 import { differenceInDays } from "date-fns";
@@ -17,20 +17,21 @@ import { robustDateParser } from "../DateTimeCalculations";
  * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
  *
  * @param {PluginDataJson} settings - The plugin settings object.
- * @param {number} activeBoardIndex - The index of the active board.
+ * @param {number} activeViewData - The active view configs.
  * @param {ColumnData} columnData - The single column configs.
  * @param {taskJsonMerged | null} allTasks - The collection of all tasks to segregate.
+ * @param {function} onBoardDataChange - Optional callback function to update the board data when changes occur (e.g., when manual ordering is enabled and tasks are reordered).
  * @returns {taskItem[]} - The tasks to display in the column.
  */
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
-	activeBoardData: Board,
+	activeViewData: TaskBoardView,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged | null,
-	onBoardDataChange?: (boardData: Board) => void,
+	onBoardDataChange?: (updatedViewData: TaskBoardView) => void,
 ): taskItem[] => {
-	if (!allTasks) return [];
+	if (!allTasks || !activeViewData || !activeViewData.kanbanView) return [];
 
 	// Call the filter function based on the column's tag and properties
 	let tasksToDisplay: taskItem[] = [];
@@ -136,7 +137,17 @@ export const columnSegregator = (
 
 				// const diffDays = daysBetween(formatDate(today), taskUniversalDate);
 
-				//  ---------- METHOD 3 -------------
+				// //  ---------- METHOD 3 -------------
+				// const today = new Date();
+				// today.setHours(0, 0, 0, 0);
+
+				// const moment = _moment as unknown as typeof _moment.default;
+				// const diffDays = moment(taskUniversalDate).diff(
+				// 	moment(today),
+				// 	"days",
+				// );
+
+				//  ---------- METHOD 4 -------------
 				// Parse the task's universal date using robust parser
 				const universalDateFormat =
 					settings.data.dateFormat || DEFAULT_DATE_FORMAT;
@@ -230,23 +241,16 @@ export const columnSegregator = (
 			}
 			break;
 		case colTypeNames.otherTags:
-			// 1. Get the current board based on activeBoardIndex index
-			const currentBoard = activeBoardData;
-
-			// 2. Collect all coltags from columns where colType is 'namedTag'
+			const TaggedColumns = activeViewData.kanbanView.columns.filter(
+				(col: ColumnData) =>
+					col.colType === colTypeNames.namedTag && col.coltag,
+			);
 			const namedTags =
-				currentBoard?.columns
-					.filter(
-						(col: ColumnData) =>
-							col.colType === colTypeNames.namedTag && col.coltag,
-					)
-					.map((col: ColumnData) =>
-						col.coltag?.toLowerCase().replace(`#`, ""),
-					)
-					.filter(
-						(tag): tag is string =>
-							typeof tag === "string" && tag.length > 0,
-					) || [];
+				TaggedColumns.map((col: ColumnData) => {
+					if (col.coltag)
+						return col.coltag.toLowerCase().replace(`#`, "");
+					else return "";
+				}) || [];
 
 			// 3. Now filter tasks
 			tasksToDisplay = pendingTasks.filter((task) => {
@@ -262,19 +266,12 @@ export const columnSegregator = (
 			});
 			break;
 		case colTypeNames.completed:
-			const tasksLimit = columnData?.limit;
+			// NOTE : to apply the sorting algorithm properly, we have to take all the completed tasks.
+			// Here we are taking around 1000 which should be enough.
+			// After applying the filtering and sorting algorithms, we will slice as per the configs limit.
+			// A better approach is under discussion. See this : https://github.com/tu2-atmanand/Task-Board/issues/68
 
-			// This sorting will be done through the columnData.sortCriteria for this column if its configured
-			// const sortedCompletedTasks = completedTasks.sort((a, b): number => {
-			// 	if (a.completion && b.completion) {
-			// 		const dateA = new Date(a.completion).getTime();
-			// 		const dateB = new Date(b.completion).getTime();
-			// 		return dateB - dateA;
-			// 	}
-			// 	return 0;
-			// });
-
-			tasksToDisplay = completedTasks.slice(0, tasksLimit);
+			tasksToDisplay = completedTasks.slice(0, 1000);
 			break;
 		case colTypeNames.taskPriority:
 			tasksToDisplay = pendingTasks.filter(
@@ -340,7 +337,7 @@ export const columnSegregator = (
 			}
 
 			let newTasksIdManualOrder = columnData.tasksIdManualOrder;
-			let currentBoardData = activeBoardData;
+			let updatedViewdData = activeViewData;
 
 			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
@@ -361,11 +358,12 @@ export const columnSegregator = (
 
 			// Update the newTasksIdManualOrder inside board data.
 			// columnData.tasksIdManualOrder = newTasksIdManualOrder;
-			currentBoardData.columns[columnData.index - 1].tasksIdManualOrder =
-				newTasksIdManualOrder;
+			updatedViewdData.kanbanView!.columns[
+				columnData.index - 1
+			].tasksIdManualOrder = newTasksIdManualOrder;
 
 			if (onBoardDataChange && didTasksIdManualOrderChange) {
-				onBoardDataChange(currentBoardData);
+				onBoardDataChange(updatedViewdData);
 			}
 
 			tasksToDisplay = sorted;
@@ -377,6 +375,10 @@ export const columnSegregator = (
 				columnData.sortCriteria,
 			);
 		}
+	}
+
+	if (columnData.colType === colTypeNames.completed) {
+		tasksToDisplay = tasksToDisplay.slice(0, columnData?.limit ?? 20);
 	}
 
 	return tasksToDisplay;

@@ -16,7 +16,7 @@ import { statusTypeNames } from "src/interfaces/Enums";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { format } from "date-fns";
 import { DEFAULT_DATE_TIME_FORMAT } from "src/interfaces/Constants";
-import { getCurrentLocalDateTimeString } from "../DateTimeCalculations";
+import { formatToday, getCurrentLocalDateTimeString } from "../DateTimeCalculations";
 
 /**
  * Handle task note status change (checkbox change)
@@ -34,9 +34,11 @@ export const handleTaskNoteStatusChange = async (
 			globalSettings.customStatuses,
 			task.status,
 		);
-		const currentDateValue = getCurrentLocalDateTimeString(
-			globalSettings.dateTimeFormat,
-		);
+		// const moment = _moment as unknown as typeof _moment.default;
+		// const currentDateValue = moment().format(
+		// 	globalSettings?.dateTimeFormat,
+		// );
+		const currentDateValue = formatToday(globalSettings.dateFormat);
 
 		const updatedTask = {
 			...task,

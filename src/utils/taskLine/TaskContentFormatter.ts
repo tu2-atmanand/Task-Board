@@ -2,8 +2,13 @@
 
 import TaskBoard from "main";
 import {
+	extractCancelledDate,
+	extractCreatedDate,
 	extractDependsOn,
+	extractDueDate,
 	extractPriority,
+	extractScheduledDate,
+	extractStartDate,
 	extractTaskId,
 } from "../../managers/VaultScanner";
 import {
@@ -23,7 +28,7 @@ import { taskItem } from "src/interfaces/TaskItem";
 import { cursorLocation } from "src/interfaces/TaskItem";
 import { generateTaskId } from "../TaskItemUtils";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { getCurrentLocalDateTimeStringLegacy } from "../DateTimeCalculations";
+import { formatDateStringAsPerSettings, formatDateTimeAsPerSettings, getCurrentLocalDateTimeString, getCurrentLocalDateTimeStringLegacy } from "../DateTimeCalculations";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -77,8 +82,12 @@ export const addIdToTaskContent = async (
 	forcefullyAddId?: boolean,
 ): Promise<{ formattedTaskContent: string; newId: string | undefined }> => {
 	const taskId = extractTaskId(formattedTaskContent);
-	let newId = undefined;
-	if ((!taskId && Plugin.settings.data.autoAddUniqueID) || forcefullyAddId) {
+	let newId = taskId?.[1];
+	if (
+		(taskId === null &&
+			Plugin.settings.data.autoAddUniqueID) ||
+		forcefullyAddId
+	) {
 		newId = generateTaskId(Plugin);
 		const format = Plugin.settings.data.taskPropertyFormat;
 		switch (format) {
@@ -209,11 +218,7 @@ export const getSanitizedTaskContent = (
 		updatedTask.due,
 	);
 
-	updatedTitle = sanitizeTags(
-		updatedTitle,
-		updatedTask.tags,
-		updatedTask.tags || [],
-	);
+	updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
 
 	updatedTitle = sanitizeReminder(
 		globalSettings,
@@ -284,7 +289,7 @@ export const sanitizeStatus = (
 
 	if (newStatusType === statusTypeNames.DONE) {
 		if (globalSettings.autoAddCompletedDate) {
-			const currentDateValue = getCurrentLocalDateTimeStringLegacy(
+			const currentDateValue = getCurrentLocalDateTimeString(
 				globalSettings.dateTimeFormat,
 			);
 			newTitle = sanitizeCompletionDate(
@@ -295,7 +300,7 @@ export const sanitizeStatus = (
 		}
 	} else if (newStatusType === statusTypeNames.CANCELLED) {
 		if (globalSettings.autoAddCancelledDate) {
-			const currentDateValue = getCurrentLocalDateTimeStringLegacy(
+			const currentDateValue = getCurrentLocalDateTimeString(
 				globalSettings.dateTimeFormat,
 			);
 			newTitle = sanitizeCancelledDate(
@@ -326,33 +331,33 @@ export const sanitizeCreatedDate = (
 	createdDate: string,
 	cursorLocation?: cursorLocation,
 ): string => {
-	const createdDateRegex =
-		/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::\s*?\d{4}-\d{2}-\d{2}\]|@created\(\d{4}-\d{2}-\d{2}\)/;
-	const extractedCreatedDateMatch = title.match(createdDateRegex);
+	// const createdDateRegex =
+	// 	/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::\s*?\d{4}-\d{2}-\d{2}\]|@created\(\d{4}-\d{2}-\d{2}\)/;
+	// const extractedCreatedDateMatch = title.match(createdDateRegex);
+	const extractedCreatedDateMatch = extractCreatedDate(title);
 
 	// If user has removed the created date, remove it from the title inside the note.
 	if (!createdDate) {
 		if (extractedCreatedDateMatch) {
-			// If created date is empty, remove any existing due date
 			return title.replace(extractedCreatedDateMatch[0], "").trimEnd();
 		}
 		return title;
 	}
 
 	let createdDateWithFormat: string = "";
-	if (createdDate) {
+	let formattedCreatedDate = formatDateStringAsPerSettings(
+		createdDate,
+		globalSettings.dateFormat,
+	);
+	if (formattedCreatedDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			createdDateWithFormat = createdDate ? `➕${createdDate}` : "";
+			createdDateWithFormat = `➕${formattedCreatedDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			createdDateWithFormat = createdDate ? `➕ ${createdDate}` : "";
+			createdDateWithFormat = `➕ ${formattedCreatedDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			createdDateWithFormat = createdDate
-				? `[created:: ${createdDate}]`
-				: "";
+			createdDateWithFormat = `[created:: ${formattedCreatedDate}]`;
 		} else {
-			createdDateWithFormat = createdDate
-				? `@created(${createdDate})`
-				: "";
+			createdDateWithFormat = `@created(${formattedCreatedDate})`;
 		}
 	}
 
@@ -369,15 +374,13 @@ export const sanitizeCreatedDate = (
 		return `${title} ${createdDateWithFormat}`;
 	}
 
-	const extractedCreatedDate = extractedCreatedDateMatch[0];
-
-	if (extractedCreatedDate.includes(createdDateWithFormat)) {
-		// If extracted created date matches the new one, no need to change
+	// If extracted created date matches the new one, no need to change
+	if (extractedCreatedDateMatch[0].includes(createdDateWithFormat)) {
 		return title;
 	}
 
 	// Replace the old created date with the updated one
-	return title.replace(createdDateRegex, createdDateWithFormat);
+	return title.replace(extractedCreatedDateMatch[0], createdDateWithFormat);
 };
 
 /**
@@ -394,9 +397,10 @@ export const sanitizeStartDate = (
 	startDate: string,
 	cursorLocation?: cursorLocation,
 ): string => {
-	const startDateRegex =
-		/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::\s*?\d{4}-\d{2}-\d{2}\]|@start\(\d{4}-\d{2}-\d{2}\)/;
-	const extractedStartDateMatch = title.match(startDateRegex);
+	// const startDateRegex =
+	// 	/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::\s*?\d{4}-\d{2}-\d{2}\]|@start\(\d{4}-\d{2}-\d{2}\)/;
+	// const extractedStartDateMatch = title.match(startDateRegex);
+	const extractedStartDateMatch = extractStartDate(title);
 
 	// If user has removed the created date, remove it from the title inside the note.
 	if (!startDate) {
@@ -408,15 +412,19 @@ export const sanitizeStartDate = (
 	}
 
 	let startDateWithFormat: string = "";
-	if (startDate) {
+	let formattedStartDate = formatDateStringAsPerSettings(
+		startDate,
+		globalSettings.dateFormat,
+	);
+	if (formattedStartDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			startDateWithFormat = startDate ? `🛫${startDate}` : "";
+			startDateWithFormat = `🛫${formattedStartDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			startDateWithFormat = startDate ? `🛫 ${startDate}` : "";
+			startDateWithFormat = `🛫 ${formattedStartDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			startDateWithFormat = startDate ? `[start:: ${startDate}]` : "";
+			startDateWithFormat = `[start:: ${formattedStartDate}]`;
 		} else {
-			startDateWithFormat = startDate ? `@start(${startDate})` : "";
+			startDateWithFormat = `@start(${formattedStartDate})`;
 		}
 	}
 
@@ -441,7 +449,7 @@ export const sanitizeStartDate = (
 	}
 
 	// Replace the old created date with the updated one
-	return title.replace(startDateRegex, startDateWithFormat);
+	return title.replace(extractedStartDateMatch[0], startDateWithFormat);
 };
 
 /**
@@ -458,9 +466,10 @@ export const sanitizeScheduledDate = (
 	scheduledDate: string,
 	cursorLocation?: cursorLocation,
 ): string => {
-	const scheduledDateRegex =
-		/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::\s*?\d{4}-\d{2}-\d{2}\]|@scheduled\(\d{4}-\d{2}-\d{2}\)/;
-	const extractedScheduledDateMatch = title.match(scheduledDateRegex);
+	// const scheduledDateRegex =
+	// 	/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::\s*?\d{4}-\d{2}-\d{2}\]|@scheduled\(\d{4}-\d{2}-\d{2}\)/;
+	// const extractedScheduledDateMatch = title.match(scheduledDateRegex);
+	const extractedScheduledDateMatch = extractScheduledDate(title);
 
 	// If user has removed the scheduled date, remove it from the title inside the note.
 	if (!scheduledDate) {
@@ -472,21 +481,19 @@ export const sanitizeScheduledDate = (
 	}
 
 	let scheduledDateWithFormat: string = "";
-	if (scheduledDate) {
+	let formattedScheduledDate = formatDateStringAsPerSettings(
+		scheduledDate,
+		globalSettings.dateFormat,
+	);
+	if (formattedScheduledDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			scheduledDateWithFormat = scheduledDate ? `⏳${scheduledDate}` : "";
+			scheduledDateWithFormat = `⏳${formattedScheduledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			scheduledDateWithFormat = scheduledDate
-				? `⏳ ${scheduledDate}`
-				: "";
+			scheduledDateWithFormat = `⏳ ${formattedScheduledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			scheduledDateWithFormat = scheduledDate
-				? `[scheduled:: ${scheduledDate}]`
-				: "";
+			scheduledDateWithFormat = `[scheduled:: ${formattedScheduledDate}]`;
 		} else {
-			scheduledDateWithFormat = scheduledDate
-				? `@scheduled(${scheduledDate})`
-				: "";
+			scheduledDateWithFormat = `@scheduled(${formattedScheduledDate})`;
 		}
 	}
 
@@ -503,15 +510,16 @@ export const sanitizeScheduledDate = (
 		return `${title} ${scheduledDateWithFormat}`;
 	}
 
-	const extractedScheduledDate = extractedScheduledDateMatch[0];
-
-	if (extractedScheduledDate.includes(scheduledDateWithFormat)) {
+	if (extractedScheduledDateMatch[0].includes(scheduledDateWithFormat)) {
 		// If extracted scheduled date matches the new one, no need to change
 		return title;
 	}
 
 	// Replace the old scheduled date with the updated one
-	return title.replace(scheduledDateRegex, scheduledDateWithFormat);
+	return title.replace(
+		extractedScheduledDateMatch[0],
+		scheduledDateWithFormat,
+	);
 };
 
 /**
@@ -528,10 +536,10 @@ export const sanitizeDueDate = (
 	dueDate: string,
 	cursorLocation?: cursorLocation,
 ): string => {
-	const dueDateRegex =
-		/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
-	const extractedDueDateMatch = title.match(dueDateRegex);
-	// console.log("extractedDueDateMatch", extractedDueDateMatch);
+	// const dueDateRegex =
+	// 	/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
+	// const extractedDueDateMatch = title.match(dueDateRegex);
+	const extractedDueDateMatch = extractDueDate(title);
 
 	// If user has removed the due date, remove it from the title inside the note.
 	if (!dueDate) {
@@ -543,15 +551,19 @@ export const sanitizeDueDate = (
 	}
 
 	let dueDateWithFormat: string = "";
-	if (dueDate) {
+	let formattedDueDate = formatDateStringAsPerSettings(
+		dueDate,
+		globalSettings.dateFormat,
+	);
+	if (formattedDueDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			dueDateWithFormat = dueDate ? `📅${dueDate}` : "";
+			dueDateWithFormat = `📅${formattedDueDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			dueDateWithFormat = dueDate ? `📅 ${dueDate}` : "";
+			dueDateWithFormat = `📅 ${formattedDueDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			dueDateWithFormat = dueDate ? `[due:: ${dueDate}]` : "";
+			dueDateWithFormat = `[due:: ${formattedDueDate}]`;
 		} else {
-			dueDateWithFormat = dueDate ? `@due(${dueDate})` : "";
+			dueDateWithFormat = `@due(${formattedDueDate})`;
 		}
 	}
 
@@ -568,15 +580,13 @@ export const sanitizeDueDate = (
 		return `${title} ${dueDateWithFormat}`;
 	}
 
-	const extractedDueDate = extractedDueDateMatch[0];
-
-	if (extractedDueDate.includes(dueDateWithFormat)) {
+	if (extractedDueDateMatch[0].includes(dueDateWithFormat)) {
 		// If extracted due date matches the new one, no need to change
 		return title;
 	}
 
 	// Replace the old due date with the updated one
-	return title.replace(dueDateRegex, dueDateWithFormat);
+	return title.replace(extractedDueDateMatch[0], dueDateWithFormat);
 };
 
 /**
@@ -606,19 +616,19 @@ export const sanitizeCompletionDate = (
 	}
 
 	let completedWitFormat: string = "";
-	if (completionDate) {
+	let formattedCompletionDate = formatDateTimeAsPerSettings(
+		completionDate,
+		globalSettings.dateTimeFormat,
+	);
+	if (formattedCompletionDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			completedWitFormat = completionDate ? `✅${completionDate} ` : "";
+			completedWitFormat = `✅${formattedCompletionDate} `;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			completedWitFormat = completionDate ? `✅ ${completionDate} ` : "";
+			completedWitFormat = `✅ ${formattedCompletionDate} `;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			completedWitFormat = completionDate
-				? `[completion:: ${completionDate}] `
-				: "";
+			completedWitFormat = `[completion:: ${formattedCompletionDate}] `;
 		} else {
-			completedWitFormat = completionDate
-				? `@completion(${completionDate}) `
-				: "";
+			completedWitFormat = `@completion(${formattedCompletionDate}) `;
 		}
 	}
 
@@ -660,12 +670,13 @@ export const sanitizeCancelledDate = (
 	cancelledDate: string,
 	cursorLocation?: cursorLocation,
 ): string => {
-	const cancellationDateRegex =
-		/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[cancelled::\s*?\d{4}-\d{2}-\d{2}\]|@cancelled\(\d{4}-\d{2}-\d{2}\)/;
-	const extractedCancellationDateMatch = title.match(cancellationDateRegex);
+	// const cancellationDateRegex =
+	// 	/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[cancelled::\s*?\d{4}-\d{2}-\d{2}\]|@cancelled\(\d{4}-\d{2}-\d{2}\)/;
+	// const extractedCancellationDateMatch = title.match(cancellationDateRegex);
+	const extractedCancellationDateMatch = extractCancelledDate(title);
 
+	// If cancellation date is empty, remove any existing cancellation date
 	if (!cancelledDate) {
-		// If cancellation date is empty, remove any existing cancellation date
 		if (extractedCancellationDateMatch) {
 			return title
 				.replace(extractedCancellationDateMatch[0], "")
@@ -675,19 +686,19 @@ export const sanitizeCancelledDate = (
 	}
 
 	let cancelledWithFormat: string = "";
-	if (cancelledDate) {
+	let formattedCancelledDate = formatDateTimeAsPerSettings(
+		cancelledDate,
+		globalSettings.dateTimeFormat,
+	);
+	if (formattedCancelledDate) {
 		if (globalSettings?.taskPropertyFormat === "1") {
-			cancelledWithFormat = cancelledDate ? `❌${cancelledDate}` : "";
+			cancelledWithFormat = `❌${formattedCancelledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "2") {
-			cancelledWithFormat = cancelledDate ? `❌ ${cancelledDate}` : "";
+			cancelledWithFormat = `❌ ${formattedCancelledDate}`;
 		} else if (globalSettings?.taskPropertyFormat === "3") {
-			cancelledWithFormat = cancelledDate
-				? `[cancelled:: ${cancelledDate}]`
-				: "";
+			cancelledWithFormat = `[cancelled:: ${formattedCancelledDate}]`;
 		} else {
-			cancelledWithFormat = cancelledDate
-				? `@cancelled(${cancelledDate})`
-				: "";
+			cancelledWithFormat = `@cancelled(${formattedCancelledDate})`;
 		}
 	}
 
@@ -704,15 +715,16 @@ export const sanitizeCancelledDate = (
 		return `${title} ${cancelledWithFormat}`;
 	}
 
-	const extractedCancellationDate = extractedCancellationDateMatch[0];
-
-	if (extractedCancellationDate.includes(cancelledWithFormat)) {
-		// If extracted cancellation date matches the new one, no need to change
+	// If extracted cancellation date matches the new one, no need to change
+	if (extractedCancellationDateMatch[0].includes(cancelledWithFormat)) {
 		return title;
 	}
 
 	// Replace the old cancellation date with the updated one
-	return title.replace(cancellationDateRegex, cancelledWithFormat);
+	return title.replace(
+		extractedCancellationDateMatch[0],
+		cancelledWithFormat,
+	);
 };
 
 /**
@@ -891,7 +903,7 @@ export const sanitizePriority = (
 
 	const extractedPriorityMatch = extractPriority(title);
 
-	if (extractedPriorityMatch === 0) {
+	if (extractedPriorityMatch.value === 0) {
 		if (newPriority > 0) {
 			let priorityWithFormat: string = "";
 			if (globalSettings?.taskPropertyFormat === "3") {
@@ -916,30 +928,42 @@ export const sanitizePriority = (
 		return title;
 	}
 
-	let match = title.match(
-		new RegExp(`\\[priority::\\s*${extractedPriorityMatch}\\s*\\]`),
-	);
-	if (match) {
+	// let match = title.match(
+	// 	new RegExp(`\\[priority::\\s*${extractedPriorityMatch}\\s*\\]`),
+	// );
+	if (extractedPriorityMatch.parsedString.startsWith("[")) {
 		return newPriority > 0
-			? title.replace(match[0], `[priority:: ${newPriority}]`)
-			: title.replace(match[0], "");
+			? title.replace(
+					extractedPriorityMatch.parsedString,
+					`[priority:: ${newPriority}]`,
+				)
+			: title.replace(extractedPriorityMatch.parsedString, "");
 	}
 
-	match = title.match(
-		new RegExp(`@priority\\(\\s*${extractedPriorityMatch}\\s*\\)`),
-	);
-	if (match) {
+	if (extractedPriorityMatch.parsedString.startsWith("@")) {
 		return newPriority > 0
-			? title.replace(match[0], `@priority(${newPriority})`)
-			: title.replace(match[0], "");
+			? title.replace(
+					extractedPriorityMatch.parsedString,
+					`@priority(${newPriority})`,
+				)
+			: title.replace(extractedPriorityMatch.parsedString, "");
 	}
+
+	// match = title.match(
+	// 	new RegExp(`@priority\\(\\s*${extractedPriorityMatch}\\s*\\)`),
+	// );
+	// if (match) {
+	// 	return newPriority > 0
+	// 		? title.replace(match[0], `@priority(${newPriority})`)
+	// 		: title.replace(match[0], "");
+	// }
 
 	// This part is where only the last left format of emojies will be handled.
-	if (extractedPriorityMatch === newPriority) {
+	if (extractedPriorityMatch.value === newPriority) {
 		return title;
 	} else {
 		return title.replace(
-			priorityEmojis[extractedPriorityMatch],
+			priorityEmojis[extractedPriorityMatch.value],
 			priorityEmojis[newPriority],
 		);
 	}
@@ -948,14 +972,12 @@ export const sanitizePriority = (
 /**
  * Function to sanitize tags inside the task title.
  * @param title - The title of the task.
- * @param oldTagsList - The list of old tags currently present (with #).
  * @param newTagsList - The updated list of tags that should exist (with #).
  * @param cursorLocation - (Optional) Cursor location for insertion.
  * @returns The sanitized title with correct tags.
  */
 export const sanitizeTags = (
 	title: string,
-	oldTagsList: string[],
 	newTagsList: string[],
 	cursorLocation?: cursorLocation,
 ): string => {
@@ -1276,7 +1298,8 @@ export const sanitizeDependsOn = (
  */
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Get the list of properties to hide
-	const hiddenProperties = plugin.settings.data.hiddenTaskProperties || [];
+	const hiddenProperties =
+		plugin.settings.data.hiddenTaskProperties || [];
 
 	// If no properties are configured to hide and the legacy setting is false, return original title
 	if (
@@ -1297,7 +1320,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		.trim();
 
 	// // If legacy showTaskWithoutMetadata is enabled, hide all properties (backward compatibility)
-	// if (plugin.settings.data.globalSettings.showTaskWithoutMetadata) {
+	// if (plugin.settings.data.showTaskWithoutMetadata) {
 	// 	return cleanTaskTitleLegacy(task);
 	// }
 
@@ -1475,7 +1498,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	// Remove time (handles both formats)
 	if (task.time) {
 		const timeRegex =
-			/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|\@time\(.*?\))/g;
+			/\s*(⏰\s*\[.*?\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(.*?)|\[time::.*?\]|\@time\(.*?\))/g;
 		const timeMatch = cleanedTitle.match(timeRegex);
 		if (timeMatch) {
 			cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
@@ -1484,29 +1507,28 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 	// Remove due date in various formats
 	if (task.due) {
-		const dueDateRegex =
-			/\s*(📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::.*?\]|@due\(.*?\))/g;
+		const dueDateRegex = /\s*(📅\s*.*?(?=\s|$)|\[due::.*?\]|@due\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
 	}
 
 	// Remove Created date in various formats
 	if (task.createdDate) {
 		const createdDateRegex =
-			/\s*(➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::.*?\]|@created\(.*?\))/g;
+			/\s*(➕\s*.*?(?=\s|$)|\[created::.*?\]|@created\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(createdDateRegex, "");
 	}
 
 	// Remove start date in various formats
 	if (task.startDate) {
 		const startDateRegex =
-			/\s*(🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::.*?\]|@start\(.*?\))/g;
+			/\s*(🛫\s*.*?(?=\s|$)|\[start::.*?\]|@start\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(startDateRegex, "");
 	}
 
 	// Remove scheduled date in various formats
 	if (task.scheduledDate) {
 		const scheduledDateRegex =
-			/\s*(⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::.*?\]|@scheduled\(.*?\))/g;
+			/\s*(⏳\s*.*?(?=\s|$)|\[scheduled::.*?\]|@scheduled\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(scheduledDateRegex, "");
 	}
 

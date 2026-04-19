@@ -8,7 +8,8 @@ export enum taskPropertyFormatOptions {
 export enum EditButtonMode {
 	None = "none",
 	Modal = "popUp",
-	View = "view",
+	ViewInSplitTab = "viewInSplit",
+	ViewInWindow = "viewInWindow",
 	TasksPluginModal = "tasksPluginModal",
 	NoteInTab = "noteInTab",
 	NoteInSplit = "noteInSplit",
@@ -93,6 +94,12 @@ export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 export enum viewTypeNames {
 	kanban = "kanban",
 	map = "map",
+
+	// Upcoming views...
+	list = "list",
+	table = "table",
+	inbox = "inbox",
+	gantt = "gantt",
 }
 
 export enum defaultTaskStatuses {
@@ -215,4 +222,17 @@ export enum scanModeOptions {
 	REAL_TIME = "realtime",
 	AUTOMATIC = "automatic",
 	MANUAL = "manual",
+}
+
+export enum HeaderUITypeOptions {
+	horizontal = "hor",
+	vertical = "vert",
+}
+
+export enum viewsPanelPropertiesToShow {
+	Title = "title",
+	Description = "description",
+	progress = "progress",
+	CreatedDate = "createdDate",
+	ModifiedDate = "modifiedDate",
 }
