@@ -102,7 +102,6 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD).forEach((leaf) => {
 				leaf.detach();
 			});
-			plugin.registerTaskBoardView();
 		} else {
 			// Emit REFRESH_BOARD event to update the board with newly scanned tasks
 			eventEmitter.emit("REFRESH_BOARD");

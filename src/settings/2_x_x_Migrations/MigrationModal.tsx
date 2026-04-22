@@ -115,21 +115,6 @@ const MigrationModalContent: React.FC<{
 			setMigrationResult(result);
 			setProgress(100);
 
-			// Save logs to file after migration completes
-			const logSaveResult = await saveMigrationLogsToFile(
-				plugin.app,
-				result.logs || [],
-				result.errors
-			);
-			if (logSaveResult.success && logSaveResult.filePath) {
-				result.logFilePath = logSaveResult.filePath;
-				addLog("", "info");
-				addLog(
-					`✓ Migration logs saved to: ${logSaveResult.filePath}`,
-					"success",
-				);
-			}
-
 			if (result.success) {
 				addLog("✓ Migration completed successfully!", "success");
 				await sleep(500);
@@ -155,6 +140,21 @@ const MigrationModalContent: React.FC<{
 
 			// Show Notice to reload Obsidian and make the "Reload Obsidian" button visible
 			showReloadObsidianNotice(plugin);
+
+			// Save logs to file after migration completes
+			const logSaveResult = await saveMigrationLogsToFile(
+				plugin.app,
+				result.logs || [],
+				result.errors
+			);
+			if (logSaveResult.success && logSaveResult.filePath) {
+				result.logFilePath = logSaveResult.filePath;
+				addLog("", "info");
+				addLog(
+					`✓ Migration logs saved to: ${logSaveResult.filePath}`,
+					"success",
+				);
+			}
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : String(error);
 			addLog(`✗ Unexpected error: ${errorMsg}`, "error");
