@@ -150,7 +150,6 @@ export interface globalSettingsData {
 		renderVisibleNodes: boolean;
 		edgeType: mapViewEdgeType;
 	};
-	loadAllBoards: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -464,7 +463,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					"This board contains dated type columns for managing time critical scheduled tasks.",
 			},
 		},
-		loadAllBoards: false,
 	},
 };
 

@@ -299,7 +299,6 @@ export class SettingsManager {
 		const {
 			scanFilters,
 			openOnStartup,
-			loadAllBoards,
 			scanMode,
 			tasksCacheFilePath,
 			showModifiedFilesNotice,
@@ -603,17 +602,6 @@ export class SettingsManager {
 		};
 
 		renderTasksCachePathSetting();
-
-		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl)
-			.setName(t("load-all-boards"))
-			.setDesc(t("load-all-boards-info"))
-			.addToggle((toggle) =>
-				toggle.setValue(loadAllBoards).onChange(async (value) => {
-					this.globalSettings!.loadAllBoards = value;
-					await this.saveSettings();
-				}),
-			);
 
 		// Setting to show/Hide the Header of the task card
 		new Setting(contentEl)
