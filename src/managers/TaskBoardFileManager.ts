@@ -62,6 +62,72 @@ export default class TaskBoardFileManager {
 			}
 
 			// Read the file
+			const fileContent = await this.app.vault.adapter.read(filePath);
+			if (!fileContent) {
+				console.warn(`TaskBoard file is empty: ${filePath}`);
+				return null;
+			}
+
+			// Parse JSON content
+			let boardData: Board = JSON.parse(fileContent);
+
+			// Same Board ID ChecK : Check if board with this ID already exists in registry
+			// This is to ensure that, when a .taskboard file has been simply duplicated externally
+			// We can detect it and only update its boardID to avoid have two same IDs on two different boards.
+			const taskBoardFilesRegistry =
+				this.plugin.settings.data.taskBoardFilesRegistry || {};
+			const existingRegistryEntry = Object.entries(
+				taskBoardFilesRegistry,
+			).find(([, entry]) => entry.boardId === boardData.id);
+
+			if (existingRegistryEntry) {
+				const [, registryEntry] = existingRegistryEntry;
+				if (registryEntry.filePath === filePath) {
+					// Same boardID and same filePath - no action needed
+					console.log(
+						`Board "${boardData.name}" with ID "${boardData.id}" already registered at: ${filePath}`,
+					);
+				} else {
+					// Same boardID but different filePath - generate new ID
+					const oldId = boardData.id;
+					boardData.id = generateRandomTempTaskId();
+					console.log(
+						`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
+					);
+				}
+			}
+
+			boardData = this.applyMigrationIfNeeded(boardData);
+
+			return boardData;
+		} catch (error) {
+			console.error(`Error loading board from file ${filePath}:`, error);
+			return null;
+		}
+	}
+
+	/**
+	 * Load board configuration from a .taskboard file from disk.
+	 * This function uses the readBinary API of Obsidian to load the data.
+	 * Which also requires decoding and using extra operations.
+	 *
+	 * After loading, checks if the boardID already exists in the registry:
+	 * - If exists with same filePath: no action needed
+	 * - If exists with different filePath: generates new boardID for this board
+	 * - If doesn't exist: adds the board to the registry
+	 * @param filePath - The path to the .taskboard file
+	 * @returns The board configuration object, or null if file doesn't exist or cannot be parsed
+	 */
+	async loadBoardFromDiskEncoded(filePath: string): Promise<Board | null> {
+		try {
+			// Check if file exists
+			const fileExists = await this.app.vault.adapter.exists(filePath);
+			if (!fileExists) {
+				console.warn(`TaskBoard file not found: ${filePath}`);
+				return null;
+			}
+
+			// Read the file
 			const file = await this.app.vault.adapter.readBinary(filePath);
 			const decodedData = new TextDecoder().decode(file);
 
@@ -192,6 +258,31 @@ export default class TaskBoardFileManager {
 	 * @returns boolean - True if saved successfully, false otherwise
 	 */
 	async saveBoardToDisk(
+		filePath: string,
+		boardData: Board,
+	): Promise<boolean> {
+		try {
+			// Convert board data to JSON string
+			const jsonString = JSON.stringify(boardData);
+			await this.app.vault.adapter.write(filePath, jsonString);
+
+			return true;
+		} catch (error) {
+			console.error(`Error saving board to file ${filePath}:`, error);
+			return false;
+		}
+	}
+
+	/**
+	 * Save board configuration to a .taskboard file.
+	 * This function uses the {@method createBinary} API of Obsidian.
+	 * Which requires encoding the data and few additional operations.
+	 *
+	 * @param filePath - The path to the .taskboard file
+	 * @param boardData - The board configuration object to save
+	 * @returns boolean - True if saved successfully, false otherwise
+	 */
+	async saveBoardToDiskEncoded(
 		filePath: string,
 		boardData: Board,
 	): Promise<boolean> {
