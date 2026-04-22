@@ -210,7 +210,7 @@ export async function createBackupConfigFile(
 export async function createBoardFiles(
 	plugin: TaskBoard,
 	legacyBoards: BoardLegacy[],
-	onProgress?: (
+	onProgress: (
 		message: string,
 		boardName?: string,
 		status?: "success" | "error",
@@ -231,6 +231,12 @@ export async function createBoardFiles(
 		status: "success" | "error";
 		message: string;
 	}> = [];
+
+	onProgress(
+		`The Task Board's board files (.taskboard) will be created at the following path: Meta/Task_Board/Boards/`,
+		"All",
+		"success",
+	);
 
 	try {
 		// Ensure the boards directory exists
@@ -253,7 +259,7 @@ export async function createBoardFiles(
 			}
 		}
 
-		onProgress?.(`Processing ${legacyBoards.length} boards...`);
+		onProgress(`Processing ${legacyBoards.length} boards...`);
 		let boardIndex = -1;
 
 		for (const board of legacyBoards) {
@@ -305,7 +311,7 @@ export async function createBoardFiles(
 				await sleep(500);
 
 				if (saveBoardResult) {
-					onProgress?.(
+					onProgress(
 						`✓ Created: ${board.name}`,
 						board.name,
 						"success",
@@ -325,7 +331,7 @@ export async function createBoardFiles(
 					boardError instanceof Error
 						? boardError.message
 						: String(boardError);
-				onProgress?.(
+				onProgress(
 					`✗ Failed to create ${board.name}: ${errorMsg}`,
 					board.name,
 					"error",
@@ -341,7 +347,7 @@ export async function createBoardFiles(
 		}
 	} catch (error) {
 		const errorMsg = error instanceof Error ? error.message : String(error);
-		onProgress?.(
+		onProgress(
 			`✗ Unexpected error during boards creation process: ${errorMsg}\nNo boards were created.`,
 		);
 	}
@@ -442,7 +448,7 @@ export async function migrateMapViewData(
 							viewType: viewTypeNames.map,
 							mapView: newMapViewData,
 							showFilteredTags: true,
-							viewFilter: {
+							viewFilter: boardData.views[0]?.viewFilter ?? {
 								rootCondition: "none",
 								filterGroups: [],
 							},
@@ -537,17 +543,17 @@ export async function updateRegistryAndSettings(
  */
 export async function migrateVersion1_to_Version2(
 	plugin: TaskBoard,
-	onStepStart?: (
+	onStepStart: (
 		stepNumber: number,
 		totalSteps: number,
 		stepName: string,
 	) => void,
-	onStepProgress?: (
+	onStepProgress: (
 		message: string,
 		boardName?: string,
 		status?: "success" | "error",
 	) => void,
-	onStepComplete?: (
+	onStepComplete: (
 		stepNumber: number,
 		totalSteps: number,
 		stepName: string,

@@ -6,6 +6,7 @@ import {
 	migrateVersion1_to_Version2,
 	MigrationResult,
 } from "./MigrationUtils";
+import { showReloadObsidianNotice } from "../SettingSynchronizer";
 
 interface LogEntry {
 	id: string;
@@ -108,7 +109,8 @@ const MigrationModalContent: React.FC<{
 			if (result.success) {
 				addLog("✓ Migration completed successfully!", "success");
 				await sleep(500);
-				addLog(`Migrated ${result.migratedBoards.filter((b) => b.status === "success").length} boards`, "success");
+				await plugin.taskBoardFileManager.scanAllTaskBoardFiles();
+				addLog(`Migrated ${result.migratedBoards.filter((b) => b.status === "success").length} boards. You can find them at the following path : Meta/Task_Board/Boards/`, "success");
 				await sleep(500);
 			} else {
 				addLog("⚠ Migration completed with warnings or errors. Kindly report this issue to the developer.", "warning");
@@ -126,6 +128,9 @@ const MigrationModalContent: React.FC<{
 				addLog("", "info");
 				addLog(`Backup file will be available at the root of the vault: ${result.backupPath}`, "success");
 			}
+
+			// Show Notice to reload Obsidian and make the "Reload Obsidian" button visible
+			showReloadObsidianNotice(plugin);
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : String(error);
 			addLog(`✗ Unexpected error: ${errorMsg}`, "error");
@@ -256,12 +261,9 @@ const MigrationModalContent: React.FC<{
 					)}
 
 					<div className="migration-actions-section">
-						<button className="migration-close-button" onClick={handleClose}>
-							Close
-						</button>
-						<button className="migration-open-folder-button" onClick={handleOpenBoardsFolder}>
+						{/* <button className="migration-open-folder-button" onClick={handleOpenBoardsFolder}>
 							Open Boards Folder
-						</button>
+						</button> */}
 						<button className="migration-reload-button" onClick={handleReloadObsidian}>
 							Reload Obsidian
 						</button>

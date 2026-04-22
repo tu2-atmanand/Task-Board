@@ -240,12 +240,12 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			{
 				name: "wip",
 				color: "rgba(0, 255, 0, 0.53)",
-				priority: 2,
+				priority: 3,
 			},
 			{
 				name: "review",
 				color: "rgba(0, 0, 255, 0.49)",
-				priority: 3,
+				priority: 4,
 			},
 		],
 		editButtonAction: EditButtonMode.Modal,

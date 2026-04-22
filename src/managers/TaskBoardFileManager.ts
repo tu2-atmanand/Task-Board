@@ -584,17 +584,26 @@ export default class TaskBoardFileManager {
 
 		if (allFilePaths.length < 1) return [];
 
+		let newTaskBoardFilesRegistry: taskBoardFilesRegistryType = {};
+
 		for (const filepath of allFilePaths) {
 			const boardData = await this.loadBoardFromDisk(filepath);
 
 			if (boardData) {
 				// Add board to registry and cache it in memory
-				await this.addNewBoardToRegistry(
-					boardData.id,
-					filepath,
-					boardData,
-				);
+				newTaskBoardFilesRegistry[boardData.id] = {
+					boardId: boardData.id,
+					filePath: filepath,
+					boardName: boardData.name,
+					boardDescription: boardData.description ?? "",
+				};
 			}
+		}
+
+		if (Object.keys(newTaskBoardFilesRegistry).length > 0) {
+			this.plugin.settings.data.taskBoardFilesRegistry =
+				newTaskBoardFilesRegistry;
+			this.plugin.saveSettings();
 		}
 
 		return allFilePaths;
