@@ -186,57 +186,6 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Loads all the boards data from disk,
-	 * as per the file paths stored in the task board file path registry saved in the global settings.
-	 * @returns All boards data as an object keyed by file path or an empty object if failed to load the boards.
-	 */
-	async loadAllBoards(): Promise<recentBoardsDataType | {}> {
-		console.log("loadAllBoards : Starting to load all boards...");
-		try {
-			const taskBoardFilesRegistry =
-				this.plugin.settings.data.taskBoardFilesRegistry || {};
-			let loadedBoardsData: recentBoardsDataType = {};
-
-			for (const [, registryEntry] of Object.entries(
-				taskBoardFilesRegistry,
-			)) {
-				if (
-					!registryEntry.filePath ||
-					registryEntry.filePath.trim() === ""
-				) {
-					console.error(
-						`No board file path configured for registry entry`,
-					);
-					continue;
-				}
-
-				// Load board from file
-				const boardData = await this.loadBoardFromDisk(
-					registryEntry.filePath,
-				);
-
-				if (boardData) {
-					// Cache the board data in memory using file path as key
-					loadedBoardsData[registryEntry.filePath] = boardData;
-					console.log(
-						`Loaded and cached board "${boardData.name}" from: ${registryEntry.filePath}`,
-					);
-				} else {
-					console.warn(
-						`Error loading board data from file: ${registryEntry.filePath}`,
-					);
-				}
-			}
-
-			this.recentBoardsData = loadedBoardsData;
-			return loadedBoardsData;
-		} catch (error) {
-			console.error(`Error loading all boards:`, error);
-			return {};
-		}
-	}
-
-	/**
 	 * Save board configuration to a .taskboard file
 	 * @param filePath - The path to the .taskboard file
 	 * @param boardData - The board configuration object to save
@@ -685,7 +634,7 @@ export default class TaskBoardFileManager {
 
 		const firstItemFromRegistry = Object.values(taskBoardFilesRegistry)[0];
 
-		if (!firstItemFromRegistry.filePath) {
+		if (!firstItemFromRegistry?.filePath) {
 			console.error(
 				`First registry entry does not have a valid filePath.`,
 			);
@@ -775,12 +724,20 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * This function will be used to run a migration check whenever any board is loaded. Based on the pluginVersion property in the board data, we can decide if we need to run any migration steps to update the board data structure to be compatible with the current plugin version.
-	 * This is important to ensure that users can still load their existing boards even after we release updates that may change the board data structure.
+	 * This function will be used to run a migration check whenever any board is loaded.
+	 * Based on the pluginVersion property in the board data, we can decide if we need to
+	 * run any migration steps to update the board data structure to be compatible with the
+	 * current plugin version.
+	 * This is important to ensure that users can still load their existing boards even
+	 * after we release updates that may change the board data structure.
 	 *
-	 * First will check if the boardData.pluginVersion is different from the currentPluginVersion. If they are different, it means the board data was last saved with an older version of the plugin, and we may need to run migrations.
-	 * Then based on the pluginVersion in the board data, we can determine which migration steps to run to update the board data structure to be compatible with the current plugin version.
-	 * After running the necessary migrations, we should also update the pluginVersion in the board data to the currentPluginVersion, so that we don't run the same migrations again in the future.
+	 * First will check if the boardData.pluginVersion is different from the currentPluginVersion.
+	 * If they are different, it means the board data was last saved with an older version of the
+	 * plugin, and we may need to run migrations.
+	 * Then based on the pluginVersion in the board data, we can determine which migration steps
+	 * to run to update the board data structure to be compatible with the current plugin version.
+	 * After running the necessary migrations, we should also update the pluginVersion in the board
+	 * data to the currentPluginVersion, so that we don't run the same migrations again in the future.
 	 * Finally, we save the migrated board data back to disk and return the updated board data object.
 	 *
 	 * @param boardData - The old board data to check if it needs migrations
@@ -1113,5 +1070,60 @@ export default class TaskBoardFileManager {
 		}
 
 		return createdCount;
+	}
+
+	/**
+	 * @deprecated - This is a very bad design to load all the boards.
+	 * A new approach has been adopted to have multiple views, instead of loading
+	 * all the boards. Refer this {@link https://github.com/tu2-atmanand/Task-Board/issues/723}
+	 *
+	 * Loads all the boards data from disk,
+	 * as per the file paths stored in the task board file path registry saved in the global settings.
+	 * @returns All boards data as an object keyed by file path or an empty object if failed to load the boards.
+	 */
+	async loadAllBoards(): Promise<recentBoardsDataType | {}> {
+		console.log("loadAllBoards : Starting to load all boards...");
+		try {
+			const taskBoardFilesRegistry =
+				this.plugin.settings.data.taskBoardFilesRegistry || {};
+			let loadedBoardsData: recentBoardsDataType = {};
+
+			for (const [, registryEntry] of Object.entries(
+				taskBoardFilesRegistry,
+			)) {
+				if (
+					!registryEntry.filePath ||
+					registryEntry.filePath.trim() === ""
+				) {
+					console.error(
+						`No board file path configured for registry entry`,
+					);
+					continue;
+				}
+
+				// Load board from file
+				const boardData = await this.loadBoardFromDisk(
+					registryEntry.filePath,
+				);
+
+				if (boardData) {
+					// Cache the board data in memory using file path as key
+					loadedBoardsData[registryEntry.filePath] = boardData;
+					console.log(
+						`Loaded and cached board "${boardData.name}" from: ${registryEntry.filePath}`,
+					);
+				} else {
+					console.warn(
+						`Error loading board data from file: ${registryEntry.filePath}`,
+					);
+				}
+			}
+
+			this.recentBoardsData = loadedBoardsData;
+			return loadedBoardsData;
+		} catch (error) {
+			console.error(`Error loading all boards:`, error);
+			return {};
+		}
 	}
 }

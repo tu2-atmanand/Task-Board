@@ -23,6 +23,7 @@ import {
 	openAddNewTaskNoteModal,
 	openBoardsExplorerModal,
 	openScanVaultModal,
+	openMigrationModal,
 } from "src/services/OpenModals";
 
 import { TaskBoardView } from "./src/obsidian_views/TaskBoardView";
@@ -51,6 +52,10 @@ import {
 import { isTasksPluginEnabled } from "src/services/tasks-plugin/helpers";
 import { scanModeOptions, taskPropertiesNames } from "src/interfaces/Enums";
 import { migrateSettings } from "src/settings/SettingSynchronizer";
+import {
+	checkForV1Data,
+	readDataFile,
+} from "src/settings/MigratePluginArchitecture";
 import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
@@ -130,9 +135,12 @@ export default class TaskBoard extends Plugin {
 		dragDropTasksManagerInsatance.setPlugin(this);
 		bugReporterManagerInsatance.setPlugin(this);
 
+		// Migrations for updating from v1.x.x version series to v2.x.x series version
+		const shouldApplyV2Migrations = await this.checkAndNotifyV2Migration();
+
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
-		await this.runOnPluginUpdate();
+		if (!shouldApplyV2Migrations) await this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		// this.getLanguage();
@@ -189,6 +197,79 @@ export default class TaskBoard extends Plugin {
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
 		// onUnloadSave(this.plugin);
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
+	}
+
+	/**
+	 * Check if v1 data exists and show a notification with migration option
+	 */
+	private async checkAndNotifyV2Migration(): Promise<boolean> {
+		try {
+			const oldPluginSettings = await readDataFile(this);
+			if (oldPluginSettings) {
+				const v1Check = await checkForV1Data(oldPluginSettings);
+
+				if (v1Check.hasV1Data) {
+					// Show a notice with a button to open the migration modal
+					// const noticeEl = document.createElement("div");
+					// noticeEl.className = "migration-notice";
+					// noticeEl.innerHTML = `
+					// 	<p style="margin: 0 0 0.5rem 0;">Task Board migration required: You have updated Task Board from ${v1Check.version} (v1.x.x series) to ${newReleaseVersion} (v2.x.x series). You are required to run the migrations for this new version to work.</p>
+					// 	<button class="migration-notice-button" style="background-color: var(--interactive-accent); color: var(--text-on-accent); border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 600;">
+					// 		Open migrations
+					// 	</button>
+					// `;
+
+					// const migrationNotice = new Notice(noticeEl as any, 0);
+
+					// const button = noticeEl.querySelector("button");
+					// if (button) {
+					// 	button.addEventListener("click", () => {
+					// 		openMigrationModal(this);
+					// 		migrationNotice.hide();
+					// 	});
+					// }
+
+					const migrationNotice = new Notice(
+						createFragment((f) => {
+							f.createDiv("bugReportNotice", (el) => {
+								el.createEl("p", {
+									text: "Task Board migration required: You have updated Task Board from ${v1Check.version} (v1.x.x series) to ${newReleaseVersion} (v2.x.x series). You are required to run the migrations for this new version to work.",
+								});
+								el.createEl("button", {
+									text: t("Open migration modal"),
+									cls: "reportBugButton",
+									onclick: () => {
+										openMigrationModal(this);
+										el.hide();
+									},
+								});
+							});
+						}),
+						0,
+					);
+
+					migrationNotice.messageEl.onClickEvent((e) => {
+						if (!(e.target instanceof HTMLButtonElement)) {
+							e.stopPropagation();
+							e.preventDefault();
+							e.stopImmediatePropagation();
+						}
+					});
+					return true;
+				}
+				return false;
+			} else {
+				bugReporterManagerInsatance.addToLogs(
+					188,
+					"There was an issue while reading the current plugin configurations. If this is a fresh install ignore this log message. But, if this message is appearing after updating this plugin. Kindly take a backup of your current configuration, using the 'Export' setting button under the General tab. Then you can uninstall the plugin and re-install the previous version of Task Board. Please refer the following documentation : https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/#how-to-revert-back-to-the-previous-version",
+					"main.ts/checkAndNotifyV2Migration",
+				);
+				return false;
+			}
+		} catch (error) {
+			console.error("Error checking for v1 migration:", error);
+			return false;
+		}
 	}
 
 	/**

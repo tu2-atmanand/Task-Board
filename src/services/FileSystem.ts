@@ -1,4 +1,5 @@
 // import { BlobReader, configure, Reader, ZipReader } from '@zip.js/zip.js';
+import TaskBoard from "main";
 import type * as NodeFS from "node:fs";
 import type * as NodeOS from "node:os";
 import type * as NodePath from "node:path";
@@ -295,3 +296,39 @@ export function splitext(name: string) {
 // 		return new Uint8Array(nodeBufferToArrayBuffer(buffer, 0, result.bytesRead));
 // 	}
 // }
+
+export async function createFolderRecursively(
+	plugin: TaskBoard,
+	folderPath: string,
+): Promise<boolean> {
+	const parts = folderPath.split("/").filter(Boolean);
+	let currentPath = "";
+	for (const part of parts) {
+		currentPath = currentPath ? `${currentPath}/${part}` : part;
+
+		const existing = plugin.app.vault.getAbstractFileByPath(currentPath);
+		if (!existing) {
+			// createFolder will create the single folder at currentPath
+			try {
+				await plugin.app.vault.createFolder(currentPath);
+			} catch (error) {
+				if (String(error).contains("already exists")) continue;
+			}
+		} else {
+			// If a file exists where a folder is expected, report and abort
+			// (this is unlikely but safer to surface)
+			// existing.type may not be available in all builds, so just check truthiness and skip create
+			if ((existing as any).path && !(existing as any).children) {
+				bugReporterManagerInsatance.showNotice(
+					58,
+					`A file exists where a folder is expected: ${currentPath}`,
+					`Unexpected file at folder path: ${currentPath}`,
+					"TaskItemUtils.ts/archiveTask",
+				);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}

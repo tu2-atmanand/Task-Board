@@ -137,7 +137,7 @@
     "compatiblePlugins": {
       "dailyNotesPlugin": false,
       "dayPlannerPlugin": false,
-      "tasksPlugin": true,
+      "tasksPlugin": false,
       "reminderPlugin": false,
       "quickAddPlugin": false
     },
@@ -250,7 +250,7 @@
     "safeGuardFeature": true,
     "lastViewHistory": {
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-      "settingTab": 2,
+      "settingTab": 0,
       "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
