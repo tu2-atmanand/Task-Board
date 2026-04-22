@@ -3,7 +3,7 @@ import type TaskBoard from "main";
 import {
 	BoardLegacy,
 	PluginDataJsonLegacy,
-} from "src/interfaces/BoardConfigs-Legacy";
+} from "src/settings/2_x_x_Migrations/LegacyInterfacesAndTypings";
 import { t } from "src/utils/lang/helper";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { viewTypeNames } from "src/interfaces/Enums";

@@ -3,9 +3,9 @@ import {
 	FilterConfigSettings,
 	RootFilterState,
 	swimlaneConfigs,
-} from "./BoardConfigs";
-import { EditButtonMode, mapViewArrowDirection, mapViewEdgeType, mapViewScrollAction, TagColorType, taskPropertiesNames } from "./Enums";
-import { CustomStatus, frontmatterFormatting, scanFilters, TagColor, TaskBoardAction } from "./GlobalSettings";
+} from "../../interfaces/BoardConfigs";
+import { EditButtonMode, mapViewArrowDirection, mapViewEdgeType, mapViewScrollAction, TagColorType, taskPropertiesNames } from "../../interfaces/Enums";
+import { CustomStatus, frontmatterFormatting, scanFilters, TagColor, TaskBoardAction } from "../../interfaces/GlobalSettings";
 
 export type BoardLegacy = {
 	name: string;
