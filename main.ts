@@ -3,7 +3,6 @@
 import { around } from "monkey-around";
 import {
 	App,
-	debounce,
 	normalizePath,
 	Notice,
 	Plugin,
@@ -132,26 +131,21 @@ export default class TaskBoard extends Plugin {
 		bugReporterManagerInsatance.setPlugin(this);
 
 		// Migrations for updating from v1.x.x version series to v2.x.x series version
-		const shouldApplyV2Migrations = await checkAndNotifyV2Migration(this);
+		const appliedV2Migrations = await checkAndNotifyV2Migration(this);
+		await sleep(200); // For all the migrations code to properly save all the files.
 
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
-		if (!shouldApplyV2Migrations) await this.runOnPluginUpdate();
+		if (!appliedV2Migrations) await this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
-		// this.getLanguage();
+		await this.vaultScanner.initializeTasksCache();
 
+		// this.getLanguage();
 		await loadTranslationsOnStartup(this);
 
 		// Register the Kanban view
 		this.registerTaskBoardView();
-
-		await this.vaultScanner.initializeTasksCache();
-
-		// console.log(
-		// 	"TASK BOARD : Loaded following boards : ",
-		// 	this.taskBoardFileManager.getAllBoards(),
-		// );
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
