@@ -627,7 +627,10 @@ const en: Lang = {
 	"your-views": "Your views",
 	"no-views-created-yet": "No views created yet",
 	"select-a-view": "Select a view",
-	"open-migration-modal": "Open migrations modal"
+	"open-migration-modal": "Open migration modal",
+	"no-board-found": "Board was not found",
+	"no-boards-found-description": "The current board was not found. If this issue happened after updating the plugin to the new version from Task Board series 2.x.x, kindly run the migrations first. Else, close this tab and open a new board or you can also use the below button to create a new template board.",
+	"create-template-board": "Create a new template board",
 };
 
 export default en;

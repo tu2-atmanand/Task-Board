@@ -299,8 +299,7 @@ export class TaskBoardView extends ItemView {
 		const description = content.createEl("p", {
 			cls: "taskboard-no-board-description",
 		});
-		description.innerHTML = t("no-boards-found-description") ||
-			"This plugin didn't find any boards in your vault. Please re-scan the vault to find any available boards. Or create a new template board.";
+		description.innerHTML = t("no-boards-found-description");
 
 		// Action buttons
 		const buttonContainer = content.createDiv({
@@ -312,7 +311,7 @@ export class TaskBoardView extends ItemView {
 			text: t("create-template-board") || "Create Template Board",
 			cls: "taskboard-no-board-create-btn",
 			attr: {
-				"aria-label": t("create-template-board") || "Create a new template board",
+				"aria-label": t("create-template-board"),
 			},
 		});
 		createBtn.addEventListener("click", () => {
@@ -324,7 +323,7 @@ export class TaskBoardView extends ItemView {
 			text: t("scan-vault-modal") || "Scan Vault",
 			cls: "taskboard-no-board-scan-btn",
 			attr: {
-				"aria-label": t("scan-vault-modal") || "Scan the vault for boards",
+				"aria-label": t("scan-vault-modal"),
 			},
 		});
 		scanBtn.addEventListener("click", () => {

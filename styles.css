@@ -7959,7 +7959,6 @@ li[data-task=b]>p>input:checked {
 .taskboard-no-board-create-btn,
 .taskboard-no-board-scan-btn {
 	flex: 1;
-	min-width: 140px;
 	padding: 0.75rem 1.5rem;
 	border: none;
 	border-radius: var(--radius-s, 4px);
@@ -8031,7 +8030,6 @@ li[data-task=b]>p>input:checked {
 
 	.taskboard-no-board-create-btn,
 	.taskboard-no-board-scan-btn {
-		min-width: 120px;
 		padding: 0.65rem 1.25rem;
 		font-size: 0.95rem;
 	}

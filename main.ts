@@ -33,6 +33,7 @@ import TaskBoardFileManager from "src/managers/TaskBoardFileManager";
 import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
+import { MergeBoardsModal } from "src/modals/MergeBoardsModal";
 import {
 	MANDATORY_SCAN_KEY,
 	newReleaseVersion,
@@ -126,6 +127,9 @@ export default class TaskBoard extends Plugin {
 	async onload() {
 		console.log("Task Board : Loading...");
 
+		// this.getLanguage();
+		await loadTranslationsOnStartup(this);
+
 		// NOTE : I feel, if these singleton instances needs the latest version of 'this', then they might show some unexpected behavior as I am not updating the 'this' inside those singleton instances latest during the plugin life-cycle.
 		dragDropTasksManagerInsatance.setPlugin(this);
 		bugReporterManagerInsatance.setPlugin(this);
@@ -140,9 +144,6 @@ export default class TaskBoard extends Plugin {
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		await this.vaultScanner.initializeTasksCache();
-
-		// this.getLanguage();
-		await loadTranslationsOnStartup(this);
 
 		// Register the Kanban view
 		this.registerTaskBoardView();
@@ -727,8 +728,16 @@ export default class TaskBoard extends Plugin {
 				openScanVaultModal(this.plugin);
 			},
 		});
-
-		// // TODO : Remove this command before publishing, DEV commands
+		this.addCommand({
+			id: "merge-boards",
+			name: "Merge Boards",
+			callback: () => {
+				new MergeBoardsModal(this.app, {
+					plugin: this,
+					taskBoardFileManager: this.taskBoardFileManager,
+				}).open();
+			},
+		});
 		// this.addCommand({
 		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
