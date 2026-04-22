@@ -5,6 +5,7 @@ import type TaskBoard from "main";
 import {
 	migrateVersion1_to_Version2,
 	MigrationResult,
+	saveMigrationLogsToFile,
 } from "./MigrationUtils";
 import { showReloadObsidianNotice } from "../SettingSynchronizer";
 
@@ -103,8 +104,31 @@ const MigrationModalContent: React.FC<{
 				},
 			);
 
+			// Add logs to the result
+			result.logs = logs.map((log) => ({
+				timestamp: log.timestamp,
+				status: log.status,
+				message: log.message,
+				boardName: log.boardName,
+			}));
+
 			setMigrationResult(result);
 			setProgress(100);
+
+			// Save logs to file after migration completes
+			const logSaveResult = await saveMigrationLogsToFile(
+				plugin.app,
+				result.logs || [],
+				result.errors
+			);
+			if (logSaveResult.success && logSaveResult.filePath) {
+				result.logFilePath = logSaveResult.filePath;
+				addLog("", "info");
+				addLog(
+					`✓ Migration logs saved to: ${logSaveResult.filePath}`,
+					"success",
+				);
+			}
 
 			if (result.success) {
 				addLog("✓ Migration completed successfully!", "success");
@@ -260,14 +284,16 @@ const MigrationModalContent: React.FC<{
 						</div>
 					)}
 
-					<div className="migration-actions-section">
-						{/* <button className="migration-open-folder-button" onClick={handleOpenBoardsFolder}>
-							Open Boards Folder
-						</button> */}
-						<button className="migration-reload-button" onClick={handleReloadObsidian}>
-							Reload Obsidian
-						</button>
-					</div>
+					{migrationResult.success && (
+						<div className="migration-actions-section">
+							{/* <button className="migration-open-folder-button" onClick={handleOpenBoardsFolder}>
+								Open Boards Folder
+							</button> */}
+							<button className="migration-reload-button" onClick={handleReloadObsidian}>
+								Reload Obsidian
+							</button>
+						</div>
+					)}
 				</div>
 			) : null}
 		</div>

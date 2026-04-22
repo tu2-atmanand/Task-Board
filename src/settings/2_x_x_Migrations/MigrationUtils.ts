@@ -41,6 +41,13 @@ export interface MigrationResult {
 	errors: string[];
 	totalSteps: number;
 	completedSteps: number;
+	logs?: Array<{
+		timestamp: string;
+		status: "info" | "success" | "error" | "warning";
+		message: string;
+		boardName?: string;
+	}>;
+	logFilePath?: string;
 }
 
 export async function readDataFile(
@@ -57,6 +64,75 @@ export async function readDataFile(
 	const dataContent = await app.vault.adapter.read(normalizedPath);
 	const data: PluginDataJsonLegacy = JSON.parse(dataContent);
 	return data;
+}
+
+/**
+ * Get status icon for log file formatting
+ */
+function getStatusIconForLog(status: string): string {
+	switch (status) {
+		case "success":
+			return "[✓]";
+		case "error":
+			return "[✗]";
+		case "warning":
+			return "[⚠]";
+		default:
+			return "[•]";
+	}
+}
+
+/**
+ * Save migration logs to a file in the plugin config folder
+ */
+export async function saveMigrationLogsToFile(
+	app: App,
+	logs: Array<{
+		timestamp: string;
+		status: "info" | "success" | "error" | "warning";
+		message: string;
+		boardName?: string;
+	}>,
+	errors: string[],
+): Promise<{ success: boolean; filePath?: string; error?: string }> {
+	try {
+		const timestamp = getCurrentLocalDateTimeString().replace(
+			/[:\s]/g,
+			"_",
+		);
+		const logFilename = `migration-log-${timestamp}.log`;
+		const logPath = normalizePath(
+			`${app.vault.configDir}/plugins/task-board/${logFilename}`,
+		);
+
+		// Format logs as readable text
+		const logContent = [
+			`=== Task Board Migration Log ===`,
+			`Generated: ${new Date().toLocaleString()}`,
+			``,
+			...logs.map((log) => {
+				const icon = getStatusIconForLog(log.status);
+				const boardInfo = log.boardName ? ` [${log.boardName}]` : "";
+				return `[${log.timestamp}] ${icon} ${log.message}${boardInfo}`;
+			}),
+			``,
+			`=== End of Log ===`,
+			`\n`,
+			`\n`,
+			`\n`,
+			`=== ERRORS ===`,
+			...errors.join("\n"),
+			`=== End of ERRORS`,
+		].join("\n");
+
+		await app.vault.adapter.write(logPath, logContent);
+
+		return { success: true, filePath: logPath };
+	} catch (error) {
+		const errorMsg = error instanceof Error ? error.message : String(error);
+		console.error("Error saving migration logs:", errorMsg);
+		return { success: false, error: errorMsg };
+	}
 }
 
 /**
