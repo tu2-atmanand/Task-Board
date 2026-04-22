@@ -14,11 +14,12 @@ import {
 	newReleaseVersion,
 	NODE_POSITIONS_STORAGE_KEY,
 } from "src/interfaces/Constants";
-import { migrateSettings } from "./SettingSynchronizer";
+import { migrateSettings } from "../SettingSynchronizer";
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
 } from "src/interfaces/GlobalSettings";
+import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export interface MigrationStepResult {
 	stepName: string;
@@ -43,17 +44,17 @@ export interface MigrationResult {
 }
 
 export async function readDataFile(
-	plugin: TaskBoard,
+	app: App,
 ): Promise<PluginDataJsonLegacy | undefined> {
-	let path = `${plugin.app.vault.configDir}/plugins/task-board/data.json`;
+	let path = `${app.vault.configDir}/plugins/task-board/data.json`;
 	const normalizedPath = normalizePath(path);
 
-	const fileExists = await plugin.app.vault.adapter.exists(normalizedPath);
+	const fileExists = await app.vault.adapter.exists(normalizedPath);
 	if (!fileExists) {
 		return;
 	}
 
-	const dataContent = await plugin.app.vault.adapter.read(normalizedPath);
+	const dataContent = await app.vault.adapter.read(normalizedPath);
 	const data: PluginDataJsonLegacy = JSON.parse(dataContent);
 	return data;
 }
@@ -89,6 +90,76 @@ export async function checkForV1Data(
 		return { hasV1Data: false };
 	}
 }
+
+// Function to open the MigrationModal
+export const openMigrationModal = (
+	plugin: TaskBoard,
+	onMigrationComplete?: (result: any) => void,
+) => {
+	// Dynamic import to avoid circular dependencies
+	import("src/settings/2_x_x_Migrations/MigrationModal").then(
+		({ MigrationModal }) => {
+			new MigrationModal(plugin, onMigrationComplete).open();
+		},
+	);
+};
+
+/**
+ * Check if v1 data exists and show a notification with migration option
+ */
+export async function checkAndNotifyV2Migration(plugin: TaskBoard): Promise<boolean> {
+	try {
+		const oldPluginSettings = await readDataFile(plugin.app);
+		if (oldPluginSettings) {
+			const v1Check = await checkForV1Data(oldPluginSettings);
+
+			if (v1Check.hasV1Data) {
+				const migrationNotice = new Notice(
+					createFragment((f) => {
+						f.createDiv("bugReportNotice", (el) => {
+							el.createEl("div", {
+								text: `⚠ Task Board migration required<br /><br />Task Board has been updated from version ${v1Check.version} (v1.x.x series) to version ${newReleaseVersion} (v2.x.x series). You are required to run the migrations for this new version to work.`,
+							});
+							el.createEl("button", {
+								text: t("open-migration-modal"),
+								cls: "reportBugButton",
+								onclick: () => {
+									openMigrationModal(plugin);
+									el.hide();
+								},
+							});
+						});
+					}),
+					0,
+				);
+
+				migrationNotice.messageEl.onClickEvent((e) => {
+					if (!(e.target instanceof HTMLButtonElement)) {
+						e.stopPropagation();
+						e.preventDefault();
+						e.stopImmediatePropagation();
+					}
+				});
+				return true;
+			}
+			return false;
+		} else {
+			bugReporterManagerInsatance.addToLogs(
+				188,
+				"There was an issue while reading the current plugin configurations. If this is a fresh install ignore this log message. But, if this message is appearing after updating this plugin. Kindly take a backup of your current configuration, using the 'Export' setting button under the General tab. Then you can uninstall the plugin and re-install the previous version of Task Board and import the exported configurations. Please refer the following documentation : https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/#how-to-revert-back-to-the-previous-version",
+				"main.ts/checkAndNotifyV2Migration",
+			);
+			return false;
+		}
+	} catch (error) {
+		console.error("Error checking for v1 migration:", error);
+		return false;
+	}
+}
+
+// ---------------------------------------------------
+// UTILS FOR PROCESSING THE MIGRATIONS
+// ---------------------------------------------------
 
 /**
  * Create a backup of the current data.json file in the vault root
@@ -473,7 +544,7 @@ export async function migrateVersion1_to_Version2(
 	};
 
 	try {
-		const oldPluginSettings = await readDataFile(plugin);
+		const oldPluginSettings = await readDataFile(plugin.app);
 		if (oldPluginSettings === undefined) {
 			result.success = true;
 			result.completedSteps = 4;

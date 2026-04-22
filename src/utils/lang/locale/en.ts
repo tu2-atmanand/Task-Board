@@ -627,6 +627,7 @@ const en: Lang = {
 	"your-views": "Your views",
 	"no-views-created-yet": "No views created yet",
 	"select-a-view": "Select a view",
+	"open-migration-modal": "Open migrations modal"
 };
 
 export default en;

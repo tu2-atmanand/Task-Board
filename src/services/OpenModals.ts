@@ -826,14 +826,3 @@ export const openDateInputModal = async (
 
 	datePicker.open();
 };
-
-// Function to open the MigrationModal
-export const openMigrationModal = (
-	plugin: TaskBoard,
-	onMigrationComplete?: (result: any) => void,
-) => {
-	// Dynamic import to avoid circular dependencies
-	import("src/settings/MigrationModal").then(({ MigrationModal }) => {
-		new MigrationModal(plugin, onMigrationComplete).open();
-	});
-};

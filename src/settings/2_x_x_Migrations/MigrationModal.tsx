@@ -6,7 +6,7 @@ import { t } from "src/utils/lang/helper";
 import {
 	migrateVersion1_to_Version2,
 	MigrationResult,
-} from "./MigratePluginArchitecture";
+} from "./MigrationUtils";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { newReleaseVersion } from "src/interfaces/Constants";
 
