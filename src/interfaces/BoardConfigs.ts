@@ -139,26 +139,26 @@ export type viewPortType = {
 	zoom: number;
 };
 
-export type nodePositionWidth = {
+export type nodePositionData = {
 	x: number;
 	y: number;
-	width: number;
+	width?: number;
 };
 
 export type nodeDataType = {
-	[taskID: string]: nodePositionWidth;
+	[taskID: string]: nodePositionData;
 };
+
+export interface MapView {
+	viewPortData: viewPortType;
+	nodesData: nodeDataType;
+}
 
 export interface KanbanView {
 	columns: ColumnData[];
 	showColumnTags: boolean;
 	hideEmptyColumns: boolean;
 	swimlanes: swimlaneConfigs;
-}
-
-export interface MapView {
-	viewPortData: viewPortType;
-	nodesData: nodeDataType;
 }
 
 /**

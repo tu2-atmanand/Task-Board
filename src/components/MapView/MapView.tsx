@@ -32,7 +32,7 @@ import { TasksImporterPanel } from './TasksImporterPanel';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
 import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { Board,  nodeDataType, nodePositionWidth, TaskBoardView, viewPortType } from 'src/interfaces/BoardConfigs';
+import { Board,  nodeDataType, nodePositionData, TaskBoardView, viewPortType } from 'src/interfaces/BoardConfigs';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -168,7 +168,7 @@ const MapView: React.FC<MapViewProps> = ({
 		setStorageLoaded(false);
 		// Load and sanitize positions
 		const nodesData: nodeDataType = loadAllNodesData();
-		const sanitizedPositions: Record<string, nodePositionWidth> = {};
+		const sanitizedPositions: Record<string, nodePositionData> = {};
 		Object.keys(nodesData).forEach(id => {
 			sanitizedPositions[id] = {
 				x: Number.isFinite(nodesData[id]?.x) ? nodesData[id].x : 0,
@@ -449,7 +449,7 @@ const MapView: React.FC<MapViewProps> = ({
 		try {
 			// Update positions for current board with validation
 			// Only update useRef - no state update needed, avoiding re-render
-			const nodesDataMap: Record<string, nodePositionWidth> = {};
+			const nodesDataMap: Record<string, nodePositionData> = {};
 			for (const node of nodes) {
 				const x = Number.isFinite(node.position?.x) ? node.position.x : 0;
 				const y = Number.isFinite(node.position?.y) ? node.position.y : 0;
