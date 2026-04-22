@@ -1,14 +1,11 @@
 import { App, Modal, normalizePath } from "obsidian";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
 import {
 	migrateVersion1_to_Version2,
 	MigrationResult,
 } from "./MigrationUtils";
-import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
-import { newReleaseVersion } from "src/interfaces/Constants";
 
 interface LogEntry {
 	id: string;
@@ -69,10 +66,10 @@ const MigrationModalContent: React.FC<{
 		logIdRef.current = 0;
 
 		addLog("Initializing migration process...", "info");
+		await sleep(500);
 		addLog("", "info");
 
 		try {
-			addLog("=== Step 1/4: Creating backup ===", "info");
 			let currentProgress = 0;
 
 			const result = await migrateVersion1_to_Version2(
@@ -110,9 +107,11 @@ const MigrationModalContent: React.FC<{
 
 			if (result.success) {
 				addLog("✓ Migration completed successfully!", "success");
+				await sleep(500);
 				addLog(`Migrated ${result.migratedBoards.filter((b) => b.status === "success").length} boards`, "success");
+				await sleep(500);
 			} else {
-				addLog("⚠ Migration completed with warnings or errors", "warning");
+				addLog("⚠ Migration completed with warnings or errors. Kindly report this issue to the developer.", "warning");
 			}
 
 			if (result.errors.length > 0) {
@@ -125,7 +124,7 @@ const MigrationModalContent: React.FC<{
 
 			if (result.backupPath) {
 				addLog("", "info");
-				addLog(`Backup file: ${result.backupPath}`, "success");
+				addLog(`Backup file will be available at the root of the vault: ${result.backupPath}`, "success");
 			}
 		} catch (error) {
 			const errorMsg = error instanceof Error ? error.message : String(error);

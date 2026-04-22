@@ -107,7 +107,9 @@ export const openMigrationModal = (
 /**
  * Check if v1 data exists and show a notification with migration option
  */
-export async function checkAndNotifyV2Migration(plugin: TaskBoard): Promise<boolean> {
+export async function checkAndNotifyV2Migration(
+	plugin: TaskBoard,
+): Promise<boolean> {
 	try {
 		const oldPluginSettings = await readDataFile(plugin.app);
 		if (oldPluginSettings) {
@@ -117,8 +119,11 @@ export async function checkAndNotifyV2Migration(plugin: TaskBoard): Promise<bool
 				const migrationNotice = new Notice(
 					createFragment((f) => {
 						f.createDiv("bugReportNotice", (el) => {
-							el.createEl("div", {
-								text: `⚠ Task Board migration required<br /><br />Task Board has been updated from version ${v1Check.version} (v1.x.x series) to version ${newReleaseVersion} (v2.x.x series). You are required to run the migrations for this new version to work.`,
+							el.createEl("h4", {
+								text: `⚠ Task Board migration required`,
+							});
+							el.createEl("p", {
+								text: `Task Board has been updated from version ${v1Check.version} (v1.x.x series) to version ${newReleaseVersion} (v2.x.x series). You are required to run the migrations for this new version to work.`,
 							});
 							el.createEl("button", {
 								text: t("open-migration-modal"),
@@ -185,7 +190,11 @@ export async function createBackupConfigFile(
 			backupPath,
 			JSON.stringify(dataContent),
 		);
-		onProgress?.(`✓ Backup created: ${backupFilename}`);
+
+		await sleep(500);
+		onProgress?.(
+			`✓ Backup created at the root of the vault with the following name: ${backupFilename}`,
+		);
 
 		return { success: true, backupPath };
 	} catch (error) {
@@ -293,6 +302,7 @@ export async function createBoardFiles(
 						boardFilePath,
 						boardContent,
 					);
+				await sleep(500);
 
 				if (saveBoardResult) {
 					onProgress?.(
@@ -353,6 +363,7 @@ export async function migrateMapViewData(
 ): Promise<void> {
 	try {
 		onProgress?.("Migrating map view data...");
+		await sleep(500);
 
 		// Query localStorage for map view data using board name as key
 		// Note: localStorage in Obsidian is scoped per workspace
@@ -364,9 +375,10 @@ export async function migrateMapViewData(
 			mapViewData = JSON.parse(mapViewPostionsDataStr);
 		} else {
 			onProgress?.(
-				`⚠ No map view data found in the LocalStorge.`,
+				`⚠ No map view data found in the LocalStorge. Safely moving for the next operation.`,
 				"All Boards",
 			);
+			await sleep(500);
 		}
 
 		for (const board of boardResults) {
@@ -377,9 +389,10 @@ export async function migrateMapViewData(
 				);
 				if (!fileExists) {
 					onProgress?.(
-						`⚠ Board file not found for ${board.boardName}`,
+						`⚠ Board file does note exists for the following board: ${board.boardName}. Safely moving for the next board.`,
 						board.boardName,
 					);
+					await sleep(500);
 					continue;
 				}
 
@@ -389,95 +402,98 @@ export async function migrateMapViewData(
 					);
 				if (!boardData) {
 					onProgress?.(
-						`⚠ Error while rading the following board file ${board.boardName}.taskboard`,
+						`⚠ Error while reading the following board file: ${board.filePath}. Safely moving for the next board.`,
 						board.boardName,
 					);
+					await sleep(500);
 					continue;
 				}
-				try {
-					const boardIndexKey = String(board.boardIndex);
+				const boardIndexKey = String(board.boardIndex);
 
-					if (
-						mapViewData &&
-						typeof mapViewData === "object" &&
-						!Array.isArray(mapViewData) &&
-						boardIndexKey in mapViewData &&
-						typeof mapViewData[boardIndexKey] === "object" &&
-						mapViewData[boardIndexKey] !== null &&
-						!Array.isArray(mapViewData[boardIndexKey])
-					) {
-						if (boardData && !boardData?.views) {
-							boardData.views = [];
-						}
-
-						let newMapViewData: MapView = {
-							viewPortData: {
-								x: 0,
-								y: 0,
-								zoom: 1.5,
-							},
-							nodesData: mapViewData[boardIndexKey], // ✅ Safely accessed now
-						};
-
-						const mapViewExists = boardData.views.some(
-							(v: any) => v.type === "map",
-						);
-						if (!mapViewExists) {
-							boardData.views.push({
-								viewId: generateRandomTempTaskId(),
-								viewName: "Map View",
-								viewType: viewTypeNames.map,
-								mapView: newMapViewData,
-								showFilteredTags: true,
-								viewFilter: {
-									rootCondition: "none",
-									filterGroups: [],
-								},
-								taskCount: {
-									pending: 0,
-									completed: 0,
-								},
-							});
-						}
-
-						const saveBoardResult =
-							await plugin.taskBoardFileManager.saveBoardToDisk(
-								board.filePath,
-								boardData,
-							);
-
-						if (saveBoardResult) {
-							onProgress?.(
-								`✓ Map view data migrated for ${board.boardName}`,
-								board.boardName,
-							);
-						} else {
-							onProgress?.(
-								`⚠ There was an error while saving the map view data in the board file ${board.filePath}`,
-								board.boardName,
-							);
-						}
+				if (
+					mapViewData &&
+					typeof mapViewData === "object" &&
+					!Array.isArray(mapViewData) &&
+					boardIndexKey in mapViewData &&
+					typeof mapViewData[boardIndexKey] === "object" &&
+					mapViewData[boardIndexKey] !== null &&
+					!Array.isArray(mapViewData[boardIndexKey])
+				) {
+					if (boardData && !boardData?.views) {
+						boardData.views = [];
 					}
-				} catch (parseError) {
+
+					let newMapViewData: MapView = {
+						viewPortData: {
+							x: 0,
+							y: 0,
+							zoom: 0.5,
+						},
+						nodesData: mapViewData[boardIndexKey], // ✅ Safely accessed now
+					};
+
+					const mapViewExists = boardData.views.some(
+						(v: any) => v.type === "map",
+					);
+					if (!mapViewExists) {
+						boardData.views.push({
+							viewId: generateRandomTempTaskId(),
+							viewName: "Map View",
+							viewType: viewTypeNames.map,
+							mapView: newMapViewData,
+							showFilteredTags: true,
+							viewFilter: {
+								rootCondition: "none",
+								filterGroups: [],
+							},
+							taskCount: {
+								pending: 0,
+								completed: 0,
+							},
+						});
+					}
+
+					const saveBoardResult =
+						await plugin.taskBoardFileManager.saveBoardToDisk(
+							board.filePath,
+							boardData,
+						);
+
+					if (saveBoardResult) {
+						onProgress?.(
+							`✓ Map view data migrated for following board: ${board.boardName}`,
+							board.boardName,
+						);
+						await sleep(500);
+					} else {
+						onProgress?.(
+							`⚠ There was an error while saving the map view data in the board file ${board.filePath}`,
+							board.boardName,
+						);
+					}
+				} else {
 					onProgress?.(
-						`⚠ Could not parse map view data for ${board.boardName}`,
+						`⚠ The map view data doesnt exists for the following board in LocalStorage: ${board.boardName}. Safely moving for the next board.`,
 						board.boardName,
 					);
+					await sleep(500);
 				}
 			} catch (error) {
 				const errorMsg =
 					error instanceof Error ? error.message : String(error);
 				onProgress?.(
-					`⚠ Failed to migrate map view for ${board.boardName}: ${errorMsg}`,
+					`⚠ Failed to migrate map view for the following board: ${board.boardName}. ERROR: ${errorMsg}. Safely moving for the next board.`,
 					board.boardName,
 				);
+				await sleep(500);
 			}
 		}
 	} catch (error) {
 		const errorMsg = error instanceof Error ? error.message : String(error);
 		onProgress?.(
-			`⚠ Unexpected error during map view migration: ${errorMsg}`,
+			`⚠ Unexpected error during map view migration process. ERROR: ${errorMsg}`,
 		);
+		await sleep(500);
 	}
 }
 
@@ -491,6 +507,7 @@ export async function updateRegistryAndSettings(
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		onProgress?.("Updating plugin settings...");
+		await sleep(500);
 
 		const migratedSettings = migrateSettings(
 			DEFAULT_SETTINGS,
@@ -504,6 +521,7 @@ export async function updateRegistryAndSettings(
 			migratedSettings.version = newReleaseVersion;
 			await plugin.saveSettings(migratedSettings);
 		}
+		await sleep(500);
 		onProgress?.("✓ Plugin settings updated");
 
 		return { success: true };
@@ -576,9 +594,10 @@ export async function migrateVersion1_to_Version2(
 			return result;
 		}
 		onStepComplete?.(1, 4, "Backup creation");
+		await sleep(500);
 
 		// Step 2: Create board files
-		onStepStart?.(2, 4, "Creating .taskboard board files...");
+		onStepStart?.(2, 4, "Creating board files (.taskboard) ...");
 		if (v1Check.legacyBoards && v1Check.legacyBoards.length > 0) {
 			const boardResults = await createBoardFiles(
 				plugin,
@@ -591,6 +610,7 @@ export async function migrateVersion1_to_Version2(
 			result.errors.push("No legacy boards found to migrate");
 		}
 		onStepComplete?.(2, 4, "Board file creation");
+		await sleep(500);
 
 		// Step 3: Migrate map view data
 		onStepStart?.(3, 4, "Migrating map view data...");
@@ -600,10 +620,10 @@ export async function migrateVersion1_to_Version2(
 		await migrateMapViewData(plugin, successfulBoards, onStepProgress);
 		result.completedSteps++;
 		onStepComplete?.(3, 4, "Map view data migration");
+		await sleep(500);
 
 		// Step 4: Update the main settings file (data.json) and the registry inside it.
 		onStepStart?.(4, 4, "Finalizing migration...");
-		debugger;
 		const modifiedOldPluginSettings = {
 			version: oldPluginSettings.version,
 			data: oldPluginSettings.data.globalSettings,
@@ -617,7 +637,7 @@ export async function migrateVersion1_to_Version2(
 			result.completedSteps++;
 		} else {
 			result.errors.push(
-				`Registry update failed: ${registryResult.error}`,
+				`Plugin settings updation process failed. ERROR: ${registryResult.error}`,
 			);
 		}
 		onStepComplete?.(4, 4, "Registry update");
