@@ -3,6 +3,7 @@
 import { around } from "monkey-around";
 import {
 	App,
+	Component,
 	normalizePath,
 	Notice,
 	Plugin,
@@ -25,6 +26,7 @@ import {
 } from "src/services/OpenModals";
 
 import { TaskBoardView } from "./src/obsidian_views/TaskBoardView";
+import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent";
 import { RealTimeScanner } from "src/managers/RealTimeScanner";
 import VaultScanner, {
 	fileTypeAllowedForScanning,
@@ -57,6 +59,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { checkAndNotifyV2Migration } from "src/settings/2_x_x_Migrations/MigrationUtils";
+import { EmbedRegistry } from "obsidian-typings";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -368,6 +371,24 @@ export default class TaskBoard extends Plugin {
 
 		// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
 		this.registerMonkeyPatchForTaskboardFiles();
+
+		// @ts-ignore
+		const embedRegistry = this.app.embedRegistry as EmbedRegistry;
+		embedRegistry.registerExtension(
+			TASKBOARD_FILE_EXTENSION,
+			(context, file, _) => {
+				console.log("Context :", context, "\nFile :", file);
+
+				// @ts-ignore
+				return new TaskBoardEmbedComponent(
+					context.containerEl,
+					this,
+					// @ts-ignore
+					file,
+					context.containerEl.getAttr("alt"),
+				) as any;
+			},
+		);
 
 		// Register AddOrEditTask view (can be opened in tabs or popout windows)
 		// this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {

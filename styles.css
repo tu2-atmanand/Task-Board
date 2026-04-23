@@ -376,7 +376,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	height: 0 !important;
 }
 
-/* Drawer Main Content Container */
 .taskBoardMainContent {
 	display: flex;
 	flex-direction: column;
@@ -387,7 +386,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	z-index: 0;
 }
 
-/* Drawer Sidebar */
 .boardSidebarDrawer {
 	width: 0;
 	min-width: 0;
@@ -476,6 +474,16 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	align-self: center;
 	text-align: center;
 	color: #888;
+}
+
+/* Task Board Embed Styles */
+.task-board-embed {
+	max-height: 600px;
+	overflow: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 8px;
+	background-color: var(--background-primary);
 }
 
 /* // src/components/KanbanBoard.tsx */

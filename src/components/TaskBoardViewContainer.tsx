@@ -22,7 +22,7 @@ import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getViewById, getViewIndex } from "src/utils/ViewUtils";
 
-const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf }> = ({ plugin, currentBoardData, currentLeaf }) => {
+const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf?: WorkspaceLeaf }> = ({ plugin, currentBoardData, currentLeaf }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
@@ -77,7 +77,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	const filterPopoverRef = useRef<TaskFilterPopover | null>(null);
 	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
 
-	const [viewWidth, setviewWidth] = useState<number>(currentLeaf.width);
+	const [viewWidth, setviewWidth] = useState<number>(currentLeaf ? currentLeaf.width : 800);
 	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
 	const [isMobileView, setIsMobileView] = useState(false); // show elements for screens smaller than 800px
 	const [showViewsPanel, setshowViewsPanel] = useState(boardData.viewsPanel.isOpen);
@@ -101,7 +101,9 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		};
 
 		handleResize();
-		plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
+		if (currentLeaf) {
+			plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
+		}
 		return () => {
 			// cleanup if needed
 		};
