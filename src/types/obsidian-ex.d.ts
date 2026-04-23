@@ -11,7 +11,7 @@ import {
 	Setting,
 	Vault,
 } from "obsidian";
-import { Plugins } from "obsidian-typings";
+import { InternalPlugins, Plugins } from "obsidian-typings";
 import { Component } from "obsidian";
 
 interface Token extends EditorRange {
@@ -325,7 +325,7 @@ declare module "obsidian" {
 		 */
 		lastEvent: UserEvent | null;
 
-		internalPlugins: any;
+		internalPlugins: InternalPlugins;
 
 		plugins: Plugins;
 

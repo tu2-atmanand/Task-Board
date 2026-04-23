@@ -487,33 +487,28 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 /* Custom view header path elements */
-.task-board-view-header-path {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 2px;
-	font-size: 0.9em;
-	color: var(--text-muted);
-	padding: 4px 8px;
-	border-radius: 4px;
-	background-color: var(--background-modifier-hover);
-	margin-left: 8px;
-}
-
-.task-board-view-header-path-segment {
-	cursor: pointer;
-	padding: 2px 4px;
-	border-radius: 3px;
+.taskboard-path-folder,
+.taskboard-path-file {
 	transition: background-color 0.2s ease;
+	padding: 2px 4px;
+	border-radius: var(--radius-s);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--text-faint);
 }
 
-.task-board-view-header-path-segment:hover {
+.taskboard-path-folder:hover,
+.taskboard-path-file:hover {
 	background-color: var(--background-modifier-border);
 	color: var(--text-accent);
 }
 
-.task-board-view-header-path-separator {
-	margin: 0 2px;
+.taskboard-path-folder {
+	color: var(--text-faint);
+}
+
+.taskboard-path-separator {
+	padding: 2px 1px;
 	color: var(--text-faint);
 }
 

@@ -1,6 +1,6 @@
 // src/views/TaskBoardView.tsx
 
-import { ItemView, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu, TFolder } from "obsidian";
+import { ItemView, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu, TFolder, TFile } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { funnelIcon, RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
 import { StrictMode } from "react";
@@ -14,6 +14,7 @@ import { t } from "src/utils/lang/helper";
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { revealFileFolderInExplorer } from "src/services/CommunityPlugins";
 
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
@@ -308,26 +309,16 @@ export class TaskBoardView extends ItemView {
 		// Create path elements
 		let currentPath = '';
 
-		// Add root if path starts with /
-		if (this.currentFilePath.startsWith('/')) {
-			const rootSpan = titleContainer.createSpan({ text: '/', cls: 'taskboard-path-root' });
-			rootSpan.addEventListener('click', () => {
-				// Reveal root folder
-				const rootFolder = this.app.vault.getRoot();
-				this.revealFolderInFileExplorer(rootFolder);
-			});
-			currentPath = '/';
-		}
-
 		// Add folder parts
 		folderParts.forEach((part, index) => {
 			if (part) {
 				currentPath += part;
+				const folderPath = currentPath;
 				const folderSpan = titleContainer.createSpan({ text: part, cls: 'taskboard-path-folder' });
 				folderSpan.addEventListener('click', () => {
-					const folder = this.app.vault.getAbstractFileByPath(currentPath) as TFolder;
-					if (folder) {
-						this.revealFolderInFileExplorer(folder);
+					const folder = this.app.vault.getAbstractFileByPath(folderPath);
+					if (folder instanceof TFolder) {
+						revealFileFolderInExplorer(this.plugin, folder);
 					}
 				});
 
@@ -341,22 +332,15 @@ export class TaskBoardView extends ItemView {
 
 		// Add file name
 		if (fileName) {
+			const filePath = `${currentPath}${fileName}`;
 			const fileSpan = titleContainer.createSpan({ text: fileName, cls: 'taskboard-path-file' });
-			// File click could open the file, but since it's already open, maybe no action
+			fileSpan.addEventListener('click', () => {
+				const file = this.app.vault.getAbstractFileByPath(filePath) as TFile | null;
+				if (file) {
+					revealFileFolderInExplorer(this.plugin, file);
+				}
+			});
 		}
-	}
-
-	/**
-	 * Reveals a folder in the file explorer by setting it as active.
-	 */
-	private revealFolderInFileExplorer(folder: TFolder) {
-		const fileExplorerLeaves = this.app.workspace.getLeavesOfType('file-explorer');
-		fileExplorerLeaves.forEach(leaf => {
-			const view = leaf.view as any;
-			if (view.setActiveFolder) {
-				view.setActiveFolder(folder);
-			}
-		});
 	}
 
 	/**
