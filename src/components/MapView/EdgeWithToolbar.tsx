@@ -36,14 +36,14 @@ import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
  * @param props...edgeProps - Standard ReactFlow EdgeProps including source, target, selected state, etc.
  */
 export function EdgeWithToolbar(props: EdgeProps) {
-	console.log("Edge :", props);
+	// console.log("Edge :", props);
 	// const { plugin, allTasks, ...edgeProps } = props;
 	const edgeProps = props;
 	const [edgePath, labelX, labelY] = getBezierPath(edgeProps);
 	const { deleteElements, getEdges } = useReactFlow();
 
 	const deleteEdge = async () => {
-		console.log("Edge pressed :", edgeProps);
+		// console.log("Edge pressed :", edgeProps);
 
 		// // Find the edge
 		// const edge = getEdges().find((e) => e.id === edgeProps.id);
@@ -95,12 +95,12 @@ export function EdgeWithToolbar(props: EdgeProps) {
 
 	const handleColorChange = () => {
 		// Placeholder for future implementation
-		console.log('Color change feature - to be implemented');
+		// console.log('Color change feature - to be implemented');
 	};
 
 	const handleAnimationToggle = () => {
 		// Placeholder for future implementation
-		console.log('Animation toggle feature - to be implemented');
+		// console.log('Animation toggle feature - to be implemented');
 	};
 
 	return (
