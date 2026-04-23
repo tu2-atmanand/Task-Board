@@ -1,6 +1,6 @@
 // src/views/TaskBoardView.tsx
 
-import { ItemView, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu } from "obsidian";
+import { ItemView, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu, TFolder } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { funnelIcon, RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
 import { StrictMode } from "react";
@@ -131,7 +131,7 @@ export class TaskBoardView extends ItemView {
 	 * @param result 
 	 */
 	async setState(state: any, result: ViewStateResult): Promise<void> {
-		console.log(`Running setState...\nstate : ${JSON.parse(JSON.stringify(state))}\nresult : ${result}`);
+		console.log(`Running setState...`);
 		const { filePath } = state;
 
 		// Check if a specific .taskboard file was clicked from File Navigator
@@ -141,8 +141,8 @@ export class TaskBoardView extends ItemView {
 			const clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
 			if (clickedFileData) {
 				this.currentFilePath = clickedFilePath;
-				state.state = {
-					...state.state,
+				state = {
+					...state,
 					filePath: this.currentFilePath
 				};
 				this.renderBoard(clickedFileData);
@@ -150,19 +150,15 @@ export class TaskBoardView extends ItemView {
 				bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
 			}
 		} else {
-			// In this case, mostly user is opening the leaf from the ribbon icon
-			// Show last viewed board or the board from the filePath in the state if it exists
-			// Check if the board was already loaded by setState() when workspace was restored
-			// if (this.currentFilePath) {
 			if (filePath && typeof filePath === "string") {
-				// Use the filePath from saved state to load and render the board
+				// This will run when an in-active (deffered) leaf will come in focus. Specially happen when Obsidian is opened again and the Task Board leaf was brought in focus.
 				const boardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(
 					filePath
 				);
 				if (boardData) {
 					this.currentFilePath = filePath;
-					state.state = {
-						...state.state,
+					state = {
+						...state,
 						filePath: this.currentFilePath
 					};
 					this.renderBoard(boardData);
@@ -175,8 +171,9 @@ export class TaskBoardView extends ItemView {
 					);
 				}
 			}
-			// }
 			else {
+				// This will run when user has clicked on the Ribbon icon or running the "Open task board" command.
+				// We need to get the last opened board.
 				const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
 				if (lastViewedBoardData) {
 					// Get the filePath from the registry
@@ -187,7 +184,7 @@ export class TaskBoardView extends ItemView {
 						const firstItemFromRegistry = registryEntries[0];
 						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
-							state.state = {
+							state.filePath = {
 								...state.state,
 								filePath: this.currentFilePath
 							};
@@ -273,8 +270,93 @@ export class TaskBoardView extends ItemView {
 			</StrictMode>
 		);
 
+		// Render custom view header with file path
+		this.renderCustomViewHeader();
+
 		// Signal the workspace to save the updated layout state
 		this.app.workspace.requestSaveLayout();
+	}
+
+	/**
+	 * Renders a custom view header with clickable file path elements that highlight folders in the File Navigator.
+	 */
+	private renderCustomViewHeader() {
+		// Find the view header title container
+		const leafEl = this.containerEl.closest('.workspace-leaf');
+		if (!leafEl) return;
+
+		const viewHeader = leafEl.querySelector('.view-header');
+		if (!viewHeader) return;
+
+		const titleContainer = viewHeader.querySelector('.view-header-title-container');
+		if (!titleContainer) return;
+
+		// Clear existing content
+		titleContainer.empty();
+
+		// If no file path, show default text
+		if (!this.currentFilePath) {
+			titleContainer.createSpan({ text: this.boardName });
+			return;
+		}
+
+		// Parse the file path
+		const pathParts = this.currentFilePath.split('/');
+		const fileName = pathParts.pop() || '';
+		const folderParts = pathParts;
+
+		// Create path elements
+		let currentPath = '';
+
+		// Add root if path starts with /
+		if (this.currentFilePath.startsWith('/')) {
+			const rootSpan = titleContainer.createSpan({ text: '/', cls: 'taskboard-path-root' });
+			rootSpan.addEventListener('click', () => {
+				// Reveal root folder
+				const rootFolder = this.app.vault.getRoot();
+				this.revealFolderInFileExplorer(rootFolder);
+			});
+			currentPath = '/';
+		}
+
+		// Add folder parts
+		folderParts.forEach((part, index) => {
+			if (part) {
+				currentPath += part;
+				const folderSpan = titleContainer.createSpan({ text: part, cls: 'taskboard-path-folder' });
+				folderSpan.addEventListener('click', () => {
+					const folder = this.app.vault.getAbstractFileByPath(currentPath) as TFolder;
+					if (folder) {
+						this.revealFolderInFileExplorer(folder);
+					}
+				});
+
+				// Add separator
+				if (index < folderParts.length - 1 || fileName) {
+					titleContainer.createSpan({ text: '/', cls: 'taskboard-path-separator' });
+				}
+				currentPath += '/';
+			}
+		});
+
+		// Add file name
+		if (fileName) {
+			const fileSpan = titleContainer.createSpan({ text: fileName, cls: 'taskboard-path-file' });
+			// File click could open the file, but since it's already open, maybe no action
+		}
+	}
+
+	/**
+	 * Reveals a folder in the file explorer by setting it as active.
+	 */
+	private revealFolderInFileExplorer(folder: TFolder) {
+		const fileExplorerLeaves = this.app.workspace.getLeavesOfType('file-explorer');
+		fileExplorerLeaves.forEach(leaf => {
+			const view = leaf.view as any;
+			if (view.setActiveFolder) {
+				view.setActiveFolder(folder);
+			}
+		});
 	}
 
 	/**
@@ -284,6 +366,9 @@ export class TaskBoardView extends ItemView {
 	private renderNoBoard() {
 		const container = this.containerEl.children[1] as HTMLElement;
 		container.empty(); // Clear any previous content
+
+		// Reset view header
+		this.renderCustomViewHeader();
 
 		const wrapper = container.createDiv({ cls: "taskboard-no-board-wrapper" });
 

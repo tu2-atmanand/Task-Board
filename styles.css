@@ -486,6 +486,37 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	background-color: var(--background-primary);
 }
 
+/* Custom view header path elements */
+.task-board-view-header-path {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 2px;
+	font-size: 0.9em;
+	color: var(--text-muted);
+	padding: 4px 8px;
+	border-radius: 4px;
+	background-color: var(--background-modifier-hover);
+	margin-left: 8px;
+}
+
+.task-board-view-header-path-segment {
+	cursor: pointer;
+	padding: 2px 4px;
+	border-radius: 3px;
+	transition: background-color 0.2s ease;
+}
+
+.task-board-view-header-path-segment:hover {
+	background-color: var(--background-modifier-border);
+	color: var(--text-accent);
+}
+
+.task-board-view-header-path-separator {
+	margin: 0 2px;
+	color: var(--text-faint);
+}
+
 /* // src/components/KanbanBoard.tsx */
 
 .kanbanBoard {
