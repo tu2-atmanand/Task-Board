@@ -9,7 +9,7 @@ import { App, TFile, Notice, normalizePath } from "obsidian";
 import { Board, DEFAULT_BOARD } from "src/interfaces/BoardConfigs";
 import type TaskBoard from "main";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
-import { LEAFID_FILEPATH_MAPPING_KEY } from "src/interfaces/Constants";
+import { LEAFID_FILEPATH_MAPPING_KEY, TASKBOARD_FILE_EXTENSION } from "src/interfaces/Constants";
 import { bugReporterManagerInsatance } from "./BugReporter";
 import { taskBoardFilesRegistryType } from "src/interfaces/GlobalSettings";
 
@@ -650,7 +650,8 @@ export default class TaskBoardFileManager {
 			const taskboardFiles = allFiles
 				.filter(
 					(file) =>
-						file instanceof TFile && file.extension === "taskboard",
+						file instanceof TFile &&
+						file.extension === TASKBOARD_FILE_EXTENSION,
 				)
 				.map((file) => (file as TFile).path);
 

@@ -38,6 +38,7 @@ import {
 	MANDATORY_SCAN_KEY,
 	newReleaseVersion,
 	OBSIDIAN_CLOSED_TIME_KEY,
+	TASKBOARD_FILE_EXTENSION,
 	VIEW_TYPE_TASKBOARD,
 } from "src/interfaces/Constants";
 import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
@@ -360,7 +361,10 @@ export default class TaskBoard extends Plugin {
 			return this.view;
 		});
 
-		this.registerExtensions(["taskboard"], VIEW_TYPE_TASKBOARD);
+		this.registerExtensions(
+			[TASKBOARD_FILE_EXTENSION],
+			VIEW_TYPE_TASKBOARD,
+		);
 
 		// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
 		this.registerMonkeyPatchForTaskboardFiles();
