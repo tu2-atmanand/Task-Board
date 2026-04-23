@@ -2448,7 +2448,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-width: 111px;
 }
 
-.boardConfigModalColumnRowContentColDatedVal.border-red {
+.boardConfigModalColumnRowContentColDatedVal.border-red,
+.boardConfigModalColumnRowContentColDatedVal.border-red:hover,
+.boardConfigModalColumnRowContentColDatedVal.border-red:active,
+.boardConfigModalColumnRowContentColDatedVal.border-red:focus,
+.boardConfigModalColumnRowContentColDatedVal.border-red:focus-visible,
+.boardConfigModalColumnRowContentColDatedVal.border-red:focus-within {
 	border-color: red;
 	border-width: 2px;
 }
