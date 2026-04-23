@@ -41,6 +41,7 @@ export class TaskBoardView extends TextFileView {
 	}
 
 	setViewData(data: string): void {
+		console.log("Running setViewData...");
 		try {
 			const board = JSON.parse(data) as Board;
 			this.boardName = board.name || "Unnamed Board";
@@ -61,10 +62,12 @@ export class TaskBoardView extends TextFileView {
 	}
 
 	getViewData(): string {
+		console.log("Running getViewData...");
 		return this.currentBoard ? JSON.stringify(this.currentBoard, null, "\t") : "{}";
 	}
 
 	clear(): void {
+		console.log("Running clear()...");
 		this.root?.unmount();
 		this.root = null;
 		const container = this.containerEl.children[1] as HTMLElement;
@@ -145,7 +148,8 @@ export class TaskBoardView extends TextFileView {
 	}
 
 	/**
-	 * This is called by Obsidian when the layout is about to be save its state/layout.
+	 * This is called by Obsidian when Obsidian is about to save its state/layout.
+	 * 
 	 * @returns The state data to be stored inside the workspace.json file inside the
 	 * Obsidian's config folder. (.obsidian/workspace.json)
 	 */
@@ -167,7 +171,7 @@ export class TaskBoardView extends TextFileView {
 	 * @param result 
 	 */
 	async setState(state: any, result: ViewStateResult): Promise<void> {
-		console.log(`Running setState...\nstate : ${JSON.parse(JSON.stringify(state))}\nresult : ${result}`);
+		console.log(`Running setState...`);
 		const { filePath } = state;
 
 		// Check if a specific .taskboard file was clicked from File Navigator
@@ -177,8 +181,8 @@ export class TaskBoardView extends TextFileView {
 			const clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
 			if (clickedFileData) {
 				this.currentFilePath = clickedFilePath;
-				state.state = {
-					...state.state,
+				state = {
+					...state,
 					filePath: this.currentFilePath
 				};
 				this.renderBoard(clickedFileData);
@@ -186,19 +190,15 @@ export class TaskBoardView extends TextFileView {
 				bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
 			}
 		} else {
-			// In this case, mostly user is opening the leaf from the ribbon icon
-			// Show last viewed board or the board from the filePath in the state if it exists
-			// Check if the board was already loaded by setState() when workspace was restored
-			// if (this.currentFilePath) {
 			if (filePath && typeof filePath === "string") {
-				// Use the filePath from saved state to load and render the board
+				// This will run when an in-active (deffered) leaf will come in focus. Specially happen when Obsidian is opened again and the Task Board leaf was brought in focus.
 				const boardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(
 					filePath
 				);
 				if (boardData) {
 					this.currentFilePath = filePath;
-					state.state = {
-						...state.state,
+					state = {
+						...state,
 						filePath: this.currentFilePath
 					};
 					this.renderBoard(boardData);
@@ -211,8 +211,9 @@ export class TaskBoardView extends TextFileView {
 					);
 				}
 			}
-			// }
 			else {
+				// This will run when user has clicked on the Ribbon icon or running the "Open task board" command.
+				// We need to get the last opened board.
 				const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
 				if (lastViewedBoardData) {
 					// Get the filePath from the registry
@@ -223,7 +224,7 @@ export class TaskBoardView extends TextFileView {
 						const firstItemFromRegistry = registryEntries[0];
 						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
-							state.state = {
+							state.filePath = {
 								...state.state,
 								filePath: this.currentFilePath
 							};
