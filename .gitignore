@@ -30,3 +30,4 @@ locales/
 
 # Logs files
 task-board-logs.log
+data.json

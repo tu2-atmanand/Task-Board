@@ -960,8 +960,6 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 
 	const renderHeader = () => {
 		try {
-			debugger;
-			console.log("Task tags : ", task.tags, "\nFrontmatter tags :", task.frontmatterTags);
 			return (
 				<div className="taskItemHeader">
 					{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
