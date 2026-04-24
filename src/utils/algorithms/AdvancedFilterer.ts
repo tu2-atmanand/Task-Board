@@ -1,16 +1,12 @@
 // src/utils/advancedFilterer.ts
 
-import { taskItem } from "src/interfaces/TaskItem";
-import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter";
-import {
-	RootFilterState,
-	FilterGroup,
-	Filter,
-} from "src/interfaces/BoardConfigs";
-import { getAllTaskTags } from "../TaskItemUtils";
 import { compareAsc } from "date-fns";
-import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
-import { robustDateParser } from "../DateTimeCalculations";
+import { RootFilterState, FilterGroup, Filter } from "../../interfaces/BoardConfigs.js";
+import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { robustDateParser } from "../DateTimeCalculations.js";
+import { getAllTaskTags } from "../TaskItemUtils.js";
+import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter.js";
 
 /**
  * Filters tasks based on the board's filter configuration

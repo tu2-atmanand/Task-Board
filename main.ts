@@ -3,7 +3,6 @@
 import { around } from "monkey-around";
 import {
 	App,
-	Component,
 	normalizePath,
 	Notice,
 	Plugin,
@@ -13,53 +12,58 @@ import {
 	TFolder,
 	WorkspaceLeaf,
 } from "obsidian";
+import { EmbedRegistry } from "obsidian-typings";
+import { parse } from "date-fns";
+import { t } from "i18next";
 import {
-	DEFAULT_SETTINGS,
+	taskPropertyHidingExtension,
+	getTaskPropertyRegexPatterns,
+} from "./src/editor-extensions/task-operations/property-hiding.js";
+import {
+	VIEW_TYPE_TASKBOARD,
+	TASKBOARD_FILE_EXTENSION,
+	OBSIDIAN_CLOSED_TIME_KEY,
+	DEFAULT_DATE_TIME_FORMAT,
+	newReleaseVersion,
+	MANDATORY_SCAN_KEY,
+} from "./src/interfaces/Constants.js";
+import {
+	taskPropertiesNames,
+	scanModeOptions,
+} from "./src/interfaces/Enums.js";
+import {
 	PluginDataJson,
-} from "src/interfaces/GlobalSettings";
-import {
-	openAddNewTaskInCurrentFileModal,
-	openAddNewTaskModal,
-	openAddNewTaskNoteModal,
-	openBoardsExplorerModal,
-	openScanVaultModal,
-} from "src/services/OpenModals";
-
-import { TaskBoardView } from "./src/obsidian_views/TaskBoardView";
-import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent";
-import { RealTimeScanner } from "src/managers/RealTimeScanner";
+	DEFAULT_SETTINGS,
+} from "./src/interfaces/GlobalSettings.js";
+import { TaskBoardIcon } from "./src/interfaces/Icons.js";
+import { bugReporterManagerInsatance } from "./src/managers/BugReporter.js";
+import { dragDropTasksManagerInsatance } from "./src/managers/DragDropTasksManager.js";
+import { RealTimeScanner } from "./src/managers/RealTimeScanner.js";
+import TaskBoardFileManager from "./src/managers/TaskBoardFileManager.js";
 import VaultScanner, {
 	fileTypeAllowedForScanning,
-} from "src/managers/VaultScanner";
-import TaskBoardFileManager from "src/managers/TaskBoardFileManager";
-import { TaskBoardIcon } from "src/interfaces/Icons";
-import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
-import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
-import { MergeBoardsModal } from "src/modals/MergeBoardsModal";
+} from "./src/managers/VaultScanner.js";
+import { MergeBoardsModal } from "./src/modals/MergeBoardsModal.js";
+import { ModifiedFilesModal } from "./src/modals/ModifiedFilesModal.js";
+import { TaskBoardView } from "./src/obsidian_views/TaskBoardView.js";
+import { isReminderPluginInstalled } from "./src/services/CommunityPlugins.js";
+import { eventEmitter } from "./src/services/EventEmitter.js";
 import {
-	MANDATORY_SCAN_KEY,
-	newReleaseVersion,
-	OBSIDIAN_CLOSED_TIME_KEY,
-	TASKBOARD_FILE_EXTENSION,
-	VIEW_TYPE_TASKBOARD,
-} from "src/interfaces/Constants";
-import { isReminderPluginInstalled } from "src/services/CommunityPlugins";
-import { loadTranslationsOnStartup, t } from "src/utils/lang/helper";
-import { TaskBoardApi } from "src/taskboardAPIs";
-import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import {
-	getTaskPropertyRegexPatterns,
-	taskPropertyHidingExtension,
-} from "src/editor-extensions/task-operations/property-hiding";
-import { isTasksPluginEnabled } from "src/services/tasks-plugin/helpers";
-import { scanModeOptions, taskPropertiesNames } from "src/interfaces/Enums";
-import { migrateSettings } from "src/settings/SettingSynchronizer";
-import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager";
-import { eventEmitter } from "src/services/EventEmitter";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
-import { checkAndNotifyV2Migration } from "src/settings/2_x_x_Migrations/MigrationUtils";
-import { EmbedRegistry } from "obsidian-typings";
+	openAddNewTaskModal,
+	openAddNewTaskNoteModal,
+	openAddNewTaskInCurrentFileModal,
+	openBoardsExplorerModal,
+	openScanVaultModal,
+} from "./src/services/OpenModals.js";
+import { TasksPluginApi } from "./src/services/tasks-plugin/api.js";
+import { isTasksPluginEnabled } from "./src/services/tasks-plugin/helpers.js";
+import { checkAndNotifyV2Migration } from "./src/settings/2_x_x_Migrations/MigrationUtils.js";
+import { migrateSettings } from "./src/settings/SettingSynchronizer.js";
+import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
+import { TaskBoardApi } from "./src/taskboardAPIs.js";
+import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.js";
+import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
+import { DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -385,7 +389,7 @@ export default class TaskBoard extends Plugin {
 					this,
 					// @ts-ignore
 					file,
-					context.containerEl.getAttr("alt"),
+					context.containerEl.getAttr("alt") || undefined,
 				) as any;
 			},
 		);
@@ -1061,23 +1065,35 @@ export default class TaskBoard extends Plugin {
 	 * till now.
 	 */
 	async findModifiedFilesOnAppAbsense() {
-		let OBSIDIAN_CLOSED_TIME = this.app.loadLocalStorage(
+		const storedTime = this.app.loadLocalStorage(
 			OBSIDIAN_CLOSED_TIME_KEY,
-		);
+		) as string | undefined;
 
-		if (!OBSIDIAN_CLOSED_TIME)
-			OBSIDIAN_CLOSED_TIME = this.vaultScanner.tasksCache.Modified_at;
+		let OBSIDIAN_CLOSED_TIME: Date | undefined;
+
+		if (storedTime) {
+			OBSIDIAN_CLOSED_TIME = parse(
+				storedTime,
+				DEFAULT_DATE_TIME_FORMAT,
+				new Date(),
+			);
+		} else {
+			OBSIDIAN_CLOSED_TIME = parse(
+				this.vaultScanner.tasksCache.Modified_at,
+				DEFAULT_DATE_TIME_FORMAT,
+				new Date(),
+			);
+		}
 
 		if (OBSIDIAN_CLOSED_TIME) {
-			OBSIDIAN_CLOSED_TIME = Date.parse(OBSIDIAN_CLOSED_TIME);
 			let filesScannedCount = 0;
 			const modifiedCreatedRenamedFiles = this.app.vault
 				.getFiles()
 				.filter((file) => {
 					filesScannedCount++;
 					return (
-						file.stat.mtime > OBSIDIAN_CLOSED_TIME ||
-						file.stat.ctime > OBSIDIAN_CLOSED_TIME
+						file.stat.mtime > OBSIDIAN_CLOSED_TIME!.getTime() ||
+						file.stat.ctime > OBSIDIAN_CLOSED_TIME!.getTime()
 					);
 				});
 
@@ -1585,8 +1601,6 @@ export default class TaskBoard extends Plugin {
 	private async createTemplateBoard() {
 		try {
 			// Import DEFAULT_BOARDS from BoardConfigs
-			const { DEFAULT_BOARD } =
-				await import("src/interfaces/BoardConfigs");
 			const DEFAULT_BOARD_REGISTRY_ITEM = Object.values(
 				DEFAULT_SETTINGS.data.taskBoardFilesRegistry,
 			)[0];

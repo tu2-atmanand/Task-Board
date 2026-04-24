@@ -1,22 +1,15 @@
 // /src/utils/TaskItemUtils.ts
 
-import {
-	addIdToTaskContent,
-	getFormattedTaskContent,
-} from "./TaskContentFormatter";
-import { taskItem } from "src/interfaces/TaskItem";
-import {
-	readDataOfVaultFile,
-	writeDataToVaultFile,
-} from "../MarkdownFileOperations";
-
 import { normalizePath, Notice } from "obsidian";
-import TaskBoard from "main";
-import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import { openDiffContentCompareModal } from "src/services/OpenModals";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { isTheContentDiffAreOnlySpaces_V2 } from "src/modals/DiffContentCompareModal";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { isTheContentDiffAreOnlySpaces_V2 } from "../../modals/DiffContentCompareModal.js";
+import { allowedFileExtensionsRegEx } from "../../regularExpressions/MiscelleneousRegExpr.js";
+import { openDiffContentCompareModal } from "../../services/OpenModals.js";
+import { TasksPluginApi } from "../../services/tasks-plugin/api.js";
+import { readDataOfVaultFile, writeDataToVaultFile } from "../MarkdownFileOperations.js";
+import { getFormattedTaskContent, addIdToTaskContent } from "./TaskContentFormatter.js";
 
 /**
  * This function will simpy check if the task title contains the recurring tag:

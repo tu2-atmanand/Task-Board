@@ -1,19 +1,19 @@
 // /src/modal/AddOrEditTaskModal.tsx
 
+import { t } from "i18next";
 import { Modal, normalizePath } from "obsidian";
-import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import ReactDOM from "react-dom/client";
-import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
-import { taskItemEmpty } from "src/interfaces/Mapping";
-import { taskItem } from "src/interfaces/TaskItem";
-import { generateTaskId } from "src/utils/TaskItemUtils";
-import { DEFAULT_SETTINGS } from "src/interfaces/GlobalSettings";
-import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import TaskBoard from "../../main.js";
+import { AddOrEditTaskRC } from "../components/AddOrEditTaskRC.js";
+import { DEFAULT_SETTINGS } from "../interfaces/GlobalSettings.js";
+import { taskItemEmpty } from "../interfaces/Mapping.js";
+import { taskItem } from "../interfaces/TaskItem.js";
+import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
+import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
+import { readDataOfVaultFile } from "../utils/MarkdownFileOperations.js";
+import { generateTaskId } from "../utils/TaskItemUtils.js";
+import { getFormattedTaskContent } from "../utils/taskLine/TaskContentFormatter.js";
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 
 
 // Class component extending Modal for Obsidian

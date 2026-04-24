@@ -1,9 +1,9 @@
+import { t } from "i18next";
 import { Modal } from "obsidian";
-import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { RootFilterState } from "src/interfaces/BoardConfigs";
-import { TaskFilterComponent } from "./TaskFilterComponent";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { RootFilterState } from "../../interfaces/BoardConfigs.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { TaskFilterComponent } from "./TaskFilterComponent.js";
 
 export class TaskFilterModal extends Modal {
 	private plugin: TaskBoard;

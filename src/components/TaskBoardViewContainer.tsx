@@ -1,26 +1,25 @@
 // src/components/TaskBoardViewContainer.tsx
 
-import { Board, RootFilterState, TaskBoardView } from "../interfaces/BoardConfigs";
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadTasksAndMerge } from "src/utils/JsonFileOperations";
-import { taskJsonMerged } from "src/interfaces/TaskItem";
-
-import { App, debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
-import type TaskBoard from "main";
-import { eventEmitter } from "src/services/EventEmitter";
-import { openAddNewTaskModal, openBoardConfigModal, openScanVaultModal } from "../services/OpenModals";
-import { t } from "src/utils/lang/helper";
-import KanbanBoard from "./KanbanView/KanbanBoardView";
-import MapView from "./MapView/MapView";
-import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
-import { TaskFilterPopover } from "./AdvancedFilterer/TaskFilterPopover";
-import { advancedFilterer } from "src/utils/algorithms/AdvancedFilterer";
-import { TaskFilterModal } from 'src/components/AdvancedFilterer';
-import { taskPropertiesNames, viewsPanelPropertiesToShow, viewTypeNames } from "src/interfaces/Enums";
-import { ScanVaultIcon, funnelIcon } from "src/interfaces/Icons";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { getViewById, getViewIndex } from "src/utils/ViewUtils";
+import { debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
+import { t } from 'i18next';
+import TaskBoard from '../../main.js';
+import { Board, RootFilterState, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
+import { DEFAULT_DATE_FORMAT } from '../interfaces/Constants.js';
+import { taskPropertiesNames, viewTypeNames, viewsPanelPropertiesToShow } from '../interfaces/Enums.js';
+import { funnelIcon, ScanVaultIcon } from '../interfaces/Icons.js';
+import { taskJsonMerged } from '../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../managers/BugReporter.js';
+import { eventEmitter } from '../services/EventEmitter.js';
+import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '../services/OpenModals.js';
+import { advancedFilterer } from '../utils/algorithms/AdvancedFilterer.js';
+import { loadTasksAndMerge } from '../utils/JsonFileOperations.js';
+import { getViewIndex, getViewById } from '../utils/ViewUtils.js';
+import { TaskFilterModal } from './AdvancedFilterer/TaskFilterModal.js';
+import { TaskFilterPopover } from './AdvancedFilterer/TaskFilterPopover.js';
+import MapView from './MapView/MapView.js';
+import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf?: WorkspaceLeaf }> = ({ plugin, currentBoardData, currentLeaf }) => {
 	// const [boards, setBoards] = useState<Board[]>(boardConfigs);
@@ -29,7 +28,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
 	// Track current view by ID. Initialize to the first view if available
 	const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
-	const [currentView, setCurrentView] = useState<TaskBoardView | null>(() => {
+	const [currentView, setCurrentView] = useState<TaskBoardViewType | null>(() => {
 		const initialBoard = currentBoardData;
 		if (initialBoard?.views?.length > 0) {
 			const lastViewIndex = getViewIndex(initialBoard, initialBoard.lastViewId);
@@ -1239,7 +1238,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
 						{boardData && currentView ? (
 							currentView.viewType === viewTypeNames.kanban ? (
-								<KanbanBoard
+								<KanbanBoardView
 									plugin={plugin}
 									currentBoardData={boardData}
 									currentView={currentView}

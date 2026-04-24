@@ -1,26 +1,9 @@
-import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
-import {
-	EditButtonMode,
-	TagColorType,
-	taskPropertiesNames,
-	taskPropertyFormatOptions,
-	UniversalDateOptions,
-	NotificationService,
-	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
-	mapViewBackgrounVariantTypes,
-	mapViewNodeMapOrientation,
-	mapViewScrollAction,
-	mapViewArrowDirection,
-	mapViewEdgeType,
-	colTypeNames,
-	defaultTaskStatuses,
-	taskCardStyleNames,
-	scanModeOptions,
-} from "./Enums";
-import { taskItemKeyToNameMapping } from "./Mapping";
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants";
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants.js";
+import { EditButtonMode, TagColorType, taskPropertiesNames, mapViewArrowDirection, mapViewScrollAction, mapViewEdgeType, taskPropertyFormatOptions, scanModeOptions, taskCardStyleNames, UniversalDateOptions, defaultTaskStatuses, DEFAULT_TASK_NOTE_FRONTMATTER_KEYS, NotificationService, mapViewBackgrounVariantTypes, mapViewNodeMapOrientation } from "./Enums.js";
+import { taskItemKeyToNameMapping } from "./Mapping.js";
 
-export interface scanFilters {
+
+export type ScanFilters = {
 	files: {
 		polarity: number;
 		values: string[];
@@ -60,7 +43,7 @@ export interface TaskBoardAction {
 	targetColumn: string;
 }
 
-export interface frontmatterFormatting {
+export interface FrontmatterFormattingInterface {
 	index: number;
 	property: string;
 	key: string;
@@ -79,7 +62,7 @@ export interface taskBoardFilesRegistryType {
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
-	scanFilters: scanFilters;
+	scanFilters: ScanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskPropertyFormat: string;
@@ -121,7 +104,7 @@ export interface globalSettingsData {
 	archivedTasksFilePath: string;
 	taskNoteDefaultLocation: string;
 	archivedTBNotesFolderPath: string;
-	frontmatterFormatting: frontmatterFormatting[];
+	frontmatterFormatting: FrontmatterFormattingInterface[];
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
 	notificationService: string;

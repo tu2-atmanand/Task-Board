@@ -2,21 +2,21 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import { taskItem } from 'src/interfaces/TaskItem';
-import TaskItem from '../TaskCard/TaskItem';
-import TaskBoard from 'main';
-import { Board, TaskBoardView } from 'src/interfaces/BoardConfigs';
-import { t } from 'src/utils/lang/helper';
-import { eventEmitter } from 'src/services/EventEmitter';
-import { applyIdToTaskItem } from 'src/utils/TaskItemUtils';
-import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { viewTypeNames } from 'src/interfaces/Enums';
+import TaskBoard from '../../../main.js';
+import { Board, TaskBoardViewType } from '../../interfaces/BoardConfigs.js';
+import { viewTypeNames } from '../../interfaces/Enums.js';
+import { taskItem } from '../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
+import { eventEmitter } from '../../services/EventEmitter.js';
+import { applyIdToTaskItem } from '../../utils/TaskItemUtils.js';
+import TaskItem from '../TaskCard/TaskItem.js';
+import { t } from '../../utils/lang/helper.js';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
 	allTasksArranged: taskItem[][];
 	activeBoardSettings: Board;
-	activeViewData: TaskBoardView;
+	activeViewData: TaskBoardViewType;
 	activeViewIndex: number;
 	isVisible: boolean;
 	onClose: () => void;

@@ -8,47 +8,27 @@ import {
 	TFolder,
 	moment as _moment,
 } from "obsidian";
-import {
-	extractCheckboxSymbol,
-	getObsidianIndentationSetting,
-	isTaskCompleted,
-	isTaskLine,
-} from "../utils/CheckBoxUtils";
-import {
-	loadJsonCacheDataFromDisk,
-	writeJsonCacheDataToDisk,
-} from "../utils/JsonFileOperations";
-import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
-import {
-	extractTaskNoteProperties,
-	isTaskNotePresentInFrontmatter,
-} from "../utils/taskNote/TaskNoteUtils";
-
-import type TaskBoard from "main";
-import { eventEmitter } from "src/services/EventEmitter";
-import { readDataOfVaultFile } from "../utils/MarkdownFileOperations";
-import { globalSettingsData, scanFilters } from "src/interfaces/GlobalSettings";
-import {
-	TaskRegularExpressions,
-	TASKS_PLUGIN_DEFAULT_SYMBOLS,
-} from "../regularExpressions/TasksPluginRegularExpr";
-import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
-import {
-	extractFrontmatterFromFile,
-	extractFrontmatterTags,
-} from "../utils/taskNote/FrontmatterOperations";
-import { t } from "../utils/lang/helper";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { priorityEmojis } from "src/interfaces/Mapping";
-import { UniversalDateOptions } from "src/interfaces/Enums";
-import {
-	scanFilterForFilesNFoldersNFrontmatter,
-	scanFilterForTags,
-} from "src/utils/algorithms/ScanningFilterer";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
-import { bugReporterManagerInsatance } from "./BugReporter";
-import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { isValid, parse } from "date-fns";
+import { t } from "i18next";
+import type TaskBoard from "../../main.js";
+import { UniversalDateOptions } from "../interfaces/Enums.js";
+import { globalSettingsData } from "../interfaces/GlobalSettings.js";
+import { priorityEmojis } from "../interfaces/Mapping.js";
+import { jsonCacheData, taskItem } from "../interfaces/TaskItem.js";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/DataviewPluginRegularExpr.js";
+import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS, TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { scanFilterForTags, scanFilterForFilesNFoldersNFrontmatter } from "../utils/algorithms/ScanningFilterer.js";
+import { getObsidianIndentationSetting, isTaskLine, isTaskCompleted, extractCheckboxSymbol } from "../utils/CheckBoxUtils.js";
+import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
+import { loadJsonCacheDataFromDisk, writeJsonCacheDataToDisk } from "../utils/JsonFileOperations.js";
+import { readDataOfVaultFile } from "../utils/MarkdownFileOperations.js";
+import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { extractFrontmatterFromFile, extractFrontmatterTags } from "../utils/taskNote/FrontmatterOperations.js";
+import { isTaskNotePresentInFrontmatter, extractTaskNoteProperties } from "../utils/taskNote/TaskNoteUtils.js";
+import { bugReporterManagerInsatance } from "./BugReporter.js";
+import type { ScanFilters } from "../interfaces/GlobalSettings.js";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -107,7 +87,7 @@ export default class VaultScanner {
 	// Extract tasks from a specific file
 	async extractTasksFromFile(
 		file: TFile,
-		scanFilters: scanFilters,
+		scanFilters: ScanFilters,
 	): Promise<string> {
 		try {
 			const fileNameWithPath = file.path;
@@ -742,16 +722,17 @@ export function buildTaskFromRawContent(
 ): Partial<taskItem> {
 	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
-	const title = lines[0]; // extractTitle(lines[0]);
-	const time = extractTime(lines[0]);
-	const createdDate = extractCreatedDate(lines[0]);
-	const startDate = extractStartDate(lines[0]);
-	const scheduledDate = extractScheduledDate(lines[0]);
-	const due = extractDueDate(lines[0]);
-	const priority = extractPriority(lines[0]);
-	const tags = extractTags(lines[0]);
-	const completionDate = extractCompletionDate(lines[0]);
-	const cancelledDate = extractCancelledDate(lines[0]);
+	const firstLine = lines[0] || "";
+	const title = firstLine; // extractTitle(lines[0]);
+	const time = extractTime(firstLine);
+	const createdDate = extractCreatedDate(firstLine);
+	const startDate = extractStartDate(firstLine);
+	const scheduledDate = extractScheduledDate(firstLine);
+	const due = extractDueDate(firstLine);
+	const priority = extractPriority(firstLine);
+	const tags = extractTags(firstLine);
+	const completionDate = extractCompletionDate(firstLine);
+	const cancelledDate = extractCancelledDate(firstLine);
 	const body = extractBody(lines, 1, indentationString);
 
 	return {
@@ -855,11 +836,11 @@ export function extractBody(
 	startLineIndex: number,
 	indentationString: string,
 ): string[] {
-	const bodyLines = [];
+	const bodyLines: string[] = [];
 	let bodyStartIndex = startLineIndex;
 	const prevLine = lines[bodyStartIndex - 1];
 	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
-		const line = lines[bodyStartIndex];
+		const line = lines[bodyStartIndex] || "";
 		// Using regex for faster matching/removal of leading '>' or '> '
 		const sanitizedLine = line.replace(/^>\s?/, "");
 
@@ -868,11 +849,11 @@ export function extractBody(
 		}
 
 		let n = 0;
-		if (prevLine.startsWith(indentationString)) {
+		if (prevLine && prevLine.startsWith(indentationString)) {
 			let tempLine = prevLine;
-			while (tempLine.startsWith(indentationString)) {
+			while (tempLine && tempLine.startsWith(indentationString)) {
 				n++;
-				tempLine = tempLine.slice(indentationString.length);
+				tempLine = tempLine!.slice(indentationString.length);
 			}
 			const requiredIndent = indentationString.repeat(n + 1);
 			if (!sanitizedLine.startsWith(requiredIndent)) {

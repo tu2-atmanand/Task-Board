@@ -8,12 +8,12 @@
  * @module settings/2_x_x_Migrations
  * @requires src/settings/2_x_x_Migrations/MigrationUtils
  * @requires src/settings/2_x_x_Migrations/MigrationModal
- * 
+ *
  * @description This is a temporary code, which is only required for the next 6 months after the official release of the first version of Task Board's 2.x.x series.
  * We may not have to keep it after that, hence this whole module can be deleted after that. We have dedicated migration architecture for plugin settings (data.json) and for individual board file (*.taskboard) in the respective modules/folders.
  */
 
-import { MigrationModal } from "./MigrationModal";
+import { MigrationModal } from "./MigrationModal.js";
 import {
 	checkForV1Data,
 	createBackupConfigFile,
@@ -21,7 +21,7 @@ import {
 	migrateMapViewData,
 	updateRegistryAndSettings,
 	migrateVersion1_to_Version2,
-} from "./MigrationUtils";
+} from "./MigrationUtils.js";
 
 export {
 	MigrationModal,

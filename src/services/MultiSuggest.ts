@@ -1,11 +1,11 @@
 // /src/services/MultiSuggests.ts
 
-import TaskBoard from "main";
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
-import { CustomStatus } from "src/interfaces/GlobalSettings";
-import { taskItem } from "src/interfaces/TaskItem";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
+import TaskBoard from "../../main.js";
+import { CustomStatus } from "../interfaces/GlobalSettings.js";
+import { taskItem } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
 	content: Set<string>;

@@ -1,21 +1,13 @@
 // /src/utils/TaskNoteUtils.ts
 
-import TaskBoard from "main";
-import {
-	updateFrontmatterProperties,
-	createYamlFromObject,
-	extractFrontmatterFromContent,
-} from "./FrontmatterOperations";
-import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
-import {
-	CustomStatus,
-	frontmatterFormatting,
-	globalSettingsData,
-	PluginDataJson,
-} from "src/interfaces/GlobalSettings";
 import { Notice, normalizePath } from "obsidian";
-import { defaultTaskStatuses } from "src/interfaces/Enums";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { defaultTaskStatuses } from "../../interfaces/Enums.js";
+import { PluginDataJson, CustomStatus, globalSettingsData, FrontmatterFormattingInterface } from "../../interfaces/GlobalSettings.js";
+import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { extractFrontmatterFromContent, updateFrontmatterProperties, createYamlFromObject } from "./FrontmatterOperations.js";
+
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -73,7 +65,7 @@ export function extractTaskNoteProperties(
 		return {};
 	}
 
-	const frontmatterFormatting: frontmatterFormatting[] =
+	const frontmatterFormatting: FrontmatterFormattingInterface[] =
 		settings.data.frontmatterFormatting;
 
 	return {
@@ -196,7 +188,7 @@ export function getPriorityNameForTaskNote(priority: number): string {
 
 export function getCustomFrontmatterKey(
 	taskItemKey: string,
-	frontmatterFormatting: frontmatterFormatting[],
+	frontmatterFormatting: FrontmatterFormattingInterface[],
 ): string {
 	// Find the custom mapping for this task item key
 	const customMapping = frontmatterFormatting.find(
@@ -346,7 +338,7 @@ export async function updateFrontmatterInMarkdownFile(
 		}
 
 		// Method 1 - Using Obsidian's filemanager API.
-		await plugin.app.fileManager.processFrontMatter(file, (existing) => {
+		await plugin.app.fileManager.processFrontMatter(file, (existing: customFrontmatterCache) => {
 			const updated = updateFrontmatterProperties(
 				plugin,
 				existing,

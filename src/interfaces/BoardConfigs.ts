@@ -1,10 +1,5 @@
-import {
-	colTypeNames,
-	defaultTaskStatuses,
-	HeaderUITypeOptions,
-	viewsPanelPropertiesToShow,
-	viewTypeNames,
-} from "./Enums";
+import { viewTypeNames, colTypeNames, HeaderUITypeOptions, defaultTaskStatuses, viewsPanelPropertiesToShow } from "./Enums.js";
+
 
 export interface columnSortingCriteria {
 	criteria:
@@ -164,7 +159,7 @@ export interface KanbanView {
 /**
  * Interface for the Task Board view. It will store the data specific to a particular view created by user inside the board.
  */
-export interface TaskBoardView {
+export interface TaskBoardViewType {
 	viewId: string;
 	viewName: string;
 	viewType: string;
@@ -192,7 +187,7 @@ export type Board = {
 	description?: string;
 	filterConfig?: FilterConfigSettings;
 
-	views: TaskBoardView[];
+	views: TaskBoardViewType[];
 	lastViewId: string;
 	viewsPanel: {
 		isOpen: boolean;

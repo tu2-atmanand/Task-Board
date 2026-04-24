@@ -1,7 +1,10 @@
-import TaskBoard from "main";
+// /src/taskboardAPIs.ts
+
 import { App } from "obsidian";
-import { AddOrEditTaskModal } from "./modals/AddOrEditTaskModal";
-import { bugReporterManagerInsatance } from "./managers/BugReporter";
+import TaskBoard from "../main.js";
+import { bugReporterManagerInsatance } from "./managers/BugReporter.js";
+import { AddOrEditTaskModal } from "./modals/AddOrEditTaskModal.js";
+
 
 /**
  * TaskBoardApi provides external plugins with a public API to interact with Task Board functionality.

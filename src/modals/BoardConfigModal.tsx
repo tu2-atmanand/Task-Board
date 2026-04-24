@@ -4,24 +4,23 @@ import { Modal, Notice } from "obsidian";
 import Sortable from "sortablejs";
 import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
-
-import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
 import { RxDragHandleDots2, RxDragHandleHorizontal } from "react-icons/rx";
-import { SettingsManager } from "src/settings/SettingConstructUI";
-import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { colTypeNames, UniversalDateOptions, viewTypeNames } from "src/interfaces/Enums";
-import { Board, ColumnData, swimlaneConfigs, TaskBoardView } from "src/interfaces/BoardConfigs";
-import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
-import { AddColumnModal } from "./AddColumnModal";
-import { AddViewModal } from "./AddViewModal";
-import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { t } from "i18next";
+import TaskBoard from "../../main.js";
+import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../interfaces/BoardConfigs.js";
+import { viewTypeNames, colTypeNames, UniversalDateOptions } from "../interfaces/Enums.js";
+import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { getFileSuggestions, MultiSuggest, getTagSuggestions } from "../services/MultiSuggest.js";
+import { SettingsManager } from "../settings/SettingConstructUI.js";
+import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { AddColumnModal } from "./AddColumnModal.js";
+import { AddViewModal } from "./AddViewModal.js";
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
+import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -42,7 +41,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	onClose,
 	setIsEdited,
 }) => {
-	const [allViewsData, setAllViewsData] = useState<TaskBoardView[]>(() => {
+	const [allViewsData, setAllViewsData] = useState<TaskBoardViewType[]>(() => {
 		try {
 			return currentBoardData.views ? JSON.parse(JSON.stringify(currentBoardData.views)) : [];
 		} catch (e) {
@@ -340,7 +339,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			return;
 		}
 		const viewToDuplicate = allViewsData[selectedViewIndex];
-		const duplicatedView: TaskBoardView = {
+		const duplicatedView: TaskBoardViewType = {
 			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
 			viewId: generateRandomTempTaskId(),
 			viewName: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
@@ -435,7 +434,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
 			id: generateRandomTempTaskId(),
 			name: `${activeBoardData.name} ${t("copy-suffix")}`,
-			views: activeBoardData.views ? activeBoardData.views.map((view: TaskBoardView) => ({
+			views: activeBoardData.views ? activeBoardData.views.map((view: TaskBoardViewType) => ({
 				...view,
 				viewId: generateRandomTempTaskId(), // New unique ID for each view
 			})) : [],
@@ -617,7 +616,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			globalSettingsHTMLSection.current.empty();
 		}
 
-		let view: TaskBoardView | undefined;
+		let view: TaskBoardViewType | undefined;
 		if (allViewsData && allViewsData.length > 0)
 			view = allViewsData[viewIndex];
 		if (!view) view = allViewsData[0];

@@ -1,5 +1,6 @@
 // /src/components/BoardFilters/ViewTaskFilter.ts
 
+import { t } from "i18next";
 import {
 	Component,
 	ExtraButtonComponent,
@@ -10,29 +11,14 @@ import {
 	Notice,
 } from "obsidian";
 import Sortable from "sortablejs";
-import { FilterConfigModal } from "./FilterConfigModal";
-import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import {
-	Filter,
-	FilterGroup,
-	RootFilterState,
-	SavedFilterConfig,
-} from "src/interfaces/BoardConfigs";
-import {
-	MultiSuggest,
-	getTagSuggestions,
-	getFileSuggestions,
-} from "src/services/MultiSuggest";
-import {
-	getPriorityOptionsForDropdown,
-	getCustomStatusOptionsForDropdown,
-	statusDropDownOption,
-	priorityDropDownOption,
-} from "src/interfaces/Mapping";
-import { PluginDataJson } from "src/interfaces/GlobalSettings";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import TaskBoard from "../../../main.js";
+import { RootFilterState, FilterGroup, Filter, SavedFilterConfig } from "../../interfaces/BoardConfigs.js";
+import { PluginDataJson } from "../../interfaces/GlobalSettings.js";
+import { getCustomStatusOptionsForDropdown, statusDropDownOption, getPriorityOptionsForDropdown, priorityDropDownOption } from "../../interfaces/Mapping.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { MultiSuggest, getTagSuggestions, getFileSuggestions } from "../../services/MultiSuggest.js";
+import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
+import { FilterConfigModal } from "./FilterConfigModal.js";
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;

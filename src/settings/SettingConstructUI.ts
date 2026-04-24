@@ -1,61 +1,61 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
 import { App, Notice, Setting, normalizePath, setIcon } from "obsidian";
-import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
-import TaskBoard from "main";
-import { downloadAndApplyLanguageFile, t } from "src/utils/lang/helper";
-import {
-	MultiSuggest,
-	getFileSuggestions,
-	getFolderSuggestions,
-	getQuickAddPluginChoices,
-} from "src/services/MultiSuggest";
-import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { openScanFiltersModal } from "src/services/OpenModals";
-import { CustomStatusModal } from "src/modals/CustomStatusConfigurator";
-import { moveTasksCacheFileToNewPath } from "src/utils/JsonFileOperations";
-import {
-	exportConfigurations,
-	importConfigurations,
-	showReloadObsidianNotice,
-} from "./SettingSynchronizer";
-import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
-import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/TasksPluginRegularExpr";
+import { isValid, parse, format, differenceInHours } from "date-fns";
+import { t } from "i18next";
+import TaskBoard from "../../main.js";
 import {
 	taskPropertiesNames,
+	scanModeOptions,
+	taskCardStyleNames,
 	TagColorType,
-	EditButtonMode,
-	NotificationService,
+	statusTypeNames,
 	UniversalDateOptions,
 	taskPropertyFormatOptions,
+	mapViewScrollAction,
 	mapViewBackgrounVariantTypes,
 	mapViewNodeMapOrientation,
 	mapViewArrowDirection,
-	mapViewScrollAction,
 	mapViewEdgeType,
-	statusTypeNames,
-	scanModeOptions,
-} from "src/interfaces/Enums";
+	EditButtonMode,
+	NotificationService,
+} from "../interfaces/Enums.js";
 import {
-	frontmatterFormatting,
 	globalSettingsData,
-	taskCardStyleNames,
-	type CustomStatus,
-} from "src/interfaces/GlobalSettings";
-import { createFragmentWithHTML } from "src/utils/UIHelpers";
-import { StatusType } from "src/interfaces/StatusConfiguration";
-import { fetchTasksPluginCustomStatuses } from "src/services/tasks-plugin/helpers";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { isValid, parse, format, differenceInHours } from "date-fns";
+	CustomStatus,
+	FrontmatterFormattingInterface,
+} from "../interfaces/GlobalSettings.js";
+import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "../interfaces/Icons.js";
+import { StatusType } from "../interfaces/StatusConfiguration.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { CustomStatusModal } from "../modals/CustomStatusConfigurator.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/TasksPluginRegularExpr.js";
+import { CommunityPlugins } from "../services/CommunityPlugins.js";
+import {
+	getFileSuggestions,
+	MultiSuggest,
+	getFolderSuggestions,
+	getQuickAddPluginChoices,
+} from "../services/MultiSuggest.js";
+import { openScanFiltersModal } from "../services/OpenModals.js";
+import { fetchTasksPluginCustomStatuses } from "../services/tasks-plugin/helpers.js";
+import { moveTasksCacheFileToNewPath } from "../utils/JsonFileOperations.js";
+import { downloadAndApplyLanguageFile } from "../utils/lang/helper.js";
+import { createFragmentWithHTML } from "../utils/UIHelpers.js";
+import {
+	showReloadObsidianNotice,
+	importConfigurations,
+	exportConfigurations,
+} from "./SettingSynchronizer.js";
 
 export class SettingsManager {
 	win: Window;
 	app: App;
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData;
-	allPickrs: Pickr[] = [];
+	allPickrs: any[] = [];
 	reloadNoticeAlreadyShown: boolean = false;
 
 	constructor(plugin: TaskBoard) {
@@ -1145,7 +1145,7 @@ export class SettingsManager {
 												]?.color || "#ff0000",
 										}),
 									);
-								const pickr = new Pickr({
+								const pickr = new (Pickr as any)({
 									el: btn.buttonEl,
 									theme: "nano",
 									swatches: colorMap.map(
@@ -1961,7 +1961,7 @@ export class SettingsManager {
 					.filter(
 						(
 							frontmatterItem,
-						): frontmatterItem is frontmatterFormatting =>
+						): frontmatterItem is FrontmatterFormattingInterface =>
 							frontmatterItem !== null,
 					);
 

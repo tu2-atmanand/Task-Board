@@ -1,12 +1,12 @@
 // /src/utils/RealTimeScanner.ts
 
 import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
+import TaskBoard from "../../main.js";
+import { PENDING_SCAN_FILE_STACK } from "../interfaces/Constants.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { bugReporterManagerInsatance } from "./BugReporter.js";
+import VaultScanner from "./VaultScanner.js";
 
-import type VaultScanner from "src/managers/VaultScanner";
-import type TaskBoard from "main";
-import { eventEmitter } from "src/services/EventEmitter";
-import { PENDING_SCAN_FILE_STACK } from "src/interfaces/Constants";
-import { bugReporterManagerInsatance } from "./BugReporter";
 
 export class RealTimeScanner {
 	app: App;

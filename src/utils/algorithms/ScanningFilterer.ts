@@ -1,11 +1,11 @@
 import { TFile } from "obsidian";
-import { scanFilters } from "src/interfaces/GlobalSettings";
-import TaskBoard from "main";
-import { taskItem } from "src/interfaces/TaskItem";
-import { isTaskCompleted, isTaskLine } from "../CheckBoxUtils";
-import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
-import { getTaskFromId } from "../TaskItemUtils";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { isTaskLine, isTaskCompleted } from "../CheckBoxUtils.js";
+import { getTaskFromId } from "../TaskItemUtils.js";
+import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations.js";
+import { ScanFilters } from "../../interfaces/GlobalSettings.js";
 
 /**
  * Checks whether the file is mentioned in the "Files" filter or not and based on the logic returns a truth array to specify if the file is explicitely mentioned inside the filter and whether its allowed for scanning or not.
@@ -16,7 +16,7 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
  */
 export function checkFileFilters(
 	fileName: string,
-	scanFilters: scanFilters,
+	scanFilters: ScanFilters,
 ): boolean[] | undefined {
 	// const fileInFilters = scanFilters.files.values.includes(fileName);
 	const fileInFilters = scanFilters.files.values.some((value) => {
@@ -59,7 +59,7 @@ export function checkFileFilters(
 export function checkFrontMatterFilters(
 	plugin: TaskBoard,
 	file: TFile,
-	scanFilters: scanFilters,
+	scanFilters: ScanFilters,
 ): boolean[] | undefined {
 	const frontmatter = extractFrontmatterFromFile(plugin, file);
 
@@ -73,7 +73,7 @@ export function checkFrontMatterFilters(
 		if (filterString) {
 			const valueMatch = filterString.match(/"[^"]+":\s*([^,\]]+)/);
 			if (valueMatch) {
-				const filterValue = valueMatch[1].trim();
+				const filterValue = valueMatch[1]?.trim() || "";
 				const frontmatterValue = frontmatter[key];
 				if (Array.isArray(frontmatterValue)) {
 					return frontmatterValue.includes(filterValue); // Check if the filterValue is in the list
@@ -110,7 +110,7 @@ export function checkFrontMatterFilters(
  */
 export function checkFolderFilters(
 	parentFolder: string,
-	scanFilters: scanFilters,
+	scanFilters: ScanFilters,
 ): boolean[] | undefined {
 	let folderInFilters = scanFilters.folders.values.includes(parentFolder);
 
@@ -193,7 +193,7 @@ export function checkFolderFilters(
 export function scanFilterForFilesNFoldersNFrontmatter(
 	plugin: TaskBoard,
 	file: TFile,
-	scanFilters: scanFilters,
+	scanFilters: ScanFilters,
 ): boolean {
 	if (
 		scanFilters.files.polarity === 3 &&
@@ -216,7 +216,7 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 		fileRes = checkFileFilters(fileName, scanFilters);
 	}
 	// Explicit mention precedence
-	if (fileRes?.[0]) return fileRes[1];
+	if (fileRes && fileRes[0]) return fileRes[1];
 
 	if (
 		scanFilters.frontmatter.polarity !== 3 &&
@@ -224,7 +224,7 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 	) {
 		fmRes = checkFrontMatterFilters(plugin, file, scanFilters);
 	}
-	if (fmRes?.[0]) return fmRes[1];
+	if (fmRes && fmRes[0]) return fmRes[1];
 
 	if (
 		scanFilters.folders.polarity !== 3 &&
@@ -232,7 +232,7 @@ export function scanFilterForFilesNFoldersNFrontmatter(
 	) {
 		folderRes = checkFolderFilters(parentFolder, scanFilters);
 	}
-	if (folderRes?.[0]) return folderRes[1];
+	if (folderRes && folderRes[0]) return folderRes[1];
 
 	// Otherwise combine enabled filters deterministically (AND across enabled filters)
 	let allowed = true;
@@ -250,7 +250,7 @@ export function scanFilterForFilesNFoldersNFrontmatter(
  * @param scanFilters - Object containing filter values
  * @returns boolean - true if the task matches the filter, false otherwise
  */
-export function scanFilterForTags(tags: string[], scanFilters: scanFilters) {
+export function scanFilterForTags(tags: string[], scanFilters: ScanFilters) {
 	const tagPolarity = scanFilters.tags.polarity;
 	if (tagPolarity === 3) return true;
 

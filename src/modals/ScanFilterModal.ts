@@ -1,15 +1,9 @@
-import TaskBoard from "main";
+import { t } from "i18next";
 import { Modal, Setting, setIcon } from "obsidian";
-import {
-	MultiSuggest,
-	getFileSuggestions,
-	getFolderSuggestions,
-	getTagSuggestions,
-	getYAMLPropertySuggestions,
-} from "src/services/MultiSuggest";
-import { trashIcon } from "src/interfaces/Icons";
-import { t } from "src/utils/lang/helper";
-import { scanFilters } from "src/interfaces/GlobalSettings";
+import TaskBoard from "../../main.js";
+import { ScanFilters } from "../interfaces/GlobalSettings.js";
+import { trashIcon } from "../interfaces/Icons.js";
+import { getFileSuggestions, getYAMLPropertySuggestions, getFolderSuggestions, getTagSuggestions, MultiSuggest } from "../services/MultiSuggest.js";
 
 export class ScanFilterModal extends Modal {
 	private inputEl!: HTMLInputElement;
@@ -19,14 +13,12 @@ export class ScanFilterModal extends Modal {
 
 	constructor(
 		private plugin: TaskBoard,
-		private filterType: keyof scanFilters,
+		private filterType: keyof ScanFilters,
 		private onSave: (values: string[]) => void,
 	) {
 		super(plugin.app);
 		this.selectedValues = new Set(
-			this.plugin.settings.data.scanFilters[
-				this.filterType
-			].values,
+			this.plugin.settings.data.scanFilters[this.filterType].values,
 		);
 		this.selectedValue = "";
 	}

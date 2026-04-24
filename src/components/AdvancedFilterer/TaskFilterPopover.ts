@@ -3,11 +3,11 @@
 import { App } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
-import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { RootFilterState } from "src/interfaces/BoardConfigs";
-import { TaskFilterComponent } from "./TaskFilterComponent";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { t } from "i18next";
+import TaskBoard from "../../../main.js";
+import { RootFilterState } from "../../interfaces/BoardConfigs.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { TaskFilterComponent } from "./TaskFilterComponent.js";
 
 export class TaskFilterPopover
 	extends Component

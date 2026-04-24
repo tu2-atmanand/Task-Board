@@ -10,9 +10,9 @@
  * In the current version, this FrontmatterRenderer is using a simple custom styling method to render the properties.
  */
 
-import type TaskBoard from "main";
 import { App, Component, Notice, TFile } from "obsidian";
-import { extractFrontmatterFromContent } from "src/utils/taskNote/FrontmatterOperations";
+import TaskBoard from "../../main.js";
+import { extractFrontmatterFromContent } from "../utils/taskNote/FrontmatterOperations.js";
 
 /**
  * Renders frontmatter properties using Obsidian's PropertyWidget API

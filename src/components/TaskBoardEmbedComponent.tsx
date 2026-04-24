@@ -1,8 +1,8 @@
 import { Component, TFile } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
-import TaskBoardViewContainer from "./TaskBoardViewContainer";
-import type TaskBoard from "../../main";
+import TaskBoard from "../../main.js";
+import TaskBoardViewContainer from "./TaskBoardViewContainer.js";
 
 export class TaskBoardEmbedComponent extends Component {
 	plugin: TaskBoard;

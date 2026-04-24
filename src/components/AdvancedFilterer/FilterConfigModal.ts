@@ -1,13 +1,9 @@
+import { t } from "i18next";
 import { App, Modal, Setting, Notice, DropdownComponent } from "obsidian";
-import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import {
-	FilterGroup,
-	RootFilterState,
-	SavedFilterConfig,
-} from "src/interfaces/BoardConfigs";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import type { RootFilterState, SavedFilterConfig, FilterGroup, Board } from "../../interfaces/BoardConfigs.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
+import type TaskBoard from "../../../main.js";
 
 export class FilterConfigModal extends Modal {
 	private plugin: TaskBoard;
@@ -97,7 +93,7 @@ export class FilterConfigModal extends Modal {
 
 		contentEl.createEl("h2", { text: t("load-filter-configuration") });
 
-		const board =
+		const board: Board | null =
 			await this.plugin.taskBoardFileManager.getCurrentBoardData();
 		if (board && !board?.filterConfig) {
 			board.filterConfig = {

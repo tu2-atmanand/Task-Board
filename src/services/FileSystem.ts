@@ -1,12 +1,14 @@
 // import { BlobReader, configure, Reader, ZipReader } from '@zip.js/zip.js';
-import TaskBoard from "main";
 import type * as NodeFS from "node:fs";
 import type * as NodeOS from "node:os";
 import type * as NodePath from "node:path";
 import type * as NodeUrl from "node:url";
 import type * as NodeZlib from "node:zlib";
 import { Platform } from "obsidian";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+
+
+import TaskBoard from "../../main.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 // import { configureWebWorker } from './z-worker-inline';
 
 // configureWebWorker(configure);

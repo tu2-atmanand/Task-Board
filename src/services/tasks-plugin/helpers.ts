@@ -1,16 +1,13 @@
 // /src/services/tasks-plugin/helpers.ts
 
-import { TasksPluginApi } from "./api";
-import TaskBoard from "main";
-import { taskItem } from "src/interfaces/TaskItem";
-import {
-	addIdToTaskContent,
-	getFormattedTaskContent,
-} from "src/utils/taskLine/TaskContentFormatter";
-import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskLineUtils";
-import { CustomStatus } from "src/interfaces/GlobalSettings";
-import { eventEmitter } from "../EventEmitter";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { CustomStatus } from "../../interfaces/GlobalSettings.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { getFormattedTaskContent, addIdToTaskContent } from "../../utils/taskLine/TaskContentFormatter.js";
+import { replaceOldTaskWithNewTask } from "../../utils/taskLine/TaskLineUtils.js";
+import { eventEmitter } from "../EventEmitter.js";
+import { TasksPluginApi } from "./api.js";
 
 export async function isTasksPluginEnabled(plugin: TaskBoard) {
 	try {

@@ -1,17 +1,20 @@
 // src/utils/RenderColumns.ts
 
-import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import { Board, ColumnData, TaskBoardView } from "src/interfaces/BoardConfigs";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm";
-import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
-import { matchTagsWithWildcards } from "./ScanningFilterer";
-import { advancedFilterer } from "./AdvancedFilterer";
-import { PluginDataJson } from "src/interfaces/GlobalSettings";
-import { getAllTaskTags } from "../TaskItemUtils";
 import { differenceInDays } from "date-fns";
-import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
-import { robustDateParser } from "../DateTimeCalculations";
+import {
+	TaskBoardViewType,
+	ColumnData,
+} from "../../interfaces/BoardConfigs.js";
+import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
+import { colTypeNames, UniversalDateOptions } from "../../interfaces/Enums.js";
+import { PluginDataJson } from "../../interfaces/GlobalSettings.js";
+import { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
+import { allowedFileExtensionsRegEx } from "../../regularExpressions/MiscelleneousRegExpr.js";
+import { robustDateParser } from "../DateTimeCalculations.js";
+import { getAllTaskTags } from "../TaskItemUtils.js";
+import { advancedFilterer } from "./AdvancedFilterer.js";
+import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm.js";
+import { matchTagsWithWildcards } from "./ScanningFilterer.js";
 
 /**
  * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
@@ -26,10 +29,10 @@ import { robustDateParser } from "../DateTimeCalculations";
 export const columnSegregator = (
 	settings: PluginDataJson,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
-	activeViewData: TaskBoardView,
+	activeViewData: TaskBoardViewType,
 	columnData: ColumnData,
 	allTasks: taskJsonMerged | null,
-	onBoardDataChange?: (updatedViewData: TaskBoardView) => void,
+	onBoardDataChange?: (updatedViewData: TaskBoardViewType) => void,
 ): taskItem[] => {
 	if (!allTasks || !activeViewData || !activeViewData.kanbanView) return [];
 

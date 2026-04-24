@@ -2,16 +2,11 @@
 
 import { Notice, normalizePath, requestUrl, getLanguage } from "obsidian";
 import i18next from "i18next";
-import en from "./locale/en";
-import TaskBoard from "main";
-import { langCodes } from "src/interfaces/GlobalSettings";
-import {
-	NODE_POSITIONS_STORAGE_KEY,
-	NODE_SIZE_STORAGE_KEY,
-	PENDING_SCAN_FILE_STACK,
-	VIEWPORT_STORAGE_KEY,
-} from "src/interfaces/Constants";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY, PENDING_SCAN_FILE_STACK } from "../../interfaces/Constants.js";
+import { langCodes } from "../../interfaces/GlobalSettings.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import en from "./locale/en.js";
 
 // --- Called Once On Plugin Load ---
 export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {

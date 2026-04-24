@@ -1,10 +1,10 @@
 // /src/modal/BugReporter.ts
 
-import type TaskBoard from "main";
+import { t } from "i18next";
 import { Modal, Notice } from "obsidian";
-import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
-import { createFragmentWithHTML } from "src/utils/UIHelpers";
-import { t } from "src/utils/lang/helper";
+import TaskBoard from "../../main.js";
+import { getObsidianDebugInfo } from "../services/ObsidianDebugInfo.js";
+import { createFragmentWithHTML } from "../utils/UIHelpers.js";
 
 export class BugReporterModal extends Modal {
 	private plugin: TaskBoard;

@@ -1,11 +1,24 @@
 import {
 	ColumnData,
-	FilterConfigSettings,
 	RootFilterState,
+	FilterConfigSettings,
 	swimlaneConfigs,
-} from "../../interfaces/BoardConfigs";
-import { EditButtonMode, mapViewArrowDirection, mapViewEdgeType, mapViewScrollAction, TagColorType, taskPropertiesNames } from "../../interfaces/Enums";
-import { CustomStatus, frontmatterFormatting, scanFilters, TagColor, TaskBoardAction } from "../../interfaces/GlobalSettings";
+} from "../../interfaces/BoardConfigs.js";
+import {
+	EditButtonMode,
+	TagColorType,
+	taskPropertiesNames,
+	mapViewArrowDirection,
+	mapViewScrollAction,
+	mapViewEdgeType,
+} from "../../interfaces/Enums.js";
+import {
+	ScanFilters,
+	TagColor,
+	CustomStatus,
+	FrontmatterFormattingInterface,
+	TaskBoardAction,
+} from "../../interfaces/GlobalSettings.js";
 
 export type BoardLegacy = {
 	name: string;
@@ -32,7 +45,7 @@ export type BoardConfigsLegacy = BoardLegacy[];
 export interface globalSettingsDataLegacy {
 	openOnStartup: boolean;
 	lang: string;
-	scanFilters: scanFilters;
+	scanFilters: ScanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskPropertyFormat: string;
@@ -74,7 +87,7 @@ export interface globalSettingsDataLegacy {
 	archivedTasksFilePath: string;
 	taskNoteDefaultLocation: string;
 	archivedTBNotesFolderPath: string;
-	frontmatterFormatting: frontmatterFormatting[];
+	frontmatterFormatting: FrontmatterFormattingInterface[];
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
 	notificationService: string;

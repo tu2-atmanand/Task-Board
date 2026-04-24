@@ -1,5 +1,5 @@
 import { sanitizeHTMLToDom } from "obsidian";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 
 /**
  * Convert a hex color string to an rgba() CSS string.

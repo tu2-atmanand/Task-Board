@@ -1,40 +1,20 @@
-import TaskBoard from "main";
+// /src/utils/UserTaskEvents.ts
+
 import { WorkspaceLeaf, TFile, Notice } from "obsidian";
-import {
-	EditButtonMode,
-	statusTypeNames,
-	UniversalDateOptions,
-} from "src/interfaces/Enums";
-import { taskItem, UpdateTaskEventData } from "src/interfaces/TaskItem";
-import {
-	openEditTaskNoteModal,
-	openEditTaskModal,
-	openEditTaskView,
-	bugReporter,
-} from "src/services/OpenModals";
-import { openTasksPluginEditModal } from "src/services/tasks-plugin/helpers";
-import {
-	isTaskNotePresentInTags,
-	updateFrontmatterInMarkdownFile,
-} from "./taskNote/TaskNoteUtils";
-import { updateTaskInFile } from "./taskLine/TaskLineUtils";
-import { eventEmitter } from "src/services/EventEmitter";
-import {
-	sanitizeDueDate,
-	sanitizePriority,
-	sanitizeReminder,
-	sanitizeScheduledDate,
-	sanitizeStartDate,
-	sanitizeStatus,
-	sanitizeTags,
-} from "./taskLine/TaskContentFormatter";
-import {
-	globalSettingsData,
-	PluginDataJson,
-} from "src/interfaces/GlobalSettings";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer";
-import { t } from "./lang/helper";
+
+import { t } from "i18next";
+import TaskBoard from "../../main.js";
+import { EditButtonMode, statusTypeNames, UniversalDateOptions } from "../interfaces/Enums.js";
+import { globalSettingsData } from "../interfaces/GlobalSettings.js";
+import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { openEditTaskNoteModal, openEditTaskModal, openEditTaskView } from "../services/OpenModals.js";
+import { openTasksPluginEditModal } from "../services/tasks-plugin/helpers.js";
+import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer.js";
+import { sanitizeStatus, sanitizePriority, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizeTags } from "./taskLine/TaskContentFormatter.js";
+import { updateTaskInFile } from "./taskLine/TaskLineUtils.js";
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "./taskNote/TaskNoteUtils.js";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.

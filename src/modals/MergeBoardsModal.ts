@@ -1,10 +1,9 @@
 import { App, Modal, Setting, Notice, TFile } from "obsidian";
-import { t } from "src/utils/lang/helper";
-import { MultiSuggest } from "src/services/MultiSuggest";
-import TaskBoardFileManager from "src/managers/TaskBoardFileManager";
-import { Board } from "src/interfaces/BoardConfigs";
-import { generateRandomNumber } from "src/utils/TaskItemUtils";
-import TaskBoard from "main";
+import TaskBoard from "../../main.js";
+import { Board } from "../interfaces/BoardConfigs.js";
+import TaskBoardFileManager from "../managers/TaskBoardFileManager.js";
+import { MultiSuggest } from "../services/MultiSuggest.js";
+import { generateRandomNumber } from "../utils/TaskItemUtils.js";
 
 interface MergeBoardsModalProps {
 	plugin: TaskBoard;

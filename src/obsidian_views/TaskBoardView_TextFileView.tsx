@@ -2,18 +2,17 @@
 
 import { TextFileView, TFile, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
-import { funnelIcon, RefreshIcon, ScanVaultIcon, TaskBoardIcon } from "src/interfaces/Icons";
 import { StrictMode } from "react";
-
-import { Board, DEFAULT_BOARD } from "src/interfaces/BoardConfigs";
-import TaskBoardViewContainer from "src/components/TaskBoardViewContainer";
-import type TaskBoard from "../../main";
-import { MANDATORY_SCAN_KEY, PENDING_SCAN_FILE_STACK, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { openBoardsExplorerModal, openScanVaultModal } from "../services/OpenModals";
-import { t } from "src/utils/lang/helper";
-import { eventEmitter } from "src/services/EventEmitter";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { t } from "i18next";
+import TaskBoard from "../../main.js";
+import TaskBoardViewContainer from "../components/TaskBoardViewContainer.js";
+import { Board, DEFAULT_BOARD } from "../interfaces/BoardConfigs.js";
+import { VIEW_TYPE_TASKBOARD, PENDING_SCAN_FILE_STACK, MANDATORY_SCAN_KEY } from "../interfaces/Constants.js";
+import { TaskBoardIcon, funnelIcon, ScanVaultIcon, RefreshIcon } from "../interfaces/Icons.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { openScanVaultModal, openBoardsExplorerModal } from "../services/OpenModals.js";
+import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
 
 export class TaskBoardView extends TextFileView {
 	plugin: TaskBoard;

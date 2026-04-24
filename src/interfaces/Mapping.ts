@@ -1,7 +1,8 @@
-import { t } from "src/utils/lang/helper";
-import { defaultTaskStatuses } from "./Enums";
-import { taskItem } from "./TaskItem";
-import { CustomStatus } from "./GlobalSettings";
+import { t } from "../utils/lang/helper.js";
+import { defaultTaskStatuses } from "./Enums.js";
+import { CustomStatus } from "./GlobalSettings.js";
+import { taskItem } from "./TaskItem.js";
+
 
 export const priorityEmojis: { [key: number]: string } = {
 	0: "0",

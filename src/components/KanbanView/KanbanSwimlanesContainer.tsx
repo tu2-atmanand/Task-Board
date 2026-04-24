@@ -1,16 +1,16 @@
 // src/components/KanbanView/KanbanSwimlanesContainer.tsx
 
+import { t } from 'i18next';
+import { TableCellsSplit, ChevronRight, ChevronDown } from 'lucide-react';
 import React, { useMemo, memo } from 'react';
-import { Board, ColumnData, KanbanView } from 'src/interfaces/BoardConfigs';
-import { taskItem } from 'src/interfaces/TaskItem';
-import LazyColumn from './LazyColumn';
-import type TaskBoard from 'main';
-import { t } from 'src/utils/lang/helper';
-import { ChevronDown, ChevronRight, TableCellsSplit } from 'lucide-react';
-import { eventEmitter } from 'src/services/EventEmitter';
-import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { HeaderUITypeOptions } from 'src/interfaces/Enums';
-import { getAllTaskTags } from 'src/utils/TaskItemUtils';
+import TaskBoard from '../../../main.js';
+import { Board, KanbanView, ColumnData } from '../../interfaces/BoardConfigs.js';
+import { HeaderUITypeOptions } from '../../interfaces/Enums.js';
+import { taskItem } from '../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
+import { eventEmitter } from '../../services/EventEmitter.js';
+import { getAllTaskTags } from '../../utils/TaskItemUtils.js';
+import LazyColumn from './LazyColumn.js';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;

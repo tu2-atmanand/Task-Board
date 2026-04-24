@@ -1,6 +1,6 @@
 import { Modal } from "obsidian";
-import { DateTimePickerComponent } from "./DateTimePickerComponent";
-import TaskBoard from "main";
+import TaskBoard from "../../../main.js";
+import { DateTimePickerComponent } from "./DateTimePickerComponent.js";
 
 export class DateTimePickerModal extends Modal {
 	private plugin: TaskBoard;

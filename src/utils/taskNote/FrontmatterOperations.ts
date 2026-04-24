@@ -1,18 +1,15 @@
-import TaskBoard from "main";
+// /src/utils/taskNote/FrontmatterOperations.ts
+
 import { parseYaml, stringifyYaml, TFile } from "obsidian";
-import { customFrontmatterCache, taskItem } from "src/interfaces/TaskItem";
-import {
-	getCustomFrontmatterKey,
-	getPriorityNameForTaskNote,
-	getStatusNameFromStatusSymbol,
-} from "./TaskNoteUtils";
-import { frontmatterFormatting } from "src/interfaces/GlobalSettings";
-import { generateTaskId } from "../TaskItemUtils";
-import { statusTypeNames } from "src/interfaces/Enums";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { format } from "date-fns";
-import { DEFAULT_DATE_TIME_FORMAT } from "src/interfaces/Constants";
-import { formatToday, getCurrentLocalDateTimeString } from "../DateTimeCalculations";
+
+import TaskBoard from "../../../main.js";
+import { statusTypeNames } from "../../interfaces/Enums.js";
+import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { formatToday } from "../DateTimeCalculations.js";
+import { generateTaskId } from "../TaskItemUtils.js";
+import { getCustomFrontmatterKey, getStatusNameFromStatusSymbol, getPriorityNameForTaskNote } from "./TaskNoteUtils.js";
+import { FrontmatterFormattingInterface } from "../../interfaces/GlobalSettings.js";
 
 /**
  * Extract frontmatter from file content
@@ -160,7 +157,7 @@ export function extractFrontmatterTags(
  */
 function orderFrontmatterProperties(
 	frontmatterObj: Partial<customFrontmatterCache>,
-	frontmatterFormatting: frontmatterFormatting[],
+	frontmatterFormatting: FrontmatterFormattingInterface[],
 	existingFrontmatter?: customFrontmatterCache,
 ): Partial<customFrontmatterCache> {
 	const orderedFrontmatter: Partial<customFrontmatterCache> = {};
@@ -213,7 +210,7 @@ function orderFrontmatterProperties(
 export function createFrontmatterFromTask(
 	plugin: TaskBoard,
 	task: taskItem,
-	frontmatterFormatting: frontmatterFormatting[],
+	frontmatterFormatting: FrontmatterFormattingInterface[],
 ): string {
 	const frontmatterObj: Partial<customFrontmatterCache> = {};
 
@@ -300,7 +297,7 @@ export function updateFrontmatterProperties(
 	task: taskItem,
 	forceId?: boolean,
 ): Partial<customFrontmatterCache> {
-	const frontmatterFormatting: frontmatterFormatting[] =
+	const frontmatterFormatting: FrontmatterFormattingInterface[] =
 		plugin.settings.data.frontmatterFormatting;
 	const oldFrontmatter = existingFrontmatter;
 

@@ -1,11 +1,10 @@
 // /src/modals/AddViewModal.ts
 
+import { t } from "i18next";
 import { App, Modal } from "obsidian";
-import { Board } from "src/interfaces/BoardConfigs";
-import { viewTypeNames } from "src/interfaces/Enums";
-import { t } from "src/utils/lang/helper";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
-import { addViewToBoard } from "src/utils/ViewUtils";
+import { Board } from "../interfaces/BoardConfigs.js";
+import { viewTypeNames } from "../interfaces/Enums.js";
+import { addViewToBoard } from "../utils/ViewUtils.js";
 
 interface AddViewModalProps {
 	app?: App;

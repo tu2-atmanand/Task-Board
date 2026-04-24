@@ -1,5 +1,3 @@
-import { UniversalDateOptions } from "src/interfaces/Enums";
-import { taskItem } from "src/interfaces/TaskItem";
 import {
 	format,
 	parse,
@@ -7,12 +5,11 @@ import {
 	eachDayOfInterval,
 	startOfToday,
 } from "date-fns";
-import {
-	DEFAULT_DATE_FORMAT,
-	DEFAULT_DATE_TIME_FORMAT,
-} from "src/interfaces/Constants";
 import { moment as _moment } from "obsidian";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "../interfaces/Constants.js";
+import { UniversalDateOptions } from "../interfaces/Enums.js";
+import { taskItem } from "../interfaces/TaskItem.js";
 
 /**
  * A simple function to get today's date in the user's custom format from the plugin's setting using the date-fns library.
@@ -143,7 +140,8 @@ export const getCurrentLocalDateString = (
 		return format(now, dateFormat);
 	} catch (error) {
 		// Fallback to ISO format if format string is invalid
-		return new Date().toISOString().split("T")[0];
+		const iso = new Date().toISOString();
+		return iso.split("T")[0];
 	}
 };
 
@@ -159,11 +157,8 @@ export const getCurrentLocalDateTimeString = (
 	try {
 		// Convert moment.js format pattern to date-fns format pattern
 		// moment pattern: yyyy-MM-dd HH:mm:ss -> date-fns: yyyy-MM-dd HH:mm:ss
-		const dateFormatPatternForDateFns = (
-			dateTimeFormat || DEFAULT_DATE_TIME_FORMAT
-		)
-			.replace(/YYYY/g, "yyyy")
-			.replace(/DD/g, "dd");
+		const dateFormatPatternForDateFns =
+			dateTimeFormat || DEFAULT_DATE_TIME_FORMAT;
 
 		const now = new Date();
 		return format(now, dateFormatPatternForDateFns);

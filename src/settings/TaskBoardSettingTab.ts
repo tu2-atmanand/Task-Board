@@ -1,12 +1,11 @@
 // src/views/TaskBoardSettingTab.ts
 
+import { t } from "i18next";
 import { App, PluginSettingTab } from "obsidian";
-
-import { SettingsManager } from "src/settings/SettingConstructUI";
-import type TaskBoard from "../../main";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
-import { t } from "src/utils/lang/helper";
-import { TaskBoardIcon } from "src/interfaces/Icons";
+import TaskBoard from "../../main.js";
+import { globalSettingsData } from "../interfaces/GlobalSettings.js";
+import { TaskBoardIcon } from "../interfaces/Icons.js";
+import { SettingsManager } from "./SettingConstructUI.js";
 
 export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;

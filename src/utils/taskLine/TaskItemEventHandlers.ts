@@ -1,20 +1,17 @@
-import { checkboxStateSwitcher } from "../CheckBoxUtils";
-import {
-	archiveTask,
-	deleteTaskFromFile,
-	useTasksPluginToUpdateInFile,
-	updateTaskInFile,
-	isTaskRecurring,
-} from "./TaskLineUtils";
-import TaskBoard from "main";
-import { t } from "../lang/helper";
-import { taskItem } from "src/interfaces/TaskItem";
-import { TasksPluginApi } from "src/services/tasks-plugin/api";
-import { archiveTaskNote, deleteTaskNote } from "../taskNote/TaskNoteUtils";
-import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
-import { eventEmitter } from "src/services/EventEmitter";
-import { sanitizeStatus } from "./TaskContentFormatter";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+// /src/utils/taskLine/TaskItemEventHandlers.ts
+
+import { t } from "i18next";
+import TaskBoard from "../../../main.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { DeleteConfirmationModal } from "../../modals/DeleteConfirmationModal.js";
+import { eventEmitter } from "../../services/EventEmitter.js";
+import { TasksPluginApi } from "../../services/tasks-plugin/api.js";
+import { checkboxStateSwitcher } from "../CheckBoxUtils.js";
+import { deleteTaskNote, archiveTaskNote } from "../taskNote/TaskNoteUtils.js";
+import { sanitizeStatus } from "./TaskContentFormatter.js";
+import { isTaskRecurring, updateTaskInFile, useTasksPluginToUpdateInFile, deleteTaskFromFile, archiveTask } from "./TaskLineUtils.js";
+
 
 /**
  * Handle the checkbox change event for the inline-tasks and update the task in the file.

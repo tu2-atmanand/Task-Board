@@ -16,28 +16,28 @@ import {
 	ControlButton,
 } from '@xyflow/react';
 // import '@xyflow/react/dist/style.css';
-import { taskItem, UpdateTaskEventData, taskJsonMerged } from 'src/interfaces/TaskItem';
-import TaskBoard from 'main';
-import ResizableNodeSelected from './ResizableNodeSelected';
-import TaskItem from '../TaskCard/TaskItem';
-import { updateTaskInFile } from 'src/utils/taskLine/TaskLineUtils';
 import { debounce, Menu, Notice, Platform } from 'obsidian';
-import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
-import { t } from 'src/utils/lang/helper';
-import { MapViewMinimap } from './MapViewMinimap';
-import { mapViewArrowDirection, mapViewBackgrounVariantTypes, mapViewScrollAction, viewTypeNames } from 'src/interfaces/Enums';
-import { eventEmitter } from 'src/services/EventEmitter';
 import { PanelLeftOpenIcon } from 'lucide-react';
-import { TasksImporterPanel } from './TasksImporterPanel';
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from 'src/utils/taskNote/TaskNoteUtils';
-import { isTaskCompleted } from 'src/utils/CheckBoxUtils';
-import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { Board,  nodeDataType, nodePositionData, TaskBoardView, viewPortType } from 'src/interfaces/BoardConfigs';
+import { t } from 'i18next';
+import TaskBoard from '../../../main.js';
+import { Board, TaskBoardViewType, viewPortType, nodeDataType, nodePositionData } from '../../interfaces/BoardConfigs.js';
+import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewArrowDirection, mapViewScrollAction } from '../../interfaces/Enums.js';
+import { taskJsonMerged, taskItem, UpdateTaskEventData } from '../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
+import { eventEmitter } from '../../services/EventEmitter.js';
+import { isTaskCompleted } from '../../utils/CheckBoxUtils.js';
+import { sanitizeDependsOn } from '../../utils/taskLine/TaskContentFormatter.js';
+import { updateTaskInFile } from '../../utils/taskLine/TaskLineUtils.js';
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../utils/taskNote/TaskNoteUtils.js';
+import TaskItem from '../TaskCard/TaskItem.js';
+import { MapViewMinimap } from './MapViewMinimap.js';
+import ResizableNodeSelected from './ResizableNodeSelected.js';
+import { TasksImporterPanel } from './TasksImporterPanel.js';
 
 type MapViewProps = {
 	plugin: TaskBoard;
 	activeBoardData: Board;
-	currentView: TaskBoardView;
+	currentView: TaskBoardViewType;
 	currentViewIndex: number;
 	filteredTasks: taskJsonMerged;
 	focusOnTaskId?: string;

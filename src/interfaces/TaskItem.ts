@@ -76,7 +76,7 @@ export interface taskJsonMerged {
 	Completed: taskItem[];
 }
 
-export interface cursorLocation {
+export interface cursorLocationInterface {
 	lineNumber: number;
 	charIndex: number;
 }

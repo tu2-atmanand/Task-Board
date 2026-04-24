@@ -1,11 +1,11 @@
 import { t } from "i18next";
-import TaskBoard from "main";
 import { Notice } from "obsidian";
-import { newReleaseVersion } from "src/interfaces/Constants";
-import { BugReporterModal } from "src/modals/BugReporterModal";
-import { fsPromises } from "src/services/FileSystem";
-import { getObsidianDebugInfo } from "src/services/ObsidianDebugInfo";
-import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import type TaskBoard from "../../main.js";
+import { newReleaseVersion } from "../interfaces/Constants.js";
+import { BugReporterModal } from "../modals/BugReporterModal.js";
+import { fsPromises } from "../services/FileSystem.js";
+import { getObsidianDebugInfo } from "../services/ObsidianDebugInfo.js";
+import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
 
 /**
  * Interface for bug report entries
@@ -59,7 +59,7 @@ class BugReporterManager {
 	 */
 	setPlugin(plugin: TaskBoard): void {
 		this.plugin = plugin;
-		this.LOG_FILE_PATH = `${plugin.app.vault.configDir}/plugins/task-board/task-board-logs.log`;
+		// this.LOG_FILE_PATH = `${this.plugin.app.vault.configDir}/plugins/task-board/task-board-logs.log`;
 	}
 
 	/**

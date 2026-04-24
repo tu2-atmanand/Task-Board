@@ -9,11 +9,6 @@ import {
 	useReactFlow,
 } from '@xyflow/react';
 import { Trash2, Palette, Sparkles } from 'lucide-react';
-import TaskBoard from 'main';
-import { taskItem } from 'src/interfaces/TaskItem';
-import { updateTaskInFile } from 'src/utils/taskLine/TaskLineUtils';
-import { sanitizeDependsOn } from 'src/utils/taskLine/TaskContentFormatter';
-import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 // interface EdgeWithToolbarProps extends EdgeProps {
 // 	plugin: TaskBoard;

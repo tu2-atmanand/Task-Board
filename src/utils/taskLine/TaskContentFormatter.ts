@@ -1,34 +1,37 @@
 // /src/utils/TaskContentFormatter.ts
 
-import TaskBoard from "main";
+import TaskBoard from "../../../main.js";
 import {
-	extractCancelledDate,
-	extractCreatedDate,
-	extractDependsOn,
-	extractDueDate,
-	extractPriority,
-	extractScheduledDate,
-	extractStartDate,
+	taskPropertyFormatOptions,
+	statusTypeNames,
+	NotificationService,
+	taskPropertiesNames,
+} from "../../interfaces/Enums.js";
+import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
+import { priorityEmojis } from "../../interfaces/Mapping.js";
+import { cursorLocationInterface, taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import {
 	extractTaskId,
-} from "../../managers/VaultScanner";
+	extractCreatedDate,
+	extractStartDate,
+	extractScheduledDate,
+	extractDueDate,
+	extractCancelledDate,
+	extractPriority,
+	extractDependsOn,
+} from "../../managers/VaultScanner.js";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../regularExpressions/DataviewPluginRegularExpr.js";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
-} from "src/regularExpressions/TasksPluginRegularExpr";
-import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
+} from "../../regularExpressions/TasksPluginRegularExpr.js";
 import {
-	taskPropertyFormatOptions,
-	NotificationService,
-	taskPropertiesNames,
-	statusTypeNames,
-} from "src/interfaces/Enums";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
-import { priorityEmojis } from "src/interfaces/Mapping";
-import { taskItem } from "src/interfaces/TaskItem";
-import { cursorLocation } from "src/interfaces/TaskItem";
-import { generateTaskId } from "../TaskItemUtils";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { formatDateStringAsPerSettings, formatDateTimeAsPerSettings, getCurrentLocalDateTimeString, getCurrentLocalDateTimeStringLegacy } from "../DateTimeCalculations";
+	getCurrentLocalDateTimeString,
+	formatDateStringAsPerSettings,
+	formatDateTimeAsPerSettings,
+} from "../DateTimeCalculations.js";
+import { generateTaskId } from "../TaskItemUtils.js";
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -84,8 +87,7 @@ export const addIdToTaskContent = async (
 	const taskId = extractTaskId(formattedTaskContent);
 	let newId = taskId?.[1];
 	if (
-		(taskId === null &&
-			Plugin.settings.data.autoAddUniqueID) ||
+		(taskId === null && Plugin.settings.data.autoAddUniqueID) ||
 		forcefullyAddId
 	) {
 		newId = generateTaskId(Plugin);
@@ -329,7 +331,7 @@ export const sanitizeCreatedDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	createdDate: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	// const createdDateRegex =
 	// 	/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::\s*?\d{4}-\d{2}-\d{2}\]|@created\(\d{4}-\d{2}-\d{2}\)/;
@@ -395,7 +397,7 @@ export const sanitizeStartDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	startDate: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	// const startDateRegex =
 	// 	/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::\s*?\d{4}-\d{2}-\d{2}\]|@start\(\d{4}-\d{2}-\d{2}\)/;
@@ -464,7 +466,7 @@ export const sanitizeScheduledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	scheduledDate: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	// const scheduledDateRegex =
 	// 	/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::\s*?\d{4}-\d{2}-\d{2}\]|@scheduled\(\d{4}-\d{2}-\d{2}\)/;
@@ -534,7 +536,7 @@ export const sanitizeDueDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	dueDate: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	// const dueDateRegex =
 	// 	/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
@@ -601,7 +603,7 @@ export const sanitizeCompletionDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	completionDate: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	const completionDateRegex =
 		/\[completion::[^\]]+\]|\@completion\(.*?\)|✅\s*.*?(?=\s|$)/;
@@ -668,7 +670,7 @@ export const sanitizeCancelledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
 	cancelledDate: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	// const cancellationDateRegex =
 	// 	/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[cancelled::\s*?\d{4}-\d{2}-\d{2}\]|@cancelled\(\d{4}-\d{2}-\d{2}\)/;
@@ -739,7 +741,7 @@ export const sanitizeTime = (
 	globalSettings: globalSettingsData,
 	title: string,
 	newTime: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	const timeAtStartRegex = /]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
 	const timeFormatsRegex =
@@ -841,7 +843,7 @@ export const sanitizePriority = (
 	globalSettings: globalSettingsData,
 	title: string,
 	newPriority: number,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	// // Create a regex pattern to match any priority emoji
 	// const emojiPattern = new RegExp(
@@ -979,7 +981,7 @@ export const sanitizePriority = (
 export const sanitizeTags = (
 	title: string,
 	newTagsList: string[],
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	// Remove <mark> and <font> tags before processing
 	let updatedTitle = title;
@@ -1063,7 +1065,7 @@ export const sanitizeReminder = (
 	globalSettings: globalSettingsData,
 	title: string,
 	newReminder: string,
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	const formatReminder = (reminder: string) => {
 		const date = new Date(reminder);
@@ -1140,7 +1142,7 @@ export const sanitizeDependsOn = (
 	globalSettings: globalSettingsData,
 	title: string,
 	dependesOnIds: string[],
-	cursorLocation?: cursorLocation,
+	cursorLocation?: cursorLocationInterface,
 ): string => {
 	const extractedDependsOnMatch = extractDependsOn(title);
 
@@ -1298,8 +1300,7 @@ export const sanitizeDependsOn = (
  */
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Get the list of properties to hide
-	const hiddenProperties =
-		plugin.settings.data.hiddenTaskProperties || [];
+	const hiddenProperties = plugin.settings.data.hiddenTaskProperties || [];
 
 	// If no properties are configured to hide and the legacy setting is false, return original title
 	if (

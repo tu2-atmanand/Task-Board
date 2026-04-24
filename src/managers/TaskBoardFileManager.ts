@@ -6,12 +6,11 @@
  */
 
 import { App, TFile, Notice, normalizePath } from "obsidian";
-import { Board, DEFAULT_BOARD } from "src/interfaces/BoardConfigs";
-import type TaskBoard from "main";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
-import { LEAFID_FILEPATH_MAPPING_KEY, TASKBOARD_FILE_EXTENSION } from "src/interfaces/Constants";
-import { bugReporterManagerInsatance } from "./BugReporter";
-import { taskBoardFilesRegistryType } from "src/interfaces/GlobalSettings";
+import TaskBoard from "../../main.js";
+import { Board, DEFAULT_BOARD } from "../interfaces/BoardConfigs.js";
+import { LEAFID_FILEPATH_MAPPING_KEY, TASKBOARD_FILE_EXTENSION } from "../interfaces/Constants.js";
+import { taskBoardFilesRegistryType } from "../interfaces/GlobalSettings.js";
+import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
 
 /**
  * Interface for storing recently loaded board data keyed by file path
@@ -36,11 +35,6 @@ export default class TaskBoardFileManager {
 		this.plugin = plugin;
 		this.app = plugin.app;
 		this.currentPluginVersion = plugin.settings.version;
-
-		const mappingData: leafIdFilePathMapType = JSON.parse(
-			this.app.loadLocalStorage(LEAFID_FILEPATH_MAPPING_KEY),
-		);
-		this.leafIdFilePathMapping = mappingData;
 	}
 
 	/**

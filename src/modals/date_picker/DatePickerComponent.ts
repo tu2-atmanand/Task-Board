@@ -1,7 +1,4 @@
 import { Component, setIcon, App } from "obsidian";
-import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
 import {
 	format,
 	addDays,
@@ -18,7 +15,10 @@ import {
 	eachDayOfInterval,
 	isToday as isTodayDateFns,
 } from "date-fns";
-import { robustDateParser } from "src/utils/DateTimeCalculations";
+import { t } from "i18next";
+import TaskBoard from "../../../main.js";
+import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
+import { robustDateParser } from "../../utils/DateTimeCalculations.js";
 
 export interface DatePickerState {
 	selectedDate: string | null;

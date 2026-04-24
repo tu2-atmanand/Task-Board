@@ -1,12 +1,9 @@
+import { t } from "i18next";
 import { Modal, Setting, TextComponent } from "obsidian";
 import type { Plugin } from "obsidian";
-import { statusTypeNames } from "src/interfaces/Enums";
-import {
-	StatusConfiguration,
-	StatusType,
-} from "src/interfaces/StatusConfiguration";
-import { t } from "src/utils/lang/helper";
-import type { CustomStatus } from "src/interfaces/GlobalSettings";
+import { statusTypeNames } from "../interfaces/Enums.js";
+import { CustomStatus } from "../interfaces/GlobalSettings.js";
+import { StatusType, StatusConfiguration } from "../interfaces/StatusConfiguration.js";
 
 export class CustomStatusModal extends Modal {
 	statusSymbol: string;

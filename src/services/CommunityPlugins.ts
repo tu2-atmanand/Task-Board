@@ -1,6 +1,6 @@
-import TaskBoard from "main";
-import { TaskBoardSubmodule } from "./subModules";
 import { TFile, TFolder } from "obsidian";
+import { TaskBoardSubmodule } from "./subModules.js";
+import type TaskBoard from "../../main.js";
 
 export class CommunityPlugins extends TaskBoardSubmodule {
 	get fileExplorerPlugin() {
@@ -52,7 +52,6 @@ export function revealFileFolderInExplorer(plugin: TaskBoard, abstractFile: TFil
 	const communityPlugins = new CommunityPlugins(plugin);
 
 	if(communityPlugins.isFileExplorerPluginEnabled()) {
-		// @ts-ignore
 		communityPlugins.fileExplorerPlugin?.revealInFolder(abstractFile);
 	}
 }

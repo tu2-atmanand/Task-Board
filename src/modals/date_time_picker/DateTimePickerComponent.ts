@@ -1,7 +1,7 @@
+import { t } from "i18next";
 import { App } from "obsidian";
-import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { DatePickerComponent } from "../date_picker/DatePickerComponent";
+import TaskBoard from "../../../main.js";
+import { DatePickerComponent } from "../date_picker/DatePickerComponent.js";
 
 export class DateTimePickerComponent {
 	private hostEl: HTMLElement;

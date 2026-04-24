@@ -1,22 +1,14 @@
 // /src/utils/TaskNoteEventHandlers.ts
 
 import { Notice } from "obsidian";
-import { taskItem } from "src/interfaces/TaskItem";
-import TaskBoard from "main";
-import {
-	getStatusNameFromStatusSymbol,
-	updateFrontmatterInMarkdownFile,
-} from "./TaskNoteUtils";
-import { checkboxStateSwitcher } from "../CheckBoxUtils";
-import {
-	readDataOfVaultFile,
-	writeDataToVaultFile,
-} from "../MarkdownFileOperations";
-import { statusTypeNames } from "src/interfaces/Enums";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { format } from "date-fns";
-import { DEFAULT_DATE_TIME_FORMAT } from "src/interfaces/Constants";
-import { formatToday, getCurrentLocalDateTimeString } from "../DateTimeCalculations";
+import TaskBoard from "../../../main.js";
+import { statusTypeNames } from "../../interfaces/Enums.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { checkboxStateSwitcher } from "../CheckBoxUtils.js";
+import { formatToday } from "../DateTimeCalculations.js";
+import { readDataOfVaultFile, writeDataToVaultFile } from "../MarkdownFileOperations.js";
+import { getStatusNameFromStatusSymbol, updateFrontmatterInMarkdownFile } from "./TaskNoteUtils.js";
 
 /**
  * Handle task note status change (checkbox change)

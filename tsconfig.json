@@ -1,6 +1,5 @@
 {
 	"compilerOptions": {
-		"baseUrl": ".",
 		"jsx": "react-jsx",
 		// "jsxFactory": "React.createElement",
 		// "jsxFragmentFactory": "React.Fragment",
@@ -8,7 +7,6 @@
 		"inlineSources": true,
 		"module": "node16",
 		"moduleResolution": "node16",
-		"ignoreDeprecations": "6.0",
 		"target": "ES2024",
 		"allowJs": true,
 		"noImplicitAny": true,
@@ -32,6 +30,7 @@
 			"obsidian-typings",
 			"node"
 		],
+		// "verbatimModuleSyntax": true
 		// TODO : Below are new settings enabled in the "obsidian-sample-plugin"
 		// "strictBindCallApply": true,
 		// "allowSyntheticDefaultImports": true,
@@ -42,7 +41,6 @@
 		// "allowImportingTsExtensions": true,
 		// "libReplacement": true,
 		// "noEmit": true,
-		// "verbatimModuleSyntax": true
 	},
 	"include": [
 		"src"

@@ -1,5 +1,5 @@
 import { Modal } from 'obsidian';
-import TaskBoard from 'main';
+import TaskBoard from '../../main.js';
 
 export default class EditTagsModal extends Modal {
     plugin: TaskBoard;

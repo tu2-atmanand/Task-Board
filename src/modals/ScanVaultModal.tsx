@@ -1,19 +1,19 @@
 // /src/components/ScanVaultModal.tsx
 
+import { t } from "i18next";
 import { App, Component, Modal, Notice } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
-import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
-
-import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
-import VaultScanner, { fileTypeAllowedForScanning } from "src/managers/VaultScanner";
-import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { MANDATORY_SCAN_KEY, newReleaseVersion, VIEW_TYPE_TASKBOARD } from "src/interfaces/Constants";
-import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
-import { eventEmitter } from "src/services/EventEmitter";
-import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+
+import TaskBoard from "../../main.js";
+import { MANDATORY_SCAN_KEY, VIEW_TYPE_TASKBOARD, newReleaseVersion } from "../interfaces/Constants.js";
+import { jsonCacheData, taskItem } from "../interfaces/TaskItem.js";
+import VaultScanner, { fileTypeAllowedForScanning } from "../managers/VaultScanner.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
+import { scanFilterForFilesNFoldersNFrontmatter } from "../utils/algorithms/ScanningFilterer.js";
+import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
+import { getFormattedTaskContent } from "../utils/taskLine/TaskContentFormatter.js";
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;

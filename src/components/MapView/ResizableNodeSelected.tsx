@@ -1,12 +1,11 @@
 import { memo, FC } from 'react';
 import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
+import { t } from 'i18next';
+import { CircleArrowRightIcon, CircleArrowDownIcon } from 'lucide-react';
+import TaskBoard from '../../../main.js';
+import { mapViewNodeMapOrientation } from '../../interfaces/Enums.js';
+import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 // import { nodeSize } from './MapView';
-import { NODE_SIZE_STORAGE_KEY } from 'src/interfaces/Constants';
-import type TaskBoard from 'main';
-import { mapViewNodeMapOrientation } from 'src/interfaces/Enums';
-import { CircleArrowDownIcon, CircleArrowRightIcon } from 'lucide-react';
-import { t } from 'src/utils/lang/helper';
-import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 interface dataProps extends React.ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };

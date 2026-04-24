@@ -1,10 +1,11 @@
 // /src/modals/SwimlanesConfigModal.tsx
 
 import { Modal, App, Setting } from 'obsidian';
-import { t } from 'src/utils/lang/helper';
 import Sortable from 'sortablejs';
-import { swimlaneConfigs } from 'src/interfaces/BoardConfigs';
-import { HeaderUITypeOptions } from 'src/interfaces/Enums';
+
+import { swimlaneConfigs } from '../interfaces/BoardConfigs.js';
+import { HeaderUITypeOptions } from '../interfaces/Enums.js';
+import { t } from '../utils/lang/helper.js';
 
 interface SwimlanesConfigModalProps {
 	swimlaneConfig: swimlaneConfigs;

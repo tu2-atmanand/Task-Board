@@ -1,15 +1,9 @@
 // /src/utils/JsonFileOperations.ts
 
-import {
-	jsonCacheData,
-	taskItem,
-	taskJsonMerged,
-} from "src/interfaces/TaskItem";
-
-import { Board } from "../interfaces/BoardConfigs";
-import type TaskBoard from "main";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { App } from "obsidian";
+import TaskBoard from "../../main.js";
+import { jsonCacheData, taskJsonMerged, taskItem } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 
 // --------------- Operations with data.json ---------------
 

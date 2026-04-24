@@ -1,35 +1,29 @@
 // src/services/OpenModals.ts
 
+import { t } from "i18next";
 import { App, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
-import {
-	addTaskInNote,
-	updateTaskInFile,
-} from "src/utils/taskLine/TaskLineUtils";
-import { AddOrEditTaskView } from "src/obsidian_views/AddOrEditTaskView";
-import { Board } from "../interfaces/BoardConfigs";
-import type TaskBoard from "main";
-import { eventEmitter } from "./EventEmitter";
-import { CommunityPlugins } from "./CommunityPlugins";
-import {
-	addIdToTaskContent,
-	getFormattedTaskContent,
-} from "src/utils/taskLine/TaskContentFormatter";
-import { t } from "src/utils/lang/helper";
-import { taskItem, UpdateTaskEventData } from "src/interfaces/TaskItem";
-import { updateFrontmatterInMarkdownFile } from "src/utils/taskNote/TaskNoteUtils";
-import { writeDataToVaultFile } from "src/utils/MarkdownFileOperations";
-import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "src/interfaces/Constants";
-import { AddOrEditTaskModal } from "src/modals/AddOrEditTaskModal";
-import { BoardConfigureModal } from "src/modals/BoardConfigModal";
-import { BoardsExplorerModal } from "src/modals/BoardsExplorer";
-import { BugReporterModal } from "src/modals/BugReporterModal";
-import { DiffContentCompareModal } from "src/modals/DiffContentCompareModal";
-import { ScanFilterModal } from "src/modals/ScanFilterModal";
-import { ScanVaultModal } from "src/modals/ScanVaultModal";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { DatePickerModal } from "src/modals/date_picker";
-import { scanFilters } from "src/interfaces/GlobalSettings";
-import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import TaskBoard from "../../main.js";
+import { Board } from "../interfaces/BoardConfigs.js";
+import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "../interfaces/Constants.js";
+import { ScanFilters } from "../interfaces/GlobalSettings.js";
+import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { AddOrEditTaskModal } from "../modals/AddOrEditTaskModal.js";
+import { BoardConfigureModal } from "../modals/BoardConfigModal.js";
+import { BoardsExplorerModal } from "../modals/BoardsExplorer.js";
+import { BugReporterModal } from "../modals/BugReporterModal.js";
+import { DatePickerModal } from "../modals/date_picker/DatePickerModal.js";
+import { DiffContentCompareModal } from "../modals/DiffContentCompareModal.js";
+import { ScanFilterModal } from "../modals/ScanFilterModal.js";
+import { ScanVaultModal } from "../modals/ScanVaultModal.js";
+import { AddOrEditTaskView } from "../obsidian_views/AddOrEditTaskView.js";
+import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
+import { writeDataToVaultFile } from "../utils/MarkdownFileOperations.js";
+import { getFormattedTaskContent, addIdToTaskContent } from "../utils/taskLine/TaskContentFormatter.js";
+import { addTaskInNote, updateTaskInFile } from "../utils/taskLine/TaskLineUtils.js";
+import { updateFrontmatterInMarkdownFile } from "../utils/taskNote/TaskNoteUtils.js";
+import { CommunityPlugins } from "./CommunityPlugins.js";
+import { eventEmitter } from "./EventEmitter.js";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -545,7 +539,7 @@ export const openDiffContentCompareModal = (
 
 export const openScanFiltersModal = (
 	plugin: TaskBoard,
-	filterType: keyof scanFilters,
+	filterType: keyof ScanFilters,
 	onSave: (scanFilters: string[]) => void,
 ) => {
 	new ScanFilterModal(plugin, filterType, async (newValues) => {

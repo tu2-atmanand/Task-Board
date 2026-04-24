@@ -1,11 +1,11 @@
 // /src/modal/AddColumnModal.ts
 
+import { t } from "i18next";
 import { App, Modal } from "obsidian";
-import { ColumnData } from "src/interfaces/BoardConfigs";
-import { colTypeNames, UniversalDateOptions } from "src/interfaces/Enums";
-import { columnTypeAndNameMapping } from "src/interfaces/Mapping";
-import { t } from "src/utils/lang/helper";
-import { generateRandomNumber } from "src/utils/TaskItemUtils";
+import { ColumnData } from "../interfaces/BoardConfigs.js";
+import { colTypeNames, UniversalDateOptions } from "../interfaces/Enums.js";
+import { columnTypeAndNameMapping } from "../interfaces/Mapping.js";
+import { generateRandomNumber } from "../utils/TaskItemUtils.js";
 
 interface AddColumnModalProps {
 	app: App;

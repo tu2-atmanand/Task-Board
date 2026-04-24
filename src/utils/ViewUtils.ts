@@ -4,13 +4,10 @@
  * Utility functions for managing multiple views within a board
  */
 
-import { Board, TaskBoardView } from "src/interfaces/BoardConfigs";
-import {
-	colTypeNames,
-	HeaderUITypeOptions,
-	viewTypeNames,
-} from "src/interfaces/Enums";
-import { generateRandomTempTaskId } from "./TaskItemUtils";
+import { Board, TaskBoardViewType } from "../interfaces/BoardConfigs.js";
+import { viewTypeNames, HeaderUITypeOptions, colTypeNames } from "../interfaces/Enums.js";
+import { generateRandomTempTaskId } from "./TaskItemUtils.js";
+
 
 /**
  * Get the index of a view within a board by its viewId
@@ -28,7 +25,10 @@ export function getViewIndex(board: Board, viewId: string): number {
  * @param viewId The viewId to retrieve
  * @returns The view object, or undefined if not found
  */
-export function getViewById(board: Board, viewId: string): TaskBoardView | undefined {
+export function getViewById(
+	board: Board,
+	viewId: string,
+): TaskBoardViewType | undefined {
 	return board.views.find((v) => v.viewId === viewId);
 }
 
@@ -41,7 +41,7 @@ export function getViewById(board: Board, viewId: string): TaskBoardView | undef
 export function getViewByType(
 	board: Board,
 	viewType: string,
-): TaskBoardView | undefined {
+): TaskBoardViewType | undefined {
 	return board.views.find((v) => v.viewType === viewType);
 }
 
@@ -51,7 +51,7 @@ export function getViewByType(
  * @param viewType The type of views to find
  * @returns Array of views matching the type
  */
-export function getViewsByType(board: Board, viewType: string): TaskBoardView[] {
+export function getViewsByType(board: Board, viewType: string): TaskBoardViewType[] {
 	return board.views.filter((v) => v.viewType === viewType);
 }
 
@@ -70,7 +70,7 @@ export function addViewToBoard(
 	const newViewId = generateRandomTempTaskId();
 
 	// Create base view structure
-	const newView: TaskBoardView = {
+	const newView: TaskBoardViewType = {
 		viewId: newViewId,
 		viewName: viewName,
 		viewType: viewType,
@@ -142,7 +142,7 @@ export function duplicateViewInBoard(board: Board, viewIndex: number): boolean {
 	}
 
 	const originalView = board.views[viewIndex];
-	const newView: TaskBoardView = JSON.parse(JSON.stringify(originalView));
+	const newView: TaskBoardViewType = JSON.parse(JSON.stringify(originalView));
 
 	// Generate new view ID
 	newView.viewId = generateRandomTempTaskId();
@@ -189,7 +189,7 @@ export function reorderViews(
 export function updateView(
 	board: Board,
 	viewIndex: number,
-	updates: Partial<TaskBoardView>,
+	updates: Partial<TaskBoardViewType>,
 ): boolean {
 	if (viewIndex < 0 || viewIndex >= board.views.length) {
 		return false;

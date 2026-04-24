@@ -1,32 +1,18 @@
-import TaskBoard from "main";
 import { Notice } from "obsidian";
-import { ColumnData } from "src/interfaces/BoardConfigs";
-import {
-	colTypeNames,
-	statusTypeNames,
-	UniversalDateOptions,
-} from "src/interfaces/Enums";
-import { taskItem } from "src/interfaces/TaskItem";
-import {
-	updateTaskItemProperty,
-	updateTaskItemTags,
-} from "src/utils/UserTaskEvents";
-import { eventEmitter } from "src/services/EventEmitter";
-import { swimlaneDataProp } from "src/components/TaskCard/TaskItem";
-import {
-	isTaskNotePresentInTags,
-	updateFrontmatterInMarkdownFile,
-} from "src/utils/taskNote/TaskNoteUtils";
-import {
-	sanitizeStatus,
-	sanitizeTags,
-} from "src/utils/taskLine/TaskContentFormatter";
-import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
-import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
-import { DatePickerModal } from "src/modals/date_picker";
-import { bugReporterManagerInsatance } from "./BugReporter";
-import { openDateInputModal } from "src/services/OpenModals";
+import TaskBoard from "../../main.js";
+import { swimlaneDataProp } from "../components/TaskCard/TaskItemV2.js";
+import { ColumnData } from "../interfaces/BoardConfigs.js";
+import { statusTypeNames, colTypeNames } from "../interfaces/Enums.js";
+import { globalSettingsData } from "../interfaces/GlobalSettings.js";
+import { taskItem } from "../interfaces/TaskItem.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { openDateInputModal } from "../services/OpenModals.js";
+import { getAllDatesInRelativeRange } from "../utils/DateTimeCalculations.js";
+import { sanitizeStatus } from "../utils/taskLine/TaskContentFormatter.js";
+import { updateTaskInFile } from "../utils/taskLine/TaskLineUtils.js";
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../utils/taskNote/TaskNoteUtils.js";
+import { updateTaskItemTags, updateTaskItemProperty } from "../utils/UserTaskEvents.js";
+import { bugReporterManagerInsatance } from "./BugReporter.js";
 
 export interface currentDragDataPayload {
 	task: taskItem;
@@ -459,7 +445,7 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
+		const { updateTaskItemDate } = await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -568,7 +554,7 @@ class DragDropTasksManager {
 		}
 
 		const { updateTaskItemPriority } =
-			await import("src/utils/UserTaskEvents");
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -620,7 +606,7 @@ class DragDropTasksManager {
 		}
 
 		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -698,7 +684,7 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
+		const { updateTaskItemDate } = await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -881,7 +867,7 @@ class DragDropTasksManager {
 		}
 
 		const { updateTaskItemPriority } =
-			await import("src/utils/UserTaskEvents");
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -935,7 +921,7 @@ class DragDropTasksManager {
 		}
 
 		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -981,7 +967,7 @@ class DragDropTasksManager {
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;

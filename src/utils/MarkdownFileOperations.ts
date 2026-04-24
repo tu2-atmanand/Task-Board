@@ -1,8 +1,8 @@
 // /src/utils/MarkdownFileOperations.ts
 
 import { TFile } from "obsidian";
-import type TaskBoard from "main";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../main.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 
 /**
  * Read data from a file in the vault

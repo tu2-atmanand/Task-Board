@@ -1,17 +1,10 @@
+import { t } from "i18next";
 import { Notice } from "obsidian";
-import TaskBoard from "main";
-import { fsPromises, NodePickedFile } from "src/services/FileSystem";
-import {
-	DEFAULT_SETTINGS,
-	PluginDataJson,
-} from "src/interfaces/GlobalSettings";
-import { t } from "src/utils/lang/helper";
-import { Board, ColumnData } from "src/interfaces/BoardConfigs";
-import { generateIdForFilters } from "src/components/AdvancedFilterer/TaskFilterComponent";
-import { colTypeNames } from "src/interfaces/Enums";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { generateRandomNumber } from "src/utils/TaskItemUtils";
-import { newReleaseVersion } from "src/interfaces/Constants";
+import TaskBoard from "../../main.js";
+import { newReleaseVersion } from "../interfaces/Constants.js";
+import { PluginDataJson, DEFAULT_SETTINGS } from "../interfaces/GlobalSettings.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.

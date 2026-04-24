@@ -1,9 +1,9 @@
 // src/modals/BoardsExplorer.ts
 
-import type TaskBoard from "main";
+import { t } from "i18next";
 import { Modal, Notice } from "obsidian";
-import { taskBoardFilesRegistryType } from "src/interfaces/GlobalSettings";
-import { t } from "src/utils/lang/helper";
+import TaskBoard from "../../main.js";
+import { taskBoardFilesRegistryType } from "../interfaces/GlobalSettings.js";
 
 export class BoardsExplorerModal extends Modal {
 	private plugin: TaskBoard;

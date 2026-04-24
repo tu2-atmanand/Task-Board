@@ -1,26 +1,24 @@
 // src/components/KanbanView/LazyColumn.tsx
 
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
-
 import { CSSProperties } from 'react';
-import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem';
-import { t } from 'src/utils/lang/helper';
-import TaskBoard from 'main';
-import { Board, ColumnData, KanbanView, RootFilterState } from 'src/interfaces/BoardConfigs';
-import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
-import { TaskFilterPopover } from 'src/components/AdvancedFilterer/TaskFilterPopover';
-import { eventEmitter } from 'src/services/EventEmitter';
-import { TaskFilterModal } from 'src/components/AdvancedFilterer';
-import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
-import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
-import { isRootFilterStateEmpty } from 'src/utils/algorithms/AdvancedFilterer';
-import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
-import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
-import TaskItemV2 from '../TaskCard/TaskItemV2';
+import { t } from 'i18next';
 import { AlertOctagon } from 'lucide-react';
-import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { viewTypeNames } from 'src/interfaces/Enums';
+import TaskBoard from '../../../main.js';
+import { Board, KanbanView, ColumnData, RootFilterState } from '../../interfaces/BoardConfigs.js';
+import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
+import { taskItem } from '../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
+import { dragDropTasksManagerInsatance } from '../../managers/DragDropTasksManager.js';
+import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSortingModal.js';
+import { eventEmitter } from '../../services/EventEmitter.js';
+import { isRootFilterStateEmpty } from '../../utils/algorithms/AdvancedFilterer.js';
+import { matchTagsWithWildcards } from '../../utils/algorithms/ScanningFilterer.js';
+import { TaskFilterModal } from '../AdvancedFilterer/TaskFilterModal.js';
+import { TaskFilterPopover } from '../AdvancedFilterer/TaskFilterPopover.js';
+import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem.js';
+import TaskItemV2 from '../TaskCard/TaskItemV2.js';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;

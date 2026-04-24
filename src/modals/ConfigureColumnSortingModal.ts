@@ -1,13 +1,13 @@
 // src/modal/ConfigureColumnSortingModal.ts
 
-import type TaskBoard from "main";
+import { t } from "i18next";
 import { Modal, Notice, Setting } from "obsidian";
 import Sortable from "sortablejs";
-import { ColumnData, columnSortingCriteria } from "src/interfaces/BoardConfigs";
-import { t } from "src/utils/lang/helper";
-import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../main.js";
+import { ColumnData, columnSortingCriteria } from "../interfaces/BoardConfigs.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 
 export class ConfigureColumnSortingModal extends Modal {
 	plugin: TaskBoard;

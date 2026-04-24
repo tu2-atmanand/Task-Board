@@ -10,8 +10,8 @@
  * @url https://github.com/Quorafind/Obsidian-Task-Genius/blob/6307b018cae3c1a20e753127faac88492aac9ffc/src/components/features/task/filter/index.ts
  */
 
-import { TaskFilterComponent } from "./TaskFilterComponent";
-import { TaskFilterModal } from "./TaskFilterModal";
-import { TaskFilterPopover } from "./TaskFilterPopover";
+import { TaskFilterComponent } from "./TaskFilterComponent.js";
+import { TaskFilterModal } from "./TaskFilterModal.js";
+import { TaskFilterPopover } from "./TaskFilterPopover.js";
 
 export { TaskFilterComponent, TaskFilterModal, TaskFilterPopover };

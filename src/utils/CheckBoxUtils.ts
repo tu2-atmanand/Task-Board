@@ -1,9 +1,11 @@
-import type TaskBoard from "main";
+// /src/utils/CheckBoxUtils.ts
+
 import { Notice } from "obsidian";
-import { statusTypeNames } from "src/interfaces/Enums";
-import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
+import TaskBoard from "../../main.js";
+import { statusTypeNames } from "../interfaces/Enums.js";
+import { CustomStatus, PluginDataJson } from "../interfaces/GlobalSettings.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr.js";
 
 /**
  * Switches the checkbox state based on the current symbol.
@@ -127,7 +129,7 @@ export function isTaskLine(line: string): boolean {
 	return (
 		regexMatch !== null &&
 		regexMatch.length === 5 &&
-		regexMatch[4].trim().length > 0
+		regexMatch[4]?.trim().length > 0
 	);
 }
 
@@ -140,7 +142,7 @@ export function extractCheckboxSymbol(task: string): string {
 	const match = task.match(/\[(.)\]/); // Extract the symbol inside [ ]
 	if (!match || match.length < 2) return " ";
 
-	return match[1];
+	return match[1]!;
 }
 
 /**

@@ -1,19 +1,18 @@
 // src/components/KanbanBoard.tsx
 
-import { Board, ColumnData, KanbanView, TaskBoardView } from "../../interfaces/BoardConfigs";
-import React, { memo, useEffect, useMemo, useState } from "react";
-import { taskItem, taskJsonMerged } from "src/interfaces/TaskItem";
-import LazyColumn from "./LazyColumn";
-import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer";
-import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { columnSegregator } from "src/utils/algorithms/ColumnSegregator";
-import { viewTypeNames } from "src/interfaces/Enums";
+import { t } from "i18next";
+import React, { memo, useMemo, useState } from "react";
+import TaskBoard from "../../../main.js";
+import type { Board, ColumnData, KanbanView, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
+import type { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
+import { columnSegregator } from "../../utils/algorithms/ColumnSegregator.js";
+import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer.js";
+import LazyColumn from "./LazyColumn.js";
 
 interface KanbanBoardProps {
 	plugin: TaskBoard;
 	currentBoardData: Board;
-	currentView: TaskBoardView;
+	currentView: TaskBoardViewType;
 	currentViewIndex: number;
 	filteredAndSearchedTasks: taskJsonMerged;
 	freshInstall: boolean;
@@ -39,7 +38,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 			const finalArrangedTasks = columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, currentView, column, filteredAndSearchedTasks, (updatedViewData: TaskBoardView) => {
+					columnSegregator(plugin.settings, currentView, column, filteredAndSearchedTasks, (updatedViewData: TaskBoardViewType) => {
 						// plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
 						let updatedBoardData = { ...currentBoardData };
 						if (updatedBoardData.views) {

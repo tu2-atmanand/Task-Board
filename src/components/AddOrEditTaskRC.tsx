@@ -5,31 +5,31 @@ import { Component, Keymap, Notice, Platform, TFile, UserEvent, debounce, normal
 import { FaTimes, FaTrash } from 'react-icons/fa';
 import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
-import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
-import TaskBoard from "main";
-import { updateRGBAOpacity } from "src/utils/UIHelpers";
-import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeStatus, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
-import { buildTaskFromRawContent } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon } from "lucide-react";
-import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
-import { CommunityPlugins } from "src/services/CommunityPlugins";
-import { openEditTaskView } from "src/services/OpenModals";
-import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
-import { getObsidianIndentationSetting, isTaskLine } from "src/utils/CheckBoxUtils";
-import { formatTaskNoteContent, isTaskNotePresentInTags } from "src/utils/taskNote/TaskNoteUtils";
-import { eventEmitter } from "src/services/EventEmitter";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { markdownButtonHoverPreviewEvent } from "src/services/MarkdownHoverPreview";
 import { ViewUpdate } from "@codemirror/view";
-import { createEmbeddableMarkdownEditor, EmbeddableMarkdownEditor } from "src/services/MarkdownEditor";
-import { UniversalDateOptions, EditButtonMode, NotificationService, statusTypeNames, viewTypeNames } from "src/interfaces/Enums";
-import { getPriorityOptionsForDropdown, taskItemEmpty } from "src/interfaces/Mapping";
-import { applyIdToTaskItem, getTaskFromId } from "src/utils/TaskItemUtils";
-import { handleEditTask } from "src/utils/UserTaskEvents";
 import { RxDragHandleHorizontal } from "react-icons/rx";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
-import { verifySubtasksAndChildtasksAreComplete } from "src/utils/algorithms/ScanningFilterer";
+import TaskBoard from "../../main.js";
+import { statusTypeNames, UniversalDateOptions, viewTypeNames, EditButtonMode, NotificationService } from "../interfaces/Enums.js";
+import { taskItemEmpty, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
+import { taskItem, cursorLocationInterface } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { buildTaskFromRawContent } from "../managers/VaultScanner.js";
+import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
+import { CommunityPlugins } from "../services/CommunityPlugins.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "../services/MarkdownEditor.js";
+import { markdownButtonHoverPreviewEvent } from "../services/MarkdownHoverPreview.js";
+import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
+import { getTagSuggestions, MultiSuggest, getQuickAddPluginChoices, getFileSuggestions, getPendingTasksSuggestions } from "../services/MultiSuggest.js";
+import { openEditTaskView } from "../services/OpenModals.js";
+import { verifySubtasksAndChildtasksAreComplete } from "../utils/algorithms/ScanningFilterer.js";
+import { getObsidianIndentationSetting, isTaskLine } from "../utils/CheckBoxUtils.js";
+import { applyIdToTaskItem, getTaskFromId } from "../utils/TaskItemUtils.js";
+import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn } from "../utils/taskLine/TaskContentFormatter.js";
+import { formatTaskNoteContent, isTaskNotePresentInTags } from "../utils/taskNote/TaskNoteUtils.js";
+import { updateRGBAOpacity } from "../utils/UIHelpers.js";
+import { handleEditTask } from "../utils/UserTaskEvents.js";
+import { t } from "../utils/lang/helper.js";
 
 export interface filterOptions {
 	value: string;
@@ -80,7 +80,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
 	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(true);
-	const cursorLocationRef = useRef<cursorLocation | null>(null);
+	const cursorLocationRef = useRef<cursorLocationInterface | null>(null);
 
 	const indentationString = getObsidianIndentationSetting(plugin);
 
@@ -596,7 +596,7 @@ export const AddOrEditTaskRC: React.FC<{
 		filePath: newFilePath,
 		status: status,
 		reminder: reminder,
-		taskLocation: task.taskLocation,
+		taskLocation: task?.taskLocation || taskItemEmpty.taskLocation,
 		dependsOn: dependsOn,
 		completion: task.completion || '',
 		cancelledDate: task.cancelledDate || '',

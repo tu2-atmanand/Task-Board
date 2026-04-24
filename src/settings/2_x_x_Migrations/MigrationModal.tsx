@@ -1,13 +1,9 @@
 import { App, Modal, normalizePath } from "obsidian";
 import React, { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import type TaskBoard from "main";
-import {
-	migrateVersion1_to_Version2,
-	MigrationResult,
-	saveMigrationLogsToFile,
-} from "./MigrationUtils";
-import { showReloadObsidianNotice } from "../SettingSynchronizer";
+import TaskBoard from "../../../main.js";
+import { showReloadObsidianNotice } from "../SettingSynchronizer.js";
+import { MigrationResult, migrateVersion1_to_Version2, saveMigrationLogsToFile } from "./MigrationUtils.js";
 
 interface LogEntry {
 	id: string;
