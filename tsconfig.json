@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"baseUrl": ".",
+		"baseUrl": "./",
 		"jsx": "react-jsx",
 		// "jsxFactory": "React.createElement",
 		// "jsxFragmentFactory": "React.Fragment",
@@ -29,6 +29,11 @@
 		"types": [
 			"obsidian-typings"
 		],
+		// TODO : Below are new settings enabled in the "obsidian-sample-plugin"
+		// "strictBindCallApply": true,
+		// "allowSyntheticDefaultImports": true,
+		// "useUnknownInCatchVariables": true,
+		// "noUncheckedIndexedAccess": true,
 	},
 	"include": [
 		"src"
