@@ -59,7 +59,7 @@ class BugReporterManager {
 	 */
 	setPlugin(plugin: TaskBoard): void {
 		this.plugin = plugin;
-		// this.LOG_FILE_PATH = `${this.plugin.app.vault.configDir}/plugins/task-board/task-board-logs.log`;
+		this.LOG_FILE_PATH = `${this.plugin.app.vault.configDir}/plugins/task-board/task-board-logs.log`;
 	}
 
 	/**

@@ -109,7 +109,8 @@ export default class TaskBoard extends Plugin {
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
 		this.plugin = this;
-		this.app = this.plugin.app;
+		this.app = app;
+		this.plugin.app = app;
 		this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.vaultScanner = new VaultScanner(this.app, this.plugin);
