@@ -8,7 +8,10 @@
 import { App, TFile, Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../main.js";
 import { Board, DEFAULT_BOARD } from "../interfaces/BoardConfigs.js";
-import { LEAFID_FILEPATH_MAPPING_KEY, TASKBOARD_FILE_EXTENSION } from "../interfaces/Constants.js";
+import {
+	LEAFID_FILEPATH_MAPPING_KEY,
+	TASKBOARD_FILE_EXTENSION,
+} from "../interfaces/Constants.js";
 import { taskBoardFilesRegistryType } from "../interfaces/GlobalSettings.js";
 import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
 
@@ -26,10 +29,18 @@ interface leafIdFilePathMapType {
 export default class TaskBoardFileManager {
 	private app: App;
 	private plugin: TaskBoard;
-	private recentBoardsData: recentBoardsDataType = {}; // This will hold the board-files data which user opened in the current Obsidian session. So, opening them again becomes faster.
-	private leafIdFilePathMapping: leafIdFilePathMapType = {}; // This will hold the mapping of all the older leafs(Obsidian tabs) and which board-file they are rendering, opened in the past.
+	/**
+	 * Caches the board-files data which user opened in the current Obsidian session. So, opening them again becomes faster.
+	 */
+	private recentBoardsData: recentBoardsDataType = {};
 	private debouncedSaveBoardTimers: Map<string, NodeJS.Timeout> = new Map(); // Track debounce timers per board
 	private currentPluginVersion: string;
+
+	/**
+	 * @deprecated
+	 * This will hold the mapping of all the older leafs(Obsidian tabs) and which board-file they are rendering, opened in the past.
+	 */
+	private leafIdFilePathMapping: leafIdFilePathMapType = {};
 
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
@@ -78,9 +89,9 @@ export default class TaskBoardFileManager {
 				const [, registryEntry] = existingRegistryEntry;
 				if (registryEntry.filePath === filePath) {
 					// Same boardID and same filePath - no action needed
-					console.log(
-						`Board "${boardData.name}" with ID "${boardData.id}" already registered at: ${filePath}`,
-					);
+					// console.log(
+					// 	`Board "${boardData.name}" with ID "${boardData.id}" already registered at: ${filePath}`,
+					// );
 				} else {
 					// Same boardID but different filePath - generate new ID
 					const oldId = boardData.id;
@@ -492,7 +503,7 @@ export default class TaskBoardFileManager {
 	 * properties for quick reference.
 	 *
 	 * If boardData is passed, the board name and the description will be also saved inside
-	 * registry data. Also, the data will be updated in the this.recentBoardsData memory.
+	 * registry data.
 	 *
 	 * @param boardId - The board id of the board to add inside the registry.
 	 * @param filePath - The file path of the board file.
@@ -543,12 +554,7 @@ export default class TaskBoardFileManager {
 				[boardId]: newEntry,
 				...updatedTaskBoardFilesRegistry,
 			};
-			await this.plugin.saveSettings();
-
-			// Cache the board data if provided
-			if (boardData) {
-				this.recentBoardsData[filePath] = boardData;
-			}
+			this.plugin.saveSettings();
 
 			console.log(
 				`Added new board to registry: ID="${boardId}", filePath="${filePath}"`,
@@ -602,6 +608,9 @@ export default class TaskBoardFileManager {
 				await this.plugin.app.vault.createFolder(folderPath);
 			}
 
+			// Cache the board data in memory using file path as key
+			this.recentBoardsData[filePath] = boardData;
+			// Update the registry to move this board on top
 			this.addNewBoardToRegistry(boardData.id, filePath, boardData);
 
 			return await this.saveBoardToDisk(filePath, boardData);
@@ -624,7 +633,7 @@ export default class TaskBoardFileManager {
 				return false;
 			}
 
-			await this.app.vault.delete(file);
+			await this.app.vault.trash(file, false);
 			console.log(`Deleted TaskBoard file: ${filePath}`);
 			return true;
 		} catch (error) {
@@ -706,6 +715,8 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
+	 * @todo - Need to improve the logic.
+	 *
 	 * Fetches the first entry from the taskBoardFilesRegistry.
 	 * Attempts to first get the board data if present in the cache.
 	 * Otherwise, load the board from disk.
@@ -775,7 +786,7 @@ export default class TaskBoardFileManager {
 	 * @param boardId - The ID of the board
 	 * @returns The index of the board in the registry, or null if not found
 	 */
-	getBoardIndexFromRegistry(boardId: string): number | null {
+	getBoardIndexFromRegistry(boardId: string): number {
 		console.warn(
 			"getBoardIndexFromRegistry is deprecated. Use getBoardFilepathFromRegistry instead.",
 		);
@@ -787,7 +798,7 @@ export default class TaskBoardFileManager {
 
 		const allBoardIDs = Object.keys(taskBoardFilesRegistry);
 		const index = allBoardIDs.indexOf(boardId);
-		return index >= 0 ? index : null;
+		return index >= 0 ? index : -1;
 	}
 
 	/**
@@ -883,6 +894,7 @@ export default class TaskBoardFileManager {
 	async validateBoardFiles(): Promise<void> {
 		let taskBoardFilesRegistry: taskBoardFilesRegistryType =
 			this.plugin.settings.data.taskBoardFilesRegistry || {};
+		let flag = false;
 
 		// Iterate through registry entries and check file existence
 		for (const [boardId, entry] of Object.entries(taskBoardFilesRegistry)) {
@@ -892,6 +904,7 @@ export default class TaskBoardFileManager {
 				if (!exists) {
 					// Remove the orphaned entry from the registry
 					delete taskBoardFilesRegistry[boardId];
+					flag = true;
 				}
 			} catch (error) {
 				// Handle potential errors during file check (permissions, invalid path, etc.)
@@ -899,10 +912,12 @@ export default class TaskBoardFileManager {
 			}
 		}
 
-		// Update settings with cleaned registry
-		this.plugin.settings.data.taskBoardFilesRegistry =
-			taskBoardFilesRegistry;
-		await this.plugin.saveSettings(this.plugin.settings);
+		if (flag) {
+			// Update settings with cleaned registry
+			this.plugin.settings.data.taskBoardFilesRegistry =
+				taskBoardFilesRegistry;
+			await this.plugin.saveSettings(this.plugin.settings);
+		}
 	}
 
 	// --------------------------------------------------------------------

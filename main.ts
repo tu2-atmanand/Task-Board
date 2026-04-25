@@ -1,4 +1,9 @@
-// main.ts
+/**
+ * @name main.ts
+ * @path /main.ts
+ * The entry-point of this plugin. Initializes the plugin, initializes all the required
+ * internal managers and utils.
+ */
 
 import { around } from "monkey-around";
 import {
@@ -65,6 +70,9 @@ import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
 import { DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 
+/**
+ * The entry-point of this project.
+ */
 export default class TaskBoard extends Plugin {
 	app: App;
 	plugin: TaskBoard;
@@ -74,13 +82,14 @@ export default class TaskBoard extends Plugin {
 	realTimeScanner: RealTimeScanner;
 	taskBoardFileManager: TaskBoardFileManager;
 	// taskBoardFileStack: string[] = [];
-	private _editorModified: boolean = false; // Private backing field
 	// currentModifiedFile: TFile | null;
 	// fileUpdatedUsingModal: string;
 	IstasksJsonDataChanged: boolean;
 	isI18nInitialized: boolean;
-	private _leafIsActive: boolean; // Private property to track leaf state
+
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
+	private _editorModified: boolean = false; // Private backing field
+	private _leafIsActive: boolean; // Private property to track leaf state
 
 	// Public getter/setter for editorModified that emits events
 	get editorModified(): boolean {
@@ -140,7 +149,6 @@ export default class TaskBoard extends Plugin {
 		await loadTranslationsOnStartup(this);
 
 		// NOTE : I feel, if these singleton instances needs the latest version of 'this', then they might show some unexpected behavior as I am not updating the 'this' inside those singleton instances latest during the plugin life-cycle.
-		dragDropTasksManagerInsatance.setPlugin(this);
 		bugReporterManagerInsatance.setPlugin(this);
 
 		// Migrations for updating from v1.x.x version series to v2.x.x series version
@@ -161,6 +169,8 @@ export default class TaskBoard extends Plugin {
 		this.app.workspace.onLayoutReady(() => {
 			this.compatiblePluginsAvailabilityCheck();
 
+			dragDropTasksManagerInsatance.setPlugin(this);
+
 			//Creates a Icon on Ribbon Bar (after i18n is initialized)
 			this.getRibbonIcon();
 
@@ -169,8 +179,6 @@ export default class TaskBoard extends Plugin {
 
 			// Register few commands
 			this.registerCommands();
-
-			this.taskBoardFileManager.validateBoardFiles();
 
 			// For non-realtime scanning and scanning last modified files
 			this.createLocalStorageAndScanModifiedFiles();
@@ -186,6 +194,8 @@ export default class TaskBoard extends Plugin {
 
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
+
+			this.taskBoardFileManager.validateBoardFiles();
 
 			setTimeout(() => this.findModifiedFilesOnAppAbsense(), 10000);
 		});
@@ -364,7 +374,6 @@ export default class TaskBoard extends Plugin {
 
 	registerTaskBoardView() {
 		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
-			console.log("Leaf :", leaf);
 			this.view = new TaskBoardView(this, leaf);
 			return this.view;
 		});
