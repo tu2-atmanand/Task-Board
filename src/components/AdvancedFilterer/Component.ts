@@ -18,7 +18,7 @@ import { getCustomStatusOptionsForDropdown, statusDropDownOption, getPriorityOpt
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { MultiSuggest, getTagSuggestions, getFileSuggestions } from "../../services/MultiSuggest.js";
 import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
-import { FilterConfigModal } from "./FilterConfigModal.js";
+import { FilterConfigModal } from "./LoadSavedFiltersModal.js";
 
 export class TaskFilterComponent extends Component {
 	private hostEl: HTMLElement;

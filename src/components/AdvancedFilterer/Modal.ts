@@ -3,7 +3,7 @@ import { Modal } from "obsidian";
 import TaskBoard from "../../../main.js";
 import { RootFilterState } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { TaskFilterComponent } from "./TaskFilterComponent.js";
+import { TaskFilterComponent } from "./Component.js";
 
 export class TaskFilterModal extends Modal {
 	private plugin: TaskBoard;

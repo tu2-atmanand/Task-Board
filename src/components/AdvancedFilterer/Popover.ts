@@ -7,7 +7,7 @@ import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { RootFilterState } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { TaskFilterComponent } from "./TaskFilterComponent.js";
+import { TaskFilterComponent } from "./Component.js";
 
 export class TaskFilterPopover
 	extends Component

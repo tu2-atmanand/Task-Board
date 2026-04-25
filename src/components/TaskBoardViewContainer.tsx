@@ -16,8 +16,8 @@ import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '.
 import { advancedFilterer } from '../utils/algorithms/AdvancedFilterer.js';
 import { loadTasksAndMerge } from '../utils/JsonFileOperations.js';
 import { getViewIndex, getViewById } from '../utils/ViewUtils.js';
-import { TaskFilterModal } from './AdvancedFilterer/TaskFilterModal.js';
-import { TaskFilterPopover } from './AdvancedFilterer/TaskFilterPopover.js';
+import { TaskFilterModal } from './AdvancedFilterer/Modal.js';
+import { TaskFilterPopover } from './AdvancedFilterer/Popover.js';
 import MapView from './MapView/MapView.js';
 import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 

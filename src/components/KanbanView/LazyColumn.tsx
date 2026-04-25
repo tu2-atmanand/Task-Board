@@ -15,8 +15,8 @@ import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSorting
 import { eventEmitter } from '../../services/EventEmitter.js';
 import { isRootFilterStateEmpty } from '../../utils/algorithms/AdvancedFilterer.js';
 import { matchTagsWithWildcards } from '../../utils/algorithms/ScanningFilterer.js';
-import { TaskFilterModal } from '../AdvancedFilterer/TaskFilterModal.js';
-import { TaskFilterPopover } from '../AdvancedFilterer/TaskFilterPopover.js';
+import { TaskFilterModal } from '../AdvancedFilterer/Modal.js';
+import { TaskFilterPopover } from '../AdvancedFilterer/Popover.js';
 import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem.js';
 import TaskItemV2 from '../TaskCard/TaskItemV2.js';
 
