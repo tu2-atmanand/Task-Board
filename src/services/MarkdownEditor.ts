@@ -27,8 +27,8 @@ import {
 import { StateField } from "@codemirror/state";
 
 import { around } from "monkey-around";
-import type TaskBoard from "main";
-import { FrontmatterRenderer } from "./FrontmatterRenderer";
+import TaskBoard from "../../main.js";
+import { FrontmatterRenderer } from "./FrontmatterRenderer.js";
 
 /**
  * Creates an embeddable markdown editor

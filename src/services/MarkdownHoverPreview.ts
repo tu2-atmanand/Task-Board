@@ -1,7 +1,7 @@
 import { App, Keymap } from "obsidian";
 
 import React from "react";
-import TaskBoard from "main";
+import TaskBoard from "../../main.js";
 
 export function hookMarkdownLinkMouseEventHandlers(
 	app: App,

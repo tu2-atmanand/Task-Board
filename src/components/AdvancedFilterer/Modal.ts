@@ -1,13 +1,14 @@
+import { t } from "i18next";
 import { Modal } from "obsidian";
-import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { RootFilterState } from "src/interfaces/BoardConfigs";
-import { TaskFilterComponent } from "./ViewTaskFilter";
+import TaskBoard from "../../../main.js";
+import { RootFilterState } from "../../interfaces/BoardConfigs.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { AdvancedFilterComponent } from "./Component.js";
 
-export class ViewTaskFilterModal extends Modal {
+export class AdvancedFilterModal extends Modal {
 	private plugin: TaskBoard;
-	public activeBoardIndex?: number;
-	public taskFilterComponent: TaskFilterComponent | null;
+	private currentBoardID: string;
+	public taskFilterComponent: AdvancedFilterComponent | null;
 	private columnOrBoardName?: string;
 	private initialFilterState?: RootFilterState;
 	public filterCloseCallback:
@@ -17,14 +18,13 @@ export class ViewTaskFilterModal extends Modal {
 	constructor(
 		plugin: TaskBoard,
 		forColumn: boolean,
-		private leafId?: string,
-		activeBoardIndex?: number,
+		currentBoardID: string,
 		columnOrBoardName?: string,
-		initialFilterState?: RootFilterState
+		initialFilterState?: RootFilterState,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
-		this.activeBoardIndex = activeBoardIndex;
+		this.currentBoardID = currentBoardID;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
 
@@ -32,11 +32,11 @@ export class ViewTaskFilterModal extends Modal {
 
 		if (forColumn) {
 			this.setTitle(
-				t("column-filters-for") + " " + this.columnOrBoardName
+				t("column-filters-for") + " " + this.columnOrBoardName,
 			);
 		} else {
 			this.setTitle(
-				t("board-filters-for") + " " + this.columnOrBoardName
+				t("board-filters-for") + " " + this.columnOrBoardName,
 			);
 		}
 	}
@@ -45,13 +45,12 @@ export class ViewTaskFilterModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		this.taskFilterComponent = new TaskFilterComponent(
+		this.taskFilterComponent = new AdvancedFilterComponent(
 			this.contentEl,
 			this.plugin,
 			this.app,
-			this.leafId,
-			this.activeBoardIndex,
-			this.initialFilterState
+			this.currentBoardID,
+			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();
@@ -66,9 +65,10 @@ export class ViewTaskFilterModal extends Modal {
 				filterState = this.taskFilterComponent.getFilterState();
 				this.taskFilterComponent.onunload();
 			} catch (error) {
-				console.error(
-					"Failed to get filter state before modal close",
-					error
+				bugReporterManagerInsatance.addToLogs(
+					114,
+					String(error),
+					"AdvancedFilterModal.ts/onClose",
 				);
 			}
 		}
@@ -79,7 +79,11 @@ export class ViewTaskFilterModal extends Modal {
 			try {
 				this.filterCloseCallback(filterState);
 			} catch (error) {
-				console.error("Error in filter close callback", error);
+				bugReporterManagerInsatance.addToLogs(
+					115,
+					String(error),
+					"AdvancedFilterModal.ts/onClose",
+				);
 			}
 		}
 	}

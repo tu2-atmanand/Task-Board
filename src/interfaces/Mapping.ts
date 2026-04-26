@@ -1,7 +1,8 @@
-import { t } from "src/utils/lang/helper";
-import { defaultTaskStatuses } from "./Enums";
-import { taskItem } from "./TaskItem";
-import { CustomStatus } from "./GlobalSettings";
+import { t } from "../utils/lang/helper.js";
+import { defaultTaskStatuses } from "./Enums.js";
+import { CustomStatus } from "./GlobalSettings.js";
+import { taskItem } from "./TaskItem.js";
+
 
 export const priorityEmojis: { [key: number]: string } = {
 	0: "0",
@@ -14,6 +15,7 @@ export const priorityEmojis: { [key: number]: string } = {
 
 export interface statusDropDownOption {
 	value: string;
+	name: string;
 	text: string;
 }
 
@@ -41,10 +43,11 @@ export const getPriorityOptionsForDropdown = (): priorityDropDownOption[] => [
 export const priorityOptions = getPriorityOptionsForDropdown();
 
 export const getCustomStatusOptionsForDropdown = (
-	statusConfigs: CustomStatus[]
+	statusConfigs: CustomStatus[],
 ): statusDropDownOption[] => {
 	return statusConfigs.map(({ symbol, name }) => ({
 		value: symbol,
+		name: name,
 		text: `${name} : [${symbol}]`,
 	}));
 };
@@ -149,5 +152,5 @@ export const columnTypeAndNameMapping: { [key: string]: string } = {
 	taskPriority: "Priority",
 	pathFiltered: "Path filtered",
 	completed: "Completed",
-	allPending: "All pending tasks"
+	allPending: "All pending tasks",
 };

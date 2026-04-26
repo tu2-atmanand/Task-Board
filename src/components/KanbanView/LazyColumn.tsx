@@ -1,26 +1,24 @@
 // src/components/KanbanView/LazyColumn.tsx
 
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
-
 import { CSSProperties } from 'react';
-import TaskItem, { swimlaneDataProp } from './TaskItem';
-import { t } from 'src/utils/lang/helper';
-import TaskBoard from 'main';
-import { Board, ColumnData, RootFilterState } from 'src/interfaces/BoardConfigs';
-import { taskItem } from 'src/interfaces/TaskItem';
 import { Menu, Notice, Platform } from 'obsidian';
-import { ViewTaskFilterPopover } from 'src/components/BoardFilters/ViewTaskFilterPopover';
-import { eventEmitter } from 'src/services/EventEmitter';
-import { bugReporter } from 'src/services/OpenModals';
-import { ViewTaskFilterModal } from 'src/components/BoardFilters';
-import { ConfigureColumnSortingModal } from 'src/modals/ConfigureColumnSortingModal';
-import { matchTagsWithWildcards } from 'src/utils/algorithms/ScanningFilterer';
-import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
-import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
-import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
-import TaskItemV2 from './TaskItemV2';
+import { t } from 'i18next';
 import { AlertOctagon } from 'lucide-react';
-import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
+import TaskBoard from '../../../main.js';
+import { Board, KanbanView, ColumnData, RootFilterState } from '../../interfaces/BoardConfigs.js';
+import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
+import { taskItem } from '../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
+import { dragDropTasksManagerInsatance } from '../../managers/DragDropTasksManager.js';
+import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSortingModal.js';
+import { eventEmitter } from '../../services/EventEmitter.js';
+import { isRootFilterStateEmpty } from '../../utils/algorithms/AdvancedFilterer.js';
+import { matchTagsWithWildcards } from '../../utils/algorithms/ScanningFilterer.js';
+import { AdvancedFilterModal } from '../AdvancedFilterer/index.js';
+import { AdvancedFilterPopover } from '../AdvancedFilterer/Popover.js';
+import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem.js';
+import TaskItemV2 from '../TaskCard/TaskItemV2.js';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -28,11 +26,13 @@ type CustomCSSProperties = CSSProperties & {
 
 export interface LazyColumnProps {
 	plugin: TaskBoard;
-	columnIndex: number;
 	activeBoardData: Board;
-	collapsed?: boolean;
+	currentViewIndex: number;
+	kanbanViewData: KanbanView;
 	columnData: ColumnData;
+	// columnIndex: number;
 	tasksForThisColumn: taskItem[];
+	// collapsed?: boolean;
 	swimlaneData?: swimlaneDataProp;
 	hideColumnHeader?: boolean;
 	headerOnly?: boolean;
@@ -40,23 +40,26 @@ export interface LazyColumnProps {
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
 	plugin,
-	columnIndex,
 	activeBoardData,
+	currentViewIndex,
+	kanbanViewData,
 	columnData,
 	tasksForThisColumn,
 	swimlaneData,
 	hideColumnHeader = false,
 	headerOnly = false,
 }) => {
-	if (!headerOnly && activeBoardData?.hideEmptyColumns && (tasksForThisColumn === undefined || tasksForThisColumn?.length === 0)) {
+	// console.log("Column Data :", columnData);
+	if (!headerOnly && tasksForThisColumn?.length === 0) {
 		return null; // Don't render the column if it has no tasks and empty columns are hidden
 	}
 
-	// Lazy loading settings from plugin
-	const lazySettings = plugin.settings.data.globalSettings.kanbanView;
-	const initialTaskCount = lazySettings.initialTaskCount || 20;
-	const loadMoreCount = lazySettings.loadMoreCount || 10;
-	const scrollThresholdPercent = lazySettings.scrollThresholdPercent || 80;
+	// Lazy loading configs
+	const initialTaskCount = 20;
+	const loadMoreCount = 10;
+	const scrollThresholdPercent = 80;
+
+	const [currentViewData, setCurrentViewData] = useState(kanbanViewData);
 
 	// State for managing visible tasks
 	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);
@@ -68,6 +71,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	const insertIndexRef = useRef<number | null>(null);
 	const rafRef = useRef<number | null>(null);
 	const [localTasks, setLocalTasks] = useState(tasksForThisColumn);
+
+	// Navigation visibility state
+	const prevScrollTopRef = useRef<number>(0);
+	// const isNavHiddenRef = useRef<boolean>(false);
+	const scrollPositionWhenHiddenRef = useRef<number>(0);
+	const SCROLL_UP_THRESHOLD = 10;
 
 	const scheduleSetInsertIndex = (pos: number | null) => {
 		if (insertIndexRef.current === pos) return;
@@ -101,6 +110,37 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		setLocalTasks(tasksForThisColumn);
 	}, [tasksForThisColumn]);
 
+	const handleNavVisibility = () => {
+		const container = tasksContainerRef.current;
+		if (!container) return;
+
+		const currentScrollTop = container.scrollTop;
+		const isScrollingDown = currentScrollTop > prevScrollTopRef.current;
+		const scrollDifference = Math.abs(currentScrollTop - prevScrollTopRef.current);
+		// console.log("LazyColumn.tsx...\ncurrentScrollTop:", currentScrollTop, "\nisScrollingDown :", isScrollingDown, "\nscrollDifference :", scrollDifference, "\nisNavHiddenRef :");
+
+		if (scrollDifference < 1) return;
+
+		const htmlElement = document.documentElement;
+
+		if (isScrollingDown) {
+			// User is scrolling down - hide navigation
+			htmlElement.classList.add('is-hidden-nav');
+			// isNavHiddenRef.current = true;
+			scrollPositionWhenHiddenRef.current = currentScrollTop;
+		} else if (!isScrollingDown) {
+			// User is scrolling up - show navigation after scrolling up by threshold
+			const scrolledUpDistance = scrollPositionWhenHiddenRef.current - currentScrollTop;
+			if (scrolledUpDistance >= SCROLL_UP_THRESHOLD) {
+				htmlElement.classList.remove('is-hidden-nav');
+				// isNavHiddenRef.current = false;
+			}
+		}
+
+		// Update previous scroll position for next iteration
+		prevScrollTopRef.current = currentScrollTop;
+	};
+
 	// Scroll event handler
 	const handleScroll = useCallback(() => {
 		const container = tasksContainerRef.current;
@@ -129,6 +169,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			if (throttleTimeout) return;
 			throttleTimeout = setTimeout(() => {
 				handleScroll();
+
+				if (Platform.isMobile)
+					handleNavVisibility();
+
 				throttleTimeout = null;
 			}, 100);
 		};
@@ -140,10 +184,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		};
 	}, [handleScroll]);
 
-	const columnWidth = plugin.settings.data.globalSettings.columnWidth || '273px';
+	const columnWidth = plugin.settings.data.columnWidth || '273px';
 
 	// Extra code to provide special data-types for theme support.
-	const tagColors = plugin.settings.data.globalSettings.tagColors;
+	const tagColors = plugin.settings.data.tagColors;
 	const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
 	let tagData = tagColorMap.get(columnData?.coltag || '');
 	if (!tagData) {
@@ -187,21 +231,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 		// 	(board: Board) => board.name === activeBoardData.name
 		// );
-		const boardIndex = activeBoardData.index;
 
-		if (boardIndex !== -1) {
-			// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
-			// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-			// 	(col: ColumnData) => col.id === columnData.id
-			// );
-			const columnIndex = columnData.index - 1;
+		// const boardIndex = activeBoardData.index;
+		// if (boardIndex !== -1) {
+		// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
+		// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+		// 	(col: ColumnData) => col.id === columnData.id
+		// );
+		const columnIndex = columnData.index - 1;
 
-			if (columnIndex !== -1) {
-				plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized = !plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].minimized;
-				await plugin.saveSettings();
-				eventEmitter.emit('REFRESH_BOARD');
-			}
+		if (columnIndex !== -1) {
+			let newBoardData = activeBoardData;
+			newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].minimized = !newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].minimized;
+			plugin.taskBoardFileManager.saveBoard(newBoardData);
+
+			eventEmitter.emit('REFRESH_BOARD');
 		}
+		// }
 	}
 
 	async function handleAlertButtonClick() {
@@ -232,25 +278,20 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					columnData,
 					(updatedColumnConfiguration: ColumnData) => {
 						// Update the column configuration in the board data
-						const boardIndex = plugin.settings.data.boardConfigs.findIndex(
-							(board: Board) => board.index === activeBoardData.index
+
+						// if (activeBoardData.index !== -1) {
+						const columnIndex = activeBoardData.views[currentViewIndex].kanbanView!.columns.findIndex(
+							(col: ColumnData) => col.id === columnData.id
 						);
 
-						if (boardIndex !== -1) {
-							const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-								(col: ColumnData) => col.id === columnData.id
-							);
+						if (columnIndex !== -1) {
+							// Update the column configuration
+							let newBoardData = activeBoardData;
+							newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex] = updatedColumnConfiguration;
+							plugin.taskBoardFileManager.saveBoard(newBoardData);
 
-							if (columnIndex !== -1) {
-								// Update the column configuration
-								plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex] = updatedColumnConfiguration;
-
-								// Save the settings
-								plugin.saveSettings();
-
-								eventEmitter.emit('REFRESH_BOARD');
-							}
 						}
+						// }
 					},
 					() => {
 						// onCancel callback - nothing to do
@@ -267,28 +308,28 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 					// 	(board: Board) => board.name === activeBoardData.name
 					// );
-					const boardIndex = activeBoardData.index;
+					// const boardIndex = activeBoardData.index;
 					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
 					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
 					// 	(col: ColumnData) => col.id === columnData.id
 					// );
-					const columnIndex = columnData.index - 1;
 
+					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
-						const filterModal = new ViewTaskFilterModal(
-							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
+						const filterModal = new AdvancedFilterModal(
+							plugin, true, activeBoardData.id, columnData.name, columnData.filters
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
 						filterModal.filterCloseCallback = async (filterState) => {
-							if (filterState && boardIndex !== -1) {
+							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									let newBoardData = activeBoardData;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
 
-									// Save the settings
-									await plugin.saveSettings();
+									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
@@ -308,24 +349,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 						// Create and show filter popover
 						// leafId is undefined for column filters (not tied to a specific leaf)
-						const popover = new ViewTaskFilterPopover(
+						const popover = new AdvancedFilterPopover(
 							plugin,
 							true, // forColumn is true
-							undefined,
-							boardIndex,
+							activeBoardData.id,
 							columnData.name,
 							columnData.filters
 						);
 
 						// Set up close callback to save filter state
 						popover.onClose = async (filterState?: RootFilterState) => {
-							if (filterState && boardIndex !== -1) {
+							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
-									plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].filters = filterState;
+									let newBoardData = activeBoardData;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
 
-									// Save the settings
-									await plugin.saveSettings();
+									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
@@ -354,26 +394,29 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
 				// 	(board: Board) => board.name === activeBoardData.name
 				// );
-				const boardIndex = activeBoardData.index;
+				// const boardIndex = activeBoardData.index;
 
-				if (boardIndex !== -1) {
-					// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
-					// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
-					// 	(col: ColumnData) => col.id === columnData.id
-					// );
-					const columnIndex = columnData.index - 1;
+				// if (boardIndex !== -1) {
+				// NOTE : This extra thing we need to do because, the columnData.index is stored starting with 1 and not 0. Hence, I we will need to subtract 1 from it.
+				// const columnIndex = plugin.settings.data.boardConfigs[boardIndex].columns.findIndex(
+				// 	(col: ColumnData) => col.id === columnData.id
+				// );
+				const columnIndex = columnData.index - 1;
 
-					if (columnIndex !== -1) {
-						// Set the active property to false
-						plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].active = false;
+				if (columnIndex !== -1) {
+					// Set the active property to false
+					let newBoardData = activeBoardData;
+					newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].active = false;
 
-						// Save the settings
-						await plugin.saveSettings();
+					plugin.taskBoardFileManager.saveBoard(newBoardData);
 
-						// Refresh the board view
-						eventEmitter.emit('REFRESH_BOARD');
-					}
+					// Save the settings
+					// await plugin.saveSettings();
+
+					// Refresh the board view
+					eventEmitter.emit('REFRESH_BOARD');
 				}
+				// }
 			});
 		});
 
@@ -396,6 +439,37 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			});
 		}
 
+		// Show swimlane toggle option only when swimlanes are enabled
+		const isSwimlanesEnabled = kanbanViewData.swimlanes.enabled;
+		if (isSwimlanesEnabled) {
+			columnMenu.addSeparator();
+			columnMenu.addItem((item) => {
+				const isSwimlaneEnabled = columnData.swimlaneEnabled;
+				item.setTitle(isSwimlaneEnabled ? t("exclude-from-swimlanes") : t("include-in-swimlanes"));
+				item.setIcon(isSwimlaneEnabled ? "layout-panel-left" : "rows-3");
+				item.onClick(async () => {
+					let updatedViewData = { ...kanbanViewData };
+					updatedViewData.columns[columnData.index - 1].swimlaneEnabled = !isSwimlaneEnabled;
+
+					let updatedBoardData = { ...activeBoardData };
+					if (updatedBoardData.views[currentViewIndex].kanbanView) {
+						updatedBoardData.views[currentViewIndex].kanbanView = updatedViewData;
+						plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+					}
+
+					// const boardIndex = activeBoardData.index;
+					// if (boardIndex !== -1) {
+					// 	const columnIndex = columnData.index - 1;
+					// 	if (columnIndex !== -1) {
+					// 		plugin.settings.data.boardConfigs[boardIndex].columns[columnIndex].swimlaneEnabled = !isSwimlaneEnabled;
+					// 		await plugin.saveSettings();
+					// 		eventEmitter.emit('REFRESH_BOARD');
+					// 	}
+					// }
+				});
+			});
+		}
+
 		// Use native event if available (React event has nativeEvent property)
 		columnMenu.showAtMouseEvent(
 			(event instanceof MouseEvent ? event : event.nativeEvent)
@@ -407,144 +481,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// -------------------------------------------------
 
 	/**
-	 * Handles the drop event of a task in this column.
-	 * Moves the task from its original position (dragIndex) to the new position (dropIndex).
-	 * Updates the localTasks state and the columnData.tasksIdManualOrder if the column uses manualOrder.
-	 * Clears the raf timer to prevent any pending raf calls.
-	 * @param {React.DragEvent<HTMLDivElement>} e - The drag event.
-	 * @param {number} dropIndex - The index at which to drop the task.
+	 * This function will be only run when user will drag the taskItem on another taskItem.
+	 * Computes insertion index based on mouse Y relative to task items inside the container.
 	 */
-	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
-		e.preventDefault();
-		setIsDragOver(false);
-		setInsertIndex(null);
-
-		const targetColumnContainer = tasksContainerRef.current;
-		if (!targetColumnContainer) {
-			return;
-		}
-
-		// We are basically doing same thing from the handleDrop function below.
-		dragDropTasksManagerInsatance.handleDropEvent(
-			e.nativeEvent,
-			columnData,
-			targetColumnContainer,
-			swimlaneData
-		);
-
-		// Clear manager payload (drag finished)
-		dragDropTasksManagerInsatance.clearCurrentDragData();
-		dragDropTasksManagerInsatance.clearDesiredDropIndex();
-
-		// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-		// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
-		// const updated = [...localTasks];
-		// const [moved] = updated.splice(dragIndex, 1);
-		// updated.splice(dropIndex, 0, moved);
-		// setLocalTasks(updated);
-		// // If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
-		// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-		// if (hasManualOrder) {
-		// 	columnData.tasksIdManualOrder = updated.map(t => t.id);
-		// }
-
-		// clear any pending raf
-		if (rafRef.current) {
-			cancelAnimationFrame(rafRef.current);
-			rafRef.current = null;
-		}
-	};
-
-	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-		e.preventDefault();
-		setIsDragOver(false);
-
-		try {
-			// Get the data of the dragged task -- No need anymore, since its already stored in the dragdropmanager.
-			// const taskData = e.dataTransfer.getData('application/json');
-			// if (taskData) {
-			// 	const { task, sourceColumnData } = JSON.parse(taskData);
-
-			// 	// Ensure we have valid data
-			// 	if (!task || !sourceColumnData) return;
-
-			// Get the target column container
-			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
-
-
-			// Try to locate the source container by stable column id first (works for all colTypes) -- No need to find this anymore, since I am not making use of sourceColumnContainer in dragdropmanager.
-			// 	let sourceColumnContainer: HTMLDivElement | null = null;
-			// 	if (sourceColumnData?.id) {
-			// 		try {
-			// 			const escapedId = CSS.escape(String(sourceColumnData.id));
-			// 			sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
-			// 		} catch (err) {
-			// 			// fallback to tag-based lookup below
-			// 		}
-			// 	}
-			// 	if (!sourceColumnContainer) {
-			// 		// Fallback: find by tag name (legacy behavior)
-			// 		console.log("------------- I hope this fall-back mechanism is never running -------------");
-			// 		const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
-			// 		sourceColumnContainer = allColumnContainers.find(container => {
-			// 			const containerTag = container.getAttribute('data-column-tag-name');
-			// 			return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
-			// 		}) || targetColumnContainer;
-			// 	}
-
-			// we will allow cross-column drops now with target column having manualOrder sortCriteria. Disabling below code.
-			// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-			// if (hasManualOrder && sourceColumnData.id !== columnData.id) {
-			// 	// Not allowed: ignore drop
-			// 	dragDropTasksManagerInsatance.clearCurrentDragData();
-			// 	dragDropTasksManagerInsatance.clearDesiredDropIndex();
-			// 	return;
-			// }
-
-			// // Use the DragDropTasksManager to handle the drop
-			// try {
-			// 	const dragIdxStr = e.dataTransfer.getData('text/plain');
-			// 	const dragIdx = dragIdxStr ? parseInt(dragIdxStr) : NaN;
-			// 	if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndexRef.current !== null) {
-			// 		// Reorder locally
-			// 		const updated = [...localTasks];
-			// 		const [moved] = updated.splice(dragIdx, 1);
-			// 		updated.splice(insertIndexRef.current!, 0, moved);
-			// 		setLocalTasks(updated);
-			// 		setInsertIndex(null);
-			// 		insertIndexRef.current = null;
-			// 		// Update manual order if applicable
-			// 		const hasManualOrderLocal = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
-			// 		if (hasManualOrderLocal) {
-			// 			columnData.tasksIdManualOrder = updated.map(t => t.id);
-			// 		}
-			// 		// Clear manager payload and skip default handling
-			// 		dragDropTasksManagerInsatance.clearCurrentDragData();
-			// 		dragDropTasksManagerInsatance.clearDesiredDropIndex();
-			// 		return;
-			// 	}
-			// } catch (err) {
-			// 	// ignore and continue to default handling
-			// }
-
-			dragDropTasksManagerInsatance.handleDropEvent(
-				e.nativeEvent,
-				columnData,
-				targetColumnContainer,
-				swimlaneData
-			);
-
-			// Clear manager payload (drag finished)
-			dragDropTasksManagerInsatance.clearCurrentDragData();
-			dragDropTasksManagerInsatance.clearDesiredDropIndex();
-			// }
-		} catch (error) {
-			console.error('Error handling task drop:', error);
-		}
-	}, [columnData, plugin]);
-
-	// This function will be only run when user will drag the taskItem on another taskItem.
-	// Compute insertion index based on mouse Y relative to task items inside the container.
 	const handleTaskItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(true);
@@ -616,10 +555,18 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
 			}
 		} catch (error) {
-			console.error('Error computing insert index:', error);
+			bugReporterManagerInsatance.addToLogs(
+				119,
+				String(error),
+				"Column.tsx/handleTaskItemDragOVer",
+			);
 		}
 	}, [scheduleSetInsertIndex, columnData]);
 
+	/**
+	 * This function will only run when userwill drag the taskItem on a emtpy tasksContainer.
+	 * If dragged over another taskItem within this tasksContainer, then handleTaskItemDragOver function will run.
+	 */
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		setIsDragOver(true);
@@ -690,21 +637,17 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			// const allowed = dragDropTasksManagerInsatance.isTaskDropAllowed(sourceColumnData, columnData);
 			// e.dataTransfer!.dropEffect = allowed ? 'move' : 'none';
 		} catch (error) {
-			console.error('Error handling drag over:', error);
+			bugReporterManagerInsatance.addToLogs(
+				120,
+				String(error),
+				"Column.tsx/handleDragOver",
+			);
 		}
 	}, [columnData]);
 
-	// Cleanup any pending RAF on unmount
-	useEffect(() => {
-		return () => {
-			if (rafRef.current) {
-				cancelAnimationFrame(rafRef.current);
-				rafRef.current = null;
-			}
-		};
-	}, []);
-
-	// Handle the dragleave event to remove the visual effect
+	/**
+	 * Handles the dragleave event to remove the visual effect
+	 */
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		// Avoid flicker: if the drag event indicates the pointer is still within the container bounds,
 		// ignore this dragleave (this happens when moving between child elements).
@@ -714,140 +657,317 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const y = e.clientY;
 			if (typeof x === 'number' && typeof y === 'number') {
 				const rect = container.getBoundingClientRect();
-				if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+				if (x >= rect.left + 10 && x <= rect.right - 10 && y >= rect.top && y <= rect.bottom) {
 					// still inside container — ignore to prevent CSS flicker
 					return;
 				}
 			}
 		} catch (err) {
+			console.log("While drag leave : ", err);
 			// ignore and continue cleanup
 		}
 
 		setIsDragOver(false);
 		setInsertIndex(null);
-		dragDropTasksManagerInsatance.clearDesiredDropIndex();
-		// Let manager clean up the dropindicator and column highlight
+		// Let manager clean up the column highlight
 		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget as HTMLDivElement);
+		dragDropTasksManagerInsatance.clearDesiredDropIndex();
 	}, []);
 
+
+	/**
+	 * Handles the drop event of a task when its dropped over another task.
+	 * Moves the task from its original position (dragIndex) to the new position (dropIndex).
+	 * Updates the localTasks state and the columnData.tasksIdManualOrder if the column uses manualOrder.
+	 * Clears the raf timer to prevent any pending raf calls.
+	 * @param {React.DragEvent<HTMLDivElement>} e - The drag event.
+	 * @param {number} dropIndex - The index at which to drop the task.
+	 */
+	const handleTaskDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+		e.preventDefault();
+		setIsDragOver(false);
+		setInsertIndex(null);
+
+		try {
+
+			const targetColumnContainer = tasksContainerRef.current;
+			if (!targetColumnContainer) {
+				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
+			}
+
+			// We are basically doing same thing from the handleDrop function below.
+			dragDropTasksManagerInsatance.handleDropEvent(
+				e.nativeEvent,
+				columnData,
+				targetColumnContainer,
+				swimlaneData
+			);
+
+			// Clear manager payload (drag finished)
+			dragDropTasksManagerInsatance.clearCurrentDragData();
+			dragDropTasksManagerInsatance.clearDesiredDropIndex();
+
+			// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+			// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+			// const updated = [...localTasks];
+			// const [moved] = updated.splice(dragIndex, 1);
+			// updated.splice(dropIndex, 0, moved);
+			// setLocalTasks(updated);
+			// // If this column uses manualOrder, update the columnData.tasksIdManualOrder to reflect new order
+			// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			// if (hasManualOrder) {
+			// 	columnData.tasksIdManualOrder = updated.map(t => t.id);
+			// }
+
+			// clear any pending raf
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				188,
+				String(error),
+				"Column.tsx/handleTaskDrop",
+			);
+		}
+	};
+
+	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		setIsDragOver(false);
+		setInsertIndex(null);
+
+		try {
+			// Get the data of the dragged task -- No need anymore, since its already stored in the dragdropmanager.
+			// const taskData = e.dataTransfer.getData('application/json');
+			// if (taskData) {
+			// 	const { task, sourceColumnData } = JSON.parse(taskData);
+
+			// 	// Ensure we have valid data
+			// 	if (!task || !sourceColumnData) return;
+
+			// Get the target column container
+			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+			if (!targetColumnContainer) {
+				throw `e.currentTarget not found : ${JSON.stringify(targetColumnContainer)}`;
+			}
+
+
+			// Try to locate the source container by stable column id first (works for all colTypes) -- No need to find this anymore, since I am not making use of sourceColumnContainer in dragdropmanager.
+			// 	let sourceColumnContainer: HTMLDivElement | null = null;
+			// 	if (sourceColumnData?.id) {
+			// 		try {
+			// 			const escapedId = CSS.escape(String(sourceColumnData.id));
+			// 			sourceColumnContainer = document.querySelector(`.TaskBoardColumnsSection[data-column-id="${escapedId}"]`) as HTMLDivElement | null;
+			// 		} catch (err) {
+			// 			// fallback to tag-based lookup below
+			// 		}
+			// 	}
+			// 	if (!sourceColumnContainer) {
+			// 		// Fallback: find by tag name (legacy behavior)
+			// 		console.log("------------- I hope this fall-back mechanism is never running -------------");
+			// 		const allColumnContainers = Array.from(document.querySelectorAll('.TaskBoardColumnsSection')) as HTMLDivElement[];
+			// 		sourceColumnContainer = allColumnContainers.find(container => {
+			// 			const containerTag = container.getAttribute('data-column-tag-name');
+			// 			return containerTag === sourceColumnData.coltag || sourceColumnData.coltag?.includes(containerTag || '');
+			// 		}) || targetColumnContainer;
+			// 	}
+
+			// we will allow cross-column drops now with target column having manualOrder sortCriteria. Disabling below code.
+			// const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			// if (hasManualOrder && sourceColumnData.id !== columnData.id) {
+			// 	// Not allowed: ignore drop
+			// 	dragDropTasksManagerInsatance.clearCurrentDragData();
+			// 	dragDropTasksManagerInsatance.clearDesiredDropIndex();
+			// 	return;
+			// }
+
+			// // Use the DragDropTasksManager to handle the drop
+			// try {
+			// 	const dragIdxStr = e.dataTransfer.getData('text/plain');
+			// 	const dragIdx = dragIdxStr ? parseInt(dragIdxStr) : NaN;
+			// 	if (sourceColumnData.coltag === columnData.coltag && !isNaN(dragIdx) && insertIndexRef.current !== null) {
+			// 		// Reorder locally
+			// 		const updated = [...localTasks];
+			// 		const [moved] = updated.splice(dragIdx, 1);
+			// 		updated.splice(insertIndexRef.current!, 0, moved);
+			// 		setLocalTasks(updated);
+			// 		setInsertIndex(null);
+			// 		insertIndexRef.current = null;
+			// 		// Update manual order if applicable
+			// 		const hasManualOrderLocal = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			// 		if (hasManualOrderLocal) {
+			// 			columnData.tasksIdManualOrder = updated.map(t => t.id);
+			// 		}
+			// 		// Clear manager payload and skip default handling
+			// 		dragDropTasksManagerInsatance.clearCurrentDragData();
+			// 		dragDropTasksManagerInsatance.clearDesiredDropIndex();
+			// 		return;
+			// 	}
+			// } catch (err) {
+			// 	// ignore and continue to default handling
+			// }
+
+			dragDropTasksManagerInsatance.handleDropEvent(
+				e.nativeEvent,
+				columnData,
+				targetColumnContainer,
+				swimlaneData
+			);
+
+			// Clear manager payload (drag finished)
+			dragDropTasksManagerInsatance.clearCurrentDragData();
+			dragDropTasksManagerInsatance.clearDesiredDropIndex();
+			// }
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				118,
+				String(error),
+				"Column.tsx/handleDrop",
+			);
+		}
+	}, [columnData, plugin]);
+
+
+	// Cleanup any pending RAF on unmount
+	useEffect(() => {
+		return () => {
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+			// Clean up navigation visibility class when component unmounts
+			// if (isNavHiddenRef.current) {
+			document.documentElement.classList.remove('is-hidden-nav');
+			// isNavHiddenRef.current = false;
+			// }
+		};
+	}, []);
 
 	// -------------------------------------------------
 	// Render
 	// -------------------------------------------------
 
-	const taskItemComponent = plugin.settings.data.globalSettings.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
+	const taskItemComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
 
-	return (
-		<div
-			className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
-			data-column-id={columnData.id}
-			style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
-			data-column-type={columnData.colType}
-			data-column-tag-name={tagData?.name}
-			data-column-tag-color={tagData?.color}
-		>
-			{columnData.minimized && !hideColumnHeader ? (
-				// Minimized view
-				<div className="taskBoardColumnMinimized">
-					<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-						{allTasks?.length ?? 0}
-					</div>
-					<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
-						await handleMinimizeColumn();
-						eventEmitter.emit('REFRESH_BOARD');
-					}}>{columnData.name}</div>
-				</div>
-			) : (
-				// Normal view
-				<>
-					{!hideColumnHeader && (
-						<div className="taskBoardColumnSecHeader">
-							<div className="taskBoardColumnSecHeaderTitleSec">
-								<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
-								{columnData?.workLimit && tasksForThisColumn.length > columnData.workLimit && (
-									<div className='taskBoardColumnSecHeaderTitleSecWorkLimitAlert' aria-label={t("work-limit-alert")} onClick={handleAlertButtonClick}>
-										<AlertOctagon size={20} />
-									</div>
-								)}
-							</div>
-							<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-								{allTasks?.length ?? 0}
-							</div>
+	try {
+		return (
+			<div
+				className={`TaskBoardColumnsSection${columnData.minimized ? ' minimized' : ''}`}
+				data-column-id={columnData.id}
+				style={{ '--task-board-column-width': columnData.minimized ? '3rem' : columnWidth } as CustomCSSProperties}
+				data-column-type={columnData.colType}
+				data-column-tag-name={tagData?.name}
+				data-column-tag-color={tagData?.color}
+			>
+				{columnData.minimized && !hideColumnHeader ? (
+					// Minimized view
+					<div className="taskBoardColumnMinimized">
+						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+							{allTasks?.length ?? 0}
 						</div>
-					)}
-					<div
-						className={`tasksContainer${plugin.settings.data.globalSettings.showVerticalScroll ? '' : '-SH'}`}
-						ref={tasksContainerRef}
-						onDragOver={(e) => { handleDragOver(e); }}
-						onDragLeave={handleDragLeave}
-						onDrop={handleDrop}
-						onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
-					>
-						{columnData.minimized ? <></> : (
-							<>
-								{visibleTasks && visibleTasks.length > 0 ? (
-									<>
-										{(() => {
-											const elements: React.ReactNode[] = [];
-											for (let i = 0; i < visibleTasks.length; i++) {
-												// If insertIndex points to this position, render placeholder
-												if (insertIndex === i) {
+						<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
+							await handleMinimizeColumn();
+							eventEmitter.emit('REFRESH_BOARD');
+						}}>{columnData.name}</div>
+					</div>
+				) : (
+					// Normal view
+					<>
+						{!hideColumnHeader && (
+							<div className="taskBoardColumnSecHeader">
+								<div className="taskBoardColumnSecHeaderTitleSec">
+									<div className="taskBoardColumnSecHeaderTitleSecColumnTitle">{columnData.name}</div>
+									{columnData?.workLimit && tasksForThisColumn.length > columnData.workLimit && (
+										<div className='taskBoardColumnSecHeaderTitleSecWorkLimitAlert' aria-label={t("work-limit-alert")} onClick={handleAlertButtonClick}>
+											<AlertOctagon size={20} />
+										</div>
+									)}
+								</div>
+								<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+									{allTasks?.length ?? 0}
+								</div>
+							</div>
+						)}
+						<div
+							className={`tasksContainer${plugin.settings.data.showVerticalScroll ? '' : ' SH'}`}
+							ref={tasksContainerRef}
+							onDragOver={(e) => { handleDragOver(e); }}
+							onDragLeave={handleDragLeave}
+							onDrop={handleDrop}
+							onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
+						>
+							{columnData.minimized ? <></> : (
+								<>
+									{visibleTasks && visibleTasks.length > 0 ? (
+										<>
+											{(() => {
+												const elements: React.ReactNode[] = [];
+												for (let i = 0; i < visibleTasks.length; i++) {
+													// If insertIndex points to this position, render placeholder
+													if (insertIndex === i) {
+														elements.push(
+															<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+														);
+													}
+													const task = visibleTasks[i];
 													elements.push(
-														<div key={`placeholder-${i}`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+														<div
+															key={task.id}
+															className="taskItemFadeIn"
+															data-taskitem-index={i}
+															data-taskitem-id={task.id}
+															onDragOver={(e) => { handleTaskItemDragOver(e); }
+															}
+															onDrop={e => handleTaskDrop(e, i)}
+														>
+															<MemoizedTaskItem
+																Component={taskItemComponent}
+																key={task.id}
+																dataAttributeIndex={i}
+																plugin={plugin}
+																task={task}
+																activeViewType={viewTypeNames.kanban} // Since this Column component will be always rendered inside a Kanban view.
+																activeViewIndex={currentViewIndex}
+																kanbanViewData={currentViewData}
+																columnIndex={columnData.index}
+																swimlaneData={swimlaneData}
+															/>
+														</div>
 													);
 												}
-												const task = visibleTasks[i];
-												elements.push(
-													<div
-														key={task.id}
-														className="taskItemFadeIn"
-														data-taskitem-index={i}
-														data-taskitem-id={task.id}
-														onDragOver={(e) => { handleTaskItemDragOver(e); }
-														}
-														onDrop={e => handleTaskDrop(e, i)}
-													>
-														<MemoizedTaskItem
-															Component={taskItemComponent}
-															key={task.id}
-															dataAttributeIndex={i}
-															plugin={plugin}
-															task={task}
-															activeBoardSettings={activeBoardData}
-															columnIndex={columnIndex}
-															swimlaneData={swimlaneData}
-														/>
-													</div>
-												);
-											}
-											// If insertIndex points to end (after last item)
-											if (insertIndex === localTasks.length) {
-												elements.push(
-													<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
-												);
-											}
-											return elements;
-										})()}
-										{allTasks && visibleTaskCount < allTasks.length && (
-											<div className="lazyLoadIndicator">
-												<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
-											</div>
-										)}
-									</>
-								) : (
-									<div onDragOver={(e) => { e.preventDefault(); }}>
-										<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
-									</div>
-								)}
-							</>
-						)
-						}
-					</div>
-				</>
-			)
-			}
-		</div >
-	);
+												// If insertIndex points to end (after last item)
+												if (localTasks && insertIndex === localTasks.length) {
+													elements.push(
+														<div key={`placeholder-end`} className="task-insert-placeholder"><span className="task-insert-text">Drop here</span></div>
+													);
+												}
+												return elements;
+											})()}
+											{allTasks && visibleTaskCount < allTasks.length && (
+												<div className="lazyLoadIndicator">
+													<p>{t("scroll-to-load-more")} ({visibleTaskCount} / {allTasks.length ?? 0})</p>
+												</div>
+											)}
+										</>
+									) : (
+										<div onDragOver={(e) => { e.preventDefault(); }}>
+											<p className='tasksContainerNoTasks'>{t("no-tasks-available")}</p>
+										</div>
+									)}
+								</>
+							)
+							}
+						</div>
+					</>
+				)
+				}
+			</div >
+		);
+	} catch (error) {
+		bugReporterManagerInsatance.showNotice(180, "There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer", JSON.stringify(error), "LazyColumn.tsx/return");
+	}
 };
 
 const MemoizedTaskItem = memo<{
@@ -855,7 +975,9 @@ const MemoizedTaskItem = memo<{
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
-	activeBoardSettings: Board;
+	activeViewType: string;
+	activeViewIndex: number;
+	kanbanViewData: KanbanView;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
 }>(({ Component, ...props }) => {
@@ -864,7 +986,9 @@ const MemoizedTaskItem = memo<{
 	return (
 		prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
 		prevProps.task === nextProps.task &&
-		prevProps.activeBoardSettings === nextProps.activeBoardSettings &&
+		prevProps.activeViewType === nextProps.activeViewType &&
+		prevProps.activeViewIndex === nextProps.activeViewIndex &&
+		prevProps.kanbanViewData === nextProps.kanbanViewData &&
 		prevProps.columnIndex === nextProps.columnIndex &&
 		prevProps.swimlaneData === nextProps.swimlaneData
 	);

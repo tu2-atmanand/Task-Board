@@ -2,17 +2,11 @@
 
 import { Notice, normalizePath, requestUrl, getLanguage } from "obsidian";
 import i18next from "i18next";
-import en from "./locale/en";
-import TaskBoard from "main";
-import { langCodes } from "src/interfaces/GlobalSettings";
-import { bugReporter } from "src/services/OpenModals";
-import {
-	NODE_POSITIONS_STORAGE_KEY,
-	NODE_SIZE_STORAGE_KEY,
-	PENDING_SCAN_FILE_STACK,
-	VIEWPORT_STORAGE_KEY,
-} from "src/interfaces/Constants";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY, PENDING_SCAN_FILE_STACK } from "../../interfaces/Constants.js";
+import { langCodes } from "../../interfaces/GlobalSettings.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import en from "./locale/en.js";
 
 // --- Called Once On Plugin Load ---
 export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
@@ -41,7 +35,7 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 		try {
 			const pluginFolder = `${plugin.app.vault.configDir}/plugins/task-board/`;
 			const filePath = normalizePath(
-				`${pluginFolder}/locales/${lang}.json`
+				`${pluginFolder}/locales/${lang}.json`,
 			);
 			const file = await plugin.app.vault.adapter.read(filePath);
 			const parsed = JSON.parse(file);
@@ -49,9 +43,10 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 			// Add the loaded translations to i18next
 			i18next.addResourceBundle(lang, "translation", parsed, true, true);
 		} catch (err) {
-			console.warn(
-				`Could not load language file for '${lang}', falling back to English.`,
-				err
+			bugReporterManagerInsatance.addToLogs(
+				104,
+				String(err),
+				"lang/helper.ts/loadTranslationsOnStartup",
 			);
 		}
 	}
@@ -60,7 +55,6 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 // Main translation function
 export function t(key: string): string {
 	// if (!isI18nInitialized) { // INFO : Cannot use this method, since I dont have access to plugin instance to access the isI18nInitialized variable.
-	// 	console.warn("i18n not initialized, falling back to English");
 	// 	return en?.[key] || `Missing translation for "${key}"`;
 	// }
 
@@ -75,10 +69,6 @@ export function t(key: string): string {
 		// 	transString === null ||
 		// 	transString === undefined
 		// ) {
-		// 	console.warn(
-		// 		`Translation for "${key}" returned invalid value:`,
-		// 		transString
-		// 	);
 		// 	return en?.[key] || `Missing translation for "${key}"`;
 		// }
 
@@ -95,7 +85,7 @@ export function tSync(key: string): string {
 
 // Download and apply a new language file
 export async function downloadAndApplyLanguageFile(
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<boolean> {
 	const lang = getLanguage();
 
@@ -112,7 +102,7 @@ export async function downloadAndApplyLanguageFile(
 
 	let progressNotice = new Notice(
 		`Downloading '${lang}' language file...`,
-		0
+		0,
 	);
 
 	try {
@@ -135,7 +125,7 @@ export async function downloadAndApplyLanguageFile(
 		progressNotice.hide();
 		new Notice(
 			`Language file '${lang}.json' downloaded successfully!\nPlease reload Obsidian to apply changes.`,
-			0
+			0,
 		);
 
 		return true;
@@ -145,7 +135,7 @@ export async function downloadAndApplyLanguageFile(
 			44,
 			`You have selected the following language for Obsidian application : ${langCodes[lang]} - ${lang}.\nBased on the error message below, either your internet is OFF or the language translation file is not present at the following link : https://github.com/tu2-atmanand/Task-Board/main/src/utils/lang/locale/. \nIt would be really helpful if you can contribute for your native language translation by visiting the following link : https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/`,
 			err as string,
-			"helper.ts/downloadAndApplyLanguageFile"
+			"helper.ts/downloadAndApplyLanguageFile",
 		);
 
 		return false;

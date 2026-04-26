@@ -1,15 +1,24 @@
+import { Component, setIcon, App } from "obsidian";
 import {
-	Component,
-	ExtraButtonComponent,
-	setIcon,
-	DropdownComponent,
-	ButtonComponent,
-	App,
-	setTooltip,
-} from "obsidian";
-import { moment as _moment } from "obsidian";
-import TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
+	format,
+	addDays,
+	addWeeks,
+	addMonths,
+	addYears,
+	startOfMonth,
+	endOfMonth,
+	startOfWeek,
+	endOfWeek,
+	isBefore,
+	isSameDay,
+	isSameMonth,
+	eachDayOfInterval,
+	isToday as isTodayDateFns,
+} from "date-fns";
+import { t } from "i18next";
+import TaskBoard from "../../../main.js";
+import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
+import { robustDateParser } from "../../utils/DateTimeCalculations.js";
 
 export interface DatePickerState {
 	selectedDate: string | null;
@@ -18,32 +27,34 @@ export interface DatePickerState {
 
 export class DatePickerComponent extends Component {
 	private hostEl: HTMLElement;
+	private plugin: TaskBoard;
 	private app: App;
-	private plugin?: TaskBoard;
+	private dateName: string | undefined = "";
 	private state: DatePickerState;
 	private onDateChange?: (date: string) => void;
-	private currentViewDate: moment.Moment;
-	private moment: typeof _moment.default;
+	private currentViewDate: Date;
 
 	constructor(
 		hostEl: HTMLElement,
-		app: App,
-		plugin?: TaskBoard,
+		plugin: TaskBoard,
+		dateName: string | undefined,
 		initialDate?: string,
-		dateMark: string = "📅"
+		dateMark: string = "📅",
 	) {
 		super();
 		this.hostEl = hostEl;
-		this.app = app;
 		this.plugin = plugin;
+		this.app = plugin.app;
+		this.dateName = dateName;
 		this.state = {
 			selectedDate: initialDate || null,
 			dateMark: dateMark,
 		};
-		this.moment = _moment as unknown as typeof _moment.default;
+		// Parse initial date or use current date
 		this.currentViewDate = initialDate
-			? this.moment(initialDate)
-			: this.moment();
+			? robustDateParser(initialDate, plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT) ||
+			  new Date()
+			: new Date();
 	}
 
 	onload(): void {
@@ -65,9 +76,10 @@ export class DatePickerComponent extends Component {
 	setSelectedDate(date: string | null): void {
 		this.state.selectedDate = date;
 		this.updateSelectedDateDisplay();
-		if (this.onDateChange && date) {
-			// Only pass the date string, let the caller handle formatting
-			this.onDateChange(date);
+		// Only pass the date string, let the caller handle formatting
+		if (this.onDateChange) {
+			if (date) this.onDateChange(date);
+			else this.onDateChange("");
 		}
 	}
 
@@ -75,7 +87,16 @@ export class DatePickerComponent extends Component {
 		this.hostEl.empty();
 		this.hostEl.addClass("date-picker-root-container");
 
-		const mainPanel = this.hostEl.createDiv({
+		const datePickerContainer = this.hostEl.createDiv({
+			cls: "date-picker-container",
+		});
+
+		// const heading = datePickerContainer.createEl("h2", {
+		// 	cls: "date-picker-heading",
+		// 	text: "Change " + this.dateName + " Date",
+		// });
+
+		const mainPanel = datePickerContainer.createDiv({
 			cls: "date-picker-main-panel",
 		});
 
@@ -99,19 +120,19 @@ export class DatePickerComponent extends Component {
 
 		// Add quick date options
 		const quickOptions = [
-			{ amount: 0, unit: "days", label: t("Today") },
-			{ amount: 1, unit: "days", label: t("Tomorrow") },
-			{ amount: 2, unit: "days", label: t("In 2 days") },
-			{ amount: 3, unit: "days", label: t("In 3 days") },
-			{ amount: 5, unit: "days", label: t("In 5 days") },
-			{ amount: 1, unit: "weeks", label: t("In 1 week") },
-			{ amount: 10, unit: "days", label: t("In 10 days") },
-			{ amount: 2, unit: "weeks", label: t("In 2 weeks") },
-			{ amount: 1, unit: "months", label: t("In 1 month") },
-			{ amount: 2, unit: "months", label: t("In 2 months") },
-			{ amount: 3, unit: "months", label: t("In 3 months") },
-			{ amount: 6, unit: "months", label: t("In 6 months") },
-			{ amount: 1, unit: "years", label: t("In 1 year") },
+			{ amount: 0, unit: "days", label: t("today") },
+			{ amount: 1, unit: "days", label: t("tomorrow") },
+			{ amount: 2, unit: "days", label: t("in-2-days") },
+			{ amount: 3, unit: "days", label: t("in-3-days") },
+			// { amount: 5, unit: "days", label: t("In 5 days") },
+			{ amount: 1, unit: "weeks", label: t("in-1-week") },
+			// { amount: 10, unit: "days", label: t("In 10 days") },
+			{ amount: 2, unit: "weeks", label: t("in-2-weeks") },
+			{ amount: 1, unit: "months", label: t("in-1-month") },
+			{ amount: 2, unit: "months", label: t("in-2-months") },
+			// { amount: 3, unit: "months", label: t("In 3 months") },
+			{ amount: 6, unit: "months", label: t("in-6-months") },
+			{ amount: 1, unit: "years", label: t("in-1-year") },
 		];
 
 		quickOptions.forEach((option) => {
@@ -124,11 +145,20 @@ export class DatePickerComponent extends Component {
 				cls: "quick-option-label",
 			});
 
-			const date = this.moment().add(
-				option.amount,
-				option.unit as moment.unitOfTime.DurationConstructor
-			);
-			const formattedDate = date.format("YYYY-MM-DD");
+			let date = new Date();
+			if (option.unit === "days") {
+				date = addDays(date, option.amount);
+			} else if (option.unit === "weeks") {
+				date = addWeeks(date, option.amount);
+			} else if (option.unit === "months") {
+				date = addMonths(date, option.amount);
+			} else if (option.unit === "years") {
+				date = addYears(date, option.amount);
+			}
+
+			const usersDateFormat =
+				this.plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+			const formattedDate = format(date, usersDateFormat);
 
 			optionEl.createSpan({
 				text: formattedDate,
@@ -153,7 +183,7 @@ export class DatePickerComponent extends Component {
 		});
 
 		clearOption.createSpan({
-			text: t("Clear Date"),
+			text: t("clear-date"),
 			cls: "quick-option-label",
 		});
 
@@ -175,7 +205,7 @@ export class DatePickerComponent extends Component {
 
 	private renderCalendarHeader(
 		container: HTMLElement,
-		currentDate: moment.Moment
+		currentDate: Date,
 	): void {
 		const header = container.createDiv({
 			cls: "calendar-header",
@@ -195,7 +225,7 @@ export class DatePickerComponent extends Component {
 		// Month/Year display
 		const monthYear = header.createDiv({
 			cls: "calendar-month-year",
-			text: currentDate.format("MMMM YYYY"),
+			text: format(currentDate, "MMMM yyyy"),
 		});
 
 		// Next month button
@@ -212,7 +242,7 @@ export class DatePickerComponent extends Component {
 
 	private renderCalendarGrid(
 		container: HTMLElement,
-		currentDate: moment.Moment
+		currentDate: Date,
 	): void {
 		const grid = container.createDiv({
 			cls: "calendar-grid",
@@ -228,30 +258,32 @@ export class DatePickerComponent extends Component {
 		});
 
 		// Get first day of month and number of days
-		const firstDay = currentDate.clone().startOf("month");
-		const lastDay = currentDate.clone().endOf("month");
-		const startDate = firstDay.clone().startOf("week");
-		const endDate = lastDay.clone().endOf("week");
+		const firstDay = startOfMonth(currentDate);
+		const lastDay = endOfMonth(currentDate);
+		const startDate = startOfWeek(firstDay);
+		const endDate = endOfWeek(lastDay);
 
 		// Generate calendar days
-		const current = startDate.clone();
-		while (current.isSameOrBefore(endDate)) {
+		const days = eachDayOfInterval({ start: startDate, end: endDate });
+		days.forEach((day) => {
 			const dayEl = grid.createDiv({
 				cls: "calendar-day",
-				text: current.format("D"),
+				text: format(day, "d"),
 			});
 
-			const dateStr = current.format("YYYY-MM-DD");
+			const usersDateFormat =
+				this.plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+			const dateStr = format(day, usersDateFormat);
 
 			// Store the full date string for easy comparison later
 			dayEl.setAttribute("data-date", dateStr);
 
 			// Add classes for styling
-			if (!current.isSame(firstDay, "month")) {
+			if (!isSameMonth(day, firstDay)) {
 				dayEl.addClass("other-month");
 			}
 
-			if (current.isSame(this.moment(), "day")) {
+			if (isTodayDateFns(day)) {
 				dayEl.addClass("today");
 			}
 
@@ -265,14 +297,11 @@ export class DatePickerComponent extends Component {
 				e.stopPropagation();
 				this.setSelectedDate(dateStr);
 			});
-
-			current.add(1, "day");
-		}
+		});
 	}
 
 	private navigateMonth(direction: number): void {
-		console.log(`Navigating month: ${direction}`);
-		this.currentViewDate.add(direction, "month");
+		this.currentViewDate = addMonths(this.currentViewDate, direction);
 		this.render();
 	}
 
@@ -297,7 +326,7 @@ export class DatePickerComponent extends Component {
 			// Highlight selected calendar day
 			this.hostEl.querySelectorAll(".calendar-day").forEach((el) => {
 				const storedDate = (el as HTMLElement).getAttribute(
-					"data-date"
+					"data-date",
 				);
 				if (storedDate && this.state.selectedDate === storedDate) {
 					el.addClass("selected");

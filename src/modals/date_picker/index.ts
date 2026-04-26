@@ -12,7 +12,8 @@
  * - Added dateMark
  */
 
-import { DatePickerComponent } from "./DatePickerComponent";
-import { DatePickerModal } from "./DatePickerModal";
+
+import { DatePickerComponent } from "./DatePickerComponent.js";
+import { DatePickerModal } from "./DatePickerModal.js";
 
 export { DatePickerComponent, DatePickerModal };

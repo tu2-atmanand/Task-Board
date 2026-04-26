@@ -59,7 +59,7 @@ export interface jsonCacheData {
 	Completed: {
 		[filePath: string]: taskItem[]; // Maps file paths to arrays of completed tasks
 	};
-	// Notes: noteItem[]; // @deprecated v1.9.0
+	// Notes: noteItem[]; -- @deprecated v1.9.0
 }
 
 export interface tasksJsonData {
@@ -76,7 +76,7 @@ export interface taskJsonMerged {
 	Completed: taskItem[];
 }
 
-export interface cursorLocation {
+export interface cursorLocationInterface {
 	lineNumber: number;
 	charIndex: number;
 }

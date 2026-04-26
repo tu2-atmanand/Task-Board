@@ -1,43 +1,36 @@
 // /src/services/tasks-plugin/helpers.ts
 
-import { TasksPluginApi } from "./api";
-import { bugReporter } from "../OpenModals";
-import TaskBoard from "main";
-import { taskItem } from "src/interfaces/TaskItem";
-import {
-	addIdToTaskContent,
-	getFormattedTaskContent,
-} from "src/utils/taskLine/TaskContentFormatter";
-import { replaceOldTaskWithNewTask } from "src/utils/taskLine/TaskLineUtils";
-import { CustomStatus } from "src/interfaces/GlobalSettings";
-import { eventEmitter } from "../EventEmitter";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import TaskBoard from "../../../main.js";
+import { CustomStatus } from "../../interfaces/GlobalSettings.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { getFormattedTaskContent, addIdToTaskContent } from "../../utils/taskLine/TaskContentFormatter.js";
+import { replaceOldTaskWithNewTask } from "../../utils/taskLine/TaskLineUtils.js";
+import { eventEmitter } from "../EventEmitter.js";
+import { TasksPluginApi } from "./api.js";
 
 export async function isTasksPluginEnabled(plugin: TaskBoard) {
 	try {
 		const tasksPluginO = new TasksPluginApi(plugin);
 		return tasksPluginO.isTasksPluginEnabled();
 	} catch (err) {
-		console.error("Error checking tasks plugin status:", err);
+		bugReporterManagerInsatance.addToLogs(
+			148,
+			String(err),
+			"tasks-plugin/helpers.ts/isTasksPluginEnabled",
+		);
 		return false;
 	}
 }
 
 export async function fetchTasksPluginCustomStatuses(
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<boolean> {
 	try {
 		const tasksPluginO = new TasksPluginApi(plugin);
-		console.log(
-			"Tasks Plugin API:",
-			tasksPluginO,
-			"\nIs tasks plugin enabled?",
-			tasksPluginO.isTasksPluginEnabled()
-		);
 		// if( plugin.app.plugins.getPlugin("obsidian-tasks-plugin")) {
 		if (tasksPluginO.isTasksPluginEnabled()) {
-			plugin.settings.data.globalSettings.compatiblePlugins.tasksPlugin =
-				true;
+			plugin.settings.data.compatiblePlugins.tasksPlugin = true;
 
 			// Define the path to the tasks plugin data.json file
 			const path = `${plugin.app.vault.configDir}/plugins/obsidian-tasks-plugin/data.json`;
@@ -56,10 +49,10 @@ export async function fetchTasksPluginCustomStatuses(
 
 			const statusMap = new Map();
 			coreStatuses.forEach((status: CustomStatus) =>
-				statusMap.set(status.symbol, status)
+				statusMap.set(status.symbol, status),
 			);
 			customStatuses.forEach((status: CustomStatus) =>
-				statusMap.set(status.symbol, status)
+				statusMap.set(status.symbol, status),
 			);
 			const statuses: CustomStatus[] = Array.from(statusMap.values());
 
@@ -67,28 +60,29 @@ export async function fetchTasksPluginCustomStatuses(
 			// 	"Fetched custom statuses from tasks plugin:",
 			// 	statuses,
 			// 	"\nTask Board old statuses:",
-			// 	plugin.settings.data.globalSettings.customStatuses,
+			// 	plugin.settings.data.customStatuses,
 			// 	"\nCondition :",
 			// 	JSON.stringify(
-			// 		plugin.settings.data.globalSettings
+			// 		plugin.settings.data
 			// 			.customStatuses
 			// 	) !== JSON.stringify(statuses)
 			// );
 
 			// Store it in the plugin settings if there is a difference
 			if (
-				JSON.stringify(
-					plugin.settings.data.globalSettings.customStatuses
-				) !== JSON.stringify(statuses)
+				JSON.stringify(plugin.settings.data.customStatuses) !==
+				JSON.stringify(statuses)
 			) {
-				plugin.settings.data.globalSettings.customStatuses = statuses;
+				plugin.settings.data.customStatuses = statuses;
 				await plugin.saveSettings(plugin.settings);
 			}
 		}
 	} catch (error) {
-		console.warn(
-			"Error fetching custom statuses from tasks plugin:",
-			error
+		bugReporterManagerInsatance.showNotice(
+			100,
+			"There was an issue while importing the custom statuses configs from the Tasks plugin. See the below details to get more info. If required, please report this issue to the developer.",
+			String(error),
+			"tasks-plugin/helper.ts/fetchTasksPluginCustomStatuses",
 		);
 
 		return false;
@@ -98,7 +92,7 @@ export async function fetchTasksPluginCustomStatuses(
 
 export async function openTasksPluginEditModal(
 	plugin: TaskBoard,
-	oldTask: taskItem
+	oldTask: taskItem,
 ) {
 	try {
 		const tasksPlugin = new TasksPluginApi(plugin);
@@ -109,7 +103,7 @@ export async function openTasksPluginEditModal(
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const tasksPluginApiOutput = await tasksPlugin.editTaskLineModal(
-				completeOldTaskContent
+				completeOldTaskContent,
 			);
 
 			if (!tasksPluginApiOutput) {
@@ -139,7 +133,7 @@ export async function openTasksPluginEditModal(
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else if ((twoTaskTitles.length = 1)) {
 				const { formattedTaskContent, newId } =
@@ -154,7 +148,7 @@ export async function openTasksPluginEditModal(
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else if ((twoTaskTitles.length = 2)) {
 				newContent = `${twoTaskTitles[0]}${
@@ -171,7 +165,7 @@ export async function openTasksPluginEditModal(
 					plugin,
 					oldTask,
 					completeOldTaskContent,
-					newContent
+					newContent,
 				);
 			} else {
 				bugReporterManagerInsatance.showNotice(

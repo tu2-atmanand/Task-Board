@@ -1,5 +1,5 @@
-import { Modal, Setting } from 'obsidian';
-import TaskBoard from 'main';
+import { Modal } from 'obsidian';
+import TaskBoard from '../../main.js';
 
 export default class EditTagsModal extends Modal {
     plugin: TaskBoard;
@@ -36,7 +36,7 @@ export default class EditTagsModal extends Modal {
         // MultiSuggest for tag suggestions (best-effort)
         try {
             // @ts-ignore - MultiSuggest is available globally in project
-            const suggestionContent = this.plugin.settings.data.globalSettings.tagColors?.map(tc => tc.name) || [];
+            const suggestionContent = this.plugin.settings.data.tagColors?.map(tc => tc.name) || [];
             // @ts-ignore
             new (window as any).MultiSuggest(this.inputEl, new Set(suggestionContent), (choice: string) => {
                 this.handleAddTag(choice);

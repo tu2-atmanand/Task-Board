@@ -1,5 +1,14 @@
 // /src/utils/TaskItemCacheOperations.ts
 
+import TaskBoard from "../../main.js";
+import { taskItem, jsonCacheData } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { getCurrentLocalDateTimeString } from "./DateTimeCalculations.js";
+import { loadJsonCacheDataFromDisk, writeJsonCacheDataToDisk } from "./JsonFileOperations.js";
+import { generateTaskId } from "./TaskItemUtils.js";
+import { extractFrontmatterFromFile, extractFrontmatterTags } from "./taskNote/FrontmatterOperations.js";
+
 /**
  * @file TaskItemCacheOperations.ts
  * @author tu2-atmanand
@@ -7,21 +16,7 @@
  * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
  */
 
-import TaskBoard from "main";
-import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
-import { eventEmitter } from "src/services/EventEmitter";
-import { bugReporter } from "src/services/OpenModals";
-import {
-	loadJsonCacheDataFromDisk,
-	writeJsonCacheDataToDisk,
-} from "./JsonFileOperations";
-import { getCurrentLocalTimeString } from "./DateTimeCalculations";
-import {
-	extractFrontmatterFromFile,
-	extractFrontmatterTags,
-} from "./taskNote/FrontmatterOperations";
-import { generateTaskId } from "./TaskItemUtils";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+
 
 /**
  * Move a task from Pending to Completed in the tasks.json file (cache file).
@@ -31,21 +26,19 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
  */
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Move task from Pending to Completed
 		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = allTasks.Pending[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
+			allTasks.Pending[task.filePath] = (allTasks.Pending[task.filePath] || []).filter((t: taskItem) => t.id !== task.id);
 
 			if (!allTasks.Completed[task.filePath]) {
 				allTasks.Completed[task.filePath] = [];
 			}
-			allTasks.Completed[task.filePath].push(task);
+			allTasks.Completed[task.filePath]!.push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -55,7 +48,7 @@ export const moveFromPendingToCompleted = async (
 			78,
 			"Error updating task in tasks.json",
 			error as string,
-			"TaskItemUtils.ts/moveFromPendingToCompleted"
+			"TaskItemUtils.ts/moveFromPendingToCompleted",
 		);
 	}
 
@@ -70,21 +63,19 @@ export const moveFromPendingToCompleted = async (
  */
 export const moveFromCompletedToPending = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Move task from Completed to Pending
 		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = allTasks.Completed[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
+			allTasks.Completed[task.filePath] = (allTasks.Completed[task.filePath] || []).filter((t: taskItem) => t.id !== task.id);
 
 			if (!allTasks.Pending[task.filePath]) {
 				allTasks.Pending[task.filePath] = [];
 			}
-			allTasks.Pending[task.filePath].push(task);
+			allTasks.Pending[task.filePath]!.push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -94,7 +85,7 @@ export const moveFromCompletedToPending = async (
 			79,
 			"Error updating task in tasks.json",
 			error as string,
-			"TaskItemUtils.ts/moveFromCompletedToPending"
+			"TaskItemUtils.ts/moveFromCompletedToPending",
 		);
 	}
 
@@ -141,7 +132,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
  */
 export const updateTaskInJson = async (
 	plugin: TaskBoard,
-	updatedTask: taskItem
+	updatedTask: taskItem,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -153,14 +144,14 @@ export const updateTaskInJson = async (
 			return Object.entries(taskCategory).reduce(
 				(
 					acc: { [filePath: string]: taskItem[] },
-					[filePath, tasks]: [string, taskItem[]]
+					[filePath, tasks]: [string, taskItem[]],
 				) => {
 					acc[filePath] = tasks.map((task: taskItem) =>
-						task.id === updatedTask.id ? updatedTask : task
+						task.id === updatedTask.id ? updatedTask : task,
 					);
 					return acc;
 				},
-				{} as { [filePath: string]: taskItem[] } // Set the initial accumulator type
+				{} as { [filePath: string]: taskItem[] }, // Set the initial accumulator type
 			);
 		};
 
@@ -171,7 +162,7 @@ export const updateTaskInJson = async (
 		// Create the updated data object with both updated Pending and Completed tasks
 		const updatedData: jsonCacheData = {
 			VaultName: plugin.app.vault.getName(),
-			Modified_at: getCurrentLocalTimeString(),
+			Modified_at: getCurrentLocalDateTimeString(),
 			Pending: updatedPendingTasks,
 			Completed: updatedCompletedTasks,
 		};
@@ -184,7 +175,7 @@ export const updateTaskInJson = async (
 			80,
 			"Error updating task in tasks.json",
 			String(error),
-			"TaskItemUtils.ts/updateTaskInJson"
+			"TaskItemUtils.ts/updateTaskInJson",
 		);
 	}
 };
@@ -219,7 +210,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 			81,
 			"Error deleting task from tasks.json",
 			String(error),
-			"TaskItemUtils.ts/deleteTaskFromJson"
+			"TaskItemUtils.ts/deleteTaskFromJson",
 		);
 	}
 };

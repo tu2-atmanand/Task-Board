@@ -1,29 +1,30 @@
-import type TaskBoard from "main";
+// /src/utils/CheckBoxUtils.ts
+
 import { Notice } from "obsidian";
-import { statusTypeNames } from "src/interfaces/Enums";
-import { CustomStatus, PluginDataJson } from "src/interfaces/GlobalSettings";
-import { TaskRegularExpressions } from "src/regularExpressions/TasksPluginRegularExpr";
+import TaskBoard from "../../main.js";
+import { statusTypeNames } from "../interfaces/Enums.js";
+import { CustomStatus, PluginDataJson } from "../interfaces/GlobalSettings.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr.js";
 
 /**
  * Switches the checkbox state based on the current symbol.
- * @param plugin - The plugin instance.
+ * @param customStatuses - The customStatuses configurations from setting.
  * @param symbol - The current checkbox symbol.
- * @returns The next checkbox state symbol.
+ * @returns The next checkbox state.
  */
 export function checkboxStateSwitcher(
-	plugin: TaskBoard,
-	symbol: string
+	customStatuses: CustomStatus[],
+	symbol: string,
 ): { newSymbol: string; newSymbolType: string } {
-	const { customStatuses } = plugin.settings.data.globalSettings;
-
 	// Check if customStatuses is available and has entries
 	if (customStatuses?.length > 0) {
 		const oldStatus = customStatuses.find(
-			(status) => status.symbol === symbol
+			(status) => status.symbol === symbol,
 		);
 		if (oldStatus) {
 			const nextStatus = customStatuses.find(
-				(status) => status.symbol === oldStatus?.nextStatusSymbol
+				(status) => status.symbol === oldStatus?.nextStatusSymbol,
 			);
 			if (nextStatus) {
 				return {
@@ -35,18 +36,18 @@ export function checkboxStateSwitcher(
 	}
 
 	new Notice(
-		"customStatuses is not available or empty. Please check your settings. Falling back to default behavior."
+		"customStatuses are not available or empty. Please check your settings. Falling back to default behavior.",
 	);
 	// Default fallback behavior
 	return symbol === "x" || symbol === "X"
 		? {
 				newSymbol: " ",
 				newSymbolType: statusTypeNames.TODO,
-		  }
+			}
 		: {
 				newSymbol: "x",
 				newSymbolType: statusTypeNames.DONE,
-		  };
+			};
 }
 
 /**
@@ -59,7 +60,7 @@ export function checkboxStateSwitcher(
 export function isTaskCompleted(
 	titleOrSymbol: string,
 	isTaskNote: boolean,
-	settings: PluginDataJson
+	settings: PluginDataJson,
 ): boolean {
 	// console.log(
 	// 	"isTaskCompleted...\ntitleOrSymbol :",
@@ -85,8 +86,7 @@ export function isTaskCompleted(
 		// 	symbol === defaultTaskStatuses.dropped
 		// );
 
-		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.customStatuses;
+		const tasksPluginStatusConfigs = settings.data.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
@@ -101,8 +101,7 @@ export function isTaskCompleted(
 		});
 		return flag;
 	} else {
-		const tasksPluginStatusConfigs =
-			settings.data.globalSettings.customStatuses;
+		const tasksPluginStatusConfigs = settings.data.customStatuses;
 		let flag = false;
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (
@@ -129,8 +128,8 @@ export function isTaskLine(line: string): boolean {
 	// return /^- \[[^\]]\]\s+.*\S/.test(line);
 	return (
 		regexMatch !== null &&
-		regexMatch.length > 0 &&
-		regexMatch[0].trim().length > 0
+		regexMatch.length === 5 &&
+		regexMatch[4]?.trim().length > 0
 	);
 }
 
@@ -143,7 +142,7 @@ export function extractCheckboxSymbol(task: string): string {
 	const match = task.match(/\[(.)\]/); // Extract the symbol inside [ ]
 	if (!match || match.length < 2) return " ";
 
-	return match[1];
+	return match[1]!;
 }
 
 /**
@@ -154,9 +153,16 @@ export function extractCheckboxSymbol(task: string): string {
 export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 	try {
 		if (plugin.app.vault.config) {
-			plugin.app;
-			const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
-			return plugin.app.vault.config.useTab ? `\t` : " ".repeat(tabSize);
+			if (plugin.app.vault.config.useTab === undefined) {
+				// Obsidian has not initialized any settings, hence they will be undefined
+				// So return the following default settings of Obsidian.
+				return `\t`;
+			} else {
+				const tabSize = plugin.app.vault.config.tabSize || 4; // Default to 4 if not set
+				return plugin.app.vault.config.useTab
+					? `\t`
+					: " ".repeat(tabSize);
+			}
 		}
 		return `\t`; // Default indentation value
 	} catch {
@@ -165,14 +171,25 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 			const path = `${plugin.app.vault.configDir}/app.json`;
 			plugin.app.vault.adapter.read(path).then((content: string) => {
 				const parsed = JSON.parse(content || "{}");
-				const tabSize =
-					typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
-				return parsed?.useTab ? `\t` : " ".repeat(tabSize);
+				if (parsed?.useTab === undefined) {
+					// Obsidian has not initialized any settings, hence they will be undefined
+					// So return the following default settings of Obsidian.
+					return `\t`;
+				} else {
+					if (typeof parsed?.tabSize === "number") {
+						const tabSize = parsed.tabSize;
+						return parsed?.useTab ? `\t` : " ".repeat(tabSize);
+					}
+
+					return `\t`;
+				}
 			});
 			return `\t`; // Default indentation while async read happens
-		} catch {
-			console.warn(
-				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				108,
+				String(err),
+				"CheckBoxUtils.ts/getObsidianIndentationSetting",
 			);
 			return `\t`;
 		}
@@ -185,7 +202,7 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
  * @returns A promise that resolves to the indentation string.
  */
 export async function getObsidianIndentationSettingAsync(
-	plugin: TaskBoard
+	plugin: TaskBoard,
 ): Promise<string> {
 	try {
 		if (plugin.app.vault.config) {
@@ -203,9 +220,11 @@ export async function getObsidianIndentationSettingAsync(
 				typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
 			const useTab = !!parsed?.useTab;
 			return useTab ? `\t` : " ".repeat(tabSize);
-		} catch {
-			console.warn(
-				"CheckBoxUtils.ts : getObsidianIndentationSetting : There was an error reading vault config (app.json); using default indentation."
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				109,
+				String(err),
+				"CheckBoxUtils.ts/getObsidianIndentationSettingAsync",
 			);
 			return `\t`;
 		}

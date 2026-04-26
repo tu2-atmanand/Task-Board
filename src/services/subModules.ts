@@ -1,6 +1,6 @@
 import { App } from "obsidian";
-import { PluginDataJson } from "src/interfaces/GlobalSettings";
-import TaskBoard from "main";
+import TaskBoard from "../../main.js";
+import { PluginDataJson } from "../interfaces/GlobalSettings.js";
 
 export class TaskBoardSubmodule {
 	app: App;

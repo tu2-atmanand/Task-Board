@@ -1,13 +1,18 @@
-import TaskBoard from "main";
-import { TaskBoardSubmodule } from "./subModules";
+import { TFile, TFolder } from "obsidian";
+import { TaskBoardSubmodule } from "./subModules.js";
+import type TaskBoard from "../../main.js";
 
 export class CommunityPlugins extends TaskBoardSubmodule {
+	get fileExplorerPlugin() {
+		return this.app.internalPlugins.getEnabledPluginById("file-explorer");
+	}
+
+	isFileExplorerPluginEnabled() {
+		return !!this.fileExplorerPlugin;
+	}
+
 	get reminderPlugin() {
-		this.app
-		return (
-			this.app.plugins.plugins["obsidian-reminder-plugin"] ??
-			null
-		);
+		return this.app.plugins.plugins["obsidian-reminder-plugin"] ?? null;
 	}
 
 	isReminderPluginEnabled() {
@@ -24,8 +29,8 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 
 	isQuickAddPluginIntegrationEnabled() {
 		return (
-			this.settings.data.globalSettings.compatiblePlugins
-				.quickAddPlugin && this.isQuickAddPluginEnabled()
+			this.settings.data.compatiblePlugins.quickAddPlugin &&
+			this.isQuickAddPluginEnabled()
 		);
 	}
 
@@ -39,6 +44,14 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 export function isReminderPluginInstalled(plugin: TaskBoard) {
 	const reminderPlugin = new CommunityPlugins(plugin);
 
-	plugin.settings.data.globalSettings.compatiblePlugins.reminderPlugin =
+	plugin.settings.data.compatiblePlugins.reminderPlugin =
 		reminderPlugin.isReminderPluginEnabled();
+}
+
+export function revealFileFolderInExplorer(plugin: TaskBoard, abstractFile: TFile | TFolder) {
+	const communityPlugins = new CommunityPlugins(plugin);
+
+	if(communityPlugins.isFileExplorerPluginEnabled()) {
+		communityPlugins.fileExplorerPlugin?.revealInFolder(abstractFile);
+	}
 }

@@ -1,24 +1,27 @@
-import { App, Modal } from "obsidian";
-import { DatePickerComponent, DatePickerState } from "./DatePickerComponent";
-import TaskBoard from "main";
+import { Modal } from "obsidian";
+import TaskBoard from "../../../main.js";
+import { DatePickerComponent } from "./DatePickerComponent.js";
 
 export class DatePickerModal extends Modal {
-	public datePickerComponent!: DatePickerComponent;
-	public onDateSelected: ((date: string | null) => void) | null = null;
-	private plugin?: TaskBoard;
+	private plugin: TaskBoard;
+	private dateName?: string;
 	private initialDate?: string;
-	private dateMark: string;
+	private dateMark!: string;
+	public datePickerComponent!: DatePickerComponent;
+	public onDateSelected: ((date: string) => void) | null = null;
 
 	constructor(
-		app: App,
-		plugin?: TaskBoard,
+		plugin: TaskBoard,
+		dateName?: string,
 		initialDate?: string,
-		dateMark: string = "📅"
+		dateMark: string = "📅",
 	) {
-		super(app);
+		super(plugin.app);
 		this.plugin = plugin;
+		this.dateName = dateName;
 		this.initialDate = initialDate;
 		this.dateMark = dateMark;
+		this.setTitle("Change " + this.dateName + " Date");
 	}
 
 	onOpen() {
@@ -27,10 +30,10 @@ export class DatePickerModal extends Modal {
 
 		this.datePickerComponent = new DatePickerComponent(
 			this.contentEl,
-			this.app,
 			this.plugin,
+			this.dateName,
 			this.initialDate,
-			this.dateMark
+			this.dateMark,
 		);
 
 		this.datePickerComponent.onload();

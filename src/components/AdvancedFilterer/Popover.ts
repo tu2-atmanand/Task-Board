@@ -1,43 +1,40 @@
-// /src/components/BoardFilters/ViewTaskFilterPopover.ts
+// /src/components/BoardFilters/AdvancedFilterPopover.ts
 
 import { App } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
-import type TaskBoard from "main";
-import { t } from "src/utils/lang/helper";
-import { RootFilterState } from "src/interfaces/BoardConfigs";
-import { TaskFilterComponent } from "./ViewTaskFilter";
+import { t } from "i18next";
+import TaskBoard from "../../../main.js";
+import { RootFilterState } from "../../interfaces/BoardConfigs.js";
+import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { AdvancedFilterComponent } from "./Component.js";
 
-export class ViewTaskFilterPopover
-	extends Component
-	implements CloseableComponent
-{
+export class AdvancedFilterPopover extends Component implements CloseableComponent {
 	private plugin: TaskBoard;
 	private app: App;
-	public popoverRef: HTMLDivElement | null = null;
 	public forColumn: boolean;
-	public taskFilterComponent!: TaskFilterComponent;
+	public currentBoardID: string;
+	public popoverRef: HTMLDivElement | null = null;
+	public taskFilterComponent!: AdvancedFilterComponent;
 	private win: Window;
 	private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
 	public onClose: ((filterState?: RootFilterState) => void) | null = null;
-	private activeBoardIndex?: number;
 	private columnOrBoardName?: string;
 	private initialFilterState?: RootFilterState;
 
 	constructor(
 		plugin: TaskBoard,
 		forColumn: boolean,
-		private leafId?: string | undefined,
-		activeBoardIndex?: number,
+		currentBoardID: string,
 		columnOrBoardName?: string,
-		initialFilterState?: RootFilterState
+		initialFilterState?: RootFilterState,
 	) {
 		super();
 		this.plugin = plugin;
 		this.app = plugin.app;
 		this.forColumn = forColumn;
-		this.activeBoardIndex = activeBoardIndex;
+		this.currentBoardID = currentBoardID;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
 		this.win = plugin.app.workspace.containerEl.win || window;
@@ -84,13 +81,12 @@ export class ViewTaskFilterPopover
 		});
 
 		// Create metadata editor, use compact mode
-		this.taskFilterComponent = new TaskFilterComponent(
+		this.taskFilterComponent = new AdvancedFilterComponent(
 			taskFilterContainer,
 			this.plugin,
 			this.app,
-			this.leafId,
-			this.activeBoardIndex,
-			this.initialFilterState
+			this.currentBoardID,
+			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();
@@ -151,7 +147,7 @@ export class ViewTaskFilterPopover
 							},
 						},
 					],
-				}
+				},
 			);
 		}
 
@@ -221,7 +217,11 @@ export class ViewTaskFilterPopover
 			try {
 				filterState = this.taskFilterComponent.getFilterState();
 			} catch (error) {
-				console.error("Failed to get filter state before close", error);
+				bugReporterManagerInsatance.addToLogs(
+					116,
+					String(error),
+					"AdvancedFilterPopover.ts/close",
+				);
 			}
 		}
 
@@ -245,7 +245,11 @@ export class ViewTaskFilterPopover
 			try {
 				this.onClose(filterState);
 			} catch (error) {
-				console.error("Error in onClose callback", error);
+				bugReporterManagerInsatance.addToLogs(
+					117,
+					String(error),
+					"AdvancedFilterPopover.ts/close",
+				);
 			}
 		}
 	}

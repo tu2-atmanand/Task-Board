@@ -1,14 +1,14 @@
 // /src/components/KanbanBoard.tsx
 
-import TaskBoard from "main";
 import {
 	Modal,
 	ToggleComponent,
 	DropdownComponent,
 	ButtonComponent,
 } from "obsidian";
-import { ColumnData } from "src/interfaces/BoardConfigs";
-import { TaskBoardAction } from "src/interfaces/GlobalSettings";
+import TaskBoard from "../../main.js";
+import { ColumnData } from "../interfaces/BoardConfigs.js";
+import { TaskBoardAction } from "../interfaces/GlobalSettings.js";
 
 export class TaskBoardActionsModal extends Modal {
 	plugin: TaskBoard;
@@ -43,7 +43,7 @@ export class TaskBoardActionsModal extends Modal {
 				type: "move",
 				targetColumn: this.columns[0].name || "",
 			};
-			this.plugin.settings.data.globalSettings.actions.push(newAction);
+			this.plugin.settings.data.actions.push(newAction);
 			this.plugin.saveSettings();
 			this.refresh();
 		};
@@ -63,7 +63,7 @@ export class TaskBoardActionsModal extends Modal {
 		});
 
 		const actions: TaskBoardAction[] =
-			this.plugin.settings.data.globalSettings.actions;
+			this.plugin.settings.data.actions;
 
 		for (let i = 0; i < actions.length; i++) {
 			const action = actions[i];
@@ -119,7 +119,7 @@ export class TaskBoardActionsModal extends Modal {
 				.setIcon("trash")
 				.setTooltip("Delete Action")
 				.onClick(() => {
-					this.plugin.settings.data.globalSettings.actions.splice(
+					this.plugin.settings.data.actions.splice(
 						i,
 						1
 					);

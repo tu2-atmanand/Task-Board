@@ -1,16 +1,15 @@
 {
 	"compilerOptions": {
-		"baseUrl": ".",
 		"jsx": "react-jsx",
 		// "jsxFactory": "React.createElement",
 		// "jsxFragmentFactory": "React.Fragment",
 		"inlineSourceMap": true,
 		"inlineSources": true,
-		"module": "ESNext",
-		"target": "ES6",
+		"module": "node16",
+		"moduleResolution": "node16",
+		"target": "ES2024",
 		"allowJs": true,
 		"noImplicitAny": true,
-		"moduleResolution": "node",
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
@@ -23,12 +22,25 @@
 			"ES6",
 			"ES7",
 			"ES2017",
-			"es2022"
+			"ES2022",
+			"ES2024"
 		],
 		"forceConsistentCasingInFileNames": true,
 		"types": [
-			"obsidian-typings"
+			"obsidian-typings",
+			"node"
 		],
+		// "verbatimModuleSyntax": true
+		// TODO : Below are new settings enabled in the "obsidian-sample-plugin"
+		// "strictBindCallApply": true,
+		// "allowSyntheticDefaultImports": true,
+		// "useUnknownInCatchVariables": true,
+		// "noUncheckedIndexedAccess": true,
+		// TODO : Use below options for more strict checks
+		// "allowArbitraryExtensions": true,
+		// "allowImportingTsExtensions": true,
+		// "libReplacement": true,
+		// "noEmit": true,
 	},
 	"include": [
 		"src"

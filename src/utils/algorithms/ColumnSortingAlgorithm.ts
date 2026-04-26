@@ -1,8 +1,7 @@
 // /src/utils/ColumnSortingAlgorithm.ts
 
-import type TaskBoard from "main";
-import { columnSortingCriteria } from "src/interfaces/BoardConfigs";
-import { taskItem } from "src/interfaces/TaskItem";
+import { columnSortingCriteria } from "../../interfaces/BoardConfigs.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
 
 /**
  * Gets the property value from a task based on the criteria name
@@ -295,7 +294,8 @@ export function columnSortingAlgorithm(
 	// Apply sorting criteria in reverse order (lowest priority first)
 	// This ensures that the highest priority criteria has the final say
 	for (let i = orderedCriteria.length - 1; i >= 0; i--) {
-		const criterion = orderedCriteria[i];
+		const criterion = orderedCriteria[i]!;
+		if (!criterion) continue;
 
 		sortedTasks = sortedTasks.sort((taskA, taskB) => {
 			const valueA = getTaskPropertyValue(

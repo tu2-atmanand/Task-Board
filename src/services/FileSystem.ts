@@ -5,6 +5,10 @@ import type * as NodePath from "node:path";
 import type * as NodeUrl from "node:url";
 import type * as NodeZlib from "node:zlib";
 import { Platform } from "obsidian";
+
+
+import TaskBoard from "../../main.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 // import { configureWebWorker } from './z-worker-inline';
 
 // configureWebWorker(configure);
@@ -60,11 +64,11 @@ export const zlib: typeof NodeZlib = Platform.isDesktopApp
 export function nodeBufferToArrayBuffer(
 	buffer: Buffer,
 	offset = 0,
-	length = buffer.byteLength
+	length = buffer.byteLength,
 ): ArrayBuffer | SharedArrayBuffer {
 	return buffer.buffer.slice(
 		buffer.byteOffset + offset,
-		buffer.byteOffset + offset + length
+		buffer.byteOffset + offset + length,
 	);
 }
 
@@ -140,11 +144,11 @@ export class NodePickedFolder implements PickedFolder {
 		for (let file of files) {
 			if (file.isFile()) {
 				results.push(
-					new NodePickedFile(path.join(filepath, file.name))
+					new NodePickedFile(path.join(filepath, file.name)),
 				);
 			} else if (file.isDirectory()) {
 				results.push(
-					new NodePickedFolder(path.join(filepath, file.name))
+					new NodePickedFolder(path.join(filepath, file.name)),
 				);
 			}
 		}
@@ -185,7 +189,7 @@ export class WebPickedFile implements PickedFile {
 		return new Promise((resolve, reject) => {
 			let reader = new FileReader();
 			reader.addEventListener("load", () =>
-				resolve(reader.result as string)
+				resolve(reader.result as string),
 			);
 			reader.addEventListener("error", reject);
 			reader.readAsText(this.file);
@@ -200,7 +204,7 @@ export class WebPickedFile implements PickedFile {
 		return new Promise((resolve, reject) => {
 			let reader = new FileReader();
 			reader.addEventListener("load", () =>
-				resolve(reader.result as ArrayBuffer)
+				resolve(reader.result as ArrayBuffer),
 			);
 			reader.addEventListener("error", reject);
 			reader.readAsArrayBuffer(this.file);
@@ -218,7 +222,7 @@ export class WebPickedFile implements PickedFile {
 
 export async function getAllFiles(
 	files: (PickedFolder | PickedFile)[],
-	filter?: (file: PickedFile) => boolean
+	filter?: (file: PickedFile) => boolean,
 ): Promise<PickedFile[]> {
 	let results: PickedFile[] = [];
 	for (let file of files) {
@@ -231,9 +235,10 @@ export async function getAllFiles(
 				}
 			}
 		} catch (e) {
-			console.warn(
-				"FileSystem.ts/getAllFiles : There was an error while fetching all files : ",
-				e
+			bugReporterManagerInsatance.addToLogs(
+				101,
+				String(e),
+				"FileSystem.ts/getAllFiles",
 			);
 		}
 	}
@@ -252,7 +257,7 @@ export function parseFilePath(filepath: string): {
 } {
 	let lastIndex = Math.max(
 		filepath.lastIndexOf("/"),
-		filepath.lastIndexOf("\\")
+		filepath.lastIndexOf("\\"),
 	);
 	let name = filepath;
 	let parent = "";
@@ -293,3 +298,39 @@ export function splitext(name: string) {
 // 		return new Uint8Array(nodeBufferToArrayBuffer(buffer, 0, result.bytesRead));
 // 	}
 // }
+
+export async function createFolderRecursively(
+	plugin: TaskBoard,
+	folderPath: string,
+): Promise<boolean> {
+	const parts = folderPath.split("/").filter(Boolean);
+	let currentPath = "";
+	for (const part of parts) {
+		currentPath = currentPath ? `${currentPath}/${part}` : part;
+
+		const existing = plugin.app.vault.getAbstractFileByPath(currentPath);
+		if (!existing) {
+			// createFolder will create the single folder at currentPath
+			try {
+				await plugin.app.vault.createFolder(currentPath);
+			} catch (error) {
+				if (String(error).contains("already exists")) continue;
+			}
+		} else {
+			// If a file exists where a folder is expected, report and abort
+			// (this is unlikely but safer to surface)
+			// existing.type may not be available in all builds, so just check truthiness and skip create
+			if ((existing as any).path && !(existing as any).children) {
+				bugReporterManagerInsatance.showNotice(
+					58,
+					`A file exists where a folder is expected: ${currentPath}`,
+					`Unexpected file at folder path: ${currentPath}`,
+					"TaskItemUtils.ts/archiveTask",
+				);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}

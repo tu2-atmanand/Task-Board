@@ -1,11 +1,11 @@
 import { memo, FC } from 'react';
 import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
-import { nodeSize } from './MapView';
-import { NODE_SIZE_STORAGE_KEY } from 'src/interfaces/Constants';
-import type TaskBoard from 'main';
-import { mapViewNodeMapOrientation } from 'src/interfaces/Enums';
-import { CircleArrowDownIcon, CircleArrowRightIcon } from 'lucide-react';
-import { t } from 'src/utils/lang/helper';
+import { t } from 'i18next';
+import { CircleArrowRightIcon, CircleArrowDownIcon } from 'lucide-react';
+import TaskBoard from '../../../main.js';
+import { mapViewNodeMapOrientation } from '../../interfaces/Enums.js';
+import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
+// import { nodeSize } from './MapView';
 
 interface dataProps extends React.ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };
@@ -17,7 +17,7 @@ interface ResizableNodeSelectedProps {
 }
 
 const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id, data, selected, width, height }) => {
-	const mapViewSettings = data.label?.props?.plugin.settings.data.globalSettings.mapView;
+	const mapViewSettings = data.label?.props?.plugin.settings.data.mapView;
 	const orientationHorizontal = mapViewSettings.mapOrientation === mapViewNodeMapOrientation.horizontal;
 	// console.log('Rendering ResizableNodeSelected for node:', id, { data, selected, width, height });
 
@@ -34,14 +34,19 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 				onResizeEnd={(newSize, params) => {
 					// console.log('Node resized to:', newSize, "\nparams:", params, "\nNode ID:", id);
 					try {
-						const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
-						sizeData[id] = {
-							width: params.width ?? data.label.props.plugin.settings.data.globalSettings.columnWidth ?? 300
-							// height: params.height ?? 30 
-						};
-						localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));
+						console.log("Data :", data);
+						// const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
+						// sizeData[id] = {
+						// 	width: params.width ?? data.label.props.plugin.settings.data.columnWidth ?? 300
+						// 	// height: params.height ?? 30 
+						// };
+						// localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));
 					} catch (e) {
-						console.error('Failed to update node size in localStorage:', e);
+						bugReporterManagerInsatance.addToLogs(
+							127,
+							String(e),
+							"ResizableNodeSelected.tsx/return()",
+						);
 					}
 				}}
 			/>

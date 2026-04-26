@@ -1,40 +1,32 @@
-import TaskBoard from "main";
 import { Notice } from "obsidian";
-import { ColumnData } from "src/interfaces/BoardConfigs";
+import TaskBoard from "../../main.js";
+import { swimlaneDataProp } from "../components/TaskCard/TaskItemV2.js";
+import { ColumnData } from "../interfaces/BoardConfigs.js";
+import { statusTypeNames, colTypeNames } from "../interfaces/Enums.js";
+import { globalSettingsData } from "../interfaces/GlobalSettings.js";
+import { taskItem } from "../interfaces/TaskItem.js";
+import { eventEmitter } from "../services/EventEmitter.js";
+import { openDateInputModal } from "../services/OpenModals.js";
+import { getAllDatesInRelativeRange } from "../utils/DateTimeCalculations.js";
+import { sanitizeStatus } from "../utils/taskLine/TaskContentFormatter.js";
+import { updateTaskInFile } from "../utils/taskLine/TaskLineUtils.js";
 import {
-	colTypeNames,
-	statusTypeNames,
-	UniversalDateOptions,
-} from "src/interfaces/Enums";
-import { taskItem } from "src/interfaces/TaskItem";
-import {
-	updateTaskItemProperty,
-	updateTaskItemTags,
-} from "src/utils/UserTaskEvents";
-import { eventEmitter } from "src/services/EventEmitter";
-import { swimlaneDataProp } from "src/components/KanbanView/TaskItem";
-import {
-	getStatusNameFromStatusSymbol,
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,
-} from "src/utils/taskNote/TaskNoteUtils";
+} from "../utils/taskNote/TaskNoteUtils.js";
 import {
-	sanitizeStatus,
-	sanitizeTags,
-} from "src/utils/taskLine/TaskContentFormatter";
-import { updateTaskInFile } from "src/utils/taskLine/TaskLineUtils";
-import { globalSettingsData } from "src/interfaces/GlobalSettings";
-import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
-import { bugReporter } from "src/services/OpenModals";
-import { DatePickerModal } from "src/modals/date_picker";
-import { bugReporterManagerInsatance } from "./BugReporter";
+	updateTaskItemTags,
+	updateTaskItemProperty,
+} from "../utils/UserTaskEvents.js";
+import { bugReporterManagerInsatance } from "./BugReporter.js";
 
 export interface currentDragDataPayload {
 	task: taskItem;
 	taskIndex: string;
 	sourceColumnData: ColumnData;
-	currentBoardIndex: number;
-	swimlaneData: swimlaneDataProp | null | undefined;
+	currentViewIndex: number;
+	currentBoardID: string;
+	swimlaneData: swimlaneDataProp | undefined;
 }
 
 /**
@@ -43,12 +35,17 @@ export interface currentDragDataPayload {
  */
 class DragDropTasksManager {
 	private static instance: DragDropTasksManager;
+	private plugin: TaskBoard | null = null;
 
 	// Hold the current drag payload so dragover handlers can access it reliably
 	private currentDragData: currentDragDataPayload | null = null;
 	private desiredDropIndex: number | null = null;
-	private dropIndicator: HTMLElement | null = null;
-	private plugin: TaskBoard | null = null;
+	// private clonedDraggedElement: HTMLElement | null = null;
+	// private dropIndicator: HTMLElement | null = null; // deprecated
+
+	// Auto-scroll state
+	private scrollIntervalId: number | null = null;
+	private isAutoScrolling: boolean = false;
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -93,7 +90,6 @@ class DragDropTasksManager {
 	 * Store current drag payload (called from dragstart)
 	 */
 	setCurrentDragData(data: currentDragDataPayload) {
-		console.log("setCurrentDragData", data);
 		this.currentDragData = data;
 	}
 
@@ -109,6 +105,129 @@ class DragDropTasksManager {
 	 */
 	clearCurrentDragData() {
 		this.currentDragData = null;
+		this.stopAutoScroll();
+		// if (this.clonedDraggedElement) {
+		// 	document.body.removeChild(this.clonedDraggedElement);
+		// 	this.clonedDraggedElement = null;
+		// }
+	}
+
+	// --------------------------------------
+	// Auto-scroll functionality for horizontal panning during drag
+	// --------------------------------------
+
+	/**
+	 * Start auto-scroll monitoring during drag
+	 * Called from dragstart event handler
+	 */
+	startAutoScroll(): void {
+		if (this.isAutoScrolling) return;
+
+		this.isAutoScrolling = true;
+
+		const handleDragOver = (e: Event) => {
+			this.handleAutoScroll(e as DragEvent);
+		};
+
+		const handleDragEnd = () => {
+			this.stopAutoScroll();
+			document.removeEventListener("dragover", handleDragOver);
+			document.removeEventListener("dragend", handleDragEnd);
+		};
+
+		document.addEventListener("dragover", handleDragOver);
+		document.addEventListener("dragend", handleDragEnd);
+	}
+
+	/**
+	 * Handle auto-scroll based on mouse position during drag
+	 * @param e - The drag event
+	 */
+	private handleAutoScroll(e: DragEvent): void {
+		if (!this.plugin) return;
+
+		const edgePercent =
+			this.plugin.settings.data.dragAutoScrollEdgePercent || 20;
+		const scrollSpeed = 10;
+		const taskBoardViewSection = document.querySelector(
+			".taskBoardViewSection",
+		);
+		const viewportWidth =
+			taskBoardViewSection?.clientWidth ?? window.innerWidth;
+		const viewportHeight =
+			taskBoardViewSection?.clientHeight ?? window.innerHeight;
+		const horizontalEdgeThreshold = (viewportWidth * edgePercent) / 100;
+		const verticalEdgeThreshold = (viewportHeight * edgePercent) / 100;
+
+		const clientX = e.clientX;
+		const clientY = e.clientY;
+
+		// Try to find the horizontal scroll container (works for both normal kanban and swimlanes)
+		const horizontalContainer = document.querySelector(
+			".columnsContainer, .swimlanesContainer",
+		) as HTMLElement;
+		if (horizontalContainer) {
+			// Horizontal scroll (left/right)
+			if (clientX < horizontalEdgeThreshold) {
+				const scrollLeft = horizontalContainer.scrollLeft;
+				if (scrollLeft > 0) {
+					horizontalContainer.scrollLeft = Math.max(
+						0,
+						scrollLeft - scrollSpeed,
+					);
+				}
+			} else if (clientX > viewportWidth - horizontalEdgeThreshold) {
+				const scrollLeft = horizontalContainer.scrollLeft;
+				const maxScrollLeft =
+					horizontalContainer.scrollWidth -
+					horizontalContainer.clientWidth;
+				if (scrollLeft < maxScrollLeft) {
+					horizontalContainer.scrollLeft = Math.min(
+						maxScrollLeft,
+						scrollLeft + scrollSpeed,
+					);
+				}
+			}
+		}
+
+		// Vertical scroll for swimlanes (top/bottom)
+		// Find the swimlanes container for vertical scrolling
+		const swimlanesContainer = document.querySelector(
+			".swimlanesContainer",
+		) as HTMLElement;
+		if (swimlanesContainer) {
+			if (clientY < verticalEdgeThreshold) {
+				const scrollTop = swimlanesContainer.scrollTop;
+				if (scrollTop > 0) {
+					swimlanesContainer.scrollTop = Math.max(
+						0,
+						scrollTop - scrollSpeed,
+					);
+				}
+			} else if (clientY > viewportHeight - verticalEdgeThreshold) {
+				const scrollTop = swimlanesContainer.scrollTop;
+				const maxScrollTop =
+					swimlanesContainer.scrollHeight -
+					swimlanesContainer.clientHeight;
+				if (scrollTop < maxScrollTop) {
+					swimlanesContainer.scrollTop = Math.min(
+						maxScrollTop,
+						scrollTop + scrollSpeed,
+					);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Stop auto-scroll monitoring
+	 */
+	stopAutoScroll(): void {
+		this.isAutoScrolling = false;
+		if (this.scrollIntervalId !== null) {
+			clearInterval(this.scrollIntervalId);
+			this.scrollIntervalId = null;
+		}
 	}
 
 	// --------------------------------------
@@ -130,15 +249,15 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumnData: ColumnData,
 		targetColumnData: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		// This means, user either wants to change the order of the taskItems within the column or is changing the swimlanes.
 		this.handleTasksOrderChange(
 			this.plugin!,
 			currentDragData,
 			sourceColumnData,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
 		if (
@@ -152,7 +271,7 @@ class DragDropTasksManager {
 				newTask,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
+				plugin.settings.data,
 			);
 			eventEmitter.emit("UPDATE_TASK", {
 				taskID: oldTask.id,
@@ -160,8 +279,8 @@ class DragDropTasksManager {
 			});
 
 			const isThisTaskNote = isTaskNotePresentInTags(
-				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-				oldTask.tags
+				plugin.settings.data.taskNoteIdentifierTag,
+				oldTask.tags,
 			);
 
 			if (isThisTaskNote) {
@@ -169,21 +288,15 @@ class DragDropTasksManager {
 					sleep(1000).then(() => {
 						plugin.realTimeScanner.processAllUpdatedFiles(
 							oldTask.filePath,
-							oldTask.id
+							oldTask.id,
 						);
 					});
 				});
 			} else {
-				newTask.title = sanitizeTags(
-					newTask.title,
-					oldTask.tags,
-					newTask.tags
-				);
-				console.log("Sanitized title after tag update:", newTask.title);
 				updateTaskInFile(plugin, newTask, oldTask).then(() => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
 						oldTask.filePath,
-						oldTask.id
+						oldTask.id,
 					);
 				});
 			}
@@ -209,15 +322,17 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (
 			sourceColumn.coltag == undefined ||
 			targetColumn.coltag == undefined
 		) {
-			console.error(
-				"handleTaskMove_namedTag_to_namedTag: coltag undefined"
+			bugReporterManagerInsatance.addToLogs(
+				132,
+				`coltag of either source or target column is undefined.\nSource=${sourceColumn.coltag}\nTarget=${targetColumn.coltag}`,
+				"DragDropTasksManager.ts/handleTaskMove_namedTag_to_namedTag",
 			);
 			return;
 		}
@@ -233,21 +348,18 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
 		// -----------------------------------------------
 		// STEP 2 - Update the task properties so that it moves from source swimlane to target swilane
 		// -----------------------------------------------
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		// -----------------------------------------------
 		// STEP 3 - Will first update the properties of the task which should make it move from source column to target column.
@@ -258,28 +370,23 @@ class DragDropTasksManager {
 		let newTags = newTask.tags.filter(
 			(tag: string) =>
 				tag.replace("#", "").toLowerCase() !==
-				sourceTag.replace("#", "").toLowerCase()
+				sourceTag.replace("#", "").toLowerCase(),
 		);
 
 		// Add the target column tag if it doesn't exist
 		const targetTag = targetColumn.coltag.replace("#", "");
 		// Make sure we don't have duplicates
-		newTags.push(targetTag);
+		newTags.push(targetTag.startsWith("#") ? targetTag : `#${targetTag}`);
 		newTags = Array.from(new Set(newTags));
 
 		// newTask.tags = newTags;
 		// newTask = await updateTaskItemProperty(
 		// 	oldTask,
-		// 	plugin.settings.data.globalSettings,
+		// 	plugin.settings.data,
 		// 	"tags",
 		// 	oldTask.tags,
 		// 	newTask.tags
 		// );
-
-		console.log(
-			"handleTaskMove_namedTag_to_namedTag...\nnewTask=",
-			newTask
-		);
 
 		// -----------------------------------------------
 		// STEP 4 - Finally update the task in the note, so that its automatically scanned again. Which will trigger screen refresh.
@@ -289,7 +396,7 @@ class DragDropTasksManager {
 		// eventEmitter.emit("UPDATE_TASK", { taskID: oldTask.id, state: true });
 
 		// const isThisTaskNote = isTaskNotePresentInTags(
-		// 	plugin.settings.data.globalSettings.taskNoteIdentifierTag,
+		// 	plugin.settings.data.taskNoteIdentifierTag,
 		// 	oldTask.tags
 		// );
 
@@ -333,20 +440,20 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!currentDragData || !targetColumn.datedBasedColumn) {
-			console.error(
-				"No current drag data available for reordering : ",
-				JSON.stringify(currentDragData),
-				"\nOr the target column data : ",
-				JSON.stringify(targetColumn)
+			bugReporterManagerInsatance.addToLogs(
+				133,
+				`No current drag data available for reordering.\ncurrentDragData=${JSON.stringify(currentDragData)}\ntargetColumn=${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated",
 			);
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
+		const { updateTaskItemDate } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -355,18 +462,15 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (
 			targetColumn.datedBasedColumn &&
@@ -374,52 +478,59 @@ class DragDropTasksManager {
 				targetColumn.datedBasedColumn.to
 		) {
 			// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
-
-			const oldDateValueOfTheTask = newTask[dateType] || "";
+			const dateType = targetColumn.datedBasedColumn.dateType;
+			// const oldDateValueOfTheTask = newTask[dateType] || "";
 
 			const newDateValue = getAllDatesInRelativeRange(
 				targetColumn.datedBasedColumn?.from,
-				targetColumn.datedBasedColumn?.to
+				targetColumn.datedBasedColumn?.to,
 			)[0];
 
 			// newTask[dateType] = newDateValue;
 
-			updateTaskItemDate(plugin, newTask, dateType, newDateValue);
+			updateTaskItemDate(
+				plugin,
+				oldTask,
+				newTask,
+				dateType,
+				newDateValue,
+			);
 		} else if (
 			targetColumn.datedBasedColumn &&
 			targetColumn.datedBasedColumn.from <=
 				targetColumn.datedBasedColumn.to
 		) {
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn.dateType;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin.app, plugin);
-			datePicker.onDateSelected = async (date: string | null) => {
-				if (date) {
-					// newTask[dateType] = date;
-					updateTaskItemDate(plugin, newTask, dateType, date);
-				}
-			};
+			// const datePicker = new DatePickerModal(plugin, dateType);
+			// datePicker.onDateSelected = async (date: string | null) => {};
 
-			datePicker.open();
+			openDateInputModal(
+				plugin,
+				dateType,
+				async (date: string | null) => {
+					if (date) {
+						// newTask[dateType] = date;
+						updateTaskItemDate(
+							plugin,
+							oldTask,
+							newTask,
+							dateType,
+							date,
+						);
+					}
+				},
+			);
+
+			// datePicker.open();
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
 				30,
-				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
+				"The column configurations are currupted. Configurations are not valid for this operation. The value of 'from' should be always lower or equal to value of 'to'. Kindly verify the column configuration in which you just dropped the task.",
 				`Column configuration :	${JSON.stringify(targetColumn)}`,
-				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated"
+				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated",
 			);
 		}
 	};
@@ -438,20 +549,20 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskPriority) {
-			console.error(
-				"The priority value not found in the target column configuration : ",
-				JSON.stringify(targetColumn)
+			bugReporterManagerInsatance.addToLogs(
+				134,
+				`The priority value not found in the target column configuration.\ntargetColumn=${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_priority_to_priority",
 			);
 			return;
 		}
 
-		const { updateTaskItemPriority } = await import(
-			"src/utils/UserTaskEvents"
-		);
+		const { updateTaskItemPriority } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -460,23 +571,20 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		// Extract the priority value from the source column
 		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
 
-		updateTaskItemPriority(plugin, newTask, targetColumnPrioirty);
+		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
 
 	/**
@@ -493,20 +601,20 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskStatus) {
-			console.error(
-				"The status value not found in the target column configuration : ",
-				JSON.stringify(targetColumn)
+			bugReporterManagerInsatance.addToLogs(
+				135,
+				`The status value not found in the target column configuration.\ntargetColumn=${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_status_to_status",
 			);
 			return;
 		}
 
-		const { updateTaskItemStatus } = await import(
-			"src/utils/UserTaskEvents"
-		);
+		const { updateTaskItemStatus } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -515,29 +623,26 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		// Extract the status value from the source column
 		const targetColumnStatusValue =
 			(targetColumn.taskStatus as string) || "";
 
-		updateTaskItemStatus(plugin, newTask, targetColumnStatusValue);
+		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
 	};
 
 	handleTaskMove_DONE_to_TODO = (
 		plugin: TaskBoard,
-		task: taskItem
+		task: taskItem,
 	): taskItem => {
 		const newTitle = task.title;
 		let newTask: taskItem = {
@@ -548,15 +653,15 @@ class DragDropTasksManager {
 		};
 		if (
 			!isTaskNotePresentInTags(
-				plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-				task.tags
+				plugin.settings.data.taskNoteIdentifierTag,
+				task.tags,
 			)
 		) {
 			newTask.title = sanitizeStatus(
-				plugin.settings.data.globalSettings,
+				plugin.settings.data,
 				task.title,
 				" ",
-				statusTypeNames.TODO
+				statusTypeNames.TODO,
 			);
 		}
 
@@ -575,20 +680,20 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!currentDragData || !targetColumn.datedBasedColumn) {
-			console.error(
-				"No current drag data available for reordering : ",
-				JSON.stringify(currentDragData),
-				"\nOr the target column data : ",
-				JSON.stringify(targetColumn)
+			bugReporterManagerInsatance.addToLogs(
+				136,
+				`No current drag data available for reordering.\ncurrentDragData=${JSON.stringify(currentDragData)}\ntargetColumn=${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated",
 			);
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
+		const { updateTaskItemDate } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -597,18 +702,15 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
@@ -620,50 +722,68 @@ class DragDropTasksManager {
 				targetColumn.datedBasedColumn.to
 		) {
 			// Determine the date type (startDate, scheduledDate, or due) from datedBasedColumn
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn?.dateType;
 
 			const newDateValue = getAllDatesInRelativeRange(
 				targetColumn.datedBasedColumn?.from,
-				targetColumn.datedBasedColumn?.to
+				targetColumn.datedBasedColumn?.to,
 			)[0];
 
 			// newTask[dateType] = newDateValue;
 
-			updateTaskItemDate(plugin, newTask, dateType, newDateValue);
+			updateTaskItemDate(
+				plugin,
+				oldTask,
+				newTask,
+				dateType,
+				newDateValue,
+			);
 		} else if (
 			targetColumn.datedBasedColumn &&
 			targetColumn.datedBasedColumn.from <=
 				targetColumn.datedBasedColumn.to
 		) {
-			const dateType =
-				(targetColumn.datedBasedColumn?.dateType as
-					| UniversalDateOptions.startDate
-					| UniversalDateOptions.scheduledDate
-					| UniversalDateOptions.dueDate) ||
-				UniversalDateOptions.dueDate;
+			const dateType = targetColumn.datedBasedColumn?.dateType;
 
 			// Call the date input modal, to take new date from user.
-			const datePicker = new DatePickerModal(plugin.app, plugin);
-			datePicker.onDateSelected = async (date: string | null) => {
-				if (date) {
-					// newTask[dateType] = date;
-					updateTaskItemDate(plugin, newTask, dateType, date);
-				}
-			};
+			// const datePicker = new DatePickerModal(plugin, dateType);
+			// datePicker.onDateSelected = async (date: string | null) => {
+			// 	if (date) {
+			// 		// newTask[dateType] = date;
+			// 		updateTaskItemDate(
+			// 			plugin,
+			// 			oldTask,
+			// 			newTask,
+			// 			dateType,
+			// 			date,
+			// 		);
+			// 	}
+			// };
+			// datePicker.open();
 
-			datePicker.open();
+			openDateInputModal(
+				plugin,
+				dateType,
+				async (date: string | null) => {
+					if (date) {
+						// newTask[dateType] = date;
+						updateTaskItemDate(
+							plugin,
+							oldTask,
+							newTask,
+							dateType,
+							date,
+						);
+					}
+				},
+			);
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
 				31,
 				"The column configurations are currupted. Configurations are not valid for this operation. Kindly verify the column configuration in which you just dropped the task.",
 				`Column configuration :	${JSON.stringify(targetColumn)}`,
-				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated"
+				"DragDropTasksManager.ts/handleTaskMove_dated_to_dated",
 			);
 		}
 	};
@@ -680,12 +800,14 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn?.coltag) {
-			console.error(
-				"handleTaskMove_to_namedTag: coltag undefined in the target column configs"
+			bugReporterManagerInsatance.addToLogs(
+				137,
+				`coltag is undefined in the target column.\ntargetColumn=${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_to_namedTag",
 			);
 			return;
 		}
@@ -698,27 +820,23 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
 		// STEP 2 - Check if swimlanes are enabled and if user is moving from one swimlane to another.
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
-		console.log("Should hit this one...");
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
 		}
 
 		// STEP 3 - Add the target column tag if it doesn't already exist
-		let newTags = oldTask.tags ?? [];
+		let newTags = newTask.tags ?? [];
 		if (targetColumn.coltag) {
 			const targetTag = targetColumn.coltag.startsWith("#")
 				? targetColumn.coltag
@@ -745,20 +863,20 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskPriority) {
-			console.error(
-				"The priority value not found in the target column configuration : ",
-				JSON.stringify(targetColumn)
+			bugReporterManagerInsatance.addToLogs(
+				138,
+				`The priority value not found in the target column configuration.\ntargetColumn=${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_to_priority",
 			);
 			return;
 		}
 
-		const { updateTaskItemPriority } = await import(
-			"src/utils/UserTaskEvents"
-		);
+		const { updateTaskItemPriority } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -767,18 +885,15 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
@@ -787,7 +902,7 @@ class DragDropTasksManager {
 		// Extract the priority value from the source column
 		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
 
-		updateTaskItemPriority(plugin, newTask, targetColumnPrioirty);
+		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
 
 	/**
@@ -802,20 +917,20 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		if (!targetColumn.taskStatus) {
-			console.error(
-				"The status value not found in the target column configuration : ",
-				JSON.stringify(targetColumn)
+			bugReporterManagerInsatance.addToLogs(
+				139,
+				`The status value not found in the target column configuration.\ntargetColumn=${JSON.stringify(targetColumn)}`,
+				"DragDropTasksManager.ts/handleTaskMove_to_status",
 			);
 			return;
 		}
 
-		const { updateTaskItemStatus } = await import(
-			"src/utils/UserTaskEvents"
-		);
+		const { updateTaskItemStatus } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -824,18 +939,15 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
 		if (sourceColumn.colType === colTypeNames.completed) {
 			newTask = this.handleTaskMove_DONE_to_TODO(plugin, newTask);
@@ -845,7 +957,7 @@ class DragDropTasksManager {
 		const targetColumnStatusValue =
 			(targetColumn.taskStatus as string) || "";
 
-		updateTaskItemStatus(plugin, newTask, targetColumnStatusValue);
+		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
 	};
 
 	/**
@@ -860,12 +972,11 @@ class DragDropTasksManager {
 		currentDragData: currentDragDataPayload,
 		sourceColumn: ColumnData,
 		targetColumn: ColumnData,
-		sourceColumnSwimlaneData: swimlaneDataProp | null | undefined,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
-		const { updateTaskItemStatus } = await import(
-			"src/utils/UserTaskEvents"
-		);
+		const { updateTaskItemStatus } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -875,27 +986,28 @@ class DragDropTasksManager {
 			plugin,
 			currentDragData,
 			targetColumn,
-			this.desiredDropIndex
+			this.desiredDropIndex,
 		);
 
 		// STEP 2 - Check if swimlanes are enabled and if user is moving from one swimlane to another.
-		if (sourceColumnSwimlaneData && targetColumnSwimlaneData) {
-			newTask = await this.updateTaskItemOnSwimlaneChange(
-				newTask,
-				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData,
-				plugin.settings.data.globalSettings
-			);
-			console.log("newTask after swimlane change:", newTask);
-		}
+		newTask = await this.updateTaskItemOnSwimlaneChange(
+			newTask,
+			sourceColumnSwimlaneData,
+			targetColumnSwimlaneData,
+			plugin.settings.data,
+		);
 
-		const newStatus =
-			plugin.settings.data.globalSettings.customStatuses.find(
-				(status) => status.type === statusTypeNames.DONE
-			);
+		const newStatus = plugin.settings.data.customStatuses.find(
+			(status) => status.type === statusTypeNames.DONE,
+		);
 
 		// FINALLY - Update the task in the note.
-		updateTaskItemStatus(plugin, newTask, newStatus?.symbol ?? "x");
+		updateTaskItemStatus(
+			plugin,
+			oldTask,
+			newTask,
+			newStatus?.symbol ?? "x",
+		);
 	};
 
 	/**
@@ -904,21 +1016,15 @@ class DragDropTasksManager {
 	 * @param task The task being moved
 	 * @param targetColumnData The column data with manualOrder sorting
 	 * @param desiredIndex The desired index to insert the task at
+	 * 
+	 * @todo - Need optimization
 	 */
-	handleTasksOrderChange = (
+	handleTasksOrderChange = async (
 		plugin: TaskBoard,
 		currentDragData: currentDragDataPayload,
 		targetColumnData: ColumnData,
-		desiredIndex: number | null
-	): void => {
-		console.log(
-			"handleTasksOrderChange called...\ncurrentDragData=",
-			currentDragData,
-			"\ntargetColumnData=",
-			targetColumnData,
-			"\ndesiredIndex=",
-			desiredIndex
-		);
+		desiredIndex: number | null,
+	): Promise<void> => {
 		if (
 			!(
 				targetColumnData?.sortCriteria &&
@@ -929,79 +1035,88 @@ class DragDropTasksManager {
 			return; // If not manualOrder sorting, exit
 
 		const task = currentDragData.task;
+		let updatedTargetColumnData: ColumnData = targetColumnData;
 
 		// Ensure manual order array exists
 		if (!targetColumnData.tasksIdManualOrder) {
-			targetColumnData.tasksIdManualOrder = [];
+			updatedTargetColumnData.tasksIdManualOrder = [];
 		}
 
 		// Remove any existing occurrence of the task id
-		targetColumnData.tasksIdManualOrder =
-			targetColumnData.tasksIdManualOrder.filter((id) => id !== task.id);
+		updatedTargetColumnData.tasksIdManualOrder =
+			updatedTargetColumnData.tasksIdManualOrder!.filter(
+				(id) => id !== task.id,
+			);
 
 		// Insert at desired index or push to end
 		if (
 			typeof desiredIndex === "number" &&
 			desiredIndex >= 0 &&
-			desiredIndex <= targetColumnData.tasksIdManualOrder.length
+			desiredIndex <= updatedTargetColumnData.tasksIdManualOrder.length
 		) {
-			targetColumnData.tasksIdManualOrder.splice(
+			updatedTargetColumnData.tasksIdManualOrder.splice(
 				desiredIndex,
 				0,
-				task.id
+				task.id,
 			);
 		} else {
-			targetColumnData.tasksIdManualOrder.push(task.id);
+			updatedTargetColumnData.tasksIdManualOrder.push(task.id);
 		}
 
-		let newSettings = plugin.settings;
-		newSettings.data.boardConfigs[
-			currentDragData.currentBoardIndex
-		].columns[targetColumnData.index - 1] = targetColumnData;
+		let newBoardData =
+			await this.plugin?.taskBoardFileManager.loadBoardUsingID(
+				currentDragData.currentBoardID,
+			);
 
-		// Persist settings and refresh the board
-		try {
-			plugin.saveSettings(newSettings);
-		} catch (err) {
-			console.error("Error saving settings after task reorder:", err);
+		if (!newBoardData) {
+			throw "Board data not found";
 		}
+
+		newBoardData.views[
+			currentDragData.currentViewIndex
+		].kanbanView!.columns[targetColumnData.index - 1] =
+			updatedTargetColumnData;
+
+		plugin.taskBoardFileManager.saveBoard(newBoardData);
 	};
 
 	/**
 	 * Handles reordering of tasks within the same column with swimlane sorting
-	 * @param plugin TaskBoard plugin instance
 	 * @param task The task being moved
 	 * @param targetColumnData The column data with swimlane sorting
 	 * @param desiredIndex The desired index to insert the task at
 	 */
 	updateTaskItemOnSwimlaneChange = async (
 		task: taskItem,
-		sourceColumnSwimlaneData: swimlaneDataProp,
-		targetColumnSwimlaneData: swimlaneDataProp,
-		globalSettings: globalSettingsData
+		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
+		globalSettings: globalSettingsData,
 	): Promise<taskItem> => {
-		const property = sourceColumnSwimlaneData.property;
-		const oldValue = sourceColumnSwimlaneData.value;
-		const newValue = targetColumnSwimlaneData.value;
+		if (!targetColumnSwimlaneData) return task;
 
+		const property = targetColumnSwimlaneData.property;
+		const newValue = targetColumnSwimlaneData.value;
 		let newTask: taskItem = { ...task };
 
 		if (property === "tags") {
 			const oldTags = task.tags ?? [];
 			let newTags: string[] = oldTags;
 			// Remove old tag of source swimlane
-			if (oldValue !== "All rest") {
-				newTags = newTags.filter(
-					(tag) =>
-						tag.replace("#", "").toLowerCase() !==
-						oldValue.replace("#", "").toLowerCase()
-				);
+			if (sourceColumnSwimlaneData) {
+				const oldValue = sourceColumnSwimlaneData.value;
+				if (oldValue !== "All rest") {
+					newTags = newTags.filter(
+						(tag) =>
+							tag.replace("#", "").toLowerCase() !==
+							oldValue.replace("#", "").toLowerCase(),
+					);
+				}
 			}
 
 			// Add new tag of target swimlane
 			if (newValue !== "All rest")
 				newTags.push(
-					newValue.startsWith("#") ? newValue : `#${newValue}`
+					newValue.startsWith("#") ? newValue : `#${newValue}`,
 				);
 			newTags = Array.from(new Set(newTags));
 
@@ -1009,16 +1124,14 @@ class DragDropTasksManager {
 				newTask,
 				globalSettings,
 				property,
-				oldTags,
-				newTags
+				newTags,
 			);
 		} else {
 			newTask = await updateTaskItemProperty(
 				newTask,
 				globalSettings,
 				property,
-				oldValue,
-				newValue
+				newValue,
 			);
 		}
 
@@ -1046,7 +1159,7 @@ class DragDropTasksManager {
 	 */
 	isTaskDropAllowed(
 		sourceColumnData: ColumnData,
-		targetColumnData: ColumnData
+		targetColumnData: ColumnData,
 	): boolean {
 		// Since there are more positive rules then negative ones.
 		// Hence this function will only mention the negative ones and return false.
@@ -1089,7 +1202,13 @@ class DragDropTasksManager {
 	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element
 	 */
 	dimDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
-		draggedTaskItem.classList.add("task-item-dragging-dimmed");
+		// draggedTaskItem.classList.add("task-item-dragging-dimmed");
+
+		// Add dragging class after a small delay to not affect the drag image
+		requestAnimationFrame(() => {
+			// e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
+			draggedTaskItem.classList.add("task-item-dragging");
+		});
 	}
 
 	/**
@@ -1099,6 +1218,7 @@ class DragDropTasksManager {
 	 */
 	removeDimFromDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
 		draggedTaskItem.classList.remove("task-item-dragging-dimmed");
+		draggedTaskItem.classList.remove("task-item-dragging");
 	}
 
 	/**
@@ -1106,71 +1226,74 @@ class DragDropTasksManager {
 	 *
 	 * @param {HTMLElement} cardEl - The card element
 	 * @param {boolean} isAbove - True if the indicator should be shown above the card, false otherwise
+	 *
 	 */
-	showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
-		if (!this.plugin) return;
-		if (!cardEl || !cardEl.parentElement) return;
+	// * @deprecated - This approach has been deprecated. Will show the indicator directly inside the column component.
+	// showCardDropIndicator(cardEl: HTMLElement, isAbove: boolean): void {
+	// 	if (!this.plugin) return;
+	// 	if (!cardEl || !cardEl.parentElement) return;
 
-		console.log("cardEl", cardEl, "\nparentEl", cardEl.parentElement);
+	// 	// Create indicator if not already created
+	// 	if (!this.dropIndicator) {
+	// 		this.dropIndicator = document.createElement("div");
+	// 		this.dropIndicator.className =
+	// 			"taskboard-drop-indicator is-visible";
+	// 		this.dropIndicator.style.position = "absolute";
+	// 		this.dropIndicator.style.pointerEvents = "none";
+	// 		this.dropIndicator.style.zIndex = "9999";
+	// 		this.dropIndicator.style.background =
+	// 			"var(--interactive-accent, #5b8cff)";
+	// 		this.dropIndicator.style.borderRadius = "4px";
+	// 		// default height; adjusted below
+	// 		this.dropIndicator.style.height = "4px";
+	// 	}
 
-		// Create indicator if not already created
-		if (!this.dropIndicator) {
-			this.dropIndicator = document.createElement("div");
-			this.dropIndicator.className =
-				"taskboard-drop-indicator is-visible";
-			this.dropIndicator.style.position = "absolute";
-			this.dropIndicator.style.pointerEvents = "none";
-			this.dropIndicator.style.zIndex = "9999";
-			this.dropIndicator.style.background =
-				"var(--interactive-accent, #5b8cff)";
-			this.dropIndicator.style.borderRadius = "4px";
-			// default height; adjusted below
-			this.dropIndicator.style.height = "4px";
-		}
+	// 	const rect = cardEl.getBoundingClientRect();
+	// 	const parentRect = cardEl.parentElement.getBoundingClientRect();
+	// 	const topPos = isAbove
+	// 		? `${rect.top - parentRect.top - 6}px`
+	// 		: `${rect.bottom - parentRect.top + 2}px`;
 
-		const rect = cardEl.getBoundingClientRect();
-		const parentRect = cardEl.parentElement.getBoundingClientRect();
-		const topPos = isAbove
-			? `${rect.top - parentRect.top - 6}px`
-			: `${rect.bottom - parentRect.top + 2}px`;
+	// 	// A proof of concept to show a box instead of a simple line and to move the adjacent cards up or down.
+	// 	// cardEl.style.marginBottom = "0px";
+	// 	// cardEl.style.marginTop = "0px";
+	// 	// if (isAbove) {
+	// 	// 	cardEl.style.marginTop = "40px";
+	// 	// } else {
+	// 	// 	cardEl.style.marginBottom = "40px";
+	// 	// }
 
-		// A proof of concept to show a box instead of a simple line and to move the adjacent cards up or down.
-		// cardEl.style.marginBottom = "0px";
-		// cardEl.style.marginTop = "0px";
-		// if (isAbove) {
-		// 	cardEl.style.marginTop = "40px";
-		// } else {
-		// 	cardEl.style.marginBottom = "40px";
-		// }
+	// 	this.dropIndicator.style.width = `${rect.width}px`;
+	// 	this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
+	// 	this.dropIndicator.style.top = topPos;
 
-		this.dropIndicator.style.width = `${rect.width}px`;
-		this.dropIndicator.style.left = `${rect.left - parentRect.left}px`;
-		this.dropIndicator.style.top = topPos;
-
-		cardEl.parentElement.appendChild(this.dropIndicator);
-	}
+	// 	cardEl.parentElement.appendChild(this.dropIndicator);
+	// }
 
 	/**
-	 * Clears all drag-related styling from all task items and columns
+	 * Clears all drag-related styling from all columns
 	 *
 	 */
 	clearAllDragStyling(): void {
 		// For column we can do this kind of heavy DOM traversing,
 		// since there will be less columns, so querySelecting them all is not so big issue.
 		const allColumnContainers = Array.from(
-			document.querySelectorAll(".TaskBoardColumnsSection")
+			document.querySelectorAll(".tasksContainer"),
 		) as HTMLDivElement[];
 		allColumnContainers.forEach((container) => {
 			container.classList.remove(
 				"drag-over-allowed",
-				"drag-over-not-allowed"
+				"drag-over-not-allowed",
 			);
 		});
 
+		// Remove the dim styling from the dragged components
+
+		// @deprecated - This approach is no longer used.
 		// Removes the drop indicator, if the target column had manualOrder sorting and if the dropIndicator was visible.
-		if (this.dropIndicator && this.dropIndicator.parentElement) {
-			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
-		}
+		// if (this.dropIndicator && this.dropIndicator.parentElement) {
+		// 	this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		// }
 
 		// TODO : This feels like overkill, because I am only dimming the single .taskItem which I will be dragging. Optimize this later.
 		// Also clear dimming from all task items
@@ -1193,23 +1316,32 @@ class DragDropTasksManager {
 	 * @param {DragEvent} e - The drag event.
 	 * @param {HTMLDivElement} draggedTaskItem - The dragged task item DOM element.
 	 * @param {currentDragDataPayload} currentDragData - The current drag data payload.
-	 * @param {number} dragIndex (Optional) - The index of the task item being dragged.
-	 *
 	 */
 	public handleDragStartEvent(
 		e: DragEvent,
 		draggedTaskItem: HTMLDivElement,
 		currentDragData: currentDragDataPayload,
-		dragIndex: number
 	): void {
 		if (!e.dataTransfer) return;
 
-		// prevent column drag from also starting
-		e.stopPropagation();
-
 		this.setCurrentDragData(currentDragData);
 
+		this.startAutoScroll();
+
 		e.dataTransfer.effectAllowed = "move";
+
+		// Set a drag image from the whole task element so the preview is the full card
+		// NOTE : The below code worked and then it just stopped working. Also, a long back it worked during screen recording then stopped working. So, its not dependent on the code, but the platform and some other unknown factor.
+		// const clone = e.targetNode?.parentNode?.cloneNode(true) as HTMLElement;
+		// clone.setAttribute(
+		// 	"style",
+		// 	"position: absolute; left: 0px; top: 0px; z-index: -1",
+		// );
+		// console.log(clone);
+		// document.body.appendChild(clone);
+		// this.clonedDraggedElement = clone;
+		// const rectangle = clone.getBoundingClientRect();
+		// e.dataTransfer.setDragImage(clone, rectangle.width/2, rectangle.height/2);
 
 		// TODO : I probably wont need this anymore since I am using the singleton manager to hold the current drag data.
 		// provide a JSON payload so drop handlers can inspect
@@ -1224,21 +1356,18 @@ class DragDropTasksManager {
 		// 	);
 		// } catch (err) {
 		// 	// some browsers may throw on setData for complex types
-		// 	console.warn("Could not set JSON dataTransfer payload", err);
+		// 				bugReporterManagerInsatance.addToLogs(
+		// 					180,
+		// 					`Could not set JSON dataTransfer payload: ${String(err)}`,
+		// 					"DragDropTasksManager.ts",
+		// 				);
 		// 	try {
 		// 		e.dataTransfer.setData("text/plain", currentDragData.task.id);
 		// 	} catch {}
 		// }
 
-		// Add dragging class after a small delay to not affect the drag image
-		requestAnimationFrame(() => {
-			e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
-			draggedTaskItem.classList.add("task-item-dragging");
-		});
-
 		// Visual dim / dragging class
 		this.dimDraggedTaskItem(draggedTaskItem);
-		// draggedTaskItem.classList.add('task-item-dragging');
 	}
 
 	/**
@@ -1254,7 +1383,7 @@ class DragDropTasksManager {
 		e: DragEvent,
 		cardEl: HTMLElement,
 		columnContainerEl: HTMLDivElement,
-		ColumnData: ColumnData
+		ColumnData: ColumnData,
 	): void {
 		if (!this.getCurrentDragData() || this.getCurrentDragData() === null)
 			return;
@@ -1279,7 +1408,7 @@ class DragDropTasksManager {
 		const dropAllowed = this.handleColumnDragOverEvent(
 			e,
 			ColumnData,
-			columnContainerEl
+			columnContainerEl,
 		);
 
 		if (!dropAllowed) return;
@@ -1300,11 +1429,13 @@ class DragDropTasksManager {
 	 * @param {DragEvent} e - The drag event object
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
+	 *
+	 * @returns - true if drop is allowed in the hovered column, else false.
 	 */
 	public handleColumnDragOverEvent(
 		e: DragEvent,
 		targetColumnData: ColumnData,
-		targetColumnContainer: HTMLDivElement
+		targetColumnContainer: HTMLDivElement,
 	): boolean {
 		// console.log("DragDropTasksManager : handleDragOver called...");
 		e.preventDefault();
@@ -1313,14 +1444,18 @@ class DragDropTasksManager {
 			? this.currentDragData.sourceColumnData
 			: null;
 		if (!sourceColumnData) {
-			console.error("No source column data available for dragover.");
+			bugReporterManagerInsatance.addToLogs(
+				141,
+				`No source column data available for dragover.\nSourceColumn=${JSON.stringify(sourceColumnData)}`,
+				"DragDropTasksManager.ts/handleColumnDragOverEvent",
+			);
 			return false;
 		}
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(
 			sourceColumnData,
-			targetColumnData
+			targetColumnData,
 		);
 		// console.log("isDropAllowed", isDropAllowed);
 
@@ -1331,10 +1466,6 @@ class DragDropTasksManager {
 			e.dataTransfer!.dropEffect = "move";
 			return true;
 		} else {
-			console.log(
-				"Task drop not allowed from column:",
-				sourceColumnData.name
-			);
 			// Apply CSS styling for not allowed drop
 			targetColumnContainer.classList.add("drag-over-not-allowed");
 			targetColumnContainer.classList.remove("drag-over-allowed");
@@ -1352,14 +1483,14 @@ class DragDropTasksManager {
 	public handleDragLeaveEvent(columnContainerEl: HTMLDivElement): void {
 		this.clearDesiredDropIndex();
 		// remove indicator if present
-		if (this.dropIndicator && this.dropIndicator.parentElement) {
-			this.dropIndicator.parentElement.removeChild(this.dropIndicator);
-		}
-		this.dropIndicator = null;
+		// if (this.dropIndicator && this.dropIndicator.parentElement) {
+		// 	this.dropIndicator.parentElement.removeChild(this.dropIndicator);
+		// }
+		// this.dropIndicator = null;
 
 		columnContainerEl.classList.remove(
 			"drag-over-allowed",
-			"drag-over-not-allowed"
+			"drag-over-not-allowed",
 		);
 
 		// Clear drag-over styling from all columns
@@ -1393,22 +1524,27 @@ class DragDropTasksManager {
 		e: DragEvent,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
-		targetColumnSwimlaneData: swimlaneDataProp | null | undefined
+		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): void {
-		console.log("DragDropTasksManager : handleDrop called...");
 		e.preventDefault();
 
 		// All checks before proceeding with the calculations...
 		if (!this.currentDragData) {
-			console.error("No current drag data available for drop operation.");
+			bugReporterManagerInsatance.addToLogs(
+				142,
+				`No current drag data available for drop operation.\currentDragData=${JSON.stringify(this.currentDragData)}`,
+				"DragDropTasksManager.ts/handleDropEvent",
+			);
 			return;
 		}
 
 		const sourceColumnData = this.currentDragData.sourceColumnData;
 		const sourceColumnSwimlaneData = this.currentDragData.swimlaneData;
 		if (!sourceColumnData) {
-			console.error(
-				"There was an error while capturing the source column data."
+			bugReporterManagerInsatance.addToLogs(
+				143,
+				`There was an error while capturing the source column data.\sourceColumnData=${JSON.stringify(sourceColumnData)}`,
+				"DragDropTasksManager.ts/handleDropEvent",
 			);
 			return;
 		}
@@ -1416,36 +1552,31 @@ class DragDropTasksManager {
 		// Remove drag-over styling from target
 		targetColumnContainer.classList.remove(
 			"drag-over-allowed",
-			"drag-over-not-allowed"
+			"drag-over-not-allowed",
 		);
+		this.clearAllDragStyling();
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(
 			sourceColumnData,
-			targetColumnData
+			targetColumnData,
 		);
 
 		if (!isDropAllowed) {
-			console.warn(
-				"Task drop not allowed from column:",
-				sourceColumnData.name,
-				"to column:",
-				targetColumnData.name
-			);
 			new Notice(
-				`Task drop not allowed from column: ${sourceColumnData.name} to column: ${targetColumnData.name}`
+				`Task drop not allowed from column type: ${sourceColumnData.colType} to column type: ${targetColumnData.colType}`,
 			);
 			return;
 		}
 
 		// Perform required operations to update task properties
 		// This is where the actual task update logic will be implemented
-		console.log("Task drop allowed. Updating task properties...");
-		console.log("Source column:", sourceColumnData);
-		console.log("Target column:", targetColumnData);
-		console.log("Current drag data:", this.currentDragData);
-		console.log("Current drag index:", this.desiredDropIndex);
-		console.log("targetSwimilaneData", targetColumnSwimlaneData);
+		// console.log("Task drop allowed. Updating task properties...");
+		// console.log("Source column:", sourceColumnData);
+		// console.log("Target column:", targetColumnData);
+		// console.log("Current drag data:", this.currentDragData);
+		// console.log("Current drag index:", this.desiredDropIndex);
+		// console.log("targetSwimilaneData", targetColumnSwimlaneData);
 
 		// Determine the operation based on source and target column types
 
@@ -1457,7 +1588,7 @@ class DragDropTasksManager {
 					sourceColumnData,
 					targetColumnData,
 					sourceColumnSwimlaneData,
-					targetColumnSwimlaneData
+					targetColumnSwimlaneData,
 				);
 				return;
 			} else if (targetColumnData.colType === colTypeNames.namedTag) {
@@ -1467,7 +1598,7 @@ class DragDropTasksManager {
 					sourceColumnData,
 					targetColumnData,
 					sourceColumnSwimlaneData,
-					targetColumnSwimlaneData
+					targetColumnSwimlaneData,
 				);
 			} else if (targetColumnData.colType === colTypeNames.dated) {
 				this.handleTaskMove_to_dated(
@@ -1476,7 +1607,7 @@ class DragDropTasksManager {
 					sourceColumnData,
 					targetColumnData,
 					sourceColumnSwimlaneData,
-					targetColumnSwimlaneData
+					targetColumnSwimlaneData,
 				);
 			} else if (targetColumnData.colType === colTypeNames.taskPriority) {
 				this.handleTaskMove_priority_to_priority(
@@ -1485,7 +1616,7 @@ class DragDropTasksManager {
 					sourceColumnData,
 					targetColumnData,
 					sourceColumnSwimlaneData,
-					targetColumnSwimlaneData
+					targetColumnSwimlaneData,
 				);
 			} else if (targetColumnData.colType === colTypeNames.taskStatus) {
 				this.handleTaskMove_status_to_status(
@@ -1494,11 +1625,11 @@ class DragDropTasksManager {
 					sourceColumnData,
 					targetColumnData,
 					sourceColumnSwimlaneData,
-					targetColumnSwimlaneData
+					targetColumnSwimlaneData,
 				);
 			} else {
 				new Notice(
-					"This operation is not possible in the current version. Please request this idea to the developer."
+					"This operation is not possible in the current version. Please request this idea to the developer.",
 				);
 			}
 		} else if (targetColumnData.colType === colTypeNames.completed) {
@@ -1510,7 +1641,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData,
 				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData
+				targetColumnSwimlaneData,
 			);
 		} else if (targetColumnData.colType === colTypeNames.dated) {
 			// This means user is moving task to a dated column from any other type of column.
@@ -1521,7 +1652,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData,
 				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData
+				targetColumnSwimlaneData,
 			);
 		} else if (targetColumnData.colType === colTypeNames.namedTag) {
 			// This means user is moving task to a namedTag column from any other type of column.
@@ -1532,7 +1663,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData,
 				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData
+				targetColumnSwimlaneData,
 			);
 		} else if (targetColumnData.colType === colTypeNames.taskPriority) {
 			// This means user is moving task to a priority column from any other type of column.
@@ -1543,7 +1674,7 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData,
 				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData
+				targetColumnSwimlaneData,
 			);
 		} else if (targetColumnData.colType === colTypeNames.taskStatus) {
 			// This means user is moving task to a status column from any other type of column.
@@ -1554,11 +1685,11 @@ class DragDropTasksManager {
 				sourceColumnData,
 				targetColumnData,
 				sourceColumnSwimlaneData,
-				targetColumnSwimlaneData
+				targetColumnSwimlaneData,
 			);
 		} else {
 			new Notice(
-				"This operation is not possible in the current version. Please request this idea to the developer."
+				"This operation is not possible in the current version. Please request this idea to the developer.",
 			);
 		}
 	}
