@@ -914,7 +914,13 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 		}
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
-			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentViewIndex: activeViewIndex, swimlaneData: swimlaneData };
+			const payload: currentDragDataPayload = {
+				task,
+				taskIndex: String(dataAttributeIndex),
+				sourceColumnData: columnData,
+				currentViewIndex: activeViewIndex,
+				swimlaneData: swimlaneData
+			};
 			// Delegate to manager for standardized behavior (sets current payload and dims element)
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload);
 		} catch (err) {

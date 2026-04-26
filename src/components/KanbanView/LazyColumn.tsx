@@ -290,6 +290,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex] = updatedColumnConfiguration;
 							plugin.taskBoardFileManager.saveBoard(newBoardData);
 
+							// Refresh the board view
+							eventEmitter.emit('REFRESH_BOARD');
 						}
 						// }
 					},
@@ -409,9 +411,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].active = false;
 
 					plugin.taskBoardFileManager.saveBoard(newBoardData);
-
-					// Save the settings
-					// await plugin.saveSettings();
 
 					// Refresh the board view
 					eventEmitter.emit('REFRESH_BOARD');
@@ -970,7 +969,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	}
 };
 
-const MemoizedTaskItem = memo<{
+export default memo(LazyColumn);
+
+// Define MemoizedTaskItem outside the component to maintain stable reference
+// This prevents React's hook reconciliation from becoming unstable
+interface MemoizedTaskItemProps {
 	Component: typeof TaskItem | typeof TaskItemV2;
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
@@ -980,18 +983,21 @@ const MemoizedTaskItem = memo<{
 	kanbanViewData: KanbanView;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
-}>(({ Component, ...props }) => {
-	return <Component {...props} />;
-}, (prevProps, nextProps) => {
-	return (
-		prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
-		prevProps.task === nextProps.task &&
-		prevProps.activeViewType === nextProps.activeViewType &&
-		prevProps.activeViewIndex === nextProps.activeViewIndex &&
-		prevProps.kanbanViewData === nextProps.kanbanViewData &&
-		prevProps.columnIndex === nextProps.columnIndex &&
-		prevProps.swimlaneData === nextProps.swimlaneData
-	);
-});
+}
 
-export default memo(LazyColumn);
+const MemoizedTaskItem = memo<MemoizedTaskItemProps>(
+	({ Component, ...props }) => {
+		return <Component {...props} />;
+	},
+	(prevProps, nextProps) => {
+		return (
+			prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
+			prevProps.task === nextProps.task &&
+			prevProps.activeViewType === nextProps.activeViewType &&
+			prevProps.activeViewIndex === nextProps.activeViewIndex &&
+			prevProps.kanbanViewData === nextProps.kanbanViewData &&
+			prevProps.columnIndex === nextProps.columnIndex &&
+			prevProps.swimlaneData === nextProps.swimlaneData
+		);
+	}
+);
