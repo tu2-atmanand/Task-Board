@@ -55,14 +55,7 @@ const MapView: React.FC<MapViewProps> = ({
 	plugin.settings.data.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.mapView;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
-
-	// Flatten the filtered tasks from taskJsonMerged to a single array for MapView
-	// IMPORTANT: Memoize to prevent infinite loop - prevents recreating array on every render
-	const allTasksFlattened = useMemo(() =>
-		filteredTasks ? [...filteredTasks.Completed, ...filteredTasks.Pending] : [],
-		[filteredTasks]
-	);
-
+	const tagColors = plugin.settings.data.tagColors;
 	const userBackgroundVariant: BackgroundVariant | undefined = (() => {
 		switch (mapViewSettings.background) {
 			case mapViewBackgrounVariantTypes.dots:
@@ -75,60 +68,36 @@ const MapView: React.FC<MapViewProps> = ({
 				return undefined;
 		}
 	})();
-	const tagColors = plugin.settings.data.tagColors;
-	// const activeBoardIndex = activeBoardSettings.index;
 
+	// Flatten the filtered tasks from taskJsonMerged to a single array for MapView
+	// IMPORTANT: Memoize to prevent infinite loop - prevents recreating array on every render
+	const allTasksFlattened = useMemo(() =>
+		filteredTasks ? [...filteredTasks.Completed, ...filteredTasks.Pending] : [],
+		[filteredTasks]
+	);
 	// Loading state for board map data (stored on the board object)
 	const [storageLoaded, setStorageLoaded] = useState(false);
 	// const [activeBoardSettings, setActiveBoardSettings] = useState(activeBoardData)
-	const [viewport, setViewport] = useState<viewPortType>({ x: 10, y: 10, zoom: 1.5 });
 	const [boardChangeKey, setBoardChangeKey] = useState(0); 	// Track when board changes to force node recalculation
 	const [isImporterPanelVisible, setIsImporterPanelVisible] = useState(false); 	// Task importer panel state
 
-	// ReactFlow instance ref so we can programmatically set viewport when switching boards
-	// const reactFlowInstanceRef = useRef<any | null>(null);
 	const mapDataUpdated = useRef<boolean>(false);
+	const viewPortDataUpdated = useRef<boolean>(false);
 	// Store node positions in ref to avoid re-renders during drag operations
 	const allNodesData = useRef<nodeDataType>({});
+	const viewPortData = useRef<viewPortType>({ x: 10, y: 10, zoom: 1 });
+	// const [viewport, setViewport] = useState<viewPortType>({ x: 10, y: 10, zoom: 1 });
+	// ReactFlow instance ref so we can programmatically set viewport when switching boards
+	// const reactFlowInstanceRef = useRef<any | null>(null);
 
-
-	useEffect(() => {
-		const saveMapDataListener = () => {
-			if (!mapDataUpdated.current) return;
-
-			let newBoardData = activeBoardData;
-			// Update the currentView's mapView data
-			const viewIndex = newBoardData.views.findIndex(v => v.viewId === currentView.viewId);
-			if (viewIndex >= 0) {
-				newBoardData.views[viewIndex].mapView = {
-					viewPortData: viewport,
-					nodesData: allNodesData.current,
-				};
-			}
-			plugin.taskBoardFileManager.saveBoard(newBoardData);
-
-			emitMapDataUpdatedSignal(false);
-		};
-
-		eventEmitter.on("SAVE_MAP", saveMapDataListener);
-		return () => eventEmitter.off("SAVE_MAP", saveMapDataListener);
-	}, [activeBoardData, currentView, viewport]);
-
-	const emitMapDataUpdatedSignal = (flag: boolean) => {
-		console.log("emitMapDataUpdatedSignal called....\nflag : ", mapDataUpdated.current);
-		if (flag) {
-			if (!mapDataUpdated.current) {
-				eventEmitter.emit("MAP_UPDATED", { status: flag });
-				mapDataUpdated.current = true;
-			}
-		} else {
-			eventEmitter.emit("MAP_UPDATED", { status: flag });
-			mapDataUpdated.current = false;
-		}
-	}
+	// -------------------------------------------------------------
+	//            LOADING MAP DATA FROM BOARD FILE
+	// -------------------------------------------------------------
 
 	// Load positions from the active board data
-	const loadAllNodesData = () => {
+	const loadAllNodesData = (): nodeDataType => {
+		console.log("loadAllNodesData called...");
+
 		try {
 			const list = currentView?.mapView?.nodesData ? currentView.mapView.nodesData : {};
 			// const map: Record<string, nodeDataType> = {};
@@ -146,22 +115,23 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Load viewport from the active board data
 	const loadViewport = (): viewPortType => {
+		// debugger;
+		console.log("loadViewport called...");
 		try {
 			const vp = currentView?.mapView?.viewPortData;
 			if (vp && typeof vp === 'object') {
 				return {
 					x: Number.isFinite(vp.x) ? vp.x : 10,
 					y: Number.isFinite(vp.y) ? vp.y : 10,
-					zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1.5,
+					zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1,
 				};
 			}
-			return { x: 10, y: 10, zoom: 1.5 };
+			return { x: 10, y: 10, zoom: 1 };
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(95, String(error), 'MapView.tsx/loadViewport');
-			return { x: 10, y: 10, zoom: 1.5 };
+			return { x: 10, y: 10, zoom: 1 };
 		}
 	};
-
 
 	// Load all map data from the active board on mount and when activeBoardData changes
 	useEffect(() => {
@@ -186,12 +156,74 @@ const MapView: React.FC<MapViewProps> = ({
 			y: Number.isFinite(rawVp.y) ? rawVp.y : 10,
 			zoom: Number.isFinite(rawVp.zoom) ? rawVp.zoom : 1.5
 		};
-		setViewport(sanitizedForBoard);
+		// setViewport(sanitizedForBoard);
+		viewPortData.current = sanitizedForBoard;
 
 		setStorageLoaded(true);
 		// Increment board change key to force initialNodes recalculation
 		setBoardChangeKey(prev => prev + 1);
 	}, [activeBoardData]);
+
+
+	// -------------------------------------------------------------
+	//         EVENT EMITTERS FOR SAVING BOARD FILE
+	// -------------------------------------------------------------
+
+	useEffect(() => {
+		const saveMapDataListener = () => {
+			// debugger;
+			console.log("[Task Board] [MapView] SAVE_MAP signal fired...\nmapDataUpdated = ", mapDataUpdated.current);
+			if (!mapDataUpdated.current && !viewPortDataUpdated.current) return;
+
+			let newBoardData = activeBoardData;
+			// Update the currentView's mapView data
+			// const viewIndex = newBoardData.views.findIndex(v => v.viewId === currentView.viewId);
+			if (currentViewIndex >= 0 && currentViewIndex < newBoardData.views.length) {
+				newBoardData.views[currentViewIndex].mapView = {
+					viewPortData: viewPortData.current,
+					nodesData: allNodesData.current,
+				};
+			}
+			plugin.taskBoardFileManager.saveBoard(newBoardData);
+
+			mapDataUpdated.current = false;
+			viewPortDataUpdated.current = false;
+			emitMapDataUpdatedSignal(false);
+		};
+
+		eventEmitter.on("SAVE_MAP", saveMapDataListener);
+		return () => eventEmitter.off("SAVE_MAP", saveMapDataListener);
+	}, [activeBoardData]);
+
+	/**
+	 * This function should be called when you want to emit a signal for 
+	 * other entities to know whether the map view is in UNSAVED sate or
+	 * it the updated data has been properly saved.
+	 * 
+	 * DONT CALL THIS FUNCTION WHEN VIEWPORT DATA HAS BEEN CHANGED.
+	 * 
+	 * It also transmits a JSON data in the following form : { viewport: boolean }. 
+	 * True -> Means, only the viewport data has been updated. (Viewport data is 
+	 * not considered to be a very important data in some scenarios, but still needs 
+	 * to be saved to board file.)
+	 * False -> Means, other important map data has been updated along with 
+	 * the viewport data.
+	 * 
+	 * @param flag - The flag tells what kind of signal to emit. 
+	 * True -> The map view is in unsaved state. 
+	 * False -> The map view has been saved to board file successfully.
+	 */
+	const emitMapDataUpdatedSignal = (flag: boolean) => {
+		if (flag) {
+			if (!mapDataUpdated.current) {
+				eventEmitter.emit("MAP_UNSAVED");
+				mapDataUpdated.current = true;
+			}
+		} else {
+			eventEmitter.emit("MAP_SAVED");
+			mapDataUpdated.current = false;
+		}
+	}
 
 
 	// const reactFlowInstance = useReactFlow();
@@ -200,6 +232,9 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	reactFlowInstance.setViewport({ x: positions[0].x, y: positions[0].y, zoom: 1 });
 	// }, []);
 
+	// -------------------------------------------------------------
+	//          ALL REACTFLOW INITIALIZATION CODE
+	// -------------------------------------------------------------
 
 	// Kanban-style initial layout, memoized
 	const initialNodes: Node[] = useMemo(() => {
@@ -305,6 +340,10 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Manage nodes state
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+	// Reset nodes when initialNodes changes
+	useEffect(() => {
+		setNodes(initialNodes);
+	}, [initialNodes]);
 
 	// TODO : Its not a good idea to use debounce and allow stale data. I am already storing the data in localStorage on resize end in ResizableNodeSelected component. And there its much better as I can capture the final size directly based on the callback.
 	// Custom handler that intercepts dimension changes and updates nodeSizeTypes state
@@ -352,11 +391,6 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	500
 	// );
 
-	// Reset nodes when initialNodes changes
-	useEffect(() => {
-		setNodes(initialNodes);
-	}, [initialNodes]);
-
 	// When the active board or viewport data changes, apply the stored viewport to the ReactFlow instance.
 	// useEffect(() => {
 	// 	const instance = reactFlowInstanceRef.current;
@@ -394,13 +428,13 @@ const MapView: React.FC<MapViewProps> = ({
 		// const cssMin = 1.2; // value when zoom is maxZ
 		// const cssMax = 1.5;   // value when zoom is minZ
 
-		const vpForBoard = viewport || { x: 10, y: 10, zoom: 1.5 };
-		const zoom = Number.isFinite(vpForBoard?.zoom) ? vpForBoard.zoom : 1.5;
-		const clamped = Math.max(0.5, Math.min(2, zoom));
-		const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
-		const mapped = 1.5 - ratio * (1.5 - 1.2);
-		// Keep a compact string value suitable for CSS variable
-		const safeMarkerSize: number = Number.isFinite(mapped) ? 15 * mapped : 15;
+		// const vpForBoard = viewport || { x: 10, y: 10, zoom: 1.5 };
+		// const zoom = Number.isFinite(vpForBoard?.zoom) ? vpForBoard.zoom : 1.5;
+		// const clamped = Math.max(0.5, Math.min(2, zoom));
+		// const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
+		// const mapped = 1.5 - ratio * (1.5 - 1.2);
+		// // Keep a compact string value suitable for CSS variable
+		// const safeMarkerSize: number = Number.isFinite(mapped) ? 15 * mapped : 15;
 
 		tasks.forEach(task => {
 			const sourceId = task.legacyId ? task.legacyId : String(task.id);
@@ -425,15 +459,15 @@ const MapView: React.FC<MapViewProps> = ({
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
-									width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									// height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									// width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
 								},
 								markerEnd: {
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
-									width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									// height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									// width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
 								},
 							});
 						}
@@ -443,12 +477,15 @@ const MapView: React.FC<MapViewProps> = ({
 		});
 		return edges;
 	}
-	const edges = useMemo(() => getEdgesFromTasks(), [allTasksFlattened, viewport]);
+	const edges = useMemo(() => getEdgesFromTasks(), [allTasksFlattened]);
+
+	// -------------------------------------------------------------
+	//           ALL EVENT HANDLING
+	// -------------------------------------------------------------
 
 	const handlenodePositionChange = useCallback(() => {
 		try {
 			// Update positions for current board with validation
-			// Only update useRef - no state update needed, avoiding re-render
 			const nodesDataMap: Record<string, nodePositionData> = {};
 			for (const node of nodes) {
 				const x = Number.isFinite(node.position?.x) ? node.position.x : 0;
@@ -457,6 +494,7 @@ const MapView: React.FC<MapViewProps> = ({
 				nodesDataMap[node.id] = { x, y, width };
 			}
 
+			// Only update useRef - no state update needed, avoiding re-render
 			allNodesData.current = nodesDataMap;
 			emitMapDataUpdatedSignal(true);
 		} catch (error) {
@@ -604,26 +642,29 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	localStorage.setItem(VIEWPORT_STORAGE_KEY, JSON.stringify(vp));
 	// }, 20000);
 
-	const lastViewportSaveTime = useRef(0);
+	// const lastViewportSaveTime = useRef(0);
 	const debouncedSetViewportStorage = useCallback(debounce((vp: viewPortType) => {
-		const now = Date.now();
-		if (now - lastViewportSaveTime.current > 2000) {
+		// debugger;
+		// const now = Date.now();
+		// if (now - lastViewportSaveTime.current > 2000) {
+		try {
 			// Validate viewport values before saving
 			const safeViewport: viewPortType = {
 				x: Number.isFinite(vp.x) ? vp.x : 10,
 				y: Number.isFinite(vp.y) ? vp.y : 10,
 				zoom: Number.isFinite(vp.zoom) && vp.zoom > 0 ? vp.zoom : 1.5
 			};
-			try {
-				// Update the in-memory board object; persisting to disk will be handled by SAVE_MAP elsewhere
-				setViewport(safeViewport);
-				mapDataUpdated.current = true;
-				lastViewportSaveTime.current = now;
-			} catch (error) {
-				bugReporterManagerInsatance.addToLogs(99, String(error), 'MapView.tsx/debouncedSetViewportStorage');
-			}
+			// Update the in-memory board object; persisting to disk will be handled by SAVE_MAP elsewhere
+			// setViewport(safeViewport);
+			viewPortData.current = safeViewport;
+			// emitMapDataUpdatedSignal(true);
+			viewPortDataUpdated.current = true;
+			// lastViewportSaveTime.current = now;
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(99, String(error), 'MapView.tsx/debouncedSetViewportStorage');
 		}
-	}, 2000), []);
+		// }
+	}, 500), []);
 
 
 	const handlePaneContextMenu = useCallback((event: MouseEvent | React.MouseEvent) => {
@@ -850,6 +891,10 @@ const MapView: React.FC<MapViewProps> = ({
 	}, [allTasksFlattened, taskNoteIdentifierTag, plugin]);
 
 
+	// -------------------------------------------------------------
+	//            ALL RENDERING CODE
+	// -------------------------------------------------------------
+
 	if (allTasksFlattened.length === 0) {
 		return (
 			<div className='taskBoardMapViewWrapper'>
@@ -915,7 +960,7 @@ const MapView: React.FC<MapViewProps> = ({
 							// const cssMin = 1; // value when zoom is maxZ
 							// const cssMax = 2;   // value when zoom is minZ
 
-							const vpForBoard = viewport || { x: 10, y: 10, zoom: 1.5 };
+							const vpForBoard = viewPortData.current || { x: 10, y: 10, zoom: 1.5 };
 							const z = Number.isFinite(vpForBoard?.zoom) ? vpForBoard.zoom : 1.5;
 							const clamped = Math.max(0.5, Math.min(2, z));
 							const ratio = (clamped - 0.5) / (2 - 0.5); // 0..1
@@ -935,7 +980,8 @@ const MapView: React.FC<MapViewProps> = ({
 							nodeTypes={nodeTypes}
 							onEdgeClick={handleEdgeClick}
 							onNodesChange={onNodesChange}
-							onNodeDragStop={() => {
+							onNodeDragStop={(node) => {
+								console.log("Following node position has been updated : ", node);
 								handlenodePositionChange();
 							}}
 
@@ -967,6 +1013,8 @@ const MapView: React.FC<MapViewProps> = ({
 							// rendering
 							onlyRenderVisibleElements={mapViewSettings.renderVisibleNodes} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
 							onInit={(instance) => {
+								// debugger;
+								console.log("Reactflow Initializing...");
 								// store reactflow instance for later programmatic viewport updates
 								// try {
 								// 	reactFlowInstanceRef.current = instance;
@@ -984,23 +1032,25 @@ const MapView: React.FC<MapViewProps> = ({
 										// Validate the new viewport before setting
 										if (Number.isFinite(newVp.x) && Number.isFinite(newVp.y) && Number.isFinite(newVp.zoom)) {
 											instance.setViewport(newVp);
-											setViewport(newVp);
+											// setViewport(newVp);
+											viewPortData.current = newVp;
 											debouncedSetViewportStorage(newVp);
 											return;
 										}
 									}
 								}
 								// Use current viewport if valid for this board, otherwise fall back to defaults
-								const currentVpForBoard = viewport;
+								const currentVpForBoard = viewPortData.current;
 								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom) && currentVpForBoard.zoom > 0) {
 									instance.setViewport(currentVpForBoard);
 								} else {
 									const defaultVp: viewPortType = { x: 10, y: 10, zoom: 1.5 };
 									instance.setViewport(defaultVp);
-									setViewport(defaultVp);
+									// setViewport(defaultVp);
+									viewPortData.current = defaultVp;
 								}
 							}}
-							defaultViewport={viewport}
+							defaultViewport={viewPortData.current}
 							elevateEdgesOnSelect={true}
 						>
 							<Controls>

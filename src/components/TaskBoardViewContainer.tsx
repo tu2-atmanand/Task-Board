@@ -204,15 +204,20 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}, []);
 
 	useEffect(() => {
-		const handleMapDataUpdated = (eventData: { status: boolean }) => {
-			if (eventData.status)
-				setMapViewDataUpdated(true);
-			else
-				setMapViewDataUpdated(false);
+		const handleMapDataUpdated = () => {
+			setMapViewDataUpdated(true);
 		};
 
-		eventEmitter.on("MAP_UPDATED", handleMapDataUpdated);
-		return () => eventEmitter.off("MAP_UPDATED", handleMapDataUpdated);
+		const handleMapDataSaved = () => {
+			setMapViewDataUpdated(false);
+		}
+
+		eventEmitter.on("MAP_UNSAVED", handleMapDataUpdated);
+		eventEmitter.on("MAP_SAVED", handleMapDataSaved);
+		return () => {
+			eventEmitter.off("MAP_UNSAVED", handleMapDataUpdated);
+			eventEmitter.off("MAP_SAVED", handleMapDataSaved);
+		};
 	}, []);
 
 	useEffect(() => {
@@ -338,13 +343,10 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				filterModal.filterCloseCallback = async (filterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedcurrentBoardData = boardData;
+						let updatedcurrentBoardData = boardData;
 						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
 						setCurrentBoardData(updatedcurrentBoardData);
-
-						// Persist to settings
-						boardData!.views[currentViewIndex].viewFilter = filterState;
-						await plugin.saveSettings();
+						plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
 						// Refresh the board view
 						eventEmitter.emit('REFRESH_BOARD');
@@ -395,10 +397,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 						const updatedcurrentBoardData = boardData;
 						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
 						setCurrentBoardData(updatedcurrentBoardData);
-
-						// Persist to settings
-						boardData!.views[currentViewIndex].viewFilter = filterState;
-						await plugin.saveSettings();
+						plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
 						// Refresh the board view
 						eventEmitter.emit('REFRESH_BOARD');
@@ -678,6 +677,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}
 
 	function handleViewSelect(index: number) {
+		console.log("Will store the map view data first...");
+		if (mapViewDataUpdated) {
+			eventEmitter.emit("SAVE_MAP");
+			setMapViewDataUpdated(false);
+			sleep(100);
+		}
+
+		console.log("Now will switch the view...");
 		if (index !== currentViewIndex) {
 			setSearchQuery("");
 			plugin.settings.data.searchQuery = "";
@@ -687,7 +694,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			if (boardData?.views && index >= 0 && index < boardData.views.length) {
 				let updatedBoard = { ...boardData };
 				updatedBoard.lastViewId = boardData.views[index].viewId;
-				plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoard);
+				plugin.taskBoardFileManager.saveBoard(updatedBoard);
 			}
 
 			// setTimeout(() => {
@@ -1003,7 +1010,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					<p>{t("no-views-in-board")}</p>
 					<button onClick={() => openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
 						setCurrentBoardData(updatedBoard);
-						debugger;
 
 						setTimeout(() => {
 							eventEmitter.emit("REFRESH_BOARD");
@@ -1018,7 +1024,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	return (
 		<div className="taskBoardView">
-			{/* Drawer opened from the left side */}
+			{/* BOARD DRAWER TO LIST VIEW AND OTHER STUFF */}
 			<div
 				ref={drawerRef}
 				className={`boardSidebarDrawer ${boardDrawerVisible ? 'boardSidebarDrawer--open' : 'boardSidebarDrawer--closed'}`}
@@ -1111,7 +1117,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				)
 			}
 
-			{/* Main content area with smooth transition */}
+			{/* MAIN VIEW CONTENT */}
 			<div className="taskBoardMainContent">
 				<div className="taskBoardHeader">
 					<div className="taskBoardHeaderLeftSec">
@@ -1128,7 +1134,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 										strokeWidth={1.5}
 									/>
 								</button>
-								{!boardDrawerVisible && showAllElements && boardData.viewsPanel.buttonsBelt ? (
+								{!boardDrawerVisible && boardData.viewsPanel.buttonsBelt ? (
 									<div className="viewSwitcherBar" ref={leftHeaderSecRef}>
 										{boardData.views.map((view, index) => (
 											<button
@@ -1145,7 +1151,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 									<div className="mobileBoardHeader">
 										<div
 											ref={viewDropdownRef}
-											className={`taskBoardViewDropdown ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+											className={`taskBoardViewDropdown`}
 											onClick={() => {
 												setShowViewDropdown(!showViewDropdown);
 											}}
@@ -1162,7 +1168,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 											</div>
 
 											{/* Custom Dropdown Menu */}
-											<div className={`taskBoardViewDropdownMenu ${showViewDropdown ? 'taskBoardViewDropdownMenu--open' : ''}`}>
+											<div className={`taskBoardViewDropdownMenu`}>
 												{boardData.views.map((view, index) => (
 													<div
 														key={`${view.viewId}-${index}`}
@@ -1257,7 +1263,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 								openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
 									// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
 									setCurrentBoardData(updatedBoard);
-									debugger;
 
 									setTimeout(() => {
 										eventEmitter.emit("REFRESH_BOARD");
