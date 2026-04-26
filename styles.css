@@ -14,7 +14,9 @@
 	padding-inline: 5px !important;
 }
 
-/* modals */
+/* ------------------------------------------------------- */
+/*              All Modals Container settings              */
+/* ------------------------------------------------------- */
 
 .modal-close-button {
 	z-index: 20;
@@ -38,9 +40,9 @@
 	min-width: fit-content;
 }
 
-.modal-container[modal-type='task-board-edit-task'] {
-	justify-content: flex-end;
-}
+/* ------------------------------------------------------- */
+/*                The Task Board Config Modal              */
+/* ------------------------------------------------------- */
 
 @keyframes slideInRightModal {
 	from {
@@ -64,6 +66,10 @@
 		transform: translateX(100%);
 		opacity: 0.2;
 	}
+}
+
+.modal-container[modal-type='task-board-edit-task'] {
+	justify-content: flex-end;
 }
 
 .modal[modal-type="task-board-edit-task"] {
@@ -86,10 +92,30 @@
 	height: 95%;
 }
 
+@media screen and (max-width: 768px) {
+	.modal[modal-type="task-board-edit-task"] {
+		width: 100vw;
+		max-width: 100vw;
+		min-width: 100vw;
+		overflow: auto;
+		min-height: fit-content;
+		max-height: 80vh;
+	}
+}
+
+/* ------------------------------------------------------- */
+/*                The Task Board Config Modal              */
+/* ------------------------------------------------------- */
+
 .modal[modal-type="task-board-config"] {
-	width: auto;
-	max-width: none;
-	min-height: auto;
+	width: var(--dialog-max-width);
+	max-width: var(--dialog-max-width);
+	height: var(--dialog-max-height);
+	min-height: var(--dialog-max-height);
+}
+
+.modal[modal-type="task-board-config"] .modal-content {
+	height: 98%;
 }
 
 .is-phone .modal[modal-type="task-board-config"] {
@@ -101,59 +127,19 @@
 	max-height: 80vh;
 }
 
-.modal[modal-type="task-board-edit-task"] {
-	width: 75vw;
-	max-width: 1100px;
-	height: 100%;
-	min-height: 92%;
-	border-radius: var(--modal-radius) 0 0 var(--modal-radius);
-	/* Animation for sliding in */
-	animation: slideInRightModal 0.35s cubic-bezier(0.4, 0.2, 0.2, 1) both;
-}
-
-@keyframes slideInRightModal {
-	from {
-		transform: translateX(100%);
-		opacity: 0.2;
-	}
-
-	to {
-		transform: translateX(0);
-		opacity: 1;
-	}
-}
-
-@keyframes slideOutRightModal {
-	from {
-		transform: translateX(0);
-		opacity: 1;
-	}
-
-	to {
-		transform: translateX(100%);
-		opacity: 0.2;
-	}
-}
-
-/* To animate sliding out, add a class like .slide-out to the modal when closing */
-.modal[modal-type="task-board-edit-task"].slide-out {
-	animation: slideOutRightModal 0.3s cubic-bezier(0.4, 0.2, 0.2, 1) both;
-}
-
 @media screen and (max-width: 768px) {
-
-	.modal[modal-type="task-board-edit-task"],
 	.modal[modal-type="task-board-config"] {
 		width: 100vw;
 		max-width: 100vw;
 		min-width: 100vw;
 		overflow: auto;
 		min-height: fit-content;
-		max-height: 80vh;
 	}
 }
 
-/* src/TaskBoardView.tsx */
+/* ------------------------------------------------------- */
+/*                   /src/TaskBoardView.tsx                */
+/* ------------------------------------------------------- */
 
 .task-board-ribbon-class {
 	color: var(--color-orange);
@@ -166,6 +152,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 /* // src/components/TaskBoardViewContainer.tsx*/
+.taskBoardViewContainer.noViews {
+	width: 100%;
+	height: 100%;
+}
+
+
 .taskBoardView {
 	display: flex;
 	flex-direction: row;
@@ -189,16 +181,38 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskBoardHeader {
 	display: flex;
+	align-items: center;
+	/* Vertically center items */
 	justify-content: space-between;
 	padding: 4px;
 	padding-block-end: 8px;
 	border-bottom: 1px solid var(--text-normal);
 	flex-shrink: 0;
+	min-width: 0;
+	/* Allow flex container to shrink below content */
 }
 
 .taskBoardHeaderLeftSec {
 	display: flex;
 	flex-direction: row;
+	flex: 1;
+	/* Take all remaining space */
+	min-width: 0;
+}
+
+.taskBoardHeaderRightSec {
+	display: flex;
+	flex-direction: row;
+	flex-shrink: 0;
+	/* CRITICAL: Prevent right section from shrinking */
+	margin-inline-start: 8px;
+	align-items: center;
+	white-space: nowrap;
+	/* Prevent content wrapping */
+}
+
+.taskBoardHeaderRightSec .is-mobile input[type='text'] {
+	min-width: 14rem;
 }
 
 .taskBoardHeaderPluginIcon {
@@ -212,37 +226,85 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: row;
 	gap: 0.5em;
 	overflow: auto;
-	margin-left: 35px;
+	position: relative;
+	background: transparent !important;
+	border-radius: var(--radius-s);
+	/* border: var(--border-width) solid var(--tab-outline-color); */
+	gap: 5px;
+
+	/* CRITICAL: Allows flex item to shrink and scroll */
+	overflow-x: auto;
+	/* Enable horizontal scrolling */
+	overflow-y: hidden;
+	/* Prevent vertical scroll */
+
+	/* Hide scrollbar - Chrome/Safari/Opera */
+	&::-webkit-scrollbar {
+		display: none;
+		height: 0;
+		width: 0;
+	}
+
+	/* Hide scrollbar - Firefox */
+	scrollbar-width: none;
+
+	/* Hide scrollbar - IE/Edge */
+	-ms-overflow-style: none;
+
+	/* Smooth scrolling experience */
+	scroll-behavior: smooth;
+
+	/* Prevent content from being cut off during scroll */
+	padding-inline-end: 4px;
+}
+
+.viewSwitcherBar::before,
+.viewSwitcherBar::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 20px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	z-index: 1;
+}
+
+.viewSwitcherBar::before {
+	left: 0;
+	background: linear-gradient(to right, var(--background-primary), transparent);
+}
+
+.viewSwitcherBar::after {
+	right: 0;
+	background: linear-gradient(to left, var(--background-primary), transparent);
+}
+
+.viewSwitcherBar.can-scroll-left::before,
+.viewSwitcherBar.can-scroll-right::after {
+	opacity: 1;
 }
 
 .viewTitleButton {
-	background: transparent !important;
+	flex-shrink: 0;
+	white-space: nowrap;
+	background-color: transparent !important;
+	background: none;
+	padding-inline: 7px;
+	padding-block: 2px !important;
+	color: var(--icon-color) !important;
 	border-radius: var(--radius-s);
-	cursor: pointer;
-	border: var(--border-width) solid var(--tab-outline-color);
-	padding-inline: 8px;
-	gap: 5px;
+	padding-inline: 6px;
+	gap: 4px;
 }
 
-.viewTitleButtonActive {
-	box-shadow: var(--embed-block-shadow-hover) !important;
+.viewTitleButton.Active {
+	color: var(--text-color) !important;
 	background: var(--background-secondary-alt) !important;
-	border-radius: var(--radius-s);
-	border: var(--border-width) solid var(--interactive-accent);
+	/* border: var(--border-width) solid var(--interactive-accent); */
 	padding-inline: 8px;
 	gap: 5px;
-}
-
-.taskBoardHeaderRightSec {
-	display: flex;
-	flex-direction: row;
-	margin-inline-start: 8px;
-	align-content: center;
-	align-items: center;
-}
-
-.taskBoardHeaderRightSec .is-mobile input[type='text'] {
-	min-width: 14rem;
 }
 
 .taskCountContainer {
@@ -315,12 +377,20 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	background-color: transparent !important;
 	background: none;
 	padding: 7px;
-	margin-inline: 0.3em;
-	/* color: #fff; */
-	/* border: none; */
-	/* border-radius: 3px; */
+	margin-inline: 0.1em;
 	cursor: pointer;
-	/* font-size: 14px; */
+	border: none !important;
+	box-shadow: none !important;
+	-webkit-app-region: no-drag;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--size-2-2) var(--size-2-3);
+	cursor: var(--cursor);
+	border-radius: var(--clickable-icon-radius);
+	color: var(--icon-color) !important;
+	height: auto;
+	-electron-corner-smoothing: var(--corner-smoothing);
 }
 
 .RefreshBtn.needrefresh {
@@ -336,10 +406,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .RefreshBtn:hover,
 .taskBoardViewHeaderOptionsBtn:hover,
 .taskboardActionshBtn:hover,
-.taskBoardViewDropdown:hover,
 .boardsExplorerModalButton:hover {
-	/* border: var(--border-width) solid olive; */
-	box-shadow: 0px 0px 1px 1px var(--color-accent);
+	box-shadow: none !important;
+	color: var(--icon-color-hover) !important;
+	background-color: var(--background-modifier-hover) !important;
 }
 
 .taskBoardMapViewSaveIcon {
@@ -348,26 +418,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskBoardMapViewSaveIcon.red {
 	color: red !important;
-}
-
-.taskBoardViewDropdown {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
-	gap: 4px;
-	border-radius: 5px;
-	padding-inline: 4px;
-	min-height: 100%;
-	box-shadow: 0px 0px 1px 1px var(--text-faint);
-	background: var(--background-modifier-border);
-	min-width: 80px;
-}
-
-.taskBoardViewDropdownIcon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
 }
 
 .taskBoardViewHeaderHideElements {
@@ -403,6 +453,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .boardSidebarDrawer--closed {
 	width: 0;
+	border-right: none;
 }
 
 /* Resizable Separator */
@@ -920,7 +971,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemTitle {
 	padding: 0;
 	padding-inline-start: 0.4em;
-	font-weight: 500;
+	/* font-weight: 500; */
 	font-size: 0.88rem;
 	word-wrap: break-word;
 	word-break: break-word;
@@ -1292,7 +1343,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-inline: 6px;
 	border: 1px solid var(--background-modifier-border-focus);
 	padding-block: 2px;
-	color: var(--icon-color);
+	color: var(--icon-color) !important;
 	border-radius: var(--pill-radius);
 	opacity: 75%;
 	flex-direction: row;
@@ -2220,7 +2271,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .boardConfigModalHome {
 	display: flex;
 	flex-direction: row;
-	height: auto;
+	height: 100%;
 	/* max-height: 90vh; */
 	overflow-y: auto;
 }
@@ -2250,8 +2301,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	position: sticky;
 	top: 0;
 	overflow: hidden;
-	min-width: 180px;
-	max-width: 220px;
+	width: 200px;
+	min-width: 200px;
 	gap: .5em;
 	transition: transform 0.3s ease-in-out;
 }
@@ -2262,6 +2313,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	width: 100%;
 	flex-direction: column;
 	align-items: flex-start;
+	overflow: auto;
 }
 
 .boardConfigModalSidebarBtnArea hr {
@@ -2275,10 +2327,12 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .boardConfigModalSidebarBtnAreaGlobal {
 	padding: 8px;
-	border: 1px solid #ddd;
+	border: 1px solid var(--text-faint);
 	border-radius: 4px;
 	align-self: center;
 	cursor: pointer;
+	width: 100%;
+	text-align: center;
 }
 
 .boardConfigModalSidebarBtnAreaBoardBtnsSection {
@@ -2346,22 +2400,36 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex: 1;
 	padding-left: 1em;
 	/* overflow-y: auto; */
-	max-width: 50vw;
+	/* max-width: 50vw; */
 	width: -webkit-fill-available;
 	max-height: calc(var(--dialog-max-height) - 6vh);
+}
+
+.boardConfigTab {
+	height: 100%;
 }
 
 .boardConfigModalSidebarToggleBtn {
 	display: none;
 }
 
-.boardConfigModalMainContentBoardSettingTab,
+.boardConfigModalMainContentBoardSettingTab {
+	/* max-width: 50vw; */
+	height: 100%;
+}
+
 .pluginGlobalSettingsTab {
-	max-width: 50vw;
-	margin-inline-start: 1em;
+	max-width: fit-content;
 }
 
 .boardConfigModalMainContent-Active {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100%;
+}
+
+.boardConfigModalMainContent-Active-TopSec {
 	display: flex;
 	flex-direction: column;
 }
@@ -2401,6 +2469,13 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	line-height: var(--line-height-tight);
 }
 
+.boardConfigModalSettingDescriptionTextArea {
+	width: 20rem;
+	min-width: 200px;
+	height: 5rem;
+	min-height: 100px;
+}
+
 .boardConfigModalMainContent-Active-BodyColumnSec {
 	display: flex;
 	flex-direction: column;
@@ -2410,6 +2485,17 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .boardConfigModalMainContent-Active-BodyColumnsList {
 	display: flex;
 	flex-direction: column;
+}
+
+.boardConfigModalNoViewSelected {
+	padding: 5rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	width: 100%;
+	height: 100%;
 }
 
 .boardConfigModalColumnRow {
@@ -2509,6 +2595,11 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: white;
 }
 
+.boardConfigModalMainContent-Active-BottomSec {
+	display: flex;
+	flex-direction: column;
+}
+
 .boardConfigModalDoubleBtnContainer {
 	display: flex;
 	gap: .5em;
@@ -2543,9 +2634,10 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	.boardConfigModalHome {
 		/* flex-direction: column; */
 		/* width: 100vw; */
-		padding-top: 1em;
+		/* padding-top: 1em; */
 		overflow: auto;
-		max-height: 80vh;
+		max-height: calc(80vh - 60px);
+		padding-bottom: 1rem;
 	}
 
 	/* Hide sidebar by default */
@@ -2572,6 +2664,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	.pluginGlobalSettingsTab {
 		max-width: 95vw !important;
 		overflow: auto;
+		height: 100%;
 	}
 
 	/* Show when toggled */
@@ -2615,11 +2708,14 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	}
 
 	.boardConfigModalDeleteBoardBtn {
-		background-color: darkred !important;
-		color: white !important;
 		max-width: 50%;
 		align-self: end;
 		margin-bottom: 1.5em;
+	}
+
+	.boardConfigModalDeleteBoardBtn:hover {
+		background-color: darkred !important;
+		color: white !important;
 	}
 
 	.boardConfigModalSidebarSaveBtn {
@@ -5442,6 +5538,129 @@ svg.react-flow__connectionline {
 	flex: 1;
 }
 
+.taskBoarHeaderLeftSecDrawerBtn {
+	background-color: transparent !important;
+	background: none;
+	padding: 7px;
+	color: var(--text-faint) !important;
+	cursor: pointer;
+	box-shadow: none !important;
+}
+
+.taskBoardViewDropdown {
+	position: relative;
+}
+
+.taskBoardViewDropdownBtn {
+	display: flex;
+	align-content: center;
+	align-items: center;
+	flex-direction: row;
+	gap: 2px;
+}
+
+.taskBoardHeaderLeftSecViewsDropdownIcon {
+	display: none;
+}
+
+.taskBoardHeader:hover .taskBoardHeaderLeftSecViewsDropdownIcon {
+	display: block;
+}
+
+/* Custom Dropdown Menu Styles */
+@keyframes dropdownSlideIn {
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scaleY(0.95);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+	}
+}
+
+@keyframes dropdownSlideOut {
+	from {
+		opacity: 1;
+		transform: translateY(0) scaleY(1);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(-8px) scaleY(0.95);
+	}
+}
+
+.taskBoardViewDropdownMenu {
+	position: absolute;
+	top: 100%;
+	width: max-content;
+	min-width: 100%;
+	margin-top: 6px;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+	z-index: 1000;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-8px) scaleY(0.95);
+	transform-origin: top center;
+	transition: opacity 0.25s cubic-bezier(0.4, 0.2, 0.2, 1),
+		visibility 0.25s cubic-bezier(0.4, 0.2, 0.2, 1),
+		transform 0.25s cubic-bezier(0.4, 0.2, 0.2, 1);
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.taskBoardViewDropdownMenu--open {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0) scaleY(1);
+	pointer-events: auto;
+	animation: dropdownSlideIn 0.25s cubic-bezier(0.4, 0.2, 0.2, 1) forwards;
+}
+
+.taskBoardViewDropdownItem {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 8px 6px;
+	cursor: pointer;
+	transition: background-color 0.15s ease,
+		color 0.15s ease;
+	color: var(--text-normal);
+	font-size: 0.8rem;
+	user-select: none;
+	position: relative;
+}
+
+.taskBoardViewDropdownItem:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-accent);
+}
+
+.taskBoardViewDropdownItem:active {
+	background-color: var(--background-modifier-active);
+}
+
+.taskBoardViewDropdownItem--active {
+	background-color: var(--background-modifier-active);
+	color: var(--text-accent);
+}
+
+.taskBoardViewDropdownItem--active::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 3px;
+	background: var(--color-accent);
+	border-radius: 0 2px 2px 0;
+}
+
 .hamburgerMenuButton {
 	align-items: center;
 	padding: 8px 12px;
@@ -5508,12 +5727,21 @@ svg.react-flow__connectionline {
 	border-radius: 10px;
 }
 
-.boardSidebarBoardHeader h3 {
+.boardSidebarHeaderBoardName {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-content: center;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 0.5rem;
+}
+
+.boardSidebarHeaderBoardName h3 {
 	margin: 0;
 	font-size: var(--font-text-size);
 	color: var(--text-normal);
 	font-weight: 600;
-	margin-left: 25px;
 }
 
 .boardSidebarBoardHeader p {
@@ -8448,4 +8676,115 @@ li[data-task=b]>p>input:checked {
 .migration-terminal::-webkit-scrollbar-thumb:hover,
 .migration-modal-content::-webkit-scrollbar-thumb:hover {
 	background-color: var(--scrollbar-thin-thumb-hover);
+}
+
+/* ========================================
+   Add View Modal - Obsidian Native Styling
+   ======================================== */
+
+/* Main modal content container */
+.addViewModalOverlayContent {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-4);
+	/* 16px - Obsidian spacing scale */
+	padding: var(--size-4-3);
+	/* 12px */
+	min-width: 320px;
+	max-width: 480px;
+	margin: 0 auto;
+}
+
+/* Action buttons container */
+.addViewModalOverlayContentActions {
+	display: flex;
+	justify-content: flex-end;
+	/* Align buttons to right */
+	gap: var(--size-4-2);
+	/* 8px between buttons */
+	margin-top: var(--size-4-4);
+	/* 16px top margin */
+	padding-top: var(--size-4-3);
+	/* 12px */
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Base button styling */
+.addViewModalOverlayContentActions button {
+	padding: var(--size-4-2) var(--size-4-5);
+	/* 8px vertical, 20px horizontal */
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
+	border-radius: var(--radius-s);
+	cursor: pointer;
+	transition: background-color 0.15s ease, transform 0.05s ease;
+	border: 1px solid var(--background-modifier-border);
+	background-color: var(--background-modifier-form-field);
+	color: var(--text-normal);
+}
+
+/* Hover state */
+.addViewModalOverlayContentActions button:hover {
+	background-color: var(--background-modifier-hover);
+	border-color: var(--background-modifier-border-hover);
+}
+
+/* Active/click state */
+.addViewModalOverlayContentActions button:active {
+	transform: scale(0.98);
+}
+
+/* Primary/CTA button (mod-cta class) */
+.addViewModalOverlayContentActions button.mod-cta {
+	background-color: var(--interactive-accent);
+	border-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.addViewModalOverlayContentActions button.mod-cta:hover {
+	background-color: var(--interactive-accent-hover);
+	border-color: var(--interactive-accent-hover);
+}
+
+.addViewModalOverlayContentActions button.mod-cta:active {
+	background-color: var(--interactive-accent);
+}
+
+/* Cancel button specific styling (secondary) */
+.addViewModalOverlayContentActions button:not(.mod-cta) {
+	background-color: var(--background-secondary);
+}
+
+/* Focus visible for accessibility */
+.addViewModalOverlayContentActions button:focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+/* Responsive: Stack buttons on very small screens */
+@media (max-width: 400px) {
+	.addViewModalOverlayContentActions {
+		flex-direction: column-reverse;
+	}
+
+	.addViewModalOverlayContentActions button {
+		width: 100%;
+	}
+}
+
+/* Optional: Animation for modal content */
+.addViewModalOverlayContent {
+	animation: modalFadeIn 0.15s ease-out;
+}
+
+@keyframes modalFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }

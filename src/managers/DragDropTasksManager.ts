@@ -10,8 +10,14 @@ import { openDateInputModal } from "../services/OpenModals.js";
 import { getAllDatesInRelativeRange } from "../utils/DateTimeCalculations.js";
 import { sanitizeStatus } from "../utils/taskLine/TaskContentFormatter.js";
 import { updateTaskInFile } from "../utils/taskLine/TaskLineUtils.js";
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../utils/taskNote/TaskNoteUtils.js";
-import { updateTaskItemTags, updateTaskItemProperty } from "../utils/UserTaskEvents.js";
+import {
+	isTaskNotePresentInTags,
+	updateFrontmatterInMarkdownFile,
+} from "../utils/taskNote/TaskNoteUtils.js";
+import {
+	updateTaskItemTags,
+	updateTaskItemProperty,
+} from "../utils/UserTaskEvents.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 
 export interface currentDragDataPayload {
@@ -19,6 +25,7 @@ export interface currentDragDataPayload {
 	taskIndex: string;
 	sourceColumnData: ColumnData;
 	currentViewIndex: number;
+	currentBoardID: string;
 	swimlaneData: swimlaneDataProp | undefined;
 }
 
@@ -445,7 +452,8 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("../utils/UserTaskEvents.js");
+		const { updateTaskItemDate } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -684,7 +692,8 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("../utils/UserTaskEvents.js");
+		const { updateTaskItemDate } =
+			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -1007,6 +1016,8 @@ class DragDropTasksManager {
 	 * @param task The task being moved
 	 * @param targetColumnData The column data with manualOrder sorting
 	 * @param desiredIndex The desired index to insert the task at
+	 * 
+	 * @todo - Need optimization
 	 */
 	handleTasksOrderChange = async (
 		plugin: TaskBoard,
@@ -1024,33 +1035,38 @@ class DragDropTasksManager {
 			return; // If not manualOrder sorting, exit
 
 		const task = currentDragData.task;
+		let updatedTargetColumnData: ColumnData = targetColumnData;
 
 		// Ensure manual order array exists
 		if (!targetColumnData.tasksIdManualOrder) {
-			targetColumnData.tasksIdManualOrder = [];
+			updatedTargetColumnData.tasksIdManualOrder = [];
 		}
 
 		// Remove any existing occurrence of the task id
-		targetColumnData.tasksIdManualOrder =
-			targetColumnData.tasksIdManualOrder.filter((id) => id !== task.id);
+		updatedTargetColumnData.tasksIdManualOrder =
+			updatedTargetColumnData.tasksIdManualOrder!.filter(
+				(id) => id !== task.id,
+			);
 
 		// Insert at desired index or push to end
 		if (
 			typeof desiredIndex === "number" &&
 			desiredIndex >= 0 &&
-			desiredIndex <= targetColumnData.tasksIdManualOrder.length
+			desiredIndex <= updatedTargetColumnData.tasksIdManualOrder.length
 		) {
-			targetColumnData.tasksIdManualOrder.splice(
+			updatedTargetColumnData.tasksIdManualOrder.splice(
 				desiredIndex,
 				0,
 				task.id,
 			);
 		} else {
-			targetColumnData.tasksIdManualOrder.push(task.id);
+			updatedTargetColumnData.tasksIdManualOrder.push(task.id);
 		}
 
 		let newBoardData =
-			await this.plugin?.taskBoardFileManager.getCurrentBoardData();
+			await this.plugin?.taskBoardFileManager.loadBoardUsingID(
+				currentDragData.currentBoardID,
+			);
 
 		if (!newBoardData) {
 			throw "Board data not found";
@@ -1058,10 +1074,10 @@ class DragDropTasksManager {
 
 		newBoardData.views[
 			currentDragData.currentViewIndex
-		].kanbanView!.columns[targetColumnData.index - 1] = targetColumnData;
+		].kanbanView!.columns[targetColumnData.index - 1] =
+			updatedTargetColumnData;
 
-		// Persist settings and refresh the board
-		// plugin.saveSettings(newSettings);
+		plugin.taskBoardFileManager.saveBoard(newBoardData);
 	};
 
 	/**

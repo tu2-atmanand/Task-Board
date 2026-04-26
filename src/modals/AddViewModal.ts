@@ -1,7 +1,7 @@
 // /src/modals/AddViewModal.ts
 
 import { t } from "i18next";
-import { App, Modal } from "obsidian";
+import { App, Modal, Setting } from "obsidian";
 import { Board } from "../interfaces/BoardConfigs.js";
 import { viewTypeNames } from "../interfaces/Enums.js";
 import { addViewToBoard } from "../utils/ViewUtils.js";
@@ -38,65 +38,38 @@ export class AddViewModal extends Modal {
 		this.modalEl.setAttribute("data-type", "task-board-view");
 		contentEl.setAttribute("data-type", "task-board-view");
 
+		this.setTitle(t("add-view"));
+
 		const modalContent = contentEl.createDiv({
 			cls: "addViewModalOverlayContent",
 		});
 
-		// Header
-		modalContent.createEl("h2", { text: t("add-view") });
+		new Setting(modalContent)
+			.setName(t("view-type"))
+			.setDesc(t("view-type-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[viewTypeNames.kanban]: t(viewTypeNames.kanban),
+						[viewTypeNames.map]: t(viewTypeNames.map),
+					})
+					.setValue(this.viewType)
+					.onChange(async (value) => {
+						this.viewType = value;
+					}),
+			);
 
-		// View Name Field
-		const nameField = modalContent.createDiv({
-			cls: "addViewModalOverlayContentField",
-		});
-		nameField.createEl("label", {
-			attr: { for: "viewName" },
-			text: t("view-name"),
-		});
-		const nameInput = nameField.createEl("input", {
-			attr: {
-				type: "text",
-				id: "viewName",
-				placeholder: t("enter-view-name"),
-			},
-		});
-		nameInput.addEventListener("input", (event: Event) => {
-			const target = event.target as HTMLInputElement;
-			this.viewName = target.value;
-		});
-
-		// View Type Field
-		const viewTypeField = modalContent.createDiv({
-			cls: "addViewModalOverlayContentField",
-		});
-		viewTypeField.createEl("label", {
-			attr: { for: "viewType" },
-			text: t("view-type"),
-		});
-		const viewTypeSelect = viewTypeField.createEl("select", {
-			attr: { id: "viewType" },
-		});
-
-		[
-			{
-				value: viewTypeNames.kanban,
-				text: t("kanban-view"),
-			},
-			{
-				value: viewTypeNames.map,
-				text: t("map-view"),
-			},
-		].forEach((option) => {
-			viewTypeSelect.createEl("option", {
-				attr: { value: option.value },
-				text: option.text,
-			});
-		});
-
-		viewTypeSelect.addEventListener("change", (event: Event) => {
-			const target = event.target as HTMLSelectElement;
-			this.viewType = target.value;
-		});
+		new Setting(modalContent)
+			.setName(t("view-name"))
+			.setDesc(t("view-name-info"))
+			.addText((text) =>
+				text
+					.setValue(this.viewName)
+					.onChange(async (value) => {
+						this.viewName = value;
+					})
+					.setPlaceholder(t("enter-view-name")),
+			);
 
 		// Action Buttons
 		const actions = modalContent.createDiv({
@@ -114,11 +87,6 @@ export class AddViewModal extends Modal {
 			cls: "mod-cta",
 		});
 		submitButton.addEventListener("click", () => {
-			if (!this.viewName.trim()) {
-				alert(t("please-enter-view-name"));
-				return;
-			}
-
 			let updatedBoard = addViewToBoard(
 				this.boardData,
 				this.viewType,
@@ -127,22 +95,6 @@ export class AddViewModal extends Modal {
 
 			this.onSubmit(updatedBoard);
 			this.close();
-		});
-
-		// Set focus on name input
-		setTimeout(() => {
-			nameInput.focus();
-		}, 100);
-
-		// Handle Enter key to submit
-		nameInput.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") {
-				e.preventDefault();
-				submitButton.click();
-			} else if (e.key === "Escape") {
-				e.preventDefault();
-				cancelButton.click();
-			}
 		});
 	}
 

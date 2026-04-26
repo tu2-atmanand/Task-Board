@@ -1,5 +1,10 @@
-import { viewTypeNames, colTypeNames, HeaderUITypeOptions, defaultTaskStatuses, viewsPanelPropertiesToShow } from "./Enums.js";
-
+import {
+	viewTypeNames,
+	colTypeNames,
+	HeaderUITypeOptions,
+	defaultTaskStatuses,
+	viewsPanelPropertiesToShow,
+} from "./Enums.js";
 
 export interface columnSortingCriteria {
 	criteria:
@@ -193,6 +198,7 @@ export type Board = {
 		isOpen: boolean;
 		width: number;
 		propertiesToShow: string[];
+		buttonsBelt: boolean;
 	};
 
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
@@ -498,5 +504,6 @@ export const DEFAULT_BOARD: Board = {
 			viewsPanelPropertiesToShow.Title,
 			viewsPanelPropertiesToShow.Description,
 		],
+		buttonsBelt: true,
 	},
 };

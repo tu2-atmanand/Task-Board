@@ -7,18 +7,13 @@
 - **Operating system**: Windows 10 Home Single Language 10.0.19045
 - **Use [[Wikilinks]]**: true
 - **Base color scheme**: dark
-- **Community theme**: Blue Topaz v2024121301
-- **Snippets enabled**: 2
-- **Plugins installed**: 53
+- **Community theme**: none
+- **Snippets enabled**: 0
+- **Plugins installed**: 54
 - **Plugins enabled**: 
   - Plugin Reloader v0.0.3
-  - Advanced Debug Mode v1.9.1
-  - Task Board v1.9.4
+  - Task Board v2.0.0-beta-1
   - BRAT v1.4.0
-  - Tasks v7.22.0
-  - Hover Editor v0.11.28
-  - Excalidraw v2.18.3
-  - Calendar v1.5.10
 
 ## Recent Bug Reports
 
@@ -74,33 +69,163 @@ undefined
 
 -------------
 
-Timestamp : 2026-03-20T09:07:59
+Timestamp : undefined
 ID : 185
-Message : There was an issue with opening the last viewed board by user
+Message : undefined
 Context : undefined
-Version : 1.9.5
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-lastViewedBoardData is undefined
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-03-20T10:09:00
+Timestamp : undefined
 ID : 7
-Message : 
+Message : undefined
 Context : undefined
-Version : 2.0.0-beta-1
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-TypeError: Cannot read properties of undefined (reading 'showColumnTags')
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-03-20T10:09:59
+Timestamp : undefined
+ID : 141
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 142
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 185
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 185
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 187
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 185
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 7
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 7
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 141
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 7
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : 2026-04-25T16:16:19
 ID : 141
 Message : 
 Context : undefined
@@ -114,7 +239,7 @@ SourceColumn=null
 
 -------------
 
-Timestamp : 2026-03-20T10:10:00
+Timestamp : 2026-04-25T16:16:20
 ID : 142
 Message : 
 Context : undefined
@@ -127,105 +252,13 @@ No current drag data available for drop operation.currentDragData=null
 
 -------------
 
-Timestamp : 2026-03-20T20:59:39
-ID : 185
-Message : There was an issue with opening the last viewed board by user
-Context : undefined
-Version : 2.0.0-beta-1
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-03-20T21:30:39
-ID : 185
-Message : There was an issue with opening the last viewed board by user
-Context : undefined
-Version : 2.0.0-beta-1
-
-#### Bug Content
-```log
-lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-03-20T21:46:20
-ID : 187
-Message : Failed to create template board
-Context : undefined
-Version : 2.0.0-beta-1
-
-#### Bug Content
-```log
-saveBoardToDisk returned false
-```
-
--------------
-
-Timestamp : 2026-03-21T18:25:51
-ID : 185
+Timestamp : 2026-04-25T21:56:58
+ID : 142
 Message : 
-Context : undefined
+Context : DragDropTasksManager.ts/handleDropEvent
 Version : 2.0.0-beta-1
 
 #### Bug Content
 ```log
-There was an issue with opening the last viewed board. lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-03-21T19:50:13
-ID : 7
-Message : 
-Context : undefined
-Version : 2.0.0-beta-1
-
-#### Bug Content
-```log
-TypeError: Cannot read properties of undefined (reading 'showColumnTags')
-```
-
--------------
-
-Timestamp : 2026-03-21T21:39:08
-ID : 7
-Message : 
-Context : undefined
-Version : 2.0.0-beta-1
-
-#### Bug Content
-```log
-TypeError: Cannot read properties of undefined (reading 'showColumnTags')
-```
-
--------------
-
-Timestamp : 2026-03-22T22:03:08
-ID : 141
-Message : 
-Context : undefined
-Version : 2.0.0-beta-1
-
-#### Bug Content
-```log
-No source column data available for dragover.
-SourceColumn=null
-```
-
--------------
-
-Timestamp : 2026-03-25T18:59:17
-ID : 7
-Message : 
-Context : TaskItem.tsx/renderHeader
-Version : 2.0.0-beta-1
-
-#### Bug Content
-```log
-TypeError: Cannot read properties of undefined (reading 'showColumnTags')
+No current drag data available for drop operation.currentDragData=null
 ```

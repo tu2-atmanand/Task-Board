@@ -12,22 +12,34 @@ import {
 } from "obsidian";
 import Sortable from "sortablejs";
 import TaskBoard from "../../../main.js";
-import { RootFilterState, FilterGroup, Filter, SavedFilterConfig } from "../../interfaces/BoardConfigs.js";
-import { PluginDataJson } from "../../interfaces/GlobalSettings.js";
-import { getCustomStatusOptionsForDropdown, statusDropDownOption, getPriorityOptionsForDropdown, priorityDropDownOption } from "../../interfaces/Mapping.js";
+import {
+	RootFilterState,
+	FilterGroup,
+	Filter,
+	SavedFilterConfig,
+} from "../../interfaces/BoardConfigs.js";
+import {
+	getCustomStatusOptionsForDropdown,
+	statusDropDownOption,
+	getPriorityOptionsForDropdown,
+	priorityDropDownOption,
+} from "../../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { MultiSuggest, getTagSuggestions, getFileSuggestions } from "../../services/MultiSuggest.js";
+import {
+	MultiSuggest,
+	getTagSuggestions,
+	getFileSuggestions,
+} from "../../services/MultiSuggest.js";
 import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
-import { FilterConfigModal } from "./LoadSavedFiltersModal.js";
+import { BoardFiltersStoreModal } from "./LoadSavedFiltersModal.js";
 
-export class TaskFilterComponent extends Component {
+export class AdvancedFilterComponent extends Component {
 	private hostEl: HTMLElement;
 	private rootFilterState!: RootFilterState;
 	private plugin: TaskBoard;
 	private app: App;
-	private pluginSettings: PluginDataJson;
+	private currentBoardID: string;
 	private filterGroupsContainerEl!: HTMLElement;
-	private activeBoardIndex?: number;
 
 	// Sortable instances
 	private groupsSortable?: Sortable;
@@ -61,14 +73,14 @@ export class TaskFilterComponent extends Component {
 		hostEl: HTMLElement,
 		plugin: TaskBoard,
 		app: App,
-		private leafId?: string | undefined,
+		currentBoardID: string,
 		private initialFilterState?: RootFilterState,
 	) {
 		super();
 		this.hostEl = hostEl;
 		this.plugin = plugin;
 		this.app = app;
-		this.pluginSettings = plugin.settings;
+		this.currentBoardID = currentBoardID;
 	}
 
 	onload() {
@@ -1543,13 +1555,13 @@ export class TaskFilterComponent extends Component {
 
 	// --- Filter Configuration Management ---
 	private openSaveConfigModal(): void {
-		if (!this.plugin || this.activeBoardIndex === undefined) return;
+		if (!this.plugin) return;
 
-		const modal = new FilterConfigModal(
+		const modal = new BoardFiltersStoreModal(
 			this.app,
 			this.plugin,
 			"save",
-			this.activeBoardIndex,
+			this.currentBoardID,
 			this.getFilterState(),
 			(config: SavedFilterConfig) => {
 				// Optional: Handle successful save
@@ -1566,13 +1578,13 @@ export class TaskFilterComponent extends Component {
 	}
 
 	private openLoadConfigModal(): void {
-		if (!this.plugin || this.activeBoardIndex === undefined) return;
+		if (!this.plugin) return;
 
-		const modal = new FilterConfigModal(
+		const modal = new BoardFiltersStoreModal(
 			this.app,
 			this.plugin,
 			"load",
-			this.activeBoardIndex,
+			this.currentBoardID,
 			undefined,
 			undefined,
 			(config: SavedFilterConfig) => {

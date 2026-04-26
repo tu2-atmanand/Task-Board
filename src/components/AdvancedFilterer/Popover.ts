@@ -1,4 +1,4 @@
-// /src/components/BoardFilters/TaskFilterPopover.ts
+// /src/components/BoardFilters/AdvancedFilterPopover.ts
 
 import { App } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
@@ -7,17 +7,15 @@ import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { RootFilterState } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { TaskFilterComponent } from "./Component.js";
+import { AdvancedFilterComponent } from "./Component.js";
 
-export class TaskFilterPopover
-	extends Component
-	implements CloseableComponent
-{
+export class AdvancedFilterPopover extends Component implements CloseableComponent {
 	private plugin: TaskBoard;
 	private app: App;
-	public popoverRef: HTMLDivElement | null = null;
 	public forColumn: boolean;
-	public taskFilterComponent!: TaskFilterComponent;
+	public currentBoardID: string;
+	public popoverRef: HTMLDivElement | null = null;
+	public taskFilterComponent!: AdvancedFilterComponent;
 	private win: Window;
 	private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
@@ -28,7 +26,7 @@ export class TaskFilterPopover
 	constructor(
 		plugin: TaskBoard,
 		forColumn: boolean,
-		private leafId?: string | undefined,
+		currentBoardID: string,
 		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState,
 	) {
@@ -36,6 +34,7 @@ export class TaskFilterPopover
 		this.plugin = plugin;
 		this.app = plugin.app;
 		this.forColumn = forColumn;
+		this.currentBoardID = currentBoardID;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
 		this.win = plugin.app.workspace.containerEl.win || window;
@@ -82,11 +81,11 @@ export class TaskFilterPopover
 		});
 
 		// Create metadata editor, use compact mode
-		this.taskFilterComponent = new TaskFilterComponent(
+		this.taskFilterComponent = new AdvancedFilterComponent(
 			taskFilterContainer,
 			this.plugin,
 			this.app,
-			this.leafId,
+			this.currentBoardID,
 			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded
@@ -221,7 +220,7 @@ export class TaskFilterPopover
 				bugReporterManagerInsatance.addToLogs(
 					116,
 					String(error),
-					"TaskFilterPopover.ts/close",
+					"AdvancedFilterPopover.ts/close",
 				);
 			}
 		}
@@ -249,7 +248,7 @@ export class TaskFilterPopover
 				bugReporterManagerInsatance.addToLogs(
 					117,
 					String(error),
-					"TaskFilterPopover.ts/close",
+					"AdvancedFilterPopover.ts/close",
 				);
 			}
 		}

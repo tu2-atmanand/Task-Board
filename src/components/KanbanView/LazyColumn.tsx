@@ -15,8 +15,8 @@ import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSorting
 import { eventEmitter } from '../../services/EventEmitter.js';
 import { isRootFilterStateEmpty } from '../../utils/algorithms/AdvancedFilterer.js';
 import { matchTagsWithWildcards } from '../../utils/algorithms/ScanningFilterer.js';
-import { TaskFilterModal } from '../AdvancedFilterer/Modal.js';
-import { TaskFilterPopover } from '../AdvancedFilterer/Popover.js';
+import { AdvancedFilterModal } from '../AdvancedFilterer/index.js';
+import { AdvancedFilterPopover } from '../AdvancedFilterer/Popover.js';
 import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem.js';
 import TaskItemV2 from '../TaskCard/TaskItemV2.js';
 
@@ -317,8 +317,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
-						const filterModal = new TaskFilterModal(
-							plugin, true, undefined, columnData.name, columnData.filters
+						const filterModal = new AdvancedFilterModal(
+							plugin, true, activeBoardData.id, columnData.name, columnData.filters
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
@@ -349,10 +349,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 						// Create and show filter popover
 						// leafId is undefined for column filters (not tied to a specific leaf)
-						const popover = new TaskFilterPopover(
+						const popover = new AdvancedFilterPopover(
 							plugin,
 							true, // forColumn is true
-							undefined,
+							activeBoardData.id,
 							columnData.name,
 							columnData.filters
 						);

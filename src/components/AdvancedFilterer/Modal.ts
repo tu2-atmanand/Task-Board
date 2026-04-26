@@ -3,11 +3,12 @@ import { Modal } from "obsidian";
 import TaskBoard from "../../../main.js";
 import { RootFilterState } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { TaskFilterComponent } from "./Component.js";
+import { AdvancedFilterComponent } from "./Component.js";
 
-export class TaskFilterModal extends Modal {
+export class AdvancedFilterModal extends Modal {
 	private plugin: TaskBoard;
-	public taskFilterComponent: TaskFilterComponent | null;
+	private currentBoardID: string;
+	public taskFilterComponent: AdvancedFilterComponent | null;
 	private columnOrBoardName?: string;
 	private initialFilterState?: RootFilterState;
 	public filterCloseCallback:
@@ -17,12 +18,13 @@ export class TaskFilterModal extends Modal {
 	constructor(
 		plugin: TaskBoard,
 		forColumn: boolean,
-		private leafId?: string,
+		currentBoardID: string,
 		columnOrBoardName?: string,
 		initialFilterState?: RootFilterState,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
+		this.currentBoardID = currentBoardID;
 		this.columnOrBoardName = columnOrBoardName;
 		this.initialFilterState = initialFilterState;
 
@@ -43,11 +45,11 @@ export class TaskFilterModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		this.taskFilterComponent = new TaskFilterComponent(
+		this.taskFilterComponent = new AdvancedFilterComponent(
 			this.contentEl,
 			this.plugin,
 			this.app,
-			this.leafId,
+			this.currentBoardID,
 			this.initialFilterState,
 		);
 		// Ensure the component is properly loaded
@@ -66,7 +68,7 @@ export class TaskFilterModal extends Modal {
 				bugReporterManagerInsatance.addToLogs(
 					114,
 					String(error),
-					"TaskFilterModal.ts/onClose",
+					"AdvancedFilterModal.ts/onClose",
 				);
 			}
 		}
@@ -80,7 +82,7 @@ export class TaskFilterModal extends Modal {
 				bugReporterManagerInsatance.addToLogs(
 					115,
 					String(error),
-					"TaskFilterModal.ts/onClose",
+					"AdvancedFilterModal.ts/onClose",
 				);
 			}
 		}

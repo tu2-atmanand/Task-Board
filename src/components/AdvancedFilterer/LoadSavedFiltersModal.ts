@@ -5,19 +5,19 @@ import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
 import type TaskBoard from "../../../main.js";
 
-export class FilterConfigModal extends Modal {
+export class BoardFiltersStoreModal extends Modal {
 	private plugin: TaskBoard;
 	private mode: "save" | "load";
+	private currentBoardID: string;
 	private currentFilterState?: RootFilterState;
 	private onSave?: (config: SavedFilterConfig) => void;
 	private onLoad?: (config: SavedFilterConfig) => void;
-	private activeBoardIndex: number;
 
 	constructor(
 		app: App,
 		plugin: TaskBoard,
 		mode: "save" | "load",
-		activeBoardIndex: number,
+		currentBoardID: string,
 		currentFilterState?: RootFilterState,
 		onSave?: (config: SavedFilterConfig) => void,
 		onLoad?: (config: SavedFilterConfig) => void,
@@ -25,7 +25,7 @@ export class FilterConfigModal extends Modal {
 		super(app);
 		this.plugin = plugin;
 		this.mode = mode;
-		this.activeBoardIndex = activeBoardIndex;
+		this.currentBoardID = currentBoardID;
 		this.currentFilterState = currentFilterState;
 		this.onSave = onSave;
 		this.onLoad = onLoad;
@@ -94,7 +94,7 @@ export class FilterConfigModal extends Modal {
 		contentEl.createEl("h2", { text: t("load-filter-configuration") });
 
 		const board: Board | null =
-			await this.plugin.taskBoardFileManager.getCurrentBoardData();
+			await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
 		if (board && !board?.filterConfig) {
 			board.filterConfig = {
 				enableSavedFilters: true,
@@ -179,7 +179,7 @@ export class FilterConfigModal extends Modal {
 		if (!configId) return;
 
 		const board =
-			await this.plugin.taskBoardFileManager.getCurrentBoardData();
+			await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
 		if (board && !board.filterConfig) return;
 
 		const config = board!.filterConfig!.savedConfigs.find(
@@ -254,7 +254,7 @@ export class FilterConfigModal extends Modal {
 
 		try {
 			const board =
-				await this.plugin.taskBoardFileManager.getCurrentBoardData();
+				await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
 			if (board && !board.filterConfig) {
 				board.filterConfig = {
 					enableSavedFilters: true,
@@ -273,7 +273,7 @@ export class FilterConfigModal extends Modal {
 			bugReporterManagerInsatance.addToLogs(
 				111,
 				String(error),
-				"FilterConfigModal.ts/saveConfiguration",
+				"BoardFiltersStoreModal.ts/saveConfiguration",
 			);
 			new Notice(t("failed-to-save-filter-configuration"));
 		}
@@ -286,7 +286,7 @@ export class FilterConfigModal extends Modal {
 		}
 
 		const board =
-			await this.plugin.taskBoardFileManager.getCurrentBoardData();
+			await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
 		if (!board || !board.filterConfig) return;
 
 		const config = board.filterConfig.savedConfigs.find(
@@ -308,7 +308,7 @@ export class FilterConfigModal extends Modal {
 			bugReporterManagerInsatance.addToLogs(
 				112,
 				String(error),
-				"FilterConfigModal.ts/loadConfiguration",
+				"BoardFiltersStoreModal.ts/loadConfiguration",
 			);
 			new Notice(t("failed-to-load-filter-configuration"));
 		}
@@ -320,7 +320,7 @@ export class FilterConfigModal extends Modal {
 			return;
 		}
 
-		const board = await this.plugin.taskBoardFileManager.getCurrentBoardData();
+		const board = await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
 		if (!board || !board.filterConfig) return;
 
 		const config = board.filterConfig.savedConfigs.find(
@@ -369,7 +369,7 @@ export class FilterConfigModal extends Modal {
 
 		try {
 			const board =
-				await this.plugin.taskBoardFileManager.getCurrentBoardData();
+				await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
 			if (!board || !board.filterConfig) return;
 
 			board.filterConfig.savedConfigs =
@@ -385,11 +385,11 @@ export class FilterConfigModal extends Modal {
 			this.close();
 
 			// Reopen in load mode to refresh the list
-			const newModal = new FilterConfigModal(
+			const newModal = new BoardFiltersStoreModal(
 				this.app,
 				this.plugin,
 				"load",
-				this.activeBoardIndex,
+				this.currentBoardID,
 				undefined,
 				this.onSave,
 				this.onLoad,
@@ -399,7 +399,7 @@ export class FilterConfigModal extends Modal {
 			bugReporterManagerInsatance.addToLogs(
 				113,
 				String(error),
-				"FilterConfigModal.ts/deleteConfiguration",
+				"BoardFiltersStoreModal.ts/deleteConfiguration",
 			);
 			new Notice(t("failed-to-delete-filter-configuration"));
 		}

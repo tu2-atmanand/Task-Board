@@ -326,7 +326,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				setAllViewsData(updatedViewsData);
 				setIsEdited(true);
 			},
-			() => {}
+			() => { }
 		);
 
 		swimlaneModal.open();
@@ -388,8 +388,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			app,
 			mssg,
 			onConfirm: () => {
-				new Notice('NOT IMPLEMENTED');
-
 				if (selectedViewIndex !== -1) {
 					const updatedViewsData = [...allViewsData];
 					updatedViewsData.splice(selectedViewIndex, 1);
@@ -469,10 +467,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		boardToSave.views = allViewsData;
 
 		if (boardToSave) {
-			const filePath = plugin.taskBoardFileManager.getBoardFilepathFromRegistry(boardToSave.id);
-			if (filePath) {
-				await plugin.taskBoardFileManager.saveBoard(boardToSave, filePath);
-			}
+			await plugin.taskBoardFileManager.saveBoard(boardToSave);
 		}
 
 		// Find and return the updated current view data
@@ -560,49 +555,53 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		return (
 			<div className="boardConfigTab">
 				<div className="boardConfigModalMainContent-Active">
-					<h2 className="boardConfigModalMainContent-Active-Heading">{activeBoardData.name} {t("configurations")}</h2>
-					<hr className="boardConfigModalHr-50" />
-					<div className="boardConfigModalMainContent-Active-Body">
-						<div className="boardConfigModalMainContent-Active-Body-InputItems">
-							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-								<div className="boardConfigModalSettingName">{t("view-name")}</div>
-								<div className="boardConfigModalSettingDescription">{t("view-name-info")}</div>
+					<div className="boardConfigModalMainContent-Active-TopSec">
+						<h2 className="boardConfigModalMainContent-Active-Heading">{activeBoardData.name} {t("configurations")}</h2>
+						<hr className="boardConfigModalHr-50" />
+						<div className="boardConfigModalMainContent-Active-Body">
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+									<div className="boardConfigModalSettingName">{t("view-name")}</div>
+									<div className="boardConfigModalSettingDescription">{t("view-name-info")}</div>
+								</div>
+								<input
+									type="text"
+									value={activeBoardData.name || ""}
+									onChange={(e) => {
+										setActiveBoardData({
+											...activeBoardData,
+											name: e.target.value,
+										});
+										setIsEdited(true);
+									}}
+								/>
 							</div>
-							<input
-								type="text"
-								value={activeBoardData.name || ""}
-								onChange={(e) => {
-									setActiveBoardData({
-										...activeBoardData,
-										name: e.target.value,
-									});
-									setIsEdited(true);
-								}}
-							/>
-						</div>
-						<div className="boardConfigModalMainContent-Active-Body-InputItems">
-							<div className="boardConfigModalMainContent-Active-Body-boardDescriptionTag">
-								<div className="boardConfigModalSettingName">{t("view-description")}</div>
-								<div className="boardConfigModalSettingDescription">{t("view-description-info")}</div>
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardDescriptionTag">
+									<div className="boardConfigModalSettingName">{t("view-description")}</div>
+									<div className="boardConfigModalSettingDescription">{t("view-description-info")}</div>
+								</div>
+								<textarea
+									className="boardConfigModalSettingDescriptionTextArea"
+									value={activeBoardData.description || ""}
+									onChange={(e) => {
+										setActiveBoardData({
+											...activeBoardData,
+											description: e.target.value,
+										});
+										setIsEdited(true);
+									}}
+								/>
 							</div>
-							<textarea
-								rows={4}
-								value={activeBoardData.description || ""}
-								onChange={(e) => {
-									setActiveBoardData({
-										...activeBoardData,
-										description: e.target.value,
-									});
-									setIsEdited(true);
-								}}
-							/>
 						</div>
 					</div>
 
-					<hr className="boardConfigModalHr-100" />
+					<div className="boardConfigModalMainContent-Active-BottomSec">
+						<hr className="boardConfigModalHr-100" />
 
-					<div className="boardConfigModalDoubleBtnContainer">
-						<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
+						<div className="boardConfigModalDoubleBtnContainer">
+							<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -624,354 +623,446 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (!view) {
 			return (
 				<div className="boardConfigModalMainContent-Active">
-					<div className="boardConfigModalNoViewSelected">{t("no-view-selected")}</div>
+					<div className="boardConfigModalNoViewSelected">
+						{t("no-view-selected-1")}
+						{t("no-view-selected-2")}
+					</div>
 				</div>
 			);
 		}
 
 		return (
 			<div className="boardConfigModalMainContent-Active">
-				<h2 className="boardConfigModalMainContent-Active-Heading">{view.viewName} {t("configurations")}</h2>
-				<hr className="boardConfigModalHr-50" />
-				<div className="boardConfigModalMainContent-Active-Body">
-					<div className="boardConfigModalMainContent-Active-Body-InputItems">
-						<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-							<div className="boardConfigModalSettingName">{t("view-name")}</div>
-							<div className="boardConfigModalSettingDescription">{t("view-name-info")}</div>
+				<div className="boardConfigModalMainContent-Active-TopSec">
+					<h2 className="boardConfigModalMainContent-Active-Heading">{view.viewName} {t("configurations")}</h2>
+					<hr className="boardConfigModalHr-50" />
+					<div className="boardConfigModalMainContent-Active-Body">
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+								<div className="boardConfigModalSettingName">{t("view-name")}</div>
+								<div className="boardConfigModalSettingDescription">{t("view-name-info")}</div>
+							</div>
+							<input
+								type="text"
+								value={view.viewName}
+								onChange={(e) => handleViewNameChange(viewIndex, e.target.value)}
+							/>
 						</div>
-						<input
-							type="text"
-							value={view.viewName}
-							onChange={(e) => handleViewNameChange(viewIndex, e.target.value)}
-						/>
-					</div>
-					<div className="boardConfigModalMainContent-Active-Body-InputItems">
-						<div className="boardConfigModalMainContent-Active-Body-boardDescriptionTag">
-							<div className="boardConfigModalSettingName">{t("view-description")}</div>
-							<div className="boardConfigModalSettingDescription">{t("view-description-info")}</div>
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardDescriptionTag">
+								<div className="boardConfigModalSettingName">{t("view-description")}</div>
+								<div className="boardConfigModalSettingDescription">{t("view-description-info")}</div>
+							</div>
+							<textarea
+								className="boardConfigModalSettingDescriptionTextArea"
+								value={view?.description || ""}
+								onChange={(e) => handleBoardDescriptionChange(viewIndex, e.target.value)}
+							/>
 						</div>
-						<textarea
-							rows={4}
-							value={view?.description || ""}
-							onChange={(e) => handleBoardDescriptionChange(viewIndex, e.target.value)}
-						/>
-					</div>
 
-					{view.viewType === viewTypeNames.kanban && (
-						<>
-							<div className="boardConfigModalMainContent-Active-Body-InputItems">
-								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-									<div className="boardConfigModalSettingName">{t("show-tags-in-the-columns-of-type-tagged")}</div>
-									<div className="boardConfigModalSettingDescription">{t("show-tags-in-the-columns-of-type-tagged-info")}</div>
+						{view.viewType === viewTypeNames.kanban && (
+							<>
+								<div className="boardConfigModalMainContent-Active-Body-InputItems">
+									<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+										<div className="boardConfigModalSettingName">{t("show-tags-in-the-columns-of-type-tagged")}</div>
+										<div className="boardConfigModalSettingDescription">{t("show-tags-in-the-columns-of-type-tagged-info")}</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={view.kanbanView!.showColumnTags}
+										onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "showColumnTags", e.target.checked)}
+									/>
 								</div>
-								<input
-									type="checkbox"
-									checked={view.kanbanView!.showColumnTags}
-									onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "showColumnTags", e.target.checked)}
-								/>
-							</div>
-							<div className="boardConfigModalMainContent-Active-Body-InputItems">
-								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-									<div className="boardConfigModalSettingName">{t("automatically-hide-empty-columns")}</div>
-									<div className="boardConfigModalSettingDescription">{t("automatically-hide-empty-columns-info")}</div>
+								<div className="boardConfigModalMainContent-Active-Body-InputItems">
+									<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+										<div className="boardConfigModalSettingName">{t("automatically-hide-empty-columns")}</div>
+										<div className="boardConfigModalSettingDescription">{t("automatically-hide-empty-columns-info")}</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={view.kanbanView!.hideEmptyColumns}
+										onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "hideEmptyColumns", e.target.checked)}
+									/>
 								</div>
-								<input
-									type="checkbox"
-									checked={view.kanbanView!.hideEmptyColumns}
-									onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "hideEmptyColumns", e.target.checked)}
-								/>
-							</div>
-							<div className="boardConfigModalMainContent-Active-Body-InputItems">
-								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
-									<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
-									<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
+								<div className="boardConfigModalMainContent-Active-Body-InputItems">
+									<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+										<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
+										<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
+									</div>
+									<button
+										className="boardConfigModalMainContentConfigureSwimlanesBtn"
+										onClick={handleSwimlanesConfigureBtnClick}
+									>{t("configure")}</button>
 								</div>
-								<button
-									className="boardConfigModalMainContentConfigureSwimlanesBtn"
-									onClick={handleSwimlanesConfigureBtnClick}
-								>{t("configure")}</button>
-							</div>
 
-							<hr className="boardConfigModalHr-100" />
+								<hr className="boardConfigModalHr-100" />
 
-							<div className="boardConfigModalMainContent-Active-BodyColumnSec">
-								<h3>{t("columns")}</h3>
-								<div
-									ref={columnListRef}
-									className="boardConfigModalMainContent-Active-BodyColumnsList"
-								>
-									{view.kanbanView!.columns.map((column: ColumnData, columnIndex: number) => (
-										<div key={column.id} className={`boardConfigModalColumnRow${column.active ? "" : " Hidden"}`}>
-											<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
-											{column.active ? (
-												<EyeIcon
-													onClick={() => toggleActiveState(viewIndex, columnIndex)}
-													className="boardConfigModalColumnRowEyeButton"
-												/>
-											) : (
-												<EyeOffIcon
-													onClick={() => toggleActiveState(viewIndex, columnIndex)}
-													className="boardConfigModalColumnRowEyeButton"
-												/>
-											)}
-											<div className="boardConfigModalColumnRowContent">
-												<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
-												<input
-													type="text"
-													placeholder={t("enter-column-name")}
-													aria-label={t("column-name")}
-													value={column.name || ""}
-													onChange={(e) =>
-														handleColumnChange(
-															viewIndex,
-															columnIndex,
-															"name",
-															e.target.value
-														)
-													}
-													className="boardConfigModalColumnRowContentColName"
-												/>
-												{column.colType === colTypeNames.allPending && (
+								<div className="boardConfigModalMainContent-Active-BodyColumnSec">
+									<h3>{t("columns")}</h3>
+									<div
+										ref={columnListRef}
+										className="boardConfigModalMainContent-Active-BodyColumnsList"
+									>
+										{view.kanbanView!.columns.map((column: ColumnData, columnIndex: number) => (
+											<div key={column.id} className={`boardConfigModalColumnRow${column.active ? "" : " Hidden"}`}>
+												<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
+												{column.active ? (
+													<EyeIcon
+														onClick={() => toggleActiveState(viewIndex, columnIndex)}
+														className="boardConfigModalColumnRowEyeButton"
+													/>
+												) : (
+													<EyeOffIcon
+														onClick={() => toggleActiveState(viewIndex, columnIndex)}
+														className="boardConfigModalColumnRowEyeButton"
+													/>
+												)}
+												<div className="boardConfigModalColumnRowContent">
+													<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
 													<input
-														type="number"
-														placeholder={t("work-limit")}
-														aria-label={t("work-limit-info")}
-														value={getInputValue(getInputKey(column.id, "workLimit"), column.workLimit ?? 0)}
-														onChange={(e) => {
-															setInputValues(prev => ({
-																...prev,
-																[getInputKey(column.id, "workLimit")]: e.target.value
-															}));
-														}}
-														onBlur={(e) => {
-															const value = e.target.value;
-															const key = getInputKey(column.id, "workLimit");
-															setInputValues(prev => ({
-																...prev,
-																[key]: value
-															}));
+														type="text"
+														placeholder={t("enter-column-name")}
+														aria-label={t("column-name")}
+														value={column.name || ""}
+														onChange={(e) =>
 															handleColumnChange(
 																viewIndex,
 																columnIndex,
-																"workLimit",
-																value === "" ? 0 : Number(value),
-															);
-														}}
+																"name",
+																e.target.value
+															)
+														}
 														className="boardConfigModalColumnRowContentColName"
 													/>
-												)}
-												{column.colType === colTypeNames.namedTag && (
-													<>
+													{column.colType === colTypeNames.allPending && (
+														<input
+															type="number"
+															placeholder={t("work-limit")}
+															aria-label={t("work-limit-info")}
+															value={getInputValue(getInputKey(column.id, "workLimit"), column.workLimit ?? 0)}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "workLimit")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "workLimit");
+																setInputValues(prev => ({
+																	...prev,
+																	[key]: value
+																}));
+																handleColumnChange(
+																	viewIndex,
+																	columnIndex,
+																	"workLimit",
+																	value === "" ? 0 : Number(value),
+																);
+															}}
+															className="boardConfigModalColumnRowContentColName"
+														/>
+													)}
+													{column.colType === colTypeNames.namedTag && (
+														<>
+															<input
+																type="text"
+																ref={(el) => {
+																	filePathInputRefs.current[column.id] = el;
+																}}
+																placeholder={t("enter-tag")}
+																value={column.coltag || ""}
+																onChange={(e) =>
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"coltag",
+																		e.target.value
+																	)
+																}
+																className="boardConfigModalColumnRowContentColName"
+															/>
+															<input
+																type="number"
+																placeholder={t("work-limit")}
+																aria-label={t("work-limit-info")}
+																value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
+																onChange={(e) => {
+																	setInputValues(prev => ({
+																		...prev,
+																		[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
+																	}));
+																}}
+																onBlur={(e) => {
+																	const value = e.target.value;
+																	const key = getInputKey(column.id, "namedTag-workLimit");
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: value
+																	}));
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"workLimit",
+																		value === "" ? 0 : Number(value)
+																	);
+																}}
+																className="boardConfigModalColumnRowContentColName"
+															/>
+														</>
+													)}
+													{column.colType === colTypeNames.taskStatus && (
+														<>
+															<input
+																type="text"
+																placeholder={t("enter-status-placeholder")}
+																aria-label={t("task-status")}
+																value={column.taskStatus || ""}
+																onChange={(e) =>
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		colTypeNames.taskStatus,
+																		e.target.value
+																	)
+																}
+																className="boardConfigModalColumnRowContentColName"
+															/>
+															<input
+																type="number"
+																placeholder={t("work-limit")}
+																aria-label={t("work-limit-info")}
+																value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
+																onChange={(e) => {
+																	setInputValues(prev => ({
+																		...prev,
+																		[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
+																	}));
+																}}
+																onBlur={(e) => {
+																	const value = e.target.value;
+																	const key = getInputKey(column.id, "namedTag-workLimit");
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: value
+																	}));
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"workLimit",
+																		value === "" ? 0 : Number(value)
+																	);
+																}}
+																className="boardConfigModalColumnRowContentColName"
+															/>
+														</>
+													)}
+													{column.colType === colTypeNames.taskPriority && (
+														<>
+															<select
+																aria-label="Select priority"
+																value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+																onChange={(e) =>
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		colTypeNames.taskPriority,
+																		Number(e.target.value)
+																	)
+																}
+																className="boardConfigModalColumnRowContentPriorityDropdown"
+															>
+																{getPriorityOptionsForDropdown().map((option) => (
+																	<option key={option.value} value={option.value}>{option.text}</option>
+																))}
+															</select>
+															<input
+																type="number"
+																placeholder={t("work-limit")}
+																aria-label={t("work-limit-info")}
+																value={getInputValue(getInputKey(column.id, "taskPriority-workLimit"), column.workLimit || 0)}
+																onChange={(e) => {
+																	setInputValues(prev => ({
+																		...prev,
+																		[getInputKey(column.id, "taskPriority-workLimit")]: e.target.value
+																	}));
+																}}
+																onBlur={(e) => {
+																	const value = e.target.value;
+																	const key = getInputKey(column.id, "taskPriority-workLimit");
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: value
+																	}));
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"workLimit",
+																		value === "" ? 0 : Number(value),
+																	);
+																}}
+																className="boardConfigModalColumnRowContentColName"
+															/>
+														</>
+													)}
+													{column.colType === colTypeNames.completed && (
+														<input
+															type="number"
+															placeholder={t("max-items")}
+															value={getInputValue(getInputKey(column.id, "limit"), column.limit || 20)}
+															onChange={(e) => {
+																setInputValues(prev => ({
+																	...prev,
+																	[getInputKey(column.id, "limit")]: e.target.value
+																}));
+															}}
+															onBlur={(e) => {
+																const value = e.target.value;
+																const key = getInputKey(column.id, "limit");
+																setInputValues(prev => ({
+																	...prev,
+																	[key]: value
+																}));
+																handleColumnChange(
+																	viewIndex,
+																	columnIndex,
+																	"limit",
+																	value === "" ? 0 : Number(value),
+																);
+															}}
+															className="boardConfigModalColumnRowContentColDatedVal"
+														/>
+													)}
+													{column.colType === colTypeNames.pathFiltered && (
 														<input
 															type="text"
 															ref={(el) => {
 																filePathInputRefs.current[column.id] = el;
 															}}
-															placeholder={t("enter-tag")}
-															value={column.coltag || ""}
+															className="boardConfigModalColumnRowContentColName"
+															value={column.filePaths || ""}
 															onChange={(e) =>
 																handleColumnChange(
 																	viewIndex,
 																	columnIndex,
-																	"coltag",
+																	"filePaths",
 																	e.target.value
 																)
 															}
-															className="boardConfigModalColumnRowContentColName"
+															placeholder={t("enter-path-pattern")}
 														/>
-														<input
-															type="number"
-															placeholder={t("work-limit")}
-															aria-label={t("work-limit-info")}
-															value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "namedTag-workLimit");
-																setInputValues(prev => ({
-																	...prev,
-																	[key]: value
-																}));
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"workLimit",
-																	value === "" ? 0 : Number(value)
-																);
-															}}
-															className="boardConfigModalColumnRowContentColName"
-														/>
-													</>
-												)}
-												{column.colType === colTypeNames.taskStatus && (
-													<>
-														<input
-															type="text"
-															placeholder={t("enter-status-placeholder")}
-															aria-label={t("task-status")}
-															value={column.taskStatus || ""}
-															onChange={(e) =>
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	colTypeNames.taskStatus,
-																	e.target.value
-																)
-															}
-															className="boardConfigModalColumnRowContentColName"
-														/>
-														<input
-															type="number"
-															placeholder={t("work-limit")}
-															aria-label={t("work-limit-info")}
-															value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "namedTag-workLimit");
-																setInputValues(prev => ({
-																	...prev,
-																	[key]: value
-																}));
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"workLimit",
-																	value === "" ? 0 : Number(value)
-																);
-															}}
-															className="boardConfigModalColumnRowContentColName"
-														/>
-													</>
-												)}
-												{column.colType === colTypeNames.taskPriority && (
-													<>
-														<select
-															aria-label="Select priority"
-															value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
-															onChange={(e) =>
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	colTypeNames.taskPriority,
-																	Number(e.target.value)
-																)
-															}
-															className="boardConfigModalColumnRowContentPriorityDropdown"
-														>
-															{getPriorityOptionsForDropdown().map((option) => (
-																<option key={option.value} value={option.value}>{option.text}</option>
-															))}
-														</select>
-														<input
-															type="number"
-															placeholder={t("work-limit")}
-															aria-label={t("work-limit-info")}
-															value={getInputValue(getInputKey(column.id, "taskPriority-workLimit"), column.workLimit || 0)}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "taskPriority-workLimit")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "taskPriority-workLimit");
-																setInputValues(prev => ({
-																	...prev,
-																	[key]: value
-																}));
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"workLimit",
-																	value === "" ? 0 : Number(value),
-																);
-															}}
-															className="boardConfigModalColumnRowContentColName"
-														/>
-													</>
-												)}
-												{column.colType === colTypeNames.completed && (
-													<input
-														type="number"
-														placeholder={t("max-items")}
-														value={getInputValue(getInputKey(column.id, "limit"), column.limit || 20)}
-														onChange={(e) => {
-															setInputValues(prev => ({
-																...prev,
-																[getInputKey(column.id, "limit")]: e.target.value
-															}));
-														}}
-														onBlur={(e) => {
-															const value = e.target.value;
-															const key = getInputKey(column.id, "limit");
-															setInputValues(prev => ({
-																...prev,
-																[key]: value
-															}));
-															handleColumnChange(
-																viewIndex,
-																columnIndex,
-																"limit",
-																value === "" ? 0 : Number(value),
-															);
-														}}
-														className="boardConfigModalColumnRowContentColDatedVal"
-													/>
-												)}
-												{column.colType === colTypeNames.pathFiltered && (
-													<input
-														type="text"
-														ref={(el) => {
-															filePathInputRefs.current[column.id] = el;
-														}}
-														className="boardConfigModalColumnRowContentColName"
-														value={column.filePaths || ""}
-														onChange={(e) =>
-															handleColumnChange(
-																viewIndex,
-																columnIndex,
-																"filePaths",
-																e.target.value
-															)
-														}
-														placeholder={t("enter-path-pattern")}
-													/>
-												)}
-												{column.colType === colTypeNames.dated && (
-													<>
-														<input
-															required={true}
-															type="number"
-															placeholder={t("from") + "  (eg. = -365)"}
-															aria-label={t("from-tooltip")}
-															value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from ?? 0) ?? ""}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "from")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "from");
-																if (value === "") {
+													)}
+													{column.colType === colTypeNames.dated && (
+														<>
+															<input
+																required={true}
+																type="number"
+																placeholder={t("from") + "  (eg. = -365)"}
+																aria-label={t("from-tooltip")}
+																value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from ?? 0) ?? ""}
+																onChange={(e) => {
 																	setInputValues(prev => ({
 																		...prev,
-																		[key]: ""
+																		[getInputKey(column.id, "from")]: e.target.value
 																	}));
-																} else {
+																}}
+																onBlur={(e) => {
+																	const value = e.target.value;
+																	const key = getInputKey(column.id, "from");
+																	if (value === "") {
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: ""
+																		}));
+																	} else {
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"datedBasedColumn",
+																			{
+																				...column.datedBasedColumn,
+																				from: Number(value),
+																			}
+																		);
+																	}
+																}}
+																className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "from"), 0) ? " border-red" : ""}`}
+															/>
+															<input
+																type="number"
+																placeholder={t("to") + "  (eg. = 365)"}
+																aria-label={t("to-tooltip")}
+																value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to ?? 0) ?? ""}
+																onChange={(e) => {
+																	setInputValues(prev => ({
+																		...prev,
+																		[getInputKey(column.id, "to")]: e.target.value
+																	}));
+																}}
+																onBlur={(e) => {
+																	const value = e.target.value;
+																	const key = getInputKey(column.id, "to");
+																	if (value === "") {
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: ""
+																		}));
+																	} else {
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"datedBasedColumn",
+																			{
+																				...column.datedBasedColumn,
+																				to: Number(value),
+																			}
+																		);
+																	}
+																}}
+																className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "to"), 0) ? " border-red" : ""}`}
+															/>
+															<select
+																aria-label="Select date type"
+																value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
+																onChange={(e) =>
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"datedBasedColumn",
+																		{
+																			...column.datedBasedColumn,
+																			dateType: e.target.value,
+																		}
+																	)
+																}
+																className="boardConfigModalColumnRowContentColDatedVal"
+															>
+																<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+																<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+																<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
+															</select>
+															<input
+																type="number"
+																placeholder={t("work-limit")}
+																aria-label={t("work-limit-info")}
+																value={getInputValue(getInputKey(column.id, "dated-workLimit"), column.workLimit || 0)}
+																onChange={(e) => {
+																	setInputValues(prev => ({
+																		...prev,
+																		[getInputKey(column.id, "dated-workLimit")]: e.target.value
+																	}));
+																}}
+																onBlur={(e) => {
+																	const value = e.target.value;
+																	const key = getInputKey(column.id, "dated-workLimit");
 																	setInputValues(prev => ({
 																		...prev,
 																		[key]: value
@@ -979,142 +1070,57 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																	handleColumnChange(
 																		viewIndex,
 																		columnIndex,
-																		"datedBasedColumn",
-																		{
-																			...column.datedBasedColumn,
-																			from: Number(value),
-																		}
+																		"workLimit",
+																		value === "" ? 0 : Number(value),
 																	);
-																}
-															}}
-															className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "from"), 0) ? " border-red" : ""}`}
-														/>
-														<input
-															type="number"
-															placeholder={t("to") + "  (eg. = 365)"}
-															aria-label={t("to-tooltip")}
-															value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to ?? 0) ?? ""}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "to")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "to");
-																if (value === "") {
-																	setInputValues(prev => ({
-																		...prev,
-																		[key]: ""
-																	}));
-																} else {
-																	setInputValues(prev => ({
-																		...prev,
-																		[key]: value
-																	}));
+																}}
+																className="boardConfigModalColumnRowContentColName"
+															/>
+														</>
+													)}
+													{column.colType === colTypeNames.undated && (
+														<>
+															<select
+																aria-label="Select date type"
+																value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
+																onChange={(e) =>
 																	handleColumnChange(
 																		viewIndex,
 																		columnIndex,
 																		"datedBasedColumn",
 																		{
-																			...column.datedBasedColumn,
-																			to: Number(value),
+																			from: 0,
+																			to: 0,
+																			dateType: e.target.value,
 																		}
-																	);
+																	)
 																}
-															}}
-															className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "to"), 0) ? " border-red" : ""}`}
-														/>
-														<select
-															aria-label="Select date type"
-															value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
-															onChange={(e) =>
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"datedBasedColumn",
-																	{
-																		...column.datedBasedColumn,
-																		dateType: e.target.value,
-																	}
-																)
-															}
-															className="boardConfigModalColumnRowContentColDatedVal"
-														>
-															<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
-															<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
-															<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
-														</select>
-														<input
-															type="number"
-															placeholder={t("work-limit")}
-															aria-label={t("work-limit-info")}
-															value={getInputValue(getInputKey(column.id, "dated-workLimit"), column.workLimit || 0)}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "dated-workLimit")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "dated-workLimit");
-																setInputValues(prev => ({
-																	...prev,
-																	[key]: value
-																}));
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"workLimit",
-																	value === "" ? 0 : Number(value),
-																);
-															}}
-															className="boardConfigModalColumnRowContentColName"
-														/>
-													</>
-												)}
-												{column.colType === colTypeNames.undated && (
-													<>
-														<select
-															aria-label="Select date type"
-															value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
-															onChange={(e) =>
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"datedBasedColumn",
-																	{
-																		from: 0,
-																		to: 0,
-																		dateType: e.target.value,
-																	}
-																)
-															}
-															className="boardConfigModalColumnRowContentColDatedVal"
-														>
-															<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
-															<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
-															<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
-														</select>
-													</>
-												)}
-												<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
+																className="boardConfigModalColumnRowContentColDatedVal"
+															>
+																<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+																<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+																<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
+															</select>
+														</>
+													)}
+													<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
+												</div>
 											</div>
-										</div>
-									))}
+										))}
+									</div>
 								</div>
-							</div>
-							<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t("add-column")}</button>
-						</>
-					)}
-
+								<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t("add-column")}</button>
+							</>
+						)}
+					</div>
 				</div>
-				<hr className="boardConfigModalHr-100" />
-				<div className="boardConfigModalDoubleBtnContainer">
-					<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentView}>{t("duplicate-this-view")}</button>
-					<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentView}>{t("delete-this-view")}</button>
+
+				<div className="boardConfigModalMainContent-Active-BottomSec">
+					<hr className="boardConfigModalHr-100" />
+					<div className="boardConfigModalDoubleBtnContainer">
+						<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentView}>{t("duplicate-this-view")}</button>
+						<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentView}>{t("delete-this-view")}</button>
+					</div>
 				</div>
 			</div>
 		);
@@ -1140,8 +1146,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								}}>
 									{t("global-settings")}
 								</div>
-
-								<hr className="boardConfigModalHr-100" />
 
 								<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => {
 									setSelectedViewIndex(-1);

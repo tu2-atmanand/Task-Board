@@ -386,23 +386,25 @@ export default class TaskBoard extends Plugin {
 		// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
 		this.registerMonkeyPatchForTaskboardFiles();
 
-		// @ts-ignore
-		const embedRegistry = this.app.embedRegistry as EmbedRegistry;
-		embedRegistry.registerExtension(
-			TASKBOARD_FILE_EXTENSION,
-			(context, file, _) => {
-				console.log("Context :", context, "\nFile :", file);
+		if (this.settings.data.experimentalFeatures) {
+			// @ts-ignore
+			const embedRegistry = this.app.embedRegistry as EmbedRegistry;
+			embedRegistry.registerExtension(
+				TASKBOARD_FILE_EXTENSION,
+				(context, file, _) => {
+					console.log("Context :", context, "\nFile :", file);
 
-				// @ts-ignore
-				return new TaskBoardEmbedComponent(
-					context.containerEl,
-					this,
 					// @ts-ignore
-					file,
-					context.containerEl.getAttr("alt") || undefined,
-				) as any;
-			},
-		);
+					return new TaskBoardEmbedComponent(
+						context.containerEl,
+						this,
+						// @ts-ignore
+						file,
+						context.containerEl.getAttr("alt") || undefined,
+					) as any;
+				},
+			);
+		}
 
 		// Register AddOrEditTask view (can be opened in tabs or popout windows)
 		// this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {

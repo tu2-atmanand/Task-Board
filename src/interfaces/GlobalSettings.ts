@@ -76,7 +76,7 @@ export interface globalSettingsData {
 	autoAddCreatedDate: boolean;
 	autoAddCompletedDate: boolean;
 	autoAddCancelledDate: boolean;
-	// scanVaultAtStartup: boolean; // @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
+	// scanVaultAtStartup: boolean; - @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
 	showModifiedFilesNotice: boolean;
 	scanMode: string;
 	columnWidth: string;
