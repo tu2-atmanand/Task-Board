@@ -232,12 +232,72 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	reactFlowInstance.setViewport({ x: positions[0].x, y: positions[0].y, zoom: 1 });
 	// }, []);
 
+	// ===== DEBUG: Selection monitoring component =====
+	// This component monitors which nodes are actually selected by ReactFlow
+	// to debug the "ghost node" selection issue
+	// SOLUTION : This issue has been fixed, the root-cause of this issue was Numeric strings
+	// present in the tasks cache. So, when I was initializing the nodes, the numeric ID 
+	// tasks were also getting initialized and it was causing this strange behavior.
+	// const MapViewSelectionDebugger: React.FC = () => {
+	// 	useOnSelectionChange({
+	// 		onChange: (changes) => {
+	// 			const selectedNodeCount = changes.nodes?.length ?? 0;
+	// 			const selectedNodeIds = changes.nodes?.map((n) => n.id) ?? [];
+	// 			const selectedEdgeCount = changes.edges?.length ?? 0;
+	// 			const selectedEdgeIds = changes.edges?.map((e) => e.id) ?? [];
+
+	// 			console.group('🔍 [MapView] Selection Change Debug Info');
+	// 			console.log(`📊 Selected Nodes: ${selectedNodeCount}`);
+	// 			console.log('📝 Selected Node IDs:', selectedNodeIds);
+	// 			console.log(`📊 Selected Edges: ${selectedEdgeCount}`);
+	// 			console.log('📝 Selected Edge IDs:', selectedEdgeIds);
+	// 			console.log('🎯 Full Selection Changes Object:', changes);
+	// 			console.log('📋 Total nodes in map:', nodes.length);
+	// 			console.log('📋 All node IDs in map:', nodes.map(n => n.id));
+	// 			console.groupEnd();
+
+	// 			// If selection count seems suspicious, log more details
+	// 			if (selectedNodeCount > (nodes?.length ?? 0) || selectedNodeCount < 0) {
+	// 				console.error(
+	// 					`⚠️  SUSPICIOUS: Selected ${selectedNodeCount} nodes, but only ${nodes?.length ?? 0} nodes exist in the map!`,
+	// 					changes
+	// 				);
+	// 			}
+
+	// 			// Check for ghost nodes - nodes that are selected but don't exist in our nodes array
+	// 			const ghostNodes = selectedNodeIds.filter(selectedId =>
+	// 				!nodes.some(node => node.id === selectedId)
+	// 			);
+	// 			if (ghostNodes.length > 0) {
+	// 				console.error('👻 GHOST NODES DETECTED! Selected node IDs that don\'t exist in nodes array:', ghostNodes);
+	// 			}
+
+	// 			// If user selected more nodes than available, log for investigation
+	// 			if (selectedNodeCount > 0) {
+	// 				const selectedNodeObjects = nodes?.filter((n) => selectedNodeIds.includes(n.id)) ?? [];
+	// 				console.log('🔎 Detailed info on selected nodes:', {
+	// 					nodesCount: selectedNodeObjects.length,
+	// 					nodes: selectedNodeObjects.map((n) => ({
+	// 						id: n.id,
+	// 						position: n.position,
+	// 						width: n.width,
+	// 						selected: n.selected,
+	// 					}))
+	// 				});
+	// 			}
+	// 		}
+	// 	});
+
+	// 	return null; // This component doesn't render anything
+	// };
+	// ===== END DEBUG: Selection monitoring component =====
+
 	// -------------------------------------------------------------
 	//          ALL REACTFLOW INITIALIZATION CODE
 	// -------------------------------------------------------------
 
-	// Kanban-style initial layout, memoized
-	const initialNodes: Node[] = useMemo(() => {
+	// Kanban-style initial layout, memoized - now used for dynamic node updates
+	const computedNodes: Node[] = useMemo(() => {
 		// Don't calculate nodes until storage data is loaded
 		if (!storageLoaded) { return []; }
 		const newNodes: Node[] = [];
@@ -273,7 +333,15 @@ const MapView: React.FC<MapViewProps> = ({
 
 		allTasksFlattened.forEach((task) => {
 			if (task.legacyId) {
-				const id = task.legacyId;
+				/**
+				 * We should cast this value to string cumpulsorily even though 
+				 * its already a string, else there is a possibility 
+				 * that atleast one of the id might be of type Numeric which can start 
+				 * causing the "GHOST NODE issue". 
+				 * 
+				 * @link - https://github.com/tu2-atmanand/Task-Board/issues/665
+				 */
+				const id = String(task.legacyId); 
 				if (usedIds.has(id)) {
 					duplicateIds.add(id);
 					return;
@@ -338,12 +406,14 @@ const MapView: React.FC<MapViewProps> = ({
 		return newNodes;
 	}, [allTasksFlattened, activeBoardData, storageLoaded, boardChangeKey]);
 
-	// Manage nodes state
-	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-	// Reset nodes when initialNodes changes
+	// Manage nodes state - start with empty array as suggested by ReactFlow team
+	const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+
+	// Update nodes dynamically when computedNodes changes (ReactFlow team suggestion)
 	useEffect(() => {
-		setNodes(initialNodes);
-	}, [initialNodes]);
+		console.log("[MapView] Updating nodes via setNodes - computedNodes length:", computedNodes.length);
+		setNodes(computedNodes);
+	}, [computedNodes, setNodes]);
 
 	// TODO : Its not a good idea to use debounce and allow stale data. I am already storing the data in localStorage on resize end in ResizableNodeSelected component. And there its much better as I can capture the final size directly based on the callback.
 	// Custom handler that intercepts dimension changes and updates nodeSizeTypes state
@@ -905,7 +975,7 @@ const MapView: React.FC<MapViewProps> = ({
 				</div>
 			</div>
 		);
-	} else if (storageLoaded && initialNodes.length === 0) {
+	} else if (storageLoaded && computedNodes.length === 0) {
 		return (
 			<div className='taskBoardMapViewWrapper'>
 				<div className="taskBoardMapView">
@@ -1066,6 +1136,9 @@ const MapView: React.FC<MapViewProps> = ({
 							)}
 
 							<Background gap={12} size={1} color={mapViewSettings.background === mapViewBackgrounVariantTypes.transparent ? 'transparent' : ''} variant={userBackgroundVariant} />
+
+							{/* DEBUG: Selection monitoring */}
+							{/* <MapViewSelectionDebugger /> */}
 						</ReactFlow>
 
 						<TasksImporterPanel
