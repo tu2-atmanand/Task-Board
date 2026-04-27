@@ -19,6 +19,34 @@ interface KanbanBoardProps {
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
+	const [loading, setLoading] = useState(true);
+
+	// const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	const columns = currentView?.kanbanView?.columns || [];
+
+	// Second memo: Segregate filtered tasks by column (for Kanban view only)
+	const allTasksArrangedPerColumn = useMemo(() => {
+		if (currentBoardData && currentView && filteredAndSearchedTasks) {
+			return columns
+				.filter((column) => column.active)
+				.map((column: ColumnData) =>
+					columnSegregator(plugin.settings, currentView, column, filteredAndSearchedTasks, (updatedViewData: TaskBoardViewType) => {
+						let updatedBoardData = { ...currentBoardData };
+						if (updatedBoardData.views) {
+							updatedBoardData.views[currentViewIndex] = updatedViewData;
+						}
+
+						plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoardData);
+					})
+				);
+		}
+		return [];
+	}, [filteredAndSearchedTasks, currentBoardData, currentView, columns, currentViewIndex, plugin]);
+
+	useEffect(() => {
+		setLoading(!(currentBoardData && currentView && filteredAndSearchedTasks));
+	}, [currentBoardData, currentView, filteredAndSearchedTasks]);
+
 	if (!currentView?.kanbanView) {
 		return (
 			<div className="emptyBoardMessage">
@@ -26,35 +54,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 			</div>
 		)
 	}
-
-	const [loading, setLoading] = useState(true);
-
-	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
-	const columns = currentView?.kanbanView?.columns || [];
-
-	// Second memo: Segregate filtered tasks by column (for Kanban view only)
-	const allTasksArrangedPerColumn = useMemo(() => {
-		if (currentBoardData && currentView && filteredAndSearchedTasks) {
-			const finalArrangedTasks = columns
-				.filter((column) => column.active)
-				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, currentView, column, filteredAndSearchedTasks, (updatedViewData: TaskBoardViewType) => {
-						// plugin.settings.data.boardConfigs[board.index] = updatedBoardData;
-						let updatedBoardData = { ...currentBoardData };
-						if (updatedBoardData.views) {
-							updatedBoardData.views[currentViewIndex] = updatedViewData;
-						}
-
-						// Using the plugin's debounced save function to update the board data with the new view configuration
-						plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoardData);
-					})
-				);
-
-			setLoading(false);
-			return finalArrangedTasks;
-		}
-		return [];
-	}, [filteredAndSearchedTasks, currentBoardData, currentView]);
 
 	const renderColumns = (columns: ColumnData[], tasks: taskItem[][]) => {
 		return columns.map((column, index) => (
