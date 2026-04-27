@@ -52,11 +52,21 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	const [refreshCount, setRefreshCount] = useState(0);
 	const [freshInstall, setFreshInstall] = useState(false);
 	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
-	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
 	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
 	const [isMobileView, setIsMobileView] = useState(false); // show elements for screens smaller than 800px
 	const [boardDrawerVisible, setboardDrawerVisible] = useState(boardData.viewsPanel.isOpen);
 	const [editorModified, setEditorModified] = useState(plugin.editorModified);
+
+	/**
+	 * These below two states are a temporary solution using eventEmitters for now which is working fine. 
+	 * In reality, the map view should update the boardData inside the {@link taskBoardFileManager} 
+	 * cache, just like how Obsidian does an atomic transaction operations. In this scenario, if
+	 * in the future, this plugin has to do atomic changes to the same board file instantly, 
+	 * the data can be simply updated in the cache and then after sometime it will be 
+	 * written to the disk.
+	 */
+	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
+	const viewPortDataOfMapViewUpdated = useRef<boolean>(false);
 
 	// // Derive current view from board data and currentViewId
 	// const currentView: View | undefined = useMemo(() => {
@@ -204,12 +214,17 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}, []);
 
 	useEffect(() => {
-		const handleMapDataUpdated = () => {
-			setMapViewDataUpdated(true);
+		const handleMapDataUpdated = (eventData: { onlyviewport: boolean }) => {
+			if (eventData.onlyviewport)
+				viewPortDataOfMapViewUpdated.current = true;
+			else
+				setMapViewDataUpdated(true);
 		};
 
 		const handleMapDataSaved = () => {
 			setMapViewDataUpdated(false);
+			viewPortDataOfMapViewUpdated.current = false;
+
 		}
 
 		eventEmitter.on("MAP_UNSAVED", handleMapDataUpdated);
@@ -678,9 +693,10 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	function handleViewSelect(index: number) {
 		console.log("Will store the map view data first...");
-		if (mapViewDataUpdated) {
+		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
 			eventEmitter.emit("SAVE_MAP");
-			setMapViewDataUpdated(false);
+			// setMapViewDataUpdated(false);
+			// viewPortDataOfMapViewUpdated.current = false;
 			sleep(100);
 		}
 

@@ -202,7 +202,7 @@ const MapView: React.FC<MapViewProps> = ({
 	 * 
 	 * DONT CALL THIS FUNCTION WHEN VIEWPORT DATA HAS BEEN CHANGED.
 	 * 
-	 * It also transmits a JSON data in the following form : { viewport: boolean }. 
+	 * It also transmits a JSON data in the following form : { onlyviewport: boolean }. 
 	 * True -> Means, only the viewport data has been updated. (Viewport data is 
 	 * not considered to be a very important data in some scenarios, but still needs 
 	 * to be saved to board file.)
@@ -216,7 +216,7 @@ const MapView: React.FC<MapViewProps> = ({
 	const emitMapDataUpdatedSignal = (flag: boolean) => {
 		if (flag) {
 			if (!mapDataUpdated.current) {
-				eventEmitter.emit("MAP_UNSAVED");
+				eventEmitter.emit("MAP_UNSAVED", { onlyviewport: false });
 				mapDataUpdated.current = true;
 			}
 		} else {
@@ -341,7 +341,7 @@ const MapView: React.FC<MapViewProps> = ({
 				 * 
 				 * @link - https://github.com/tu2-atmanand/Task-Board/issues/665
 				 */
-				const id = String(task.legacyId); 
+				const id = String(task.legacyId);
 				if (usedIds.has(id)) {
 					duplicateIds.add(id);
 					return;
@@ -718,6 +718,10 @@ const MapView: React.FC<MapViewProps> = ({
 		// const now = Date.now();
 		// if (now - lastViewportSaveTime.current > 2000) {
 		try {
+			if (!viewPortDataUpdated.current) {
+				eventEmitter.emit("MAP_UNSAVED", { onlyviewport: true });
+			}
+
 			// Validate viewport values before saving
 			const safeViewport: viewPortType = {
 				x: Number.isFinite(vp.x) ? vp.x : 10,
