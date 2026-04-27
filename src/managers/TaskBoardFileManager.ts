@@ -9,6 +9,7 @@ import { App, TFile, Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../main.js";
 import { Board, DEFAULT_BOARD } from "../interfaces/BoardConfigs.js";
 import {
+	CURRENT_REVISION,
 	LEAFID_FILEPATH_MAPPING_KEY,
 	TASKBOARD_FILE_EXTENSION,
 } from "../interfaces/Constants.js";
@@ -35,7 +36,6 @@ export default class TaskBoardFileManager {
 	private recentBoardsData: recentBoardsDataType = {};
 	private taskBoardFilesRegistry: taskBoardFilesRegistryType = {};
 	private debouncedSaveBoardTimers: Map<string, NodeJS.Timeout> = new Map(); // Track debounce timers per board
-	private currentPluginVersion: string;
 
 	/**
 	 * @deprecated
@@ -46,7 +46,6 @@ export default class TaskBoardFileManager {
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
 		this.app = plugin.app;
-		this.currentPluginVersion = plugin.settings.version;
 		this.taskBoardFilesRegistry =
 			this.plugin.settings.data.taskBoardFilesRegistry;
 	}
@@ -103,7 +102,7 @@ export default class TaskBoardFileManager {
 				}
 			}
 
-			boardData = this.applyMigrationIfNeeded(boardData);
+			boardData = this.applyMigrationIfNeeded(boardData, filePath);
 
 			return boardData;
 		} catch (error) {
@@ -167,7 +166,7 @@ export default class TaskBoardFileManager {
 				}
 			}
 
-			boardData = this.applyMigrationIfNeeded(boardData);
+			boardData = this.applyMigrationIfNeeded(boardData, filePath);
 
 			return boardData;
 		} catch (error) {
@@ -266,6 +265,8 @@ export default class TaskBoardFileManager {
 		boardData: Board,
 	): Promise<boolean> {
 		try {
+			if (!filePath) return false;
+
 			// Convert board data to JSON string
 			const jsonString = JSON.stringify(boardData);
 			await this.app.vault.adapter.write(filePath, jsonString);
@@ -815,62 +816,93 @@ export default class TaskBoardFileManager {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Migration for the following new properties :
-	 * - boardData.viewPanel
+	 * Migration for the following properties :
+	 * - Board.pluginVersion has been deprecated
+	 * - Board.revision has been added
 	 *
-	 * @Date - 2026-04-01
+	 * @todo - Remove this migration while releasing the first beta version itself.
+	 * Also, assign the {@link CURRENT_REVISION} to 0.
 	 */
-	runMigrationForVersion_2_0_0(oldBoardData: Board): Board {
+	runMigrationForRevision_0(oldBoardData: Board): Board {
 		let newBoardData = { ...oldBoardData };
-		if (!oldBoardData?.viewsPanel) {
-			newBoardData["viewsPanel"] = DEFAULT_BOARD.viewsPanel;
+		if (oldBoardData?.pluginVersion) {
+			delete newBoardData.pluginVersion;
+		}
+
+		if (!oldBoardData?.revision) {
+			newBoardData["revision"] = CURRENT_REVISION;
 		}
 
 		return newBoardData;
 	}
 
 	/**
+	 * Example Migration function...
+	 * Migration for the following properties :
+	 * - Board.pluginVersion has been deprecated
+	 * - Board.revision has been added
+	 *
+	 * @Date - 2026-04-27
+	 */
+	runMigrationForRevision_1(oldBoardData: Board): Board {
+		if (oldBoardData.revision < CURRENT_REVISION) {
+			let newBoardData = { ...oldBoardData };
+			if (!oldBoardData?.pluginVersion) {
+				delete newBoardData.pluginVersion;
+			}
+
+			if (!oldBoardData?.revision) {
+				newBoardData["revision"] = CURRENT_REVISION;
+			}
+
+			return newBoardData;
+		}
+
+		return oldBoardData;
+	}
+
+	/**
 	 * This function will be used to run a migration check whenever any board is loaded.
-	 * Based on the pluginVersion property in the board data, we can decide if we need to
+	 * Based on the revision property in the board data, we can decide if we need to
 	 * run any migration steps to update the board data structure to be compatible with the
 	 * current plugin version.
 	 * This is important to ensure that users can still load their existing boards even
 	 * after we release updates that may change the board data structure.
 	 *
-	 * First will check if the boardData.pluginVersion is different from the currentPluginVersion.
+	 * First will check if the boardData.revision is different from the currentRevisionNumber.
 	 * If they are different, it means the board data was last saved with an older version of the
 	 * plugin, and we may need to run migrations.
-	 * Then based on the pluginVersion in the board data, we can determine which migration steps
+	 * Then based on the revision in the board data, we can determine which migration steps
 	 * to run to update the board data structure to be compatible with the current plugin version.
-	 * After running the necessary migrations, we should also update the pluginVersion in the board
-	 * data to the currentPluginVersion, so that we don't run the same migrations again in the future.
+	 * After running the necessary migrations, we should also update the revision in the board
+	 * data to the currentRevisionNumber, so that we don't run the same migrations again in the future.
 	 * Finally, we save the migrated board data back to disk and return the updated board data object.
 	 *
 	 * @param boardData - The old board data to check if it needs migrations
 	 *
 	 * @returns - The migrated board data that is compatible with the current plugin version. If no migration was needed, it returns the original board data.
 	 */
-	applyMigrationIfNeeded(boardData: Board): Board {
+	applyMigrationIfNeeded(boardData: Board, filePath: string): Board {
 		try {
-			if (boardData.pluginVersion === this.currentPluginVersion) {
+			if (boardData.revision === CURRENT_REVISION) {
 				//Board data plugin version matches current plugin version. No migration needed.
 				return boardData;
 			} else {
 				// There are two situations :
-				// 1. boardData.pluginVersion === "";
-				// 2. boardData.pluginVersion !== this.currentPluginVersion;
+				// 1. boardData.revision === "";
+				// 2. boardData.revision !== this.currentRevisionNumber;
 				// In both these cases, will apply all the migrations.
 				// Here we can run all the migrations sequentially since we don't know which version it was last saved with.
 				// Will add a date to the version specific migration function to remember when that migration was introduced.
 				// If the date has crossed 6 months, will remove that migration, since its very old now.
 
-				boardData = this.runMigrationForVersion_2_0_0(boardData);
+				boardData = this.runMigrationForRevision_0(boardData);
 			}
 
-			// After applying necessary migrations, update the pluginVersion in the board data
-			boardData.pluginVersion = this.currentPluginVersion;
+			// After applying necessary migrations, update the revision in the board data
+			boardData.revision = CURRENT_REVISION;
 
-			this.saveBoard(boardData);
+			this.saveBoard(boardData, filePath);
 
 			return boardData;
 		} catch (error) {

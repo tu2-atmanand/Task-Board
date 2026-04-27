@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 
 import TaskBoard from "../../main.js";
-import { MANDATORY_SCAN_KEY, VIEW_TYPE_TASKBOARD, newReleaseVersion } from "../interfaces/Constants.js";
+import { MANDATORY_SCAN_KEY, VIEW_TYPE_TASKBOARD, CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import { jsonCacheData, taskItem } from "../interfaces/TaskItem.js";
 import VaultScanner, { fileTypeAllowedForScanning } from "../managers/VaultScanner.js";
 import { eventEmitter } from "../services/EventEmitter.js";
@@ -162,10 +162,10 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 			<h2>{t("vault-scanner")}</h2>
 			{localStorage.getItem(MANDATORY_SCAN_KEY) === "true" ?
 				(<>
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {newReleaseVersion}</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {CURRENT_PLUGIN_VERSION}</div>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
 					<br />
-					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href={`https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`}>Task Board v{newReleaseVersion}</a>.</div>
+					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-3")} : <a href={`https://github.com/tu2-atmanand/Task-Board/releases/tag/${CURRENT_PLUGIN_VERSION}`}>Task Board v{CURRENT_PLUGIN_VERSION}</a>.</div>
 				</>
 				) :
 				(<>

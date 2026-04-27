@@ -1,7 +1,7 @@
 import { t } from "i18next";
 import { Notice } from "obsidian";
 import TaskBoard from "../../main.js";
-import { newReleaseVersion } from "../interfaces/Constants.js";
+import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import { PluginDataJson, DEFAULT_SETTINGS } from "../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
@@ -66,7 +66,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			181,
-			`There was an issue while applying the migrations to the configurations for this new version ${newReleaseVersion}.\nIt will be recommended to bring this issue to the developers notice to get some suggestion on this.`,
+			`There was an issue while applying the migrations to the configurations for this new version ${CURRENT_PLUGIN_VERSION}.\nIt will be recommended to bring this issue to the developers notice to get some suggestion on this.`,
 			JSON.stringify(error),
 			"SettingSynchronizer.ts",
 		);

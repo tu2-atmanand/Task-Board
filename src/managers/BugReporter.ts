@@ -1,7 +1,7 @@
 import { t } from "i18next";
 import { Notice } from "obsidian";
 import type TaskBoard from "../../main.js";
-import { newReleaseVersion } from "../interfaces/Constants.js";
+import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import { BugReporterModal } from "../modals/BugReporterModal.js";
 import { fsPromises } from "../services/FileSystem.js";
 import { getObsidianDebugInfo } from "../services/ObsidianDebugInfo.js";
@@ -257,7 +257,7 @@ ${entry.bugContent}
 				id,
 				message,
 				context,
-				version: newReleaseVersion,
+				version: CURRENT_PLUGIN_VERSION,
 				bugContent,
 			};
 

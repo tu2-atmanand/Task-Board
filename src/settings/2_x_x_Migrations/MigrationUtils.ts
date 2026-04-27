@@ -2,7 +2,7 @@ import { t } from "i18next";
 import { App, Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../../main.js";
 import { Board, DEFAULT_BOARD, MapView } from "../../interfaces/BoardConfigs.js";
-import { newReleaseVersion, NODE_POSITIONS_STORAGE_KEY } from "../../interfaces/Constants.js";
+import { CURRENT_PLUGIN_VERSION, CURRENT_REVISION, NODE_POSITIONS_STORAGE_KEY } from "../../interfaces/Constants.js";
 import { viewTypeNames } from "../../interfaces/Enums.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
@@ -190,7 +190,7 @@ export async function checkAndNotifyV2Migration(
 								text: `⚠ Task Board migration required`,
 							});
 							el.createEl("p", {
-								text: `Task Board has been updated from version ${v1Check.version} (v1.x.x series) to version ${newReleaseVersion} (v2.x.x series). You are required to run the migrations for this new version to work.`,
+								text: `Task Board has been updated from version ${v1Check.version} (v1.x.x series) to version ${CURRENT_PLUGIN_VERSION} (v2.x.x series). You are required to run the migrations for this new version to work.`,
 							});
 							el.createEl("button", {
 								text: t("open-migration-modal"),
@@ -340,7 +340,7 @@ export async function createBoardFiles(
 				// Create the board file content (v2 format)
 				const boardContent: Board = {
 					id: generateRandomTempTaskId(),
-					pluginVersion: newReleaseVersion,
+					revision: CURRENT_REVISION,
 					viewsPanel: DEFAULT_BOARD.viewsPanel,
 					name: board.name,
 					description: board.description || "",
@@ -591,7 +591,7 @@ export async function updateRegistryAndSettings(
 			// There was an error while migrating the settings. => ABORT
 			return { success: false };
 		} else {
-			migratedSettings.version = newReleaseVersion;
+			migratedSettings.version = CURRENT_PLUGIN_VERSION;
 			await plugin.saveSettings(migratedSettings);
 		}
 		await sleep(500);

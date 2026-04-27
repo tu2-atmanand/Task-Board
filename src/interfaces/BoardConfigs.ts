@@ -187,7 +187,14 @@ export interface TaskBoardViewType {
 
 export type Board = {
 	id: string;
-	pluginVersion: string; // This property will help us to manage the migrations in future when we will be adding new properties to the board or view data structure. Whenever there will be a breaking change in the data structure, we will update this pluginVersion and during the loading of the board data, we can check this version and can decide if we need to run any migration function to update the data structure to the latest one.
+	/**
+	 * This property will help us to manage the migrations in future when we will be adding
+	 * new properties to the board or view data structure. Whenever there will be a breaking
+	 * change in the data structure, we will update this revision and during the loading of
+	 * the board data, we can check this revision number and can decide if we need to run 
+	 * specific selective migration functions to update the data structure to the latest one.
+	 */
+	revision: number;
 	name: string;
 	description?: string;
 	filterConfig?: FilterConfigSettings;
@@ -204,12 +211,13 @@ export type Board = {
 	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
 	filters?: string[];
 	filterPolarity?: string;
+	pluginVersion?: string;
 };
 
 // A single board is a single project, inside a board user will create multiple types of views to visualize their tasks in different ways. Hence, when user will install this plugin for the first time, will only going to have a single board to which will be enought show the capabilities of this plugin and later user can easily create more boards.
 export const DEFAULT_BOARD: Board = {
 	id: "3103563481",
-	pluginVersion: "",
+	revision: 0,
 	name: "My Project",
 	description:
 		"This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards.",
