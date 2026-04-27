@@ -921,18 +921,17 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 															}
 															onDrop={e => handleTaskDrop(e, i)}
 														>
-															<MemoizedTaskItem
-																Component={taskItemComponent}
-																key={task.id}
-																dataAttributeIndex={i}
-																plugin={plugin}
-																task={task}
-																activeViewType={viewTypeNames.kanban} // Since this Column component will be always rendered inside a Kanban view.
-																activeViewIndex={currentViewIndex}
-																kanbanViewData={currentViewData}
-																columnIndex={columnData.index}
-																swimlaneData={swimlaneData}
-															/>
+															{React.createElement(taskItemComponent, {
+																key: task.id,
+																dataAttributeIndex: i,
+																plugin: plugin,
+																task: task,
+																activeViewType: viewTypeNames.kanban, // Since this Column component will be always rendered inside a Kanban view.
+																activeViewIndex: currentViewIndex,
+																kanbanViewData: currentViewData,
+																columnIndex: columnData.index,
+																swimlaneData: swimlaneData
+															})}
 														</div>
 													);
 												}
@@ -970,34 +969,3 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 };
 
 export default memo(LazyColumn);
-
-// Define MemoizedTaskItem outside the component to maintain stable reference
-// This prevents React's hook reconciliation from becoming unstable
-interface MemoizedTaskItemProps {
-	Component: typeof TaskItem | typeof TaskItemV2;
-	dataAttributeIndex: number;
-	plugin: TaskBoard;
-	task: taskItem;
-	activeViewType: string;
-	activeViewIndex: number;
-	kanbanViewData: KanbanView;
-	columnIndex?: number;
-	swimlaneData?: swimlaneDataProp;
-}
-
-const MemoizedTaskItem = memo<MemoizedTaskItemProps>(
-	({ Component, ...props }) => {
-		return <Component {...props} />;
-	},
-	(prevProps, nextProps) => {
-		return (
-			prevProps.dataAttributeIndex === nextProps.dataAttributeIndex &&
-			prevProps.task === nextProps.task &&
-			prevProps.activeViewType === nextProps.activeViewType &&
-			prevProps.activeViewIndex === nextProps.activeViewIndex &&
-			prevProps.kanbanViewData === nextProps.kanbanViewData &&
-			prevProps.columnIndex === nextProps.columnIndex &&
-			prevProps.swimlaneData === nextProps.swimlaneData
-		);
-	}
-);
