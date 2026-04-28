@@ -1516,18 +1516,14 @@ class DragDropTasksManager {
 	 * Handles the drop event and performs required operations to update task properties
 	 * based on source and target column data
 	 *
-	 * @param {DragEvent} e - The drop event object
 	 * @param {ColumnData} targetColumnData - The target column data
 	 * @param {HTMLDivElement} targetColumnContainer - The target column DOM container
 	 */
 	public handleDropEvent(
-		e: DragEvent,
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): void {
-		e.preventDefault();
-
 		// All checks before proceeding with the calculations...
 		if (!this.currentDragData) {
 			bugReporterManagerInsatance.addToLogs(

@@ -36,7 +36,7 @@ export interface swimlaneDataProp {
 	value: string;
 }
 
-const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeViewType, activeViewIndex, kanbanViewData, columnIndex, swimlaneData }) => {
+const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeBoardID, activeViewIndex, activeViewType, kanbanViewData, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
@@ -919,6 +919,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 				taskIndex: String(dataAttributeIndex),
 				sourceColumnData: columnData,
 				currentViewIndex: activeViewIndex,
+				currentBoardID: activeBoardID,
 				swimlaneData: swimlaneData
 			};
 			// Delegate to manager for standardized behavior (sets current payload and dims element)

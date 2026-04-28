@@ -55,15 +55,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	const initialTaskCount = 20;
 	const loadMoreCount = 10;
 	const scrollThresholdPercent = 80;
-
-	const [currentViewData, setCurrentViewData] = useState(kanbanViewData);
+	const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
 
 	// State for managing visible tasks
 	const [visibleTaskCount, setVisibleTaskCount] = useState(initialTaskCount);
 	const tasksContainerRef = useRef<HTMLDivElement>(null);
 
 	// Drag and drop state
-	const [isDragOver, setIsDragOver] = useState(false);
+	// const [isDragOver, setIsDragOver] = useState(false);
 	const [insertIndex, setInsertIndex] = useState<number | null>(null);
 	const insertIndexRef = useRef<number | null>(null);
 	const rafRef = useRef<number | null>(null);
@@ -194,9 +193,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 */
 	const handleTaskItemDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
-		setIsDragOver(true);
+		// setIsDragOver(true);
 		try {
-			const hasManualOrder = Array.isArray(columnData.sortCriteria) && columnData.sortCriteria.some((c) => c.criteria === 'manualOrder');
+			// Only compute insertion index for columns that use "manualOrder" as the sorting criteria.
 			if (!hasManualOrder) {
 				if (insertIndexRef.current !== null) {
 					scheduleSetInsertIndex(null);
@@ -204,6 +203,23 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				dragDropTasksManagerInsatance.clearDesiredDropIndex();
 				return;
 			} else {
+				// APPROACH 1 - COMPUTE INSERTION INDEX BASED ON MOUSE Y POSITION BY COMPARING WITH TASK ITEM BOUNDING RECTANGLES
+				// Else will proceed with finding the insertion index
+				// const container = e.currentTarget.parentElement as HTMLDivElement;
+				// const children = Array.from(container.querySelectorAll('.taskItemFadeIn')) as HTMLElement[];
+				// let pos = children.length; // default to end
+				// const clientY = e.clientY;
+				// for (let i = 0; i < children.length; i++) {
+				// 	const child = children[i];
+				// 	const rect = child.getBoundingClientRect();
+				// 	const midpoint = rect.top + rect.height / 2;
+				// 	if (clientY < midpoint) {
+				// 		pos = i;
+				// 		break;
+				// 	}
+				// }
+
+				// APPROACH 2 - DIRECTLY FETCH THE INDEX FROM THE DATA ATTRIBUTE OF THE HOVERED ELEMENT
 				let pos = 0;
 				const hoveredElement = e.currentTarget;
 				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
@@ -219,9 +235,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					} else {
 						pos = parseInt(draggedOverItemIndex, 10) + 1;
 					}
+
+					// Throttle updates via RAF
 					scheduleSetInsertIndex(pos);
 					dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
 				} else {
+					// Clear any visual placeholder and desired index
 					if (insertIndexRef.current !== null) {
 						scheduleSetInsertIndex(null);
 					}
@@ -236,10 +255,15 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		}
 	}, [scheduleSetInsertIndex, columnData]);
 
+	/**
+	 * This function will only run when user will drag the taskItem on a emtpy tasksContainer.
+	 * If dragged over another taskItem within this tasksContainer, then handleTaskItemDragOver function will run.
+	*/
 	const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
-		setIsDragOver(true);
+		// setIsDragOver(true);
 		try {
+			// Get the target column container
 			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
 			dragDropTasksManagerInsatance.handleColumnDragOverEvent(e.nativeEvent, columnData, targetColumnContainer);
 		} catch (error) {
@@ -247,14 +271,20 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		}
 	}, [columnData]);
 
+	/**
+	 * Handles the dragleave event to remove the visual effect
+	 */
 	const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		try {
+			// Avoid flicker: if the drag event indicates the pointer is still within the container bounds,
+			// ignore this dragleave (this happens when moving between child elements).
 			const container = e.currentTarget as HTMLElement;
 			const x = e.clientX;
 			const y = e.clientY;
 			if (typeof x === 'number' && typeof y === 'number') {
 				const rect = container.getBoundingClientRect();
 				if (x >= rect.left + 10 && x <= rect.right - 10 && y >= rect.top && y <= rect.bottom) {
+					// still inside container — ignore to prevent CSS flicker
 					return;
 				}
 			}
@@ -262,26 +292,46 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			console.log("While drag leave : ", err);
 		}
 
-		setIsDragOver(false);
+		// setIsDragOver(false);
 		setInsertIndex(null);
+		// Let manager clean up the column highlight
 		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget as HTMLDivElement);
 		dragDropTasksManagerInsatance.clearDesiredDropIndex();
 	}, []);
 
+	/**
+	 * Handles the drop event of a task when its dropped over either another task or within an empty column.
+	 * 
+	 * Moves the task from its orginal column to the target column.
+	 * If manualSorting is enabled for the target column, Moves the task from its original 
+	 * position (dragIndex) to the new position (dropIndex). And updates the localTasks state 
+	 * and the columnData.tasksIdManualOrder.
+	 * Clears the raf timer to prevent any pending raf calls.
+	 * 
+	 * @param {React.DragEvent<HTMLDivElement>} e - The drag event.
+	 */
 	const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
-		setIsDragOver(false);
+		// setIsDragOver(false);
 		setInsertIndex(null);
 
 		try {
-			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+			// Get the target column container
+			const targetColumnContainer = tasksContainerRef.current;
+			// const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
 			if (!targetColumnContainer) {
 				throw `e.currentTarget not found : ${JSON.stringify(targetColumnContainer)}`;
 			}
 
-			dragDropTasksManagerInsatance.handleDropEvent(e.nativeEvent, columnData, targetColumnContainer, swimlaneData);
+			dragDropTasksManagerInsatance.handleDropEvent(columnData, targetColumnContainer, swimlaneData);
 			dragDropTasksManagerInsatance.clearCurrentDragData();
 			dragDropTasksManagerInsatance.clearDesiredDropIndex();
+
+			// clear any pending raf
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(118, String(error), "LazyColumn.tsx/handleDrop");
 		}
@@ -294,7 +344,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				cancelAnimationFrame(rafRef.current);
 				rafRef.current = null;
 			}
+
+			// Clean up navigation visibility class when component unmounts
+			// if (isNavHiddenRef.current) {
 			document.documentElement.classList.remove('is-hidden-nav');
+			// isNavHiddenRef.current = false;
+			// }
 		};
 	}, []);
 
@@ -649,7 +704,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							onDragOver={(e) => { handleDragOver(e); }}
 							onDragLeave={handleDragLeave}
 							onDrop={handleDrop}
-							onDragEnd={(e) => { setIsDragOver(false); setInsertIndex(null); dragDropTasksManagerInsatance.clearAllDragStyling(); }}
+							onDragEnd={(e) => {
+								// setIsDragOver(false);
+								setInsertIndex(null);
+								dragDropTasksManagerInsatance.clearAllDragStyling();
+							}}
 						>
 							{columnData.minimized ? <></> : (
 								<>
@@ -680,9 +739,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																dataAttributeIndex: i,
 																plugin: plugin,
 																task: task,
-																activeViewType: viewTypeNames.kanban, // Since this Column component will be always rendered inside a Kanban view.
+																activeBoardID: activeBoardData.id,
 																activeViewIndex: currentViewIndex,
-																kanbanViewData: currentViewData,
+																activeViewType: viewTypeNames.kanban, // Since LazyColumn will be always rendered inside a Kanban view.
+																kanbanViewData: kanbanViewData,
 																columnIndex: columnData.index,
 																swimlaneData: swimlaneData
 															})}

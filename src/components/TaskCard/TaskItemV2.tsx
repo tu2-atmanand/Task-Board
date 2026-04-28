@@ -41,14 +41,16 @@ export interface TaskCardProps {
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
-	activeViewType: string;
+	activeBoardID: string;
 	activeViewIndex: number;
+	activeViewType: string;
+	// These are optional as this TaskItem can be shown either on Kanban view or Map view.
 	kanbanViewData?: KanbanView;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
 }
 
-const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeViewType, activeViewIndex, kanbanViewData, columnIndex, swimlaneData }) => {
+const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeBoardID, activeViewIndex, activeViewType, kanbanViewData, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
@@ -926,7 +928,14 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		}
 		try {
 			const el = taskItemRef.current as HTMLDivElement;
-			const payload: currentDragDataPayload = { task, taskIndex: String(dataAttributeIndex), sourceColumnData: columnData, currentViewIndex: activeViewIndex, swimlaneData: swimlaneData };
+			const payload: currentDragDataPayload = {
+				task,
+				taskIndex: String(dataAttributeIndex),
+				sourceColumnData: columnData,
+				currentViewIndex: activeViewIndex,
+				currentBoardID: activeBoardID,
+				swimlaneData: swimlaneData
+			};
 			// Delegate to manager for standardized behavior (sets current payload and dims element)
 			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload);
 		} catch (err) {
