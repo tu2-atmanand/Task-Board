@@ -1,7 +1,7 @@
 // src/components/KanbanBoard.tsx
 
 import { t } from "i18next";
-import React, { memo, useMemo, useState } from "react";
+import React, { memo, useMemo, useState, useEffect } from "react";
 import TaskBoard from "../../../main.js";
 import type { Board, ColumnData, KanbanView, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
 import type { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
@@ -21,7 +21,7 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
 	const [loading, setLoading] = useState(true);
 
-	// const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 	const columns = currentView?.kanbanView?.columns || [];
 
 	// Second memo: Segregate filtered tasks by column (for Kanban view only)
@@ -57,7 +57,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 
 	const renderColumns = (columns: ColumnData[], tasks: taskItem[][]) => {
 		return columns.map((column, index) => (
-			<MemoizedColumn
+			<LazyColumn
 				key={`${column.id}-${index}`}
 				plugin={plugin}
 				activeBoardData={currentBoardData}
@@ -65,7 +65,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 				currentViewIndex={currentViewIndex}
 				columnData={column}
 				tasksForThisColumn={tasks[index] || []}
-				Component={ColumnComponent}
 			/>
 		));
 	};
@@ -139,25 +138,25 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 	);
 };
 
-const MemoizedColumn = memo<{
-	plugin: TaskBoard;
-	activeBoardData: Board;
-	currentViewIndex: number;
-	kanbanViewData: KanbanView;
-	columnData: ColumnData;
-	tasksForThisColumn: taskItem[];
-	Component: typeof LazyColumn;
-}>(({ Component, ...props }) => {
-	return <Component {...props} />;
-}, (prevProps, nextProps) => {
-	return (
-		prevProps.activeBoardData === nextProps.activeBoardData &&
-		prevProps.currentViewIndex === nextProps.currentViewIndex &&
-		prevProps.kanbanViewData === nextProps.kanbanViewData &&
-		prevProps.columnData === nextProps.columnData &&
-		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
-		prevProps.Component === nextProps.Component
-	);
-});
+// const MemoizedColumn = memo<{
+// 	plugin: TaskBoard;
+// 	activeBoardData: Board;
+// 	currentViewIndex: number;
+// 	kanbanViewData: KanbanView;
+// 	columnData: ColumnData;
+// 	tasksForThisColumn: taskItem[];
+// 	Component: typeof LazyColumn;
+// }>(({ Component, ...props }) => {
+// 	return <Component {...props} />;
+// }, (prevProps, nextProps) => {
+// 	return (
+// 		prevProps.activeBoardData === nextProps.activeBoardData &&
+// 		prevProps.currentViewIndex === nextProps.currentViewIndex &&
+// 		prevProps.kanbanViewData === nextProps.kanbanViewData &&
+// 		prevProps.columnData === nextProps.columnData &&
+// 		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
+// 		prevProps.Component === nextProps.Component
+// 	);
+// });
 
 export default memo(KanbanBoard);
