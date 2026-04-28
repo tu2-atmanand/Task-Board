@@ -902,18 +902,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding-inline: 0.6rem;
 }
 
-/* Smooth movement for task items when placeholder is inserted */
-.taskItemFadeIn {
-	transition: transform 0.12s ease-in-out, margin 0.12s ease-in-out;
-}
-
-.tasksContainer .taskItemFadeIn {
-	will-change: transform, margin;
-}
-
 
 /* ------------------------------------------------
-	/src/components/TaskItem.tsx 
+	       /src/components/TaskItem.tsx 
 -------------------------------------------------*/
 
 .taskItemContainer {
@@ -1600,9 +1591,21 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	 /src/components/MapView/MapView.tsx 
 -----------------------------------------------------------*/
 
-.taskBoardMapViewWrapper {
+.taskBoardMapViewContainer {
 	opacity: 0;
 	animation: mapViewFadeIn 0.5s ease-in forwards;
+}
+
+@keyframes mapViewFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .taskBoardMapViewContainer {
@@ -1643,18 +1646,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskBoardMapViewContainerNodeResizerEdges:hover {
 	background-color: red;
-}
-
-@keyframes mapViewFadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(20px);
-	}
-
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
 }
 
 /*------------------------------------------------------------
