@@ -1184,7 +1184,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 											</div>
 
 											{/* Custom Dropdown Menu */}
-											<div className={`taskBoardViewDropdownMenu`}>
+											<div className={`taskBoardViewDropdownMenu ${showViewDropdown ? 'taskBoardViewDropdownMenu--open' : ''}`}>
 												{boardData.views.map((view, index) => (
 													<div
 														key={`${view.viewId}-${index}`}
