@@ -4,6 +4,7 @@ import { Board } from "../interfaces/BoardConfigs.js";
 import TaskBoardFileManager from "../managers/TaskBoardFileManager.js";
 import { MultiSuggest } from "../services/MultiSuggest.js";
 import { generateRandomNumber } from "../utils/TaskItemUtils.js";
+import { CURRENT_REVISION } from "../interfaces/Constants.js";
 
 interface MergeBoardsModalProps {
 	plugin: TaskBoard;
@@ -243,7 +244,7 @@ export class MergeBoardsModal extends Modal {
 		// Create merged board (prioritizing board1 for common settings)
 		const mergedBoard: Board = {
 			id: newId,
-			pluginVersion: this.plugin.settings.version,
+			revision: board1?.revision ?? CURRENT_REVISION,
 			name: this.newBoardName,
 			description: board1.description,
 			filterConfig: combinedFilterConfig,

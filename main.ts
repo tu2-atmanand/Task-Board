@@ -29,7 +29,7 @@ import {
 	TASKBOARD_FILE_EXTENSION,
 	OBSIDIAN_CLOSED_TIME_KEY,
 	DEFAULT_DATE_TIME_FORMAT,
-	newReleaseVersion,
+	CURRENT_PLUGIN_VERSION,
 	MANDATORY_SCAN_KEY,
 } from "./src/interfaces/Constants.js";
 import {
@@ -1539,7 +1539,7 @@ export default class TaskBoard extends Plugin {
 
 	private async runOnPluginUpdate() {
 		// Check if the plugin version has changed
-		const currentVersion = newReleaseVersion; // Change this whenever you will going to release a new version.
+		const currentVersion = CURRENT_PLUGIN_VERSION; // Change this whenever you will going to release a new version.
 		const runMandatoryScan = false; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
 		const previousVersion = this.settings.version;
 
@@ -1567,7 +1567,7 @@ export default class TaskBoard extends Plugin {
 			// 	});
 			// 	customMessageContainer.createEl("a", {
 			// 		text: "Task Board v1.9.4",
-			// 		href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${newReleaseVersion}`,
+			// 		href: `https://github.com/tu2-atmanand/Task-Board/releases/tag/${CURRENT_PLUGIN_VERSION}`,
 			// 	});
 			// }
 
