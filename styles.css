@@ -2286,7 +2286,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-between;
-	padding: 1em;
+	padding: 0.5em;
 	border-radius: 4px;
 	max-height: calc(var(--dialog-max-height) - 5dvh);
 	position: sticky;
@@ -2331,8 +2331,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: column;
 	gap: 0.5em;
 	width: 100%;
-	overflow-y: scroll;
+	overflow-y: auto;
 	max-height: calc(var(--dialog-max-height) - 30dvh);
+	scroll-behavior: smooth;
 }
 
 .boardConfigModalSidebarBtnAreaConfigBtnsSection {
@@ -2343,35 +2344,105 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .boardConfigModalSidebarBtnArea-btn {
-	border-radius: 1rem;
 	border: var(--border-width) solid var(--table-header-border-color);
-	padding: 8px;
+	border-radius: var(--button-radius);
+	padding: 5px;
+	padding-right: 28px;
+	/* ← Space for the overlay drag handle */
 	cursor: pointer;
 	display: flex;
-	align-content: center;
+	align-items: center;
 	justify-content: space-between;
 	flex-direction: row;
-	gap: 0.5rem;
+	font-size: small;
+	position: relative;
+	/* ← CRITICAL: Creates positioning context for absolute child */
+	overflow: visible;
+	/* ← Allow drag handle to overflow visually */
 }
 
-.boardConfigModalSidebarBtnArea-btn-active {
-	box-shadow: var(--button-shadow) !important;
-	background: var(--background-primary-alt) !important;
-	border-radius: var(--button-radius);
+.boardConfigModalSidebarBtnArea-btn.active {
 	border: var(--border-width) solid var(--interactive-accent);
-	padding: 8px;
-	cursor: pointer;
+	background: var(--background-primary-alt) !important;
+	box-shadow: var(--button-shadow) !important;
+	font-weight: bold;
+}
+
+.boardConfigModalSidebarBtnArea-btn-leftSec {
 	display: flex;
-	align-content: center;
-	justify-content: space-between;
 	flex-direction: row;
 	gap: 0.5rem;
+	align-items: center;
+	justify-content: flex-start;
+	flex: 1;
+	/* ← Take all available horizontal space */
+	min-width: 0;
+	/* ← Allow truncation if needed */
+	overflow: hidden;
+	/* ← Contain text overflow */
+}
+
+.boardConfigModalSidebarBtnArea-btn-leftSecIcon {
+	min-width: fit-content;
 }
 
 .boardConfigModalSidebarBtnArea-btn-drag-handle {
+	position: absolute;
+	/* ← Remove from normal flow */
+	right: 4px;
+	/* ← Position from right edge */
+	top: 50%;
+	/* ← Vertically center */
+	transform: translateY(-50%);
+	/* ← Perfect vertical centering */
+
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	opacity: 0;
+	/* ← Hidden by default */
+	visibility: hidden;
+	/* ← Also hide from accessibility tree */
+	z-index: 10;
+	/* ← Appear above other content */
+
 	cursor: grab;
-	align-self: center;
-	min-width: 20px;
+	color: var(--text-faint);
+	transition: opacity 0.15s ease, visibility 0.15s ease, color 0.15s ease;
+
+	/* Optional: subtle background for better visibility */
+	padding: 2px;
+	border-radius: var(--radius-s);
+}
+
+.boardConfigModalSidebarBtnArea-btn-drag-handle:active {
+	cursor: grabbing;
+	color: var(--interactive-accent);
+}
+
+.boardConfigModalSidebarBtnArea-btn:hover .boardConfigModalSidebarBtnArea-btn-drag-handle {
+	opacity: 1;
+	visibility: visible;
+	color: var(--text-normal);
+}
+
+@keyframes subtlePulse {
+
+	0%,
+	100% {
+		opacity: 0;
+	}
+
+	50% {
+		opacity: 1;
+	}
+}
+
+.boardConfigModalSidebarBtnArea-btn.active .boardConfigModalSidebarBtnArea-btn-drag-handle {
+	animation: subtlePulse 2s ease-in-out infinite;
 }
 
 .boardConfigModalSidebarSaveBtn {

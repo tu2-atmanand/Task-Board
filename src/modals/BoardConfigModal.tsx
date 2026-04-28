@@ -485,11 +485,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		let viewType = viewTypeName ?? currentBoardData.views[currentViewIndex].viewType;
 		switch (viewType) {
 			case viewTypeNames.kanban:
-				return <SquareKanban size={size} strokeWidth={1.5} />;
+				return <SquareKanban className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size} strokeWidth={1.5} />;
 			case viewTypeNames.map:
-				return <Network size={size - 2} strokeWidth={1.5} />;
+				return <Network className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
 			default:
-				return <BrickWall size={size - 2} strokeWidth={1.5} />;
+				return <BrickWall className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
 		}
 	}
 
@@ -1163,16 +1163,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											{allViewsData.map((view, index) => (
 												<div
 													key={view.viewName} // Changed key from index to view.name
-													className={`boardConfigModalSidebarBtnArea-btn${index === selectedViewIndex ? "-active" : ""}`}
+													className={`boardConfigModalSidebarBtnArea-btn${index === selectedViewIndex ? " active" : ""}`}
 													onClick={() => {
 														setSelectedViewIndex(index);
 														toggleSidebar();
 													}}
 												>
-													{getViewTypeIconComponent(view.viewType, 14)}
-													<span>
-														{view.viewName}
-													</span>
+													<div className="boardConfigModalSidebarBtnArea-btn-leftSec">
+														{getViewTypeIconComponent(view.viewType, 20)}
+														<span>
+															{view.viewName}
+														</span>
+													</div>
+
 													<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
 												</div>
 											))}
