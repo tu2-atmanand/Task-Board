@@ -21,7 +21,7 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
 	const [loading, setLoading] = useState(true);
 
-	const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+	// const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
 	const columns = currentView?.kanbanView?.columns || [];
 
 	// Second memo: Segregate filtered tasks by column (for Kanban view only)
@@ -50,7 +50,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 	if (!currentView?.kanbanView) {
 		return (
 			<div className="emptyBoardMessage">
-				{t("Looks like the view data has been currupted. Please try duplicating this view or create a fresh new view.")}
+				{t("Looks like the Kanban view data has been currupted. Please try duplicating this view or create a fresh new view.")}
 			</div>
 		)
 	}
@@ -127,7 +127,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 					) : (
 						<div className="columnsContainer">
 							{renderColumns(
-								currentView.kanbanView!.columns?.filter((column) => column.active) || [],
+								columns.filter((column) => column.active) || [],
 								allTasksArrangedPerColumn
 							)}
 						</div>

@@ -353,10 +353,10 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		};
 	}, []);
 
-	const shouldRenderEmptyColumn = !headerOnly && tasksForThisColumn?.length === 0;
-	if (shouldRenderEmptyColumn) {
-		return null;
-	}
+	// const shouldRenderEmptyColumn = !headerOnly && tasksForThisColumn?.length === 0;
+	// if (shouldRenderEmptyColumn) {
+	// 	return null;
+	// }
 
 	const columnWidth = plugin.settings.data.columnWidth || '273px';
 
@@ -601,6 +601,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					if (updatedBoardData.views[currentViewIndex].kanbanView) {
 						updatedBoardData.views[currentViewIndex].kanbanView = updatedViewData;
 						plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+
+						eventEmitter.emit('REFRESH_BOARD');
 					}
 
 					// const boardIndex = activeBoardData.index;
