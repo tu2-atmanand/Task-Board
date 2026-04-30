@@ -11,7 +11,7 @@ import { t } from "i18next";
 import TaskBoard from "../../main.js";
 import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../interfaces/BoardConfigs.js";
 import { viewTypeNames, colTypeNames, UniversalDateOptions } from "../interfaces/Enums.js";
-import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
+import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions } from "../services/MultiSuggest.js";
 import { SettingsManager } from "../settings/SettingConstructUI.js";
@@ -21,6 +21,7 @@ import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
+import { CustomStatus } from "../interfaces/GlobalSettings.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -318,7 +319,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		};
 
 		const swimlaneModal = new SwimlanesConfigModal(
-			plugin.app,
+			plugin,
 			currentSwimlaneConfig,
 			(updatedConfig: swimlaneConfigs) => {
 				const updatedViewsData = [...allViewsData];
@@ -410,7 +411,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		deleteModal.open();
 	};
 
-	// Board Management - Function to handle changing the name of the active view.
+	// TaskBoardView Management - Function to handle changing the name of the active view.
 	const handleViewNameChange = (index: number, newName: string) => {
 		const updatedViewsData = [...allViewsData];
 		updatedViewsData[index].viewName = newName;
@@ -631,6 +632,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			);
 		}
 
+		const statusOptions = getCustomStatusOptionsForDropdown(
+			plugin.settings.data.customStatuses,
+			{
+				mode: 'grouped',
+				showTooltips: true,
+			}
+		);
+
 		return (
 			<div className="boardConfigModalMainContent-Active">
 				<div className="boardConfigModalMainContent-Active-TopSec">
@@ -813,12 +822,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													)}
 													{column.colType === colTypeNames.taskStatus && (
 														<>
-															<input
-																type="text"
-																placeholder={t("enter-status-placeholder")}
+															<select
 																aria-label={t("task-status")}
-																value={column.taskStatus || ""}
-																onChange={(e) =>
+																value={column.taskStatus || " "}
+																onChange={(e) => {
+																	debugger;
 																	handleColumnChange(
 																		viewIndex,
 																		columnIndex,
@@ -826,8 +834,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																		e.target.value
 																	)
 																}
-																className="boardConfigModalColumnRowContentColName"
-															/>
+																}
+																className="boardConfigModalColumnRowContentColDatedVal"
+															>
+																{statusOptions.type === 'grouped' && statusOptions.groups.map((group) => (
+																	<optgroup key={group.type} label={group.label}>
+																		{group.options.map((opt) => (
+																			<option
+																				key={`${opt.value}-${group.type}`}
+																				value={opt.value}
+																				title={opt.tooltip}
+																			>
+																				{opt.label}
+																			</option>
+																		))}
+																	</optgroup>
+																))}
+															</select>
 															<input
 																type="number"
 																placeholder={t("work-limit")}

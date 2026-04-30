@@ -692,17 +692,39 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			item.setTitle(t("status"));
 			const statusMenu = item.setSubmenu()
 
-			const customStatues = getCustomStatusOptionsForDropdown(plugin.settings.data.customStatuses);
-			customStatues.forEach((status) => {
+			const statusOptions = getCustomStatusOptionsForDropdown(
+				plugin.settings.data.customStatuses,
+				{ mode: 'flat' } // Context menus don't support optgroups, use flat
+			);
+
+			// Handle both output types for future-proofing
+			const options = statusOptions.type === 'flat'
+				? statusOptions.options
+				: statusOptions.groups.flatMap(group => group.options);
+
+			options.forEach((status) => {
 				statusMenu.addItem((item) => {
-					MarkdownUIRenderer.renderSubtaskText(plugin.app, `- [${status.value}] ${status.name} **[${status.value}]**`, item.titleEl, '', null);
-					// item.setTitle(status.text);
-					// item.setIcon("eye-off"); // TODO : In future map lucude-icons with the ITS theme emoji icons for custom statuses.
+					// Render status with markdown formatting
+					MarkdownUIRenderer.renderSubtaskText(
+						plugin.app,
+						`- [${status.value}] ${status.label}`,
+						item.titleEl,
+						'',
+						null
+					);
+
 					item.onClick(() => {
 						updateTaskItemStatus(plugin, task, task, status.value);
-					})
+					});
 				});
-			})
+			});
+
+			// Optional: Add visual separator groups if using grouped mode
+			if (statusOptions.type === 'grouped') {
+				// Rebuild menu with group separators (requires clearing and re-adding)
+				// Note: Obsidian Menu API doesn't natively support optgroups, 
+				// so this is a visual workaround using disabled items
+			}
 		});
 
 		// Priority submenu
@@ -1179,7 +1201,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status) && task?.status && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("status")}</div>
-										<div className='taskItemFooterPropertyContainerValue'>{getStatusNameFromStatusSymbol(task.status, globalSettings)}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{getStatusNameFromStatusSymbol(task.status, globalSettings.customStatuses ?? [])}</div>
 									</div>
 								)}
 								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time) && task?.time && (
