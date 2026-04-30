@@ -39,7 +39,6 @@
     "scanMode": "automatic",
     "columnWidth": "300px",
     "visiblePropertiesList": [
-      "id",
       "title",
       "tags",
       "time",
@@ -54,10 +53,11 @@
       "dependsOn",
       "checkbox",
       "status",
-      "subTasks"
+      "subTasks",
+      "id"
     ],
     "taskCardStyle": "emoji",
-    "showVerticalScroll": true,
+    "showVerticalScroll": false,
     "tagColors": [
       {
         "name": "bug",
@@ -83,7 +83,7 @@
     "editButtonAction": "popUp",
     "doubleClickCardToEdit": "none",
     "universalDate": "due",
-    "tagColorsType": "text",
+    "tagColorsType": "tagBg",
     "customStatuses": [
       {
         "symbol": " ",
@@ -118,14 +118,14 @@
         "name": "Done",
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
-        "type": "DONE"
+        "type": "IN_PROGRESS"
       },
       {
         "symbol": "X",
         "name": "Completed",
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
-        "type": "DONE"
+        "type": "IN_PROGRESS"
       },
       {
         "symbol": "-",
@@ -133,6 +133,13 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": true,
         "type": "CANCELLED"
+      },
+      {
+        "symbol": "*",
+        "name": "Now",
+        "nextStatusSymbol": "r",
+        "availableAsCommand": false,
+        "type": "IN_PROGRESS"
       }
     ],
     "compatiblePlugins": {
@@ -246,12 +253,12 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": false,
-    "uniqueIdCounter": 634,
+    "uniqueIdCounter": 670,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-      "settingTab": 0,
+      "settingTab": 2,
       "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
