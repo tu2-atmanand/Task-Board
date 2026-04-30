@@ -3,11 +3,19 @@
 import { Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../../main.js";
 import { defaultTaskStatuses } from "../../interfaces/Enums.js";
-import { PluginDataJson, CustomStatus, globalSettingsData, FrontmatterFormattingInterface } from "../../interfaces/GlobalSettings.js";
+import {
+	PluginDataJson,
+	CustomStatus,
+	globalSettingsData,
+	FrontmatterFormattingInterface,
+} from "../../interfaces/GlobalSettings.js";
 import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { extractFrontmatterFromContent, updateFrontmatterProperties, createYamlFromObject } from "./FrontmatterOperations.js";
-
+import {
+	extractFrontmatterFromContent,
+	updateFrontmatterProperties,
+	createYamlFromObject,
+} from "./FrontmatterOperations.js";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -219,8 +227,7 @@ export function getStatusSymbolFromStatusName(
 	// }
 	// return " ";
 
-	const tasksPluginStatusConfigs =
-		settings.data.customStatuses;
+	const tasksPluginStatusConfigs = settings.data.customStatuses;
 	let statusSymbol = "";
 	tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 		if (customStatus.name === statusName) {
@@ -239,12 +246,12 @@ export function getStatusSymbolFromStatusName(
  */
 export function getStatusNameFromStatusSymbol(
 	statusSymbol: string | undefined,
-	globalSettings: globalSettingsData,
+	customStatuses: CustomStatus[],
 ): string {
 	if (!statusSymbol) return "pending";
 
-	if (globalSettings) {
-		const tasksPluginStatusConfigs = globalSettings.customStatuses;
+	if (customStatuses.length > 0) {
+		const tasksPluginStatusConfigs = customStatuses;
 		let statusName = "";
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (customStatus.symbol === statusSymbol) {
@@ -338,17 +345,20 @@ export async function updateFrontmatterInMarkdownFile(
 		}
 
 		// Method 1 - Using Obsidian's filemanager API.
-		await plugin.app.fileManager.processFrontMatter(file, (existing: customFrontmatterCache) => {
-			const updated = updateFrontmatterProperties(
-				plugin,
-				existing,
-				task,
-				forceId,
-			);
-			for (const key of Object.keys(updated)) {
-				existing[key] = updated[key];
-			}
-		});
+		await plugin.app.fileManager.processFrontMatter(
+			file,
+			(existing: customFrontmatterCache) => {
+				const updated = updateFrontmatterProperties(
+					plugin,
+					existing,
+					task,
+					forceId,
+				);
+				for (const key of Object.keys(updated)) {
+					existing[key] = updated[key];
+				}
+			},
+		);
 
 		return;
 

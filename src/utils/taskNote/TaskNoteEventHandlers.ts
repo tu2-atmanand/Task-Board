@@ -54,7 +54,7 @@ export const handleTaskNoteStatusChange = async (
 		}
 		const newStatusName = getStatusNameFromStatusSymbol(
 			newStatus.newSymbol,
-			plugin.settings.data,
+			plugin.settings.data.customStatuses ?? [],
 		);
 
 		// Update frontmatter with new status
