@@ -271,7 +271,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	z-index: 1;
 }
 
-.viewSwitcherBar::before {
+/* .viewSwitcherBar::before {
 	left: 0;
 	background: linear-gradient(to right, var(--background-primary), transparent);
 }
@@ -279,7 +279,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .viewSwitcherBar::after {
 	right: 0;
 	background: linear-gradient(to left, var(--background-primary), transparent);
-}
+} */
 
 .viewSwitcherBar.can-scroll-left::before,
 .viewSwitcherBar.can-scroll-right::after {
@@ -2626,8 +2626,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .boardConfigModalColumnRowContentColDatedVal {
-	min-width: 105px;
-	max-width: 111px;
+	min-width: 110px !important;
+	max-width: 150px !important;
 }
 
 .boardConfigModalColumnRowContentColDatedVal.border-red,
@@ -2638,6 +2638,19 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .boardConfigModalColumnRowContentColDatedVal.border-red:focus-within {
 	border-color: red;
 	border-width: 2px;
+}
+
+.boardConfigModalColumnRowContentColDatedVal:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+/* Style optgroup if using grouping */
+.boardConfigModalColumnRowContentColDatedVal optgroup {
+	font-weight: var(--font-semibold);
+	color: var(--text-muted);
+	background: var(--background-secondary);
 }
 
 .boardConfigModalColumnRowContentPriorityDropdown {
@@ -6634,6 +6647,32 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	min-height: 32px;
 }
 
+.swimlanesConfigSortRowDropdown:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+/* Style optgroup headers */
+.swimlanesConfigSortRowDropdown optgroup {
+	font-weight: var(--font-semibold);
+	color: var(--text-muted);
+	background: var(--background-secondary);
+}
+
+/* Style options within optgroup */
+.swimlanesConfigSortRowDropdown optgroup option {
+	font-weight: var(--font-normal);
+	color: var(--text-normal);
+	padding-left: 8px;
+}
+
+/* Disabled group headers */
+.swimlanesConfigSortRowDropdown optgroup:disabled {
+	color: var(--text-faint);
+	pointer-events: none;
+}
+
 .swimlanesConfigSortRowDeleteBtn {
 	flex-shrink: 0;
 	cursor: pointer;
@@ -6883,9 +6922,10 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 .swimlanesContainerIcon {
 	margin-top: 4px;
+	color: var(--text-faint);
 }
 
-/* Individual swimlane row */
+/* Vertical UI */
 .swimlaneRow {
 	display: flex;
 	flex-direction: column;
@@ -6896,6 +6936,115 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	width: max-content;
 	margin-bottom: 5px;
 }
+
+.swimlaneRow.verticalUI {
+	display: flex;
+	flex-direction: row;
+}
+
+.swimlaneRow.verticalUI.minimized {
+	min-height: 2rem;
+	min-width: 100%;
+	position: sticky;
+	left: 0;
+}
+
+.swimlaneHeaderContainer-vertical {
+	position: sticky;
+	background-color: var(--background-modifier-border-hover);
+	border-bottom: 1px solid var(--divider-color);
+	left: 0;
+	z-index: 5;
+	min-width: 2rem;
+	max-width: 2rem;
+	padding-block: 0.7rem;
+	min-height: 200px;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical {
+	min-width: 100%;
+	max-width: max-content;
+	padding-block: 0;
+	min-height: 2rem;
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+}
+
+.swimlaneHeader-vertical {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 600;
+	/* margin-block: 1rem; */
+	color: var(--text-normal);
+	font-size: 0.9em;
+	text-align: center;
+	white-space: nowrap;
+	/* overflow: hidden; */
+	text-overflow: ellipsis;
+	min-height: 100%;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
+	display: flex;
+	flex-direction: row-reverse;
+	gap: 1rem;
+	padding-inline: 0.2rem;
+}
+
+.swimlaneHeaderName-vertical {
+	font-weight: 600;
+	color: var(--text-normal);
+	justify-content: center;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-word;
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	gap: 0.7rem;
+
+	transform: rotate(270deg);
+	transition: transform 0.3s ease-in-out;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneHeaderName-vertical {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 1rem;
+
+	transform: rotate(0deg);
+}
+
+.swimlaneHeaderSwimlaneCount-vertical {
+	color: var(--text-muted);
+	font-size: smaller;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 4px;
+	padding-inline: 3px;
+
+	transform: rotate(270deg);
+	transition: transform 0.3s ease-in-out;
+}
+
+.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneHeaderSwimlaneCount-vertical {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 1rem;
+
+	transform: rotate(0deg);
+}
+
+/* Horizontal UI */
 
 .swimlaneRow.minimized {
 	display: flex;
@@ -6909,18 +7058,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	z-index: 5;
 	width: 100%;
 	transition: background-color 0.15s ease;
-}
-
-.swimlaneRow.verticalUI {
-	display: flex;
-	flex-direction: row;
-}
-
-.swimlaneRow.verticalUI.minimized {
-	min-height: 2rem;
-	min-width: 100%;
-	position: sticky;
-	left: 0;
 }
 
 /* First swimlane row - make headers sticky */
@@ -6943,41 +7080,20 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	border-right: 1px solid var(--divider-color);
 	left: 0;
 	z-index: 5;
-	width: 100%;
+	width: calc(var(--taskboard-leaf-width, 100%) - 25px);
 	flex-direction: row;
 	height: 2rem;
 }
 
-.swimlaneHeaderContainer-vertical {
-	position: sticky;
-	background-color: var(--background-modifier-border-hover);
-	border-bottom: 1px solid var(--divider-color);
-	left: 0;
-	z-index: 5;
-	min-width: 2rem;
-	max-width: 2rem;
-	padding-block: 1rem;
-	min-height: 200px;
-}
-
-.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical {
-	min-width: 100%;
-	max-width: max-content;
-	padding-block: 0;
-	min-height: 2rem;
-	display: flex;
-	flex-direction: row-reverse;
-	justify-content: flex-end;
-}
-
 .swimlaneHeader {
 	position: sticky;
-	left: 1rem;
+	left: 0;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	font-weight: 600;
 	padding-block: 1rem;
+	padding-inline: 1rem;
 	color: var(--text-normal);
 	font-size: 0.9em;
 	text-align: center;
@@ -6985,33 +7101,32 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	min-height: 100%;
+	min-width: 100%;
 	flex-direction: row;
 }
 
-.swimlaneHeader-vertical {
+.swimlaneHeaderLeftSec {
 	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: space-between;
-	font-weight: 600;
-	/* margin-block: 1rem; */
-	color: var(--text-normal);
-	font-size: 0.9em;
-	text-align: center;
-	white-space: nowrap;
-	/* overflow: hidden; */
-	text-overflow: ellipsis;
-	min-height: 100%;
+	flex-direction: row;
+	justify-content: flex-start;
 }
 
-.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
+.swimlaneHeaderName {
 	display: flex;
-	flex-direction: row-reverse;
 	align-items: center;
-	gap: 1rem;
+	justify-content: flex-start;
+	flex-direction: row;
+	gap: 0.5rem;
 }
 
-/* Swimlane label on the left */
+.swimlaneHeaderNameLable {
+	font-size: small;
+	color: var(--text-muted);
+	height: 100%;
+	display: flex;
+	padding-bottom: 3px;
+}
+
 .swimlaneLabel {
 	font-weight: 600;
 	color: var(--text-normal);
@@ -7024,44 +7139,15 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	z-index: 5;
 }
 
-.swimlaneLabel-vertical {
-	font-weight: 600;
-	color: var(--text-normal);
-	justify-content: center;
-	text-align: center;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	word-break: break-word;
-	z-index: 5;
-	transform: rotate(270deg);
-}
-
-.swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneLabel-vertical {
-	transform: rotate(0deg);
-
-	transition: transform 0.3s ease-in-out;
-}
-
 .swimlaneHeaderSwimlaneCount {
 	color: var(--text-muted);
-	font-size: 0.9em;
+	font-size: smaller;
 	font-weight: 500;
 	padding-block: 3px;
 	border: 1px solid var(--text-muted);
-	border-radius: 1rem;
-	padding-inline: 7px;
+	border-radius: 4px;
+	padding-inline: 3px;
 	margin-left: 1rem;
-}
-
-.swimlaneHeaderSwimlaneCount-vertical {
-	color: var(--text-muted);
-	font-size: 0.9em;
-	font-weight: 500;
-	padding-block: 3px;
-	border: 1px solid var(--text-muted);
-	border-radius: 1rem;
-	padding-inline: 7px;
 }
 
 /* Wrapper for all columns in a swimlane */
@@ -7121,6 +7207,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	align-items: center;
 	padding: 0 6px;
+	color: var(--text-muted);
 }
 
 .swimlaneHeaderContainerMinimizICon svg {

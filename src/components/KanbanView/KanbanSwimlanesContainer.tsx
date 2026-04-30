@@ -11,6 +11,7 @@ import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
 import { getAllTaskTags } from '../../utils/TaskItemUtils.js';
 import LazyColumn from './LazyColumn.js';
+import { getStatusNameFromStatusSymbol } from '../../utils/taskNote/TaskNoteUtils.js';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -197,7 +198,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				});
 			});
 
-			const swimlaneName = t(property) + ': ' + swimlaneItem.value;
+			const statusName = getStatusNameFromStatusSymbol(swimlaneItem.value, plugin.settings.data.customStatuses ?? []);
+			const swimlaneName = property === 'status' ? (statusName ? statusName : 'All rest') : swimlaneItem.value;
 			const isSwimlaneMinimized = minimized?.includes(swimlaneName) ?? false;
 
 			return {
@@ -358,11 +360,12 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 											<div className='swimlaneHeaderSwimlaneCount-vertical'>
 												{swimlane.tasks.flat().length ?? 0}
 											</div>
-											<div className="swimlaneLabel-vertical" title={swimlane.swimlaneName}>
-												{swimlane.swimlaneName}
+											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName}>
+												<div className='swimlaneHeaderNameLable'>{property}:</div>
+												<div className='swimlaneHeaderNameValue'>{swimlane.swimlaneName}</div>
 											</div>
 											<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
-												{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
+												<ChevronRight />
 											</div>
 										</div>
 									</div>
@@ -396,11 +399,14 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									{/* Swimlane Label */}
 									<div className='swimlaneHeaderContainer'>
 										<div className='swimlaneHeader'>
-											<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
-												{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
-											</div>
-											<div className="swimlaneLabel" title={swimlane.swimlaneName}>
-												{swimlane.swimlaneName}
+											<div className='swimlaneHeaderLeftSec'>
+												<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
+													{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
+												</div>
+												<div className="swimlaneHeaderName" title={swimlane.swimlaneName}>
+													<div className='swimlaneHeaderNameLable'>{property}:</div>
+													<div className='swimlaneHeaderNameValue'>{swimlane.swimlaneName}</div>
+												</div>
 											</div>
 											<div className='swimlaneHeaderSwimlaneCount'>
 												{swimlane.tasks.flat().length ?? 0}
@@ -480,12 +486,12 @@ function getPropertyValues(
 				values = allTags.map((tag: string) => {
 					if (typeof tag === 'string') return tag.replace('#', '');
 					return '';
-				}).filter((v: string) => v);
+				}).filter((v: string) => v.trim());
 			}
 			break;
 
 		case 'priority':
-			if (task.priority !== undefined && task.priority !== null) {
+			if (typeof task.priority === 'number') {
 				values = [String(task.priority)];
 			}
 			break;
@@ -524,7 +530,7 @@ function getPropertyValues(
 			break;
 	}
 
-	return values.filter((v) => v && v.trim());
+	return values;
 }
 
 /**

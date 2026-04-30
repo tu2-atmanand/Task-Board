@@ -81,6 +81,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			const taskBoardLeaf = currentLeaf;
 			if (taskBoardLeaf) {
 				setviewWidth(taskBoardLeaf.width);
+				document.documentElement.style.setProperty('--taskboard-leaf-width', `${taskBoardLeaf.width}px`);
 			}
 		};
 
