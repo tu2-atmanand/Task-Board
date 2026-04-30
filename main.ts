@@ -206,6 +206,8 @@ export default class TaskBoard extends Plugin {
 
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
 		// onUnloadSave(this.plugin);
+
+		// Obsidian already does this, no need to manually detach.
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
 
@@ -389,21 +391,23 @@ export default class TaskBoard extends Plugin {
 		if (this.settings.data.experimentalFeatures) {
 			// @ts-ignore
 			const embedRegistry = this.app.embedRegistry as EmbedRegistry;
-			embedRegistry.registerExtension(
-				TASKBOARD_FILE_EXTENSION,
-				(context, file, _) => {
-					console.log("Context :", context, "\nFile :", file);
-
-					// @ts-ignore
-					return new TaskBoardEmbedComponent(
-						context.containerEl,
-						this,
+			if (
+				!embedRegistry?.isExtensionRegistered(TASKBOARD_FILE_EXTENSION)
+			) {
+				embedRegistry?.registerExtension(
+					TASKBOARD_FILE_EXTENSION,
+					(context, file, _) => {
 						// @ts-ignore
-						file,
-						context.containerEl.getAttr("alt") || undefined,
-					) as any;
-				},
-			);
+						return new TaskBoardEmbedComponent(
+							context.containerEl,
+							this,
+							// @ts-ignore
+							file,
+							context.containerEl.getAttr("alt") || undefined,
+						) as any;
+					},
+				);
+			}
 		}
 
 		// Register AddOrEditTask view (can be opened in tabs or popout windows)
