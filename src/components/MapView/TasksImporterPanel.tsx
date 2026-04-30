@@ -219,11 +219,12 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 									>
 										<TaskItem
 											key={task.id}
+											dataAttributeIndex={0} // TODO : No need of this data in this case.
 											plugin={plugin}
 											task={task}
 											activeViewIndex={activeViewIndex}
 											activeViewType={viewTypeNames.map}
-											dataAttributeIndex={0} // TODO : No need of this data in this case.
+											activeBoardID={activeBoardSettings.id}
 										/>
 									</div>
 								))}
