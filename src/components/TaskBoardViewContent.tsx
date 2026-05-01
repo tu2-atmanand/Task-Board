@@ -69,6 +69,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 			const taskBoardLeaf = plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD)[0];
 			if (taskBoardLeaf) {
 				setLeafWidth(taskBoardLeaf.width);
+				document.documentElement.style.setProperty('--taskboard-leaf-width', `${taskBoardLeaf.width}px`);
 			}
 		};
 		handleResize();
