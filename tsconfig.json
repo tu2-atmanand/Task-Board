@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"baseUrl": ".",
 		"jsx": "react-jsx",
 		// "jsxFactory": "React.createElement",
 		// "jsxFragmentFactory": "React.Fragment",
