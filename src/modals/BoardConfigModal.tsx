@@ -16,7 +16,7 @@ import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colTypeNames, HeaderUITypeOptions, UniversalDateOptions } from "src/interfaces/Enums";
 import { Board, ColumnData, swimlaneConfigs } from "src/interfaces/BoardConfigs";
-import { columnTypeAndNameMapping, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
+import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { AddColumnModal } from "./AddColumnModal";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
@@ -165,7 +165,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		};
 
 		const swimlaneModal = new SwimlanesConfigModal(
-			plugin.app,
+			plugin,
 			currentSwimlaneConfig,
 			(updatedConfig: swimlaneConfigs) => {
 				const updatedBoards = [...localBoards];
@@ -540,6 +540,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 		const board = localBoards[boardIndex];
 
+		const statusOptions = getCustomStatusOptionsForDropdown(
+			plugin.settings.data.globalSettings.customStatuses,
+			{
+				mode: 'grouped',
+				showTooltips: true,
+			}
+		);
+
 		return (
 			<div className="boardConfigModalMainContent-Active">
 				<h2 className="boardConfigModalMainContent-Active-Heading">{board.name} {t("configurations")}</h2>
@@ -720,12 +728,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										)}
 										{column.colType === colTypeNames.taskStatus && (
 											<>
-												<input
-													type="text"
-													placeholder={t("enter-status-placeholder")}
+												<select
 													aria-label={t("task-status")}
-													value={column.taskStatus || ""}
-													onChange={(e) =>
+													value={column.taskStatus || " "}
+													onChange={(e) => {
+														debugger;
 														handleColumnChange(
 															boardIndex,
 															columnIndex,
@@ -733,8 +740,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															e.target.value
 														)
 													}
-													className="boardConfigModalColumnRowContentColName"
-												/>
+													}
+													className="boardConfigModalColumnRowContentColDatedVal"
+												>
+													{statusOptions.type === 'grouped' && statusOptions.groups.map((group) => (
+														<optgroup key={group.type} label={group.label}>
+															{group.options.map((opt) => (
+																<option
+																	key={`${opt.value}-${group.type}`}
+																	value={opt.value}
+																	title={opt.tooltip}
+																>
+																	{opt.label}
+																</option>
+															))}
+														</optgroup>
+													))}
+												</select>
 												<input
 													type="number"
 													placeholder={t("work-limit")}

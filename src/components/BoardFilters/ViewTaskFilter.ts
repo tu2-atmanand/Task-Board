@@ -96,13 +96,14 @@ export class TaskFilterComponent extends Component {
 				this.rootFilterState.filterGroups &&
 				Array.isArray(this.rootFilterState.filterGroups)
 			) {
-				this.rootFilterState.filterGroups = this.rootFilterState.filterGroups.filter(
-					(groupData) =>
-						groupData &&
-						typeof groupData === "object" &&
-						groupData.groupCondition &&
-						Array.isArray(groupData.filters)
-				);
+				this.rootFilterState.filterGroups =
+					this.rootFilterState.filterGroups.filter(
+						(groupData) =>
+							groupData &&
+							typeof groupData === "object" &&
+							groupData.groupCondition &&
+							Array.isArray(groupData.filters),
+					);
 			}
 		} else {
 			/**
@@ -313,11 +314,14 @@ export class TaskFilterComponent extends Component {
 				groupData &&
 				typeof groupData === "object" &&
 				groupData.groupCondition &&
-				Array.isArray(groupData.filters)
+				Array.isArray(groupData.filters),
 		);
 
 		// If invalid groups were found, update the state to remove them
-		if (validFilterGroups.length !== this.rootFilterState.filterGroups.length) {
+		if (
+			validFilterGroups.length !==
+			this.rootFilterState.filterGroups.length
+		) {
 			this.rootFilterState.filterGroups = validFilterGroups;
 			this.saveStateToLocalStorage();
 		}
@@ -884,26 +888,53 @@ export class TaskFilterComponent extends Component {
 				break;
 			case "status":
 				// valueInput.type = "text";
-
 				valueInput.style.display = "none";
 				// // First remove the older dropdown options present inside valueSelect
 				// if(valueSelect.selectEl.options.length > 0) {
 				// 	valueSelect.
 				// }
-				valueSelect.addOptions(
-					getCustomStatusOptionsForDropdown(
-						this.plugin.settings.data.globalSettings.customStatuses,
-					).reduce(
-						(
-							acc: Record<number | string, string>,
-							opt: statusDropDownOption,
-						) => {
-							acc[opt.value] = opt.text;
-							return acc;
-						},
-						{},
-					),
+
+				const statusOptions = getCustomStatusOptionsForDropdown(
+					this.plugin.settings.data.globalSettings.customStatuses,
+					{ mode: "grouped" },
 				);
+				const optionsRecord: Record<string, string> = {};
+				if (statusOptions.type === "grouped") {
+					statusOptions.groups.forEach((group) => {
+						// Add visual group separator (disabled option)
+						optionsRecord[`__group_${group.type}__`] =
+							`── ${group.label} ──`;
+
+						// Add actual status options under the group
+						group.options.forEach((opt) => {
+							optionsRecord[opt.value] = opt.label;
+						});
+					});
+				} else {
+					// Fallback for flat output
+					statusOptions.options.forEach((opt) => {
+						optionsRecord[opt.value] = opt.label;
+					});
+				}
+				valueSelect.addOptions(optionsRecord);
+				// Disable and style group header options after DOM render
+				setTimeout(() => {
+					Array.from(valueSelect.selectEl.options).forEach(
+						(option) => {
+							if (option.value.startsWith("__group_")) {
+								option.disabled = true;
+								option.style.cssText = `
+        color: var(--text-muted);
+        font-weight: var(--font-semibold);
+        background: var(--background-secondary);
+        pointer-events: none;
+        user-select: none;
+      `;
+							}
+						},
+					);
+				}, 0);
+
 				valueSelect.setValue(
 					filterData.value ||
 						getPriorityOptionsForDropdown()[0].value.toString(),
@@ -1501,19 +1532,20 @@ export class TaskFilterComponent extends Component {
 			});
 
 		this.rootFilterState = JSON.parse(JSON.stringify(state));
-		
+
 		// Clean up any invalid filter groups that might exist in loaded state
 		if (
 			this.rootFilterState.filterGroups &&
 			Array.isArray(this.rootFilterState.filterGroups)
 		) {
-			this.rootFilterState.filterGroups = this.rootFilterState.filterGroups.filter(
-				(groupData) =>
-					groupData &&
-					typeof groupData === "object" &&
-					groupData.groupCondition &&
-					Array.isArray(groupData.filters)
-			);
+			this.rootFilterState.filterGroups =
+				this.rootFilterState.filterGroups.filter(
+					(groupData) =>
+						groupData &&
+						typeof groupData === "object" &&
+						groupData.groupCondition &&
+						Array.isArray(groupData.filters),
+				);
 		}
 
 		this.saveStateToLocalStorage();
