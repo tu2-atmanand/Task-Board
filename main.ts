@@ -31,6 +31,7 @@ import { TaskBoardIcon } from "src/interfaces/Icons";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab";
 import { ModifiedFilesModal } from "src/modals/ModifiedFilesModal";
 import {
+	DEFAULT_DATE_TIME_FORMAT,
 	newReleaseVersion,
 	OBSIDIAN_CLOSED_TIME_KEY,
 	VIEW_TYPE_TASKBOARD,
@@ -50,6 +51,7 @@ import { dragDropTasksManagerInsatance } from "src/managers/DragDropTasksManager
 import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
+import { parse } from "date-fns";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -940,26 +942,37 @@ export default class TaskBoard extends Plugin {
 	 * till now.
 	 */
 	async findModifiedFilesOnAppAbsense() {
-		let OBSIDIAN_CLOSED_TIME = this.app.loadLocalStorage(
+		const storedTime = this.app.loadLocalStorage(
 			OBSIDIAN_CLOSED_TIME_KEY,
-		);
+		) as string | undefined;
 
-		if (!OBSIDIAN_CLOSED_TIME)
-			OBSIDIAN_CLOSED_TIME = this.vaultScanner.tasksCache.Modified_at;
+		let OBSIDIAN_CLOSED_TIME: Date | undefined;
+
+		if (storedTime) {
+			OBSIDIAN_CLOSED_TIME = parse(
+				storedTime,
+				DEFAULT_DATE_TIME_FORMAT,
+				new Date(),
+			);
+		} else {
+			OBSIDIAN_CLOSED_TIME = parse(
+				this.vaultScanner.tasksCache.Modified_at,
+				DEFAULT_DATE_TIME_FORMAT,
+				new Date(),
+			);
+		}
 
 		if (OBSIDIAN_CLOSED_TIME) {
-			OBSIDIAN_CLOSED_TIME = Date.parse(OBSIDIAN_CLOSED_TIME);
 			let filesScannedCount = 0;
 			const modifiedCreatedRenamedFiles = this.app.vault
 				.getFiles()
 				.filter((file) => {
 					filesScannedCount++;
 					return (
-						file.stat.mtime > OBSIDIAN_CLOSED_TIME ||
-						file.stat.ctime > OBSIDIAN_CLOSED_TIME
+						file.stat.mtime > OBSIDIAN_CLOSED_TIME!.getTime() ||
+						file.stat.ctime > OBSIDIAN_CLOSED_TIME!.getTime()
 					);
 				});
-
 			// Find deleted files by comparing cache with current vault files
 			const currentFilesPaths = new Set(
 				this.app.vault.getFiles().map((file) => file.path),

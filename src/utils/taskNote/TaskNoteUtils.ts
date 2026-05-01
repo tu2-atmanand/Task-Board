@@ -346,7 +346,7 @@ export async function updateFrontmatterInMarkdownFile(
 		}
 
 		// Method 1 - Using Obsidian's filemanager API.
-		await plugin.app.fileManager.processFrontMatter(file, (existing) => {
+		await plugin.app.fileManager.processFrontMatter(file, (existing: customFrontmatterCache) => {
 			const updated = updateFrontmatterProperties(
 				plugin,
 				existing,
