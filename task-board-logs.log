@@ -19,19 +19,6 @@
 ## Recent Bug Reports
 
 Timestamp : undefined
-ID : 185
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
 ID : 7
 Message : undefined
 Context : undefined
@@ -277,11 +264,24 @@ Error: File system operation timed out.
 Timestamp : 2026-04-29T15:41:04
 ID : 131
 Message : 
-Context : TaskBoardViewContainer.tsx/loading boards and tasks useEffect
+Context : undefined
 Version : 2.0.0-beta-2
 
 #### Bug Content
 ```log
 No need to worry about this bug, if its appearing on the fresh install.
 Error: File system operation timed out.
+```
+
+-------------
+
+Timestamp : 2026-04-30T13:16:52
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
 ```

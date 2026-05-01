@@ -43,7 +43,6 @@
       "tags",
       "time",
       "reminder",
-      "priority",
       "createdDate",
       "startDate",
       "scheduledDate",
@@ -51,9 +50,7 @@
       "completionDate",
       "cancelledDate",
       "dependsOn",
-      "checkbox",
       "status",
-      "subTasks",
       "id"
     ],
     "taskCardStyle": "emoji",
