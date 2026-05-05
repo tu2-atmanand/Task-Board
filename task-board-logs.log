@@ -42,3 +42,30 @@ Version : 2.0.0-beta-2
 ```log
 There was an issue with opening the last viewed board. lastViewedBoardData is undefined
 ```
+
+-------------
+
+Timestamp : 2026-05-05T20:46:49
+ID : 141
+Message : 
+Context : DragDropTasksManager.ts/handleColumnDragOverEvent
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-05-05T20:46:49
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```

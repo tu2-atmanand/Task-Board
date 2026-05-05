@@ -317,6 +317,12 @@
         "boardName": "Status Based Workflow",
         "boardDescription": ""
       },
+      "3103563481": {
+        "boardId": "3103563481",
+        "filePath": "My Project Board.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
       "3764827886": {
         "boardId": "3764827886",
         "filePath": "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
