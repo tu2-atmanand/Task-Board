@@ -7,9 +7,9 @@ import { taskItem } from "../../interfaces/TaskItem.js";
  * Gets the property value from a task based on the criteria name
  */
 function getTaskPropertyValue(
-	startTimeConfig: string,
 	task: taskItem,
-	criteria: string
+	criteria: string,
+	startTimeConfig: string,
 ): any {
 	switch (criteria) {
 		case "content":
@@ -145,7 +145,7 @@ function compareValues(
 	value1: any,
 	value2: any,
 	criteria: string,
-	order: "asc" | "desc"
+	order: "asc" | "desc",
 ): number {
 	// Handle date criteria
 	if (
@@ -271,7 +271,7 @@ function compareValues(
 export function columnSortingAlgorithm(
 	startTimeConfig: string,
 	tasksToDisplay: taskItem[],
-	sortCriteria: columnSortingCriteria[]
+	sortCriteria: columnSortingCriteria[],
 ): taskItem[] {
 	// Return empty array if no tasks
 	if (!tasksToDisplay || tasksToDisplay.length === 0) {
@@ -288,7 +288,7 @@ export function columnSortingAlgorithm(
 
 	// Sort criteria by priority (ascending order)
 	const orderedCriteria = [...sortCriteria].sort(
-		(a, b) => a.priority - b.priority
+		(a, b) => a.priority - b.priority,
 	);
 
 	// Apply sorting criteria in reverse order (lowest priority first)
@@ -299,14 +299,14 @@ export function columnSortingAlgorithm(
 
 		sortedTasks = sortedTasks.sort((taskA, taskB) => {
 			const valueA = getTaskPropertyValue(
-				startTimeConfig,
 				taskA,
-				criterion.criteria
+				criterion.criteria,
+				startTimeConfig,
 			);
 			const valueB = getTaskPropertyValue(
-				startTimeConfig,
 				taskB,
-				criterion.criteria
+				criterion.criteria,
+				startTimeConfig,
 			);
 
 			// if (criterion.criteria === "time") {
@@ -317,7 +317,7 @@ export function columnSortingAlgorithm(
 				valueA,
 				valueB,
 				criterion.criteria,
-				criterion.order
+				criterion.order,
 			);
 
 			// For priority and other criteria that already handle order internally,

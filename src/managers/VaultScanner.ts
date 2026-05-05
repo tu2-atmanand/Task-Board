@@ -226,7 +226,7 @@ export default class VaultScanner {
 
 					// Add to appropriate cache based on completion status
 					const isTaskNoteCompleted = isTaskCompleted(
-						taskNoteProperties.status || "",
+						taskNoteProperties.status || " ",
 						true,
 						this.plugin.settings,
 					);
