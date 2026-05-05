@@ -92,11 +92,12 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		if (activeColumns.length === 0) return [];
 
 		// Extract unique values for the swimlane property from tasksPerColumn
-		const uniqueSwimlanValues = extractUniquePropertyValuesFromColumns(
+		let uniqueSwimlanValues = extractUniquePropertyValuesFromColumns(
 			swimlaneColumnTasks,
 			property,
 			customValue
 		);
+		uniqueSwimlanValues.push("");
 
 		// Sort the swimlane values
 		let sortedSwimlaneValues: { value: string; index: number }[] = [];
