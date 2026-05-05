@@ -7148,6 +7148,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	border-radius: 4px;
 	padding-inline: 3px;
 	margin-left: 1rem;
+	min-width: 1.5rem;
 }
 
 /* Wrapper for all columns in a swimlane */
