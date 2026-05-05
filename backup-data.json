@@ -6,58 +6,43 @@
     "scanFilters": {
       "files": {
         "polarity": 3,
-        "values": [
-          "A new file added.md",
-          "Task_board_note.md"
-        ]
+        "values": []
       },
       "folders": {
         "polarity": 3,
-        "values": [
-          "Daily_Notes"
-        ]
+        "values": []
       },
       "frontmatter": {
         "polarity": 3,
-        "values": [
-          "[\"publish\": true]"
-        ]
+        "values": []
       },
       "tags": {
         "polarity": 3,
-        "values": [
-          "#placeholder"
-        ]
+        "values": []
       }
     },
     "firstDayOfWeek": "Mon",
     "showTaskWithoutMetadata": true,
     "ignoreFileNameDates": false,
     "taskPropertyFormat": "2",
+    "dailyNotesPluginComp": false,
     "dateFormat": "yyyy-MM-dd",
     "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",
-    "dailyNotesPluginComp": false,
     "defaultStartTime": "",
     "taskCompletionInLocalTime": true,
     "taskCompletionShowUtcOffset": false,
     "autoAddUniversalDate": true,
-    "autoAddCreatedDate": true,
-    "autoAddCompletedDate": true,
+    "autoAddCreatedDate": false,
+    "autoAddCompletedDate": false,
     "autoAddCancelledDate": false,
     "showModifiedFilesNotice": true,
     "scanMode": "automatic",
-    "columnWidth": "340px",
+    "columnWidth": "300px",
     "visiblePropertiesList": [
-      "checkbox",
-      "id",
       "title",
-      "subTasksMinimized",
-      "descriptionMinimized",
-      "status",
       "tags",
       "time",
       "reminder",
-      "priority",
       "createdDate",
       "startDate",
       "scheduledDate",
@@ -65,40 +50,35 @@
       "completionDate",
       "cancelledDate",
       "dependsOn",
-      "filePath"
+      "status",
+      "id"
     ],
-    "taskCardStyle": "bases",
+    "taskCardStyle": "emoji",
     "showVerticalScroll": false,
-    "dragAutoScrollEdgePercent": 20,
     "tagColors": [
       {
         "name": "bug",
-        "color": "rgba(167, 6, 6, 0.71)",
+        "color": "rgba(255, 0, 0, 0.55)",
         "priority": 1
       },
       {
         "name": "important",
-        "color": "rgba(161, 167, 9, 0.79)",
+        "color": "rgba(246, 255, 0, 0.53)",
         "priority": 2
       },
       {
         "name": "wip",
-        "color": "rgba(8, 149, 8, 0.78)",
+        "color": "rgba(0, 255, 0, 0.53)",
         "priority": 2
       },
       {
         "name": "review",
-        "color": "rgba(22, 22, 181, 0.84)",
+        "color": "rgba(0, 0, 255, 0.49)",
         "priority": 3
-      },
-      {
-        "name": "feat",
-        "color": "rgba(69, 15, 183, 1)",
-        "priority": 5
       }
     ],
     "editButtonAction": "popUp",
-    "doubleClickCardToEdit": "noteInTab",
+    "doubleClickCardToEdit": "none",
     "universalDate": "due",
     "tagColorsType": "tagBg",
     "customStatuses": [
@@ -135,14 +115,14 @@
         "name": "Done",
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
-        "type": "DONE"
+        "type": "IN_PROGRESS"
       },
       {
         "symbol": "X",
         "name": "Completed",
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
-        "type": "DONE"
+        "type": "IN_PROGRESS"
       },
       {
         "symbol": "-",
@@ -150,6 +130,13 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": true,
         "type": "CANCELLED"
+      },
+      {
+        "symbol": "*",
+        "name": "Now",
+        "nextStatusSymbol": "r",
+        "availableAsCommand": false,
+        "type": "IN_PROGRESS"
       }
     ],
     "compatiblePlugins": {
@@ -167,82 +154,87 @@
     "quickAddPluginDefaultChoice": "",
     "frontmatterFormatting": [
       {
-        "index": 1,
+        "index": 0,
         "property": "ID",
         "key": "id",
         "taskItemKey": "id"
       },
       {
-        "index": 2,
+        "index": 1,
         "property": "Title",
         "key": "title",
         "taskItemKey": "title"
       },
       {
-        "index": 3,
+        "index": 2,
         "property": "Status",
         "key": "status",
         "taskItemKey": "status"
       },
       {
-        "index": 4,
+        "index": 3,
         "property": "Priority",
         "key": "priority",
         "taskItemKey": "priority"
       },
       {
-        "index": 5,
+        "index": 4,
         "property": "Tags",
         "key": "tags",
         "taskItemKey": "tags"
       },
       {
-        "index": 6,
+        "index": 5,
         "property": "Time",
         "key": "time",
         "taskItemKey": "time"
       },
       {
-        "index": 7,
+        "index": 6,
         "property": "Reminder",
         "key": "reminder",
         "taskItemKey": "reminder"
       },
       {
-        "index": 8,
+        "index": 7,
         "property": "Created date",
         "key": "created-date",
         "taskItemKey": "createdDate"
       },
       {
-        "index": 9,
+        "index": 8,
         "property": "Start date",
         "key": "start-date",
         "taskItemKey": "startDate"
       },
       {
-        "index": 10,
+        "index": 9,
         "property": "Scheduled date",
         "key": "scheduled-date",
         "taskItemKey": "scheduledDate"
       },
       {
-        "index": 11,
+        "index": 10,
         "property": "Due date",
         "key": "due-date",
         "taskItemKey": "due"
       },
       {
-        "index": 12,
+        "index": 11,
         "property": "Depends on",
         "key": "depends-on",
         "taskItemKey": "dependsOn"
       },
       {
-        "index": 13,
+        "index": 12,
         "property": "Completed date",
         "key": "cancelled-date",
         "taskItemKey": "cancelledDate"
+      },
+      {
+        "index": 13,
+        "key": "completed-date",
+        "taskItemKey": "completionDate"
       }
     ],
     "showFrontmatterTagsOnCards": false,
@@ -256,73 +248,44 @@
         "targetColumn": "Completed"
       }
     ],
-    "hiddenTaskProperties": [
-      "createdDate",
-      "startDate",
-      "onCompletion",
-      "recurring"
-    ],
-    "autoAddUniqueID": true,
-    "uniqueIdCounter": 2258,
+    "hiddenTaskProperties": [],
+    "autoAddUniqueID": false,
+    "uniqueIdCounter": 670,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
-      "viewedType": "kanban",
-      "boardIndex": 1,
-      "settingTab": 5,
-      "taskId": "",
-      "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
+      "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+      "settingTab": 2,
+      "taskId": ""
     },
-    "boundTaskCompletionToChildTasks": true,
+    "boundTaskCompletionToChildTasks": false,
     "mapView": {
       "background": "none",
       "mapOrientation": "hor",
       "optimizedRender": false,
       "arrowDirection": "c2p",
       "animatedEdges": false,
-      "scrollAction": "pan",
+      "scrollAction": "zoom",
       "showMinimap": true,
       "renderVisibleNodes": false,
-      "edgeType": "smoothstep"
+      "edgeType": "default"
     },
-    "searchQuery": "",
     "taskBoardFilesRegistry": {
-      "653162057": {
-        "boardId": "653162057",
-        "filePath": "My Project Board.taskboard",
-        "boardName": "My Project",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
       "901052398": {
         "boardId": "901052398",
         "filePath": "TaskBoard-Template-1774097758616.taskboard",
         "boardName": "My Project",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       },
-      "1743944892": {
-        "boardId": "1743944892",
-        "filePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-        "boardName": "Time Based Workflow",
-        "boardDescription": ""
-      },
-      "2248319344": {
-        "boardId": "2248319344",
-        "filePath": "Meta/Task_Board/Boards/Release 2.0.0.taskboard",
-        "boardName": "Release 2.0.0",
-        "boardDescription": "This board will be used to plan everything related to the next major version release of Task Board 2.0.0"
-      },
-      "2627237443": {
-        "boardId": "2627237443",
-        "filePath": "Meta/Task_Board/Boards/Status Based Workflow.taskboard",
-        "boardName": "Status Based Workflow",
-        "boardDescription": ""
-      },
-      "3764827886": {
-        "boardId": "3764827886",
-        "filePath": "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
-        "boardName": "Tag Based Workflow",
-        "boardDescription": ""
+      "2908513791": {
+        "boardId": "2908513791",
+        "filePath": "My Project Board.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
-    }
+    },
+    "loadAllBoards": false,
+    "searchQuery": "",
+    "dragAutoScrollEdgePercent": 20
   }
 }
