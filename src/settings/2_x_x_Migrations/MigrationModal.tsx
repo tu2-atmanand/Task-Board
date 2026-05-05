@@ -24,6 +24,7 @@ const MigrationModalContent: React.FC<{
 	const [migrationResult, setMigrationResult] = useState<MigrationResult | null>(null);
 	const terminalRef = useRef<HTMLDivElement>(null);
 	const logIdRef = useRef(0);
+	const logsRef = useRef<LogEntry[]>([]);
 
 	const addLog = (message: string, status: "info" | "success" | "error" | "warning" = "info", boardName?: string) => {
 		const timestamp = new Date().toLocaleTimeString();
@@ -35,6 +36,7 @@ const MigrationModalContent: React.FC<{
 			boardName,
 		};
 
+		logsRef.current.push(logEntry);
 		setLogs((prev) => [...prev, logEntry]);
 
 		// Auto-scroll to bottom
@@ -61,6 +63,7 @@ const MigrationModalContent: React.FC<{
 	const handleStartMigration = async () => {
 		setIsRunning(true);
 		setLogs([]);
+		logsRef.current = [];
 		logIdRef.current = 0;
 
 		addLog("Initializing migration process...", "info");
@@ -100,14 +103,6 @@ const MigrationModalContent: React.FC<{
 				},
 			);
 
-			// Add logs to the result
-			result.logs = logs.map((log) => ({
-				timestamp: log.timestamp,
-				status: log.status,
-				message: log.message,
-				boardName: log.boardName,
-			}));
-
 			setMigrationResult(result);
 			setProgress(100);
 
@@ -136,6 +131,9 @@ const MigrationModalContent: React.FC<{
 
 			// Show Notice to reload Obsidian and make the "Reload Obsidian" button visible
 			showReloadObsidianNotice(plugin);
+
+			// Capture all logs after migration completes and all logs are added
+			result.logs = [...logsRef.current];
 
 			// Save logs to file after migration completes
 			const logSaveResult = await saveMigrationLogsToFile(
@@ -191,7 +189,7 @@ const MigrationModalContent: React.FC<{
 	return (
 		<div className="migration-modal-content">
 			<p className="migration-description">
-				Task Board plugin has undergone some major architectural level changes, so backward compatibility is not possible in all the version in 2.x.x series. Please read the following wiki to understand everything about the migrations and incase if any error occured during the migration, how to revert back to the previous version : <a href="https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/">Task Board v2.x.x migration guide.</a>
+				Task Board plugin has undergone some major architectural level changes, so backward compatibility is not possible in all the version in 2.x.x series. Please read the following wiki to understand everything about the migrations and incase if any error occured during the migration, how to revert back to the previous version : <a href="https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/">Task Board v2.x.x migration guide</a>.
 			</p>
 
 			{/* Progress Section */}
