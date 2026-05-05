@@ -273,7 +273,7 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "priority":
 			return task.priority || 0;
 		case "status":
-			return task.status || "";
+			return task.status || " ";
 		case "tags":
 			return getAllTaskTags(task) || [];
 		case "frontmatterTags":

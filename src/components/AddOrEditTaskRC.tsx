@@ -69,7 +69,7 @@ export const AddOrEditTaskRC: React.FC<{
 	const [endTime, setEndTime] = useState(task.time ? task?.time?.split('-')[1]?.trim() || '' : "");
 	const [newTime, setNewTime] = useState(task.time || '');
 	const [priority, setPriority] = useState(task.priority || 0);
-	const [status, setStatus] = useState(task.status || '');
+	const [status, setStatus] = useState(task.status || ' ');
 	const [reminder, setReminder] = useState(task?.reminder || "");
 	const [dependsOn, setDependsOn] = useState<string[]>(task?.dependsOn || []);
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
@@ -743,7 +743,7 @@ export const AddOrEditTaskRC: React.FC<{
 		setEndTime(updatedTask.time ? updatedTask.time?.split('-')[1]?.trim() || '' : "");
 		setNewTime(updatedTask.time ? updatedTask.time : "");
 		setPriority(updatedTask.priority || 0);
-		setStatus(updatedTask.status || '');
+		setStatus(updatedTask.status || ' ');
 		setReminder(updatedTask.reminder || '');
 	}, 50);
 

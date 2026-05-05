@@ -180,7 +180,7 @@ class BugReporterManager {
 			}
 
 			const contextMatch = entryText.match(
-				/Context\s*:\s*(.+?)(?=\Version|$)/,
+				/Context\s*:\s*(.+?)(?=\n|$)/,
 				// /Context\s*:\s*([\s\S]*?)(?=\n#### Bug Content|\n\n|$)/,
 			);
 			if (contextMatch) {

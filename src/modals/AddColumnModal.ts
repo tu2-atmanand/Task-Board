@@ -160,7 +160,7 @@ export class AddColumnModal extends Modal {
 					active: true,
 					colType: this.colType,
 					name: this.name,
-					taskStatus: "",
+					taskStatus: " ",
 				});
 			} else if (this.colType === colTypeNames.taskPriority) {
 				this.onSubmit({
