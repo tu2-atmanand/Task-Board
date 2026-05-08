@@ -21,7 +21,7 @@ import { PanelLeftOpenIcon } from 'lucide-react';
 import { t } from 'i18next';
 import TaskBoard from '../../../main.js';
 import { Board, TaskBoardViewType, viewPortType, nodeDataType, nodePositionData } from '../../interfaces/BoardConfigs.js';
-import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewArrowDirection, mapViewScrollAction } from '../../interfaces/Enums.js';
+import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewScrollAction } from '../../interfaces/Enums.js';
 import { taskJsonMerged, taskItem, UpdateTaskEventData } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
@@ -115,7 +115,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Load viewport from the active board data
 	const loadViewport = (): viewPortType => {
-		// debugger;
 		console.log("loadViewport called...");
 		try {
 			const vp = currentView?.mapView?.viewPortData;
@@ -171,7 +170,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 	useEffect(() => {
 		const saveMapDataListener = () => {
-			// debugger;
 			console.log("[Task Board] [MapView] SAVE_MAP signal fired...\nmapDataUpdated = ", mapDataUpdated.current);
 			if (!mapDataUpdated.current && !viewPortDataUpdated.current) return;
 
@@ -715,7 +713,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// const lastViewportSaveTime = useRef(0);
 	const debouncedSetViewportStorage = useCallback(debounce((vp: viewPortType) => {
-		// debugger;
 		// const now = Date.now();
 		// if (now - lastViewportSaveTime.current > 2000) {
 		try {
@@ -1088,7 +1085,6 @@ const MapView: React.FC<MapViewProps> = ({
 							// rendering
 							onlyRenderVisibleElements={mapViewSettings.renderVisibleNodes} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
 							onInit={(instance) => {
-								// debugger;
 								console.log("Reactflow Initializing...");
 								// store reactflow instance for later programmatic viewport updates
 								// try {

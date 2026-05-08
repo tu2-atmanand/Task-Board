@@ -20,7 +20,6 @@ import {
 } from "../../interfaces/BoardConfigs.js";
 import {
 	getCustomStatusOptionsForDropdown,
-	statusDropDownOption,
 	getPriorityOptionsForDropdown,
 	priorityDropDownOption,
 } from "../../interfaces/Mapping.js";

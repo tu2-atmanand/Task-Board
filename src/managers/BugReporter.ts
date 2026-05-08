@@ -32,7 +32,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 20;
-	private readonly MAX_USED_ID = 188; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
+	private readonly MAX_USED_ID = 216; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -417,12 +417,15 @@ ${entry.bugContent}
 					URL.revokeObjectURL(a.href);
 				}, 1000);
 				new Notice(
-					"Log file exported. Check the folder where you downloaded the file.",
+					"Log file exported. Check the folder where you saved the file.",
 				);
 			}
 		} catch (err) {
-			new Notice("Failed to export logs.");
-			console.error(err);
+			bugReporterManagerInsatance.addToLogs(
+				198,
+				`Failed to export the log file: ${err}`,
+				"BugReporter.ts/exportLogFile",
+			);
 		}
 	}
 }

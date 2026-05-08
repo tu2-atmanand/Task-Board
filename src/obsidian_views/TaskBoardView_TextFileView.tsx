@@ -1,6 +1,6 @@
 // src/views/TaskBoardView.tsx
 
-import { TextFileView, TFile, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu } from "obsidian";
+import { TextFileView, Platform, WorkspaceLeaf, ViewStateResult, Notice, Menu } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { t } from "i18next";

@@ -62,7 +62,10 @@ import {
 } from "./src/services/OpenModals.js";
 import { TasksPluginApi } from "./src/services/tasks-plugin/api.js";
 import { isTasksPluginEnabled } from "./src/services/tasks-plugin/helpers.js";
-import { checkAndNotifyV2Migration } from "./src/settings/2_x_x_Migrations/MigrationUtils.js";
+import {
+	checkAndNotifyV2MigrationsRequired,
+	openMigrationModal,
+} from "./src/settings/2_x_x_Migrations/MigrationUtils.js";
 import { migrateSettings } from "./src/settings/SettingSynchronizer.js";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
 import { TaskBoardApi } from "./src/taskboardAPIs.js";
@@ -115,6 +118,8 @@ export default class TaskBoard extends Plugin {
 	private readonly QUEUE_DELAY = 2000; // Delay in ms before starting to process queue
 	private readonly PROCESSING_INTERVAL = 100; // Delay between processing each file
 
+	v2MigrationsRequired = false;
+
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
 		this.plugin = this;
@@ -152,12 +157,12 @@ export default class TaskBoard extends Plugin {
 		bugReporterManagerInsatance.setPlugin(this);
 
 		// Migrations for updating from v1.x.x version series to v2.x.x series version
-		const appliedV2Migrations = await checkAndNotifyV2Migration(this);
-		await sleep(200); // For all the migrations code to properly save all the files.
+		this.v2MigrationsRequired =
+			await checkAndNotifyV2MigrationsRequired(this);
 
 		// Loads settings data and creating the Settings Tab in main Setting
 		await this.loadSettings();
-		if (!appliedV2Migrations) await this.runOnPluginUpdate();
+		if (!this.v2MigrationsRequired) await this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
 		await this.vaultScanner.initializeTasksCache();
@@ -228,73 +233,88 @@ export default class TaskBoard extends Plugin {
 		duplicate: boolean,
 		filePath?: string,
 	) {
-		let leaf: WorkspaceLeaf | null = null;
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+		try {
+			let leaf: WorkspaceLeaf | null = null;
+			const leaves =
+				this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 
-		function isFromMainWindow(leaf: WorkspaceLeaf): boolean | undefined {
-			if (filePath) {
-				const state = leaf.getViewState();
-				if (
-					state?.state?.filePath &&
-					state?.state?.filePath !== filePath
-				) {
-					return false;
+			function isFromMainWindow(
+				leaf: WorkspaceLeaf,
+			): boolean | undefined {
+				if (filePath) {
+					const state = leaf.getViewState();
+					if (
+						state?.state?.filePath &&
+						state?.state?.filePath !== filePath
+					) {
+						return false;
+					}
 				}
+
+				if (!leaf.view.containerEl.ownerDocument.defaultView) return;
+				return (
+					"Notice" in leaf.view.containerEl.ownerDocument.defaultView
+				);
 			}
 
-			if (!leaf.view.containerEl.ownerDocument.defaultView) return;
-			return "Notice" in leaf.view.containerEl.ownerDocument.defaultView;
-		}
+			// Separate leaves into MainWindow and SeparateWindow categories
+			const mainWindowLeaf = leaves.find((leaf) =>
+				isFromMainWindow(leaf),
+			);
+			const separateWindowLeaf = leaves.find(
+				(leaf) => !isFromMainWindow(leaf),
+			);
 
-		// Separate leaves into MainWindow and SeparateWindow categories
-		const mainWindowLeaf = leaves.find((leaf) => isFromMainWindow(leaf));
-		const separateWindowLeaf = leaves.find(
-			(leaf) => !isFromMainWindow(leaf),
-		);
-
-		if (leafLayout === "icon") {
-			// Focus on any existing leaf, prioritizing MainWindow
-			leaf =
-				mainWindowLeaf ||
-				separateWindowLeaf ||
-				this.app.workspace.getLeaf("tab");
-		} else if (leafLayout === "tab") {
-			// Check if a leaf exists in MainWindow
-			if (mainWindowLeaf && !duplicate) {
-				// Prevent duplicate in MainWindow
-				leaf = mainWindowLeaf;
+			if (leafLayout === "icon") {
+				// Focus on any existing leaf, prioritizing MainWindow
+				leaf =
+					mainWindowLeaf ||
+					separateWindowLeaf ||
+					this.app.workspace.getLeaf("tab");
+			} else if (leafLayout === "tab") {
+				// Check if a leaf exists in MainWindow
+				if (mainWindowLeaf && !duplicate) {
+					// Prevent duplicate in MainWindow
+					leaf = mainWindowLeaf;
+				} else {
+					// Allow opening a new leaf in MainWindow
+					leaf = this.app.workspace.getLeaf("tab");
+				}
+			} else if (leafLayout === "window") {
+				// Check if a leaf exists in SeparateWindow
+				if (separateWindowLeaf) {
+					// Prevent duplicate in SeparateWindow
+					leaf = separateWindowLeaf;
+				} else {
+					// Allow opening a new leaf in SeparateWindow
+					leaf = this.app.workspace.getLeaf("window");
+				}
 			} else {
-				// Allow opening a new leaf in MainWindow
+				// Default behavior: open in MainWindow
 				leaf = this.app.workspace.getLeaf("tab");
 			}
-		} else if (leafLayout === "window") {
-			// Check if a leaf exists in SeparateWindow
-			if (separateWindowLeaf) {
-				// Prevent duplicate in SeparateWindow
-				leaf = separateWindowLeaf;
-			} else {
-				// Allow opening a new leaf in SeparateWindow
-				leaf = this.app.workspace.getLeaf("window");
+
+			// Open or focus the leaf
+			if (leaf) {
+				this.leafIsActive = true;
+				leaf.setEphemeralState({ taskboardFilePath: filePath ?? "" });
+
+				await leaf.setViewState({
+					type: VIEW_TYPE_TASKBOARD,
+					active: true,
+					state: {
+						filePath: filePath ?? "",
+					},
+				});
+
+				this.app.workspace.revealLeaf(leaf);
 			}
-		} else {
-			// Default behavior: open in MainWindow
-			leaf = this.app.workspace.getLeaf("tab");
-		}
-
-		// Open or focus the leaf
-		if (leaf) {
-			this.leafIsActive = true;
-			leaf.setEphemeralState({ taskboardFilePath: filePath ?? "" });
-
-			await leaf.setViewState({
-				type: VIEW_TYPE_TASKBOARD,
-				active: true,
-				state: {
-					filePath: filePath ?? "",
-				},
-			});
-
-			this.app.workspace.revealLeaf(leaf);
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				202,
+				`Error opening the board: ${error}`,
+				"main.ts/activateView",
+			);
 		}
 	}
 
@@ -708,7 +728,7 @@ export default class TaskBoard extends Plugin {
 		// statusBarItemEl.setText("Next task in # min");
 	}
 
-	registerCommands() {
+	async registerCommands() {
 		this.addCommand({
 			id: "add-new-task",
 			name: t("add-new-task"),
@@ -783,6 +803,16 @@ export default class TaskBoard extends Plugin {
 				}).open();
 			},
 		});
+
+		if (this.v2MigrationsRequired) {
+			this.addCommand({
+				id: "open-migration-modal",
+				name: "Open migration modal",
+				callback: () => {
+					openMigrationModal(this.plugin);
+				},
+			});
+		}
 		// this.addCommand({
 		// 	id: "4",
 		// 	name: "DEV : Save Data from sessionStorage to Disk",
@@ -1505,11 +1535,7 @@ export default class TaskBoard extends Plugin {
 			filePath: string;
 			duplicate: boolean;
 		}) => {
-			try {
-				this.activateView(data.layout, data.duplicate, data.filePath);
-			} catch (error) {
-				console.error(error);
-			}
+			this.activateView(data.layout, data.duplicate, data.filePath);
 		};
 
 		eventEmitter.on("OPEN_BOARD", openBoardCallback);
@@ -1643,63 +1669,6 @@ export default class TaskBoard extends Plugin {
 			);
 		}
 	}
-
-	// /**
-	//  * @deprecated - In the new design, we will not going to create multiple board files,
-	//  * instead there will be a single bord file. Please use the {@link createTemplateBoard()} function.
-	//  *
-	//  * Check if configured board files exist, and create missing default board files
-	//  * This is called during plugin initialization
-	//  */
-	// private async checkAndCreateBoardFiles() {
-	// 	try {
-	// 		console.log("Task Board: Checking for configured board files...");
-
-	// 		// Get the missing board files
-	// 		const missingFiles =
-	// 			await this.taskBoardFileManager.validateBoardFiles();
-
-	// 		if (missingFiles.length > 0) {
-	// 			console.log(
-	// 				`Task Board: Found ${missingFiles.length} missing board file(s)`,
-	// 				missingFiles,
-	// 			);
-
-	// 			// Import DEFAULT_BOARDS from BoardConfigs
-	// 			const { DEFAULT_BOARD } =
-	// 				await import("src/interfaces/BoardConfigs");
-
-	// 			// Try to create missing default board files
-	// 			const createdCount =
-	// 				await this.taskBoardFileManager.createMissingDefaultBoardFiles(
-	// 					[DEFAULT_BOARD],
-	// 				);
-
-	// 			if (createdCount > 0) {
-	// 				new Notice(
-	// 					`Task Board: Created ${createdCount} missing board file(s). Please restart the plugin or reload Obsidian to load the new boards.`,
-	// 					5000,
-	// 				);
-	// 				console.log(
-	// 					`Task Board: Successfully created ${createdCount} board file(s)`,
-	// 				);
-	// 			}
-	// 		} else {
-	// 			console.log("Task Board: All configured board files exist.");
-	// 		}
-	// 	} catch (error) {
-	// 		console.error(
-	// 			"Task Board: Error checking or creating board files:",
-	// 			error,
-	// 		);
-	// 		bugReporterManagerInsatance.showNotice(
-	// 			34,
-	// 			"Error checking or creating board files",
-	// 			error as string,
-	// 			"main.ts/checkAndCreateBoardFiles",
-	// 		);
-	// 	}
-	// }
 
 	async fileExists(filePath: string): Promise<boolean> {
 		return await this.app.vault.adapter.exists(filePath);

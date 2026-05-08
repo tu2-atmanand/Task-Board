@@ -1,8 +1,16 @@
 import { t } from "i18next";
 import { App, Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../../main.js";
-import { Board, DEFAULT_BOARD, MapView } from "../../interfaces/BoardConfigs.js";
-import { CURRENT_PLUGIN_VERSION, CURRENT_REVISION, NODE_POSITIONS_STORAGE_KEY } from "../../interfaces/Constants.js";
+import {
+	Board,
+	DEFAULT_BOARD,
+	MapView,
+} from "../../interfaces/BoardConfigs.js";
+import {
+	CURRENT_PLUGIN_VERSION,
+	CURRENT_REVISION,
+	NODE_POSITIONS_STORAGE_KEY,
+} from "../../interfaces/Constants.js";
 import { viewTypeNames } from "../../interfaces/Enums.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
@@ -10,7 +18,10 @@ import { createFolderRecursively } from "../../services/FileSystem.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
 import { migrateSettings } from "../SettingSynchronizer.js";
-import { PluginDataJsonLegacy, BoardLegacy } from "./LegacyInterfacesAndTypings.js";
+import {
+	PluginDataJsonLegacy,
+	BoardLegacy,
+} from "./LegacyInterfacesAndTypings.js";
 
 export interface MigrationStepResult {
 	stepName: string;
@@ -121,7 +132,11 @@ export async function saveMigrationLogsToFile(
 		return { success: true, filePath: logPath };
 	} catch (error) {
 		const errorMsg = error instanceof Error ? error.message : String(error);
-		console.error("Error saving migration logs:", errorMsg);
+		bugReporterManagerInsatance.addToLogs(
+			199,
+			`Error saving migration logs: ${errorMsg}`,
+			"2_x_x_Migrations/MigrationUtils.ts/saveMigrationLogsToFile",
+		);
 		return { success: false, error: errorMsg };
 	}
 }
@@ -153,7 +168,11 @@ export async function checkForV1Data(
 			legacyBoards,
 		};
 	} catch (error) {
-		console.error("Error checking for v1 data:", error);
+		bugReporterManagerInsatance.addToLogs(
+			200,
+			`Error checking for v1 data: ${error}`,
+			"2_x_x_Migrations/MigrationUtils.ts/checkForV1Data",
+		);
 		return { hasV1Data: false };
 	}
 }
@@ -164,24 +183,22 @@ export const openMigrationModal = (
 	onMigrationComplete?: (result: any) => void,
 ) => {
 	// Dynamic import to avoid circular dependencies
-	import("./MigrationModal.js").then(
-		({ MigrationModal }) => {
-			new MigrationModal(plugin, onMigrationComplete).open();
-		},
-	);
+	import("./MigrationModal.js").then(({ MigrationModal }) => {
+		new MigrationModal(plugin, onMigrationComplete).open();
+	});
 };
 
 /**
  * Check if v1 data exists and show a notification with migration option
  */
-export async function checkAndNotifyV2Migration(
+export async function checkAndNotifyV2MigrationsRequired(
 	plugin: TaskBoard,
 ): Promise<boolean> {
-	try {
-		const oldPluginSettings = await readDataFile(plugin.app);
-		if (oldPluginSettings) {
-			const v1Check = await checkForV1Data(oldPluginSettings);
+	const oldPluginSettings = await readDataFile(plugin.app);
+	if (oldPluginSettings) {
+		const v1Check = await checkForV1Data(oldPluginSettings);
 
+		try {
 			if (v1Check.hasV1Data) {
 				const migrationNotice = new Notice(
 					createFragment((f) => {
@@ -213,18 +230,24 @@ export async function checkAndNotifyV2Migration(
 					}
 				});
 				return true;
+			} else {
+				return false;
 			}
-			return false;
-		} else {
+		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
-				188,
-				"There was an issue while reading the current plugin configurations. If this is a fresh install ignore this log message. But, if this message is appearing after updating this plugin. Kindly take a backup of your current configuration, using the 'Export' setting button under the General tab. Then you can uninstall the plugin and re-install the previous version of Task Board and import the exported configurations. Please refer the following documentation : https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/#how-to-revert-back-to-the-previous-version",
-				"main.ts/checkAndNotifyV2Migration",
+				201,
+				`Error checking for v1 migration: ${String(error)}`,
+				"2_x_x_Migrations/MigrationUtils.ts/saveMigrationLogsToFile",
 			);
-			return false;
+			if (v1Check.hasV1Data) return true;
+			else return false;
 		}
-	} catch (error) {
-		console.error("Error checking for v1 migration:", error);
+	} else {
+		bugReporterManagerInsatance.addToLogs(
+			188,
+			"There was an issue while reading the current plugin configurations. If this is a fresh install ignore this log message. But, if this message is appearing after updating this plugin. Kindly take a backup of your current configuration, using the 'Export' setting button under the General tab. Then you can uninstall the plugin and re-install the previous version of Task Board and import the exported configurations. Please refer the following documentation : https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/#how-to-revert-back-to-the-previous-version",
+			"main.ts/checkAndNotifyV2Migration",
+		);
 		return false;
 	}
 }

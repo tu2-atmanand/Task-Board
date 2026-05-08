@@ -7,7 +7,7 @@
 
 import { App, TFile, Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../main.js";
-import { Board, DEFAULT_BOARD } from "../interfaces/BoardConfigs.js";
+import { Board } from "../interfaces/BoardConfigs.js";
 import {
 	CURRENT_REVISION,
 	LEAFID_FILEPATH_MAPPING_KEY,
@@ -15,6 +15,7 @@ import {
 } from "../interfaces/Constants.js";
 import { taskBoardFilesRegistryType } from "../interfaces/GlobalSettings.js";
 import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { bugReporterManagerInsatance } from "./BugReporter.js";
 
 /**
  * Interface for storing recently loaded board data keyed by file path
@@ -64,15 +65,13 @@ export default class TaskBoardFileManager {
 			// Check if file exists
 			const fileExists = await this.app.vault.adapter.exists(filePath);
 			if (!fileExists) {
-				console.warn(`TaskBoard file not found: ${filePath}`);
-				return null;
+				throw `TaskBoard file not found: ${filePath}`;
 			}
 
 			// Read the file
 			const fileContent = await this.app.vault.adapter.read(filePath);
 			if (!fileContent) {
-				console.warn(`TaskBoard file is empty: ${filePath}`);
-				return null;
+				throw `TaskBoard file is empty: ${filePath}`;
 			}
 
 			// Parse JSON content
@@ -87,18 +86,13 @@ export default class TaskBoardFileManager {
 
 			if (existingRegistryEntry) {
 				const [, registryEntry] = existingRegistryEntry;
-				if (registryEntry.filePath === filePath) {
-					// Same boardID and same filePath - no action needed
-					// console.log(
-					// 	`Board "${boardData.name}" with ID "${boardData.id}" already registered at: ${filePath}`,
-					// );
-				} else {
+				if (registryEntry.filePath !== filePath) {
 					// Same boardID but different filePath - generate new ID
 					const oldId = boardData.id;
 					boardData.id = generateRandomTempTaskId();
-					console.log(
-						`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
-					);
+					// console.log(
+					// 	`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
+					// );
 				}
 			}
 
@@ -106,7 +100,11 @@ export default class TaskBoardFileManager {
 
 			return boardData;
 		} catch (error) {
-			console.error(`Error loading board from file ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				192,
+				`Error loading board from file ${filePath} : ${error}`,
+				"TaskBoardFileManager.ts/loadBoardFromDisk",
+			);
 			return null;
 		}
 	}
@@ -128,8 +126,7 @@ export default class TaskBoardFileManager {
 			// Check if file exists
 			const fileExists = await this.app.vault.adapter.exists(filePath);
 			if (!fileExists) {
-				console.warn(`TaskBoard file not found: ${filePath}`);
-				return null;
+				throw `TaskBoard file not found: ${filePath}`;
 			}
 
 			// Read the file
@@ -137,8 +134,7 @@ export default class TaskBoardFileManager {
 			const decodedData = new TextDecoder().decode(file);
 
 			if (!decodedData) {
-				console.warn(`TaskBoard file is empty: ${filePath}`);
-				return null;
+				throw `TaskBoard file is empty: ${filePath}`;
 			}
 
 			// Parse JSON content
@@ -151,18 +147,13 @@ export default class TaskBoardFileManager {
 
 			if (existingRegistryEntry) {
 				const [, registryEntry] = existingRegistryEntry;
-				if (registryEntry.filePath === filePath) {
-					// Same boardID and same filePath - no action needed
-					console.log(
-						`Board "${boardData.name}" with ID "${boardData.id}" already registered at: ${filePath}`,
-					);
-				} else {
+				if (registryEntry.filePath !== filePath) {
 					// Same boardID but different filePath - generate new ID
 					const oldId = boardData.id;
 					boardData.id = generateRandomTempTaskId();
-					console.log(
-						`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
-					);
+					// console.log(
+					// 	`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
+					// );
 				}
 			}
 
@@ -170,7 +161,11 @@ export default class TaskBoardFileManager {
 
 			return boardData;
 		} catch (error) {
-			console.error(`Error loading board from file ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				193,
+				`Error loading board from file ${filePath} : ${error}`,
+				"TaskBoardFileManager.ts/loadBoardFromDisk",
+			);
 			return null;
 		}
 	}
@@ -183,8 +178,7 @@ export default class TaskBoardFileManager {
 	async loadBoardUsingID(boardId: string): Promise<Board | null> {
 		try {
 			if (!boardId || boardId.trim() === "") {
-				console.error(`No board ID provided to load the board`);
-				return null;
+				throw `No board ID provided to load the board`;
 			}
 
 			// Search for board by ID in the cached data
@@ -193,16 +187,16 @@ export default class TaskBoardFileManager {
 			);
 
 			if (cachedBoard) {
-				console.log(
-					`Found board "${cachedBoard.name}" (ID: ${boardId}) in cache`,
-				);
 				return cachedBoard;
 			}
 
-			console.warn(`Board with ID "${boardId}" not found in cache`);
-			return null;
+			throw `Board with ID "${boardId}" not found in cache`;
 		} catch (error) {
-			console.error(`Error loading board with ID ${boardId}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				194,
+				`Error loading board with ID ${boardId}: ${error}`,
+				"TaskBoardFileManager.ts/loadBoardFromDisk",
+			);
 			return null;
 		}
 	}
@@ -217,15 +211,14 @@ export default class TaskBoardFileManager {
 	async loadBoardUsingPath(filePath: string): Promise<Board | undefined> {
 		try {
 			if (!filePath || filePath.trim() === "") {
-				console.error(`No board file path provided to load the board`);
-				return undefined;
+				throw `No board file path provided to load the board`;
 			}
 
 			// Check if board is already cached in memory by file path
 			if (this.recentBoardsData[filePath]) {
-				console.log(
-					`Board "${this.recentBoardsData[filePath].name}" already exists in cache for file: ${filePath}`,
-				);
+				// console.log(
+				// 	`Board "${this.recentBoardsData[filePath].name}" already exists in cache for file: ${filePath}`,
+				// );
 				return this.recentBoardsData[filePath];
 			}
 
@@ -237,19 +230,19 @@ export default class TaskBoardFileManager {
 				this.recentBoardsData[filePath] = boardData;
 				// Update the registry to move this board on top
 				this.addNewBoardToRegistry(boardData.id, filePath, boardData);
-				console.log(
-					`Loaded and cached board "${boardData.name}" from: ${filePath}`,
-				);
+				// console.log(
+				// 	`Loaded and cached board "${boardData.name}" from: ${filePath}`,
+				// );
 				return boardData;
-			} else {
-				new Notice(
-					`Task Board : Error loading board data from file : ${filePath}`,
-				);
 			}
 
-			return undefined;
+			throw `Board data is not valid : ${boardData}`;
 		} catch (error) {
-			console.error(`Error loading board from file ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				204,
+				`Error loading board with file ${filePath}: ${error}`,
+				"TaskBoardFileManager.ts/loadBoardFromDisk",
+			);
 			return undefined;
 		}
 	}
@@ -273,14 +266,18 @@ export default class TaskBoardFileManager {
 
 			return true;
 		} catch (error) {
-			console.error(`Error saving board to file ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				205,
+				`Error saving board to file ${filePath}: ${error}`,
+				"TaskBoardFileManager.ts/loadBoardFromDisk",
+			);
 			return false;
 		}
 	}
 
 	/**
 	 * Save board configuration to a .taskboard file.
-	 * This function uses the {@method createBinary} API of Obsidian.
+	 * This function uses the {@link createBinary} API of Obsidian.
 	 * Which requires encoding the data and few additional operations.
 	 *
 	 * @param filePath - The path to the .taskboard file
@@ -309,24 +306,27 @@ export default class TaskBoardFileManager {
 					filePath,
 					arrayBuffer as ArrayBuffer,
 				);
-				console.log(`Created new TaskBoard file: ${filePath}`);
+				// console.log(`Created new TaskBoard file: ${filePath}`);
 			} else {
 				// Update existing file with binary data
 				const file = this.app.vault.getAbstractFileByPath(filePath);
 				if (!file || !(file instanceof TFile)) {
-					console.error(`Cannot find file to update: ${filePath}`);
-					return false;
+					throw `Cannot find file at the path to update`;
 				}
 				await this.app.vault.modifyBinary(
 					file,
 					arrayBuffer as ArrayBuffer,
 				);
-				console.log(`Updated TaskBoard file: ${filePath}`);
+				// console.log(`Updated TaskBoard file: ${filePath}`);
 			}
 
 			return true;
 		} catch (error) {
-			console.error(`Error saving board to file ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				206,
+				`Error saving board to file ${filePath}: ${error}`,
+				"TaskBoardFileManager.ts/saveBoardToDiskEncoded",
+			);
 			return false;
 		}
 	}
@@ -345,8 +345,7 @@ export default class TaskBoardFileManager {
 	): Promise<boolean> {
 		try {
 			if (!updatedBoardData.id || updatedBoardData.id.trim() === "") {
-				console.error(`Board data does not contain a valid ID`);
-				return false;
+				throw `Board data does not contain a valid ID.`;
 			}
 
 			let filepathLocal: string;
@@ -362,9 +361,7 @@ export default class TaskBoardFileManager {
 				)?.[1];
 
 				if (!registryEntry) {
-					console.error(
-						`No registry entry found for board ID: ${updatedBoardData.id}\nRetrying from the recentBoardsData`,
-					);
+					// throw `No registry entry found for board ID: ${updatedBoardData.id}\nRetrying from the recentBoardsData`;
 
 					const recentBoardEntry = Object.entries(
 						this.recentBoardsData,
@@ -375,10 +372,7 @@ export default class TaskBoardFileManager {
 						!registryEntry.filePath ||
 						registryEntry.filePath.trim() === ""
 					) {
-						console.error(
-							`No file path configured for board ID: ${updatedBoardData.id}`,
-						);
-						return false;
+						throw `No file path configured for board ID.`;
 					}
 
 					filepathLocal = registryEntry.filePath;
@@ -395,9 +389,9 @@ export default class TaskBoardFileManager {
 				// Update the cached board data in memory
 				this.recentBoardsData[filepathLocal] = updatedBoardData;
 
-				console.log(
-					`Saved board "${updatedBoardData.name}" (ID: ${updatedBoardData.id}) to: ${filepathLocal}`,
-				);
+				// console.log(
+				// 	`Saved board "${updatedBoardData.name}" (ID: ${updatedBoardData.id}) to: ${filepathLocal}`,
+				// );
 
 				/**
 				 * @note -Its better to not call this from here, as it will be called to many times.
@@ -413,9 +407,10 @@ export default class TaskBoardFileManager {
 
 			return success;
 		} catch (error) {
-			console.error(
-				`Error saving board with ID ${updatedBoardData.id}:`,
-				error,
+			bugReporterManagerInsatance.addToLogs(
+				207,
+				`Error saving board with ID ${updatedBoardData.id}: ${error}`,
+				"TaskBoardFileManager.ts/saveBoard",
 			);
 			return false;
 		}
@@ -437,10 +432,7 @@ export default class TaskBoardFileManager {
 		const boardId = updatedBoardData.id;
 
 		if (!boardId || boardId.trim() === "") {
-			console.error(
-				`Cannot debounce save: Board data does not contain a valid ID`,
-			);
-			return;
+			throw `Cannot debounce save: Board data does not contain a valid ID`;
 		}
 
 		// Clear any existing timer for this board
@@ -455,9 +447,10 @@ export default class TaskBoardFileManager {
 				await this.saveBoard(updatedBoardData, filePath);
 				this.debouncedSaveBoardTimers.delete(boardId);
 			} catch (error) {
-				console.error(
-					`Error in debounced save for board ID ${boardId}:`,
-					error,
+				bugReporterManagerInsatance.addToLogs(
+					208,
+					`Error in debounced save for board ID ${boardId} and filePath ${filePath}: ${error}`,
+					"TaskBoardFileManager.ts/debouncedSaveBoard",
 				);
 				this.debouncedSaveBoardTimers.delete(boardId);
 			}
@@ -561,11 +554,15 @@ export default class TaskBoardFileManager {
 			this.taskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry;
 
-			console.log(
-				`Added new board to registry: ID="${boardId}", filePath="${filePath}"`,
-			);
+			// console.log(
+			// 	`Added new board to registry: ID="${boardId}", filePath="${filePath}"`,
+			// );
 		} catch (error) {
-			console.error(`Error adding board to registry:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				209,
+				`Error adding board to registry: ${error}`,
+				"TaskBoardFileManager.ts/addNewBoardToRegistry",
+			);
 		}
 	}
 
@@ -578,7 +575,11 @@ export default class TaskBoardFileManager {
 		try {
 			return await this.app.vault.adapter.exists(filePath);
 		} catch (error) {
-			console.error(`Error checking if file exists ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				210,
+				`Error checking if file exists ${filePath}: ${error}`,
+				"TaskBoardFileManager.ts/addNewBoardToRegistry",
+			);
 			return false;
 		}
 	}
@@ -620,7 +621,11 @@ export default class TaskBoardFileManager {
 
 			return await this.saveBoardToDisk(filePath, boardData);
 		} catch (error) {
-			console.error(`Error creating new board file ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				211,
+				`Error creating new board file ${filePath}: ${error}`,
+				"TaskBoardFileManager.ts/createNewBoardFile",
+			);
 			return false;
 		}
 	}
@@ -634,15 +639,17 @@ export default class TaskBoardFileManager {
 		try {
 			const file = this.app.vault.getAbstractFileByPath(filePath);
 			if (!file || !(file instanceof TFile)) {
-				console.warn(`Cannot find file to delete: ${filePath}`);
-				return false;
+				throw `Cannot find file to delete.`;
 			}
 
 			await this.app.vault.trash(file, false);
-			console.log(`Deleted TaskBoard file: ${filePath}`);
 			return true;
 		} catch (error) {
-			console.error(`Error deleting board file ${filePath}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				195,
+				`Error deleting board file ${filePath}: ${error}`,
+				"TaskBoardFileManager.ts/loadBoardFromDisk",
+			);
 			return false;
 		}
 	}
@@ -663,13 +670,17 @@ export default class TaskBoardFileManager {
 				)
 				.map((file) => (file as TFile).path);
 
-			console.log(
-				`Found ${taskboardFiles.length} .taskboard files:`,
-				taskboardFiles,
-			);
+			// console.log(
+			// 	`Found ${taskboardFiles.length} .taskboard files:`,
+			// 	taskboardFiles,
+			// );
 			return taskboardFiles;
 		} catch (error) {
-			console.error("Error getting all .taskboard files:", error);
+			bugReporterManagerInsatance.addToLogs(
+				214,
+				`Error getting all .taskboard files: ${error}`,
+				"TaskBoardFileManager.ts/addNewBoardToRegistry",
+			);
 			return [];
 		}
 	}
@@ -730,46 +741,50 @@ export default class TaskBoardFileManager {
 	 * @returns The last opened board data. undefined if there is any error.
 	 */
 	async getLastOpenedBoard(): Promise<Board | undefined> {
-		// Get the first entry from the registry (regardless of key name)
-		// Filter out old numeric index entries and get the first valid boardId entry
-		// const registryEntries = Object.entries(taskBoardFilesRegistry)
-		// 	.filter(([key]) => isNaN(Number(key))) // Filter out numeric string keys
-		// 	.slice(0, 1); // Get the first entry
+		try {
+			// Get the first entry from the registry (regardless of key name)
+			// Filter out old numeric index entries and get the first valid boardId entry
+			// const registryEntries = Object.entries(taskBoardFilesRegistry)
+			// 	.filter(([key]) => isNaN(Number(key))) // Filter out numeric string keys
+			// 	.slice(0, 1); // Get the first entry
 
-		// if (registryEntries.length === 0) {
-		// 	console.error(`No board entries found in the registry.`);
-		// 	return undefined;
-		// }
+			// if (registryEntries.length === 0) {
+			// 	throw `No board entries found in the registry.`;
+			// 	return undefined;
+			// }
 
-		const firstItemFromRegistry = Object.values(
-			this.taskBoardFilesRegistry,
-		)[0];
+			const firstItemFromRegistry = Object.values(
+				this.taskBoardFilesRegistry,
+			)[0];
 
-		if (!firstItemFromRegistry?.filePath) {
-			console.error(
-				`First registry entry does not have a valid filePath.`,
+			if (!firstItemFromRegistry?.filePath) {
+				throw `First registry entry does not have a valid filePath.`;
+			}
+
+			let boardData: Board | undefined;
+
+			if (this.recentBoardsData[firstItemFromRegistry.filePath]) {
+				boardData =
+					this.recentBoardsData[firstItemFromRegistry.filePath];
+			}
+
+			if (!boardData) {
+				boardData = await this.loadBoardUsingPath(
+					firstItemFromRegistry.filePath,
+				);
+			}
+
+			if (boardData) {
+				return boardData;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				215,
+				`Error loading the last opened board: ${error}`,
+				"TaskBoardFileManager.ts/addNewBoardToRegistry",
 			);
 			return undefined;
 		}
-
-		let boardData: Board | undefined;
-
-		if (this.recentBoardsData[firstItemFromRegistry.filePath]) {
-			boardData = this.recentBoardsData[firstItemFromRegistry.filePath];
-		}
-
-		if (!boardData) {
-			boardData = await this.loadBoardUsingPath(
-				firstItemFromRegistry.filePath,
-			);
-		}
-
-		if (boardData) {
-			return boardData;
-		}
-
-		console.error(`Error loading the last opened board.`);
-		return undefined;
 	}
 
 	/**
@@ -782,24 +797,6 @@ export default class TaskBoardFileManager {
 			(e) => e.boardId === boardId,
 		);
 		return entry ? entry.filePath : null;
-	}
-
-	/**
-	 * Get the index of a board from the registry based on its boardId
-	 * @param boardId - The ID of the board
-	 * @returns The index of the board in the registry, or null if not found
-	 */
-	getBoardIndexFromRegistry(boardId: string): number {
-		console.warn(
-			"getBoardIndexFromRegistry is deprecated. Use getBoardFilepathFromRegistry instead.",
-		);
-		// const index = Object.values(taskBoardFilesRegistry).findIndex(
-		// 	(entry) => entry.boardId === boardId,
-		// );
-
-		const allBoardIDs = Object.keys(this.taskBoardFilesRegistry);
-		const index = allBoardIDs.indexOf(boardId);
-		return index >= 0 ? index : -1;
 	}
 
 	/**
@@ -816,27 +813,6 @@ export default class TaskBoardFileManager {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Migration for the following properties :
-	 * - Board.pluginVersion has been deprecated
-	 * - Board.revision has been added
-	 *
-	 * @todo - Remove this migration while releasing the first beta version itself.
-	 * Also, assign the {@link CURRENT_REVISION} to 0.
-	 */
-	runMigrationForRevision_0(oldBoardData: Board): Board {
-		let newBoardData = { ...oldBoardData };
-		if (oldBoardData?.pluginVersion) {
-			delete newBoardData.pluginVersion;
-		}
-
-		if (!oldBoardData?.revision) {
-			newBoardData["revision"] = CURRENT_REVISION;
-		}
-
-		return newBoardData;
-	}
-
-	/**
 	 * Example Migration function...
 	 * Migration for the following properties :
 	 * - Board.pluginVersion has been deprecated
@@ -844,10 +820,10 @@ export default class TaskBoardFileManager {
 	 *
 	 * @Date - 2026-04-27
 	 */
-	runMigrationForRevision_1(oldBoardData: Board): Board {
+	runMigrationForRevision_0(oldBoardData: Board): Board {
 		if (oldBoardData.revision < CURRENT_REVISION) {
 			let newBoardData = { ...oldBoardData };
-			if (!oldBoardData?.pluginVersion) {
+			if (oldBoardData?.pluginVersion) {
 				delete newBoardData.pluginVersion;
 			}
 
@@ -859,6 +835,29 @@ export default class TaskBoardFileManager {
 		}
 
 		return oldBoardData;
+	}
+
+	/**
+	 * @deprecated
+	 *
+	 * Migration for the following properties :
+	 * - Board.pluginVersion has been deprecated
+	 * - Board.revision has been added
+	 *
+	 * @todo - Remove this migration while releasing the first beta version itself.
+	 * Also, assign the {@link CURRENT_REVISION} to 0.
+	 */
+	runMigrationForRevision_1(oldBoardData: Board): Board {
+		let newBoardData = { ...oldBoardData };
+		if (oldBoardData?.pluginVersion) {
+			delete newBoardData.pluginVersion;
+		}
+
+		if (!oldBoardData?.revision) {
+			newBoardData["revision"] = CURRENT_REVISION;
+		}
+
+		return newBoardData;
 	}
 
 	/**
@@ -887,17 +886,12 @@ export default class TaskBoardFileManager {
 			if (boardData.revision === CURRENT_REVISION) {
 				//Board data plugin version matches current plugin version. No migration needed.
 				return boardData;
-			} else {
-				// There are two situations :
-				// 1. boardData.revision === "";
-				// 2. boardData.revision !== this.currentRevisionNumber;
-				// In both these cases, will apply all the migrations.
-				// Here we can run all the migrations sequentially since we don't know which version it was last saved with.
-				// Will add a date to the version specific migration function to remember when that migration was introduced.
-				// If the date has crossed 6 months, will remove that migration, since its very old now.
-
-				boardData = this.runMigrationForRevision_0(boardData);
 			}
+
+			// Here we will keep each migration function sequentially.
+			// When the migration function gets older than 6 months, it will be removed.
+
+			// boardData = this.runMigrationForRevision_1(boardData);
 
 			// After applying necessary migrations, update the revision in the board data
 			boardData.revision = CURRENT_REVISION;
@@ -906,7 +900,11 @@ export default class TaskBoardFileManager {
 
 			return boardData;
 		} catch (error) {
-			console.error(`Error applying migration to board data:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				213,
+				`Error applying migration to board data: ${error}`,
+				"TaskBoardFileManager.ts/applyMigrationIfNeeded",
+			);
 			return boardData; // Return original data if migration fails to prevent data loss
 		}
 	}
@@ -941,8 +939,11 @@ export default class TaskBoardFileManager {
 					flag = true;
 				}
 			} catch (error) {
-				// Handle potential errors during file check (permissions, invalid path, etc.)
-				console.error(error);
+				bugReporterManagerInsatance.addToLogs(
+					212,
+					`Error validating board files from the registry: ${error}`,
+					"TaskBoardFileManager.ts/validateBoardFiles",
+				);
 			}
 		}
 
@@ -958,6 +959,26 @@ export default class TaskBoardFileManager {
 	// --------------------------------------------------------------------
 	// DEPRECATED FUNCTIONS
 	// --------------------------------------------------------------------
+
+	/**
+	 * @deprecated - Use getBoardFilepathFromRegistry instead.
+	 *
+	 * Get the index of a board from the registry based on its boardId
+	 * @param boardId - The ID of the board
+	 * @returns The index of the board in the registry, or null if not found
+	 */
+	getBoardIndexFromRegistry(boardId: string): number {
+		console.warn(
+			"getBoardIndexFromRegistry is deprecated. Use getBoardFilepathFromRegistry instead.",
+		);
+		// const index = Object.values(taskBoardFilesRegistry).findIndex(
+		// 	(entry) => entry.boardId === boardId,
+		// );
+
+		const allBoardIDs = Object.keys(this.taskBoardFilesRegistry);
+		const index = allBoardIDs.indexOf(boardId);
+		return index >= 0 ? index : -1;
+	}
 
 	/**
 	 * @deprecated This function is deprecated. Use loadBoardUsingID instead.
@@ -977,15 +998,16 @@ export default class TaskBoardFileManager {
 
 			// Validate board index
 			if (boardIndex < 0 || boardIndex > boardsArray.length - 1) {
-				console.error(
-					`Invalid board index: ${boardIndex}. Available boards: ${boardsArray.length}`,
-				);
-				return null;
+				throw `Invalid board index: ${boardIndex}. Available boards: ${boardsArray.length}`;
 			}
 
 			return boardsArray[boardIndex] || null;
 		} catch (error) {
-			console.error(`Error loading board at index ${boardIndex}:`, error);
+			bugReporterManagerInsatance.addToLogs(
+				216,
+				`Error loading board at index ${boardIndex}: ${error}`,
+				"TaskBoardFileManager.ts/loadBoardUsingIndex",
+			);
 			return null;
 		}
 	}

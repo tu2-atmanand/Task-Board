@@ -1,3 +1,4 @@
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { t } from "../utils/lang/helper.js";
 import { defaultTaskStatuses } from "./Enums.js";
 import { CustomStatus } from "./GlobalSettings.js";
@@ -96,8 +97,10 @@ export const getCustomStatusOptionsForDropdown = (
 		!Array.isArray(statusConfigs) ||
 		statusConfigs.length === 0
 	) {
-		console.warn(
-			"[getCustomStatusOptionsForDropdown] Empty or invalid statusConfigs provided",
+		bugReporterManagerInsatance.addToLogs(
+			189,
+			"Empty or invalid statusConfigs provided",
+			"Mapping.ts/getCustomStatusOptionsForDropdown",
 		);
 		return mode === "grouped"
 			? { type: "grouped", groups: [] }
@@ -125,17 +128,20 @@ export const getCustomStatusOptionsForDropdown = (
 			typeof status.type === "string";
 
 		if (!isValid) {
-			console.warn(
-				`[getCustomStatusOptionsForDropdown] Invalid status at index ${index}:`,
-				status,
+			bugReporterManagerInsatance.addToLogs(
+				190,
+				`Invalid status at index ${index}: ${status}`,
+				"Mapping.ts/getCustomStatusOptionsForDropdown",
 			);
 		}
 		return isValid;
 	});
 
 	if (validStatuses.length === 0) {
-		console.error(
-			"[getCustomStatusOptionsForDropdown] No valid statuses after filtering",
+		bugReporterManagerInsatance.addToLogs(
+			197,
+			`No valid statuses after filtering`,
+			"Mapping.ts/getCustomStatusOptionsForDropdown",
 		);
 		return mode === "grouped"
 			? { type: "grouped", groups: [] }
@@ -154,9 +160,10 @@ export const getCustomStatusOptionsForDropdown = (
 			.map(([symbol]) => symbol);
 
 		if (duplicates.length > 0) {
-			console.warn(
-				`[getCustomStatusOptionsForDropdown] Duplicate status symbols detected: ${duplicates.join(", ")}. ` +
-					"This may cause unexpected behavior in dropdown selection.",
+			bugReporterManagerInsatance.addToLogs(
+				191,
+				`Duplicate status symbols detected: ${duplicates.join(", ")}.\nThis may cause unexpected behavior in dropdown selection.`,
+				"Mapping.ts/getCustomStatusOptionsForDropdown",
 			);
 			// Optional: Deduplicate by keeping first occurrence
 			// validStatuses = Array.from(new Map(validStatuses.map(s => [s.symbol, s])).values());

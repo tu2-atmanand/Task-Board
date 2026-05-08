@@ -49,6 +49,7 @@ import {
 	importConfigurations,
 	exportConfigurations,
 } from "./SettingSynchronizer.js";
+import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
 
 export class SettingsManager {
 	win: Window;

@@ -21,7 +21,6 @@ import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
-import { CustomStatus } from "../interfaces/GlobalSettings.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -826,7 +825,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																aria-label={t("task-status")}
 																value={column.taskStatus || " "}
 																onChange={(e) => {
-																	debugger;
 																	handleColumnChange(
 																		viewIndex,
 																		columnIndex,

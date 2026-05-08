@@ -1,6 +1,6 @@
 // /src/modals/SwimlanesConfigModal.tsx
 
-import { Modal, App, Setting, addIcon, setIcon, Menu } from 'obsidian';
+import { Modal, Setting, setIcon } from 'obsidian';
 import Sortable from 'sortablejs';
 
 import { swimlaneConfigs } from '../interfaces/BoardConfigs.js';

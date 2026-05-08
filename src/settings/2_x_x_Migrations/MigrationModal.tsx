@@ -189,7 +189,7 @@ const MigrationModalContent: React.FC<{
 	return (
 		<div className="migration-modal-content">
 			<p className="migration-description">
-				Task Board plugin has undergone some major architectural level changes, so backward compatibility is not possible in all the version in 2.x.x series. Please read the following wiki to understand everything about the migrations and incase if any error occured during the migration, how to revert back to the previous version : <a href="https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/">Task Board v2.x.x migration guide</a>.
+				Task Board plugin has undergone some major architectural level changes, so backward compatibility is not possible in the 2.x.x series of this plugin. Please read the following wiki to understand everything about the migrations and incase if any error occured during the migration, how to revert back to the previous version : <a href="https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/">Task Board v2.x.x migration guide</a>.
 			</p>
 
 			{/* Progress Section */}

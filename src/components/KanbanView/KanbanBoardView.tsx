@@ -3,7 +3,7 @@
 import { t } from "i18next";
 import React, { memo, useMemo, useState, useEffect } from "react";
 import TaskBoard from "../../../main.js";
-import type { Board, ColumnData, KanbanView, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
+import type { Board, ColumnData, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
 import type { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
 import { columnSegregator } from "../../utils/algorithms/ColumnSegregator.js";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer.js";

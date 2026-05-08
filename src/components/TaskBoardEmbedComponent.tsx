@@ -3,6 +3,7 @@ import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import TaskBoard from "../../main.js";
 import TaskBoardViewContainer from "./TaskBoardViewContainer.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 
 export class TaskBoardEmbedComponent extends Component {
 	plugin: TaskBoard;
@@ -38,7 +39,11 @@ export class TaskBoardEmbedComponent extends Component {
 				this.contentEl.createEl("div", { text: "Failed to load task board" });
 			}
 		} catch (error) {
-			console.error("Error loading task board for embed:", error);
+			bugReporterManagerInsatance.addToLogs(
+				196,
+				`Error loading task board for embed: ${error}`,
+				"TaskBoardEmbedComponent.tsx/loadFile",
+			);
 			this.contentEl.createEl("div", { text: "Error loading task board" });
 		}
 	}

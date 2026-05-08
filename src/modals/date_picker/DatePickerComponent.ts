@@ -9,8 +9,6 @@ import {
 	endOfMonth,
 	startOfWeek,
 	endOfWeek,
-	isBefore,
-	isSameDay,
 	isSameMonth,
 	eachDayOfInterval,
 	isToday as isTodayDateFns,
