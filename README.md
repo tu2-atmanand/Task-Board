@@ -18,11 +18,11 @@
 
 <p align="center">An <a href="https://obsidian.md/">Obsidian</a> plugin to view and manage all your tasks, throughout the vault on a centralized board using various kinds of views. Use boards to manage small to large projects.</p>
 
-> :warning: **Attention**
+> ⚠️ **Attention** ⚠️
 >
 > Right now this plugin have a serious issue with the "Map view" feature. You can read more about it [here](https://github.com/tu2-atmanand/Task-Board/issues/561). The data of the map view is being stored inside a `LocalStorage`, which a very bad system design to store user's data. This architecture will be completely changed in the next major release, [version `2.0.0`](https://github.com/tu2-atmanand/Task-Board/milestone/13).
 > 
-> Please be aware of this issue and use the feature cautiously. Would rather request to not use the map view feature for your day to day workflow till the issue has been fixed.
+> Please be aware of this issue and use the feature cautiously. Would rather request to not use the map view feature for your day to day workflow till the issue has been fixed. The testing for the next series of this plugin has already begun. Please read the migration guide : [Migrating to Task Board 2.x.x series | Task Board Docs](https://tu2-atmanand.github.io/task-board-docs/docs/Migrating_To_2.x.x/).
 
 
 ![Task Board Thumbnail](./assets/MainThumbnail-4.png)
