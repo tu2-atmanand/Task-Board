@@ -1,13 +1,13 @@
-import TaskBoard from "main";
-import { taskItem } from "src/interfaces/TaskItem";
-import { bugReporter } from "src/services/OpenModals";
-import { updateTaskInFile } from "./taskLine/TaskLineUtils";
-import {
-	isTaskNotePresentInTags,
-	updateFrontmatterInMarkdownFile,
-} from "./taskNote/TaskNoteUtils";
-import { extractTaskId } from "src/managers/VaultScanner";
-import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+// /src/utils/TaskItemUtils.ts
+
+import TaskBoard from "../../main.js";
+import { taskItem } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { extractTaskId } from "../managers/VaultScanner.js";
+import { updateTaskInFile } from "./taskLine/TaskLineUtils.js";
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "./taskNote/TaskNoteUtils.js";
+
+
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
@@ -28,7 +28,7 @@ export const getAllTaskTags = (task: taskItem): string[] => {
  */
 export const getTaskFromId = async (
 	plugin: TaskBoard,
-	id: string | number
+	id: string | number,
 ): Promise<taskItem | null> => {
 	try {
 		let foundTask: taskItem | undefined | null;
@@ -38,7 +38,7 @@ export const getTaskFromId = async (
 		for (const tasks of Object.values(pendingTasksObj)) {
 			if (id) {
 				foundTask = tasks.find(
-					(task) => task.legacyId === id || task.id === id
+					(task) => task.legacyId === id || task.id === id,
 				);
 			}
 			if (foundTask) return foundTask;
@@ -50,7 +50,7 @@ export const getTaskFromId = async (
 		for (const tasks of Object.values(completedTasksObj)) {
 			if (id) {
 				foundTask = tasks.find(
-					(task) => task.legacyId === id || task.id === id
+					(task) => task.legacyId === id || task.id === id,
 				);
 			}
 			if (foundTask) return foundTask;
@@ -62,7 +62,7 @@ export const getTaskFromId = async (
 			82,
 			"Error retrieving task from tasksCache using ID",
 			String(error),
-			"TaskItemUtils.ts/getTaskFromId"
+			"TaskItemUtils.ts/getTaskFromId",
 		);
 		return null;
 	}
@@ -77,12 +77,26 @@ export const getTaskFromId = async (
 
 /**
  * Generates a random unique ID using the Web Crypto API.
+ *
+ * For example : '1851955511'.
  * @return {string} a random unique ID for a task
  */
 export function generateRandomTempTaskId(): string {
 	const array = new Uint32Array(1);
 	crypto.getRandomValues(array);
 	return String(array[0]);
+}
+
+/**
+ * Generates a random unique ID using the Web Crypto API.
+ *
+ * For example : 1851955511.
+ * @return a random unique 10 digit number
+ */
+export function generateRandomNumber(): number {
+	const array = new Uint32Array(1);
+	crypto.getRandomValues(array);
+	return array[0];
 }
 
 /**
@@ -94,13 +108,13 @@ export function generateRandomTempTaskId(): string {
  * @returns A string representing the unique ID for the task
  */
 export function generateTaskId(plugin: TaskBoard): string {
-	plugin.settings.data.globalSettings.uniqueIdCounter =
-		plugin.settings.data.globalSettings.uniqueIdCounter + 1 || 0;
+	plugin.settings.data.uniqueIdCounter =
+		plugin.settings.data.uniqueIdCounter + 1 || 0;
 
 	// Save the updated uniqueIdCounter back to settings
 	plugin.saveSettings();
 	// Return the current counter value and then increment it for the next ID
-	return String(plugin.settings.data.globalSettings.uniqueIdCounter);
+	return String(plugin.settings.data.uniqueIdCounter);
 }
 
 /**
@@ -108,17 +122,15 @@ export function generateTaskId(plugin: TaskBoard): string {
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The taskItem object representing the task to which an id needs to be applied.
  * @returns A promise that resolves to the new id if applied, or undefined if the task already has an id or if an error occurs.
- *
- * @throws Will throw an error if there are issues updating the task in the file.
  */
 export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
-	task: taskItem
+	task: taskItem,
 ): Promise<string | undefined> => {
 	if (
 		isTaskNotePresentInTags(
-			plugin.settings.data.globalSettings.taskNoteIdentifierTag,
-			task.tags
+			plugin.settings.data.taskNoteIdentifierTag,
+			task.tags,
 		)
 	) {
 		let newId;
@@ -130,7 +142,8 @@ export const applyIdToTaskItem = async (
 
 		return newId;
 	} else {
-		if (extractTaskId(task.title) !== "") return undefined;
+		const extractedTaskId = extractTaskId(task.title)?.[1];
+		if (extractedTaskId) return extractedTaskId;
 
 		const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
 		return newIdToReturn;

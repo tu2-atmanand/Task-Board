@@ -1,0 +1,291 @@
+{
+  "version": "2.0.0-beta-2",
+  "data": {
+    "lang": "en",
+    "openOnStartup": false,
+    "scanFilters": {
+      "files": {
+        "polarity": 3,
+        "values": []
+      },
+      "folders": {
+        "polarity": 3,
+        "values": []
+      },
+      "frontmatter": {
+        "polarity": 3,
+        "values": []
+      },
+      "tags": {
+        "polarity": 3,
+        "values": []
+      }
+    },
+    "firstDayOfWeek": "Mon",
+    "showTaskWithoutMetadata": true,
+    "ignoreFileNameDates": false,
+    "taskPropertyFormat": "2",
+    "dailyNotesPluginComp": false,
+    "dateFormat": "yyyy-MM-dd",
+    "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",
+    "defaultStartTime": "",
+    "taskCompletionInLocalTime": true,
+    "taskCompletionShowUtcOffset": false,
+    "autoAddUniversalDate": true,
+    "autoAddCreatedDate": false,
+    "autoAddCompletedDate": false,
+    "autoAddCancelledDate": false,
+    "showModifiedFilesNotice": true,
+    "scanMode": "automatic",
+    "columnWidth": "300px",
+    "visiblePropertiesList": [
+      "title",
+      "tags",
+      "time",
+      "reminder",
+      "createdDate",
+      "startDate",
+      "scheduledDate",
+      "dueDate",
+      "completionDate",
+      "cancelledDate",
+      "dependsOn",
+      "status",
+      "id"
+    ],
+    "taskCardStyle": "emoji",
+    "showVerticalScroll": false,
+    "tagColors": [
+      {
+        "name": "bug",
+        "color": "rgba(255, 0, 0, 0.55)",
+        "priority": 1
+      },
+      {
+        "name": "important",
+        "color": "rgba(246, 255, 0, 0.53)",
+        "priority": 2
+      },
+      {
+        "name": "wip",
+        "color": "rgba(0, 255, 0, 0.53)",
+        "priority": 2
+      },
+      {
+        "name": "review",
+        "color": "rgba(0, 0, 255, 0.49)",
+        "priority": 3
+      }
+    ],
+    "editButtonAction": "popUp",
+    "doubleClickCardToEdit": "none",
+    "universalDate": "due",
+    "tagColorsType": "tagBg",
+    "customStatuses": [
+      {
+        "symbol": " ",
+        "name": "Todo",
+        "nextStatusSymbol": "x",
+        "availableAsCommand": false,
+        "type": "TODO"
+      },
+      {
+        "symbol": "<",
+        "name": "Ready to start",
+        "nextStatusSymbol": "x",
+        "availableAsCommand": false,
+        "type": "TODO"
+      },
+      {
+        "symbol": "?",
+        "name": "In Review",
+        "nextStatusSymbol": "x",
+        "availableAsCommand": false,
+        "type": "TODO"
+      },
+      {
+        "symbol": "/",
+        "name": "In Progress",
+        "nextStatusSymbol": "x",
+        "availableAsCommand": true,
+        "type": "IN_PROGRESS"
+      },
+      {
+        "symbol": "x",
+        "name": "Done",
+        "nextStatusSymbol": " ",
+        "availableAsCommand": true,
+        "type": "IN_PROGRESS"
+      },
+      {
+        "symbol": "X",
+        "name": "Completed",
+        "nextStatusSymbol": " ",
+        "availableAsCommand": true,
+        "type": "IN_PROGRESS"
+      },
+      {
+        "symbol": "-",
+        "name": "Cancelled",
+        "nextStatusSymbol": "x",
+        "availableAsCommand": true,
+        "type": "CANCELLED"
+      },
+      {
+        "symbol": "*",
+        "name": "Now",
+        "nextStatusSymbol": "r",
+        "availableAsCommand": false,
+        "type": "IN_PROGRESS"
+      }
+    ],
+    "compatiblePlugins": {
+      "dailyNotesPlugin": false,
+      "dayPlannerPlugin": false,
+      "tasksPlugin": false,
+      "reminderPlugin": false,
+      "quickAddPlugin": false
+    },
+    "taskNoteIdentifierTag": "taskNote",
+    "preDefinedNote": "Meta/Task_Board/New_Tasks.md",
+    "archivedTasksFilePath": "",
+    "taskNoteDefaultLocation": "Meta/Task_Board/Task_Notes",
+    "archivedTBNotesFolderPath": "Meta/Task_Board/Archived_Task_Notes",
+    "quickAddPluginDefaultChoice": "",
+    "frontmatterFormatting": [
+      {
+        "index": 0,
+        "property": "ID",
+        "key": "id",
+        "taskItemKey": "id"
+      },
+      {
+        "index": 1,
+        "property": "Title",
+        "key": "title",
+        "taskItemKey": "title"
+      },
+      {
+        "index": 2,
+        "property": "Status",
+        "key": "status",
+        "taskItemKey": "status"
+      },
+      {
+        "index": 3,
+        "property": "Priority",
+        "key": "priority",
+        "taskItemKey": "priority"
+      },
+      {
+        "index": 4,
+        "property": "Tags",
+        "key": "tags",
+        "taskItemKey": "tags"
+      },
+      {
+        "index": 5,
+        "property": "Time",
+        "key": "time",
+        "taskItemKey": "time"
+      },
+      {
+        "index": 6,
+        "property": "Reminder",
+        "key": "reminder",
+        "taskItemKey": "reminder"
+      },
+      {
+        "index": 7,
+        "property": "Created date",
+        "key": "created-date",
+        "taskItemKey": "createdDate"
+      },
+      {
+        "index": 8,
+        "property": "Start date",
+        "key": "start-date",
+        "taskItemKey": "startDate"
+      },
+      {
+        "index": 9,
+        "property": "Scheduled date",
+        "key": "scheduled-date",
+        "taskItemKey": "scheduledDate"
+      },
+      {
+        "index": 10,
+        "property": "Due date",
+        "key": "due-date",
+        "taskItemKey": "due"
+      },
+      {
+        "index": 11,
+        "property": "Depends on",
+        "key": "depends-on",
+        "taskItemKey": "dependsOn"
+      },
+      {
+        "index": 12,
+        "property": "Completed date",
+        "key": "cancelled-date",
+        "taskItemKey": "cancelledDate"
+      },
+      {
+        "index": 13,
+        "key": "completed-date",
+        "taskItemKey": "completionDate"
+      }
+    ],
+    "showFrontmatterTagsOnCards": false,
+    "tasksCacheFilePath": "",
+    "notificationService": "none",
+    "actions": [
+      {
+        "enabled": true,
+        "trigger": "Complete",
+        "type": "move",
+        "targetColumn": "Completed"
+      }
+    ],
+    "hiddenTaskProperties": [],
+    "autoAddUniqueID": false,
+    "uniqueIdCounter": 670,
+    "experimentalFeatures": false,
+    "safeGuardFeature": true,
+    "lastViewHistory": {
+      "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+      "settingTab": 2,
+      "taskId": ""
+    },
+    "boundTaskCompletionToChildTasks": false,
+    "mapView": {
+      "background": "none",
+      "mapOrientation": "hor",
+      "optimizedRender": false,
+      "arrowDirection": "c2p",
+      "animatedEdges": false,
+      "scrollAction": "zoom",
+      "showMinimap": true,
+      "renderVisibleNodes": false,
+      "edgeType": "default"
+    },
+    "taskBoardFilesRegistry": {
+      "901052398": {
+        "boardId": "901052398",
+        "filePath": "TaskBoard-Template-1774097758616.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
+      "2908513791": {
+        "boardId": "2908513791",
+        "filePath": "My Project Board.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      }
+    },
+    "loadAllBoards": false,
+    "searchQuery": "",
+    "dragAutoScrollEdgePercent": 20
+  }
+}

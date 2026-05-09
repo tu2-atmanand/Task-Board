@@ -3,7 +3,6 @@
  * Properties are hidden by default and revealed when the cursor is positioned on them.
  */
 
-import type TaskBoard from "main";
 import {
 	EditorView,
 	Decoration,
@@ -14,13 +13,11 @@ import {
 } from "@codemirror/view";
 import { Extension, Range, StateField } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
-import { isTaskLine } from "src/utils/CheckBoxUtils";
-import {
-	TaskRegularExpressions,
-	TASKS_PLUGIN_DEFAULT_SYMBOLS,
-} from "src/regularExpressions/TasksPluginRegularExpr";
-import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
-import { taskPropertiesNames } from "src/interfaces/Enums";
+import TaskBoard from "../../../main.js";
+import { taskPropertiesNames } from "../../interfaces/Enums.js";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../regularExpressions/DataviewPluginRegularExpr.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS, TaskRegularExpressions } from "../../regularExpressions/TasksPluginRegularExpr.js";
+import { isTaskLine } from "../../utils/CheckBoxUtils.js";
 
 /**
  * Widget for showing placeholder text when properties are hidden
@@ -239,7 +236,7 @@ function createPropertyDecorations(
 ): DecorationSet {
 	const decorations: Range<Decoration>[] = [];
 	const hiddenProperties =
-		plugin.settings.data.globalSettings.hiddenTaskProperties || [];
+		plugin.settings.data.hiddenTaskProperties || [];
 
 	const cursorPos = view.state.selection.main.head;
 	const doc = view.state.doc;
@@ -274,7 +271,7 @@ function createPropertyDecorations(
 		hiddenProperties.forEach((property) => {
 			const pattern = getTaskPropertyRegexPatterns(
 				property,
-				plugin.settings.data.globalSettings?.taskPropertyFormat
+				plugin.settings.data?.taskPropertyFormat
 			);
 			const matches = Array.from(lineText.matchAll(pattern));
 			// console.log(

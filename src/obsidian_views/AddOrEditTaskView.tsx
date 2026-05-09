@@ -3,16 +3,17 @@
 import { ItemView, WorkspaceLeaf, normalizePath } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
-import type TaskBoard from "../../main";
-import { t } from "src/utils/lang/helper";
-import { AddOrEditTaskRC } from "src/components/AddOrEditTaskRC";
-import { getFormattedTaskContent } from "src/utils/taskLine/TaskContentFormatter";
-import { readDataOfVaultFile } from "src/utils/MarkdownFileOperations";
-import { getLocalDateTimeString } from "src/utils/DateTimeCalculations";
-import { allowedFileExtensionsRegEx } from "src/regularExpressions/MiscelleneousRegExpr";
-import { taskItemEmpty } from "src/interfaces/Mapping";
-import { taskItem } from "src/interfaces/TaskItem";
-import { generateTaskId } from "src/utils/TaskItemUtils";
+import { t } from "i18next";
+import TaskBoard from "../../main.js";
+import { AddOrEditTaskRC } from "../components/AddOrEditTaskRC.js";
+import { DEFAULT_SETTINGS } from "../interfaces/GlobalSettings.js";
+import { taskItemEmpty } from "../interfaces/Mapping.js";
+import { taskItem } from "../interfaces/TaskItem.js";
+import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
+import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
+import { readDataOfVaultFile } from "../utils/MarkdownFileOperations.js";
+import { generateTaskId } from "../utils/TaskItemUtils.js";
+import { getFormattedTaskContent } from "../utils/taskLine/TaskContentFormatter.js";
 
 
 export class AddOrEditTaskView extends ItemView {
@@ -58,7 +59,7 @@ export class AddOrEditTaskView extends ItemView {
 	}
 
 	getDisplayText() {
-		return this.taskExists ? t("edit-task") + this.task.id : t("add-new-task");
+		return this.taskExists ? t("edit-task") + " - " + this.task.id : t("add-new-task");
 	}
 
 	async onOpen() {
@@ -66,32 +67,35 @@ export class AddOrEditTaskView extends ItemView {
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
-		if (!this.isTaskNote && this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
 			this.task.id = generateTaskId(this.plugin);
-			this.task.legacyId = String(this.task.id);
+			this.task.legacyId = this.task.id;
 		}
 
 		// Some processing, if this is a Task-Note
 		let noteContent: string = "";
 		if (this.isTaskNote) {
-			if (this.filePath) {
-				noteContent = await readDataOfVaultFile(this.plugin, this.filePath);
+			if (this.taskExists) {
+				const data = await readDataOfVaultFile(this.plugin, this.filePath, true);
+
+				if (data == null) this.onClose();
+				else noteContent = data;
+
+				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
-				const defaultLocation = this.plugin.settings.data.globalSettings.taskNoteDefaultLocation || 'Meta/Task_Board/Task_Notes';
-				const noteName = this.task.title || getLocalDateTimeString();
+				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
+				this.task.title = "";
+
 				// Sanitize filename
+				const noteName = this.task.title || getCurrentLocalDateTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
-
-			if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "Untitled";
-
-			if (this.plugin.settings.data.globalSettings.autoAddUniqueID && (!this.taskExists || !this.task.legacyId)) {
-				this.task.id = generateTaskId(this.plugin);
-				this.task.legacyId = this.task.id;
-			}
+		} else {
+			if (!this.taskExists)
+				this.task.title = "- [ ] ";
 		}
 
 		this.root = createRoot(container);

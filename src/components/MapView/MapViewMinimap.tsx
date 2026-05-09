@@ -1,8 +1,8 @@
 import React from "react";
 import { MiniMap, Node } from "@xyflow/react";
-import { TagColor } from "src/interfaces/GlobalSettings";
-import { taskItem } from "src/interfaces/TaskItem";
-import { matchTagsWithWildcards } from "src/utils/algorithms/ScanningFilterer";
+import { TagColor } from "../../interfaces/GlobalSettings.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { matchTagsWithWildcards } from "../../utils/algorithms/ScanningFilterer.js";
 
 export interface CustomNode extends Node {
 	data: { label: { props: { task: taskItem } } }

@@ -1,14 +1,9 @@
-import TaskBoard from "main";
+import { t } from "i18next";
 import { Modal, Setting, setIcon } from "obsidian";
-import {
-	MultiSuggest,
-	getFileSuggestions,
-	getFolderSuggestions,
-	getTagSuggestions,
-	getYAMLPropertySuggestions,
-} from "src/services/MultiSuggest";
-import { trashIcon } from "src/interfaces/Icons";
-import { t } from "src/utils/lang/helper";
+import TaskBoard from "../../main.js";
+import { ScanFilters } from "../interfaces/GlobalSettings.js";
+import { trashIcon } from "../interfaces/Icons.js";
+import { getFileSuggestions, getYAMLPropertySuggestions, getFolderSuggestions, getTagSuggestions, MultiSuggest } from "../services/MultiSuggest.js";
 
 export class ScanFilterModal extends Modal {
 	private inputEl!: HTMLInputElement;
@@ -18,14 +13,12 @@ export class ScanFilterModal extends Modal {
 
 	constructor(
 		private plugin: TaskBoard,
-		private filterType: "files" | "folders" | "frontMatter" | "tags",
-		private onSave: (values: string[]) => void
+		private filterType: keyof ScanFilters,
+		private onSave: (values: string[]) => void,
 	) {
 		super(plugin.app);
 		this.selectedValues = new Set(
-			this.plugin.settings.data.globalSettings.scanFilters[
-				this.filterType
-			].values
+			this.plugin.settings.data.scanFilters[this.filterType].values,
 		);
 		this.selectedValue = "";
 	}
@@ -57,9 +50,9 @@ export class ScanFilterModal extends Modal {
 		// Load suggestion content
 		if (this.filterType === "files") {
 			this.suggestionContent = new Set(getFileSuggestions(this.app));
-		} else if (this.filterType === "frontMatter") {
+		} else if (this.filterType === "frontmatter") {
 			this.suggestionContent = new Set(
-				getYAMLPropertySuggestions(this.app)
+				getYAMLPropertySuggestions(this.app),
 			);
 		} else if (this.filterType === "folders") {
 			this.suggestionContent = new Set(getFolderSuggestions(this.app));
@@ -78,7 +71,7 @@ export class ScanFilterModal extends Modal {
 				}
 				this.inputEl.value = "";
 			},
-			this.app
+			this.app,
 		);
 
 		// this.inputEl.blur();
@@ -94,13 +87,13 @@ export class ScanFilterModal extends Modal {
 					.onClick(() => {
 						this.onSave(Array.from(this.selectedValues));
 						this.close();
-					})
+					}),
 			)
 			.addButton((btn) =>
 				btn
 					.setButtonText(t("cancel"))
 					.setTooltip(t("cancel"))
-					.onClick(() => this.close())
+					.onClick(() => this.close()),
 			);
 	}
 
