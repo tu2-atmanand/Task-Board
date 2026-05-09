@@ -7,7 +7,6 @@ import { eventEmitter } from "../services/EventEmitter.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import VaultScanner from "./VaultScanner.js";
 
-
 export class RealTimeScanner {
 	app: App;
 	plugin: TaskBoard;
@@ -91,18 +90,18 @@ export class RealTimeScanner {
 				files,
 				false,
 			);
-		}
 
-		if (result) {
-			// Clear the stack to avoid re-processing during this run.
-			this.taskBoardFileStack = [];
-			// Save updated stack (which should now be empty)
-			this.saveStack();
+			if (result) {
+				// Clear the stack to avoid re-processing during this run.
+				this.taskBoardFileStack = [];
+				// Save updated stack (which should now be empty)
+				this.saveStack();
 
-			// Reset the editorModified flag after the scan.
-			this.plugin.editorModified = false;
-		} else {
-			new Notice("Few files didnt got scanned...");
+				// Reset the editorModified flag after the scan.
+				this.plugin.editorModified = false;
+			} else {
+				new Notice("Few files didnt got scanned...");
+			}
 		}
 
 		setTimeout(() => {

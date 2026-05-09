@@ -17,16 +17,36 @@ import { priorityEmojis } from "../interfaces/Mapping.js";
 import { jsonCacheData, taskItem } from "../interfaces/TaskItem.js";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/DataviewPluginRegularExpr.js";
 import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
-import { TASKS_PLUGIN_DEFAULT_SYMBOLS, TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr.js";
+import {
+	TASKS_PLUGIN_DEFAULT_SYMBOLS,
+	TaskRegularExpressions,
+} from "../regularExpressions/TasksPluginRegularExpr.js";
 import { eventEmitter } from "../services/EventEmitter.js";
-import { scanFilterForTags, scanFilterForFilesNFoldersNFrontmatter } from "../utils/algorithms/ScanningFilterer.js";
-import { getObsidianIndentationSetting, isTaskLine, isTaskCompleted, extractCheckboxSymbol } from "../utils/CheckBoxUtils.js";
+import {
+	scanFilterForTags,
+	scanFilterForFilesNFoldersNFrontmatter,
+} from "../utils/algorithms/ScanningFilterer.js";
+import {
+	getObsidianIndentationSetting,
+	isTaskLine,
+	isTaskCompleted,
+	extractCheckboxSymbol,
+} from "../utils/CheckBoxUtils.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
-import { loadJsonCacheDataFromDisk, writeJsonCacheDataToDisk } from "../utils/JsonFileOperations.js";
+import {
+	loadJsonCacheDataFromDisk,
+	writeJsonCacheDataToDisk,
+} from "../utils/JsonFileOperations.js";
 import { readDataOfVaultFile } from "../utils/MarkdownFileOperations.js";
 import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
-import { extractFrontmatterFromFile, extractFrontmatterTags } from "../utils/taskNote/FrontmatterOperations.js";
-import { isTaskNotePresentInFrontmatter, extractTaskNoteProperties } from "../utils/taskNote/TaskNoteUtils.js";
+import {
+	extractFrontmatterFromFile,
+	extractFrontmatterTags,
+} from "../utils/taskNote/FrontmatterOperations.js";
+import {
+	isTaskNotePresentInFrontmatter,
+	extractTaskNoteProperties,
+} from "../utils/taskNote/TaskNoteUtils.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import type { ScanFilters } from "../interfaces/GlobalSettings.js";
 
@@ -550,7 +570,7 @@ export default class VaultScanner {
 		showNotice: boolean,
 	): Promise<boolean> {
 		if (!files || files.length === 0) {
-			return false;
+			return true;
 		}
 
 		try {
@@ -577,24 +597,22 @@ export default class VaultScanner {
 				}
 			}
 
-			let result = false;
 			if (isFileScanned === "true") {
 				if (showNotice) {
 					new Notice(t("tasks-refreshed-successfully"));
 				}
 
 				if (this.tasksDetectedOrUpdated) {
-					result = await this.saveTasksToJsonCache();
+					let result = await this.saveTasksToJsonCache();
+					if (!result) {
+						throw "There was an error while saving the tasks cache.";
+					}
 				}
 
-				return result;
-			} else {
-				// throw new Error(
-				// 	`extractTasksFromFile returned following error : ${isFileScanned}`
-				// );
-
-				return result;
+				return true;
 			}
+
+			return false;
 		} catch (error) {
 			bugReporterManagerInsatance.showNotice(
 				33,
