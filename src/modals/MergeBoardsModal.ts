@@ -1,10 +1,11 @@
-import { App, Modal, Setting, Notice, TFile } from "obsidian";
+import { App, Modal, Setting, Notice, TFile, setIcon } from "obsidian";
 import TaskBoard from "../../main.js";
 import { Board } from "../interfaces/BoardConfigs.js";
 import TaskBoardFileManager from "../managers/TaskBoardFileManager.js";
 import { MultiSuggest } from "../services/MultiSuggest.js";
 import { generateRandomNumber } from "../utils/TaskItemUtils.js";
 import { CURRENT_REVISION } from "../interfaces/Constants.js";
+import { t } from "i18next";
 
 interface MergeBoardsModalProps {
 	plugin: TaskBoard;
@@ -31,6 +32,8 @@ export class MergeBoardsModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 
+		this.setTitle(t("merge-board-files"));
+
 		this.modalEl.setAttribute("data-type", "task-board-view");
 		contentEl.setAttribute("data-type", "task-board-view");
 
@@ -39,14 +42,17 @@ export class MergeBoardsModal extends Modal {
 		});
 
 		// Header
-		modalContent.createEl("h2", { text: "Merge Boards" });
+		modalContent.createEl("p", {
+			text: t("merge-board-files-info"),
+			cls: "setting-item-description",
+		});
 
 		// First Board Path Field
 		const firstBoardField = modalContent.createDiv({
 			cls: "mergeBoardsModalField",
 		});
 		firstBoardField.createEl("label", {
-			text: "First Board Path (.taskboard file)",
+			text: "First task board file (.taskboard)",
 		});
 		const firstBoardSetting = new Setting(firstBoardField).addText(
 			(text) => {
@@ -70,17 +76,17 @@ export class MergeBoardsModal extends Modal {
 		);
 
 		// Arrow
-		modalContent.createDiv({
+		const mergeBoardsModalPluginIcon = modalContent.createDiv({
 			cls: "mergeBoardsModalArrow",
-			text: "↓",
 		});
+		setIcon(mergeBoardsModalPluginIcon, "plus");
 
 		// Second Board Path Field
 		const secondBoardField = modalContent.createDiv({
 			cls: "mergeBoardsModalField",
 		});
 		secondBoardField.createEl("label", {
-			text: "Second Board Path (.taskboard file)",
+			text: "Second task board file (.taskboard)",
 		});
 		const secondBoardSetting = new Setting(secondBoardField).addText(
 			(text) => {
@@ -104,22 +110,26 @@ export class MergeBoardsModal extends Modal {
 		);
 
 		// Arrow
-		modalContent.createDiv({
+		const mergeBoardsModalArrow = modalContent.createDiv({
 			cls: "mergeBoardsModalArrow",
-			text: "↓",
 		});
+		setIcon(mergeBoardsModalArrow, "arrow-big-down");
 
 		// New Board Name Field
 		const newBoardNameField = modalContent.createDiv({
 			cls: "mergeBoardsModalField",
 		});
 		newBoardNameField.createEl("label", {
-			text: "New Board Name",
+			text: "New board file name",
+		});
+		newBoardNameField.createEl("p", {
+			text: "This task board file will be created at the same location as that of the first board file.",
+			cls: "setting-item-description",
 		});
 		const newBoardNameInput = newBoardNameField.createEl("input", {
 			attr: {
 				type: "text",
-				placeholder: "Enter name for the merged board",
+				placeholder: "Enter name for the merged board file",
 			},
 		});
 		newBoardNameInput.addEventListener("input", (event: Event) => {
@@ -137,10 +147,10 @@ export class MergeBoardsModal extends Modal {
 		});
 
 		// Cancel Button
-		const cancelButton = actions.createEl("button", { text: "Cancel" });
-		cancelButton.addEventListener("click", () => {
-			this.close();
-		});
+		// const cancelButton = actions.createEl("button", { text: "Cancel" });
+		// cancelButton.addEventListener("click", () => {
+		// 	this.close();
+		// });
 	}
 
 	private getTaskboardFileSuggestions(): string[] {

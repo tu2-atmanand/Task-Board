@@ -647,7 +647,9 @@ const en: Lang = {
 	"no-view-selected-1": "No views has been selected",
 	"no-view-selected-2": "Either select a view from the available list of views in this board from the left panel. Or create a new view using the 'Add view' button if no view exists.",
 	"open-board-configure-modal": "Open board configuration modal",
-	"enter-view-name": "Enter view name"
+	"enter-view-name": "Enter view name",
+	"merge-board-files": "Merge board files",
+	"merge-board-files-info": "Using this tool you can merge two task board files together to combine all their views and other data into a single file. This is helpful if you want to combine two or more boards which are use to manage a same project or group of tasks."
 };
 
 export default en;
