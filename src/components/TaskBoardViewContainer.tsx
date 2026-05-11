@@ -238,11 +238,29 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	useEffect(() => {
 		const refreshView = (viewId: string) => {
-			setCurrentView(getViewById(boardData, viewId));
+			let newViewId = viewId;
+			if (viewId === 'first-map') {
+				// Find the id of the first map-view
+				const mapView = currentBoardData.views.find((view: TaskBoardViewType) => {
+					if (view.viewType === viewTypeNames.map) return view;
+				})
 
+				if (mapView)
+					newViewId = mapView?.viewId;
+				else {
+					new Notice("No map view available in this board. Please create atleast one map view.", 5000);
+					return;
+				}
+			}
 			let updatedBoardData = boardData;
-			updatedBoardData.lastViewId = viewId;
+			updatedBoardData.lastViewId = newViewId;
 			plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+
+			setCurrentView(getViewById(boardData, newViewId));
+			// setCurrentBoardData(updatedBoardData);
+			// sleep(100);
+			// eventEmitter.emit('REFRESH_BOARD');
+
 		};
 		eventEmitter.on("SWITCH_VIEW", refreshView);
 		return () => eventEmitter.off("SWITCH_VIEW", refreshView);

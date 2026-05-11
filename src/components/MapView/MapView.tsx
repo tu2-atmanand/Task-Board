@@ -1096,8 +1096,8 @@ const MapView: React.FC<MapViewProps> = ({
 									const node = nodes.find(n => n.id === focusOnTaskId);
 									if (node && Number.isFinite(node.position.x) && Number.isFinite(node.position.y)) {
 										const newVp: viewPortType = {
-											x: - (node.position.x - 200),
-											y: - (node.position.y),
+											x: - (node.position.x - 300),
+											y: - (node.position.y - 300),
 											zoom: 1
 										};
 										// Validate the new viewport before setting
@@ -1106,6 +1106,7 @@ const MapView: React.FC<MapViewProps> = ({
 											// setViewport(newVp);
 											viewPortData.current = newVp;
 											debouncedSetViewportStorage(newVp);
+											viewPortDataUpdated.current = true;
 											return;
 										}
 									}

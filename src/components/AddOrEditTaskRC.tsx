@@ -642,14 +642,14 @@ export const AddOrEditTaskRC: React.FC<{
 		// }
 
 		applyIdToTaskItem(plugin, task).then((newId) => {
-			globalSettings.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
+			plugin.settings.data.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
 
 			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
 
 			plugin.realTimeScanner.processAllUpdatedFiles(filePath).then(() => {
 				onClose();
 				sleep(1000).then(() => {
-					eventEmitter.emit("SWITCH_VIEW", viewTypeNames.map);
+					eventEmitter.emit("SWITCH_VIEW", 'first-map');
 				});
 			});
 		});
