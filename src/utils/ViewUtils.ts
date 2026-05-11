@@ -5,9 +5,12 @@
  */
 
 import { Board, TaskBoardViewType } from "../interfaces/BoardConfigs.js";
-import { viewTypeNames, HeaderUITypeOptions, colTypeNames } from "../interfaces/Enums.js";
+import {
+	viewTypeNames,
+	HeaderUITypeOptions,
+	colTypeNames,
+} from "../interfaces/Enums.js";
 import { generateRandomTempTaskId } from "./TaskItemUtils.js";
-
 
 /**
  * Get the index of a view within a board by its viewId
@@ -51,7 +54,10 @@ export function getViewByType(
  * @param viewType The type of views to find
  * @returns Array of views matching the type
  */
-export function getViewsByType(board: Board, viewType: string): TaskBoardViewType[] {
+export function getViewsByType(
+	board: Board,
+	viewType: string,
+): TaskBoardViewType[] {
 	return board.views.filter((v) => v.viewType === viewType);
 }
 
@@ -72,6 +78,7 @@ export function addViewToBoard(
 	// Create base view structure
 	const newView: TaskBoardViewType = {
 		viewId: newViewId,
+		viewIndex: board.views.length,
 		viewName: viewName,
 		viewType: viewType,
 		showFilteredTags: true,

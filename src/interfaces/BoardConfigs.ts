@@ -166,6 +166,7 @@ export interface KanbanView {
  */
 export interface TaskBoardViewType {
 	viewId: string;
+	viewIndex: number;
 	viewName: string;
 	viewType: string;
 	description?: string;
@@ -191,7 +192,7 @@ export type Board = {
 	 * This property will help us to manage the migrations in future when we will be adding
 	 * new properties to the board or view data structure. Whenever there will be a breaking
 	 * change in the data structure, we will update this revision and during the loading of
-	 * the board data, we can check this revision number and can decide if we need to run 
+	 * the board data, we can check this revision number and can decide if we need to run
 	 * specific selective migration functions to update the data structure to the latest one.
 	 */
 	revision: number;
@@ -200,7 +201,14 @@ export type Board = {
 	filterConfig?: FilterConfigSettings;
 
 	views: TaskBoardViewType[];
-	lastViewId: string;
+	/**
+	 * @deprecated - Its getting difficult to find the index using the viewId.
+	 * Instead we can simply store the viewIndex itself inside the view data
+	 * and easily fetch it, becauase view index is also rarely going to change
+	 * when user will change it.
+	 */
+	lastViewId?: string;
+	lastViewIndex: number;
 	viewsPanel: {
 		isOpen: boolean;
 		width: number;
@@ -221,10 +229,12 @@ export const DEFAULT_BOARD: Board = {
 	name: "My Project",
 	description:
 		"This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards.",
-	lastViewId: "3103563482",
+	// lastViewId: "3103563482",
+	lastViewIndex: 0,
 	views: [
 		{
 			viewId: "3103563482",
+			viewIndex: 0,
 			viewName: "Time Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
@@ -328,6 +338,7 @@ export const DEFAULT_BOARD: Board = {
 		},
 		{
 			viewId: "3103563483",
+			viewIndex: 1,
 			viewName: "Tag Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
@@ -401,6 +412,7 @@ export const DEFAULT_BOARD: Board = {
 		},
 		{
 			viewId: "3103563484",
+			viewIndex: 2,
 			viewName: "Status Based Workflow",
 			viewType: viewTypeNames.kanban,
 			showFilteredTags: true,
@@ -484,6 +496,7 @@ export const DEFAULT_BOARD: Board = {
 		},
 		{
 			viewId: "3103563485",
+			viewIndex: 3,
 			viewName: "Map View",
 			viewType: viewTypeNames.map,
 			showFilteredTags: true,

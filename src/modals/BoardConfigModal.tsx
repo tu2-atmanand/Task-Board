@@ -465,6 +465,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleSave = async () => {
 		let boardToSave = activeBoardData;
 		boardToSave.views = allViewsData;
+		// Sanitize the viewIndex to ensure the index numbers inside each view is correct.
+		boardToSave.views = boardToSave.views.map((view, index) => ({
+			...view,
+			viewIndex: index
+		}));
 
 		if (boardToSave) {
 			await plugin.taskBoardFileManager.saveBoard(boardToSave);

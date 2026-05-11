@@ -259,7 +259,8 @@ export class MergeBoardsModal extends Modal {
 			description: board1.description,
 			filterConfig: combinedFilterConfig,
 			views: combinedViews,
-			lastViewId: board1.lastViewId, // Use from first board
+			// lastViewId: board1.lastViewId, // Use from first board
+			lastViewIndex: 0,
 			viewsPanel: board1.viewsPanel, // Use from first board
 		};
 

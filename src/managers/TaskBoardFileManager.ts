@@ -838,7 +838,7 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * @deprecated
+	 * @deprecated - This was used during the development time.
 	 *
 	 * Migration for the following properties :
 	 * - Board.pluginVersion has been deprecated
@@ -856,6 +856,33 @@ export default class TaskBoardFileManager {
 		if (!oldBoardData?.revision) {
 			newBoardData["revision"] = CURRENT_REVISION;
 		}
+
+		return newBoardData;
+	}
+
+	/**
+	 * Migration for the following properties :
+	 * - Board.lastViewId => Deprecated
+	 * - Board.lastViewIndex => We have replaced lastViewId with lastViewIndex
+	 * - Board.views[].viewIndex => Added to find the view index faster without any extra calculations
+	 *
+	 * @todo - Remove this migration while releasing the first beta version itself.
+	 * Also, assign the {@link CURRENT_REVISION} to 0.
+	 */
+	runMigrationForRevision_2(oldBoardData: Board): Board {
+		let newBoardData = { ...oldBoardData };
+		if (oldBoardData?.lastViewId) {
+			delete newBoardData.lastViewId;
+		}
+
+		if (!oldBoardData?.lastViewIndex) {
+			newBoardData["lastViewIndex"] = 0;
+		}
+
+		newBoardData.views = newBoardData.views.map((view, index) => ({
+			...view,
+			viewIndex: index,
+		}));
 
 		return newBoardData;
 	}
@@ -883,9 +910,10 @@ export default class TaskBoardFileManager {
 	 */
 	applyMigrationIfNeeded(boardData: Board, filePath: string): Board {
 		try {
-			if (boardData.revision === CURRENT_REVISION) {
+			let updatedBoardData = boardData;
+			if (updatedBoardData.revision === CURRENT_REVISION) {
 				//Board data plugin version matches current plugin version. No migration needed.
-				return boardData;
+				return updatedBoardData;
 			}
 
 			// Here we will keep each migration function sequentially.
@@ -893,12 +921,14 @@ export default class TaskBoardFileManager {
 
 			// boardData = this.runMigrationForRevision_1(boardData);
 
+			updatedBoardData = this.runMigrationForRevision_2(updatedBoardData);
+
 			// After applying necessary migrations, update the revision in the board data
-			boardData.revision = CURRENT_REVISION;
+			updatedBoardData.revision = CURRENT_REVISION;
 
-			this.saveBoard(boardData, filePath);
+			this.saveBoard(updatedBoardData, filePath);
 
-			return boardData;
+			return updatedBoardData;
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				213,
