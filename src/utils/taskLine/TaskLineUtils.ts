@@ -1,6 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
-import { normalizePath, Notice } from "obsidian";
+import { normalizePath, Notice, TFile } from "obsidian";
 import TaskBoard from "../../../main.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
@@ -8,8 +8,16 @@ import { isTheContentDiffAreOnlySpaces_V2 } from "../../modals/DiffContentCompar
 import { allowedFileExtensionsRegEx } from "../../regularExpressions/MiscelleneousRegExpr.js";
 import { openDiffContentCompareModal } from "../../services/OpenModals.js";
 import { TasksPluginApi } from "../../services/tasks-plugin/api.js";
-import { readDataOfVaultFile, writeDataToVaultFile } from "../MarkdownFileOperations.js";
-import { getFormattedTaskContent, addIdToTaskContent } from "./TaskContentFormatter.js";
+import {
+	readDataOfVaultFile,
+	writeDataToVaultFile,
+} from "../MarkdownFileOperations.js";
+import {
+	getFormattedTaskContent,
+	addIdToTaskContent,
+} from "./TaskContentFormatter.js";
+import { createFolderRecursively } from "../../services/FileSystem.js";
+import { t } from "i18next";
 
 /**
  * This function will simpy check if the task title contains the recurring tag:
@@ -494,8 +502,7 @@ export const archiveTask = async (
 	plugin: TaskBoard,
 	task: taskItem,
 ): Promise<void> => {
-	const archivedFilePath =
-		plugin.settings.data.archivedTasksFilePath;
+	const archivedFilePath = plugin.settings.data.archivedTasksFilePath;
 	// Prepare the task content to be archived
 	const oldTaskContent = await getFormattedTaskContent(task);
 	if (oldTaskContent === "")
@@ -518,61 +525,85 @@ export const archiveTask = async (
 					// 		? `${currentPath}/${part}`
 					// 		: part;
 
-						const existing =
-							plugin.app.vault.getAbstractFileByPath(currentPath);
-						if (!existing) {
-							// createFolder will create the single folder at currentPath
-							try {
-								await plugin.app.vault.createFolder(
-									currentPath,
-								);
-							} catch (error) {
-								if (String(error).contains("already exists"))
-									continue;
-							}
-						} else {
-							// If a file exists where a folder is expected, report and abort
-							// (this is unlikely but safer to surface)
-							// existing.type may not be available in all builds, so just check truthiness and skip create
-							if (
-								(existing as any).path &&
-								!(existing as any).children
-							) {
-								bugReporterManagerInsatance.showNotice(
-									58,
-									`A file exists where a folder is expected: ${currentPath}`,
-									`Unexpected file at folder path: ${currentPath}`,
-									"TaskItemUtils.ts/archiveTask",
-								);
-							}
-						}
-					}
+					// 	const existing =
+					// 		plugin.app.vault.getAbstractFileByPath(currentPath);
+					// 	if (!existing) {
+					// 		// createFolder will create the single folder at currentPath
+					// 		try {
+					// 			await plugin.app.vault.createFolder(
+					// 				currentPath,
+					// 			);
+					// 		} catch (error) {
+					// 			if (String(error).contains("already exists"))
+					// 				continue;
+					// 		}
+					// 	} else {
+					// 		// If a file exists where a folder is expected, report and abort
+					// 		// (this is unlikely but safer to surface)
+					// 		// existing.type may not be available in all builds, so just check truthiness and skip create
+					// 		if (
+					// 			(existing as any).path &&
+					// 			!(existing as any).children
+					// 		) {
+					// 			bugReporterManagerInsatance.showNotice(
+					// 				58,
+					// 				`A file exists where a folder is expected: ${currentPath}`,
+					// 				`Unexpected file at folder path: ${currentPath}`,
+					// 				"TaskItemUtils.ts/archiveTask",
+					// 			);
+					// 		}
+					// 	}
+					// }
 				}
 				// Now create the archived file
 				await plugin.app.vault.create(archivedFilePath, "");
+				new Notice(
+					`New Archived file created since it did not exist at path: "${archivedFilePath}"`,
+					0,
+				);
 			}
 
-			// Read the content of the file where archived tasks will be stored
-			const archivedFileContent = await readDataOfVaultFile(
-				plugin,
-				archivedFilePath,
-				true
-			);
+			const file =
+				plugin.app.vault.getAbstractFileByPath(archivedFilePath);
+			if (file === null || !(file instanceof TFile)) return;
 
-			// Add the task to the top of the archived file content
-			const newArchivedContent = `> Archived at ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
+			await plugin.app.vault
+				.process(file, (archivedFileContent) => {
+					// // Add the task to the top of the archived file content
+					const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
 
-			// Write the updated content back to the archived file
-			await writeDataToVaultFile(
-				plugin,
-				archivedFilePath,
-				newArchivedContent,
-			);
+					return newArchivedContent;
+				})
+				.then(() => {
+					// Now delete the task from its original file, only if the process promise was resolved
+					deleteTaskFromFile(plugin, task).then(() => {
+						plugin.realTimeScanner.processAllUpdatedFiles(
+							task.filePath,
+						);
+					});
+				});
 
-			// Now delete the task from its original file
-			await deleteTaskFromFile(plugin, task).then(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
-			});
+			// // Read the content of the file where archived tasks will be stored
+			// const archivedFileContent = await readDataOfVaultFile(
+			// 	plugin,
+			// 	archivedFilePath,
+			// 	true,
+			// );
+
+			// // Add the task to the top of the archived file content
+			// const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
+
+			// // Write the updated content back to the archived file
+			// await writeDataToVaultFile(
+			// 	plugin,
+			// 	archivedFilePath,
+			// 	newArchivedContent,
+			// );
+
+			// // Now delete the task from its original file
+			// await deleteTaskFromFile(plugin, task).then(() => {
+			// 	plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+			// });
 
 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 			// await deleteTaskFromJson(plugin, task);
