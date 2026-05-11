@@ -1,6 +1,6 @@
 // /src/utils/TaskItemUtils.ts
 
-import { normalizePath, Notice } from "obsidian";
+import { normalizePath, Notice, TFile } from "obsidian";
 import TaskBoard from "../../../main.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
@@ -8,8 +8,16 @@ import { isTheContentDiffAreOnlySpaces_V2 } from "../../modals/DiffContentCompar
 import { allowedFileExtensionsRegEx } from "../../regularExpressions/MiscelleneousRegExpr.js";
 import { openDiffContentCompareModal } from "../../services/OpenModals.js";
 import { TasksPluginApi } from "../../services/tasks-plugin/api.js";
-import { readDataOfVaultFile, writeDataToVaultFile } from "../MarkdownFileOperations.js";
-import { getFormattedTaskContent, addIdToTaskContent } from "./TaskContentFormatter.js";
+import {
+	readDataOfVaultFile,
+	writeDataToVaultFile,
+} from "../MarkdownFileOperations.js";
+import {
+	getFormattedTaskContent,
+	addIdToTaskContent,
+} from "./TaskContentFormatter.js";
+import { createFolderRecursively } from "../../services/FileSystem.js";
+import { t } from "i18next";
 
 /**
  * This function will simpy check if the task title contains the recurring tag:
@@ -78,32 +86,62 @@ export const addTaskInNote = async (
 		if (completeTask === "")
 			throw "getSanitizedTaskContent returned empty string";
 
-		// Read the file content
-		const fileContent = await readDataOfVaultFile(plugin, filePath, true);
-		if (fileContent == null) return;
+		const file = plugin.app.vault.getAbstractFileByPath(filePath);
+		if (file === null || !(file instanceof TFile)) return;
 
-		let newContent = fileContent;
+		await plugin.app.vault.process(file, (fileContent: string): string => {
+			let newContent = fileContent;
 
-		if (editorActive) {
-			// Split file content into an array of lines
-			const fileLines = fileContent.split("\n");
-			if (cursorPosition && cursorPosition.line > 0) {
-				// Insert the new task at the cursor line position
-				fileLines.splice(cursorPosition.line, 0, completeTask);
-				// Join the lines back into a single string
-				newContent = fileLines.join("\n");
+			if (editorActive) {
+				// Split file content into an array of lines
+				const fileLines = fileContent.split("\n");
+				if (cursorPosition && cursorPosition.line > 0) {
+					// Insert the new task at the cursor line position
+					fileLines.splice(cursorPosition.line, 0, completeTask);
+					// Join the lines back into a single string
+					newContent = fileLines.join("\n");
+				} else {
+					newContent = fileContent.concat("\n\n", completeTask);
+				}
+
+				// Write the updated content back to the file
+				return newContent;
+				// await writeDataToVaultFile(plugin, filePath, newContent);
 			} else {
+				// Join the lines back into a single string
 				newContent = fileContent.concat("\n\n", completeTask);
+				return newContent;
+				// await writeDataToVaultFile(plugin, filePath, newContent);
 			}
+		});
 
-			// Write the updated content back to the file
-			await writeDataToVaultFile(plugin, filePath, newContent);
-		} else {
-			// Join the lines back into a single string
-			newContent = fileContent.concat("\n\n", completeTask);
-			await writeDataToVaultFile(plugin, filePath, newContent);
-		}
-		cursorPosition = undefined;
+		// // Read the file content
+		// const fileContent = await readDataOfVaultFile(plugin, filePath, true);
+		// if (fileContent == null) return;
+
+		// let newContent = fileContent;
+
+		// if (editorActive) {
+		// 	// Split file content into an array of lines
+		// 	const fileLines = fileContent.split("\n");
+		// 	if (cursorPosition && cursorPosition.line > 0) {
+		// 		// Insert the new task at the cursor line position
+		// 		fileLines.splice(cursorPosition.line, 0, completeTask);
+		// 		// Join the lines back into a single string
+		// 		newContent = fileLines.join("\n");
+		// 	} else {
+		// 		newContent = fileContent.concat("\n\n", completeTask);
+		// 	}
+
+		// 	// Write the updated content back to the file
+		// 	await writeDataToVaultFile(plugin, filePath, newContent);
+		// } else {
+		// 	// Join the lines back into a single string
+		// 	newContent = fileContent.concat("\n\n", completeTask);
+		// 	await writeDataToVaultFile(plugin, filePath, newContent);
+		// }
+
+		// cursorPosition = undefined;
 		return newId;
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
@@ -494,8 +532,7 @@ export const archiveTask = async (
 	plugin: TaskBoard,
 	task: taskItem,
 ): Promise<void> => {
-	const archivedFilePath =
-		plugin.settings.data.archivedTasksFilePath;
+	const archivedFilePath = plugin.settings.data.archivedTasksFilePath;
 	// Prepare the task content to be archived
 	const oldTaskContent = await getFormattedTaskContent(task);
 	if (oldTaskContent === "")
@@ -518,61 +555,85 @@ export const archiveTask = async (
 					// 		? `${currentPath}/${part}`
 					// 		: part;
 
-						const existing =
-							plugin.app.vault.getAbstractFileByPath(currentPath);
-						if (!existing) {
-							// createFolder will create the single folder at currentPath
-							try {
-								await plugin.app.vault.createFolder(
-									currentPath,
-								);
-							} catch (error) {
-								if (String(error).contains("already exists"))
-									continue;
-							}
-						} else {
-							// If a file exists where a folder is expected, report and abort
-							// (this is unlikely but safer to surface)
-							// existing.type may not be available in all builds, so just check truthiness and skip create
-							if (
-								(existing as any).path &&
-								!(existing as any).children
-							) {
-								bugReporterManagerInsatance.showNotice(
-									58,
-									`A file exists where a folder is expected: ${currentPath}`,
-									`Unexpected file at folder path: ${currentPath}`,
-									"TaskItemUtils.ts/archiveTask",
-								);
-							}
-						}
-					}
+					// 	const existing =
+					// 		plugin.app.vault.getAbstractFileByPath(currentPath);
+					// 	if (!existing) {
+					// 		// createFolder will create the single folder at currentPath
+					// 		try {
+					// 			await plugin.app.vault.createFolder(
+					// 				currentPath,
+					// 			);
+					// 		} catch (error) {
+					// 			if (String(error).contains("already exists"))
+					// 				continue;
+					// 		}
+					// 	} else {
+					// 		// If a file exists where a folder is expected, report and abort
+					// 		// (this is unlikely but safer to surface)
+					// 		// existing.type may not be available in all builds, so just check truthiness and skip create
+					// 		if (
+					// 			(existing as any).path &&
+					// 			!(existing as any).children
+					// 		) {
+					// 			bugReporterManagerInsatance.showNotice(
+					// 				58,
+					// 				`A file exists where a folder is expected: ${currentPath}`,
+					// 				`Unexpected file at folder path: ${currentPath}`,
+					// 				"TaskItemUtils.ts/archiveTask",
+					// 			);
+					// 		}
+					// 	}
+					// }
 				}
 				// Now create the archived file
 				await plugin.app.vault.create(archivedFilePath, "");
+				new Notice(
+					`New Archived file created since it did not exist at path: "${archivedFilePath}"`,
+					0,
+				);
 			}
 
-			// Read the content of the file where archived tasks will be stored
-			const archivedFileContent = await readDataOfVaultFile(
-				plugin,
-				archivedFilePath,
-				true
-			);
+			const file =
+				plugin.app.vault.getAbstractFileByPath(archivedFilePath);
+			if (file === null || !(file instanceof TFile)) return;
 
-			// Add the task to the top of the archived file content
-			const newArchivedContent = `> Archived at ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
+			await plugin.app.vault
+				.process(file, (archivedFileContent) => {
+					// // Add the task to the top of the archived file content
+					const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
 
-			// Write the updated content back to the archived file
-			await writeDataToVaultFile(
-				plugin,
-				archivedFilePath,
-				newArchivedContent,
-			);
+					return newArchivedContent;
+				})
+				.then(() => {
+					// Now delete the task from its original file, only if the process promise was resolved
+					deleteTaskFromFile(plugin, task).then(() => {
+						plugin.realTimeScanner.processAllUpdatedFiles(
+							task.filePath,
+						);
+					});
+				});
 
-			// Now delete the task from its original file
-			await deleteTaskFromFile(plugin, task).then(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
-			});
+			// // Read the content of the file where archived tasks will be stored
+			// const archivedFileContent = await readDataOfVaultFile(
+			// 	plugin,
+			// 	archivedFilePath,
+			// 	true,
+			// );
+
+			// // Add the task to the top of the archived file content
+			// const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
+
+			// // Write the updated content back to the archived file
+			// await writeDataToVaultFile(
+			// 	plugin,
+			// 	archivedFilePath,
+			// 	newArchivedContent,
+			// );
+
+			// // Now delete the task from its original file
+			// await deleteTaskFromFile(plugin, task).then(() => {
+			// 	plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+			// });
 
 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 			// await deleteTaskFromJson(plugin, task);
@@ -653,169 +714,171 @@ export const replaceOldTaskWithNewTask = async (
 		? oldTask.filePath
 		: `${oldTask.filePath}.md`;
 
-	// console.log(
-	// 	"replaceOldTaskWithNewTask : filePath : ",
-	// 	filePath,
-	// 	"\n\n\nNew Task Content : ",
-	// 	newTaskContent,
-	// 	"\n\n\nOld Task Content : ",
-	// 	oldTaskContent
-	// );
-
 	try {
 		// Step 1: Read the file content
-		const fileContent = await readDataOfVaultFile(plugin, filePath, true);
-		if (fileContent == null) return false;
+		// const fileContent = await readDataOfVaultFile(plugin, filePath, true);
+		// if (fileContent == null) return false;
 
-		const lines = fileContent.split("\n");
+		const file = plugin.app.vault.getAbstractFileByPath(filePath);
+		if (file === null || !(file instanceof TFile))
+			throw `The file was either not found at the path or its not an instance of TFile.`;
 
-		const { startLine, startCharIndex, endLine, endCharIndex } =
-			oldTask.taskLocation;
+		await plugin.app.vault.process(file, (fileContent: string): string => {
+			const lines = fileContent.split("\n");
 
-		// Step 2: Check that the starting line is a task checkbox line
-		const startLineText = lines[startLine - 1];
-		if (
-			!startLineText
-				.trim()
-				.startsWith(oldTask.title.trim().substring(0, 5))
-		) {
-			// console.log(
-			// 	"\n\nOldTask location :",
-			// 	oldTask.taskLocation,
-			// 	"\n\nNewTask location :",
-			// 	newTask.taskLocation,
-			// 	"\n\nLine in the file at the oldTask.startLine: ",
-			// 	startLineText
-			// );
-			bugReporterManagerInsatance.showNotice(
-				62,
-				`Task board couldnt able to find the task which you are trying to edit inside the file ${oldTask.filePath} at the line number : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.\n\nThis was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.`,
-				`\n\nOldTask location :${JSON.stringify(
-					oldTask.taskLocation,
-				)}\n\nOldTask content inside task-board-cache :${
-					oldTask.title
-				}\n\nAt present the content inside file at line number ${
-					oldTask.taskLocation.startLine
-				} is: ${startLineText}`,
-				"TaskItemUtils.ts/replaceOldTaskWithNewTask",
-			);
-			return false;
-		}
+			const { startLine, startCharIndex, endLine, endCharIndex } =
+				oldTask.taskLocation;
 
-		// Step 3: Extract the old task content from file using char indexes
-		const linesBefore = lines.slice(0, startLine - 1);
-		const taskLines = lines.slice(startLine - 1, endLine);
+			// Step 2: Check that the starting line is a task checkbox line
+			const startLineText = lines[startLine - 1];
+			if (
+				!startLineText
+					.trim()
+					.startsWith(oldTask.title.trim().substring(0, 5))
+			) {
+				bugReporterManagerInsatance.showNotice(
+					62,
+					`Task board couldnt able to find the task which you are trying to edit inside the file ${oldTask.filePath} at the line number : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.\n\nThis was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.`,
+					`\n\nOldTask location :${JSON.stringify(
+						oldTask.taskLocation,
+					)}\n\nOldTask content inside task-board-cache :${
+						oldTask.title
+					}\n\nAt present the content inside file at line number ${
+						oldTask.taskLocation.startLine
+					} is: ${startLineText}`,
+					"TaskItemUtils.ts/replaceOldTaskWithNewTask",
+				);
 
-		// Adjust the first and last lines by slicing at char indexes
-		taskLines[0] = taskLines[0].slice(startCharIndex);
-		taskLines[taskLines.length - 1] = taskLines[taskLines.length - 1].slice(
-			0,
-			endCharIndex,
-		);
-
-		const oldTaskContentFromFile = taskLines.join("\n");
-
-		const joinFinalNoteContent = (
-			before: string,
-			newTaskContent: string,
-			after: string,
-		) => {
-			if (newTaskContent.trim() === "") {
-				return `${before}${
-					after ? (after.endsWith(`\n`) ? after : `${after}\n`) : "\n"
-				}`;
+				return fileContent;
 			}
 
-			return `${before}\n${newTaskContent}${
-				after
-					? newTaskContent.endsWith("\n") || after.startsWith("\n")
-						? after
-						: `\n${after}`
-					: newTaskContent.endsWith("\n")
-						? ""
-						: `\n`
-			}`;
-		};
+			// Step 3: Extract the old task content from file using char indexes
+			const linesBefore = lines.slice(0, startLine - 1);
+			const taskLines = lines.slice(startLine - 1, endLine);
 
-		// Step 4: Match with oldTaskContent
-		if (oldTaskContentFromFile === oldTaskContent) {
-			// Safe to replace directly
-			const before = linesBefore.join("\n");
-			const after = lines
-				.slice(endLine - 1)
-				.join("\n")
-				.slice(endCharIndex);
-			const newContent = joinFinalNoteContent(
-				before,
-				newTaskContent,
-				after,
-			);
-			await writeDataToVaultFile(plugin, filePath, newContent);
-		} else if (
-			isTheContentDiffAreOnlySpaces_V2(
-				oldTaskContent,
-				oldTaskContentFromFile,
-			)
-		) {
-			// If the content is only spaces, we can safely replace it
-			const before = linesBefore.join("\n");
-			const after = lines
-				.slice(endLine - 1)
-				.join("\n")
-				.slice(endCharIndex);
-			const newContent = joinFinalNoteContent(
-				before,
-				newTaskContent,
-				after,
-			);
-			// Replace the old task block with the updated content
-			await writeDataToVaultFile(plugin, filePath, newContent);
-		} else {
-			if (plugin.settings.data.safeGuardFeature) {
-				// Ask user to choose between old and new content
-				openDiffContentCompareModal(
-					plugin,
-					oldTaskContent,
-					newTaskContent,
-					oldTaskContentFromFile,
-					async (userChoice) => {
-						if (userChoice === "old") {
-							const before = linesBefore.join("\n");
-							const after = lines
-								.slice(endLine - 1)
-								.join("\n")
-								.slice(endCharIndex);
-							const newContent = joinFinalNoteContent(
-								before,
-								newTaskContent,
-								after,
-							);
-							// Replace the old task block with the updated content
-							await writeDataToVaultFile(
-								plugin,
-								filePath,
-								newContent,
-							);
-						}
-						// If user chooses "new", do nothing
-					},
-				);
-			} else {
-				// If safeguard feature has been disabled by the user. We will by-pass this check and instead of asking the user will directly go-ahead and replace the old content with the new content user has edited.
+			// Adjust the first and last lines by slicing at char indexes
+			taskLines[0] = taskLines[0].slice(startCharIndex);
+			taskLines[taskLines.length - 1] = taskLines[
+				taskLines.length - 1
+			].slice(0, endCharIndex);
+
+			const oldTaskContentFromFile = taskLines.join("\n");
+
+			const joinFinalNoteContent = (
+				before: string,
+				newTaskContent: string,
+				after: string,
+			) => {
+				if (newTaskContent.trim() === "") {
+					return `${before}${
+						after
+							? after.endsWith(`\n`)
+								? after
+								: `${after}\n`
+							: "\n"
+					}`;
+				}
+
+				return `${before}\n${newTaskContent}${
+					after
+						? newTaskContent.endsWith("\n") ||
+							after.startsWith("\n")
+							? after
+							: `\n${after}`
+						: newTaskContent.endsWith("\n")
+							? ""
+							: `\n`
+				}`;
+			};
+
+			let newContent = fileContent;
+
+			// Step 4: Match with oldTaskContent
+			if (oldTaskContentFromFile === oldTaskContent) {
+				// Safe to replace directly
 				const before = linesBefore.join("\n");
 				const after = lines
 					.slice(endLine - 1)
 					.join("\n")
 					.slice(endCharIndex);
-				const newContent = joinFinalNoteContent(
+				newContent = joinFinalNoteContent(
+					before,
+					newTaskContent,
+					after,
+				);
+
+				return newContent;
+				// await writeDataToVaultFile(plugin, filePath, newContent);
+			} else if (
+				isTheContentDiffAreOnlySpaces_V2(
+					oldTaskContent,
+					oldTaskContentFromFile,
+				)
+			) {
+				// If the content is only spaces, we can safely replace it
+				const before = linesBefore.join("\n");
+				const after = lines
+					.slice(endLine - 1)
+					.join("\n")
+					.slice(endCharIndex);
+				newContent = joinFinalNoteContent(
 					before,
 					newTaskContent,
 					after,
 				);
 				// Replace the old task block with the updated content
-				await writeDataToVaultFile(plugin, filePath, newContent);
+				return newContent;
+				// await writeDataToVaultFile(plugin, filePath, newContent);
+			} else {
+				if (plugin.settings.data.safeGuardFeature) {
+					// Ask user to choose between old and new content
+					openDiffContentCompareModal(
+						plugin,
+						oldTaskContent,
+						newTaskContent,
+						oldTaskContentFromFile,
+						async (userChoice) => {
+							if (userChoice === "old") {
+								const before = linesBefore.join("\n");
+								const after = lines
+									.slice(endLine - 1)
+									.join("\n")
+									.slice(endCharIndex);
+								const newContent = joinFinalNoteContent(
+									before,
+									newTaskContent,
+									after,
+								);
+								// Replace the old task block with the updated content
+								await writeDataToVaultFile(
+									plugin,
+									filePath,
+									newContent,
+								);
+							}
+							// If user chooses "new", do nothing
+						},
+					);
+				} else {
+					// If safeguard feature has been disabled by the user. We will by-pass this check and instead of asking the user will directly go-ahead and replace the old content with the new content user has edited.
+					const before = linesBefore.join("\n");
+					const after = lines
+						.slice(endLine - 1)
+						.join("\n")
+						.slice(endCharIndex);
+					newContent = joinFinalNoteContent(
+						before,
+						newTaskContent,
+						after,
+					);
+					// Replace the old task block with the updated content
+					return newContent;
+					// await writeDataToVaultFile(plugin, filePath, newContent);
+				}
 			}
-		}
+
+			return newContent;
+		});
 
 		return true; // Indicate success
 	} catch (error) {

@@ -649,7 +649,8 @@ const en: Lang = {
 	"open-board-configure-modal": "Open board configuration modal",
 	"enter-view-name": "Enter view name",
 	"merge-board-files": "Merge board files",
-	"merge-board-files-info": "Using this tool you can merge two task board files together to combine all their views and other data into a single file. This is helpful if you want to combine two or more boards which are use to manage a same project or group of tasks."
+	"merge-board-files-info": "Using this tool you can merge two task board files together to combine all their views and other data into a single file. This is helpful if you want to combine two or more boards which are use to manage a same project or group of tasks.",
+	"archived-on": "Archived on",
 };
 
 export default en;

@@ -7,8 +7,10 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { checkboxStateSwitcher } from "../CheckBoxUtils.js";
 import { formatToday } from "../DateTimeCalculations.js";
-import { readDataOfVaultFile, writeDataToVaultFile } from "../MarkdownFileOperations.js";
-import { getStatusNameFromStatusSymbol, updateFrontmatterInMarkdownFile } from "./TaskNoteUtils.js";
+import {
+	getStatusNameFromStatusSymbol,
+	updateFrontmatterInMarkdownFile,
+} from "./TaskNoteUtils.js";
 
 /**
  * Handle task note status change (checkbox change)
@@ -174,53 +176,91 @@ export const handleTaskNoteBodyChange = async (
 		const file = plugin.app.vault.getFileByPath(updatedTask.filePath);
 		if (!file) return;
 
-		const fileContent = await readDataOfVaultFile(
-			plugin,
-			updatedTask.filePath,
-			true,
-		);
-		if (fileContent == null) return;
+		plugin.app.vault
+			.process(file, (fileContent) => {
+				const oldBodyLines = Array.isArray(oldTask.body)
+					? oldTask.body
+					: [];
+				const newBodyLines = Array.isArray(updatedTask.body)
+					? updatedTask.body
+					: [];
 
-		// Find the line representing the old task and the updated task
-		// Find all lines between oldTask.body and updatedTask.body that are different
-		const oldBodyLines = Array.isArray(oldTask.body) ? oldTask.body : [];
-		const newBodyLines = Array.isArray(updatedTask.body)
-			? updatedTask.body
-			: [];
+				// Find differing lines (simple diff)
+				const oldLinesWhichAreModified: string[] = [];
+				const maxLen = Math.max(
+					oldBodyLines.length,
+					newBodyLines.length,
+				);
+				for (let i = 0; i < maxLen; i++) {
+					if (oldBodyLines[i] !== newBodyLines[i]) {
+						oldLinesWhichAreModified.push(oldBodyLines[i]);
+					}
+				}
 
-		// Find differing lines (simple diff)
-		const oldLinesWhichAreModified: string[] = [];
-		const maxLen = Math.max(oldBodyLines.length, newBodyLines.length);
-		for (let i = 0; i < maxLen; i++) {
-			if (oldBodyLines[i] !== newBodyLines[i]) {
-				oldLinesWhichAreModified.push(oldBodyLines[i]);
-			}
-		}
+				// Split content into lines and replace the old line with the new line
+				const lines = fileContent.split("\n");
+				const updatedLines = lines.map((line: string) => {
+					for (const oldLine of oldLinesWhichAreModified) {
+						const index = oldBodyLines.indexOf(oldLine);
+						const newLine = index !== -1 ? newBodyLines[index] : "";
+						return line.trim() === oldLine.trim() ? newLine : line;
+					}
+				});
 
-		// Split content into lines and replace the old line with the new line
-		const lines = fileContent.split("\n");
-		const updatedLines = lines.map((line: string) => {
-			for (const oldLine of oldLinesWhichAreModified) {
-				const index = oldBodyLines.indexOf(oldLine);
-				const newLine = index !== -1 ? newBodyLines[index] : "";
-				return line.trim() === oldLine.trim() ? newLine : line;
-			}
-		});
-
-		await writeDataToVaultFile(
-			plugin,
-			updatedTask.filePath,
-			updatedLines.join("\n"),
-		).then(() => {
-			// This is required to rescan the updated file and refresh the board.
-			sleep(1000).then(() => {
-				// This is required to rescan the updated file and refresh the board.
+				return updatedLines.join("\n");
+			})
+			.finally(() => {
 				plugin.realTimeScanner.processAllUpdatedFiles(
 					updatedTask.filePath,
 					oldTask.id,
 				);
 			});
-		});
+
+		// const fileContent = await readDataOfVaultFile(
+		// 	plugin,
+		// 	updatedTask.filePath,
+		// 	true,
+		// );
+		// if (fileContent == null) return;
+
+		// const oldBodyLines = Array.isArray(oldTask.body) ? oldTask.body : [];
+		// const newBodyLines = Array.isArray(updatedTask.body)
+		// 	? updatedTask.body
+		// 	: [];
+
+		// // Find differing lines (simple diff)
+		// const oldLinesWhichAreModified: string[] = [];
+		// const maxLen = Math.max(oldBodyLines.length, newBodyLines.length);
+		// for (let i = 0; i < maxLen; i++) {
+		// 	if (oldBodyLines[i] !== newBodyLines[i]) {
+		// 		oldLinesWhichAreModified.push(oldBodyLines[i]);
+		// 	}
+		// }
+
+		// // Split content into lines and replace the old line with the new line
+		// const lines = fileContent.split("\n");
+		// const updatedLines = lines.map((line: string) => {
+		// 	for (const oldLine of oldLinesWhichAreModified) {
+		// 		const index = oldBodyLines.indexOf(oldLine);
+		// 		const newLine = index !== -1 ? newBodyLines[index] : "";
+		// 		return line.trim() === oldLine.trim() ? newLine : line;
+		// 	}
+		// });
+
+		// await writeDataToVaultFile(
+		// 	plugin,
+		// 	updatedTask.filePath,
+		// 	updatedLines.join("\n"),
+		// ).then(() => {
+		// 	// This is required to rescan the updated file and refresh the board.
+		// 	sleep(1000).then(() => {
+		// 		// This is required to rescan the updated file and refresh the board.
+		// 		plugin.realTimeScanner.processAllUpdatedFiles(
+		// 			updatedTask.filePath,
+		// 			oldTask.id,
+		// 		);
+		// 	});
+		// });
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			156,
