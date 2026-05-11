@@ -335,7 +335,7 @@ export async function createBoardFiles(
 
 		if (!dirExists) {
 			try {
-				const result = await createFolderRecursively(plugin, boardsDir);
+				const result = await createFolderRecursively(plugin.app, boardsDir);
 				if (result) onProgress?.(`✓ Created directory: ${boardsDir}`);
 				else
 					throw "There was an error while creating the default directory for storing the board files.";

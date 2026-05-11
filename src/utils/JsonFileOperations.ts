@@ -2,8 +2,13 @@
 
 import { App } from "obsidian";
 import TaskBoard from "../../main.js";
-import { jsonCacheData, taskJsonMerged, taskItem } from "../interfaces/TaskItem.js";
+import {
+	jsonCacheData,
+	taskJsonMerged,
+	taskItem,
+} from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { createFolderRecursively } from "../services/FileSystem.js";
 
 // --------------- Operations with data.json ---------------
 
@@ -28,7 +33,7 @@ export const loadGlobalSettings = async (plugin: TaskBoard) => {
  * Loads all boards configurations from the data.json file.
  * @param plugin - Plugin instance.
  * @returns - Returns the board configurations.
- * 
+ *
  * @deprecated v2.0.0 - The individual board data will stored in their respective files. All laoding and saving of board configurations will be handled by the TaskBOardFileManager.
  */
 // export const loadBoardsData = async (plugin: TaskBoard): Promise<Board[]> => {
@@ -55,7 +60,7 @@ export const loadGlobalSettings = async (plugin: TaskBoard) => {
  * @param plugin - Plugin instance.
  * @param updatedBoards - Updated boards configurations list.
  * @returns - Returns the board configurations.
- * 
+ *
  * @deprecated v2.0.0 - The individual board data will stored in their respective files. All laoding and saving of board configurations will be handled by the TaskBOardFileManager.
  */
 // export const saveBoardsData = async (
@@ -273,7 +278,7 @@ export const moveTasksCacheFileToNewPath = (
 		if (parts.length > 1) {
 			const dirPath = parts.slice(0, -1).join("/").trim();
 			if (!(await app.vault.adapter.exists(dirPath))) {
-				await app.vault.createFolder(dirPath);
+				await createFolderRecursively(app, dirPath);
 			}
 		}
 

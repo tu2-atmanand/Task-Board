@@ -49,22 +49,22 @@ export const addTaskInNote = async (
 	try {
 		// Clean the task title to ensure it doesn't contain any special characters
 		if (!(await plugin.fileExists(filePath))) {
-			new Notice(
-				`New note created since it does not exists : "${filePath}"`,
-				5000,
-			);
 			const normalizedPath = normalizePath(filePath);
 			// Check if the directory exists, create if not
 			const parts = normalizedPath.split("/");
 			if (parts.length > 1) {
 				const dirPath = parts.slice(0, -1).join("/").trim();
 				if (!(await plugin.app.vault.adapter.exists(dirPath))) {
-					await plugin.app.vault.createFolder(dirPath);
+					await createFolderRecursively(plugin.app, dirPath);
 				}
 			}
 
 			// Create a new file if it doesn't exist
 			await plugin.app.vault.create(normalizedPath, "");
+			new Notice(
+				`New note created since it does not exists : "${filePath}"`,
+				5000,
+			);
 
 			await sleep(200);
 		}
@@ -505,20 +505,18 @@ export const archiveTask = async (
 		try {
 			// Ensure the archived file exists. If not, create it.
 			if (!(await plugin.fileExists(archivedFilePath))) {
-				new Notice(
-					`New Archived file created since it did not exist at path: "${archivedFilePath}"`,
-					0,
-				);
 				// Ensure all folders in the path exist before creating the file
 				const lastSlash = archivedFilePath.lastIndexOf("/");
 				if (lastSlash !== -1) {
 					const folderPath = archivedFilePath.substring(0, lastSlash);
-					const parts = folderPath.split("/").filter(Boolean);
-					let currentPath = "";
-					for (const part of parts) {
-						currentPath = currentPath
-							? `${currentPath}/${part}`
-							: part;
+					await createFolderRecursively(plugin.app, folderPath);
+
+					// const parts = folderPath.split("/").filter(Boolean);
+					// let currentPath = "";
+					// for (const part of parts) {
+					// 	currentPath = currentPath
+					// 		? `${currentPath}/${part}`
+					// 		: part;
 
 						const existing =
 							plugin.app.vault.getAbstractFileByPath(currentPath);

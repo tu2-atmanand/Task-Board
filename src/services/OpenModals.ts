@@ -19,11 +19,18 @@ import { ScanVaultModal } from "../modals/ScanVaultModal.js";
 import { AddOrEditTaskView } from "../obsidian_views/AddOrEditTaskView.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
 import { writeDataToVaultFile } from "../utils/MarkdownFileOperations.js";
-import { getFormattedTaskContent, addIdToTaskContent } from "../utils/taskLine/TaskContentFormatter.js";
-import { addTaskInNote, updateTaskInFile } from "../utils/taskLine/TaskLineUtils.js";
+import {
+	getFormattedTaskContent,
+	addIdToTaskContent,
+} from "../utils/taskLine/TaskContentFormatter.js";
+import {
+	addTaskInNote,
+	updateTaskInFile,
+} from "../utils/taskLine/TaskLineUtils.js";
 import { updateFrontmatterInMarkdownFile } from "../utils/taskNote/TaskNoteUtils.js";
 import { CommunityPlugins } from "./CommunityPlugins.js";
 import { eventEmitter } from "./EventEmitter.js";
+import { createFolderRecursively } from "./FileSystem.js";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -171,23 +178,30 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 				// If noteContent is provided, it means user wants to save this task as a TaskNote.
 				// Create the note content with frontmatter
 				try {
-					// Check if the directory exists, create if not
-					const parts = newTask.filePath.split("/");
-					if (parts.length > 1) {
-						const dirPath = parts.slice(0, -1).join("/").trim();
-						if (!(await plugin.app.vault.adapter.exists(dirPath))) {
-							await plugin.app.vault.createFolder(dirPath);
-						}
-
-						// Required for Obsidian to create the folder and index it.
-						sleep(200);
-					}
-
 					// Create or update the file
 					const existingFile = plugin.app.vault.getFileByPath(
 						newTask.filePath,
 					);
 					if (!existingFile) {
+						// Check if the directory exists, create if not
+						const parts = newTask.filePath.split("/");
+						if (parts.length > 1) {
+							const dirPath = parts.slice(0, -1).join("/").trim();
+							if (
+								!(await plugin.app.vault.adapter.exists(
+									dirPath,
+								))
+							) {
+								await createFolderRecursively(
+									plugin.app,
+									dirPath,
+								);
+							}
+
+							// Required for Obsidian to create the folder and index it.
+							sleep(200);
+						}
+
 						await plugin.app.vault
 							.create(newTask.filePath, noteContent)
 							.then(() => {
@@ -215,7 +229,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								` ${newName}.md`,
 							10000,
 						);
-						await plugin.app.vault.create(newPath, "").then(() => {
+						await plugin.app.vault.create(newPath, noteContent).then(() => {
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanner.onFileModified(
 								`Copy-${newTask.filePath}`,

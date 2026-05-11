@@ -4,7 +4,7 @@ import type * as NodeOS from "node:os";
 import type * as NodePath from "node:path";
 import type * as NodeUrl from "node:url";
 import type * as NodeZlib from "node:zlib";
-import { Platform } from "obsidian";
+import { App, Platform } from "obsidian";
 
 
 import TaskBoard from "../../main.js";
@@ -299,20 +299,28 @@ export function splitext(name: string) {
 // 	}
 // }
 
+/**
+ * Checks and creates folders if they are not present.
+ * Recursively checks each child folder if it exists of not.
+ * 
+ * @param plugin - The plugin's app instance
+ * @param folderPath - Only the folder path. (Filename should not be present)
+ * @returns - Void
+ */
 export async function createFolderRecursively(
-	plugin: TaskBoard,
+	pluginApp: App,
 	folderPath: string,
 ): Promise<boolean> {
-	const parts = folderPath.split("/").filter(Boolean);
+	const parts = folderPath.trim().split("/").filter(Boolean);
 	let currentPath = "";
 	for (const part of parts) {
 		currentPath = currentPath ? `${currentPath}/${part}` : part;
 
-		const existing = plugin.app.vault.getAbstractFileByPath(currentPath);
+		const existing = pluginApp.vault.getAbstractFileByPath(currentPath);
 		if (!existing) {
 			// createFolder will create the single folder at currentPath
 			try {
-				await plugin.app.vault.createFolder(currentPath);
+				await pluginApp.vault.createFolder(currentPath);
 			} catch (error) {
 				if (String(error).contains("already exists")) continue;
 			}
