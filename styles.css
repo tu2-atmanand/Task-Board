@@ -316,6 +316,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border-radius: 5px;
 	/* min-width: 12rem; */
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	margin-right: 1rem;
 }
 
 .taskCountContainerProgressBar {
@@ -373,7 +374,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskBoardViewHeaderOptionsBtn,
 .RefreshBtn,
 .taskBoardMapViewSaveIcon,
-.boardsExplorerModalButton {
+.boardsExplorerModalButton,
+.EditTaskModalHomeToggleBtn {
 	background-color: transparent !important;
 	background: none;
 	padding: 7px;
@@ -1285,7 +1287,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--tag-color);
 	font-weight: var(--tag-weight);
 	text-decoration: var(--tag-decoration);
-	padding-top: 0.35em;
+	padding-top: 0.15em;
 	padding-right: 0.65em;
 	padding-bottom: 0.25em;
 	padding-left: 0.65em;
@@ -2086,6 +2088,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: row;
 	gap: 1em;
+	align-items: center;
 }
 
 .EditTaskModalHomeSaveBtn {
