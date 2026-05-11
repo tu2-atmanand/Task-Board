@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-beta-2",
+  "version": "2.0.0-beta-1",
   "data": {
     "lang": "en",
     "openOnStartup": false,
@@ -51,21 +51,13 @@
       "checkbox",
       "id",
       "title",
-      "subTasksMinimized",
       "descriptionMinimized",
       "status",
       "tags",
-      "time",
-      "reminder",
       "priority",
-      "createdDate",
-      "startDate",
-      "scheduledDate",
-      "dueDate",
-      "completionDate",
-      "cancelledDate",
       "dependsOn",
-      "filePath"
+      "filePath",
+      "subTasks"
     ],
     "taskCardStyle": "bases",
     "showVerticalScroll": false,
@@ -263,13 +255,13 @@
       "recurring"
     ],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2258,
+    "uniqueIdCounter": 2273,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
       "boardIndex": 1,
-      "settingTab": 5,
+      "settingTab": 4,
       "taskId": "",
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
     },
@@ -287,10 +279,10 @@
     },
     "searchQuery": "",
     "taskBoardFilesRegistry": {
-      "653162057": {
-        "boardId": "653162057",
-        "filePath": "My Project Board.taskboard",
-        "boardName": "My Project",
+      "74958310": {
+        "boardId": "74958310",
+        "filePath": "A Test Board.taskboard",
+        "boardName": "A Test Board",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       },
       "901052398": {
@@ -299,35 +291,11 @@
         "boardName": "My Project",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       },
-      "1743944892": {
-        "boardId": "1743944892",
-        "filePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-        "boardName": "Time Based Workflow",
-        "boardDescription": ""
-      },
-      "2248319344": {
-        "boardId": "2248319344",
-        "filePath": "Meta/Task_Board/Boards/Release 2.0.0.taskboard",
-        "boardName": "Release 2.0.0",
-        "boardDescription": "This board will be used to plan everything related to the next major version release of Task Board 2.0.0"
-      },
-      "2627237443": {
-        "boardId": "2627237443",
-        "filePath": "Meta/Task_Board/Boards/Status Based Workflow.taskboard",
-        "boardName": "Status Based Workflow",
-        "boardDescription": ""
-      },
-      "3103563481": {
-        "boardId": "3103563481",
-        "filePath": "My Project Board.taskboard",
-        "boardName": "My Project",
+      "1683056035": {
+        "boardId": "1683056035",
+        "filePath": "A Test Board.taskboard",
+        "boardName": "A Test Board",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "3764827886": {
-        "boardId": "3764827886",
-        "filePath": "Meta/Task_Board/Boards/Tag Based Workflow.taskboard",
-        "boardName": "Tag Based Workflow",
-        "boardDescription": ""
       }
     }
   }
