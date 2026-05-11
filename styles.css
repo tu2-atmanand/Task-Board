@@ -1415,7 +1415,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 5px;
 	border: 1px solid var(--canvas-card-label-color);
 	border-radius: 5px;
-	font-size: var(--font-ui-smaller);
+	font-size: 0.7rem;
 	color: var(--text-muted);
 }
 

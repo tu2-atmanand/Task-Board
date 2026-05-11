@@ -51,13 +51,11 @@
       "checkbox",
       "id",
       "title",
-      "descriptionMinimized",
       "status",
       "tags",
       "priority",
       "dependsOn",
-      "filePath",
-      "subTasks"
+      "filePath"
     ],
     "taskCardStyle": "bases",
     "showVerticalScroll": false,
