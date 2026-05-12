@@ -1612,6 +1612,7 @@ export default class TaskBoard extends Plugin {
 			if (previousVersion === "") {
 				// creates the DEFAULT_BOARD file if it doesnt exists.
 				await this.createTemplateBoard();
+				this.settings.data.showModifiedFilesNotice = true;
 			}
 
 			// make the localStorage flag, 'manadatoryScan' to True
