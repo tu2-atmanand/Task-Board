@@ -1,4 +1,4 @@
-export const CURRENT_PLUGIN_VERSION = "2.0.0-beta-1";
+export const CURRENT_PLUGIN_VERSION = "2.0.0-beta-2";
 export const CURRENT_REVISION = 1;
 // Plugin view type identifiers
 export const VIEW_TYPE_TASKBOARD = "task-board-view";
