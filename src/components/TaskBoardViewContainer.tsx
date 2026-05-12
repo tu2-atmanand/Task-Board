@@ -23,20 +23,18 @@ import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf?: WorkspaceLeaf }> = ({ plugin, currentBoardData, currentLeaf }) => {
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
-	const [currentViewIndex, setCurrentViewIndex] = useState<number>(currentBoardData.lastViewIndex > -1 ? currentBoardData.lastViewIndex : 0);
+	const [currentViewIndex, setCurrentViewIndex] = useState<number>(() => {
+		// Clamp lastViewIndex to valid range [0, views.length - 1] or default to 0
+		if (!currentBoardData?.views?.length) return 0;
+		return Math.max(0, Math.min(currentBoardData.lastViewIndex, currentBoardData.views.length - 1));
+	});
 	const [currentView, setCurrentView] = useState<TaskBoardViewType | undefined>(() => {
 		const initialBoard = currentBoardData;
-		if (initialBoard?.views?.length > 0) {
-			// const lastViewIndex = getViewIndex(initialBoard, initialBoard.lastViewId);
-			const lastViewIndex = currentBoardData.lastViewIndex;
-			if (lastViewIndex !== -1) {
-				setCurrentViewIndex(lastViewIndex);
-				return initialBoard.views[lastViewIndex];
-			}
-
-			return initialBoard.views[0];
-		}
-		return undefined;
+		if (!initialBoard?.views?.length) return undefined;
+		
+		// Clamp lastViewIndex to valid range
+		const validIndex = Math.max(0, Math.min(initialBoard.lastViewIndex, initialBoard.views.length - 1));
+		return initialBoard.views[validIndex];
 	});
 
 	// All UI Refs
@@ -172,12 +170,18 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				Completed: advancedFilterer(allTasks.Completed, viewFilter, dateFormat),
 			};
 
-			let newBoardData = currentBoardData;
-			// Update task count in settings
-			newBoardData.views[currentViewIndex].taskCount = {
-				pending: boardFilteredTasks.Pending.length,
-				completed: boardFilteredTasks.Completed.length,
-			};
+			// Create a new board data object immutably
+			let newBoardData = { ...currentBoardData, views: [...currentBoardData.views] };
+			// Update task count in settings only if currentViewIndex is within bounds
+			if (currentViewIndex >= 0 && currentViewIndex < newBoardData.views.length) {
+				newBoardData.views[currentViewIndex] = {
+					...newBoardData.views[currentViewIndex],
+					taskCount: {
+						pending: boardFilteredTasks.Pending.length,
+						completed: boardFilteredTasks.Completed.length,
+					},
+				};
+			}
 			setCurrentBoardData(newBoardData);
 			setFilteredTasks(boardFilteredTasks);
 
