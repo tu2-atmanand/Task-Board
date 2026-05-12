@@ -52,10 +52,10 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		});
 
 		return {
-			columnsOutsideSwimlanes: outsideSwimlanes,
 			columnsInSwimlanes: insideSwimlanes,
-			outsideSwimlaneColumnTasks: outsideTasks,
-			swimlaneColumnTasks: insideTasks
+			columnsOutsideSwimlanes: outsideSwimlanes,
+			swimlaneColumnTasks: insideTasks,
+			outsideSwimlaneColumnTasks: outsideTasks
 		};
 	}, [board.columns, tasksPerColumn]);
 
@@ -97,7 +97,8 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			property,
 			customValue
 		);
-		uniqueSwimlanValues.push("");
+		if (property !== 'priority')
+			uniqueSwimlanValues.push("");
 
 		// Sort the swimlane values
 		let sortedSwimlaneValues: { value: string; index: number }[] = [];
