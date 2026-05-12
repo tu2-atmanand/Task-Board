@@ -9,7 +9,10 @@ import {
 } from "../../interfaces/Enums.js";
 import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
 import { priorityEmojis } from "../../interfaces/Mapping.js";
-import { cursorLocationInterface, taskItem } from "../../interfaces/TaskItem.js";
+import {
+	cursorLocationInterface,
+	taskItem,
+} from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import {
 	extractTaskId,
@@ -988,10 +991,9 @@ export const sanitizeTags = (
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 
 	// Regex to extract tags from title
-	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
-	const extractedTags = (tempTitle.match(tagsRegex) || []).map((t) =>
-		t.trim(),
-	);
+	const extractedTags = (
+		tempTitle.match(TaskRegularExpressions.hashTagsRegex) || []
+	).map((t) => t.trim());
 
 	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
 	// TODO : Soon, will update the tags management mechanism to store the tags without the `#`

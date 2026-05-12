@@ -113,6 +113,7 @@ export class SwimlanesConfigModal extends Modal {
 			{ value: 'tags', label: t('tags') },
 			{ value: 'priority', label: t('priority') },
 			{ value: 'status', label: t('status') },
+			{ value: 'filePath', label: t("file-path") },
 		];
 
 		new Setting(container)
