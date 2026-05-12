@@ -149,12 +149,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	// Update currentView when currentViewIndex or boardData changes
 	useEffect(() => {
-		if (boardData?.views && boardData.views.length > 0 && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
-			const newView = boardData.views[currentViewIndex];
-			setCurrentView(newView);
-		} else {
-			setCurrentView(boardData.views[0]);
+		if (!boardData?.views?.length) {
+			setCurrentView(undefined);
+			return;
 		}
+
+		// Clamp currentViewIndex to valid range [0, views.length - 1]
+		const validIndex = Math.max(0, Math.min(currentViewIndex, boardData.views.length - 1));
+		setCurrentView(boardData.views[validIndex]);
 	}, [currentViewIndex, boardData?.views]);
 
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
