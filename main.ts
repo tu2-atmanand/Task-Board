@@ -1452,6 +1452,7 @@ export default class TaskBoard extends Plugin {
 			// make the localStorage flag, 'manadatoryScan' to True
 			if (previousVersion === "" || runMandatoryScan) {
 				localStorage.setItem("manadatoryScan", "true");
+				this.settings.data.globalSettings.showModifiedFilesNotice = true;
 			}
 
 			this.settings.version = currentVersion;

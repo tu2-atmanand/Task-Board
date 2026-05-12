@@ -444,7 +444,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			autoAddCreatedDate: false,
 			autoAddCompletedDate: false,
 			autoAddCancelledDate: false,
-			showModifiedFilesNotice: true,
+			showModifiedFilesNotice: false,
 			scanMode: scanModeOptions.AUTOMATIC,
 			columnWidth: "300px",
 			visiblePropertiesList: [
