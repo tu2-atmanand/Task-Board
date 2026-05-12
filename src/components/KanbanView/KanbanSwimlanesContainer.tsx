@@ -167,13 +167,15 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 		// Create swimlane rows with tasks organized by column
 		const swimlaneRows: SwimlaneRow[] = sortedSwimlaneValues.map((swimlaneItem) => {
+			const swimlaneItemValue = swimlaneItem.value.trim();
 			const tasksByColumn = activeColumns.map((column, colIdx) => {
 				// swimlaneColumnTasks is expected to align with active columns order
 				const columnTasks = swimlaneColumnTasks[colIdx] || [];
+				debugger;
 
 				// If this swimlane is the aggregated "All rest", include any task whose
 				// property values are in the remainingValuesForAllRest list.
-				if (swimlaneItem.value === 'All rest') {
+				if (swimlaneItemValue === 'All rest') {
 					if (!remainingValuesForAllRest || remainingValuesForAllRest.length === 0) return [];
 					return columnTasks.filter((task: taskItem) => {
 						let values = getPropertyValues(task, property, customValue);
@@ -192,20 +194,22 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 					let values = getPropertyValues(task, property, customValue);
 					if (property === "tags") {
 						values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
-						return values.includes(swimlaneItem.value.replace('#', '').toLocaleLowerCase());
+						return values.includes(swimlaneItemValue.replace('#', '').toLocaleLowerCase());
+					} else if (property === "filePath") {
+						return swimlaneItemValue.endsWith("/") ? values[0].includes(swimlaneItemValue) : values[0] === swimlaneItemValue;
 					}
 
-					return values.includes(swimlaneItem.value);
+					return values.includes(swimlaneItemValue);
 				});
 			});
 
-			const statusName = getStatusNameFromStatusSymbol(swimlaneItem.value, plugin.settings.data.globalSettings);
-			const swimlaneName = property === 'status' ? (statusName ? statusName : 'All rest') : swimlaneItem.value;
+			const statusName = getStatusNameFromStatusSymbol(swimlaneItemValue, plugin.settings.data.globalSettings);
+			const swimlaneName = property === 'status' ? (statusName ? statusName : 'All rest') : swimlaneItemValue;
 			const isSwimlaneMinimized = minimized?.includes(swimlaneName) ?? false;
 
 			return {
 				swimlaneName: swimlaneName,
-				swimlaneValue: swimlaneItem.value,
+				swimlaneValue: swimlaneItemValue,
 				tasks: tasksByColumn,
 				minimized: isSwimlaneMinimized,
 			};
@@ -486,6 +490,11 @@ function getPropertyValues(
 			if (task.status) {
 				values = [task.status];
 			}
+			break;
+
+		case 'filePath':
+			if (task?.filePath)
+				values = [task.filePath];
 			break;
 
 		// case 'project':
