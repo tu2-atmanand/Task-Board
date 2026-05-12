@@ -463,8 +463,20 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Board Management - Function to handle saving the complete board configuration by saving the updated board data to the file system and updating the current view with the new board data after saving.
 	const handleSave = async () => {
-		let boardToSave = activeBoardData;
+		let boardToSave = { ...activeBoardData };
 		boardToSave.views = allViewsData;
+		// Sanitize the viewIndex to ensure the index numbers inside each view is correct.
+		boardToSave.views = boardToSave.views.map((view, index) => ({
+			...view,
+			viewIndex: index
+		}));
+		
+		// Clamp lastViewIndex to ensure it's within valid range [0, views.length - 1]
+		if (boardToSave.views.length > 0) {
+			boardToSave.lastViewIndex = Math.max(0, Math.min(boardToSave.lastViewIndex, boardToSave.views.length - 1));
+		} else {
+			boardToSave.lastViewIndex = 0;
+		}
 
 		if (boardToSave) {
 			await plugin.taskBoardFileManager.saveBoard(boardToSave);

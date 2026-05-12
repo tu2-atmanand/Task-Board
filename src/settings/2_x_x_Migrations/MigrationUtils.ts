@@ -335,7 +335,10 @@ export async function createBoardFiles(
 
 		if (!dirExists) {
 			try {
-				const result = await createFolderRecursively(plugin.app, boardsDir);
+				const result = await createFolderRecursively(
+					plugin.app,
+					boardsDir,
+				);
 				if (result) onProgress?.(`✓ Created directory: ${boardsDir}`);
 				else
 					throw "There was an error while creating the default directory for storing the board files.";
@@ -371,6 +374,7 @@ export async function createBoardFiles(
 					views: [
 						{
 							viewId: generateRandomTempTaskId(),
+							viewIndex: 0,
 							viewName: "Kanban View",
 							viewType: viewTypeNames.kanban,
 							showFilteredTags: board.showFilteredTags,
@@ -387,11 +391,12 @@ export async function createBoardFiles(
 							},
 						},
 					],
-					lastViewId: "",
+					// lastViewId: "",
+					lastViewIndex: 0,
 				};
 
-				const lastViewId = boardContent.views[0]?.viewId ?? "";
-				boardContent.lastViewId = lastViewId;
+				// const lastViewId = boardContent.views[0]?.viewId ?? "";
+				// boardContent.lastViewId = lastViewId;
 
 				const saveBoardResult =
 					await plugin.taskBoardFileManager.saveBoardToDisk(
@@ -527,6 +532,7 @@ export async function migrateMapViewData(
 						},
 						nodesData: mapViewData[boardIndexKey], // ✅ Safely accessed now
 					};
+					const viewsLength = boardData.views.length;
 
 					const mapViewExists = boardData.views.some(
 						(v: any) => v.type === "map",
@@ -534,6 +540,7 @@ export async function migrateMapViewData(
 					if (!mapViewExists) {
 						boardData.views.push({
 							viewId: generateRandomTempTaskId(),
+							viewIndex: viewsLength,
 							viewName: "Map View",
 							viewType: viewTypeNames.map,
 							mapView: newMapViewData,

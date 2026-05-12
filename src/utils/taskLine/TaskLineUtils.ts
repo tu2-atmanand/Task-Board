@@ -597,25 +597,26 @@ export const archiveTask = async (
 				plugin.app.vault.getAbstractFileByPath(archivedFilePath);
 			if (file === null || !(file instanceof TFile)) return;
 
-			await plugin.app.vault
-				.process(file, (archivedFileContent) => {
-					// // Add the task to the top of the archived file content
-					const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
+		// Archive the task to the specified file
+		await plugin.app.vault.process(file, (archivedFileContent) => {
+			// Add the task to the top of the archived file content
+			const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
+			return newArchivedContent;
+		});
 
-					return newArchivedContent;
-				})
-				.then(() => {
-					// Now delete the task from its original file, only if the process promise was resolved
-					deleteTaskFromFile(plugin, task).then(() => {
-						plugin.realTimeScanner.processAllUpdatedFiles(
-							task.filePath,
-						);
-					});
-				});
-
-			// // Read the content of the file where archived tasks will be stored
-			// const archivedFileContent = await readDataOfVaultFile(
-			// 	plugin,
+		// Now delete the task from its original file only if archiving succeeded
+		const deletionSuccess = await deleteTaskFromFile(plugin, task);
+		if (deletionSuccess) {
+			plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+		} else {
+			// Archiving succeeded but deletion failed
+			bugReporterManagerInsatance.showNotice(
+				64,
+				"Task was archived successfully but failed to delete from the original file. Please manually verify and delete the task from the source file if needed.",
+				"Archive succeeded but deletion failed",
+				"TaskItemUtils.ts/archiveTask",
+			);
+		}
 			// 	archivedFilePath,
 			// 	true,
 			// );
@@ -630,7 +631,7 @@ export const archiveTask = async (
 			// 	newArchivedContent,
 			// );
 
-			// // Now delete the task from its original file
+      // // Now delete the task from its original file
 			// await deleteTaskFromFile(plugin, task).then(() => {
 			// 	plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 			// });
@@ -648,14 +649,23 @@ export const archiveTask = async (
 	} else if (archivedFilePath === "") {
 		// If the archived file path is empty, just mark the task as archived in the same file
 		try {
-			await replaceOldTaskWithNewTask(
+			const markSuccess = await replaceOldTaskWithNewTask(
 				plugin,
 				task,
 				oldTaskContent,
 				`%%${oldTaskContent}%%`,
-			).then(() => {
+			);
+			
+			if (markSuccess) {
 				plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
-			});
+			} else {
+				bugReporterManagerInsatance.showNotice(
+					65,
+					"Failed to mark task as archived in the same file. The task may not have been found or the file content did not match.",
+					"Mark as archived failed",
+					"TaskItemUtils.ts/archiveTask",
+				);
+			}
 
 			// const newContet = fileContent.replace(
 			// 	completeTask,

@@ -23,19 +23,18 @@ import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf?: WorkspaceLeaf }> = ({ plugin, currentBoardData, currentLeaf }) => {
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
-	const [currentViewIndex, setCurrentViewIndex] = useState<number>(0);
+	const [currentViewIndex, setCurrentViewIndex] = useState<number>(() => {
+		// Clamp lastViewIndex to valid range [0, views.length - 1] or default to 0
+		if (!currentBoardData?.views?.length) return 0;
+		return Math.max(0, Math.min(currentBoardData.lastViewIndex, currentBoardData.views.length - 1));
+	});
 	const [currentView, setCurrentView] = useState<TaskBoardViewType | undefined>(() => {
 		const initialBoard = currentBoardData;
-		if (initialBoard?.views?.length > 0) {
-			const lastViewIndex = getViewIndex(initialBoard, initialBoard.lastViewId);
-			if (lastViewIndex !== -1) {
-				setCurrentViewIndex(lastViewIndex);
-				return initialBoard.views[lastViewIndex];
-			}
-
-			return initialBoard.views[0];
-		}
-		return undefined;
+		if (!initialBoard?.views?.length) return undefined;
+		
+		// Clamp lastViewIndex to valid range
+		const validIndex = Math.max(0, Math.min(initialBoard.lastViewIndex, initialBoard.views.length - 1));
+		return initialBoard.views[validIndex];
 	});
 
 	// All UI Refs
@@ -99,21 +98,17 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		setIsMobileView(viewWidth <= 800); // For even little bigger screen smartphones, let go with 800
 	}, [viewWidth]);
 
-	// Update currentView when currentViewIndex or boardData changes
-	useEffect(() => {
-		if (boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
-			const newView = boardData.views[currentViewIndex];
-			setCurrentView(newView);
-		}
-	}, [currentViewIndex, boardData?.views]);
-
 	useEffect(() => {
 		const fetchData = async () => {
 			console.log("TASK BOARD : Does this run while switching boards...");
 			try {
 				// if (currentBoardData) {
 				setCurrentBoardData(currentBoardData);
-				setCurrentView(currentBoardData.views[currentViewIndex]);
+				// const lastView = currentBoardData.views.find((view) => view.viewId === currentBoardData.lastViewId);
+				// if (lastView)
+				// 	setCurrentViewIndex(currentBoardData.views.indexOf(lastView));
+				setCurrentViewIndex(currentBoardData.lastViewIndex);
+				// setCurrentView(currentBoardData.views[currentViewIndex]);
 
 				// // Get index of the new board from the registry based on the board id.
 				// const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(currentBoardData.id);;
@@ -150,6 +145,18 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		fetchData();
 	}, [refreshCount]);
 
+	// Update currentView when currentViewIndex or boardData changes
+	useEffect(() => {
+		if (!boardData?.views?.length) {
+			setCurrentView(undefined);
+			return;
+		}
+
+		// Clamp currentViewIndex to valid range [0, views.length - 1]
+		const validIndex = Math.max(0, Math.min(currentViewIndex, boardData.views.length - 1));
+		setCurrentView(boardData.views[validIndex]);
+	}, [currentViewIndex, boardData?.views]);
+
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
 		if (allTasks && currentView) {
@@ -163,13 +170,19 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				Completed: advancedFilterer(allTasks.Completed, viewFilter, dateFormat),
 			};
 
-			let newViewdData = currentView;
-			// Update task count in settings
-			newViewdData.taskCount = {
-				pending: boardFilteredTasks.Pending.length,
-				completed: boardFilteredTasks.Completed.length,
-			};
-			setCurrentView(newViewdData);
+			// Create a new board data object immutably
+			let newBoardData = { ...currentBoardData, views: [...currentBoardData.views] };
+			// Update task count in settings only if currentViewIndex is within bounds
+			if (currentViewIndex >= 0 && currentViewIndex < newBoardData.views.length) {
+				newBoardData.views[currentViewIndex] = {
+					...newBoardData.views[currentViewIndex],
+					taskCount: {
+						pending: boardFilteredTasks.Pending.length,
+						completed: boardFilteredTasks.Completed.length,
+					},
+				};
+			}
+			setCurrentBoardData(newBoardData);
 			setFilteredTasks(boardFilteredTasks);
 
 			// Apply search filter if search query exists
@@ -241,22 +254,24 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			let newViewId = viewId;
 			if (viewId === 'first-map') {
 				// Find the id of the first map-view
-				const mapView = currentBoardData.views.find((view: TaskBoardViewType) => {
-					if (view.viewType === viewTypeNames.map) return view;
-				})
+				const mapView = currentBoardData.views.find((view: TaskBoardViewType) => view.viewType === viewTypeNames.map)
 
-				if (mapView)
-					newViewId = mapView?.viewId;
+				if (mapView) {
+					const viewIndex = currentBoardData.views.indexOf(mapView);
+					handleViewSelect(viewIndex);
+				}
 				else {
 					new Notice("No map view available in this board. Please create atleast one map view.", 5000);
 					return;
 				}
 			}
-			let updatedBoardData = boardData;
-			updatedBoardData.lastViewId = newViewId;
-			plugin.taskBoardFileManager.saveBoard(updatedBoardData);
 
-			setCurrentView(getViewById(boardData, newViewId));
+
+			// let updatedBoardData = boardData;
+			// updatedBoardData.lastViewId = newViewId;
+			// plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+
+			// setCurrentView(getViewById(boardData, newViewId));
 			// setCurrentBoardData(updatedBoardData);
 			// sleep(100);
 			// eventEmitter.emit('REFRESH_BOARD');
@@ -728,7 +743,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			// Update the board's lastViewId to persist view selection
 			if (boardData?.views && index >= 0 && index < boardData.views.length) {
 				let updatedBoard = { ...boardData };
-				updatedBoard.lastViewId = boardData.views[index].viewId;
+				// updatedBoard.lastViewId = boardData.views[index].viewId;
+				updatedBoard.lastViewIndex = index;
 				plugin.taskBoardFileManager.saveBoard(updatedBoard);
 			}
 
