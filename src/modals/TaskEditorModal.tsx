@@ -1,10 +1,10 @@
-// /src/modal/AddOrEditTaskModal.tsx
+// /src/modal/TaskEditorModal.tsx
 
 import { t } from "i18next";
 import { Modal, normalizePath } from "obsidian";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "../../main.js";
-import { AddOrEditTaskRC } from "../components/AddOrEditTaskRC.js";
+import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../interfaces/GlobalSettings.js";
 import { taskItemEmpty } from "../interfaces/Mapping.js";
 import { taskItem } from "../interfaces/TaskItem.js";
@@ -17,7 +17,7 @@ import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 
 
 // Class component extending Modal for Obsidian
-export class AddOrEditTaskModal extends Modal {
+export class TaskEditorModal extends Modal {
 	plugin: TaskBoard;
 	task: taskItem = taskItemEmpty;
 	filePath: string;
@@ -93,7 +93,7 @@ export class AddOrEditTaskModal extends Modal {
 				this.task.title = "- [ ] ";
 		}
 
-		root.render(<AddOrEditTaskRC
+		root.render(<TaskEditorRC
 			plugin={this.plugin}
 			root={contentEl}
 			isTaskNote={this.isTaskNote}
