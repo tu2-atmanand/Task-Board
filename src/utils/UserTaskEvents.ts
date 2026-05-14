@@ -147,7 +147,7 @@ export const openFileAndHighlightTask = async (
 			`Trying to open the following file: ${task.filePath}.\nLeaf type: ${
 				leaf ? leaf.constructor.name : "undefined"
 			}`,
-			"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked",
+			"UserTaskEvents.ts/openFileAndHighlightTask",
 		);
 	}
 
@@ -173,7 +173,7 @@ export const openFileAndHighlightTask = async (
 	// 		88,
 	// 		"File not found",
 	// 		`The file at path ${newFilePath} could not be found.`,
-	// 		"AddOrEditTaskModal.tsx/EditTaskContent/onOpenFilBtnClicked"
+	// 		"UserTaskEvents.ts/openFileAndHighlightTask"
 	// 	);
 	// }
 	// }

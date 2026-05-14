@@ -430,13 +430,13 @@ export default class TaskBoard extends Plugin {
 			}
 		}
 
-		// Register AddOrEditTask view (can be opened in tabs or popout windows)
+		// Register TaskEditor view (can be opened in tabs or popout windows)
 		// this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {
 		// 	console.log("Leaf returned by registerView :", leaf);
 		// 	leaf.setEphemeralState({ viewTaskId: 0 });
-		// 	// This view will be created dynamically when needed via openAddOrEditTaskView
+		// 	// This view will be created dynamically when needed via openTaskEditorView
 		// 	// The constructor requires specific parameters, so we return a placeholder
-		// 	return new AddOrEditTaskView(
+		// 	return new TaskEditorView(
 		// 		this,
 		// 		leaf,
 		// 		VIEW_TYPE_ADD_OR_EDIT_TASK,

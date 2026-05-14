@@ -438,7 +438,7 @@ export async function deleteTaskNote(
 }
 
 /**
- * Archive a task note by moving it to the archived folder
+ * Archive a task-note by moving it to the archived folder
  * @param plugin - TaskBoard plugin instance
  * @param filePath - Path to the file to archive
  */

@@ -1,6 +1,6 @@
 /**
  * Task Gutter Handler - Handles interaction for task markers in the gutter.
- * Displays a marker in front of task lines; clicking it opens AddOrEditTaskModal.
+ * Displays a marker in front of task lines; clicking it opens TaskEditorModal.
  */
 
 import { EditorView, gutter, GutterMarker } from "@codemirror/view";
@@ -8,7 +8,7 @@ import { Extension } from "@codemirror/state";
 import { App, ExtraButtonComponent } from "obsidian";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "../../../main.js";
-import { AddOrEditTaskModal } from "../../modals/AddOrEditTaskModal.js";
+import { TaskEditorModal } from "../../modals/TaskEditorModal.js";
 import { isTaskLine } from "../../utils/CheckBoxUtils.js";
 
 // Task icon marker
@@ -76,8 +76,8 @@ class TaskGutterMarker extends GutterMarker {
 					console.log("Task updated via gutter marker:", updatedTask);
 				};
 
-				// Open the AddOrEditTaskModal
-				const modal = new AddOrEditTaskModal(
+				// Open the TaskEditorModal
+				const modal = new TaskEditorModal(
 					this.plugin,
 					saveTask,
 					false,
