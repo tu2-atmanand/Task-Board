@@ -245,7 +245,7 @@ export class SwimlanesConfigModal extends Modal {
 				text: String(sortRow.index),
 			});
 
-			if (this.property !== 'status') {
+			if (this.property === 'tags') {
 				// Text input for non-status properties
 				const input = row.createEl('input', {
 					attr: { type: 'text', placeholder: t('enter-property-value') },
@@ -253,10 +253,14 @@ export class SwimlanesConfigModal extends Modal {
 				});
 				input.value = sortRow.value;
 				input.addEventListener('input', (e) => {
-					this.customSortOrder[rowIndex].value = (e.target as HTMLInputElement).value;
+					const rawValue = (e.target as HTMLInputElement).value;
+					this.customSortOrder[rowIndex].value = rawValue.startsWith("#") ? rawValue.replace('#', '') : rawValue;
 				});
+			} else if (this.property === 'filePath') {
 
-			} else {
+			} else if (this.property === 'priority') {
+
+			} else if (this.property === 'status') {
 				// Native HTML select for status property
 				const statusSelect = row.createEl('select', {
 					cls: 'swimlanesConfigSortRowDropdown',
@@ -317,6 +321,16 @@ export class SwimlanesConfigModal extends Modal {
 				statusSelect.addEventListener('change', (e) => {
 					const newValue = (e.target as HTMLSelectElement).value;
 					this.customSortOrder[rowIndex].value = newValue === '' ? ' ' : newValue;
+				});
+			} else {
+				// Text input for non-status properties
+				const input = row.createEl('input', {
+					attr: { type: 'text', placeholder: t('enter-property-value') },
+					cls: 'swimlanesConfigSortRowInput',
+				});
+				input.value = sortRow.value;
+				input.addEventListener('input', (e) => {
+					this.customSortOrder[rowIndex].value = (e.target as HTMLInputElement).value;
 				});
 			}
 

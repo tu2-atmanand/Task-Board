@@ -171,23 +171,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Kanban Column - UseEffect to initialize the MultiSuggest component for file path inputs in column configuration when the add/edit column modal is opened
-	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+	const multiSuggestInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 	useEffect(() => {
 		const view = allViewsData[selectedViewIndex];
 		if (!view || view.viewType !== viewTypeNames.kanban) return;
 
 		view.kanbanView?.columns.forEach((column, index) => {
-			const fileInputElement = filePathInputRefs.current[column.id];
+			const fileInputElement = multiSuggestInputFieldRefs.current[column.id];
 			if (!fileInputElement) return;
 
-			if (filePathInputRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
+			if (multiSuggestInputFieldRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
 				const suggestionContent = getFileSuggestions(plugin.app);
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
 					handleColumnChange(selectedViewIndex, index, "filePaths", selectedPath);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
-			} else if (filePathInputRefs.current[column.id] !== null && column.colType === colTypeNames.namedTag) {
+			} else if (multiSuggestInputFieldRefs.current[column.id] !== null && column.colType === colTypeNames.namedTag) {
 				const suggestionContent = getTagSuggestions(plugin.app);
 				const onSelectCallback = (selectedTag: string) => {
 					handleColumnChange(selectedViewIndex, index, "coltag", selectedTag);
@@ -470,7 +470,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			...view,
 			viewIndex: index
 		}));
-		
+
 		// Clamp lastViewIndex to ensure it's within valid range [0, views.length - 1]
 		if (boardToSave.views.length > 0) {
 			boardToSave.lastViewIndex = Math.max(0, Math.min(boardToSave.lastViewIndex, boardToSave.views.length - 1));
@@ -788,17 +788,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															<input
 																type="text"
 																ref={(el) => {
-																	filePathInputRefs.current[column.id] = el;
+																	multiSuggestInputFieldRefs.current[column.id] = el;
 																}}
 																placeholder={t("enter-tag")}
 																value={column.coltag || ""}
-																onChange={(e) =>
+																onChange={(e) => {
+																	const tagValue = e.target.value.startsWith('#') ? e.target.value.replace('#', '') : e.target.value;
 																	handleColumnChange(
 																		viewIndex,
 																		columnIndex,
 																		"coltag",
-																		e.target.value
+																		tagValue
 																	)
+																}
 																}
 																className="boardConfigModalColumnRowContentColName"
 															/>
@@ -970,7 +972,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														<input
 															type="text"
 															ref={(el) => {
-																filePathInputRefs.current[column.id] = el;
+																multiSuggestInputFieldRefs.current[column.id] = el;
 															}}
 															className="boardConfigModalColumnRowContentColName"
 															value={column.filePaths || ""}

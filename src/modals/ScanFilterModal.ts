@@ -3,7 +3,13 @@ import { Modal, Setting, setIcon } from "obsidian";
 import TaskBoard from "../../main.js";
 import { ScanFilters } from "../interfaces/GlobalSettings.js";
 import { trashIcon } from "../interfaces/Icons.js";
-import { getFileSuggestions, getYAMLPropertySuggestions, getFolderSuggestions, getTagSuggestions, MultiSuggest } from "../services/MultiSuggest.js";
+import {
+	getFileSuggestions,
+	getYAMLPropertySuggestions,
+	getFolderSuggestions,
+	getTagSuggestions,
+	MultiSuggest,
+} from "../services/MultiSuggest.js";
 
 export class ScanFilterModal extends Modal {
 	private inputEl!: HTMLInputElement;
@@ -38,7 +44,7 @@ export class ScanFilterModal extends Modal {
 
 		this.inputEl.onchange = (e) => {
 			const target = e.target as HTMLInputElement;
-			const value = target.value.trim();
+			const value = target.value.trim().replace("#", "");
 			if (this.selectedValues.has(this.selectedValue)) {
 				this.selectedValues.delete(this.selectedValue);
 			}
@@ -64,9 +70,9 @@ export class ScanFilterModal extends Modal {
 			this.inputEl,
 			this.suggestionContent,
 			(value: string) => {
-				this.selectedValue = value;
-				if (!this.selectedValues.has(value)) {
-					this.selectedValues.add(value);
+				this.selectedValue = value.trim().replace("#", "");
+				if (!this.selectedValues.has(this.selectedValue)) {
+					this.selectedValues.add(this.selectedValue);
 					this.renderList();
 				}
 				this.inputEl.value = "";

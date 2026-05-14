@@ -272,6 +272,47 @@ export function scanFilterForTags(tags: string[], scanFilters: ScanFilters) {
 }
 
 /**
+ * Verifies that all sub-tasks in the task body and all child-tasks (dependsOn)
+ * are completed.
+ * @param plugin - The TaskBoard plugin instance
+ * @param task - The task item to verify
+ * @returns A promise that resolves to true if all sub-tasks and child-tasks are completed, false otherwise
+ */
+export async function verifySubtasksAndChildtasksAreComplete(
+	plugin: TaskBoard,
+	task: taskItem,
+): Promise<boolean> {
+	if (!plugin.settings.data.boundTaskCompletionToChildTasks) return true;
+
+	let flag = true;
+
+	// Check sub-tasks in body
+	const subTasks = (task.body ?? []).filter((line) => isTaskLine(line));
+	if (subTasks.length > 0) {
+		// Check if all sub-tasks are completed
+		const allSubTasksCompleted = subTasks.every((line) =>
+			isTaskCompleted(line, false, plugin.settings),
+		);
+		if (!allSubTasksCompleted) flag = false;
+	}
+
+	// Check if all child-tasks (dependsOn) are completed
+	if (task?.dependsOn && (task?.dependsOn?.length ?? 0) > 0) {
+		for (const childId of task?.dependsOn ?? []) {
+			const childTask = await getTaskFromId(plugin, childId);
+			if (
+				!childTask ||
+				!(childTask.status === "X" || childTask.status === "x")
+			) {
+				flag = false;
+			}
+		}
+	}
+
+	return flag;
+}
+
+/**
  * Matches user input tags against settings tags that may include wildcards (*).
  * Wildcard (*) can be used at the start or end of a tag to match any sequence of characters.
  * Examples:
@@ -324,42 +365,47 @@ export function matchTagsWithWildcards(
 }
 
 /**
- * Verifies that all sub-tasks in the task body and all child-tasks (dependsOn)
- * are completed.
- * @param plugin - The TaskBoard plugin instance
- * @param task - The task item to verify
- * @returns A promise that resolves to true if all sub-tasks and child-tasks are completed, false otherwise
+ * @todo - Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace operation.
+ *
+ * Compares two tags by :
+ * - Removing the '#' symbol prefix, because the tags are not stored consistently through the plugin configs.
+ * - Casting the string into lower-case, because tags are case insensitive in Obsidian.
+ *
+ * @param tag1 - The first tag
+ * @param tag2 - The second tag
+ *
+ * @returns - TRUE if both the tags are same based on the above rule. Else it will return FALSE.
  */
-export async function verifySubtasksAndChildtasksAreComplete(
-	plugin: TaskBoard,
-	task: taskItem,
-): Promise<boolean> {
-	if (!plugin.settings.data.boundTaskCompletionToChildTasks) return true;
+export function compareTwoTags(tag1: string, tag2: string): boolean {
+	return (
+		tag1.replace("#", "").toLocaleLowerCase() ===
+		tag2.replace("#", "").toLocaleLowerCase()
+	);
+}
 
-	let flag = true;
-
-	// Check sub-tasks in body
-	const subTasks = (task.body ?? []).filter((line) => isTaskLine(line));
-	if (subTasks.length > 0) {
-		// Check if all sub-tasks are completed
-		const allSubTasksCompleted = subTasks.every((line) =>
-			isTaskCompleted(line, false, plugin.settings),
-		);
-		if (!allSubTasksCompleted) flag = false;
-	}
-
-	// Check if all child-tasks (dependsOn) are completed
-	if (task?.dependsOn && (task?.dependsOn?.length ?? 0) > 0) {
-		for (const childId of task?.dependsOn ?? []) {
-			const childTask = await getTaskFromId(plugin, childId);
-			if (
-				!childTask ||
-				!(childTask.status === "X" || childTask.status === "x")
-			) {
-				flag = false;
-			}
-		}
-	}
-
-	return flag;
+/**
+ * @todo Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace operation.
+ *
+ * In Obsidian we can create tags like this :
+ * - #physics/mechanics
+ * - #physics/quantum
+ * In both the above example, the parent tag is '#physics/'. This allows us to filter the tags based on the parent.
+ * This function checks if the parentTag is the real parent of the childTag by :
+ * - Removing the '#' symbol prefix, because the tags are not stored consistently through the plugin configs.
+ * - Casting the string into lower-case, because tags are case insensitive in Obsidian.
+ *
+ * Example :
+ * - parentTag = '#physics/' and childTag = 'physics/astronomy' => Returns TRUE.
+ * - parentTag = '#physics' and childTag = '#physics/quantum' => Returns FALSE.
+ *
+ * @param parentTag - The parent tag.
+ * @param childTag - The child tag.
+ *
+ * @returns - TRUE if the parentTag is the correct parent for the childTag. Else it will return FALSE.
+ */
+export function isChildTag(parentTag: string, childTag: string): boolean {
+	return childTag
+		.replace("#", "")
+		.toLocaleLowerCase()
+		.includes(parentTag.replace("#", "").toLocaleLowerCase());
 }

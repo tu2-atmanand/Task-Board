@@ -2,7 +2,10 @@ import { t } from "i18next";
 import { Notice } from "obsidian";
 import TaskBoard from "../../main.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
-import { PluginDataJson, DEFAULT_SETTINGS } from "../interfaces/GlobalSettings.js";
+import {
+	PluginDataJson,
+	DEFAULT_SETTINGS,
+} from "../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
 
@@ -21,6 +24,15 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			if (!(key in settings)) {
 				// This is a cumpulsory migration which will be required in every new version update, since a new field should be added into the users settings.
 				settings[key] = defaults[key];
+			}
+
+			if (key === "scanFilters") {
+				if (settings[key]?.tags && settings[key].tags.length > 0) {
+					const cleanedTags: string[] = settings[key].tags.map(
+						(tag: string) => tag.trim().replace("#", ""),
+					);
+					settings[key].tags = cleanedTags;
+				}
 			}
 
 			// -----------------------------------
@@ -197,10 +209,9 @@ export async function importConfigurations(
 
 		// Get current settings and defaults
 		// const currentData = plugin.settings; // No use, current settings will be overwritten, hence will use the DEFAULT_SETTINGS
-		const defaultData = DEFAULT_SETTINGS;
 
 		// Merge imported settings with current settings and defaults
-		const mergedSettings = migrateSettings(defaultData, importedData);
+		const mergedSettings = migrateSettings(DEFAULT_SETTINGS, importedData);
 
 		// Protect new fields in current settings that are not present in imported file
 		// for (const key in currentData) {

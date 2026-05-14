@@ -993,7 +993,7 @@ export const sanitizeTags = (
 	// Regex to extract tags from title
 	const extractedTags = (
 		tempTitle.match(TaskRegularExpressions.hashTagsRegex) || []
-	).map((t) => t.trim());
+	).map((t) => t.trim().replace("#", ""));
 
 	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
 	// TODO : Soon, will update the tags management mechanism to store the tags without the `#`
@@ -1001,9 +1001,10 @@ export const sanitizeTags = (
 	// and reduce the below computations.
 	const newTagSet = new Set(
 		newTagsList.map((t) => {
-			let sTag = t.trim();
-			sTag = sTag.startsWith("#") ? sTag : `#${sTag}`;
-			return sTag;
+			// let sTag = t.trim();
+			// sTag = sTag.startsWith("#") ? sTag : `#${sTag}`;
+			// return sTag;
+			return t.trim();
 		}),
 	);
 	const extractedTagsSet = new Set(extractedTags.map((t) => t.trim()));
@@ -1023,7 +1024,7 @@ export const sanitizeTags = (
 	const tagsToAdd: string[] = [];
 	for (const tag of newTagSet) {
 		if (!extractedTagsSet.has(tag)) {
-			tagsToAdd.push(tag);
+			tagsToAdd.push(`#${tag}`);
 		}
 	}
 

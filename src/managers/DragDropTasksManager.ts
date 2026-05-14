@@ -19,6 +19,7 @@ import {
 	updateTaskItemProperty,
 } from "../utils/UserTaskEvents.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
+import { compareTwoTags } from "../utils/algorithms/ScanningFilterer.js";
 
 export interface currentDragDataPayload {
 	task: taskItem;
@@ -366,17 +367,15 @@ class DragDropTasksManager {
 		// -----------------------------------------------
 
 		// Remove the source column tag if it exists
-		const sourceTag = sourceColumn.coltag;
+		const sourceTag = sourceColumn?.coltag ?? "";
 		let newTags = newTask.tags.filter(
-			(tag: string) =>
-				tag.replace("#", "").toLowerCase() !==
-				sourceTag.replace("#", "").toLowerCase(),
+			(tag: string) => !compareTwoTags(sourceTag, tag),
 		);
 
 		// Add the target column tag if it doesn't exist
-		const targetTag = targetColumn.coltag.replace("#", "");
+		const targetTag = targetColumn?.coltag ?? "";
 		// Make sure we don't have duplicates
-		newTags.push(targetTag.startsWith("#") ? targetTag : `#${targetTag}`);
+		newTags.push(targetTag);
 		newTags = Array.from(new Set(newTags));
 
 		// newTask.tags = newTags;
@@ -1016,7 +1015,7 @@ class DragDropTasksManager {
 	 * @param task The task being moved
 	 * @param targetColumnData The column data with manualOrder sorting
 	 * @param desiredIndex The desired index to insert the task at
-	 * 
+	 *
 	 * @todo - Need optimization
 	 */
 	handleTasksOrderChange = async (
@@ -1106,18 +1105,13 @@ class DragDropTasksManager {
 				const oldValue = sourceColumnSwimlaneData.value;
 				if (oldValue !== "All rest") {
 					newTags = newTags.filter(
-						(tag) =>
-							tag.replace("#", "").toLowerCase() !==
-							oldValue.replace("#", "").toLowerCase(),
+						(tag) => !compareTwoTags(oldValue, tag),
 					);
 				}
 			}
 
 			// Add new tag of target swimlane
-			if (newValue !== "All rest")
-				newTags.push(
-					newValue.startsWith("#") ? newValue : `#${newValue}`,
-				);
+			if (newValue !== "All rest") newTags.push(newValue);
 			newTags = Array.from(new Set(newTags));
 
 			newTask = await updateTaskItemProperty(

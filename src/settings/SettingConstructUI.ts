@@ -1103,11 +1103,11 @@ export class SettingsManager {
 					)
 					.addText((text) =>
 						text
-							.setPlaceholder("Tag Name")
+							.setPlaceholder(t("enter-tag-name"))
 							.setValue(tag.name)
 							.onChange(async (value) => {
-								tag.name = value;
-								row.setAttribute("data-tag-name", value);
+								tag.name = value.trim().replace("#", "");
+								row.setAttribute("data-tag-name", tag.name);
 								await this.saveSettings();
 							})
 							.inputEl.setCssStyles({
@@ -1847,14 +1847,13 @@ export class SettingsManager {
 			.addText((text) => {
 				text.setValue(taskNoteIdentifierTag).onChange((value) => {
 					if (this.globalSettings)
-						this.globalSettings.taskNoteIdentifierTag =
-							value.startsWith("#")
-								? value.replace("#", "")
-								: value;
+						this.globalSettings.taskNoteIdentifierTag = value
+							.trim()
+							.replace("#", "");
 				});
 
 				const inputEl = text.inputEl;
-				inputEl.placeholder = "e.g., #taskNote";
+				inputEl.placeholder = "e.g., taskNote";
 			});
 
 		const folderSuggestions = getFolderSuggestions(this.app);

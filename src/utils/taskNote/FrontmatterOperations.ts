@@ -8,8 +8,13 @@ import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { formatToday } from "../DateTimeCalculations.js";
 import { generateTaskId } from "../TaskItemUtils.js";
-import { getCustomFrontmatterKey, getStatusNameFromStatusSymbol, getPriorityNameForTaskNote } from "./TaskNoteUtils.js";
+import {
+	getCustomFrontmatterKey,
+	getStatusNameFromStatusSymbol,
+	getPriorityNameForTaskNote,
+} from "./TaskNoteUtils.js";
 import { FrontmatterFormattingInterface } from "../../interfaces/GlobalSettings.js";
+import { compareTwoTags, isChildTag } from "../algorithms/ScanningFilterer.js";
 
 /**
  * Extract frontmatter from file content
@@ -131,7 +136,7 @@ export function extractFrontmatterTags(
 			tags = frontmatter.tags.map((tag: any) => {
 				const tagStr = String(tag).trim();
 				// Ensure tags start with # if they don't already
-				return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+				return tagStr.replace("#", "");
 			});
 		} else if (typeof frontmatter.tags === "string") {
 			// If tags is a string, split by commas and process
@@ -139,7 +144,7 @@ export function extractFrontmatterTags(
 				.split(",")
 				.map((tag: string) => {
 					const tagStr = tag.trim();
-					return tagStr.startsWith("#") ? tagStr : `#${tagStr}`;
+					return tagStr.replace("#", "");
 				})
 				.filter((tag: string) => tag.length > 1); // Filter out empty tags
 		}
@@ -217,17 +222,19 @@ export function createFrontmatterFromTask(
 	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
 		task?.title || "";
 	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
-		getStatusNameFromStatusSymbol(task?.status, plugin.settings.data.customStatuses ?? []) ||
-		"pending";
+		getStatusNameFromStatusSymbol(
+			task?.status,
+			plugin.settings.data.customStatuses ?? [],
+		) || "pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
-		plugin.settings.data.taskNoteIdentifierTag.replace("#", ""),
-		...(task?.tags
-			?.filter(
-				(tag) =>
-					tag.includes(plugin.settings.data.taskNoteIdentifierTag) ===
-					false,
-			)
-			.map((tag: string) => tag.replace("#", "")) ?? []),
+		plugin.settings.data.taskNoteIdentifierTag,
+		...(task?.tags?.filter(
+			(tag) =>
+				!compareTwoTags(
+					tag,
+					plugin.settings.data.taskNoteIdentifierTag,
+				),
+		) ?? []),
 	];
 
 	if (task.id && plugin.settings.data.autoAddUniqueID)
@@ -319,13 +326,8 @@ export function updateFrontmatterProperties(
 	// Normalize existing tags to array of strings
 	let existingTags: string[] = [];
 	if (Array.isArray(existingTagsRaw)) {
-		existingTags = existingTagsRaw
-			.map((t) => String(t).replace("#", "").trim())
-			.filter(Boolean);
-	} else if (
-		typeof existingTagsRaw === "string" &&
-		existingTagsRaw.replace("#", "").trim().length
-	) {
+		existingTags = existingTagsRaw.filter(Boolean);
+	} else if (typeof existingTagsRaw === "string" && existingTagsRaw.length) {
 		existingTags = existingTagsRaw
 			.split(",")
 			.map((t) => t.replace("#", "").trim())
@@ -346,9 +348,7 @@ export function updateFrontmatterProperties(
 	// 		: []
 	// 	: [];
 
-	const taskTags: string[] = task.tags
-		.map((tag: string) => String(tag).replace("#", "").trim())
-		.filter(Boolean);
+	const taskTags: string[] = task.tags.filter(Boolean);
 
 	const identifierTag = plugin.settings.data.taskNoteIdentifierTag;
 
@@ -361,9 +361,8 @@ export function updateFrontmatterProperties(
 	// Build final tags: identifier + all tags from taskTags (which covers common + new)
 	let finalTags = [...taskTags, ...existingTags];
 
-	const hasIdentifierTag = finalTags.some(
-		(tag) =>
-			tag.replace("#", "").toLowerCase() === identifierTag.toLowerCase(),
+	const hasIdentifierTag = finalTags.some((tag) =>
+		compareTwoTags(tag, identifierTag),
 	);
 	finalTags = hasIdentifierTag ? finalTags : [...finalTags, identifierTag];
 

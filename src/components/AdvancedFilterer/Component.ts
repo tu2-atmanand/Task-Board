@@ -1350,7 +1350,7 @@ export class AdvancedFilterComponent extends Component {
 
 		// Create callback to update filter data when suggestion is selected
 		const onSelectCallback = (value: string) => {
-			filterData.value = value;
+			filterData.value = value.replace("#", "");
 			this.saveStateToLocalStorage();
 		};
 

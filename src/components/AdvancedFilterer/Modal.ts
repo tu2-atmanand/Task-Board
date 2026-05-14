@@ -32,12 +32,10 @@ export class AdvancedFilterModal extends Modal {
 
 		if (forColumn) {
 			this.setTitle(
-				t("column-filters-for") + " " + this.columnOrBoardName,
+				t("column-filters-for") + " - " + this.columnOrBoardName,
 			);
 		} else {
-			this.setTitle(
-				t("board-filters-for") + " " + this.columnOrBoardName,
-			);
+			this.setTitle(t("view-filters-for") + " - " + this.columnOrBoardName);
 		}
 	}
 

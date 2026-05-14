@@ -1,12 +1,17 @@
 // src/utils/advancedFilterer.ts
 
 import { compareAsc } from "date-fns";
-import { RootFilterState, FilterGroup, Filter } from "../../interfaces/BoardConfigs.js";
+import {
+	RootFilterState,
+	FilterGroup,
+	Filter,
+} from "../../interfaces/BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { robustDateParser } from "../DateTimeCalculations.js";
 import { getAllTaskTags } from "../TaskItemUtils.js";
 import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter.js";
+import { isChildTag, matchTagsWithWildcards } from "./ScanningFilterer.js";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -157,10 +162,7 @@ function evaluateFilter(
 			}
 			if (Array.isArray(taskValue)) {
 				return taskValue.some((item) =>
-					String(item)
-						.replace("#", "")
-						.toLowerCase()
-						.includes(String(value).replace("#", "").toLowerCase()),
+					matchTagsWithWildcards(value, item),
 				);
 			}
 			return false;
@@ -172,10 +174,7 @@ function evaluateFilter(
 			}
 			if (Array.isArray(taskValue)) {
 				return !taskValue.some((item) =>
-					String(item)
-						.replace("#", "")
-						.toLowerCase()
-						.includes(String(value).replace("#", "").toLowerCase()),
+					matchTagsWithWildcards(value, item),
 				);
 			}
 			return true;

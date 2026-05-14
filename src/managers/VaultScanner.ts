@@ -1093,7 +1093,7 @@ export function extractPriority(text: string): {
 export function extractTags(text: string): string[] {
 	text = text.replace(/<(mark|font).*?>/g, ""); // TODO : this might not required, try removing this.
 	const matches = text.match(TaskRegularExpressions.hashTagsRegex);
-	return matches ? matches.map((tag) => tag.trim()) : [];
+	return matches ? matches.map((tag) => tag.trim().replace("#", "")) : [];
 }
 
 export function extractReminder(

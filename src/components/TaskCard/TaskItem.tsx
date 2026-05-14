@@ -18,7 +18,7 @@ import { eventEmitter } from '../../services/EventEmitter.js';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from '../../services/MarkdownHoverPreview.js';
 import { MarkdownUIRenderer } from '../../services/MarkdownUIRenderer.js';
 import { openDateInputModal } from '../../services/OpenModals.js';
-import { matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../utils/algorithms/ScanningFilterer.js';
+import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../utils/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../utils/CheckBoxUtils.js';
 import { getUniversalDateFromTask, robustDateParser } from '../../utils/DateTimeCalculations.js';
 import { getAllTaskTags, getTaskFromId } from '../../utils/TaskItemUtils.js';
@@ -449,17 +449,17 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 			}
 
 			// Prepare a map for faster lookup
-			const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
+			const tagColorMap = new Map(tagColors.map((t) => [t.name.toLowerCase(), t]));
 
 			let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
 
 			for (const rawTag of allTags) {
-				const tagName = rawTag.replace('#', '');
+				const tagName = rawTag.toLowerCase();
 				let tagData = tagColorMap.get(tagName);
 
 				if (!tagData) {
 					tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
-						const result = matchTagsWithWildcards(tagNameKey, tagName || '');
+						const result = matchTagsWithWildcards(tagNameKey, tagName);
 						// Return the first match found
 						if (result) tagData = tagColor;
 					});
@@ -727,7 +727,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 			});
 		});
 
-		// Tags editor modal - TODO : It doesnt make sense to build another modal specifically changing the tags, when the AddOrEditTaskModal can itself do this.
+		// Tags editor modal - TODO : It doesnt make sense to build another modal specifically changing the tags, when the TaskEditorModal can itself do this.
 		// taskItemMenu.addItem((item) => {
 		// 	item.setTitle(t("tags"));
 		// 	item.setIcon("tag");
@@ -1000,23 +1000,22 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 									{task.tags.map((tag: string) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
-										const taskTag = tag.replace('#', '').toLowerCase();
-										const columnTag = columnData?.coltag?.replace('#', '').toLowerCase();
 
-										const customTag = isCardBg ? undefined : plugin.settings.data.tagColors.find(t => t.name.replace('#', '').toLowerCase() === taskTag);
+										const customTagColor = isCardBg ? undefined : plugin.settings.data.tagColors.find(t => compareTwoTags(t.name, tag));
 
-										const tagColor = customTag?.color;
-										const dimmedTagColor = customTag ? updateRGBAOpacity(customTag.color, 0.1) : undefined; // 10% opacity background
+										const tagColor = customTagColor?.color;
+										const dimmedTagColor = customTagColor ? updateRGBAOpacity(customTagColor.color, 0.1) : undefined; // 10% opacity background
 										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
 
 										// If columnIndex is defined, proceed to get the column
 										if (
 											activeViewType === viewTypeNames.kanban &&
 											kanbanViewData &&
-											kanbanViewData.showColumnTags &&
+											!kanbanViewData.showColumnTags &&
 											columnData &&
 											columnData?.colType === colTypeNames.namedTag &&
-											taskTag === columnTag
+											columnData?.coltag &&
+											compareTwoTags(columnData.coltag, tag)
 										) {
 											return null;
 										}

@@ -195,11 +195,6 @@ export const columnSegregator = (
 		case colTypeNames.namedTag:
 			tasksToDisplay = pendingTasks.filter((task) =>
 				getAllTaskTags(task).some((tag) => {
-					// return (
-					// 	tag.replace(`#`, "").toLocaleLowerCase() ===
-					// 	columnData.coltag?.replace(`#`, "").toLowerCase()
-					// );
-
 					const result = matchTagsWithWildcards(
 						columnData?.coltag || "",
 						tag,
@@ -250,8 +245,7 @@ export const columnSegregator = (
 			);
 			const namedTags =
 				TaggedColumns.map((col: ColumnData) => {
-					if (col.coltag)
-						return col.coltag.toLowerCase().replace(`#`, "");
+					if (col?.coltag) return col.coltag;
 					else return "";
 				}) || [];
 
@@ -262,7 +256,6 @@ export const columnSegregator = (
 
 				// Check if none of the task's tags are in the namedTags list
 				return allTaskTags.every((tag: string) => {
-					// return !namedTags.includes(tag.replace("#", "").toLowerCase());
 					const result = matchTagsWithWildcards(namedTags, tag);
 					return result === null;
 				});
