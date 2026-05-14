@@ -81,7 +81,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 
 					// Emit event to refresh the board and notify about the newly imported task
 					eventEmitter.emit('TASK_IMPORTED_TO_MAP', newId);
-					eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with REFRESH_COLUMN only.
+					eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with SOFT_REFRESH only.
 				})
 			}
 		} catch (error) {

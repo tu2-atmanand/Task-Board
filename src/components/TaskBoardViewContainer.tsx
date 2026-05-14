@@ -217,8 +217,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	);
 
 	useEffect(() => {
-		eventEmitter.on("REFRESH_COLUMN", debouncedRefreshColumn);
-		return () => eventEmitter.off("REFRESH_COLUMN", debouncedRefreshColumn);
+		eventEmitter.on("SOFT_REFRESH", debouncedRefreshColumn);
+		return () => eventEmitter.off("SOFT_REFRESH", debouncedRefreshColumn);
 	}, [debouncedRefreshColumn]);
 
 	useEffect(() => {

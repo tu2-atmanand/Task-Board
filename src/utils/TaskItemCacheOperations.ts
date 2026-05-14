@@ -1,22 +1,25 @@
-// /src/utils/TaskItemCacheOperations.ts
+/**
+ * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
+ *
+ * @file TaskItemCacheOperations.ts
+ * @author tu2-atmanand
+ * @description This file contains functions for adding, updating, and deleting tasks from the task list in the JSON file/cache file.
+ */
 
 import TaskBoard from "../../main.js";
 import { taskItem, jsonCacheData } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import { getCurrentLocalDateTimeString } from "./DateTimeCalculations.js";
-import { loadJsonCacheDataFromDisk, writeJsonCacheDataToDisk } from "./JsonFileOperations.js";
+import {
+	loadJsonCacheDataFromDisk,
+	writeJsonCacheDataToDisk,
+} from "./JsonFileOperations.js";
 import { generateTaskId } from "./TaskItemUtils.js";
-import { extractFrontmatterFromFile, extractFrontmatterTags } from "./taskNote/FrontmatterOperations.js";
-
-/**
- * @file TaskItemCacheOperations.ts
- * @author tu2-atmanand
- * @description This file contains functions for adding, updating, and deleting tasks from the task list in the JSON file/cache file.
- * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
- */
-
-
+import {
+	extractFrontmatterFromFile,
+	extractFrontmatterTags,
+} from "./taskNote/FrontmatterOperations.js";
 
 /**
  * Move a task from Pending to Completed in the tasks.json file (cache file).
@@ -33,7 +36,9 @@ export const moveFromPendingToCompleted = async (
 
 		// Move task from Pending to Completed
 		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = (allTasks.Pending[task.filePath] || []).filter((t: taskItem) => t.id !== task.id);
+			allTasks.Pending[task.filePath] = (
+				allTasks.Pending[task.filePath] || []
+			).filter((t: taskItem) => t.id !== task.id);
 
 			if (!allTasks.Completed[task.filePath]) {
 				allTasks.Completed[task.filePath] = [];
@@ -52,7 +57,7 @@ export const moveFromPendingToCompleted = async (
 		);
 	}
 
-	eventEmitter.emit("REFRESH_COLUMN");
+	eventEmitter.emit("SOFT_REFRESH");
 };
 
 /**
@@ -70,7 +75,9 @@ export const moveFromCompletedToPending = async (
 
 		// Move task from Completed to Pending
 		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = (allTasks.Completed[task.filePath] || []).filter((t: taskItem) => t.id !== task.id);
+			allTasks.Completed[task.filePath] = (
+				allTasks.Completed[task.filePath] || []
+			).filter((t: taskItem) => t.id !== task.id);
 
 			if (!allTasks.Pending[task.filePath]) {
 				allTasks.Pending[task.filePath] = [];
@@ -89,7 +96,7 @@ export const moveFromCompletedToPending = async (
 		);
 	}
 
-	eventEmitter.emit("REFRESH_COLUMN");
+	eventEmitter.emit("SOFT_REFRESH");
 };
 
 /**
@@ -121,7 +128,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	await writeJsonCacheDataToDisk(plugin, allTasks);
 
-	eventEmitter.emit("REFRESH_COLUMN");
+	eventEmitter.emit("SOFT_REFRESH");
 };
 
 /**
@@ -169,7 +176,7 @@ export const updateTaskInJson = async (
 		// Write the updated data back to the JSON file using the new function
 		await writeJsonCacheDataToDisk(plugin, updatedData);
 
-		eventEmitter.emit("REFRESH_COLUMN");
+		eventEmitter.emit("SOFT_REFRESH");
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			80,
@@ -204,7 +211,7 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 
 		await writeJsonCacheDataToDisk(plugin, allTasks);
 
-		eventEmitter.emit("REFRESH_COLUMN");
+		eventEmitter.emit("SOFT_REFRESH");
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			81,

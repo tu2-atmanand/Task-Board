@@ -656,7 +656,7 @@ export default class VaultScanner {
 	// 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
 	// 		) {
-	// 			eventEmitter.emit("REFRESH_COLUMN");
+	// 			eventEmitter.emit("SOFT_REFRESH");
 	// 			this.tasksDetectedOrUpdated = false;
 	// 		}
 
@@ -676,7 +676,7 @@ export default class VaultScanner {
 		);
 
 		setTimeout(() => {
-			eventEmitter.emit("REFRESH_COLUMN");
+			eventEmitter.emit("SOFT_REFRESH");
 			// 	if (this.plugin.settings.data.searchQuery) {
 			// 		console.log(
 			// 			"Refreshing the board now after saving...\nSetting : ",
@@ -684,7 +684,7 @@ export default class VaultScanner {
 			// 		);
 			// 		eventEmitter.emit("REFRESH_BOARD");
 			// 	} else {
-			// 		eventEmitter.emit("REFRESH_COLUMN");
+			// 		eventEmitter.emit("SOFT_REFRESH");
 			// 	}
 		}, 100);
 		this.tasksDetectedOrUpdated = false;

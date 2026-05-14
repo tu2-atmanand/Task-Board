@@ -206,7 +206,7 @@ export const handleDeleteTask = (
 		onArchive: () => {
 			if (isTaskNote) {
 				archiveTaskNote(plugin, task.filePath).then(() => {
-					eventEmitter.emit("REFRESH_COLUMN");
+					eventEmitter.emit("SOFT_REFRESH");
 				});
 			} else {
 				archiveTask(plugin, task);

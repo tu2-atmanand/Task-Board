@@ -822,9 +822,9 @@ export default class TaskBoard extends Plugin {
 		// });
 		// this.addCommand({
 		// 	id: "5",
-		// 	name: "DEV : REFRESH_COLUMN",
+		// 	name: "DEV : SOFT_REFRESH",
 		// 	callback: () => {
-		// 		eventEmitter.emit("REFRESH_COLUMN");
+		// 		eventEmitter.emit("SOFT_REFRESH");
 		// 	},
 		// });
 	}
@@ -1007,7 +1007,7 @@ export default class TaskBoard extends Plugin {
 			this.currentProgressNotice = null;
 
 			this.plugin.vaultScanner.saveTasksToJsonCache();
-			eventEmitter.emit("REFRESH_COLUMN");
+			eventEmitter.emit("SOFT_REFRESH");
 
 			if (processed > 0) {
 				new Notice(
