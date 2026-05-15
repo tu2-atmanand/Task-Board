@@ -51,7 +51,10 @@ import VaultScanner, {
 import { MergeBoardsModal } from "./src/modals/MergeBoardsModal.js";
 import { ModifiedFilesModal } from "./src/modals/ModifiedFilesModal.js";
 import { TaskBoardView } from "./src/obsidian_views/TaskBoardView.js";
-import { isReminderPluginInstalled } from "./src/services/CommunityPlugins.js";
+import {
+	isReminderPluginInstalled,
+	revealFileFolderInExplorer,
+} from "./src/services/CommunityPlugins.js";
 import { eventEmitter } from "./src/services/EventEmitter.js";
 import {
 	openAddNewTaskModal,
@@ -71,7 +74,8 @@ import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
 import { TaskBoardApi } from "./src/taskboardAPIs.js";
 import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.js";
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
-import { DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
+import { Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
+import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
 
 /**
  * The entry-point of this project.
@@ -795,12 +799,67 @@ export default class TaskBoard extends Plugin {
 		});
 		this.addCommand({
 			id: "merge-boards",
-			name: "Merge Boards",
+			name: t("merge-boards"),
 			callback: () => {
 				new MergeBoardsModal(this.app, {
 					plugin: this,
 					taskBoardFileManager: this.taskBoardFileManager,
 				}).open();
+			},
+		});
+		this.addCommand({
+			id: "create-template-board",
+			name: t("create-template-board"),
+			callback: async () => {
+				try {
+					// Generate unique ID and filename for the new template board
+					const boardId = generateRandomStringId("board");
+					const timestamp = new Date().getTime();
+					const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
+
+					// Create a deep copy of DEFAULT_BOARD and update its properties
+					const newBoard: Board = JSON.parse(
+						JSON.stringify(DEFAULT_BOARD),
+					);
+					newBoard.id = boardId;
+
+					// Save the board to disk
+					const saveSuccess =
+						await this.plugin.taskBoardFileManager.createNewBoardFile(
+							filePath,
+							newBoard,
+						);
+
+					if (!saveSuccess) {
+						bugReporterManagerInsatance.showNotice(
+							187,
+							"Failed to create template board",
+							"saveBoardToDisk returned false",
+							"TaskBoardView.tsx/handleCreateTemplateBoard",
+						);
+						return;
+					}
+
+					// Show success notice
+					new Notice(t("board-created-successfully"));
+
+					const file = this.app.vault.getAbstractFileByPath(filePath);
+					if (file && file instanceof TFile) {
+						revealFileFolderInExplorer(this.plugin, file);
+					}
+
+					// Open the newly created board after some dalay.
+					setTimeout(() => {
+						this.activateView("tab", false, filePath);
+					}, 400);
+				} catch (error) {
+					bugReporterManagerInsatance.showNotice(
+						187,
+						"Error creating template board",
+						String(error),
+						"TaskBoardView.tsx/handleCreateTemplateBoard",
+					);
+				}
 			},
 		});
 

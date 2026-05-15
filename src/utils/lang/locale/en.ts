@@ -634,7 +634,7 @@ const en: Lang = {
 	"open-migration-modal": "Open migration modal",
 	"no-board-found": "Board was not found",
 	"no-boards-found-description": "The current board was not found. If this issue happened after updating the plugin to the new version from Task Board series 2.x.x, kindly run the migrations first. Else, close this tab and open a new board or you can also use the below button to create a new template board.",
-	"create-template-board": "Create a new template board",
+	"create-template-board": "Create a new task board",
 	"resize-drawer": "Resize drawer",
 	"progress": "Progress",
 	"show-details": "Show details",
@@ -652,7 +652,9 @@ const en: Lang = {
 	"merge-board-files": "Merge board files",
 	"merge-board-files-info": "Using this tool you can merge two task board files together to combine all their views and other data into a single file. This is helpful if you want to combine two or more boards which are use to manage a same project or group of tasks.",
 	"archived-on": "Archived on",
-	"enter-tag-name": "Enter tag name (without #)"
+	"enter-tag-name": "Enter tag name (without #)",
+	"merge-boards": "Merge two boards",
+	"board-created-successfully": "A template task board has been created at the root of the vault."
 };
 
 export default en;

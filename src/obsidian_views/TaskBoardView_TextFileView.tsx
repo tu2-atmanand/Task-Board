@@ -403,7 +403,7 @@ export class TaskBoardView extends TextFileView {
 			this.currentFilePath = filePath;
 
 			// Show success notice
-			new Notice(t("board-created-successfully") || "Template board created successfully!");
+			new Notice(t("board-created-successfully"));
 
 			// Render the newly created board
 			this.renderBoard(newBoard);
