@@ -21,7 +21,7 @@ import { PanelLeftOpenIcon } from 'lucide-react';
 import { t } from 'i18next';
 import TaskBoard from '../../../main.js';
 import { Board, TaskBoardViewType, viewPortType, nodeDataType, nodePositionData } from '../../interfaces/BoardConfigs.js';
-import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewScrollAction } from '../../interfaces/Enums.js';
+import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewScrollAction, mapViewArrowDirection } from '../../interfaces/Enums.js';
 import { taskJsonMerged, taskItem, UpdateTaskEventData } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
@@ -528,15 +528,15 @@ const MapView: React.FC<MapViewProps> = ({
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									// height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
-									// width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? undefined : 0,
+									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? undefined : 0,
 								},
 								markerEnd: {
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									// height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
-									// width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? undefined : 0,
+									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? undefined : 0,
 								},
 							});
 						}
