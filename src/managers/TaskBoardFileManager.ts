@@ -522,7 +522,6 @@ export default class TaskBoardFileManager {
 		filePath: string,
 		boardData?: Board,
 	): Promise<void> {
-		debugger;
 		try {
 			let updatedTaskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry || {};
