@@ -12,6 +12,7 @@ import {
 	CURRENT_REVISION,
 	LEAFID_FILEPATH_MAPPING_KEY,
 	TASKBOARD_FILE_EXTENSION,
+	VIEW_TYPE_TASKBOARD,
 } from "../interfaces/Constants.js";
 import { taskBoardFilesRegistryType } from "../interfaces/GlobalSettings.js";
 import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
@@ -50,6 +51,10 @@ export default class TaskBoardFileManager {
 		this.taskBoardFilesRegistry =
 			this.plugin.settings.data.taskBoardFilesRegistry;
 	}
+
+	// --------------------------------------------------------------------
+	// 					ALL READ / WRITE FUNCTION
+	// --------------------------------------------------------------------
 
 	/**
 	 * Load board configuration from a .taskboard file from disk.
@@ -493,6 +498,10 @@ export default class TaskBoardFileManager {
 		return await this.saveBoard(updatedBoardData, filePath);
 	}
 
+	// --------------------------------------------------------------------
+	// 					ALL VALIDATION FUNCTIONS
+	// --------------------------------------------------------------------
+
 	/**
 	 * Add a new task board file (.taskboard) inside the files registry maintained in
 	 * the plugin's global setting which stores a mapping of boardID <-> and some board
@@ -567,6 +576,52 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
+	 * @note - Incomplete
+	 * Helps to remove the specific board file entry from the registry to keep the registry valid.
+	 *
+	 * @param boardId The board ID.
+	 * @param filePath The complete file-path of the board file.
+	 */
+	async removeBoardFromRegistry(
+		boardId: string | null,
+		filePath: string | null,
+	) {
+		try {
+			let updatedTaskBoardFilesRegistry =
+				this.plugin.settings.data.taskBoardFilesRegistry || {};
+
+			let flag = false;
+
+			// Check if board with this ID already exists
+			if (boardId && updatedTaskBoardFilesRegistry[boardId]) {
+				// Delete the older entry incase user wants to update some configuration and to move the last viewed board on top.
+				delete updatedTaskBoardFilesRegistry[boardId];
+				flag = true;
+			}
+
+			if (!flag && filePath) {
+				// Try to find the entry using the filePath from the registry
+				const boardID = this.getBoardIdhUsingBoardFilepath(filePath);
+				if (boardID) {
+					delete updatedTaskBoardFilesRegistry[boardID];
+					flag = true;
+				}
+			}
+
+			if (flag) {
+				this.plugin.saveSettings();
+				this.taskBoardFilesRegistry = updatedTaskBoardFilesRegistry;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				209,
+				`Error removing board from registry: ${error}`,
+				"TaskBoardFileManager.ts/removeBoardFromRegistry",
+			);
+		}
+	}
+
+	/**
 	 * Check if a .taskboard file exists for the given .taskboard file path.
 	 * @param filePath - The path to the .taskboard file
 	 * @returns boolean - True if file exists, false otherwise
@@ -583,6 +638,53 @@ export default class TaskBoardFileManager {
 			return false;
 		}
 	}
+
+	/**
+	 * Validates that all board files fromt the registry are also present on the disk.
+	 * Clear the entries whose files are no longer present on the disk.
+	 * This function basically keeps the registry valid, so we dont face issues during runtime.
+	 * This function should run during plugin load time, that is when Obsidian opens.
+	 *
+	 * @returns void once the function has finished with its operations.
+	 */
+	async validateBoardFiles(): Promise<void> {
+		let updatedTaskBoardFilesRegistry: taskBoardFilesRegistryType =
+			this.plugin.settings.data.taskBoardFilesRegistry || {};
+		let flag = false;
+
+		// Iterate through registry entries and check file existence
+		for (const [boardId, entry] of Object.entries(
+			updatedTaskBoardFilesRegistry,
+		)) {
+			try {
+				const exists = await this.boardFileExists(entry.filePath);
+
+				if (!exists) {
+					// Remove the orphaned entry from the registry
+					delete updatedTaskBoardFilesRegistry[boardId];
+					flag = true;
+				}
+			} catch (error) {
+				bugReporterManagerInsatance.addToLogs(
+					212,
+					`Error validating board files from the registry: ${error}`,
+					"TaskBoardFileManager.ts/validateBoardFiles",
+				);
+			}
+		}
+
+		if (flag) {
+			// Update settings with cleaned registry
+			this.plugin.settings.data.taskBoardFilesRegistry =
+				updatedTaskBoardFilesRegistry;
+			await this.plugin.saveSettings(this.plugin.settings);
+			this.taskBoardFilesRegistry = updatedTaskBoardFilesRegistry;
+		}
+	}
+
+	// --------------------------------------------------------------------
+	// 				ALL EVENT HANDLING FUNCTIONS
+	// --------------------------------------------------------------------
 
 	/**
 	 * Create a new .taskboard file with initial board configuration
@@ -632,8 +734,8 @@ export default class TaskBoardFileManager {
 
 	/**
 	 * Delete a .taskboard file
-	 * @param filePath - The path to the .taskboard file
-	 * @returns boolean - True if deleted successfully, false otherwise
+	 * @param filePath The path to the .taskboard file
+	 * @returns True if deleted successfully, false otherwise
 	 */
 	async deleteBoardFile(filePath: string): Promise<boolean> {
 		try {
@@ -641,6 +743,8 @@ export default class TaskBoardFileManager {
 			if (!file || !(file instanceof TFile)) {
 				throw `Cannot find file to delete.`;
 			}
+
+			// Remove from the fileRegistry and the recentBoardsCache
 
 			await this.app.vault.trash(file, false);
 			return true;
@@ -653,6 +757,106 @@ export default class TaskBoardFileManager {
 			return false;
 		}
 	}
+
+	/**
+	 * After user has deleted a .taskboard file from Obsidian,
+	 * this function removes the file from registry as well as from the cache.
+	 *
+	 * Also, it will try to find if the board is already opened inside Obsidian
+	 * and will attempt to close it. Else it will show a message to the user to close
+	 * the tab.
+	 * @param filePath The full path of the file which user deleted.
+	 */
+	async onBoardFileDelete(filePath: string) {
+		try {
+			// Get the boardId from the file path
+			const boardId = this.getBoardIdhUsingBoardFilepath(filePath);
+
+			// Remove from registry and cache
+			await this.removeBoardFromRegistry(boardId, filePath);
+			delete this.recentBoardsData[filePath];
+
+			// Try to find and close the leaf if it's currently open
+			const leaves =
+				this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+			const leafToClose = leaves.find(
+				(leaf) => (leaf as any).taskboardFilePath === filePath,
+			);
+
+			if (leafToClose) {
+				leafToClose.detach();
+			} else {
+				new Notice(
+					`Task Board: The board file "${normalizePath(filePath)}" has been deleted. Please close the corresponding tab if it's still open.`,
+				);
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				215,
+				`Error handling board file deletion for ${filePath}: ${error}`,
+				"TaskBoardFileManager.ts/onBoardFileDelete",
+			);
+		}
+	}
+
+	/**
+	 * After user has renamed or moved a .taskboard file from Obsidian,
+	 * this function will update the filePath for the same in registry as well as in cache.
+	 *
+	 * Also, it will attempt to close the board file if its already in opened state. Else,
+	 * it will show a notice to user to re-open the file again.
+	 * @param newFilePath The full path of the file after it has been renamed/moved.
+	 * @param oldFilePath The full path of the file before it was renamed/moved.
+	 */
+	async onBoardFileRenamed(newFilePath: string, oldFilePath: string) {
+		try {
+			// Get the boardId using the old file path
+			const boardId = this.getBoardIdhUsingBoardFilepath(oldFilePath);
+			if (!boardId) {
+				throw `Board ID not found for file: ${oldFilePath}`;
+			}
+
+			// Get the board data from cache
+			const boardData = this.recentBoardsData[oldFilePath];
+
+			// Remove old entry from cache
+			delete this.recentBoardsData[oldFilePath];
+
+			// Add new entry to cache with new path
+			if (boardData) {
+				this.recentBoardsData[newFilePath] = boardData;
+			}
+
+			// Update registry with new file path
+			await this.removeBoardFromRegistry(boardId, oldFilePath);
+			await this.addNewBoardToRegistry(boardId, newFilePath, boardData);
+
+			// Try to find and close the leaf if it's currently open
+			const leaves =
+				this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
+			const leafToClose = leaves.find(
+				(leaf) => (leaf as any).taskboardFilePath === oldFilePath,
+			);
+
+			if (leafToClose) {
+				leafToClose.detach();
+			} else {
+				new Notice(
+					`Task Board: The board file has been moved/renamed to "${normalizePath(newFilePath)}". Please re-open the file to continue.`,
+				);
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				216,
+				`Error handling board file rename for ${oldFilePath} to ${newFilePath}: ${error}`,
+				"TaskBoardFileManager.ts/onBoardFileRenamed",
+			);
+		}
+	}
+
+	// --------------------------------------------------------------------
+	// 					ALL GET FUNCTIONS
+	// --------------------------------------------------------------------
 
 	/**
 	 * Get all .taskboard files from the vault and creates a list of their paths.
@@ -722,16 +926,6 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Returns all the boards data cached in memory as a list of boards.
-	 * The order doesnt mean anything.
-	 * @returns Object of all board configurations as a list (Board[]).
-	 */
-	async getAllBoards(): Promise<Board[]> {
-		const allBoardsData = Object.values(this.recentBoardsData);
-		return allBoardsData;
-	}
-
-	/**
 	 * @todo - Need to improve the logic.
 	 *
 	 * Fetches the first entry from the taskBoardFilesRegistry.
@@ -792,7 +986,7 @@ export default class TaskBoardFileManager {
 	 * @param boardId - The ID of the board
 	 * @returns The file path of the board, or null if not found
 	 */
-	getBoardFilepathFromRegistry(boardId: string): string | null {
+	getBoardFilepathUsingBoardId(boardId: string): string | null {
 		const entry = Object.values(this.taskBoardFilesRegistry).find(
 			(e) => e.boardId === boardId,
 		);
@@ -800,10 +994,31 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
-	 * Clear the cached board data
-	 * Useful when switching between different boards or clearing state
+	 * Get the boardId of a board from the registry based on its file-path
+	 * @param filePath - The ID of the board
+	 * @returns The bordId of the board, or null if not found
 	 */
-	clearCurrentBoardCache(): void {
+	getBoardIdhUsingBoardFilepath(filePath: string): string | null {
+		const entry = Object.values(this.taskBoardFilesRegistry).find(
+			(e) => e.filePath === filePath,
+		);
+		return entry ? entry.boardId : null;
+	}
+
+	/**
+	 * Returns all the boards data cached in memory as a list of boards.
+	 * The order doesnt mean anything.
+	 * @returns Object of all board configurations as a list (Board[]).
+	 */
+	async getAllRecentBoardsCache(): Promise<Board[]> {
+		const allBoardsData = Object.values(this.recentBoardsData);
+		return allBoardsData;
+	}
+
+	/**
+	 * Clear the cached board data
+	 */
+	clearRecentBoardsCache(): void {
 		this.recentBoardsData = {};
 		console.log("Cleared cached board data");
 	}
@@ -942,49 +1157,6 @@ export default class TaskBoardFileManager {
 	// --------------------------------------------------------------------
 	// BELOW ARE SOME ONE TIME USE FUNCTIONS USED DURING PLUGIN INSTALLATION
 	// --------------------------------------------------------------------
-
-	/**
-	 * Validate that all board files path present in the global setting registry are also present on the disk.
-	 * Clear the entries whose files are no longer present on the disk.
-	 * This function basically keeps the registry valid, so we dont face issues during runtime.
-	 * This function should run during plugin load time, that is when Obsidian opens.
-	 *
-	 * @returns void once the function has finished with its operations.
-	 */
-	async validateBoardFiles(): Promise<void> {
-		let updatedTaskBoardFilesRegistry: taskBoardFilesRegistryType =
-			this.plugin.settings.data.taskBoardFilesRegistry || {};
-		let flag = false;
-
-		// Iterate through registry entries and check file existence
-		for (const [boardId, entry] of Object.entries(
-			updatedTaskBoardFilesRegistry,
-		)) {
-			try {
-				const exists = await this.boardFileExists(entry.filePath);
-
-				if (!exists) {
-					// Remove the orphaned entry from the registry
-					delete updatedTaskBoardFilesRegistry[boardId];
-					flag = true;
-				}
-			} catch (error) {
-				bugReporterManagerInsatance.addToLogs(
-					212,
-					`Error validating board files from the registry: ${error}`,
-					"TaskBoardFileManager.ts/validateBoardFiles",
-				);
-			}
-		}
-
-		if (flag) {
-			// Update settings with cleaned registry
-			this.plugin.settings.data.taskBoardFilesRegistry =
-				updatedTaskBoardFilesRegistry;
-			await this.plugin.saveSettings(this.plugin.settings);
-			this.taskBoardFilesRegistry = updatedTaskBoardFilesRegistry;
-		}
-	}
 
 	// --------------------------------------------------------------------
 	// DEPRECATED FUNCTIONS

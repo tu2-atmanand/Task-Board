@@ -108,8 +108,8 @@ export default class TaskBoard extends Plugin {
 	}
 
 	// Queue management for bulk file operations
-	private renameQueue: Array<{ file: TAbstractFile; oldPath: string }> = [];
-	private deleteQueue: TAbstractFile[] = [];
+	private renameQueue: Array<{ file: TFile; oldPath: string }> = [];
+	private deleteQueue: TFile[] = [];
 	private createQueue: TFile[] = [];
 	private renameProcessingTimer: NodeJS.Timeout | null = null;
 	private deleteProcessingTimer: NodeJS.Timeout | null = null;
@@ -868,8 +868,10 @@ export default class TaskBoard extends Plugin {
 		const archivedPath = normalizePath(
 			this.settings.data.archivedTBNotesFolderPath,
 		);
-		let allowedFiles = this.renameQueue.filter((fileData) =>
-			fileTypeAllowedForScanning(this.settings.data, fileData.file),
+		let allowedFiles = this.renameQueue.filter(
+			(fileData) =>
+				fileTypeAllowedForScanning(this.settings.data, fileData.file) ||
+				fileData.file.extension === TASKBOARD_FILE_EXTENSION,
 		);
 		const totalFilesLength = allowedFiles.length;
 
@@ -886,6 +888,14 @@ export default class TaskBoard extends Plugin {
 			let processed = 0;
 			while (allowedFiles.length > 0) {
 				const { file, oldPath } = allowedFiles.shift()!;
+
+				if (file.extension === TASKBOARD_FILE_EXTENSION) {
+					this.taskBoardFileManager.onBoardFileRenamed(
+						file.path,
+						oldPath,
+					);
+					continue;
+				}
 
 				try {
 					this.realTimeScanner.onFileRenamed(
@@ -963,8 +973,10 @@ export default class TaskBoard extends Plugin {
 			return;
 		}
 
-		let allowedFiles = this.deleteQueue.filter((file: TAbstractFile) =>
-			fileTypeAllowedForScanning(this.settings.data, file),
+		let allowedFiles = this.deleteQueue.filter(
+			(file: TFile) =>
+				fileTypeAllowedForScanning(this.settings.data, file) ||
+				file.extension === TASKBOARD_FILE_EXTENSION,
 		);
 		const totalFilesLength = allowedFiles.length;
 
@@ -978,6 +990,11 @@ export default class TaskBoard extends Plugin {
 			let processed = 0;
 			while (allowedFiles.length > 0) {
 				const file = allowedFiles.shift()!;
+
+				if (file.extension === TASKBOARD_FILE_EXTENSION) {
+					this.taskBoardFileManager.onBoardFileDelete(file.path);
+					continue;
+				}
 
 				try {
 					this.realTimeScanner.onFileDeleted(file);
@@ -1309,12 +1326,19 @@ export default class TaskBoard extends Plugin {
 		);
 		this.registerEvent(
 			this.app.vault.on("rename", (file, oldPath) => {
+				console.log(
+					"Following file has been renamed :",
+					file,
+					"\nOld Path:",
+					oldPath,
+				);
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForRename(file, oldPath);
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
+				console.log("Following file has been deleted :", file);
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForDeletion(file);
 			}),
