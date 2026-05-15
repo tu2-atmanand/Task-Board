@@ -1,6 +1,6 @@
 // /src/modal/BoardConfigModal.tsx
 
-import { Modal, Notice } from "obsidian";
+import { Modal, normalizePath, Notice } from "obsidian";
 import Sortable from "sortablejs";
 import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -21,6 +21,7 @@ import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
+import { eventEmitter } from "../services/EventEmitter.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -427,7 +428,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
-	const handleDuplicateCurrentBoard = () => {
+	const handleDuplicateCurrentBoard = async () => {
 		const duplicatedBoard: Board = {
 			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
 			id: generateRandomStringId('board'),
@@ -437,6 +438,25 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				viewId: generateRandomStringId('view'), // New unique ID for each view
 			})) : [],
 		};
+
+		let newFilePath = plugin.taskBoardFileManager.getBoardFilepathUsingBoardId(activeBoardData.id);
+		if (newFilePath) {
+			const parts = newFilePath.split("/");
+			const folderPath = parts.slice(0, -1).join("/");
+			newFilePath = normalizePath(folderPath + "/" + duplicatedBoard.name + ".taskboard");
+		} else {
+			newFilePath = normalizePath(duplicatedBoard.name + ".taskboard");
+		}
+
+		await plugin.taskBoardFileManager.saveBoardToDisk(newFilePath, duplicatedBoard);
+
+		setTimeout(() => {
+			eventEmitter.emit("OPEN_BOARD", {
+				layout: "tab",
+				filePath: newFilePath,
+				duplicate: false,
+			});
+		}, 400);
 
 		onClose();
 	};
