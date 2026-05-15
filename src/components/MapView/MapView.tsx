@@ -1,6 +1,6 @@
 // /src/components/MapView/MapView.tsx
 
-import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo, useCallback, MouseEvent as ReactMouseEvent } from 'react';
 import {
 	ReactFlow,
 	ReactFlowProvider,
@@ -861,83 +861,87 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	node.selected = false;
 	// }
 
+	const deleteEdge = async (event: ReactMouseEvent, edge: Edge) => {
+		// Edge id format: `${targetId}->${sourceId}`
+		const [targetId, sourceId] = edge.id.split('->');
+		const allTasks = allTasksFlattened;
+		const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
+		if (!targetTask) {
+			bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
+			return;
+		}
+
+		if (!Array.isArray(targetTask.dependsOn)) {
+			bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
+			return;
+		}
+
+		const updatedDependsOn = targetTask.dependsOn.filter((dep: string) => dep !== sourceId);
+		const updatedTargetTask = {
+			...targetTask,
+			dependsOn: updatedDependsOn
+		};
+
+		let eventData: UpdateTaskEventData = {
+			taskID: updatedTargetTask.id,
+			state: true,
+		};
+		eventEmitter.emit("UPDATE_TASK", eventData);
+
+		try {
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
+				updatedTargetTask.title = updatedTargetTaskTitle;
+
+				await updateTaskInFile(plugin, updatedTargetTask, targetTask);
+				sleep(100).then(() => {
+					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
+					new Notice(t("dependency-deleted"));
+
+					setTimeout(() => {
+						// This event emmitter will stop any loading animation of ongoing task-card.
+						eventEmitter.emit("UPDATE_TASK", {
+							taskID: updatedTargetTask.id,
+							state: false,
+						});
+					}, 500);
+				})
+				// eventEmitter.emit('REFRESH_BOARD');
+			} else {
+				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
+					// This is required to rescan the updated file and refresh the board.
+					sleep(500).then(() => {
+						plugin.realTimeScanner.processAllUpdatedFiles(
+							updatedTargetTask.filePath
+						);
+						new Notice(t("dependency-deleted"));
+						setTimeout(() => {
+							// This event emmitter will stop any loading animation of ongoing task-card.
+							eventEmitter.emit("UPDATE_TASK", {
+								taskID: updatedTargetTask.id,
+								state: false,
+							});
+						}, 500);
+					});
+				});
+			}
+		} catch (err) {
+			bugReporterManagerInsatance.showNotice(20, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
+		}
+	}
+
 	const toggleTasksImporterPanel = useCallback(() => {
 		setIsImporterPanelVisible(prev => !prev);
 	}, []);
 
-	const handleEdgeClick = useCallback((event: any, edge: Edge) => {
+	const handleEdgeClick = useCallback((event: ReactMouseEvent, edge: Edge) => {
 		// Show Obsidian menu for the selected edge
 		const menu = new Menu();
 		menu.addItem((item) => {
 			item.setTitle(t("delete-dependency"));
 			item.setIcon("trash");
 			item.onClick(async () => {
-				// Edge id format: `${targetId}->${sourceId}`
-				const [targetId, sourceId] = edge.id.split('->');
-				const allTasks = allTasksFlattened;
-				const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
-				if (!targetTask) {
-					bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
-					return;
-				}
-
-				if (!Array.isArray(targetTask.dependsOn)) {
-					bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
-					return;
-				}
-
-				const updatedDependsOn = targetTask.dependsOn.filter((dep: string) => dep !== sourceId);
-				const updatedTargetTask = {
-					...targetTask,
-					dependsOn: updatedDependsOn
-				};
-
-				let eventData: UpdateTaskEventData = {
-					taskID: updatedTargetTask.id,
-					state: true,
-				};
-				eventEmitter.emit("UPDATE_TASK", eventData);
-
-				try {
-					if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
-						const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
-						updatedTargetTask.title = updatedTargetTaskTitle;
-
-						await updateTaskInFile(plugin, updatedTargetTask, targetTask);
-						sleep(100).then(() => {
-							plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
-							new Notice(t("dependency-deleted"));
-
-							setTimeout(() => {
-								// This event emmitter will stop any loading animation of ongoing task-card.
-								eventEmitter.emit("UPDATE_TASK", {
-									taskID: updatedTargetTask.id,
-									state: false,
-								});
-							}, 500);
-						})
-						// eventEmitter.emit('REFRESH_BOARD');
-					} else {
-						updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
-							// This is required to rescan the updated file and refresh the board.
-							sleep(500).then(() => {
-								plugin.realTimeScanner.processAllUpdatedFiles(
-									updatedTargetTask.filePath
-								);
-								new Notice(t("dependency-deleted"));
-								setTimeout(() => {
-									// This event emmitter will stop any loading animation of ongoing task-card.
-									eventEmitter.emit("UPDATE_TASK", {
-										taskID: updatedTargetTask.id,
-										state: false,
-									});
-								}, 500);
-							});
-						});
-					}
-				} catch (err) {
-					bugReporterManagerInsatance.showNotice(20, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
-				}
+				deleteEdge(event, edge);
 			});
 		});
 
@@ -1051,6 +1055,7 @@ const MapView: React.FC<MapViewProps> = ({
 							edges={edges}
 							nodeTypes={nodeTypes}
 							onEdgeClick={handleEdgeClick}
+							onEdgeContextMenu={deleteEdge}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={(node) => {
 								console.log("Following node position has been updated : ", node);
