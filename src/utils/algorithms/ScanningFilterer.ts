@@ -322,6 +322,8 @@ export async function verifySubtasksAndChildtasksAreComplete(
  * @param settingsTags - Tags from settings which may include wildcards
  * @param userInputTags - Tags from user input to match against settings tags
  * @returns An array of matching tags or null if no match is found
+ * 
+ * @todo Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace("#", "") operation. Deprecate that operation in future version such as 2.1.0.
  */
 export function matchTagsWithWildcards(
 	settingsTags: string | string[],
@@ -345,12 +347,16 @@ export function matchTagsWithWildcards(
 		pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
 		// Replace * with .+ (at least one character)
 		pattern = pattern.replace(/\\\*/g, ".*").replace(/\*/g, ".+");
-		// If wildcard is at the start, allow anything before
-		if (pattern.startsWith(".+")) pattern = "^" + pattern;
-		else pattern = "^" + pattern;
-		// If wildcard is at the end, allow anything after
-		if (pattern.endsWith(".+")) pattern = pattern + "$";
-		else pattern = pattern + "$";
+
+		// // If wildcard is at the start, allow anything before
+		// if (pattern.startsWith(".+")) pattern = "^" + pattern;
+		// else pattern = "^" + pattern;
+		// // If wildcard is at the end, allow anything after
+		// if (pattern.endsWith(".+")) pattern = pattern + "$";
+		// else pattern = pattern + "$";
+
+		pattern = "^" + pattern + "$";
+
 		return new RegExp(pattern);
 	});
 
@@ -365,8 +371,6 @@ export function matchTagsWithWildcards(
 }
 
 /**
- * @todo - Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace operation.
- *
  * Compares two tags by :
  * - Removing the '#' symbol prefix, because the tags are not stored consistently through the plugin configs.
  * - Casting the string into lower-case, because tags are case insensitive in Obsidian.
@@ -375,6 +379,8 @@ export function matchTagsWithWildcards(
  * @param tag2 - The second tag
  *
  * @returns - TRUE if both the tags are same based on the above rule. Else it will return FALSE.
+ * 
+ * @todo - Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace("#", "") operation. Deprecate that operation in future version such as 2.1.0.
  */
 export function compareTwoTags(tag1: string, tag2: string): boolean {
 	return (
@@ -384,7 +390,7 @@ export function compareTwoTags(tag1: string, tag2: string): boolean {
 }
 
 /**
- * @todo Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace operation.
+ * @deprecated - Will make use of the {@link matchTagsWithWildcards} function instead of this for more features.
  *
  * In Obsidian we can create tags like this :
  * - #physics/mechanics

@@ -1458,7 +1458,8 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 };
 
 /**
- * Function to clean the task title by removing metadata. This is legacy function for compatibility.
+ * Function to clean the task title by removing all supported metadata. 
+ * This is legacy function for compatibility.
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The task item to clean.
  * @returns The cleaned task title without metadata.
@@ -1480,7 +1481,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 	// Remove tags
 	task.tags.forEach((tag) => {
-		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
+		const tagRegex = new RegExp(`\\s*#${tag}\\s*`, "g");
 		const tagsMatch = cleanedTitle.match(tagRegex);
 		if (tagsMatch) {
 			cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");

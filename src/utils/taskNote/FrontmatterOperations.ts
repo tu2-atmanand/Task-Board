@@ -14,7 +14,7 @@ import {
 	getPriorityNameForTaskNote,
 } from "./TaskNoteUtils.js";
 import { FrontmatterFormattingInterface } from "../../interfaces/GlobalSettings.js";
-import { compareTwoTags, isChildTag } from "../algorithms/ScanningFilterer.js";
+import { compareTwoTags} from "../algorithms/ScanningFilterer.js";
 
 /**
  * Extract frontmatter from file content

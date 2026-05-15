@@ -11,7 +11,7 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { robustDateParser } from "../DateTimeCalculations.js";
 import { getAllTaskTags } from "../TaskItemUtils.js";
 import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter.js";
-import { isChildTag, matchTagsWithWildcards } from "./ScanningFilterer.js";
+import { matchTagsWithWildcards } from "./ScanningFilterer.js";
 
 /**
  * Filters tasks based on the board's filter configuration
