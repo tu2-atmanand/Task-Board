@@ -6,7 +6,7 @@ import Sortable from "sortablejs";
 import TaskBoard from "../../main.js";
 import { ColumnData, columnSortingCriteria } from "../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 
 export class ConfigureColumnSortingModal extends Modal {
@@ -48,7 +48,7 @@ export class ConfigureColumnSortingModal extends Modal {
 				this.columnConfiguration.sortCriteria.map(
 					(criteria: columnSortingCriteria) => ({
 						...criteria,
-						uid: criteria.uid || generateRandomTempTaskId(),
+						uid: criteria.uid || generateRandomStringId('sort'),
 					}),
 				);
 		}
@@ -178,7 +178,7 @@ export class ConfigureColumnSortingModal extends Modal {
 													criteria: "manualOrder",
 													order: "asc",
 													priority: 1,
-													uid: generateRandomTempTaskId(),
+													uid: generateRandomStringId('sort'),
 												};
 											// Add manualOrder sort criteria
 											this.columnConfiguration.sortCriteria.push(
@@ -315,7 +315,7 @@ export class ConfigureColumnSortingModal extends Modal {
 					priority:
 						(this.columnConfiguration.sortCriteria?.length ?? 0) +
 						1,
-					uid: generateRandomTempTaskId(),
+					uid: generateRandomStringId('sort'),
 				};
 				if (!this.columnConfiguration.sortCriteria) {
 					this.columnConfiguration.sortCriteria = [];

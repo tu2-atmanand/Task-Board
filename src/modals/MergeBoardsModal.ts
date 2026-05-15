@@ -3,7 +3,7 @@ import TaskBoard from "../../main.js";
 import { Board } from "../interfaces/BoardConfigs.js";
 import TaskBoardFileManager from "../managers/TaskBoardFileManager.js";
 import { MultiSuggest } from "../services/MultiSuggest.js";
-import { generateRandomNumber } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 import { CURRENT_REVISION } from "../interfaces/Constants.js";
 import { t } from "i18next";
 
@@ -234,7 +234,7 @@ export class MergeBoardsModal extends Modal {
 
 	private mergeBoards(board1: Board, board2: Board): Board {
 		// Generate new ID
-		const newId = String(generateRandomNumber());
+		const newId = generateRandomStringId("board");
 
 		// Combine filterConfig
 		const combinedFilterConfig = {

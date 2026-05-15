@@ -38,7 +38,7 @@ import {
 	writeJsonCacheDataToDisk,
 } from "../utils/JsonFileOperations.js";
 import { readDataOfVaultFile } from "../utils/MarkdownFileOperations.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
@@ -216,7 +216,7 @@ export default class VaultScanner {
 					const taskNoteItem: taskItem = {
 						id: taskNoteProperties.id
 							? taskNoteProperties.id
-							: generateRandomTempTaskId(),
+							: generateRandomStringId(),
 						legacyId: taskNoteProperties.id
 							? taskNoteProperties.id
 							: "", // Storing the legacyId for backward compatibility
@@ -415,7 +415,7 @@ export default class VaultScanner {
 							const task: taskItem = {
 								id: legacyId
 									? (legacyId[1] ?? "")
-									: generateRandomTempTaskId(),
+									: generateRandomStringId(),
 								legacyId: legacyId ? legacyId[1] : "", // Storing the legacyId for backward compatibility
 								status: taskStatus,
 								title: title,

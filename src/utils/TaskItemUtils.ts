@@ -5,9 +5,10 @@ import { taskItem } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { extractTaskId } from "../managers/VaultScanner.js";
 import { updateTaskInFile } from "./taskLine/TaskLineUtils.js";
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "./taskNote/TaskNoteUtils.js";
-
-
+import {
+	isTaskNotePresentInTags,
+	updateFrontmatterInMarkdownFile,
+} from "./taskNote/TaskNoteUtils.js";
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
@@ -81,10 +82,10 @@ export const getTaskFromId = async (
  * For example : '1851955511'.
  * @return {string} a random unique ID for a task
  */
-export function generateRandomTempTaskId(): string {
+export function generateRandomStringId(prefix?: string): string {
 	const array = new Uint32Array(1);
 	crypto.getRandomValues(array);
-	return String(array[0]);
+	return prefix ? `${prefix}_${String(array[0])}` : String(array[0]);
 }
 
 /**

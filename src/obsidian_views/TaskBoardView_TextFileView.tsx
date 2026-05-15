@@ -12,7 +12,7 @@ import { TaskBoardIcon, funnelIcon, ScanVaultIcon, RefreshIcon } from "../interf
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import { openScanVaultModal, openBoardsExplorerModal } from "../services/OpenModals.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 
 export class TaskBoardView extends TextFileView {
 	plugin: TaskBoard;
@@ -375,7 +375,7 @@ export class TaskBoardView extends TextFileView {
 	private async handleCreateTemplateBoard() {
 		try {
 			// Generate unique ID and filename for the new template board
-			const boardId = generateRandomTempTaskId();
+			const boardId = generateRandomStringId('board');
 			const timestamp = new Date().getTime();
 			const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 

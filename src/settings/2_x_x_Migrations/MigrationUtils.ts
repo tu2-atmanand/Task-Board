@@ -16,7 +16,7 @@ import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { createFolderRecursively } from "../../services/FileSystem.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
-import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import { migrateSettings } from "../SettingSynchronizer.js";
 import {
 	PluginDataJsonLegacy,
@@ -365,7 +365,7 @@ export async function createBoardFiles(
 
 				// Create the board file content (v2 format)
 				const boardContent: Board = {
-					id: generateRandomTempTaskId(),
+					id: generateRandomStringId("board"),
 					revision: CURRENT_REVISION,
 					viewsPanel: DEFAULT_BOARD.viewsPanel,
 					name: board.name,
@@ -373,7 +373,7 @@ export async function createBoardFiles(
 					filterConfig: board.filterConfig,
 					views: [
 						{
-							viewId: generateRandomTempTaskId(),
+							viewId: generateRandomStringId('view'),
 							viewIndex: 0,
 							viewName: "Kanban View",
 							viewType: viewTypeNames.kanban,
@@ -539,7 +539,7 @@ export async function migrateMapViewData(
 					);
 					if (!mapViewExists) {
 						boardData.views.push({
-							viewId: generateRandomTempTaskId(),
+							viewId: generateRandomStringId('view'),
 							viewIndex: viewsLength,
 							viewName: "Map View",
 							viewType: viewTypeNames.map,

@@ -13,7 +13,7 @@ import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { revealFileFolderInExplorer } from "../services/CommunityPlugins.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import { openScanVaultModal, openBoardsExplorerModal } from "../services/OpenModals.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 
 export class TaskBoardView extends ItemView {
 	plugin: TaskBoard;
@@ -29,7 +29,7 @@ export class TaskBoardView extends ItemView {
 		this.plugin = plugin;
 		// this.boards = [];
 		this.icon = TaskBoardIcon;
-		this.navigation = true;
+		// this.navigation = true;
 	}
 
 	getViewType() {
@@ -407,7 +407,7 @@ export class TaskBoardView extends ItemView {
 	private async handleCreateTemplateBoard() {
 		try {
 			// Generate unique ID and filename for the new template board
-			const boardId = generateRandomTempTaskId();
+			const boardId = generateRandomStringId('board');
 			const timestamp = new Date().getTime();
 			const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 

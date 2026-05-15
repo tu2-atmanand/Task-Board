@@ -15,7 +15,7 @@ import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorit
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions } from "../services/MultiSuggest.js";
 import { SettingsManager } from "../settings/SettingConstructUI.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomNumber, generateRandomStringId } from "../utils/TaskItemUtils.js";
 import { AddColumnModal } from "./AddColumnModal.js";
 import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
@@ -341,7 +341,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const viewToDuplicate = allViewsData[selectedViewIndex];
 		const duplicatedView: TaskBoardViewType = {
 			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
-			viewId: generateRandomTempTaskId(),
+			viewId: generateRandomStringId('view'),
 			viewName: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
 		};
 
@@ -349,7 +349,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (duplicatedView?.kanbanView && duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
 			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column: ColumnData) => ({
 				...column,
-				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
+				id: generateRandomNumber(), // Generate new numeric ID for each column
 			}));
 		}
 
@@ -430,11 +430,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleDuplicateCurrentBoard = () => {
 		const duplicatedBoard: Board = {
 			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
-			id: generateRandomTempTaskId(),
+			id: generateRandomStringId('board'),
 			name: `${activeBoardData.name} ${t("copy-suffix")}`,
 			views: activeBoardData.views ? activeBoardData.views.map((view: TaskBoardViewType) => ({
 				...view,
-				viewId: generateRandomTempTaskId(), // New unique ID for each view
+				viewId: generateRandomStringId('view'), // New unique ID for each view
 			})) : [],
 		};
 

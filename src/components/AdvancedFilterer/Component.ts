@@ -29,7 +29,7 @@ import {
 	getTagSuggestions,
 	getFileSuggestions,
 } from "../../services/MultiSuggest.js";
-import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import { BoardFiltersStoreModal } from "./LoadSavedFiltersModal.js";
 
 export class AdvancedFilterComponent extends Component {
@@ -1632,5 +1632,5 @@ export class AdvancedFilterComponent extends Component {
 }
 
 export function generateIdForFilters(): string {
-	return `id-${Date.now()}-${generateRandomTempTaskId()}`;
+	return generateRandomStringId(`filter_${Date.now()}`);
 }

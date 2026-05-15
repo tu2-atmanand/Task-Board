@@ -15,7 +15,7 @@ import {
 	VIEW_TYPE_TASKBOARD,
 } from "../interfaces/Constants.js";
 import { taskBoardFilesRegistryType } from "../interfaces/GlobalSettings.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 
 /**
@@ -94,7 +94,7 @@ export default class TaskBoardFileManager {
 				if (registryEntry.filePath !== filePath) {
 					// Same boardID but different filePath - generate new ID
 					const oldId = boardData.id;
-					boardData.id = generateRandomTempTaskId();
+					boardData.id = generateRandomStringId("board");
 					// console.log(
 					// 	`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
 					// );
@@ -155,7 +155,7 @@ export default class TaskBoardFileManager {
 				if (registryEntry.filePath !== filePath) {
 					// Same boardID but different filePath - generate new ID
 					const oldId = boardData.id;
-					boardData.id = generateRandomTempTaskId();
+					boardData.id = generateRandomStringId("board");
 					// console.log(
 					// 	`Board ID conflict detected. Changed board ID from "${oldId}" to "${boardData.id}" for file: ${filePath}`,
 					// );
@@ -224,6 +224,9 @@ export default class TaskBoardFileManager {
 				// console.log(
 				// 	`Board "${this.recentBoardsData[filePath].name}" already exists in cache for file: ${filePath}`,
 				// );
+				const foundBoard = this.recentBoardsData[filePath];
+				this.addNewBoardToRegistry(foundBoard.id, filePath, foundBoard);
+
 				return this.recentBoardsData[filePath];
 			}
 
@@ -519,6 +522,7 @@ export default class TaskBoardFileManager {
 		filePath: string,
 		boardData?: Board,
 	): Promise<void> {
+		debugger;
 		try {
 			let updatedTaskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry || {};
@@ -559,7 +563,7 @@ export default class TaskBoardFileManager {
 				[boardId]: newEntry,
 				...updatedTaskBoardFilesRegistry,
 			};
-			this.plugin.saveSettings();
+			this.plugin.saveSettings(this.plugin.settings);
 			this.taskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry;
 
@@ -1093,6 +1097,9 @@ export default class TaskBoardFileManager {
 		if (!oldBoardData?.lastViewIndex) {
 			newBoardData["lastViewIndex"] = 0;
 		}
+
+		if (!oldBoardData.id.startsWith("board"))
+			newBoardData.id = generateRandomStringId("board");
 
 		newBoardData.views = newBoardData.views.map((view, index) => ({
 			...view,
