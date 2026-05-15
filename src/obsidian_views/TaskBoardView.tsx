@@ -185,9 +185,9 @@ export class TaskBoardView extends ItemView {
 						const firstItemFromRegistry = registryEntries[0];
 						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
-							state.filePath = {
-								...state.state,
-								filePath: this.currentFilePath
+							state = {
+								...state,
+								filePath: this.currentFilePath,
 							};
 						}
 					}

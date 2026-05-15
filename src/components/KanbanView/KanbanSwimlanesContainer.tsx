@@ -309,7 +309,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			}
 
 
-			await plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoardData);
+			await plugin.taskBoardFileManager.saveBoard(updatedBoardData);
 			eventEmitter.emit('REFRESH_BOARD');
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(

@@ -78,13 +78,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	useEffect(() => {
 		const handleResize = () => {
 			const taskBoardLeaf = currentLeaf;
-			if (taskBoardLeaf) {
+			if (taskBoardLeaf && taskBoardLeaf.width) {
 				setviewWidth(taskBoardLeaf.width);
 				document.documentElement.style.setProperty('--taskboard-leaf-width', `${taskBoardLeaf.width}px`);
 			}
 		};
 
 		handleResize();
+
 		if (currentLeaf) {
 			plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
 		}
