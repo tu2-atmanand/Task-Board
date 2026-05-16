@@ -553,19 +553,20 @@ const MapView: React.FC<MapViewProps> = ({
 	//           ALL EVENT HANDLING
 	// -------------------------------------------------------------
 
-	const handlenodePositionChange = useCallback(() => {
+	const handlenodePositionChange = useCallback((movedNodes: Node[]) => {
+		// console.log("Single node :", movedNodes);
 		try {
-			// Update positions for current board with validation
-			const nodesDataMap: Record<string, nodePositionData> = {};
-			for (const node of nodes) {
+			let tempAllNodes = allNodesData.current;
+
+			for (const node of movedNodes) {
 				const x = Number.isFinite(node.position?.x) ? node.position.x : 0;
 				const y = Number.isFinite(node.position?.y) ? node.position.y : 0;
 				const width = Number.isFinite(node?.width) ? node.width ?? 300 : 300;
-				nodesDataMap[node.id] = { x, y, width };
+				tempAllNodes[node.id] = { x, y, width };
 			}
 
 			// Only update useRef - no state update needed, avoiding re-render
-			allNodesData.current = nodesDataMap;
+			allNodesData.current = tempAllNodes;
 			emitMapDataUpdatedSignal(true);
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(98, String(error), 'MapView.tsx/handlenodePositionTypeChange');
@@ -1059,9 +1060,8 @@ const MapView: React.FC<MapViewProps> = ({
 							onEdgeClick={handleEdgeClick}
 							onEdgeContextMenu={deleteEdge}
 							onNodesChange={onNodesChange}
-							onNodeDragStop={(node) => {
-								console.log("Following node position has been updated : ", node);
-								handlenodePositionChange();
+							onNodeDragStop={(event, node, nodes) => {
+								handlenodePositionChange(nodes);
 							}}
 
 							// viewport controls
