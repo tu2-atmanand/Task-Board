@@ -293,6 +293,16 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		};
 	}, []);
 
+	const saveMapViewIfNeeded = async () => {
+		console.log("Will store the map view data first...");
+		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
+			eventEmitter.emit("SAVE_MAP");
+			// setMapViewDataUpdated(false);
+			// viewPortDataOfMapViewUpdated.current = false;
+			// sleep(100);
+		}
+	}
+
 	const refreshBoardButton = useCallback(() => {
 		plugin.realTimeScanner.processAllUpdatedFiles(); //.then(() => console.log("Finished processing all updated files."));
 		plugin.processCreateQueue(); //.then(() => console.log("Finished processing create queue."));
@@ -310,6 +320,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// }
 
 	function handleSearchButtonClick() {
+		saveMapViewIfNeeded();
+
 		if (showSearchInput) {
 			setSearchQuery("");
 			// el.currentTarget.focus();
@@ -372,6 +384,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
 		try {
+			saveMapViewIfNeeded();
+
 			const currentBoardConfig = boardData;
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
@@ -508,8 +522,9 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}
 
 	function handlePropertiesBtnClick(event: React.MouseEvent<HTMLButtonElement>) {
-		const propertyMenu = new Menu();
+		saveMapViewIfNeeded();
 
+		const propertyMenu = new Menu();
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("show-hide-properties"));
@@ -731,13 +746,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}
 
 	function handleViewSelect(index: number) {
-		console.log("Will store the map view data first...");
-		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
-			eventEmitter.emit("SAVE_MAP");
-			// setMapViewDataUpdated(false);
-			// viewPortDataOfMapViewUpdated.current = false;
-			sleep(100);
-		}
+		saveMapViewIfNeeded();
 
 		console.log("Now will switch the view...");
 		if (index !== currentViewIndex) {
@@ -746,19 +755,20 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				let updatedBoard = { ...boardData };
 				// updatedBoard.lastViewId = boardData.views[index].viewId;
 				updatedBoard.lastViewIndex = index;
-				plugin.taskBoardFileManager.saveBoard(updatedBoard);
-
 				setCurrentViewIndex(index);
 				setSearchQuery("");
 				plugin.settings.data.searchQuery = "";
 				// eventEmitter.emit("SOFT_REFRESH");
 				setSoftRefreshCount((prev) => prev + 1);
+
+				setTimeout(() => {
+					// eventEmitter.emit("REFRESH_BOARD");
+					// plugin.saveSettings();
+					console.log("Will now going to save the view index :", updatedBoard.lastViewIndex);
+					plugin.taskBoardFileManager.saveBoard(updatedBoard);
+				}, 500);
 			}
 
-			// setTimeout(() => {
-			// 	eventEmitter.emit("REFRESH_BOARD");
-			// 	// plugin.saveSettings();
-			// }, 100);
 		}
 		// closeBoardSidebar(); // Close sidebar after selection
 	}
@@ -1340,7 +1350,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 								className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
 								onClick={(e) => {
 									if (mapViewDataUpdated) {
-										console.log("Emitting SAVE_MAP event...");
 										eventEmitter.emit("SAVE_MAP");
 										setMapViewDataUpdated(false);
 									}
