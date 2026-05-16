@@ -29,7 +29,7 @@ export class TaskBoardView extends ItemView {
 		this.plugin = plugin;
 		// this.boards = [];
 		this.icon = TaskBoardIcon;
-		// this.navigation = true;
+		this.navigation = true;
 	}
 
 	getViewType() {
