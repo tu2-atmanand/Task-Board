@@ -170,7 +170,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 	useEffect(() => {
 		const saveMapDataListener = () => {
-			console.log("[Task Board] [MapView] SAVE_MAP signal fired...\nmapDataUpdated = ", mapDataUpdated.current);
+			// console.log("[Task Board] [MapView] SAVE_MAP signal fired...\nmapDataUpdated = ", mapDataUpdated.current, "\nviewPortDataUpdated = ", viewPortDataUpdated.current);
 			if (!mapDataUpdated.current && !viewPortDataUpdated.current) return;
 
 			let newBoardData = activeBoardData;
@@ -182,6 +182,7 @@ const MapView: React.FC<MapViewProps> = ({
 					nodesData: allNodesData.current,
 				};
 			}
+			// console.log("Will now going to save the view index :", newBoardData.lastViewIndex);
 			plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 			mapDataUpdated.current = false;
@@ -730,6 +731,7 @@ const MapView: React.FC<MapViewProps> = ({
 			// setViewport(safeViewport);
 			viewPortData.current = safeViewport;
 			// emitMapDataUpdatedSignal(true);
+			// console.log("Will make the viewPortDataUpdated TRUE on fresh render...");
 			viewPortDataUpdated.current = true;
 			// lastViewportSaveTime.current = now;
 		} catch (error) {
@@ -1071,9 +1073,10 @@ const MapView: React.FC<MapViewProps> = ({
 							selectNodesOnDrag={false}
 							selectionOnDrag={Platform.isPhone ? false : true}
 							selectionMode={SelectionMode.Partial}
-							onMoveEnd={(_, vp) => {
+							onMoveEnd={(event, vp) => {
 								// setViewport(prev => ({ ...prev, [activeBoardIndex]: vp })); // NOTE : Dont update the viewport here again, as it is giving a glitching behavior.
-								debouncedSetViewportStorage(vp);
+								if (event)
+									debouncedSetViewportStorage(vp);
 								// throttledSetViewportStorage(vp);
 							}}
 
@@ -1110,6 +1113,7 @@ const MapView: React.FC<MapViewProps> = ({
 											instance.setViewport(newVp);
 											// setViewport(newVp);
 											viewPortData.current = newVp;
+											// console.log("We are running the debouncedSetViewportStorage from here.");
 											debouncedSetViewportStorage(newVp);
 											viewPortDataUpdated.current = true;
 											return;
