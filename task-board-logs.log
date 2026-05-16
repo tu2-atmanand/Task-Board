@@ -1,0 +1,83 @@
+# Task Board Logs
+
+## System Information
+
+- **Obsidian version**: 1.12.7
+- **Installer version**: 1.12.7
+- **Operating system**: Windows 10 Home Single Language 10.0.19045
+- **Use [[Wikilinks]]**: true
+- **Base color scheme**: dark
+- **Community theme**: none
+- **Snippets enabled**: 0
+- **Plugins installed**: 55
+- **Plugins enabled**: 
+  - Plugin Reloader v0.0.3
+  - Task Board v2.0.0-beta-2
+  - BRAT v1.4.0
+  - Advanced Debug Mode v1.9.1
+
+## Recent Bug Reports
+
+Timestamp : 2026-05-14T13:12:59
+ID : 141
+Message : 
+Context : DragDropTasksManager.ts/handleColumnDragOverEvent
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-05-15T12:04:41
+ID : 183
+Message : There was an issue with opening the task board file : A Test Board.taskboard
+Context : TaskBoardView.tsx/setState
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+boardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-05-15T16:34:40
+ID : 205
+Message : 
+Context : TaskBoardFileManager.ts/loadBoardFromDisk
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+Error saving board to file parent/child folder/A Test Board (copy): Error: ENOENT: no such file or directory, open 'D:\Personal_Projects_Hub\IDE_Wise_Projects\Obsidian\TemplateToDevelopPlugin\parent\child folder\A Test Board (copy)'
+```
+
+-------------
+
+Timestamp : 2026-05-15T16:34:41
+ID : 183
+Message : There was an issue with opening the task board file : parent/child folder/A Test Board (copy)
+Context : TaskBoardView.tsx/setState
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+boardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-05-16T18:54:55
+ID : 122
+Message : 
+Context : TaskItem.tsx/Main title rendering useEffect
+Version : 2.0.0-beta-2
+
+#### Bug Content
+```log
+Error: Failed to execute 'createHTML' on 'TrustedTypePolicy': The provided callback is no longer runnable.
+```
