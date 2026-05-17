@@ -732,7 +732,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 													aria-label={t("task-status")}
 													value={column.taskStatus || " "}
 													onChange={(e) => {
-														debugger;
 														handleColumnChange(
 															boardIndex,
 															columnIndex,

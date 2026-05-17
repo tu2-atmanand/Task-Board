@@ -97,7 +97,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			property,
 			customValue
 		);
-		if (property !== 'priority')
+		if (property == 'tags')
 			uniqueSwimlanValues.push("");
 
 		// Sort the swimlane values
@@ -171,7 +171,6 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			const tasksByColumn = activeColumns.map((column, colIdx) => {
 				// swimlaneColumnTasks is expected to align with active columns order
 				const columnTasks = swimlaneColumnTasks[colIdx] || [];
-				debugger;
 
 				// If this swimlane is the aggregated "All rest", include any task whose
 				// property values are in the remainingValuesForAllRest list.
@@ -488,7 +487,7 @@ function getPropertyValues(
 
 		case 'status':
 			if (task.status) {
-				values = [task.status];
+				values = [task.status.trim()];
 			}
 			break;
 
