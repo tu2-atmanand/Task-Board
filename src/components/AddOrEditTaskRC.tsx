@@ -1320,7 +1320,9 @@ export const AddOrEditTaskRC: React.FC<{
 													<span className="EditTaskModalChildTasksListItemIdValue">{taskId}</span>
 												</div>
 												<div className="EditTaskModalChildTasksListItemFooterBtns">
-													<button className="EditTaskModalChildTasksListItemEditBtn" onClick={(e) => handleOpenChildTaskModal(e, taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
+													{!Platform.isMobileApp && (
+														<button className="EditTaskModalChildTasksListItemEditBtn" onClick={(e) => handleOpenChildTaskModal(e, taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
+													)}
 													<button className="EditTaskModalChildTasksListItemDeleteBtn" onClick={() => handleRemoveChildTask(taskId)}><DeleteIcon size={20} /></button>
 												</div>
 											</div>
