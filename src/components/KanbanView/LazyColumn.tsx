@@ -291,8 +291,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 									setTimeout(() => {
 										eventEmitter.emit('REFRESH_BOARD');
 									}, 200)
-								})
-
+								});
 							}
 						}
 					},

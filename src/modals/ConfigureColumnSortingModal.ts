@@ -25,17 +25,16 @@ export class ConfigureColumnSortingModal extends Modal {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.isEdited = false;
-		// // Deep-copy columnConfiguration to avoid mutating caller's object (avoid stale/unsaved changes)
-		// try {
-		// 	this.columnConfiguration = JSON.parse(
-		// 		JSON.stringify(columnConfiguration),
-		// 	);
-		// } catch (e) {
-		// 	// Fallback to shallow copy if stringify fails
-		// 	this.columnConfiguration = { ...columnConfiguration };
-		// }
-
-		this.columnConfiguration = columnConfiguration;
+		// Deep-copy columnConfiguration to avoid mutating caller's object (avoid stale/unsaved changes)
+		// This ensures that edits in the modal don't affect the original object until Save is clicked
+		try {
+			this.columnConfiguration = JSON.parse(
+				JSON.stringify(columnConfiguration),
+			);
+		} catch (e) {
+			// Fallback to shallow copy if stringify fails
+			this.columnConfiguration = { ...columnConfiguration };
+		}
 
 		this.onSave = onSave;
 		this.onCancel = onCancel;
@@ -347,7 +346,7 @@ export class ConfigureColumnSortingModal extends Modal {
 			"configureColumnSortingModalHomeButtonContainerCancelBtn",
 		);
 		cancelButton.addEventListener("click", () => {
-			this.onCancel();
+			// this.onCancel();
 			this.close();
 		});
 	}
