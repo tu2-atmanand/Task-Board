@@ -30,6 +30,7 @@ import { formatTaskNoteContent, isTaskNotePresentInTags } from "../utils/taskNot
 import { updateRGBAOpacity } from "../utils/UIHelpers.js";
 import { handleEditTask } from "../utils/UserTaskEvents.js";
 import { t } from "../utils/lang/helper.js";
+import { openTaskSelector } from "../services/TaskSelectorWithCreateModal.js";
 
 export interface filterOptions {
 	value: string;
@@ -973,77 +974,72 @@ export const TaskEditorRC: React.FC<{
 
 	// ------------------ Child Tasks Management -----------------
 
-	const childTaskInputRef = useRef<HTMLInputElement>(null);
 	const childTasksListRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		if (!childTaskInputRef.current) return;
 
-		const pendingTaskItems = getPendingTasksSuggestions(
-			plugin
-		);
-		const suggestionContent = pendingTaskItems.filter(t => t.title !== title).map(t => t.title && t.title !== undefined ? t.title : ""); // Exclude self from suggestions
-		const onSelectCallback = (choice: string) => {
-			// Clear the input field after MultiSuggest has finished processing
-			setTimeout(() => {
-				if (childTaskInputRef.current) {
-					childTaskInputRef.current.value = '';
-				}
-			}, 0);
+	const handleOpenChildTaskSelector = async (): Promise<void> => {
+		try {
+			let pendingTaskItems = getPendingTasksSuggestions(plugin).filter(t => t.id !== task.id);
+			pendingTaskItems = pendingTaskItems.filter((t) => !dependsOn.includes(t.legacyId));
+			openTaskSelector(plugin, pendingTaskItems, async (selected) => {
+				if (!selected) return;
 
-			let selectedTask = pendingTaskItems.find(t => t.title === choice);
-			if (!selectedTask) {
-				bugReporterManagerInsatance.showNotice(23, "Selected task not found", `The selected task with title ${choice} was not found in pending tasks.`, "TaskEditorModal.tsx/EditTaskContent/childTaskInputRef useEffect");
-				return;
-			}
-			applyIdToTaskItem(plugin, selectedTask).then((newId) => {
-				const getUpdatedDependsOnIds = (prev: string[]) => {
-					if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
-						if (newId === undefined && !selectedTask?.legacyId) {
-							bugReporterManagerInsatance.showNotice(24, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selectedTask.title}.`, "TaskEditorModal.tsx/EditTaskContent/childTaskInputRef useEffect/getUpdatedDependsOnIds");
-							return [...prev, String(globalSettings.uniqueIdCounter)];
-						} else if (newId === undefined) {
-							return [...prev, selectedTask.legacyId];
-						} else if (newId) {
-							return [...prev, newId];
+				const newId = await applyIdToTaskItem(plugin, selected);
+
+				if (newId) {
+					await plugin.realTimeScanner.processAllUpdatedFiles(selected.filePath, selected.id);
+
+					const getUpdatedDependsOnIds = (prev: string[]) => {
+						if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
+							if (newId === undefined && !selected?.legacyId) {
+								bugReporterManagerInsatance.showNotice(24, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selected.title}.`, "AddOrEditTaskModal.tsx/handleOpenChildTaskSelector/getUpdatedDependsOnIds");
+								return [...prev, String(globalSettings.uniqueIdCounter)];
+							} else if (newId === undefined) {
+								return [...prev, selected.legacyId];
+							} else if (newId) {
+								return [...prev, newId];
+							}
 						}
-					}
-					return prev;
-				};
-				// const updatedDependsOnIds = getUpdatedDependsOnIds(dependsOn);
-				// console.log("Updated dependsOn IDs:", updatedDependsOnIds);
-				setDependsOn(prev => {
-					const updated = getUpdatedDependsOnIds(prev);
-					if (!isTaskNote) {
-						const newTitle = sanitizeDependsOn(plugin.settings.data, title, updated, cursorLocationRef.current ?? undefined);
-						setTitle(newTitle);
-					}
+						return prev;
+					};
 
-					selectedTask.legacyId = selectedTask.legacyId ? selectedTask.legacyId : (newId ? String(newId) : String(globalSettings.uniqueIdCounter));
-					setChildTasks(prevChildTasks => {
-						// Avoid adding duplicates
-						if (!prevChildTasks.find(t => t.id === selectedTask.id)) {
-							return [...prevChildTasks, selectedTask];
+					setDependsOn(prev => {
+						const updated = getUpdatedDependsOnIds(prev);
+						if (!isTaskNote) {
+							const newTitle = sanitizeDependsOn(plugin.settings.data, title, updated, cursorLocationRef.current ?? undefined);
+							setTitle(newTitle);
 						}
-						return prevChildTasks;
+
+						selected.legacyId = selected.legacyId ? selected.legacyId : (newId ? String(newId) : String(globalSettings.uniqueIdCounter));
+						setChildTasks(prevChildTasks => {
+							if (!prevChildTasks.find(t => t.id === selected.id)) {
+								return [...prevChildTasks, selected];
+							}
+							return prevChildTasks;
+						});
+
+						setIsEdited(true);
+						setIsEditorContentChanged(true);
+						return updated;
 					});
+				}
 
-					setIsEdited(true);
-					setIsEditorContentChanged(true);
-					return updated;
-				});
-			}).catch(err => {
-				bugReporterManagerInsatance.showNotice(25, "Error updating task in file", `An error occurred while updating the task in file: ${err.message}`, "TaskEditorModal.tsx/EditTaskContent/childTaskInputRef useEffect");
+				// .catch(err => {
+				// 	bugReporterManagerInsatance.showNotice(25, "Error updating task in file", `An error occurred while updating the task in file: ${err.message}`, "AddOrEditTaskModal.tsx/handleOpenChildTaskSelector");
+				// });
+			}, {
+				placeholder: t("search-child-task"),
+				title: t("select-child-task")
 			});
-		};
-		new MultiSuggest(childTaskInputRef.current, new Set(suggestionContent), onSelectCallback, plugin.app);
-
-	}, [plugin.app]);
+		} catch (err) {
+			console.error(err);
+		}
+	};
 
 	const childTaskTitleRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 	// This should run only on the first render to fetch child tasks based on dependsOn IDs
 	useEffect(() => {
 		if (childTasks.length === 0 && dependsOn.length > 0) {
-			Promise.all(dependsOn.map(id => getTaskFromId(plugin, id)))
+			Promise.all(dependsOn.map(id => plugin.vaultScanner.getTaskFromID(id)))
 				.then(tasks => {
 					const validTasks = tasks.filter(Boolean) as taskItem[];
 					setChildTasks(validTasks);
@@ -1141,6 +1137,10 @@ export const TaskEditorRC: React.FC<{
 	const handleRemoveChildTask = (taskId: string) => {
 		const newDependsOn = dependsOn.filter(id => id !== taskId);
 		setDependsOn(newDependsOn);
+		setChildTasks(prevChildTasks => {
+			const newChildTasks = prevChildTasks.filter((t) => t.id !== taskId)
+			return newChildTasks;
+		});
 		if (!isTaskNote) {
 			const newTitle = sanitizeDependsOn(plugin.settings.data, title, newDependsOn, cursorLocationRef.current ?? undefined);
 			setTitle(newTitle);
@@ -1302,16 +1302,18 @@ export const TaskEditorRC: React.FC<{
 							</div>
 
 							{/* Child Tasks */}
-							<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
+							<div className="EditTaskModalChildTaskHeader">
+								<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
+								<div
+									className="EditTaskModalChildTaskAddBtn"
+									onClick={() => handleOpenChildTaskSelector()}
+									aria-label={t("child-tasks-section-description")}
+								>
+									{t("add-child-task")}
+								</div>
+							</div>
 							<div className="EditTaskModalChildTasksContainer">
-								<input
-									type="text"
-									ref={childTaskInputRef}
-									className="EditTaskModalChildTaskInput"
-									placeholder={t("child-tasks-section-description")}
-									onChange={(e) => { e.preventDefault(); }}
-								/>
-								{/* Here I want to show all the depends on tasks */}
+								{/* All child tasks in list view */}
 								<div className="EditTaskModalChildTasksList" ref={childTasksListRef}>
 									{dependsOn.map((taskId) => (
 										<div key={taskId} className="EditTaskModalChildTasksListItem">

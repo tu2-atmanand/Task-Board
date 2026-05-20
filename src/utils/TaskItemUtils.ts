@@ -128,39 +128,33 @@ export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
 	task: taskItem,
 ): Promise<string | undefined> => {
+	// If the task already has an ID, return it and avoid assigning a new one.
+	if (task.legacyId && String(task.legacyId).trim() !== "") {
+		return String(task.legacyId);
+	}
+
+	// If it's a task note, ensure frontmatter has an ID and return it.
 	if (
 		isTaskNotePresentInTags(
 			plugin.settings.data.taskNoteIdentifierTag,
 			task.tags,
 		)
 	) {
-		let newId;
-		if (task.legacyId === "") {
+		let newId = task.legacyId;
+		if (!newId || String(newId).trim() === "") {
 			newId = generateTaskId(plugin);
 			task.legacyId = newId;
 		}
 		updateFrontmatterInMarkdownFile(plugin, task, true);
 
 		return newId;
-	} else {
-		const extractedTaskId = extractTaskId(task.title)?.[1];
-		if (extractedTaskId) return extractedTaskId;
-
-		const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
-		return newIdToReturn;
 	}
-	// .then((newId) => {
-	// 	newIdToReturn = newId;
-	// })
-	// .catch((error) => {
-	// 	bugReporterManagerInsatance.showNotice(
-	// 		83,
-	// 		"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
-	// 		String(error),
-	// 		"TaskItemUtils.ts/applyIdToTaskItem"
-	// 	);
-	// 	return undefined;
-	// });
-	// return newIdToReturn;
-	// }
+
+	// Try to extract an ID from the title (legacy inline format)
+	const extractedTaskId = extractTaskId(task.title)?.[1];
+	if (extractedTaskId) return extractedTaskId;
+
+	// Otherwise, update the task line in the file which should return a new ID
+	const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
+	return newIdToReturn;
 };

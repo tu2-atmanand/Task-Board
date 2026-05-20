@@ -693,6 +693,50 @@ export default class VaultScanner {
 
 		// const result = this.saveTasksToJsonCacheDebounced();
 	}
+
+	/**
+	 * Retrieves a task from the TaskBoard plugin's task cache using its ID.
+	 * @param plugin - The TaskBoard plugin instance.
+	 * @param id - The ID of the task to retrieve. Can be a string (legacyId) or a number (id).
+	 * @returns The task item if found, or null if not found.
+	 */
+	async getTaskFromID(id: string): Promise<taskItem | undefined> {
+		try {
+			let foundTask: taskItem | undefined;
+
+			// Search in Pending tasks
+			const pendingTasksObj = this.tasksCache?.Pending ?? {};
+			for (const tasks of Object.values(pendingTasksObj)) {
+				if (id) {
+					foundTask = tasks.find(
+						(task) => task.legacyId === id || task.id === id,
+					);
+				}
+				if (foundTask) return foundTask;
+			}
+
+			// Search in Completed tasks
+			const completedTasksObj = this.tasksCache?.Completed ?? {};
+			for (const tasks of Object.values(completedTasksObj)) {
+				if (id) {
+					foundTask = tasks.find(
+						(task) => task.legacyId === id || task.id === id,
+					);
+				}
+				if (foundTask) return foundTask;
+			}
+
+			return; // Return undefined if the task is not found
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(
+				192,
+				"Error retrieving task from tasksCache using ID",
+				String(error),
+				"VaultScanner.ts/getTaskFromId",
+			);
+			return;
+		}
+	}
 }
 
 /**
@@ -755,7 +799,7 @@ export function buildTaskFromRawContent(
 
 	return {
 		title: title,
-		status: taskStatus,
+		status: taskStatus ?? " ",
 		body: body,
 		time: time?.[1] ?? "",
 		createdDate: createdDate?.[1] ?? "",
