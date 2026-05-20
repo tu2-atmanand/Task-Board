@@ -9,9 +9,20 @@ import { eventEmitter } from "../../services/EventEmitter.js";
 import { TasksPluginApi } from "../../services/tasks-plugin/api.js";
 import { checkboxStateSwitcher } from "../CheckBoxUtils.js";
 import { deleteTaskNote, archiveTaskNote } from "../taskNote/TaskNoteUtils.js";
-import { sanitizeStatus } from "./TaskContentFormatter.js";
-import { isTaskRecurring, updateTaskInFile, useTasksPluginToUpdateInFile, deleteTaskFromFile, archiveTask } from "./TaskLineUtils.js";
-
+import {
+	addIdToTaskContent,
+	getFormattedTaskContent,
+	sanitizeStatus,
+} from "./TaskContentFormatter.js";
+import {
+	isTaskRecurring,
+	updateTaskInFile,
+	useTasksPluginToUpdateInFile,
+	deleteTaskFromFile,
+	archiveTask,
+	addTaskInNote,
+} from "./TaskLineUtils.js";
+import { CommunityPlugins } from "../../services/CommunityPlugins.js";
 
 /**
  * Handle the checkbox change event for the inline-tasks and update the task in the file.
@@ -214,4 +225,31 @@ export const handleDeleteTask = (
 		},
 	});
 	deleteModal.open();
+};
+
+export const createNewInlineTask = async (
+	plugin: TaskBoard,
+	task: taskItem,
+) => {
+	const communityPlugins = new CommunityPlugins(plugin);
+	if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
+		// Call the API of QuickAdd plugin and pass the formatted content.
+		let completeTask = await getFormattedTaskContent(task);
+		const { formattedTaskContent, newId } = await addIdToTaskContent(
+			plugin,
+			completeTask,
+		);
+		completeTask = formattedTaskContent;
+
+		(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
+			plugin.settings.data.quickAddPluginDefaultChoice,
+			{
+				value: completeTask + "\n",
+			},
+		);
+	} else {
+		await addTaskInNote(plugin, task, false).then((newId) => {
+			plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+		});
+	}
 };
