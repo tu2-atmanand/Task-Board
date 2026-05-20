@@ -200,7 +200,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			return boardFilteredTasks;
 		}
 		return { Pending: [], Completed: [] };
-	}, [allTasks, searchQuery, softRefreshCount]);
+	}, [allTasks, softRefreshCount]);
 
 	useEffect(() => {
 		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
@@ -334,6 +334,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			setSearchQuery(plugin.settings.data.searchQuery || "");
 			handleSearchSubmit();
 			setShowSearchInput(true);
+
+			setTimeout(() => {
+				if (searchInputElement) searchInputElement.current?.focus();
+			}, 200);
+
+			setTimeout(() => {
+				if (!searchInputElement.current?.isActiveElement() && searchQuery === "") setShowSearchInput(false);
+			}, 10000);
 		}
 	}
 
@@ -343,13 +351,24 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// 	return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
 	// }
 
-	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | null {
-		if (!searchQuery.trim()) {
-			return null;
+	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | undefined {
+		const lowerQuery = searchQuery.toLowerCase();
+		setTimeout(() => {
+			plugin.settings.data.searchQuery = lowerQuery;
+			plugin.saveSettings();
+		}, 100);
+
+		if (!lowerQuery.trim()) {
+			eventEmitter.emit("REFRESH_COLUMN");
+
+			setTimeout(() => {
+				if (!searchInputElement.current?.isActiveElement() && plugin.settings.data.searchQuery === "") setShowSearchInput(false);
+			}, 10000)
+
+			return undefined;
 		}
 
-		const lowerQuery = searchQuery.toLowerCase();
-		let searchFilteredTasks: taskJsonMerged | null = null;
+		let searchFilteredTasks: taskJsonMerged | undefined = fileteredAllTasks || filteredAndSearchedTasks;
 
 		if (fileteredAllTasks) {
 			searchFilteredTasks = {
@@ -372,14 +391,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					}
 				})
 			};
-
-			setTimeout(() => {
-				plugin.settings.data.searchQuery = lowerQuery;
-				plugin.saveSettings();
-			}, 100);
 		}
 
-		return searchFilteredTasks;
+		if (fileteredAllTasks)
+			return searchFilteredTasks;
+		else {
+			setAllTasks(searchFilteredTasks);
+			return undefined;
+		}
 	}
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -1056,6 +1075,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	const viewDropdownRef = useRef<HTMLDivElement>(null);
 	const [showViewDropdown, setShowViewDropdown] = useState(false);
+	const searchInputElement = useRef<HTMLInputElement>(null);
 	// Close dropdown when clicking outside
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -1288,11 +1308,12 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 										handleSearchSubmit();
 									}
 								}}
-								ref={input => {
-									if (input && showSearchInput) {
-										input.focus();
-									}
-								}}
+								// ref={input => {
+								// 	if (input && showSearchInput) {
+								// 		input.focus();
+								// 	}
+								// }}
+								ref={searchInputElement}
 							/>
 						)}
 						<button
