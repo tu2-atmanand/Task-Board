@@ -1694,7 +1694,7 @@ export default class TaskBoard extends Plugin {
 	private async runOnPluginUpdate() {
 		// Check if the plugin version has changed
 		const currentVersion = CURRENT_PLUGIN_VERSION; // Change this whenever you will going to release a new version.
-		const runMandatoryScan = false; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
+		const runMandatoryScan = true; // Change this whenever you will release a major version which requires user to scan the whole vault again. And to enable the notification.
 		const previousVersion = this.settings.version;
 
 		if (previousVersion == "" || currentVersion !== previousVersion) {
@@ -1726,11 +1726,11 @@ export default class TaskBoard extends Plugin {
 			// }
 
 			// Show a message to existing users to re-scan the vault on minor version updates
-			// if (runMandatoryScan && previousVersion === "") {
-			// const smallMessage =
-			// 	"Even being a minor release, this new version of Task Board requires a re-scan of your vault. Kindly re-scan using the top-right button in the task board tab.";
-			// new Notice(smallMessage, 0);
-			// }
+			if (runMandatoryScan && previousVersion === "") {
+				const smallMessage =
+					"This version has some major changes which requires the re-scan of the vault. Kindly run the vault scanner.";
+				new Notice(smallMessage, 0);
+			}
 
 			// This will run only on a fresh plugin install
 			if (previousVersion === "") {
