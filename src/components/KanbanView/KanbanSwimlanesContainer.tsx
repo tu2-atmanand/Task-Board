@@ -98,7 +98,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			property,
 			customValue
 		);
-		if (property !== 'priority')
+		if (property === 'tags')
 			uniqueSwimlanValues.push("");
 
 		// Sort the swimlane values
@@ -503,7 +503,7 @@ function getPropertyValues(
 
 		case 'status':
 			if (task.status) {
-				values = [task.status];
+				values = [task.status.trim()];
 			}
 			break;
 
