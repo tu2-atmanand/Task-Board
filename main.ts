@@ -515,7 +515,10 @@ export default class TaskBoard extends Plugin {
 				listItems.forEach((listItem) => {
 					// const textContent = listItem.textContent || "";
 					// Check if this is a task (starts with checkbox syntax)
-					if (listItem.querySelector(".contains-task-list")) {
+					if (
+						listItem.querySelector(".task-list-item") ||
+						listItem.hasAttribute("data-task")
+					) {
 						this.hidePropertiesInElement(
 							listItem,
 							hiddenProperties,
@@ -528,26 +531,171 @@ export default class TaskBoard extends Plugin {
 			// to control visibility of task properties via static styles in styles.css.
 			// Link to refer for Tasks plugin CSS classes: https://publish.obsidian.md/tasks/Advanced/Styling#Sample+HTML+Full+mode.
 
+			// ---------------------------------------------------------
+			// METHOD 1
+			// ---------------------------------------------------------
 			// Find the view container or root element to apply CSS classes
-			const viewContainer = document.querySelector(
-				`.workspace-leaf-content[data-type="task-board-view"]`,
-			);
+			// const viewContainer = document.querySelector(`.markdown-rendered`);
 
-			if (viewContainer) {
-				// Remove all existing hide classes
-				viewContainer.classList.remove("task-board-view-container");
-				hiddenProperties.forEach((property) => {
-					const hideClass = getHideClassForProperty(property);
-					viewContainer.classList.remove(hideClass);
-				});
+			// if (viewContainer) {
+			// 	// Remove all existing hide classes
+			// 	viewContainer.classList.remove("task-board-view-container");
+			// 	hiddenProperties.forEach((property) => {
+			// 		const hideClass = getHideClassForProperty(property);
+			// 		viewContainer.classList.remove(hideClass);
+			// 	});
 
-				// Add base class and new hide classes
-				viewContainer.classList.add("task-board-view-container");
-				hiddenProperties.forEach((property) => {
-					const hideClass = getHideClassForProperty(property);
-					viewContainer.classList.add(hideClass);
-				});
+			// 	// Add base class and new hide classes
+			// 	viewContainer.classList.add("task-board-view-container");
+			// 	hiddenProperties.forEach((property) => {
+			// 		const hideClass = getHideClassForProperty(property);
+			// 		viewContainer.classList.add(hideClass);
+			// 	});
+			// }
+
+			// ---------------------------------------------------------
+			// METHOD 2
+			// ---------------------------------------------------------
+			const styleId = "task-board-hide-task-properties-style";
+			let styleEl = document.getElementById(
+				styleId,
+			) as HTMLStyleElement | null;
+			if (!styleEl) {
+				styleEl = document.createElement("style");
+				styleEl.id = styleId;
+				document.head.appendChild(styleEl);
 			}
+			let css = "";
+			const fadeInCSS =
+				"@keyframes task-board-fade-in { from { display: none !important; opacity: 0; transform: scaleX(0); } to { display: inline !important; opacity: 1; transform: scaleX(1); } }";
+			// const fadeOutCSS =
+			// 	"@keyframes task-board-fade-out { from { display: inline !important; opacity: 1; transform: scaleX(1); } to { display: none !important; opacity: 0; transform: scaleX(0); } }";
+			hiddenProperties.forEach((property) => {
+				switch (property) {
+					case taskPropertiesNames.ID:
+						css +=
+							".task-id{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-id { 	opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-id { animation: task-board-fade-out 0.5s ease-in-out 0.5s; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.Tags:
+						css +=
+							".task-description>span>a.tag { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-description>span>a.tag { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+					// css +=
+					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+					// css += fadeOutCSS;
+					case taskPropertiesNames.CreatedDate:
+						css += ".task-created { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-created { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.StartDate:
+						css += ".task-start { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-start { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.ScheduledDate:
+						css += ".task-scheduled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-scheduled { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.DueDate:
+						css += ".task-due { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-due { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.CompletionDate:
+						css += ".task-completion { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-completion { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.CancelledDate:
+						css += ".task-cancelled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-cancelled { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.Priority:
+						css += ".task-priority { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-priority { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.Time:
+						css += ".task-time { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-time { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.Dependencies:
+						css += ".task-dependsOn { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-dependsOn { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.OnCompletion:
+						css +=
+							".task-onCompletion{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-onCompletion { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+					case taskPropertiesNames.Recurring:
+						css += ".task-recurring{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							"span:hover .task-recurring { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
+						css += fadeInCSS;
+						// css +=
+						// 	"li:not(:hover) .task-recurring { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
+
+					// TODO : Reminder is pending.
+				}
+			});
+			styleEl.textContent = css;
 		}
 	}
 
@@ -580,7 +728,7 @@ export default class TaskBoard extends Plugin {
 				if (pattern.test(content)) {
 					content = content.replace(pattern, (match) => {
 						modified = true;
-						return `<span class="taskboard-hidden-property" style="display: none;">${match}</span>`;
+						return `<span class="taskboard-hidden-property">${match}</span>`;
 					});
 				}
 			});
