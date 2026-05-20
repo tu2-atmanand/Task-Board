@@ -1,13 +1,14 @@
 // /src/modals/SwimlanesConfigModal.tsx
 
-import { Modal, Setting, setIcon } from 'obsidian';
+import { Modal, Setting, getAllTags, setIcon } from 'obsidian';
 import Sortable from 'sortablejs';
 
 import { swimlaneConfigs } from '../interfaces/BoardConfigs.js';
 import { HeaderUITypeOptions } from '../interfaces/Enums.js';
 import { t } from '../utils/lang/helper.js';
-import { getCustomStatusOptionsForDropdown, StatusDropdownOption } from '../interfaces/Mapping.js';
+import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, StatusDropdownOption } from '../interfaces/Mapping.js';
 import TaskBoard from '../../main.js';
+import { getFileSuggestions, getTagSuggestions, MultiSuggest } from '../services/MultiSuggest.js';
 
 interface SwimlanesConfigModalProps {
 	plugin: TaskBoard;
@@ -52,7 +53,9 @@ export class SwimlanesConfigModal extends Modal {
 		this.customValue = swimlaneConfig.customValue || '';
 		this.sortCriteria = swimlaneConfig.sortCriteria || 'asc';
 		this.hideEmptySwimlanes = swimlaneConfig.hideEmptySwimlanes ?? false;
-		this.customSortOrder = swimlaneConfig.customSortOrder || [];
+		this.customSortOrder = swimlaneConfig.customSortOrder
+			? swimlaneConfig.customSortOrder.map((item) => ({ ...item }))
+			: [];
 		this.maxHeight = swimlaneConfig.maxHeight || '300px';
 		this.groupAllRest = swimlaneConfig.groupAllRest ?? true;
 		this.headerUIType = swimlaneConfig.headerUIType || HeaderUITypeOptions.horizontal;
@@ -246,20 +249,62 @@ export class SwimlanesConfigModal extends Modal {
 			});
 
 			if (this.property === 'tags') {
-				// Text input for non-status properties
+				// Text input element
 				const input = row.createEl('input', {
 					attr: { type: 'text', placeholder: t('enter-property-value') },
 					cls: 'swimlanesConfigSortRowInput',
 				});
-				input.value = sortRow.value;
+				// input.value = sortRow.value;
 				input.addEventListener('input', (e) => {
 					const rawValue = (e.target as HTMLInputElement).value;
 					this.customSortOrder[rowIndex].value = rawValue.startsWith("#") ? rawValue.replace('#', '') : rawValue;
 				});
+
+				const suggestions = getTagSuggestions(this.app);
+				const onSelectCallback = (value: string) => {
+					this.customSortOrder[rowIndex].value = value.replace("#", '');
+				};
+				const multiSuggestInstance = new MultiSuggest(
+					input,
+					new Set(suggestions),
+					onSelectCallback,
+					this.app,
+				);
 			} else if (this.property === 'filePath') {
-
+				const input = row.createEl('input', {
+					attr: { type: 'text', placeholder: t('enter-property-value') },
+					cls: 'swimlanesConfigSortRowInput',
+				});
+				const suggestions = getFileSuggestions(this.app);
+				const onSelectCallback = (value: string) => {
+					this.customSortOrder[rowIndex].value = value.trim();
+				};
+				const multiSuggestInstance = new MultiSuggest(
+					input,
+					new Set(suggestions),
+					onSelectCallback,
+					this.app,
+				);
 			} else if (this.property === 'priority') {
+				const prioritySelect = row.createEl('select', {
+					cls: 'swimlanesConfigSortRowDropdown',
+					attr: { 'aria-label': t('priority') },
+				});
+				const priorityOptions = getPriorityOptionsForDropdown();
 
+				priorityOptions.forEach((option) => {
+					prioritySelect.createEl('option', {
+						attr: { value: String(option.value) },
+						text: option.text,
+					});
+				});
+
+				prioritySelect.value = String(sortRow.value ?? '0');
+				prioritySelect.addEventListener('change', (e) => {
+					this.customSortOrder[rowIndex].value = (
+						e.target as HTMLSelectElement
+					).value;
+				});
 			} else if (this.property === 'status') {
 				// Native HTML select for status property
 				const statusSelect = row.createEl('select', {
