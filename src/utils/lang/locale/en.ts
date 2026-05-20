@@ -659,7 +659,9 @@ const en: Lang = {
 	"archived-on": "Archived on",
 	"enter-tag-name": "Enter tag name (without #)",
 	"merge-boards": "Merge two boards",
-	"board-created-successfully": "A template task board has been created at the root of the vault."
+	"board-created-successfully": "A template task board has been created at the root of the vault.",
+	"embed-task-boards": "Embed task boards",
+	"embed-task-boards-info": "Embed your task boards (.taskboard files) inside your notes. Easy to take notes on your project boards and manage inside the single note itself."
 };
 
 export default en;

@@ -77,6 +77,7 @@ import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
 import { Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
 import { getHideClassForProperty } from "./src/utils/UIHelpers.js";
+import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent.js";
 
 /**
  * The entry-point of this project.
@@ -422,11 +423,9 @@ export default class TaskBoard extends Plugin {
 				embedRegistry?.registerExtension(
 					TASKBOARD_FILE_EXTENSION,
 					(context, file, _) => {
-						// @ts-ignore
 						return new TaskBoardEmbedComponent(
 							context.containerEl,
 							this,
-							// @ts-ignore
 							file,
 							context.containerEl.getAttr("alt") || undefined,
 						) as any;
@@ -592,7 +591,8 @@ export default class TaskBoard extends Plugin {
 					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
 					// css += fadeOutCSS;
 					case taskPropertiesNames.CreatedDate:
-						css += ".task-created { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-created { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-created { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -601,7 +601,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.StartDate:
-						css += ".task-start { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-start { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-start { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -610,7 +611,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.ScheduledDate:
-						css += ".task-scheduled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-scheduled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-scheduled { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -619,7 +621,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.DueDate:
-						css += ".task-due { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-due { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-due { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -628,7 +631,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.CompletionDate:
-						css += ".task-completion { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-completion { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-completion { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -637,7 +641,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.CancelledDate:
-						css += ".task-cancelled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-cancelled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-cancelled { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -646,7 +651,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.Priority:
-						css += ".task-priority { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-priority { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-priority { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -655,7 +661,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.Time:
-						css += ".task-time { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-time { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-time { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -664,7 +671,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.Dependencies:
-						css += ".task-dependsOn { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-dependsOn { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-dependsOn { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
@@ -683,7 +691,8 @@ export default class TaskBoard extends Plugin {
 						// css += fadeOutCSS;
 						break;
 					case taskPropertiesNames.Recurring:
-						css += ".task-recurring{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
+						css +=
+							".task-recurring{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
 						css +=
 							"span:hover .task-recurring { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
