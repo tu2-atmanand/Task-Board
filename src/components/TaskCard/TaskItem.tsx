@@ -125,50 +125,34 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	// }, [task.title, task.filePath]);
 
 	// ========================================
-	// MAIN TITLE RENDERING WITH STABLE useLayoutEffect
+	// MAIN TITLE RENDERING WITH STABLE useEffect
 	// ========================================
 	useEffect(() => {
 		const el = taskTitleRendererRef.current;
 		if (!el || !componentRef.current) return;
 
-		new Promise(requestAnimationFrame);
+		try {
+			el.insertAdjacentHTML("beforeend", "");
+			if (task.title === "") return;
 
+			const cleanedTitle = isTaskNote ? task.title : cleanTaskTitleLegacy(task);
 
-		let cancelled = false;
+			MarkdownUIRenderer.renderTaskDisc(
+				plugin.app,
+				cleanedTitle,
+				el,
+				task.filePath,
+				componentRef.current
+			);
 
-		(async () => {
-			try {
-				el.innerHTML = '';
-				if (task.title === "") return;
-
-				const cleanedTitle = isTaskNote ? task.title : cleanTaskTitleLegacy(task);
-
-				await MarkdownUIRenderer.renderTaskDisc(
-					plugin.app,
-					cleanedTitle,
-					el,
-					task.filePath,
-					componentRef.current
-				);
-
-				if (cancelled) {
-					el.innerHTML = '';
-					return;
-				}
-
-				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
-			} catch (err) {
-				bugReporterManagerInsatance.addToLogs(
-					122,
-					String(err),
-					"TaskItem.tsx/Main title rendering useEffect",
-				);
-			}
-		})();
-
-		// return () => {
-		// 	cancelled = true;
-		// };
+			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				122,
+				String(err),
+				"TaskItem.tsx/Main title rendering useEffect",
+			);
+		}
 	}, [task.id, task.title, task.filePath, plugin.settings.data.searchQuery]);
 
 	// useEffect(() => {
@@ -206,54 +190,39 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	// }, [task.body, task.filePath]);
 
 	// ========================================
-	// SUBTASKS RENDERING WITH STABLE useLayoutEffect
+	// SUBTASKS RENDERING WITH STABLE useEffect
 	// ========================================
 	useEffect(() => {
 		if (!componentRef.current) return;
 
 		const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
-		let cancelled = false;
+		for (const [index, subtaskText] of allSubTasks.entries()) {
 
-		(async () => {
-			for (const [index, subtaskText] of allSubTasks.entries()) {
-				if (cancelled) break;
+			const uniqueKey = `${task.id}-${index}`;
+			const element = subtaskTextRefs.current.get(uniqueKey);
+			if (!element) continue;
 
-				const uniqueKey = `${task.id}-${index}`;
-				const element = subtaskTextRefs.current.get(uniqueKey);
-				if (!element) continue;
+			try {
+				const match = subtaskText.match(TaskRegularExpressions.taskRegex);
+				let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
+				MarkdownUIRenderer.renderSubtaskText(
+					plugin.app,
+					strippedSubtaskText,
+					element,
+					task.filePath,
+					componentRef.current
+				);
 
+				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
 
-				try {
-					element.innerHTML = '';
-					const match = subtaskText.match(TaskRegularExpressions.taskRegex);
-					let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
-					await MarkdownUIRenderer.renderSubtaskText(
-						plugin.app,
-						strippedSubtaskText,
-						element,
-						task.filePath,
-						componentRef.current
-					);
-
-					hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
-
-					if (cancelled) {
-						element.innerHTML = '';
-						break;
-					}
-				} catch (err) {
-					bugReporterManagerInsatance.addToLogs(
-						123,
-						String(err),
-						"TaskItem.tsx/Sub-tasks rendering useEffect",
-					);
-				}
+			} catch (err) {
+				bugReporterManagerInsatance.addToLogs(
+					123,
+					String(err),
+					"TaskItem.tsx/Sub-tasks rendering useEffect",
+				);
 			}
-		})();
-
-		return () => {
-			cancelled = true;
-		};
+		}
 	}, [task.id, task.body, task.filePath]);
 
 
