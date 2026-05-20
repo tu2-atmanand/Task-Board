@@ -111,7 +111,6 @@ export class ScanFilterModal extends Modal {
 
 		if (this.selectedValues.size === 0) {
 			listEl.setText("No values selected.");
-			// listEl.style.opacity = "0.6";
 			return;
 		}
 

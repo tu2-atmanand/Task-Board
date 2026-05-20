@@ -141,7 +141,7 @@ export class TaskEditorModal extends Modal {
 		if (this.isEdited) {
 			this.handleCloseAttempt();
 		} else {
-			this.modalEl.addClass(".slide-out");
+			this.modalEl.addClass("slide-out");
 			sleep(300);
 			this.resolvePromise("");
 			this.onClose();

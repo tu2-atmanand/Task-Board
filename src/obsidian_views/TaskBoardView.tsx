@@ -365,10 +365,10 @@ export class TaskBoardView extends ItemView {
 		});
 
 		// Detailed description
-		const description = content.createEl("p", {
+		content.createEl("p", {
 			cls: "taskboard-no-board-description",
+			text: t("no-boards-found-description")
 		});
-		description.innerHTML = t("no-boards-found-description");
 
 		// Action buttons
 		const buttonContainer = content.createDiv({

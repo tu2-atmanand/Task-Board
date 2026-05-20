@@ -7723,9 +7723,9 @@ Date picker modal styles
 }
 
 
-/* ------------------------------------------------------
-	CUSTOM NOTICE CONTAINER
-*/
+/* ------------------------------------------------------ */
+/*          CUSTOM NOTICE CONTAINER                       */
+/* ------------------------------------------------------ */
 
 .taskboardCustomMessageContainer h3 {
 	margin-top: 0 !important;
@@ -7733,6 +7733,189 @@ Date picker modal styles
 
 .taskboardCustomMessageContainerBold {
 	font-weight: 600;
+}
+
+/* ----------------------------------------------------- */
+/*    Task properties hide/show animations and styles    */
+/* ----------------------------------------------------- */
+
+@keyframes task-board-fade-in {
+	from {
+		display: none !important;
+		opacity: 0;
+		transform: scaleX(0.8);
+	}
+
+	to {
+		display: inline !important;
+		opacity: 1;
+		transform: scaleX(1);
+	}
+}
+
+/* Hide task ID property */
+.task-board-view-container.hide-task-id .task-id {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-id span:hover .task-id {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task tags property */
+.task-board-view-container.hide-task-tags .task-description>span>a.tag {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-tags span:hover .task-description>span>a.tag {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task created date property */
+.task-board-view-container.hide-task-created .task-created {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-created span:hover .task-created {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task start date property */
+.task-board-view-container.hide-task-start .task-start {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-start span:hover .task-start {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task scheduled date property */
+.task-board-view-container.hide-task-scheduled .task-scheduled {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-scheduled span:hover .task-scheduled {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task due date property */
+.task-board-view-container.hide-task-due .task-due {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-due span:hover .task-due {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task completion date property */
+.task-board-view-container.hide-task-completion .task-completion {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-completion span:hover .task-completion {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task cancelled date property */
+.task-board-view-container.hide-task-cancelled .task-cancelled {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-cancelled span:hover .task-cancelled {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task priority property */
+.task-board-view-container.hide-task-priority .task-priority {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-priority span:hover .task-priority {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task time property */
+.task-board-view-container.hide-task-time .task-time {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-time span:hover .task-time {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task dependencies property */
+.task-board-view-container.hide-task-dependsOn .task-dependsOn {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-dependsOn span:hover .task-dependsOn {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task onCompletion property */
+.task-board-view-container.hide-task-onCompletion .task-onCompletion {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-onCompletion span:hover .task-onCompletion {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+}
+
+/* Hide task recurring property */
+.task-board-view-container.hide-task-recurring .task-recurring {
+	display: none !important;
+}
+
+.task-board-view-container.hide-task-recurring span:hover .task-recurring {
+	display: inline !important;
+	animation: task-board-fade-in 0.5s ease-in-out;
+	letter-spacing: 0.5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* ------------------------------------------ */
+/*         FEW COMMON STYLING                 */
+/* ------------------------------------------ */
+
+.taskboard_display_flex {
+	display: flex;
+}
+
+.taskboard_display_block {
+	display: block;
+}
+
+.taskboard_display_none {
+	display: none;
+}
+
+.taskboard_customstatus_dropdown_option {
+	color: var(--text-muted);
+	font-weight: var(--font-semibold);
+	background: var(--background-secondary);
+	pointer-events: none;
+	user-select: none;
+}
+
+.modal-button-container {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+	margin-top: 20px;
 }
 
 

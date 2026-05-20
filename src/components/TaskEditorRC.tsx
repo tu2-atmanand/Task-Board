@@ -1060,10 +1060,6 @@ export const TaskEditorRC: React.FC<{
 			const element = childTaskTitleRefs.current[childTask.legacyId ? childTask.legacyId : childTask.id];
 			if (!element) return;
 
-			// Clear previous content before rendering
-			if (element.empty) element.empty();
-			else element.innerHTML = "";
-
 			const childTaskTitle = childTask.title;
 			MarkdownUIRenderer.renderSubtaskText(
 				plugin.app,
