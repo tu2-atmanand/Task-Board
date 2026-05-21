@@ -126,33 +126,51 @@ class DragDropTasksManager {
 
 		this.isAutoScrolling = true;
 
-		const handleDragOver = (e: Event) => {
-			this.handleAutoScroll(e as DragEvent);
-		};
+		const taskBoardViewSection = document.querySelector(
+			".taskBoardViewSection",
+		);
 
-		const handleDragEnd = () => {
-			this.stopAutoScroll();
-			document.removeEventListener("dragover", handleDragOver);
-			document.removeEventListener("dragend", handleDragEnd);
-		};
+		if (taskBoardViewSection) {
+			const handleDragOver = (e: Event) => {
+				// e.preventDefault();
+				// e.stopImmediatePropagation();
+				// e.stopPropagation();
 
-		document.addEventListener("dragover", handleDragOver);
-		document.addEventListener("dragend", handleDragEnd);
+				this.handleAutoScroll(
+					e as DragEvent,
+					taskBoardViewSection as Element,
+				);
+			};
+			const handleDragEnd = () => {
+				this.stopAutoScroll();
+				taskBoardViewSection.removeEventListener(
+					"dragover",
+					handleDragOver,
+				);
+				taskBoardViewSection.removeEventListener(
+					"dragend",
+					handleDragEnd,
+				);
+			};
+
+			taskBoardViewSection.addEventListener("dragover", handleDragOver);
+			taskBoardViewSection.addEventListener("dragend", handleDragEnd);
+		}
 	}
 
 	/**
 	 * Handle auto-scroll based on mouse position during drag
 	 * @param e - The drag event
 	 */
-	private handleAutoScroll(e: DragEvent): void {
+	private handleAutoScroll(
+		e: DragEvent,
+		taskBoardViewSection: Element,
+	): void {
 		if (!this.plugin) return;
 
 		const edgePercent =
 			this.plugin.settings.data.dragAutoScrollEdgePercent || 20;
-		const scrollSpeed = 10;
-		const taskBoardViewSection = document.querySelector(
-			".taskBoardViewSection",
-		);
+		const scrollSpeed = 5;
 		const viewportWidth =
 			taskBoardViewSection?.clientWidth ?? window.innerWidth;
 		const viewportHeight =
