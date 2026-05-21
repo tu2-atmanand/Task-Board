@@ -265,7 +265,7 @@ export class SwimlanesConfigModal extends Modal {
 				input.value = sortRow.value ?? '';
 				input.addEventListener('input', (e) => {
 					const rawValue = (e.target as HTMLInputElement).value;
-					this.customSortOrder[rowIndex].value = rawValue.startsWith("#") ? rawValue.replace('#', '') : rawValue;
+					this.customSortOrder[rowIndex].value = rawValue.replace('#', '');
 					this.edited = true;
 				});
 
@@ -274,7 +274,7 @@ export class SwimlanesConfigModal extends Modal {
 					this.customSortOrder[rowIndex].value = value.replace("#", '');
 					this.edited = true;
 				};
-				const multiSuggestInstance = new MultiSuggest(
+				new MultiSuggest(
 					input,
 					new Set(suggestions),
 					onSelectCallback,

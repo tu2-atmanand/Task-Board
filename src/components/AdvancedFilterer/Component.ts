@@ -719,16 +719,16 @@ export class AdvancedFilterComponent extends Component {
 
 		valueInput.value = filterData.value || "";
 
-		let valueInputTimeout: NodeJS.Timeout;
+		// let valueInputTimeout: NodeJS.Timeout;
 		this.registerDomEvent(valueInput, "input", (event) => {
 			filterData.value = (event.target as HTMLInputElement).value;
 
-			this.saveStateToLocalStorage(false);
+			// this.saveStateToLocalStorage(false);
 
-			clearTimeout(valueInputTimeout);
-			valueInputTimeout = setTimeout(() => {
-				this.saveStateToLocalStorage(true);
-			}, 400);
+			// clearTimeout(valueInputTimeout);
+			// valueInputTimeout = setTimeout(() => {
+			// 	this.saveStateToLocalStorage(true);
+			// }, 400);
 		});
 
 		const removeFilterBtn = new ExtraButtonComponent(newFilterEl)
@@ -1238,12 +1238,6 @@ export class AdvancedFilterComponent extends Component {
 		const finalConditionVal = conditionSelect.getValue();
 		let valueActuallyNeeded =
 			this.conditionsRequiringValue.includes(finalConditionVal);
-		console.log(
-			"finalConditionVal : ",
-			finalConditionVal,
-			"\nvalueActuallyNeeded : ",
-			valueActuallyNeeded,
-		);
 		// if (
 		// 	property === "completed" &&
 		// 	(finalConditionVal === "isTrue" || finalConditionVal === "isFalse")
@@ -1332,12 +1326,6 @@ export class AdvancedFilterComponent extends Component {
 		let suggestions: string[] = [];
 
 		switch (property) {
-			// case "status":
-			// 	suggestions = getStatusSuggestions(
-			// 		this.pluginSettings.data
-			// 			.customStatuses
-			// 	);
-			// 	break;
 			case "tags":
 				suggestions = getTagSuggestions(this.app);
 				break;
@@ -1359,7 +1347,7 @@ export class AdvancedFilterComponent extends Component {
 			onSelectCallback,
 			this.app,
 		);
-
+		multiSuggestInstance.setAutoDestroy(valueInput);
 		// Store instance in WeakMap for cleanup
 		this.multiSuggestInstances.set(valueInput, multiSuggestInstance);
 	}
