@@ -208,7 +208,7 @@ export default class TaskBoard extends Plugin {
 
 			this.taskBoardFileManager.validateBoardFiles();
 
-			setTimeout(() => this.findModifiedFilesOnAppAbsense(), 10000);
+			setTimeout(() => this.findModifiedFilesOnAppAbsense(), 5000);
 		});
 	}
 
@@ -1238,6 +1238,7 @@ export default class TaskBoard extends Plugin {
 		const storedTime = this.app.loadLocalStorage(
 			OBSIDIAN_CLOSED_TIME_KEY,
 		) as string | undefined;
+		console.log("CLOSED TIME from localStorage : ", storedTime);
 
 		let OBSIDIAN_CLOSED_TIME: Date | undefined;
 
@@ -1253,6 +1254,7 @@ export default class TaskBoard extends Plugin {
 				DEFAULT_DATE_TIME_FORMAT,
 				new Date(),
 			);
+			console.log("CLOSED TIME from cache file : ", OBSIDIAN_CLOSED_TIME);
 		}
 
 		if (OBSIDIAN_CLOSED_TIME) {
@@ -1266,6 +1268,11 @@ export default class TaskBoard extends Plugin {
 						file.stat.ctime > OBSIDIAN_CLOSED_TIME!.getTime()
 					);
 				});
+
+			console.log(
+				"All modified files found : ",
+				modifiedCreatedRenamedFiles,
+			);
 
 			// Find deleted files by comparing cache with current vault files
 			const currentFilesPaths = new Set(
