@@ -126,9 +126,7 @@ class DragDropTasksManager {
 
 		this.isAutoScrolling = true;
 
-		const taskBoardViewSection = document.querySelector(
-			".taskBoardViewSection",
-		);
+		const taskBoardViewSection = document.querySelector(".taskBoardView");
 
 		if (taskBoardViewSection) {
 			const handleDragOver = (e: Event) => {
@@ -185,6 +183,7 @@ class DragDropTasksManager {
 		const horizontalContainer = document.querySelector(
 			".columnsContainer, .swimlanesContainer",
 		) as HTMLElement;
+
 		if (horizontalContainer) {
 			// Horizontal scroll (left/right)
 			if (clientX < horizontalEdgeThreshold) {
