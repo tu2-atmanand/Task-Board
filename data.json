@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-beta-2",
+  "version": "2.0.0-beta-3",
   "data": {
     "lang": "en",
     "openOnStartup": false,
@@ -59,7 +59,7 @@
     ],
     "taskCardStyle": "bases",
     "showVerticalScroll": false,
-    "dragAutoScrollEdgePercent": 20,
+    "dragAutoScrollEdgePercent": 15,
     "tagColors": [
       {
         "name": "bug",
@@ -246,20 +246,9 @@
         "targetColumn": "Completed"
       }
     ],
-    "hiddenTaskProperties": [
-      "priority",
-      "reminder",
-      "createdDate",
-      "startDate",
-      "dueDate",
-      "completionDate",
-      "cancelledDate",
-      "recurring",
-      "onCompletion",
-      "dependsOn"
-    ],
+    "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2277,
+    "uniqueIdCounter": 2288,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
@@ -283,15 +272,15 @@
     },
     "searchQuery": "",
     "taskBoardFilesRegistry": {
-      "board_329394": {
-        "boardId": "board_329394",
-        "filePath": "TaskBoard-Template-1778937605497.taskboard",
-        "boardName": "My Project",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
       "board_2553700948": {
         "boardId": "board_2553700948",
         "filePath": "TaskBoard-Template-1774097758616.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
+      "board_329394": {
+        "boardId": "board_329394",
+        "filePath": "TaskBoard-Template-1778937605497.taskboard",
         "boardName": "My Project",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       },
