@@ -746,6 +746,7 @@ export default class TaskBoard extends Plugin {
 				// Create a temporary element to hold the HTML
 				const tempDiv = document.createElement("div");
 				// Use insertAdjacentHTML with proper sanitization (content already escaped via regex)
+				tempDiv.replaceChildren();
 				tempDiv.insertAdjacentHTML("beforeend", content);
 
 				// Replace the text node with the new content
