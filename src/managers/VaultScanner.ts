@@ -180,7 +180,6 @@ export default class VaultScanner {
 				// Extract properties from frontmatter
 				const taskNoteProperties = extractTaskNoteProperties(
 					frontmatter,
-					fileNameWithPath,
 					this.plugin.settings,
 				);
 				if (
@@ -214,24 +213,24 @@ export default class VaultScanner {
 
 					// Create task item for the task note
 					const taskNoteItem: taskItem = {
-						id: taskNoteProperties.id
+						id: taskNoteProperties?.id
 							? taskNoteProperties.id
 							: generateRandomStringId(),
-						legacyId: taskNoteProperties.id
+						legacyId: taskNoteProperties?.id
 							? taskNoteProperties.id
 							: "", // Storing the legacyId for backward compatibility
-						title: taskNoteProperties.title || file.basename,
+						title: taskNoteProperties?.title || file.basename,
 						body: subTasks, // Store sub-tasks in body
-						createdDate: taskNoteProperties.createdDate || "",
-						startDate: taskNoteProperties.startDate || "",
-						scheduledDate: taskNoteProperties.scheduledDate || "",
-						due: taskNoteProperties.due || "",
-						tags: taskNoteProperties.tags || [],
+						createdDate: taskNoteProperties?.createdDate || "",
+						startDate: taskNoteProperties?.startDate || "",
+						scheduledDate: taskNoteProperties?.scheduledDate || "",
+						due: taskNoteProperties?.due || "",
+						tags: taskNoteProperties?.tags || [],
 						frontmatterTags: [],
-						time: taskNoteProperties.time || "",
-						priority: taskNoteProperties.priority || 0,
-						dependsOn: taskNoteProperties.dependsOn || [],
-						status: taskNoteProperties.status || " ", // Default to unchecked
+						time: taskNoteProperties?.time || "",
+						priority: taskNoteProperties?.priority || 0,
+						dependsOn: taskNoteProperties?.dependsOn || [],
+						status: taskNoteProperties?.status || " ", // Default to unchecked
 						filePath: fileNameWithPath,
 						taskLocation: {
 							startLine: 1,
@@ -239,9 +238,9 @@ export default class VaultScanner {
 							endLine: lines.length,
 							endCharIndex: lines[lines.length - 1]?.length || 0,
 						},
-						completion: taskNoteProperties.completion || "",
-						cancelledDate: taskNoteProperties.cancelledDate || "",
-						reminder: taskNoteProperties.reminder || "",
+						completion: taskNoteProperties?.completion || "",
+						cancelledDate: taskNoteProperties?.cancelledDate || "",
+						reminder: taskNoteProperties?.reminder || "",
 					};
 
 					// Add to appropriate cache based on completion status
