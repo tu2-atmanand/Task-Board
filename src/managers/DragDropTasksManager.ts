@@ -1340,7 +1340,7 @@ class DragDropTasksManager {
 		// draggedTaskItem.classList.add("task-item-dragging-dimmed");
 
 		// Add dragging class after a small delay to not affect the drag image
-		requestAnimationFrame(() => {
+		window.requestAnimationFrame(() => {
 			// e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
 			draggedTaskItem.classList.add("task-item-dragging");
 		});
@@ -1454,11 +1454,6 @@ class DragDropTasksManager {
 			.forEach((el) => {
 				el.classList.remove("drag-over-not-allowed");
 			});
-		document
-			.querySelectorAll(".TaskBoardColumnsSection.drag-over-allowed")
-			.forEach((el) => {
-				el.classList.remove("drag-over-allowed");
-			});
 	}
 
 	// --------------------------------------
@@ -1518,6 +1513,7 @@ class DragDropTasksManager {
 				// this.clearDragoverFeedback();
 
 				// @todo - BUG : The below function is not able to find the correct column container at the cusor position. As well as, it adds a little lagginess providing a bad experience. If we dont do the below thing, that the dragging experience is much smoother.
+				// @see - https://github.com/tu2-atmanand/Task-Board/issues/820
 				// this.updateTouchDropTargetFeedback(
 				// 	touch.clientX,
 				// 	touch.clientY,
@@ -1653,48 +1649,48 @@ class DragDropTasksManager {
 	 * Update column drop target feedback based on touch coordinates.
 	 */
 	private updateTouchDropTargetFeedback(x: number, y: number): void {
+		// window.requestAnimationFrame(() => {
 		this.clearDragoverFeedback();
 
-		// const elementUnder = document.elementFromPoint(x, y);
-		// if (!elementUnder) return;
+		const elementUnder = document.elementFromPoint(x, y);
+		if (!elementUnder) return;
 
-		// const columnEl = (elementUnder as HTMLElement).closest(
-		// 	".TaskBoardColumnsSection",
-		// ) as HTMLElement | null;
-		// if (!columnEl) return;
+		const columnEl = (elementUnder as HTMLElement).closest(
+			".TaskBoardColumnsSection",
+		) as HTMLElement | null;
+		if (!columnEl) return;
 
-		// const tasksContainer = columnEl.querySelector(
-		// 	".tasksContainer",
-		// ) as HTMLElement | null;
-		// if (!tasksContainer) return;
+		const tasksContainer = columnEl.querySelector(
+			".tasksContainer",
+		) as HTMLElement | null;
+		if (!tasksContainer) return;
 
-		// const columnId = columnEl.getAttribute("data-column-id");
-		// if (!columnId) return;
-		// const targetColumnData = boardConfigs[currentDragData.currentBoardIndex]?.columns.find(c => String(c.id) === columnId);
-
-		const currentDragData = this.getCurrentDragData();
-		if (!currentDragData) return;
 		const boardConfigs = this.plugin?.settings.data.boardConfigs;
 		if (!boardConfigs) return;
 
-		if (!this.targetColumnData) return;
+		const columnId = columnEl.getAttribute("data-column-id");
+		if (!columnId) return;
 
+		const currentDragData = this.getCurrentDragData();
+		if (!currentDragData) return;
+		const targetColumnData = boardConfigs[
+			currentDragData.currentBoardIndex
+		]?.columns.find((c) => String(c.id) === columnId);
+
+		if (!targetColumnData) return;
 		const isDropAllowed = this.isTaskDropAllowed(
 			currentDragData.sourceColumnData,
-			this.targetColumnData,
+			targetColumnData,
 		);
 
-		if (!this.targetColumnContainer) return;
-
 		if (isDropAllowed) {
-			this.targetColumnContainer.classList.add("drag-over-allowed");
-			this.targetColumnContainer.classList.remove(
-				"drag-over-not-allowed",
-			);
+			tasksContainer.classList.add("drag-over-allowed");
+			tasksContainer.classList.remove("drag-over-not-allowed");
 		} else {
-			this.targetColumnContainer.classList.add("drag-over-not-allowed");
-			this.targetColumnContainer.classList.remove("drag-over-allowed");
+			tasksContainer.classList.add("drag-over-not-allowed");
+			tasksContainer.classList.remove("drag-over-allowed");
 		}
+		// });
 	}
 
 	/**
@@ -1728,22 +1724,14 @@ class DragDropTasksManager {
 		]?.columns.find((c) => String(c.id) === columnId);
 		if (!targetColumnData) return;
 
-		// Determine swimlane data from DOM
+		// Determine swimlane data from the column element's data attributes
 		let targetSwimlane: swimlaneDataProp | undefined;
-		const swimlaneContainer = columnEl.closest(
-			"[data-swimlane]",
-		) as HTMLElement | null;
-		if (swimlaneContainer) {
-			const swimlaneName =
-				swimlaneContainer.getAttribute("data-swimlane") ?? undefined;
-			const swimlaneProperty =
-				swimlaneContainer.getAttribute("data-swimlane-property") ?? "";
-			if (swimlaneName) {
-				targetSwimlane = {
-					value: swimlaneName,
-					property: swimlaneProperty,
-				};
-			}
+		const swimlaneValue = columnEl.getAttribute("data-swimlane-value");
+		if (swimlaneValue) {
+			targetSwimlane = {
+				value: swimlaneValue,
+				property: columnEl.getAttribute("data-swimlane-property") ?? "",
+			};
 		}
 
 		// Find insertion index if hovering over a task card
@@ -1808,7 +1796,7 @@ class DragDropTasksManager {
 		this.setElementDragImage(e, draggedTaskItem, "taskboard-drag-image");
 
 		// Visual dim / dragging class
-		this.dimDraggedTaskItem(draggedTaskItem);
+		// this.dimDraggedTaskItem(draggedTaskItem);
 	}
 
 	/**
@@ -1878,9 +1866,7 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
 	): boolean {
-		console.log("DragDropTasksManager : handleDragOver called...");
 		e.preventDefault();
-		console.log("DragDropTasksManager : For phone...");
 
 		const sourceColumnData = this.currentDragData
 			? this.currentDragData.sourceColumnData

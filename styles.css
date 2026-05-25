@@ -1169,7 +1169,7 @@ body.taskboard-touch-dragging {
 
 .taskItemChildTaskTitleText {
 	font-weight: 400;
-	max-width: calc(var(--task-board-column-width) - 70px);
+	max-width: calc(var(--task-board-column-width, 270px) - 70px);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -1178,7 +1178,7 @@ body.taskboard-touch-dragging {
 
 .taskItemChildTaskTitleText-completed {
 	text-decoration: line-through;
-	max-width: calc(var(--task-board-column-width) - 70px);
+	max-width: calc(var(--task-board-column-width, 270px) - 70px);
 	opacity: 50%;
 }
 

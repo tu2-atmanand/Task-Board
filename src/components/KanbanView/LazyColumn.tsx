@@ -850,6 +850,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				data-column-type={columnData.colType}
 				data-column-tag-name={tagData?.name}
 				data-column-tag-color={tagData?.color}
+				data-swimlane-property={swimlaneData?.property ?? ""}
+				data-swimlane-value={swimlaneData?.value}
 			>
 				{columnData.minimized && !hideColumnHeader ? (
 					// Minimized view

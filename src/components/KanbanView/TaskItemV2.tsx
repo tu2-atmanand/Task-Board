@@ -934,11 +934,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-		// Remove dim effect from this dragged task and clear manager state
-		if (taskItemRef.current) {
-			dragDropTasksManagerInsatance.removeDimFromDraggedTaskItem(taskItemRef.current);
-		}
-
 		// Clear manager drag payload and any styling on columns/task-items
 		dragDropTasksManagerInsatance.clearAllDragStyling();
 		dragDropTasksManagerInsatance.clearCurrentDragData();
@@ -988,7 +983,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && (task.tags.length > 0 || task.frontmatterTags.length > 0) && (
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
-									{task.tags.map((tag: string) => {
+									{task.tags.map((tag: string, index: number) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
 										const taskTag = tag.replace('#', '').toLowerCase();
@@ -1010,7 +1005,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 											return null;
 										}
 
-										const tagKey = `${task.id}-${tag}`;
+										const tagKey = `${task.id}-${tag}-${index}`;
 										// Render the remaining tags
 										return (
 											<div
