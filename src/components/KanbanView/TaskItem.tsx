@@ -945,6 +945,22 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 		dragDropTasksManagerInsatance.clearCurrentDragData();
 	}, []);
 
+	// Set up touch event handlers for touch devices
+	useEffect(() => {
+		const el = taskItemRef.current;
+		if (!el || !columnData) return () => {};
+
+		const payload: currentDragDataPayload = {
+			task,
+			taskIndex: String(dataAttributeIndex),
+			sourceColumnData: columnData,
+			currentBoardIndex: activeBoardSettings.index,
+			swimlaneData: swimlaneData,
+		};
+
+		return dragDropTasksManagerInsatance.setupCardTouchHandlers(el, payload);
+	}, [task.id]);
+
 	// ========================================
 	// ALL RENDERING CODE
 	// ========================================
@@ -1311,7 +1327,7 @@ const TaskItem: React.FC<TaskCardComponentProps> = ({ dataAttributeIndex, plugin
 				style={{ backgroundColor: getCardBgBasedOnTag() }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
-				draggable={Platform.isDesktopApp}
+				draggable={true}
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>

@@ -769,6 +769,63 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	will-change: transform, margin;
 }
 
+/* Custom drag image for desktop drag and drop */
+.taskboard-drag-image {
+	border: 1px solid var(--interactive-accent);
+	border-radius: 6px;
+	background: var(--background-primary);
+	box-shadow: 0 8px 18px rgba(0,0,0,0.15), 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.18);
+	position: absolute;
+	left: -10000px;
+	top: -10000px;
+	margin: 0;
+	pointer-events: none;
+	opacity: 0.92;
+}
+
+/* Touch drag ghost element (shown on mobile/long-press) */
+.taskboard-touch-ghost {
+	border-radius: 6px;
+	background: var(--background-primary);
+	border: 2px solid var(--interactive-accent);
+}
+
+/* Ensure the card being dragged shows the dragging state */
+.taskItem.task-item-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	outline: 1px dashed var(--interactive-accent);
+	outline-offset: -2px;
+}
+
+/* Disable pointer events on dragged card for touch devices */
+@media (pointer: coarse) {
+	.taskItem.task-item-dragging,
+	.taskItemFadeIn .task-item-dragging {
+		pointer-events: none;
+	}
+}
+
+/* Column dragover feedback enhancements for touch */
+@media (pointer: coarse) {
+	.tasksContainer.drag-over-allowed {
+		border-color: var(--interactive-accent);
+		border-width: 2px;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	}
+	.tasksContainer.drag-over-not-allowed {
+		border-color: var(--color-red);
+		border-width: 2px;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	}
+}
+
+/* Prevent text selection during drag on touch devices */
+body.taskboard-touch-dragging {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
 
 /* ------------------------------------------------
 	/src/components/TaskItem.tsx 
