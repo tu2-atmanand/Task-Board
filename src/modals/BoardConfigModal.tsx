@@ -60,36 +60,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const columnListRef = useRef<HTMLDivElement | null>(null);
 	const boardListRef = useRef<HTMLDivElement | null>(null);
 
-	useEffect(() => {
-		if (
-			selectedBoardIndex === -1 ||
-			!columnListRef.current ||
-			!localBoards[selectedBoardIndex]
-		)
-			return;
-
-		const sortable = Sortable.create(columnListRef.current, {
-			animation: 150,
-			handle: ".boardConfigModalColumnRowDragButton",
-			onEnd: (evt) => {
-				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
-
-				const updatedBoards = [...localBoards];
-				// const columns = updatedBoards[selectedBoardIndex].columns;
-				const [movedItem] = updatedBoards[selectedBoardIndex].columns.splice(evt.oldIndex, 1);
-				updatedBoards[selectedBoardIndex].columns.splice(evt.newIndex, 0, movedItem);
-				updatedBoards[selectedBoardIndex].columns.forEach((col, idx) => (col.index = idx + 1));
-
-				setLocalBoards(updatedBoards);
-				setIsEdited(true);
-			},
-		});
-
-		return () => {
-			sortable.destroy();
-		};
-	}, [selectedBoardIndex, localBoards]);
-
 	// useEffect for board sorting
 	useEffect(() => {
 		if (!boardListRef.current) return;
@@ -501,7 +471,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			forceFallback: true,
 			fallbackClass: "task-board-sortable-fallback",
 			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: (evt) => {
+			onEnd: (evt) => {
 				try {
 					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
