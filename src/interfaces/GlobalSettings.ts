@@ -142,6 +142,7 @@ export interface globalSettingsData {
 		renderVisibleNodes: boolean;
 		edgeType: mapViewEdgeType;
 	};
+	enableDragnDropTouch: boolean;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -698,6 +699,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				renderVisibleNodes: false,
 				edgeType: mapViewEdgeType.bezier,
 			},
+			enableDragnDropTouch: false,
 		},
 	},
 };

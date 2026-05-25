@@ -947,7 +947,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 	// Set up touch event handlers for touch devices
 	useEffect(() => {
 		const el = taskItemRef.current;
-		if (!el || !columnData) return () => {};
+		if (!el || !columnData) return () => { };
 
 		const payload: currentDragDataPayload = {
 			task,
@@ -1335,7 +1335,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 				style={{ backgroundColor: getCardBgBasedOnTag() }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
-				draggable={true}
+				draggable={Platform.isDesktop || dragDropTasksManagerInsatance.shouldEnableTouchDrag()}
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>
@@ -1346,7 +1346,7 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 
 					{/* Drag Handle and Task Menu button */}
 					{
-						Platform.isDesktopApp ? (
+						Platform.isDesktop ? (
 							<>
 								{/* Drag Handle */}
 								{columnData?.colType !== colTypeNames.allPending && plugin.settings.data.globalSettings.lastViewHistory.viewedType === viewTypeNames.kanban && (

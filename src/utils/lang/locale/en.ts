@@ -70,6 +70,7 @@ const en: Lang = {
 	"only-scan-this": "Only scan this",
 	"dont-scan-this": "Don't scan this",
 	"disable": "Disable",
+	"enable": "Enable",
 	"all-ui": "All UI",
 	"show-header-of-the-task-card": "Show header of the task card",
 	"enable-this-to-see-the-header-in-the-task-card": "Enable this to see the header in the task card",
@@ -519,7 +520,9 @@ const en: Lang = {
 	"manual-order-notice": "The manual sorting will only work as expected if all the tasks within the column or any new added task in the column have unique id on them. This feature might look like it is working for tasks with no id, but eventually the data wont be persisted. Hence unique is must for this feature to work properly.",
 	"cannot-add-more-sorting-criteria-with-manual-order": "Cannot add more sorting criteria with manual order",
 	"drag-and-drop": "Drag and drop tasks",
-	"drag-and-drop-feature-info": "This feature will help you to move tasks between columns.",
+	"drag-and-drop-info": "This feature will help you to move tasks between columns by dragging them across columns or swimlanes.",
+	"drag-and-drop-disable": "When disabled, long pressing any card will open the task card menu",
+	"drag-and-drop-enable": "When enabled, long pressing will start the drag and drop operation. But you can still access the task card menu by a single-click at the top right corner inside each task card.",
 	"kanban-swimlanes": "Kanban swimlanes",
 	"kanban-swimlanes-feature-info": "This feature will help you to group tasks based on their various properties. Additionally, this plugin has its first of kind implementation of swimlanes, to have custom sorting and aggregation of tasks.",
 	"manual-sorting": "Manual sorting",
@@ -622,7 +625,8 @@ const en: Lang = {
 	"to-tooltip": "To : The end value of the relative date range. Eg = 7 to see tasks for next seven days.",
 	"add-child-task": "Add child tasks",
 	"search-child-task": "Search for a child task",
-	"select-child-task": "Select child task"
+	"select-child-task": "Select child task",
+	"interactions": "Interactions"
 };
 
 export default en;
