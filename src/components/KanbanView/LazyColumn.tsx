@@ -685,17 +685,46 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
 			}
 
-			// We are basically doing same thing from the handleDrop function below.
-			dragDropTasksManagerInsatance.handleDropEvent(
-				e.nativeEvent,
-				columnData,
-				targetColumnContainer,
-				swimlaneData
-			);
+			let pos = 0 // Default to top of the column
+			const hoveredElement = e.currentTarget;
+			const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
+			const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
+			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+			// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
+			debugger;
+			if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
+				const clientY = e.clientY;
+				const rect = hoveredElement.getBoundingClientRect();
+				const midpoint = rect.top + rect.height / 2;
+				if (clientY < midpoint) {
+					pos = parseInt(draggedOverItemIndex, 10);
+				} else {
+					pos = parseInt(draggedOverItemIndex, 10) + 1;
+				}
 
-			// Clear manager payload (drag finished)
-			dragDropTasksManagerInsatance.clearCurrentDragData();
-			dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				// Store desired drop index in manager
+				dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+
+				dragDropTasksManagerInsatance.handleDropEvent(
+					e.nativeEvent,
+					columnData,
+					targetColumnContainer,
+					swimlaneData,
+					pos
+				);
+
+			} else {
+				dragDropTasksManagerInsatance.handleDropEvent(
+					e.nativeEvent,
+					columnData,
+					targetColumnContainer,
+					swimlaneData
+				);
+			}
+
+
+			// Throttle updates via RAF
+			scheduleSetInsertIndex(null);
 
 			// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
 			// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
@@ -805,10 +834,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				targetColumnContainer,
 				swimlaneData
 			);
-
-			// Clear manager payload (drag finished)
-			dragDropTasksManagerInsatance.clearCurrentDragData();
-			dragDropTasksManagerInsatance.clearDesiredDropIndex();
 			// }
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(

@@ -4,7 +4,10 @@ import { ColumnData } from "src/interfaces/BoardConfigs";
 import { colTypeNames, statusTypeNames } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
+	updateTaskItemDate,
+	updateTaskItemPriority,
 	updateTaskItemProperty,
+	updateTaskItemStatus,
 	updateTaskItemTags,
 } from "src/utils/UserTaskEvents";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -601,8 +604,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -709,9 +710,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemPriority } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -760,9 +758,6 @@ class DragDropTasksManager {
 			);
 			return;
 		}
-
-		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -839,8 +834,6 @@ class DragDropTasksManager {
 			);
 			return;
 		}
-
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -1022,9 +1015,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemPriority } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -1076,9 +1066,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -1122,9 +1109,6 @@ class DragDropTasksManager {
 		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
-		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -1956,11 +1940,14 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
+		manualOrderIndex?: number,
 	): void {
 		e.preventDefault();
 
 		this.targetColumnData = targetColumnData;
 		this.targetColumnContainer = targetColumnContainer;
+
+		if (manualOrderIndex) this.setDesiredDropIndex(manualOrderIndex);
 
 		// All checks before proceeding with the calculations...
 		if (!this.currentDragData) {
@@ -2126,6 +2113,10 @@ class DragDropTasksManager {
 				"This operation is not possible in the current version. Please request this idea to the developer.",
 			);
 		}
+
+		// Clear manager payload (drag finished)
+		this.clearCurrentDragData();
+		this.clearDesiredDropIndex();
 	}
 }
 
