@@ -6936,7 +6936,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	color: var(--text-faint);
 }
 
-/* Vertical UI */
 .swimlaneRow {
 	display: flex;
 	flex-direction: column;
@@ -6947,6 +6946,8 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	width: max-content;
 	margin-bottom: 5px;
 }
+
+/* Vertical UI */
 
 .swimlaneRow.verticalUI {
 	display: flex;
@@ -6988,14 +6989,12 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	align-items: center;
 	justify-content: space-between;
 	font-weight: 600;
-	/* margin-block: 1rem; */
 	color: var(--text-normal);
 	font-size: 0.9em;
 	text-align: center;
-	white-space: nowrap;
-	/* overflow: hidden; */
-	text-overflow: ellipsis;
 	min-height: 100%;
+	min-width: 0;
+	max-width: 100%;
 }
 
 .swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
@@ -7005,32 +7004,70 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	padding-inline: 0.2rem;
 }
 
-.swimlaneHeaderName-vertical {
-	font-weight: 600;
-	color: var(--text-normal);
-	justify-content: center;
-	text-align: center;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	word-break: break-word;
-	z-index: 5;
-	display: flex;
-	align-items: center;
-	flex-direction: row;
-	gap: 0.7rem;
+.swimlaneHeaderSwimlaneCount-vertical {
+	color: var(--text-muted);
+	font-size: smaller;
+	font-weight: 500;
+	padding-block: 3px;
+	border: 1px solid var(--text-muted);
+	border-radius: 4px;
+	padding-inline: 3px;
+	min-width: 20px;
 
 	transform: rotate(270deg);
 	transition: transform 0.3s ease-in-out;
 }
 
+.swimlaneHeader-vertical-leftSec {
+	display: flex;
+	flex-direction: row;
+}
+
+.swimlaneHeaderName-vertical {
+	font-weight: 600;
+	color: var(--text-normal);
+	z-index: 5;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	gap: 0.7rem;
+	min-height: 0;
+	overflow: hidden;
+	width: 125px;
+	transform: rotate(270deg);
+	transform-origin: center;
+	transition: transform 0.3s ease-in-out;
+}
+
 .swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneHeaderName-vertical {
 	display: flex;
-	flex-direction: row-reverse;
+	flex-direction: row;
 	align-items: center;
 	gap: 1rem;
-
+	width: 100%;
 	transform: rotate(0deg);
+}
+
+.swimlaneHeaderNameLable-vertical {
+	font-size: smaller;
+	color: var(--text-muted);
+	height: 100%;
+	display: flex;
+	padding-bottom: 3px;
+	flex-shrink: 0;
+}
+
+.swimlaneHeaderNameValue-vertical {
+	/* 🔑 Ellipsis requires these 3 properties together */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	/* 🔑 Allow flex shrinking in the rotated context */
+	min-width: 0;
+	min-height: 0;
+	width: 100%;
+	text-align: justify;
 }
 
 .swimlaneHeaderSwimlaneCount-vertical {
@@ -7048,10 +7085,11 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 .swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical .swimlaneHeaderSwimlaneCount-vertical {
 	display: flex;
-	flex-direction: row-reverse;
+	flex-direction: row;
 	align-items: center;
-	gap: 1rem;
-
+	margin-inline: 4px;
+	min-width: 20px;
+	justify-content: center;
 	transform: rotate(0deg);
 }
 
@@ -7101,19 +7139,22 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	left: 0;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
 	font-weight: 600;
 	padding-block: 1rem;
-	padding-inline: 1rem;
+	padding-inline-end: 1.5rem;
 	color: var(--text-normal);
 	font-size: 0.9em;
 	text-align: center;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	/* white-space: nowrap; */
+	/* overflow: hidden; */
+	/* text-overflow: ellipsis; */
 	min-height: 100%;
 	min-width: 100%;
 	flex-direction: row;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	max-width: 95%;
 }
 
 .swimlaneHeaderLeftSec {
@@ -7128,6 +7169,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	justify-content: flex-start;
 	flex-direction: row;
 	gap: 0.5rem;
+	max-width: 95%;
 }
 
 .swimlaneHeaderNameLable {
@@ -7136,6 +7178,17 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	height: 100%;
 	display: flex;
 	padding-bottom: 3px;
+	flex-shrink: 0;
+}
+
+.swimlaneHeaderNameValue {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	/* 🔑 MAGIC FIX: Flex items won't shrink without this */
+	min-width: 0;
+	/* Take up all remaining space after siblings */
+	flex: 1;
 }
 
 .swimlaneLabel {
