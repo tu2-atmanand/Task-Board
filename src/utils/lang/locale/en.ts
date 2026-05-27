@@ -626,7 +626,11 @@ const en: Lang = {
 	"add-child-task": "Add child tasks",
 	"search-child-task": "Search for a child task",
 	"select-child-task": "Select child task",
-	"interactions": "Interactions"
+	"interactions": "Interactions",
+	"file-or-folder-path": "File or folder path",
+	"date-type": "Date type",
+	"name": "Name",
+	"column-config-drag-butn-info": "Drag this column to change its order"
 };
 
 export default en;
