@@ -272,58 +272,6 @@ export function scanFilterForTags(tags: string[], scanFilters: ScanFilters) {
 }
 
 /**
- * Matches user input tags against settings tags that may include wildcards (*).
- * Wildcard (*) can be used at the start or end of a tag to match any sequence of characters.
- * Examples:
- *   - "#tag*" matches "#tag1", "#tag-abc", etc.
- *   - "*tag" matches "#mytag", "#yourtag", etc.
- *   - "*tag*" matches "#mytag123", "#123tag456", etc.
- * @param settingsTags - Tags from settings which may include wildcards
- * @param userInputTags - Tags from user input to match against settings tags
- * @returns An array of matching tags or null if no match is found
- */
-export function matchTagsWithWildcards(
-	settingsTags: string | string[],
-	userInputTags: string | string[],
-): string[] | null {
-	if (!settingsTags || !userInputTags) return null;
-
-	// Normalize to arrays
-	const settingsArr = Array.isArray(settingsTags)
-		? settingsTags
-		: [settingsTags];
-	const userArr = Array.isArray(userInputTags)
-		? userInputTags
-		: [userInputTags];
-
-	// Convert settings tags to regex patterns
-	const patterns = settingsArr.map((tag) => {
-		// Escape regex special chars except *
-		let pattern = tag.toLowerCase().replace("#", ""); // Remove leading #
-
-		pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
-		// Replace * with .+ (at least one character)
-		pattern = pattern.replace(/\\\*/g, ".*").replace(/\*/g, ".+");
-		// If wildcard is at the start, allow anything before
-		if (pattern.startsWith(".+")) pattern = "^" + pattern;
-		else pattern = "^" + pattern;
-		// If wildcard is at the end, allow anything after
-		if (pattern.endsWith(".+")) pattern = pattern + "$";
-		else pattern = pattern + "$";
-		return new RegExp(pattern);
-	});
-
-	// Find matches
-	const matches = userArr.filter((userTag) =>
-		patterns.some((regex) =>
-			regex.test(userTag.toLowerCase().replace("#", "")),
-		),
-	);
-
-	return matches.length > 0 ? matches : null;
-}
-
-/**
  * Verifies that all sub-tasks in the task body and all child-tasks (dependsOn)
  * are completed.
  * @param plugin - The TaskBoard plugin instance
@@ -362,4 +310,108 @@ export async function verifySubtasksAndChildtasksAreComplete(
 	}
 
 	return flag;
+}
+
+/**
+ * Matches user input tags against settings tags that may include wildcards (*).
+ * Wildcard (*) can be used at the start or end of a tag to match any sequence of characters.
+ * Examples:
+ *   - "#tag*" matches "#tag1", "#tag-abc", etc.
+ *   - "*tag" matches "#mytag", "#yourtag", etc.
+ *   - "*tag*" matches "#mytag123", "#123tag456", etc.
+ * @param settingsTags - Tags from settings which may include wildcards
+ * @param userInputTags - Tags from user input to match against settings tags
+ * @returns An array of matching tags or null if no match is found
+ * 
+ * @todo Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace("#", "") operation. Deprecate that operation in future version such as 2.1.0.
+ */
+export function matchTagsWithWildcards(
+	settingsTags: string | string[],
+	userInputTags: string | string[],
+): string[] | null {
+	if (!settingsTags || !userInputTags) return null;
+
+	// Normalize to arrays
+	const settingsArr = Array.isArray(settingsTags)
+		? settingsTags
+		: [settingsTags];
+	const userArr = Array.isArray(userInputTags)
+		? userInputTags
+		: [userInputTags];
+
+	// Convert settings tags to regex patterns
+	const patterns = settingsArr.map((tag) => {
+		// Escape regex special chars except *
+		let pattern = tag.toLowerCase().replace("#", ""); // Remove leading #
+
+		pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+		// Replace * with .+ (at least one character)
+		pattern = pattern.replace(/\\\*/g, ".*").replace(/\*/g, ".+");
+
+		// // If wildcard is at the start, allow anything before
+		// if (pattern.startsWith(".+")) pattern = "^" + pattern;
+		// else pattern = "^" + pattern;
+		// // If wildcard is at the end, allow anything after
+		// if (pattern.endsWith(".+")) pattern = pattern + "$";
+		// else pattern = pattern + "$";
+
+		pattern = "^" + pattern + "$";
+
+		return new RegExp(pattern);
+	});
+
+	// Find matches
+	const matches = userArr.filter((userTag) =>
+		patterns.some((regex) =>
+			regex.test(userTag.toLowerCase().replace("#", "")),
+		),
+	);
+
+	return matches.length > 0 ? matches : null;
+}
+
+/**
+ * Compares two tags by :
+ * - Removing the '#' symbol prefix, because the tags are not stored consistently through the plugin configs.
+ * - Casting the string into lower-case, because tags are case insensitive in Obsidian.
+ *
+ * @param tag1 - The first tag
+ * @param tag2 - The second tag
+ *
+ * @returns - TRUE if both the tags are same based on the above rule. Else it will return FALSE.
+ * 
+ * @todo - Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace("#", "") operation. Deprecate that operation in future version such as 2.1.0.
+ */
+export function compareTwoTags(tag1: string, tag2: string): boolean {
+	return (
+		tag1.replace("#", "").toLocaleLowerCase() ===
+		tag2.replace("#", "").toLocaleLowerCase()
+	);
+}
+
+/**
+ * @deprecated - Will make use of the {@link matchTagsWithWildcards} function instead of this for more features.
+ *
+ * In Obsidian we can create tags like this :
+ * - #physics/mechanics
+ * - #physics/quantum
+ * In both the above example, the parent tag is '#physics/'. This allows us to filter the tags based on the parent.
+ * This function checks if the parentTag is the real parent of the childTag by :
+ * - Removing the '#' symbol prefix, because the tags are not stored consistently through the plugin configs.
+ * - Casting the string into lower-case, because tags are case insensitive in Obsidian.
+ *
+ * Example :
+ * - parentTag = '#physics/' and childTag = 'physics/astronomy' => Returns TRUE.
+ * - parentTag = '#physics' and childTag = '#physics/quantum' => Returns FALSE.
+ *
+ * @param parentTag - The parent tag.
+ * @param childTag - The child tag.
+ *
+ * @returns - TRUE if the parentTag is the correct parent for the childTag. Else it will return FALSE.
+ */
+export function isChildTag(parentTag: string, childTag: string): boolean {
+	return childTag
+		.replace("#", "")
+		.toLocaleLowerCase()
+		.includes(parentTag.replace("#", "").toLocaleLowerCase());
 }

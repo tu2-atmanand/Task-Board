@@ -1651,7 +1651,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 /*------------------------------------------------------------
-	 /src/components/AddOrEditTaskModal.tsx 
+	 /src/components/TaskEditorModal.tsx 
 ------------------------------------------------------------*/
 
 .EditTaskModalHome {
@@ -1733,15 +1733,27 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	margin-bottom: 15px;
 }
 
+.EditTaskModalChildTaskHeader {
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+	justify-content: space-between;
+}
+
+.EditTaskModalChildTaskAddBtn {
+	font-size: 0.8em;
+	color: var(--text-muted);
+	padding-inline: 6px;
+	padding-block: 4px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border-focus);
+}
+
 .EditTaskModalChildTasksContainer {
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
 	margin-block-end: 1.5rem;
-}
-
-.EditTaskModalChildTaskInput {
-	width: 100%;
 }
 
 .EditTaskModalChildTasksList {
@@ -2963,26 +2975,22 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 /* Hidden Properties in Live Editor and Reading Mode */
-/* .taskboard-hidden-property {
-	display: none !important;
-	opacity: 0.3;
-	font-size: 0.8em;
-	color: var(--text-muted);
-	background-color: var(--background-modifier-hover);
-	padding: 1px 3px;
-	border-radius: 3px;
-	cursor: help;
-} */
+.taskboard-hidden-property {
+	opacity: 0;
+	transform: scaleX(0);
+	width: 0;
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, width 0.2s ease-in;
+}
 
 /* Show hidden properties on line hover for easier editing */
 li:hover .taskboard-hidden-property {
-	display: inline !important;
+	opacity: 1;
+	transform: scaleX(1);
+	width: fit-content;
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
 }
-
-/* Alternative: show on focus for better accessibility */
-/* li:focus-within .taskboard-hidden-property {
-	display: inline !important;
-} */
 
 .taskBoard-tab-section-desc {
 	text-align: center;
@@ -7711,9 +7719,9 @@ Date picker modal styles
 }
 
 
-/* ------------------------------------------------------
-	CUSTOM NOTICE CONTAINER
-*/
+/* ------------------------------------------------------ */
+/*          CUSTOM NOTICE CONTAINER                       */
+/* ------------------------------------------------------ */
 
 .taskboardCustomMessageContainer h3 {
 	margin-top: 0 !important;
@@ -7721,6 +7729,262 @@ Date picker modal styles
 
 .taskboardCustomMessageContainerBold {
 	font-weight: 600;
+}
+
+/* ----------------------------------------------------- */
+/*    Task properties hide/show animations and styles    */
+/* ----------------------------------------------------- */
+
+@keyframes task-board-fade-in {
+	from {
+		display: none !important;
+		opacity: 0;
+		transform: scaleX(0);
+	}
+
+	to {
+		display: inline !important;
+		opacity: 1;
+		transform: scaleX(1);
+	}
+}
+
+/* Hide task ID property */
+.task-board-view-container.hide-task-id .task-id {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-id span:hover .task-id {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+}
+
+/* Hide task tags property */
+.task-board-view-container.hide-task-tags .task-description>span>a.tag {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-tags span:hover .task-description>span>a.tag {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task created date property */
+.task-board-view-container.hide-task-created .task-created {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-created span:hover .task-created {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task start date property */
+.task-board-view-container.hide-task-start .task-start {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-start span:hover .task-start {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task scheduled date property */
+.task-board-view-container.hide-task-scheduled .task-scheduled {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-scheduled span:hover .task-scheduled {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task due date property */
+.task-board-view-container.hide-task-due .task-due {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-due span:hover .task-due {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task completion date property */
+.task-board-view-container.hide-task-completion .task-completion {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-completion span:hover .task-completion {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task cancelled date property */
+.task-board-view-container.hide-task-cancelled .task-cancelled {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-cancelled span:hover .task-cancelled {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task priority property */
+.task-board-view-container.hide-task-priority .task-priority {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-priority span:hover .task-priority {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task time property */
+.task-board-view-container.hide-task-time .task-time {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-time span:hover .task-time {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task dependencies property */
+.task-board-view-container.hide-task-dependsOn .task-dependsOn {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-dependsOn span:hover .task-dependsOn {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task onCompletion property */
+.task-board-view-container.hide-task-onCompletion .task-onCompletion {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-onCompletion span:hover .task-onCompletion {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* Hide task recurring property */
+.task-board-view-container.hide-task-recurring .task-recurring {
+	opacity: 0;
+	transform: scaleX(0);
+	/* Smooth transition for both properties */
+	transition: opacity 0.2s ease-in, transform 0.2s ease-in;
+}
+
+.task-board-view-container.hide-task-recurring span:hover .task-recurring {
+	opacity: 1;
+	transform: scaleX(1);
+	/* Wait 0.5s before starting the fade/scale in */
+	transition-delay: 0.3s;
+
+}
+
+/* ------------------------------------------ */
+/*         FEW COMMON STYLING                 */
+/* ------------------------------------------ */
+
+.taskboard_display_flex {
+	display: flex;
+}
+
+.taskboard_display_block {
+	display: block;
+}
+
+.taskboard_display_none {
+	display: none;
+}
+
+.taskboard_customstatus_dropdown_option {
+	color: var(--text-muted);
+	font-weight: var(--font-semibold);
+	background: var(--background-secondary);
+	pointer-events: none;
+	user-select: none;
+}
+
+.modal-button-container {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+	margin-top: 20px;
 }
 
 

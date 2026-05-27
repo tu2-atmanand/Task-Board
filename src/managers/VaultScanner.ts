@@ -38,7 +38,7 @@ import {
 	writeJsonCacheDataToDisk,
 } from "../utils/JsonFileOperations.js";
 import { readDataOfVaultFile } from "../utils/MarkdownFileOperations.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
@@ -180,7 +180,6 @@ export default class VaultScanner {
 				// Extract properties from frontmatter
 				const taskNoteProperties = extractTaskNoteProperties(
 					frontmatter,
-					fileNameWithPath,
 					this.plugin.settings,
 				);
 				if (
@@ -214,24 +213,24 @@ export default class VaultScanner {
 
 					// Create task item for the task note
 					const taskNoteItem: taskItem = {
-						id: taskNoteProperties.id
+						id: taskNoteProperties?.id
 							? taskNoteProperties.id
-							: generateRandomTempTaskId(),
-						legacyId: taskNoteProperties.id
+							: generateRandomStringId(),
+						legacyId: taskNoteProperties?.id
 							? taskNoteProperties.id
 							: "", // Storing the legacyId for backward compatibility
-						title: taskNoteProperties.title || file.basename,
+						title: taskNoteProperties?.title || file.basename,
 						body: subTasks, // Store sub-tasks in body
-						createdDate: taskNoteProperties.createdDate || "",
-						startDate: taskNoteProperties.startDate || "",
-						scheduledDate: taskNoteProperties.scheduledDate || "",
-						due: taskNoteProperties.due || "",
-						tags: taskNoteProperties.tags || [],
+						createdDate: taskNoteProperties?.createdDate || "",
+						startDate: taskNoteProperties?.startDate || "",
+						scheduledDate: taskNoteProperties?.scheduledDate || "",
+						due: taskNoteProperties?.due || "",
+						tags: taskNoteProperties?.tags || [],
 						frontmatterTags: [],
-						time: taskNoteProperties.time || "",
-						priority: taskNoteProperties.priority || 0,
-						dependsOn: taskNoteProperties.dependsOn || [],
-						status: taskNoteProperties.status || " ", // Default to unchecked
+						time: taskNoteProperties?.time || "",
+						priority: taskNoteProperties?.priority || 0,
+						dependsOn: taskNoteProperties?.dependsOn || [],
+						status: taskNoteProperties?.status || " ", // Default to unchecked
 						filePath: fileNameWithPath,
 						taskLocation: {
 							startLine: 1,
@@ -239,9 +238,9 @@ export default class VaultScanner {
 							endLine: lines.length,
 							endCharIndex: lines[lines.length - 1]?.length || 0,
 						},
-						completion: taskNoteProperties.completion || "",
-						cancelledDate: taskNoteProperties.cancelledDate || "",
-						reminder: taskNoteProperties.reminder || "",
+						completion: taskNoteProperties?.completion || "",
+						cancelledDate: taskNoteProperties?.cancelledDate || "",
+						reminder: taskNoteProperties?.reminder || "",
 					};
 
 					// Add to appropriate cache based on completion status
@@ -415,7 +414,7 @@ export default class VaultScanner {
 							const task: taskItem = {
 								id: legacyId
 									? (legacyId[1] ?? "")
-									: generateRandomTempTaskId(),
+									: generateRandomStringId(),
 								legacyId: legacyId ? legacyId[1] : "", // Storing the legacyId for backward compatibility
 								status: taskStatus,
 								title: title,
@@ -656,7 +655,7 @@ export default class VaultScanner {
 	// 			(Object.values(this.tasksCache.Pending).flat().length > 0 ||
 	// 				Object.values(this.tasksCache.Completed).flat().length > 0)
 	// 		) {
-	// 			eventEmitter.emit("REFRESH_COLUMN");
+	// 			eventEmitter.emit("SOFT_REFRESH");
 	// 			this.tasksDetectedOrUpdated = false;
 	// 		}
 
@@ -676,7 +675,7 @@ export default class VaultScanner {
 		);
 
 		setTimeout(() => {
-			eventEmitter.emit("REFRESH_COLUMN");
+			eventEmitter.emit("SOFT_REFRESH");
 			// 	if (this.plugin.settings.data.searchQuery) {
 			// 		console.log(
 			// 			"Refreshing the board now after saving...\nSetting : ",
@@ -684,7 +683,7 @@ export default class VaultScanner {
 			// 		);
 			// 		eventEmitter.emit("REFRESH_BOARD");
 			// 	} else {
-			// 		eventEmitter.emit("REFRESH_COLUMN");
+			// 		eventEmitter.emit("SOFT_REFRESH");
 			// 	}
 		}, 100);
 		this.tasksDetectedOrUpdated = false;
@@ -692,6 +691,50 @@ export default class VaultScanner {
 		return result;
 
 		// const result = this.saveTasksToJsonCacheDebounced();
+	}
+
+	/**
+	 * Retrieves a task from the TaskBoard plugin's task cache using its ID.
+	 * @param plugin - The TaskBoard plugin instance.
+	 * @param id - The ID of the task to retrieve. Can be a string (legacyId) or a number (id).
+	 * @returns The task item if found, or null if not found.
+	 */
+	async getTaskFromID(id: string): Promise<taskItem | undefined> {
+		try {
+			let foundTask: taskItem | undefined;
+
+			// Search in Pending tasks
+			const pendingTasksObj = this.tasksCache?.Pending ?? {};
+			for (const tasks of Object.values(pendingTasksObj)) {
+				if (id) {
+					foundTask = tasks.find(
+						(task) => task.legacyId === id || task.id === id,
+					);
+				}
+				if (foundTask) return foundTask;
+			}
+
+			// Search in Completed tasks
+			const completedTasksObj = this.tasksCache?.Completed ?? {};
+			for (const tasks of Object.values(completedTasksObj)) {
+				if (id) {
+					foundTask = tasks.find(
+						(task) => task.legacyId === id || task.id === id,
+					);
+				}
+				if (foundTask) return foundTask;
+			}
+
+			return; // Return undefined if the task is not found
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(
+				192,
+				"Error retrieving task from tasksCache using ID",
+				String(error),
+				"VaultScanner.ts/getTaskFromId",
+			);
+			return;
+		}
 	}
 }
 
@@ -755,7 +798,7 @@ export function buildTaskFromRawContent(
 
 	return {
 		title: title,
-		status: taskStatus,
+		status: taskStatus ?? " ",
 		body: body,
 		time: time?.[1] ?? "",
 		createdDate: createdDate?.[1] ?? "",
@@ -1093,7 +1136,7 @@ export function extractPriority(text: string): {
 export function extractTags(text: string): string[] {
 	text = text.replace(/<(mark|font).*?>/g, ""); // TODO : this might not required, try removing this.
 	const matches = text.match(TaskRegularExpressions.hashTagsRegex);
-	return matches ? matches.map((tag) => tag.trim()) : [];
+	return matches ? matches.map((tag) => tag.trim().replace("#", "")) : [];
 }
 
 export function extractReminder(

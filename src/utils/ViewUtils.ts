@@ -10,7 +10,10 @@ import {
 	HeaderUITypeOptions,
 	colTypeNames,
 } from "../interfaces/Enums.js";
-import { generateRandomTempTaskId } from "./TaskItemUtils.js";
+import {
+	generateRandomNumber,
+	generateRandomStringId,
+} from "./TaskItemUtils.js";
 
 /**
  * Get the index of a view within a board by its viewId
@@ -73,7 +76,7 @@ export function addViewToBoard(
 	viewType: string,
 	viewName: string,
 ): Board {
-	const newViewId = generateRandomTempTaskId();
+	const newViewId = generateRandomStringId('view');
 
 	// Create base view structure
 	const newView: TaskBoardViewType = {
@@ -152,7 +155,7 @@ export function duplicateViewInBoard(board: Board, viewIndex: number): boolean {
 	const newView: TaskBoardViewType = JSON.parse(JSON.stringify(originalView));
 
 	// Generate new view ID
-	newView.viewId = generateRandomTempTaskId();
+	newView.viewId = generateRandomStringId('view');
 	newView.viewName = `${originalView.viewName} (Copy)`;
 
 	board.views.push(newView);
@@ -214,7 +217,7 @@ export function updateView(
 function createDefaultKanbanColumns() {
 	return [
 		{
-			id: generateRandomTempTaskId() as any,
+			id: generateRandomNumber(),
 			colType: colTypeNames.undated,
 			active: true,
 			collapsed: false,
@@ -227,7 +230,7 @@ function createDefaultKanbanColumns() {
 			},
 		},
 		{
-			id: generateRandomTempTaskId() as any,
+			id: generateRandomNumber(),
 			colType: colTypeNames.completed,
 			active: true,
 			collapsed: false,

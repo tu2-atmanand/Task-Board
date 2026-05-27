@@ -1,6 +1,6 @@
 // /src/modal/BoardConfigModal.tsx
 
-import { Modal, Notice } from "obsidian";
+import { Modal, normalizePath, Notice } from "obsidian";
 import Sortable from "sortablejs";
 import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,12 +15,13 @@ import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorit
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions } from "../services/MultiSuggest.js";
 import { SettingsManager } from "../settings/SettingConstructUI.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomNumber, generateRandomStringId } from "../utils/TaskItemUtils.js";
 import { AddColumnModal } from "./AddColumnModal.js";
 import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
+import { eventEmitter } from "../services/EventEmitter.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -171,23 +172,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Kanban Column - UseEffect to initialize the MultiSuggest component for file path inputs in column configuration when the add/edit column modal is opened
-	const filePathInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+	const multiSuggestInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 	useEffect(() => {
 		const view = allViewsData[selectedViewIndex];
 		if (!view || view.viewType !== viewTypeNames.kanban) return;
 
 		view.kanbanView?.columns.forEach((column, index) => {
-			const fileInputElement = filePathInputRefs.current[column.id];
+			const fileInputElement = multiSuggestInputFieldRefs.current[column.id];
 			if (!fileInputElement) return;
 
-			if (filePathInputRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
+			if (multiSuggestInputFieldRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
 				const suggestionContent = getFileSuggestions(plugin.app);
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
 					handleColumnChange(selectedViewIndex, index, "filePaths", selectedPath);
 				};
 				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
-			} else if (filePathInputRefs.current[column.id] !== null && column.colType === colTypeNames.namedTag) {
+			} else if (multiSuggestInputFieldRefs.current[column.id] !== null && column.colType === colTypeNames.namedTag) {
 				const suggestionContent = getTagSuggestions(plugin.app);
 				const onSelectCallback = (selectedTag: string) => {
 					handleColumnChange(selectedViewIndex, index, "coltag", selectedTag);
@@ -341,7 +342,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		const viewToDuplicate = allViewsData[selectedViewIndex];
 		const duplicatedView: TaskBoardViewType = {
 			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
-			viewId: generateRandomTempTaskId(),
+			viewId: generateRandomStringId('view'),
 			viewName: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
 		};
 
@@ -349,7 +350,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		if (duplicatedView?.kanbanView && duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
 			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column: ColumnData) => ({
 				...column,
-				id: Number(generateRandomTempTaskId()), // Generate new numeric ID for each column
+				id: generateRandomNumber(), // Generate new numeric ID for each column
 			}));
 		}
 
@@ -427,16 +428,35 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
-	const handleDuplicateCurrentBoard = () => {
+	const handleDuplicateCurrentBoard = async () => {
 		const duplicatedBoard: Board = {
 			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
-			id: generateRandomTempTaskId(),
+			id: generateRandomStringId('board'),
 			name: `${activeBoardData.name} ${t("copy-suffix")}`,
 			views: activeBoardData.views ? activeBoardData.views.map((view: TaskBoardViewType) => ({
 				...view,
-				viewId: generateRandomTempTaskId(), // New unique ID for each view
+				viewId: generateRandomStringId('view'), // New unique ID for each view
 			})) : [],
 		};
+
+		let newFilePath = plugin.taskBoardFileManager.getBoardFilepathUsingBoardId(activeBoardData.id);
+		if (newFilePath) {
+			const parts = newFilePath.split("/");
+			const folderPath = parts.slice(0, -1).join("/");
+			newFilePath = normalizePath(folderPath + "/" + duplicatedBoard.name + ".taskboard");
+		} else {
+			newFilePath = normalizePath(duplicatedBoard.name + ".taskboard");
+		}
+
+		await plugin.taskBoardFileManager.saveBoardToDisk(newFilePath, duplicatedBoard);
+
+		setTimeout(() => {
+			eventEmitter.emit("OPEN_BOARD", {
+				layout: "tab",
+				filePath: newFilePath,
+				duplicate: false,
+			});
+		}, 400);
 
 		onClose();
 	};
@@ -470,7 +490,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			...view,
 			viewIndex: index
 		}));
-		
+
 		// Clamp lastViewIndex to ensure it's within valid range [0, views.length - 1]
 		if (boardToSave.views.length > 0) {
 			boardToSave.lastViewIndex = Math.max(0, Math.min(boardToSave.lastViewIndex, boardToSave.views.length - 1));
@@ -788,17 +808,19 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 															<input
 																type="text"
 																ref={(el) => {
-																	filePathInputRefs.current[column.id] = el;
+																	multiSuggestInputFieldRefs.current[column.id] = el;
 																}}
 																placeholder={t("enter-tag")}
 																value={column.coltag || ""}
-																onChange={(e) =>
+																onChange={(e) => {
+																	const tagValue = e.target.value.startsWith('#') ? e.target.value.replace('#', '') : e.target.value;
 																	handleColumnChange(
 																		viewIndex,
 																		columnIndex,
 																		"coltag",
-																		e.target.value
+																		tagValue
 																	)
+																}
 																}
 																className="boardConfigModalColumnRowContentColName"
 															/>
@@ -970,7 +992,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														<input
 															type="text"
 															ref={(el) => {
-																filePathInputRefs.current[column.id] = el;
+																multiSuggestInputFieldRefs.current[column.id] = el;
 															}}
 															className="boardConfigModalColumnRowContentColName"
 															value={column.filePaths || ""}

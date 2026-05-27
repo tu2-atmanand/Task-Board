@@ -15,7 +15,6 @@ import { eventEmitter } from '../services/EventEmitter.js';
 import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '../services/OpenModals.js';
 import { advancedFilterer } from '../utils/algorithms/AdvancedFilterer.js';
 import { loadTasksAndMerge } from '../utils/JsonFileOperations.js';
-import { getViewIndex, getViewById } from '../utils/ViewUtils.js';
 import { AdvancedFilterModal } from './AdvancedFilterer/index.js';
 import { AdvancedFilterPopover } from './AdvancedFilterer/Popover.js';
 import MapView from './MapView/MapView.js';
@@ -29,12 +28,12 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		return Math.max(0, Math.min(currentBoardData.lastViewIndex, currentBoardData.views.length - 1));
 	});
 	const [currentView, setCurrentView] = useState<TaskBoardViewType | undefined>(() => {
-		const initialBoard = currentBoardData;
-		if (!initialBoard?.views?.length) return undefined;
-		
+		// const initialBoard = currentBoardData;
+		if (!currentBoardData?.views?.length) return undefined;
+
 		// Clamp lastViewIndex to valid range
-		const validIndex = Math.max(0, Math.min(initialBoard.lastViewIndex, initialBoard.views.length - 1));
-		return initialBoard.views[validIndex];
+		const validIndex = Math.max(0, Math.min(currentBoardData.lastViewIndex, currentBoardData.views.length - 1));
+		return currentBoardData.views[validIndex];
 	});
 
 	// All UI Refs
@@ -48,7 +47,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
 	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
-	const [refreshCount, setRefreshCount] = useState(0);
+	const [hardRefreshCount, setHardRefreshCount] = useState(0);
+	const [softRefreshCount, setSoftRefreshCount] = useState(0);
 	const [freshInstall, setFreshInstall] = useState(false);
 	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
 	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
@@ -78,13 +78,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	useEffect(() => {
 		const handleResize = () => {
 			const taskBoardLeaf = currentLeaf;
-			if (taskBoardLeaf) {
+			if (taskBoardLeaf && taskBoardLeaf.width) {
 				setviewWidth(taskBoardLeaf.width);
 				document.documentElement.style.setProperty('--taskboard-leaf-width', `${taskBoardLeaf.width}px`);
 			}
 		};
 
 		handleResize();
+
 		if (currentLeaf) {
 			plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
 		}
@@ -103,11 +104,11 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			console.log("TASK BOARD : Does this run while switching boards...");
 			try {
 				// if (currentBoardData) {
-				setCurrentBoardData(currentBoardData);
+				// setCurrentBoardData(boardData);
 				// const lastView = currentBoardData.views.find((view) => view.viewId === currentBoardData.lastViewId);
 				// if (lastView)
 				// 	setCurrentViewIndex(currentBoardData.views.indexOf(lastView));
-				setCurrentViewIndex(currentBoardData.lastViewIndex);
+				// setCurrentViewIndex(currentViewIndex);
 				// setCurrentView(currentBoardData.views[currentViewIndex]);
 
 				// // Get index of the new board from the registry based on the board id.
@@ -127,9 +128,10 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				// 	setCurrentBoardData(data);
 				// }
 
-				const allTasks = await loadTasksAndMerge(plugin, true);
-				if (allTasks) {
-					setAllTasks(allTasks);
+				// @todo - Hard refresh here means, the in-memory cahce (plugin.vaultScanner.tasksCache) will be replaced with the disk cache (tasks.json). This might cause loss of data, since in-memory cache is always to the latest state. If any issue is reported in the future, try changing this to soft-refresh.
+				const refreshedTasks = await loadTasksAndMerge(plugin, true);
+				if (refreshedTasks) {
+					setAllTasks(refreshedTasks);
 					setFreshInstall(false);
 				}
 			} catch (error) {
@@ -143,7 +145,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		};
 
 		fetchData();
-	}, [refreshCount]);
+	}, [hardRefreshCount]);
 
 	// Update currentView when currentViewIndex or boardData changes
 	useEffect(() => {
@@ -155,12 +157,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		// Clamp currentViewIndex to valid range [0, views.length - 1]
 		const validIndex = Math.max(0, Math.min(currentViewIndex, boardData.views.length - 1));
 		setCurrentView(boardData.views[validIndex]);
+		console.log("Just updated the currentView state variable...");
 	}, [currentViewIndex, boardData?.views]);
 
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
-		if (allTasks && currentView) {
-			const viewFilter = currentView.viewFilter;
+		if (allTasks && boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
+			const viewFilter = boardData.views[currentViewIndex].viewFilter; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
+			console.log("Current view : ", currentView);
 			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 			// Apply board filters to tasks
@@ -171,7 +175,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			};
 
 			// Create a new board data object immutably
-			let newBoardData = { ...currentBoardData, views: [...currentBoardData.views] };
+			let newBoardData = { ...boardData, views: [...boardData.views] };
 			// Update task count in settings only if currentViewIndex is within bounds
 			if (currentViewIndex >= 0 && currentViewIndex < newBoardData.views.length) {
 				newBoardData.views[currentViewIndex] = {
@@ -196,7 +200,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			return boardFilteredTasks;
 		}
 		return { Pending: [], Completed: [] };
-	}, [allTasks, currentBoardData, searchQuery]);
+	}, [allTasks, softRefreshCount]);
 
 	useEffect(() => {
 		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
@@ -207,8 +211,9 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	const debouncedRefreshColumn = useCallback(
 		debounce(async () => {
 			try {
-				const allTasks = await loadTasksAndMerge(plugin, false);
-				setAllTasks(allTasks);
+				const refreshedTasks = await loadTasksAndMerge(plugin, false);
+				setAllTasks(refreshedTasks);
+				// setSoftRefreshCount((prev) => prev + 1);
 			} catch (error) {
 				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContainer.tsx/debouncedRefreshColumn");
 			}
@@ -217,48 +222,25 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	);
 
 	useEffect(() => {
-		eventEmitter.on("REFRESH_COLUMN", debouncedRefreshColumn);
-		return () => eventEmitter.off("REFRESH_COLUMN", debouncedRefreshColumn);
+		eventEmitter.on("SOFT_REFRESH", debouncedRefreshColumn);
+		return () => eventEmitter.off("SOFT_REFRESH", debouncedRefreshColumn);
 	}, [debouncedRefreshColumn]);
 
+	// Register all the EMITE event listeners
 	useEffect(() => {
-		const refreshBoardListener = () => setRefreshCount((prev) => prev + 1);
-		eventEmitter.on("REFRESH_BOARD", refreshBoardListener);
-		return () => eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
-	}, []);
-
-	useEffect(() => {
-		const handleMapDataUpdated = (eventData: { onlyviewport: boolean }) => {
-			if (eventData.onlyviewport)
-				viewPortDataOfMapViewUpdated.current = true;
-			else
-				setMapViewDataUpdated(true);
-		};
-
-		const handleMapDataSaved = () => {
-			setMapViewDataUpdated(false);
-			viewPortDataOfMapViewUpdated.current = false;
-
+		const refreshBoardListener = () => {
+			console.log("REFRESH_BOARD emitted............");
+			setHardRefreshCount((prev) => prev + 1);
 		}
 
-		eventEmitter.on("MAP_UNSAVED", handleMapDataUpdated);
-		eventEmitter.on("MAP_SAVED", handleMapDataSaved);
-		return () => {
-			eventEmitter.off("MAP_UNSAVED", handleMapDataUpdated);
-			eventEmitter.off("MAP_SAVED", handleMapDataSaved);
-		};
-	}, []);
-
-	useEffect(() => {
 		const refreshView = (viewId: string) => {
-			let newViewId = viewId;
 			if (viewId === 'first-map') {
 				// Find the id of the first map-view
-				const mapView = currentBoardData.views.find((view: TaskBoardViewType) => view.viewType === viewTypeNames.map)
+				const mapView = boardData.views.find((view: TaskBoardViewType) => view.viewType === viewTypeNames.map)
 
 				if (mapView) {
-					const viewIndex = currentBoardData.views.indexOf(mapView);
-					handleViewSelect(viewIndex);
+					// const viewIndex = boardData.views.indexOf(mapView);
+					handleViewSelect(mapView.viewIndex);
 				}
 				else {
 					new Notice("No map view available in this board. Please create atleast one map view.", 5000);
@@ -277,19 +259,49 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			// eventEmitter.emit('REFRESH_BOARD');
 
 		};
-		eventEmitter.on("SWITCH_VIEW", refreshView);
-		return () => eventEmitter.off("SWITCH_VIEW", refreshView);
-	}, []);
 
-	// Listen to editor modified state changes
-	useEffect(() => {
+		const handleMapDataUpdated = (eventData: { onlyviewport: boolean }) => {
+			if (eventData.onlyviewport)
+				viewPortDataOfMapViewUpdated.current = true;
+			else
+				setMapViewDataUpdated(true);
+		};
+
+		const handleMapDataSaved = () => {
+			setMapViewDataUpdated(false);
+			viewPortDataOfMapViewUpdated.current = false;
+
+		}
+
+		// Listen to editor modified state changes
 		const handleEditorModifiedChange = (modified: boolean) => {
 			setEditorModified(modified);
 		};
 
+		eventEmitter.on("REFRESH_BOARD", refreshBoardListener);
+		eventEmitter.on("SWITCH_VIEW", refreshView);
+		eventEmitter.on("MAP_UNSAVED", handleMapDataUpdated);
+		eventEmitter.on("MAP_SAVED", handleMapDataSaved);
 		eventEmitter.on("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
-		return () => eventEmitter.off("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+
+		return () => {
+			eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
+			eventEmitter.off("SWITCH_VIEW", refreshView);
+			eventEmitter.off("MAP_UNSAVED", handleMapDataUpdated);
+			eventEmitter.off("MAP_SAVED", handleMapDataSaved);
+			eventEmitter.off("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+		};
 	}, []);
+
+	const saveMapViewIfNeeded = async () => {
+		console.log("Will store the map view data first...");
+		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
+			eventEmitter.emit("SAVE_MAP");
+			// setMapViewDataUpdated(false);
+			// viewPortDataOfMapViewUpdated.current = false;
+			// sleep(100);
+		}
+	}
 
 	const refreshBoardButton = useCallback(() => {
 		plugin.realTimeScanner.processAllUpdatedFiles(); //.then(() => console.log("Finished processing all updated files."));
@@ -308,18 +320,28 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// }
 
 	function handleSearchButtonClick() {
+		saveMapViewIfNeeded();
+
 		if (showSearchInput) {
 			setSearchQuery("");
 			// el.currentTarget.focus();
 			plugin.settings.data.searchQuery = "";
 
-			eventEmitter.emit("REFRESH_COLUMN");
+			eventEmitter.emit("SOFT_REFRESH");
 			plugin.saveSettings();
 			setShowSearchInput(false);
 		} else {
 			setSearchQuery(plugin.settings.data.searchQuery || "");
 			handleSearchSubmit();
 			setShowSearchInput(true);
+
+			setTimeout(() => {
+				if (searchInputElement) searchInputElement.current?.focus();
+			}, 200);
+
+			setTimeout(() => {
+				if (!searchInputElement.current?.isActiveElement() && searchQuery === "") setShowSearchInput(false);
+			}, 10000);
 		}
 	}
 
@@ -329,13 +351,24 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// 	return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
 	// }
 
-	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | null {
-		if (!searchQuery.trim()) {
-			return null;
+	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | undefined {
+		const lowerQuery = searchQuery.toLowerCase();
+		setTimeout(() => {
+			plugin.settings.data.searchQuery = lowerQuery;
+			plugin.saveSettings();
+		}, 100);
+
+		if (!lowerQuery.trim()) {
+			eventEmitter.emit("REFRESH_COLUMN");
+
+			setTimeout(() => {
+				if (!searchInputElement.current?.isActiveElement() && plugin.settings.data.searchQuery === "") setShowSearchInput(false);
+			}, 10000)
+
+			return undefined;
 		}
 
-		const lowerQuery = searchQuery.toLowerCase();
-		let searchFilteredTasks: taskJsonMerged | null = null;
+		let searchFilteredTasks: taskJsonMerged | undefined = fileteredAllTasks || filteredAndSearchedTasks;
 
 		if (fileteredAllTasks) {
 			searchFilteredTasks = {
@@ -358,23 +391,25 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					}
 				})
 			};
-
-			setTimeout(() => {
-				plugin.settings.data.searchQuery = lowerQuery;
-				plugin.saveSettings();
-			}, 100);
 		}
 
-		return searchFilteredTasks;
+		if (fileteredAllTasks)
+			return searchFilteredTasks;
+		else {
+			setAllTasks(searchFilteredTasks);
+			return undefined;
+		}
 	}
 
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
 		try {
+			saveMapViewIfNeeded();
+
 			const currentBoardConfig = boardData;
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
 				const filterModal = new AdvancedFilterModal(
-					plugin, false, boardData.id, currentBoardConfig!.name
+					plugin, false, boardData.id, currentView?.viewName
 				);
 
 				// Set initial filter state
@@ -426,7 +461,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					plugin,
 					false, // forColumn = false since this is for board-level filter
 					boardData.id,
-					boardData?.name || "Board",
+					currentView?.viewName || "View",
 				);
 
 				// Load existing filter state if available
@@ -443,13 +478,16 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				popover.onClose = async (filterState?: RootFilterState) => {
 					if (filterState) {
 						// Save the filter state to the board
-						const updatedcurrentBoardData = boardData;
+						let updatedcurrentBoardData = boardData;
 						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
 						setCurrentBoardData(updatedcurrentBoardData);
 						plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
 						// Refresh the board view
-						eventEmitter.emit('REFRESH_BOARD');
+						sleep(100).then(() => {
+							console.log("REFRESH_BOARD emitting............");
+							eventEmitter.emit('REFRESH_BOARD');
+						})
 					}
 					filterPopoverRef.current = null;
 				};
@@ -503,8 +541,9 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}
 
 	function handlePropertiesBtnClick(event: React.MouseEvent<HTMLButtonElement>) {
-		const propertyMenu = new Menu();
+		saveMapViewIfNeeded();
 
+		const propertyMenu = new Menu();
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("show-hide-properties"));
@@ -726,32 +765,29 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}
 
 	function handleViewSelect(index: number) {
-		console.log("Will store the map view data first...");
-		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
-			eventEmitter.emit("SAVE_MAP");
-			// setMapViewDataUpdated(false);
-			// viewPortDataOfMapViewUpdated.current = false;
-			sleep(100);
-		}
+		saveMapViewIfNeeded();
 
 		console.log("Now will switch the view...");
 		if (index !== currentViewIndex) {
-			setSearchQuery("");
-			plugin.settings.data.searchQuery = "";
-			setCurrentViewIndex(index);
-
 			// Update the board's lastViewId to persist view selection
 			if (boardData?.views && index >= 0 && index < boardData.views.length) {
 				let updatedBoard = { ...boardData };
 				// updatedBoard.lastViewId = boardData.views[index].viewId;
 				updatedBoard.lastViewIndex = index;
-				plugin.taskBoardFileManager.saveBoard(updatedBoard);
+				setCurrentViewIndex(index);
+				setSearchQuery("");
+				plugin.settings.data.searchQuery = "";
+				// eventEmitter.emit("SOFT_REFRESH");
+				setSoftRefreshCount((prev) => prev + 1);
+
+				setTimeout(() => {
+					// eventEmitter.emit("REFRESH_BOARD");
+					// plugin.saveSettings();
+					console.log("Will now going to save the view index :", updatedBoard.lastViewIndex);
+					plugin.taskBoardFileManager.saveBoard(updatedBoard);
+				}, 500);
 			}
 
-			// setTimeout(() => {
-			// 	eventEmitter.emit("REFRESH_BOARD");
-			// 	// plugin.saveSettings();
-			// }, 100);
 		}
 		// closeBoardSidebar(); // Close sidebar after selection
 	}
@@ -1039,6 +1075,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	const viewDropdownRef = useRef<HTMLDivElement>(null);
 	const [showViewDropdown, setShowViewDropdown] = useState(false);
+	const searchInputElement = useRef<HTMLInputElement>(null);
 	// Close dropdown when clicking outside
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -1271,11 +1308,12 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 										handleSearchSubmit();
 									}
 								}}
-								ref={input => {
-									if (input && showSearchInput) {
-										input.focus();
-									}
-								}}
+								// ref={input => {
+								// 	if (input && showSearchInput) {
+								// 		input.focus();
+								// 	}
+								// }}
+								ref={searchInputElement}
 							/>
 						)}
 						<button
@@ -1333,7 +1371,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 								className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
 								onClick={(e) => {
 									if (mapViewDataUpdated) {
-										console.log("Emitting SAVE_MAP event...");
 										eventEmitter.emit("SAVE_MAP");
 										setMapViewDataUpdated(false);
 									}

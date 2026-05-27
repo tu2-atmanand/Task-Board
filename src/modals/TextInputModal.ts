@@ -53,13 +53,13 @@ export class TextInputModal extends Modal {
 			}, 100);
 		});
 
-		const buttonContainer = contentEl.createEl("div", { cls: "modal-button-container" });
-		buttonContainer.style.display = "flex";
-		buttonContainer.style.gap = "10px";
-		buttonContainer.style.justifyContent = "flex-end";
-		buttonContainer.style.marginTop = "20px";
+		const buttonContainer = contentEl.createEl("div", {
+			cls: "modal-button-container",
+		});
 
-		const cancelButton = buttonContainer.createEl("button", { text: this.options.cancelText });
+		const cancelButton = buttonContainer.createEl("button", {
+			text: this.options.cancelText,
+		});
 		cancelButton.addEventListener("click", () => {
 			this.resolve(null);
 			this.close();
@@ -103,7 +103,7 @@ export class TextInputModal extends Modal {
  */
 export async function showTextInputModal(
 	app: App,
-	options: TextInputModalOptions
+	options: TextInputModalOptions,
 ): Promise<string | null> {
 	const modal = new TextInputModal(app, options);
 	return modal.show();

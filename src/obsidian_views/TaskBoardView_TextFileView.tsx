@@ -12,7 +12,7 @@ import { TaskBoardIcon, funnelIcon, ScanVaultIcon, RefreshIcon } from "../interf
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import { openScanVaultModal, openBoardsExplorerModal } from "../services/OpenModals.js";
-import { generateRandomTempTaskId } from "../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 
 export class TaskBoardView extends TextFileView {
 	plugin: TaskBoard;
@@ -223,9 +223,9 @@ export class TaskBoardView extends TextFileView {
 						const firstItemFromRegistry = registryEntries[0];
 						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
-							state.filePath = {
-								...state.state,
-								filePath: this.currentFilePath
+							state = {
+								...state,
+								filePath: this.currentFilePath,
 							};
 						}
 					}
@@ -335,8 +335,8 @@ export class TaskBoardView extends TextFileView {
 		// Detailed description
 		const description = content.createEl("p", {
 			cls: "taskboard-no-board-description",
+			text: t("no-boards-found-description")
 		});
-		description.innerHTML = t("no-boards-found-description");
 
 		// Action buttons
 		const buttonContainer = content.createDiv({
@@ -375,7 +375,7 @@ export class TaskBoardView extends TextFileView {
 	private async handleCreateTemplateBoard() {
 		try {
 			// Generate unique ID and filename for the new template board
-			const boardId = generateRandomTempTaskId();
+			const boardId = generateRandomStringId('board');
 			const timestamp = new Date().getTime();
 			const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 
@@ -403,7 +403,7 @@ export class TaskBoardView extends TextFileView {
 			this.currentFilePath = filePath;
 
 			// Show success notice
-			new Notice(t("board-created-successfully") || "Template board created successfully!");
+			new Notice(t("board-created-successfully"));
 
 			// Render the newly created board
 			this.renderBoard(newBoard);

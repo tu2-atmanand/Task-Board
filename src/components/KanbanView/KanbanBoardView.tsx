@@ -19,6 +19,7 @@ interface KanbanBoardProps {
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
+	console.log("Lets see how many times this is running....\ncurrentViewIndex = ", currentViewIndex, "\ncurrentViewName = ", currentView.viewName);
 	const [loading, setLoading] = useState(true);
 
 	// const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;

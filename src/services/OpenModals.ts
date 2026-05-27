@@ -8,7 +8,7 @@ import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "../interfaces/Constants.js";
 import { ScanFilters } from "../interfaces/GlobalSettings.js";
 import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { AddOrEditTaskModal } from "../modals/AddOrEditTaskModal.js";
+import { TaskEditorModal } from "../modals/TaskEditorModal.js";
 import { BoardConfigureModal } from "../modals/BoardConfigModal.js";
 import { BoardsExplorerModal } from "../modals/BoardsExplorer.js";
 import { BugReporterModal } from "../modals/BugReporterModal.js";
@@ -16,7 +16,7 @@ import { DatePickerModal } from "../modals/date_picker/DatePickerModal.js";
 import { DiffContentCompareModal } from "../modals/DiffContentCompareModal.js";
 import { ScanFilterModal } from "../modals/ScanFilterModal.js";
 import { ScanVaultModal } from "../modals/ScanVaultModal.js";
-import { AddOrEditTaskView } from "../obsidian_views/AddOrEditTaskView.js";
+import { TaskEditorView } from "../obsidian_views/TaskEditorView.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
 import { writeDataToVaultFile } from "../utils/MarkdownFileOperations.js";
 import {
@@ -73,7 +73,7 @@ export const openAddNewTaskInCurrentFileModal = (
 	activeFile: TFile,
 	cursorPosition?: { line: number; ch: number } | undefined,
 ) => {
-	const AddTaskModal = new AddOrEditTaskModal(
+	const AddTaskModal = new TaskEditorModal(
 		plugin,
 		(newTask: taskItem, quickAddPluginChoice: string) => {
 			addTaskInNote(plugin, newTask, true, cursorPosition).then(
@@ -93,7 +93,8 @@ export const openAddNewTaskInCurrentFileModal = (
 			// 	addTaskInJson(plugin, newTask);
 			// }
 
-			eventEmitter.emit("REFRESH_COLUMN");
+			// @todo - I dont think I need to emit this here, since the processAllUpdatedFiles function will refresh the file and then it will emit this same signal anyways. And, until that, we dont have to refresh the view at all.
+			eventEmitter.emit("SOFT_REFRESH");
 			cursorPosition = undefined;
 			return true;
 		},
@@ -112,7 +113,7 @@ export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 		plugin.settings.data.preDefinedNote,
 	);
 	const activeTFile = activeFile ? activeFile : preDefinedNoteFile;
-	const AddTaskModal = new AddOrEditTaskModal(
+	const AddTaskModal = new TaskEditorModal(
 		plugin,
 		async (newTask: taskItem, quickAddPluginChoice: string) => {
 			const communityPlugins = new CommunityPlugins(plugin);
@@ -146,7 +147,8 @@ export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 			// 	addTaskInJson(plugin, newTask);
 			// }
 
-			eventEmitter.emit("REFRESH_COLUMN");
+			// @todo - I dont think I need to emit this here, since the processAllUpdatedFiles function will refresh the file and then it will emit this same signal anyways. And, until that, we dont have to refresh the view at all.
+			eventEmitter.emit("SOFT_REFRESH");
 		},
 		false,
 		false,
@@ -160,7 +162,7 @@ export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 };
 
 export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
-	const AddTaskModal = new AddOrEditTaskModal(
+	const AddTaskModal = new TaskEditorModal(
 		plugin,
 		async (
 			newTask: taskItem,
@@ -229,15 +231,17 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								` ${newName}.md`,
 							10000,
 						);
-						await plugin.app.vault.create(newPath, noteContent).then(() => {
-							// This is required to rescan the updated file and refresh the board.
-							plugin.realTimeScanner.onFileModified(
-								`Copy-${newTask.filePath}`,
-							);
-							sleep(1000).then(() => {
-								plugin.realTimeScanner.processAllUpdatedFiles();
+						await plugin.app.vault
+							.create(newPath, noteContent)
+							.then(() => {
+								// This is required to rescan the updated file and refresh the board.
+								plugin.realTimeScanner.onFileModified(
+									`Copy-${newTask.filePath}`,
+								);
+								sleep(1000).then(() => {
+									plugin.realTimeScanner.processAllUpdatedFiles();
+								});
 							});
-						});
 					}
 				} catch (error) {
 					bugReporterManagerInsatance.addToLogs(
@@ -250,7 +254,8 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 				}
 			}
 
-			eventEmitter.emit("REFRESH_COLUMN");
+			// @todo - I dont think I need to emit this here, since the processAllUpdatedFiles function will refresh the file and then it will emit this same signal anyways. And, until that, we dont have to refresh the view at all.
+			eventEmitter.emit("SOFT_REFRESH");
 		},
 		true,
 		false,
@@ -265,7 +270,7 @@ export const openEditTaskModal = async (
 	plugin: TaskBoard,
 	existingTask: taskItem,
 ) => {
-	const EditTaskModal = new AddOrEditTaskModal(
+	const EditTaskModal = new TaskEditorModal(
 		plugin,
 		(updatedTask: taskItem) => {
 			let eventData: UpdateTaskEventData = {
@@ -293,7 +298,7 @@ export const openEditTaskModal = async (
 			// 		task.id === updatedTask.id ? { ...task, ...updatedTask } : task
 			// 	)
 			// );
-			// NOTE : The eventEmitter.emit("REFRESH_COLUMN") is being sent from function, because if i add that here, then all the things are getting executed parallely instead of sequential.
+			// NOTE : The eventEmitter.emit("SOFT_REFRESH") is being sent from function, because if i add that here, then all the things are getting executed parallely instead of sequential.
 		},
 		false,
 		false,
@@ -308,7 +313,7 @@ export const openEditTaskNoteModal = (
 	plugin: TaskBoard,
 	existingTask: taskItem,
 ) => {
-	const EditTaskModal = new AddOrEditTaskModal(
+	const EditTaskModal = new TaskEditorModal(
 		plugin,
 		async (
 			updatedTask: taskItem,
@@ -562,7 +567,7 @@ export const openScanFiltersModal = (
 };
 
 /**
- * Open AddOrEditTask as a view in a new leaf (tab or popout window)
+ * Open TaskEditor as a view in a new leaf (tab or popout window)
  * This allows the task editor to be used in tabs alongside other content
  *
  * @param plugin - The TaskBoard plugin instance
@@ -577,7 +582,7 @@ export const openScanFiltersModal = (
  *
  * @example
  * // Open in a new tab for editing an existing task
- * openAddOrEditTaskView(
+ * openTaskEditorView(
  *   plugin,
  *   (updatedTask, quickAddChoice, noteContent) => {
  *     // Handle task update
@@ -593,7 +598,7 @@ export const openScanFiltersModal = (
  *
  * @example
  * // Open in a popout window for creating a new task
- * openAddOrEditTaskView(
+ * openTaskEditorView(
  *   plugin,
  *   (newTask, quickAddChoice, noteContent) => {
  *     // Handle new task creation
@@ -628,7 +633,7 @@ export const openEditTaskView = async (
 		// const viewEphemeralState = leaf.getEphemeralState();
 		// console.log("empheral states of : ", viewEphemeralState);
 
-		const customView = leaf.view as AddOrEditTaskView;
+		const customView = leaf.view as TaskEditorView;
 		const leafTaskId = customView?.task.legacyId
 			? customView.task.legacyId
 			: customView?.task.id;
@@ -653,7 +658,7 @@ export const openEditTaskView = async (
 
 		return leaves[0];
 	} else {
-		// Detach any existing AddOrEditTask views
+		// Detach any existing TaskEditor views
 		// workspace.detachLeavesOfType(VIEW_TYPE_ADD_OR_EDIT_TASK);
 
 		let leaf: WorkspaceLeaf | null = null;
@@ -673,13 +678,13 @@ export const openEditTaskView = async (
 			try {
 				// For the first time after the plugin has loaded, a new view will be registered only if this openEditTaskView has been called. If any error occurs then eter the 'catch' body and simply replace the old view of the leaf with the new view created.
 
-				// Register AddOrEditTask view (can be opened in tabs or popout windows)
+				// Register TaskEditor view (can be opened in tabs or popout windows)
 				plugin.registerView(viewTypeId, (leaf) => {
 					leaf.setEphemeralState({
 						viewTaskId: taskId,
 					});
 
-					return new AddOrEditTaskView(
+					return new TaskEditorView(
 						plugin,
 						leaf,
 						viewTypeId,
@@ -740,7 +745,7 @@ export const openEditTaskView = async (
 					);
 				});
 			} catch {
-				const view = new AddOrEditTaskView(
+				const view = new TaskEditorView(
 					plugin,
 					leaf,
 					viewTypeId,

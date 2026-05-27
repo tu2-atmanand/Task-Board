@@ -2,7 +2,7 @@ import { t } from "i18next";
 import { App, Modal, Setting, Notice, DropdownComponent } from "obsidian";
 import type { RootFilterState, SavedFilterConfig, FilterGroup, Board } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import type TaskBoard from "../../../main.js";
 
 export class BoardFiltersStoreModal extends Modal {
@@ -244,7 +244,7 @@ export class BoardFiltersStoreModal extends Modal {
 
 		const now = new Date().toISOString();
 		const config: SavedFilterConfig = {
-			id: `filter-config-${Date.now()}-${generateRandomTempTaskId()}`,
+			id: generateRandomStringId(`filter_saved_${Date.now()}`),
 			name: name.trim(),
 			description: description.trim() || undefined,
 			filterState: JSON.parse(JSON.stringify(this.currentFilterState)),

@@ -1,13 +1,14 @@
 // /src/modals/SwimlanesConfigModal.tsx
 
-import { Modal, Setting, setIcon } from 'obsidian';
+import { Modal, Setting, getAllTags, normalizePath, setIcon } from 'obsidian';
 import Sortable from 'sortablejs';
 
 import { swimlaneConfigs } from '../interfaces/BoardConfigs.js';
 import { HeaderUITypeOptions } from '../interfaces/Enums.js';
 import { t } from '../utils/lang/helper.js';
-import { getCustomStatusOptionsForDropdown, StatusDropdownOption } from '../interfaces/Mapping.js';
+import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, StatusDropdownOption } from '../interfaces/Mapping.js';
 import TaskBoard from '../../main.js';
+import { getFileSuggestions, getTagSuggestions, MultiSuggest } from '../services/MultiSuggest.js';
 
 interface SwimlanesConfigModalProps {
 	plugin: TaskBoard;
@@ -22,6 +23,7 @@ export class SwimlanesConfigModal extends Modal {
 	onCancel: () => void;
 
 	private plugin: TaskBoard;
+	private edited: boolean;
 	private enabled: boolean;
 	private property: string;
 	private customValue: string;
@@ -47,12 +49,15 @@ export class SwimlanesConfigModal extends Modal {
 		this.onSave = onSave;
 		this.onCancel = onCancel;
 
+		this.edited = false;
 		this.enabled = swimlaneConfig.enabled;
 		this.property = swimlaneConfig.property || 'tags';
 		this.customValue = swimlaneConfig.customValue || '';
 		this.sortCriteria = swimlaneConfig.sortCriteria || 'asc';
 		this.hideEmptySwimlanes = swimlaneConfig.hideEmptySwimlanes ?? false;
-		this.customSortOrder = swimlaneConfig.customSortOrder || [];
+		this.customSortOrder = swimlaneConfig.customSortOrder
+			? swimlaneConfig.customSortOrder.map((item) => ({ ...item }))
+			: [];
 		this.maxHeight = swimlaneConfig.maxHeight || '300px';
 		this.groupAllRest = swimlaneConfig.groupAllRest ?? true;
 		this.headerUIType = swimlaneConfig.headerUIType || HeaderUITypeOptions.horizontal;
@@ -86,7 +91,7 @@ export class SwimlanesConfigModal extends Modal {
 			this.renderHeaderUIType(modalContent);
 		}
 
-		this.renderButtons(modalContent);
+		// this.renderButtons(modalContent);
 	}
 
 	private renderHeader(container: HTMLElement) {
@@ -104,6 +109,7 @@ export class SwimlanesConfigModal extends Modal {
 					.setValue(this.enabled)
 					.onChange(async (value) => {
 						this.enabled = value;
+						this.edited = true;
 						this.renderContent(container.parentElement!);
 					}),)
 	}
@@ -113,6 +119,7 @@ export class SwimlanesConfigModal extends Modal {
 			{ value: 'tags', label: t('tags') },
 			{ value: 'priority', label: t('priority') },
 			{ value: 'status', label: t('status') },
+			{ value: 'filePath', label: t("file-path") },
 		];
 
 		new Setting(container)
@@ -127,6 +134,7 @@ export class SwimlanesConfigModal extends Modal {
 					.onChange(async (value) => {
 						this.property =
 							value;
+						this.edited = true;
 						this.renderContent(container.parentElement!);
 					})
 			});
@@ -141,6 +149,7 @@ export class SwimlanesConfigModal extends Modal {
 			.addText((text) => {
 				text.setValue(this.customValue).onChange((value) => {
 					this.customValue = value;
+					this.edited = true;
 				});
 			});
 	}
@@ -152,6 +161,7 @@ export class SwimlanesConfigModal extends Modal {
 			.addText((text) => {
 				text.setValue(this.maxHeight).onChange((value) => {
 					this.maxHeight = value;
+					this.edited = true;
 				});
 			});
 	}
@@ -175,6 +185,7 @@ export class SwimlanesConfigModal extends Modal {
 					.onChange(async (value) => {
 						this.sortCriteria =
 							value;
+						this.edited = true;
 						this.renderContent(container.parentElement!);
 					})
 			});
@@ -221,6 +232,7 @@ export class SwimlanesConfigModal extends Modal {
 
 	private renderSortRows() {
 		if (!this.sortableListEl) return;
+		this.edited = true;
 
 		this.sortableListEl.empty();
 
@@ -244,18 +256,75 @@ export class SwimlanesConfigModal extends Modal {
 				text: String(sortRow.index),
 			});
 
-			if (this.property !== 'status') {
-				// Text input for non-status properties
+			if (this.property === 'tags') {
+				// Text input element
 				const input = row.createEl('input', {
 					attr: { type: 'text', placeholder: t('enter-property-value') },
 					cls: 'swimlanesConfigSortRowInput',
 				});
-				input.value = sortRow.value;
+				input.value = sortRow.value ?? '';
 				input.addEventListener('input', (e) => {
-					this.customSortOrder[rowIndex].value = (e.target as HTMLInputElement).value;
+					const rawValue = (e.target as HTMLInputElement).value;
+					this.customSortOrder[rowIndex].value = rawValue.replace('#', '');
+					this.edited = true;
 				});
 
-			} else {
+				const suggestions = getTagSuggestions(this.app);
+				const onSelectCallback = (value: string) => {
+					this.customSortOrder[rowIndex].value = value.replace("#", '');
+					this.edited = true;
+				};
+				new MultiSuggest(
+					input,
+					new Set(suggestions),
+					onSelectCallback,
+					this.app,
+				);
+			} else if (this.property === 'filePath') {
+				const input = row.createEl('input', {
+					attr: { type: 'text', placeholder: t('enter-property-value') },
+					cls: 'swimlanesConfigSortRowInput',
+				});
+				input.value = sortRow.value ?? '';
+				input.addEventListener('input', (e) => {
+					const rawValue = (e.target as HTMLInputElement).value ?? "";
+					this.customSortOrder[rowIndex].value = normalizePath(rawValue);
+					this.edited = true;
+				});
+
+				const suggestions = getFileSuggestions(this.app);
+				const onSelectCallback = (value: string) => {
+					this.customSortOrder[rowIndex].value = value.trim();
+					this.edited = true;
+				};
+				const multiSuggestInstance = new MultiSuggest(
+					input,
+					new Set(suggestions),
+					onSelectCallback,
+					this.app,
+				);
+			} else if (this.property === 'priority') {
+				const prioritySelect = row.createEl('select', {
+					cls: 'swimlanesConfigSortRowDropdown',
+					attr: { 'aria-label': t('priority') },
+				});
+				const priorityOptions = getPriorityOptionsForDropdown();
+
+				priorityOptions.forEach((option) => {
+					prioritySelect.createEl('option', {
+						attr: { value: String(option.value) },
+						text: option.text,
+					});
+				});
+
+				prioritySelect.value = String(sortRow.value ?? '0');
+				prioritySelect.addEventListener('change', (e) => {
+					this.customSortOrder[rowIndex].value = (
+						e.target as HTMLSelectElement
+					).value;
+					this.edited = true;
+				});
+			} else if (this.property === 'status') {
 				// Native HTML select for status property
 				const statusSelect = row.createEl('select', {
 					cls: 'swimlanesConfigSortRowDropdown',
@@ -316,6 +385,18 @@ export class SwimlanesConfigModal extends Modal {
 				statusSelect.addEventListener('change', (e) => {
 					const newValue = (e.target as HTMLSelectElement).value;
 					this.customSortOrder[rowIndex].value = newValue === '' ? ' ' : newValue;
+					this.edited = true;
+				});
+			} else {
+				// Text input for non-status properties
+				const input = row.createEl('input', {
+					attr: { type: 'text', placeholder: t('enter-property-value') },
+					cls: 'swimlanesConfigSortRowInput',
+				});
+				input.value = sortRow.value;
+				input.addEventListener('input', (e) => {
+					this.customSortOrder[rowIndex].value = (e.target as HTMLInputElement).value;
+					this.edited = true;
 				});
 			}
 
@@ -346,6 +427,7 @@ export class SwimlanesConfigModal extends Modal {
 					}));
 
 					this.customSortOrder = updatedOrder;
+					this.edited = true;
 					this.renderSortRows();
 				},
 			});
@@ -353,6 +435,7 @@ export class SwimlanesConfigModal extends Modal {
 	}
 
 	private handleAddSortRow() {
+		this.edited = true;
 		const newIndex = this.customSortOrder.length + 1;
 		this.customSortOrder = [
 			...this.customSortOrder,
@@ -362,6 +445,7 @@ export class SwimlanesConfigModal extends Modal {
 	}
 
 	private handleRemoveSortRow(rowIndex: number) {
+		this.edited = true;
 		this.customSortOrder = this.customSortOrder
 			.filter((_, idx) => idx !== rowIndex)
 			.map((item, idx) => ({
@@ -380,6 +464,7 @@ export class SwimlanesConfigModal extends Modal {
 					.setValue(this.groupAllRest)
 					.onChange(async (value) => {
 						this.groupAllRest = value;
+						this.edited = true;
 					}),)
 	}
 
@@ -392,6 +477,7 @@ export class SwimlanesConfigModal extends Modal {
 					.setValue(this.hideEmptySwimlanes)
 					.onChange(async (value) => {
 						this.hideEmptySwimlanes = value;
+						this.edited = true;
 					}),)
 	}
 
@@ -413,6 +499,7 @@ export class SwimlanesConfigModal extends Modal {
 					.onChange(async (value) => {
 						this.headerUIType =
 							value;
+						this.edited = true;
 					})
 			});
 	}
@@ -446,8 +533,9 @@ export class SwimlanesConfigModal extends Modal {
 				customSortOrder: this.customSortOrder,
 				groupAllRest: this.groupAllRest,
 				headerUIType: this.headerUIType,
-				minimized: [],
+				minimized: this.swimlaneConfig.minimized,
 			};
+			this.edited = false;
 			this.onSave(updatedConfig);
 			this.close();
 		});
@@ -460,5 +548,32 @@ export class SwimlanesConfigModal extends Modal {
 		}
 		const { contentEl } = this;
 		contentEl.empty();
+
+		// Call the super method to correctly close the modal
+		super.onClose();
+	}
+
+	public close(): void {
+		if (this.edited) {
+			// this.handleCloseAttempt();
+			const updatedConfig: swimlaneConfigs = {
+				enabled: this.enabled,
+				hideEmptySwimlanes: this.hideEmptySwimlanes,
+				property: this.property,
+				maxHeight: this.maxHeight,
+				customValue: this.customValue || undefined,
+				sortCriteria: this.sortCriteria,
+				customSortOrder: this.customSortOrder,
+				groupAllRest: this.groupAllRest,
+				headerUIType: this.headerUIType,
+				minimized: this.swimlaneConfig.minimized,
+			};
+			this.onSave(updatedConfig);
+			this.onClose();
+			super.close();
+		} else {
+			this.onClose();
+			super.close();
+		}
 	}
 }

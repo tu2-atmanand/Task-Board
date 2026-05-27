@@ -1,6 +1,6 @@
 // /src/components/MapView/MapView.tsx
 
-import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo, useCallback, MouseEvent as ReactMouseEvent } from 'react';
 import {
 	ReactFlow,
 	ReactFlowProvider,
@@ -21,7 +21,7 @@ import { PanelLeftOpenIcon } from 'lucide-react';
 import { t } from 'i18next';
 import TaskBoard from '../../../main.js';
 import { Board, TaskBoardViewType, viewPortType, nodeDataType, nodePositionData } from '../../interfaces/BoardConfigs.js';
-import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewScrollAction } from '../../interfaces/Enums.js';
+import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewScrollAction, mapViewArrowDirection } from '../../interfaces/Enums.js';
 import { taskJsonMerged, taskItem, UpdateTaskEventData } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
@@ -170,7 +170,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 	useEffect(() => {
 		const saveMapDataListener = () => {
-			console.log("[Task Board] [MapView] SAVE_MAP signal fired...\nmapDataUpdated = ", mapDataUpdated.current);
+			// console.log("[Task Board] [MapView] SAVE_MAP signal fired...\nmapDataUpdated = ", mapDataUpdated.current, "\nviewPortDataUpdated = ", viewPortDataUpdated.current);
 			if (!mapDataUpdated.current && !viewPortDataUpdated.current) return;
 
 			let newBoardData = activeBoardData;
@@ -182,6 +182,7 @@ const MapView: React.FC<MapViewProps> = ({
 					nodesData: allNodesData.current,
 				};
 			}
+			// console.log("Will now going to save the view index :", newBoardData.lastViewIndex);
 			plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 			mapDataUpdated.current = false;
@@ -528,15 +529,15 @@ const MapView: React.FC<MapViewProps> = ({
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									// height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
-									// width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? undefined : 0,
+									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.childToParent ? undefined : 0,
 								},
 								markerEnd: {
 									type: MarkerType.ArrowClosed, // required property
 									// optional properties
 									// color: 'var(--text-normal)',
-									// height: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
-									// width: (mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild && Number.isFinite(safeMarkerSize)) ? safeMarkerSize : 0,
+									height: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? undefined : 0,
+									width: mapViewSettings.arrowDirection !== mapViewArrowDirection.parentToChild ? undefined : 0,
 								},
 							});
 						}
@@ -552,19 +553,20 @@ const MapView: React.FC<MapViewProps> = ({
 	//           ALL EVENT HANDLING
 	// -------------------------------------------------------------
 
-	const handlenodePositionChange = useCallback(() => {
+	const handlenodePositionChange = useCallback((movedNodes: Node[]) => {
+		// console.log("Single node :", movedNodes);
 		try {
-			// Update positions for current board with validation
-			const nodesDataMap: Record<string, nodePositionData> = {};
-			for (const node of nodes) {
+			let tempAllNodes = allNodesData.current;
+
+			for (const node of movedNodes) {
 				const x = Number.isFinite(node.position?.x) ? node.position.x : 0;
 				const y = Number.isFinite(node.position?.y) ? node.position.y : 0;
 				const width = Number.isFinite(node?.width) ? node.width ?? 300 : 300;
-				nodesDataMap[node.id] = { x, y, width };
+				tempAllNodes[node.id] = { x, y, width };
 			}
 
 			// Only update useRef - no state update needed, avoiding re-render
-			allNodesData.current = nodesDataMap;
+			allNodesData.current = tempAllNodes;
 			emitMapDataUpdatedSignal(true);
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(98, String(error), 'MapView.tsx/handlenodePositionTypeChange');
@@ -730,6 +732,7 @@ const MapView: React.FC<MapViewProps> = ({
 			// setViewport(safeViewport);
 			viewPortData.current = safeViewport;
 			// emitMapDataUpdatedSignal(true);
+			// console.log("Will make the viewPortDataUpdated TRUE on fresh render...");
 			viewPortDataUpdated.current = true;
 			// lastViewportSaveTime.current = now;
 		} catch (error) {
@@ -861,83 +864,87 @@ const MapView: React.FC<MapViewProps> = ({
 	// 	node.selected = false;
 	// }
 
+	const deleteEdge = async (event: ReactMouseEvent, edge: Edge) => {
+		// Edge id format: `${targetId}->${sourceId}`
+		const [targetId, sourceId] = edge.id.split('->');
+		const allTasks = allTasksFlattened;
+		const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
+		if (!targetTask) {
+			bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
+			return;
+		}
+
+		if (!Array.isArray(targetTask.dependsOn)) {
+			bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
+			return;
+		}
+
+		const updatedDependsOn = targetTask.dependsOn.filter((dep: string) => dep !== sourceId);
+		const updatedTargetTask = {
+			...targetTask,
+			dependsOn: updatedDependsOn
+		};
+
+		let eventData: UpdateTaskEventData = {
+			taskID: updatedTargetTask.id,
+			state: true,
+		};
+		eventEmitter.emit("UPDATE_TASK", eventData);
+
+		try {
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
+				updatedTargetTask.title = updatedTargetTaskTitle;
+
+				await updateTaskInFile(plugin, updatedTargetTask, targetTask);
+				sleep(100).then(() => {
+					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
+					new Notice(t("dependency-deleted"));
+
+					setTimeout(() => {
+						// This event emmitter will stop any loading animation of ongoing task-card.
+						eventEmitter.emit("UPDATE_TASK", {
+							taskID: updatedTargetTask.id,
+							state: false,
+						});
+					}, 500);
+				})
+				// eventEmitter.emit('REFRESH_BOARD');
+			} else {
+				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
+					// This is required to rescan the updated file and refresh the board.
+					sleep(500).then(() => {
+						plugin.realTimeScanner.processAllUpdatedFiles(
+							updatedTargetTask.filePath
+						);
+						new Notice(t("dependency-deleted"));
+						setTimeout(() => {
+							// This event emmitter will stop any loading animation of ongoing task-card.
+							eventEmitter.emit("UPDATE_TASK", {
+								taskID: updatedTargetTask.id,
+								state: false,
+							});
+						}, 500);
+					});
+				});
+			}
+		} catch (err) {
+			bugReporterManagerInsatance.showNotice(20, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
+		}
+	}
+
 	const toggleTasksImporterPanel = useCallback(() => {
 		setIsImporterPanelVisible(prev => !prev);
 	}, []);
 
-	const handleEdgeClick = useCallback((event: any, edge: Edge) => {
+	const handleEdgeClick = useCallback((event: ReactMouseEvent, edge: Edge) => {
 		// Show Obsidian menu for the selected edge
 		const menu = new Menu();
 		menu.addItem((item) => {
 			item.setTitle(t("delete-dependency"));
 			item.setIcon("trash");
 			item.onClick(async () => {
-				// Edge id format: `${targetId}->${sourceId}`
-				const [targetId, sourceId] = edge.id.split('->');
-				const allTasks = allTasksFlattened;
-				const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
-				if (!targetTask) {
-					bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
-					return;
-				}
-
-				if (!Array.isArray(targetTask.dependsOn)) {
-					bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
-					return;
-				}
-
-				const updatedDependsOn = targetTask.dependsOn.filter((dep: string) => dep !== sourceId);
-				const updatedTargetTask = {
-					...targetTask,
-					dependsOn: updatedDependsOn
-				};
-
-				let eventData: UpdateTaskEventData = {
-					taskID: updatedTargetTask.id,
-					state: true,
-				};
-				eventEmitter.emit("UPDATE_TASK", eventData);
-
-				try {
-					if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
-						const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
-						updatedTargetTask.title = updatedTargetTaskTitle;
-
-						await updateTaskInFile(plugin, updatedTargetTask, targetTask);
-						sleep(100).then(() => {
-							plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
-							new Notice(t("dependency-deleted"));
-
-							setTimeout(() => {
-								// This event emmitter will stop any loading animation of ongoing task-card.
-								eventEmitter.emit("UPDATE_TASK", {
-									taskID: updatedTargetTask.id,
-									state: false,
-								});
-							}, 500);
-						})
-						// eventEmitter.emit('REFRESH_BOARD');
-					} else {
-						updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
-							// This is required to rescan the updated file and refresh the board.
-							sleep(500).then(() => {
-								plugin.realTimeScanner.processAllUpdatedFiles(
-									updatedTargetTask.filePath
-								);
-								new Notice(t("dependency-deleted"));
-								setTimeout(() => {
-									// This event emmitter will stop any loading animation of ongoing task-card.
-									eventEmitter.emit("UPDATE_TASK", {
-										taskID: updatedTargetTask.id,
-										state: false,
-									});
-								}, 500);
-							});
-						});
-					}
-				} catch (err) {
-					bugReporterManagerInsatance.showNotice(20, "There was an error while updating the parent task inside the file. Please see the below error message.", String(err), "MapView.tsx/handleEdgeClick");
-				}
+				deleteEdge(event, edge);
 			});
 		});
 
@@ -1051,10 +1058,10 @@ const MapView: React.FC<MapViewProps> = ({
 							edges={edges}
 							nodeTypes={nodeTypes}
 							onEdgeClick={handleEdgeClick}
+							onEdgeContextMenu={deleteEdge}
 							onNodesChange={onNodesChange}
-							onNodeDragStop={(node) => {
-								console.log("Following node position has been updated : ", node);
-								handlenodePositionChange();
+							onNodeDragStop={(event, node, nodes) => {
+								handlenodePositionChange(nodes);
 							}}
 
 							// viewport controls
@@ -1066,9 +1073,10 @@ const MapView: React.FC<MapViewProps> = ({
 							selectNodesOnDrag={false}
 							selectionOnDrag={Platform.isPhone ? false : true}
 							selectionMode={SelectionMode.Partial}
-							onMoveEnd={(_, vp) => {
+							onMoveEnd={(event, vp) => {
 								// setViewport(prev => ({ ...prev, [activeBoardIndex]: vp })); // NOTE : Dont update the viewport here again, as it is giving a glitching behavior.
-								debouncedSetViewportStorage(vp);
+								if (event)
+									debouncedSetViewportStorage(vp);
 								// throttledSetViewportStorage(vp);
 							}}
 
@@ -1105,6 +1113,7 @@ const MapView: React.FC<MapViewProps> = ({
 											instance.setViewport(newVp);
 											// setViewport(newVp);
 											viewPortData.current = newVp;
+											// console.log("We are running the debouncedSetViewportStorage from here.");
 											debouncedSetViewportStorage(newVp);
 											viewPortDataUpdated.current = true;
 											return;

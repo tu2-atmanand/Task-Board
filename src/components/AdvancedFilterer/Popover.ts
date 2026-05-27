@@ -9,7 +9,10 @@ import { RootFilterState } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
 
-export class AdvancedFilterPopover extends Component implements CloseableComponent {
+export class AdvancedFilterPopover
+	extends Component
+	implements CloseableComponent
+{
 	private plugin: TaskBoard;
 	private app: App;
 	public forColumn: boolean;
@@ -63,12 +66,12 @@ export class AdvancedFilterPopover extends Component implements CloseableCompone
 		// Add column filter heading if this is for a column
 		if (this.forColumn) {
 			headerEl.createEl("h3", {
-				text: t("column-filters-for") + " " + this.columnOrBoardName,
+				text: t("column-filters-for") + " - " + this.columnOrBoardName,
 				cls: "task-popover-content-header-heading",
 			});
 		} else {
 			headerEl.createEl("h3", {
-				text: t("board-filters-for") + " " + this.columnOrBoardName,
+				text: t("view-filters-for") + " - " + this.columnOrBoardName,
 				cls: "task-popover-content-header-heading",
 			});
 		}

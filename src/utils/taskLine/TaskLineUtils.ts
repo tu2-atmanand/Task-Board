@@ -402,7 +402,7 @@ export const useTasksPluginToUpdateInFile = async (
 			// const file = plugin.app.vault.getAbstractFileByPath(filePath);
 			// if (file && file instanceof TFile)
 			// 	scannVault.refreshTasksFromFiles([file]);
-			// eventEmitter.emit("REFRESH_COLUMN");
+			// eventEmitter.emit("SOFT_REFRESH");
 		} else {
 			//fallback to normal function
 			// await updateTaskInFile(plugin, updatedTask, oldTask);

@@ -15,6 +15,7 @@ import {
 	extractFrontmatterFromContent,
 	updateFrontmatterProperties,
 	createYamlFromObject,
+	extractFrontmatterTags,
 } from "./FrontmatterOperations.js";
 
 /**
@@ -58,6 +59,18 @@ export function isTaskNotePresentInTags(
 		: false;
 }
 
+export function validateFrontmatterValue(
+	frontmatter: Partial<customFrontmatterCache>,
+	customKey: string,
+	valueType: "string" | "number" | "array",
+): string | number | string[] | undefined {
+	const value = frontmatter[customKey];
+
+	if (value && typeof value === valueType) {
+		return value;
+	}
+}
+
 /**
  * Extract task note properties from frontmatter
  * @param frontmatter - The frontmatter object
@@ -66,7 +79,6 @@ export function isTaskNotePresentInTags(
  */
 export function extractTaskNoteProperties(
 	frontmatter: Partial<customFrontmatterCache> | undefined,
-	filePath: string,
 	settings: PluginDataJson,
 ): Partial<taskItem> {
 	if (!frontmatter) {
@@ -75,79 +87,150 @@ export function extractTaskNoteProperties(
 
 	const frontmatterFormatting: FrontmatterFormattingInterface[] =
 		settings.data.frontmatterFormatting;
+	let taskItemData: Partial<taskItem> = {};
 
-	return {
-		id:
-			frontmatter[getCustomFrontmatterKey("id", frontmatterFormatting)] ||
-			"",
-		title:
-			frontmatter[
-				getCustomFrontmatterKey("title", frontmatterFormatting)
-			] || "",
-		tags: Array.isArray(
-			frontmatter[getCustomFrontmatterKey("tags", frontmatterFormatting)],
-		)
-			? frontmatter[
-					getCustomFrontmatterKey("tags", frontmatterFormatting)
-				]
-			: typeof frontmatter[
-						getCustomFrontmatterKey("tags", frontmatterFormatting)
-				  ] === "string"
-				? frontmatter[
-						getCustomFrontmatterKey("tags", frontmatterFormatting)
-					]
-						.split(",")
-						.map((tag: string) => tag.trim())
-				: [],
-		time:
-			frontmatter[
-				getCustomFrontmatterKey("time", frontmatterFormatting)
-			] || "",
-		createdDate:
-			frontmatter[
-				getCustomFrontmatterKey("createdDate", frontmatterFormatting)
-			] || "",
-		startDate:
-			frontmatter[
-				getCustomFrontmatterKey("startDate", frontmatterFormatting)
-			] || "",
-		scheduledDate:
-			frontmatter[
-				getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
-			] || "",
-		due:
-			frontmatter[
-				getCustomFrontmatterKey("due", frontmatterFormatting)
-			] || "",
-		cancelledDate:
-			frontmatter[
-				getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
-			] || "",
-		completion:
-			frontmatter[
-				getCustomFrontmatterKey("icompletiond", frontmatterFormatting)
-			] || "",
-		priority: mapPriorityNameFromFrontmatter(
-			frontmatter[
-				getCustomFrontmatterKey("priority", frontmatterFormatting)
-			],
-		),
-		status: getStatusSymbolFromStatusName(
-			frontmatter[
-				getCustomFrontmatterKey("status", frontmatterFormatting)
-			],
-			settings,
-		),
-		dependsOn:
-			frontmatter[
-				getCustomFrontmatterKey("dependsOn", frontmatterFormatting)
-			] || [],
-		reminder:
-			frontmatter[
-				getCustomFrontmatterKey("reminder", frontmatterFormatting)
-			] || "",
-		filePath: filePath,
-	};
+	console.log(
+		"Type of time :",
+		typeof frontmatter[
+			getCustomFrontmatterKey("time", frontmatterFormatting)
+		],
+	);
+
+	let value: string | string[] | number | undefined = "";
+	// Extract id
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("id", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["id"] = value;
+	}
+
+	// Extract title
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("title", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["title"] = value;
+	}
+
+	// Extract tags
+	taskItemData["tags"] = extractFrontmatterTags(frontmatter);
+
+	// Extract time
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("time", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["time"] = value;
+	}
+
+	// Extract createdDate
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("createdDate", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["createdDate"] = value;
+	}
+
+	// Extract startDate
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("startDate", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["startDate"] = value;
+	}
+
+	// Extract scheduledDate
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("scheduledDate", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["scheduledDate"] = value;
+	}
+
+	// Extract due
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("due", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["due"] = value;
+	}
+
+	// Extract cancelledDate
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("cancelledDate", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["cancelledDate"] = value;
+	}
+
+	// Extract completion
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("completion", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["completion"] = value;
+	}
+
+	// Extract priority
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("priority", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "number") {
+		taskItemData["priority"] = value;
+	}
+
+	// Extract status
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("status", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["status"] = getStatusSymbolFromStatusName(value, settings);
+	}
+
+	// Extract dependsOn
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("dependsOn", frontmatterFormatting),
+		"string",
+	);
+	if (Array.isArray(value)) {
+		taskItemData["dependsOn"] = value;
+	}
+
+	// Extract reminder
+	value = validateFrontmatterValue(
+		frontmatter,
+		getCustomFrontmatterKey("reminder", frontmatterFormatting),
+		"string",
+	);
+	if (typeof value === "string") {
+		taskItemData["reminder"] = value;
+	}
+
+	return taskItemData;
 }
 
 /**
@@ -438,7 +521,7 @@ export async function deleteTaskNote(
 }
 
 /**
- * Archive a task note by moving it to the archived folder
+ * Archive a task-note by moving it to the archived folder
  * @param plugin - TaskBoard plugin instance
  * @param filePath - Path to the file to archive
  */

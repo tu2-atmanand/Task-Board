@@ -3,7 +3,7 @@
 import { App } from "obsidian";
 import TaskBoard from "../main.js";
 import { bugReporterManagerInsatance } from "./managers/BugReporter.js";
-import { AddOrEditTaskModal } from "./modals/AddOrEditTaskModal.js";
+import { TaskEditorModal } from "./modals/TaskEditorModal.js";
 
 
 /**
@@ -101,7 +101,7 @@ export class TaskBoardApi {
 		filePath?: string,
 	): Promise<string> {
 		try {
-			const AddTaskModal = new AddOrEditTaskModal(
+			const AddTaskModal = new TaskEditorModal(
 				plugin,
 				(newTask, quickAddPluginChoice) => {
 					// Task save callback - handled by modal's onSave event

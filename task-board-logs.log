@@ -1,0 +1,98 @@
+# Task Board Logs
+
+## System Information
+
+- **Obsidian version**: 1.12.7
+- **Installer version**: 1.12.7
+- **Operating system**: Windows 10 Home Single Language 10.0.19045
+- **Use [[Wikilinks]]**: true
+- **Base color scheme**: dark
+- **Community theme**: none
+- **Snippets enabled**: 0
+- **Plugins installed**: 55
+- **Plugins enabled**: 
+  - Plugin Reloader v0.0.3
+  - Task Board v2.0.0-beta-3
+  - BRAT v1.4.0
+  - Advanced Debug Mode v1.9.1
+  - Excalidraw v2.18.3
+
+## Recent Bug Reports
+
+Timestamp : 2026-05-20T22:23:59
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-3
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-05-20T22:24:58
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-3
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-05-20T22:26:50
+ID : 141
+Message : 
+Context : DragDropTasksManager.ts/handleColumnDragOverEvent
+Version : 2.0.0-beta-3
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-05-20T22:26:51
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-3
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-05-21T20:58:51
+ID : 141
+Message : 
+Context : DragDropTasksManager.ts/handleColumnDragOverEvent
+Version : 2.0.0-beta-3
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-05-21T20:58:52
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-3
+
+#### Bug Content
+```log
+No current drag data available for drop operation.currentDragData=null
+```

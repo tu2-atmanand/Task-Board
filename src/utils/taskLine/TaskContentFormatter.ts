@@ -9,7 +9,10 @@ import {
 } from "../../interfaces/Enums.js";
 import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
 import { priorityEmojis } from "../../interfaces/Mapping.js";
-import { cursorLocationInterface, taskItem } from "../../interfaces/TaskItem.js";
+import {
+	cursorLocationInterface,
+	taskItem,
+} from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import {
 	extractTaskId,
@@ -988,10 +991,9 @@ export const sanitizeTags = (
 	const tempTitle = title.replace(/<(mark|font).*?>/g, "");
 
 	// Regex to extract tags from title
-	const tagsRegex = /\s+#([^\s!@#$%^&*()+=;:'"?<>{}[\]-]+)(?=\s|$)/g;
-	const extractedTags = (tempTitle.match(tagsRegex) || []).map((t) =>
-		t.trim(),
-	);
+	const extractedTags = (
+		tempTitle.match(TaskRegularExpressions.hashTagsRegex) || []
+	).map((t) => t.trim());
 
 	// const oldTagSet = new Set(oldTagsList.map((t) => t.trim()));
 	// TODO : Soon, will update the tags management mechanism to store the tags without the `#`
@@ -1002,6 +1004,7 @@ export const sanitizeTags = (
 			let sTag = t.trim();
 			sTag = sTag.startsWith("#") ? sTag : `#${sTag}`;
 			return sTag;
+			// return t.trim();
 		}),
 	);
 	const extractedTagsSet = new Set(extractedTags.map((t) => t.trim()));
@@ -1455,7 +1458,8 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 };
 
 /**
- * Function to clean the task title by removing metadata. This is legacy function for compatibility.
+ * Function to clean the task title by removing all supported metadata.
+ * This is legacy function for compatibility.
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The task item to clean.
  * @returns The cleaned task title without metadata.
@@ -1477,7 +1481,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 	// Remove tags
 	task.tags.forEach((tag) => {
-		const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
+		const tagRegex = new RegExp(`\\s*#${tag}\\s*`, "g");
 		const tagsMatch = cleanedTitle.match(tagRegex);
 		if (tagsMatch) {
 			cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");

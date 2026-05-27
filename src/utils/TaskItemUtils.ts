@@ -5,9 +5,10 @@ import { taskItem } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { extractTaskId } from "../managers/VaultScanner.js";
 import { updateTaskInFile } from "./taskLine/TaskLineUtils.js";
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "./taskNote/TaskNoteUtils.js";
-
-
+import {
+	isTaskNotePresentInTags,
+	updateFrontmatterInMarkdownFile,
+} from "./taskNote/TaskNoteUtils.js";
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
@@ -81,10 +82,10 @@ export const getTaskFromId = async (
  * For example : '1851955511'.
  * @return {string} a random unique ID for a task
  */
-export function generateRandomTempTaskId(): string {
+export function generateRandomStringId(prefix?: string): string {
 	const array = new Uint32Array(1);
 	crypto.getRandomValues(array);
-	return String(array[0]);
+	return prefix ? `${prefix}_${String(array[0])}` : String(array[0]);
 }
 
 /**
@@ -127,39 +128,33 @@ export const applyIdToTaskItem = async (
 	plugin: TaskBoard,
 	task: taskItem,
 ): Promise<string | undefined> => {
+	// If the task already has an ID, return it and avoid assigning a new one.
+	if (task.legacyId && String(task.legacyId).trim() !== "") {
+		return String(task.legacyId);
+	}
+
+	// If it's a task note, ensure frontmatter has an ID and return it.
 	if (
 		isTaskNotePresentInTags(
 			plugin.settings.data.taskNoteIdentifierTag,
 			task.tags,
 		)
 	) {
-		let newId;
-		if (task.legacyId === "") {
+		let newId = task.legacyId;
+		if (!newId || String(newId).trim() === "") {
 			newId = generateTaskId(plugin);
 			task.legacyId = newId;
 		}
 		updateFrontmatterInMarkdownFile(plugin, task, true);
 
 		return newId;
-	} else {
-		const extractedTaskId = extractTaskId(task.title)?.[1];
-		if (extractedTaskId) return extractedTaskId;
-
-		const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
-		return newIdToReturn;
 	}
-	// .then((newId) => {
-	// 	newIdToReturn = newId;
-	// })
-	// .catch((error) => {
-	// 	bugReporterManagerInsatance.showNotice(
-	// 		83,
-	// 		"Error while applying ID to the selected child task in its parent note. Below error message might give more information on this issue. Report the issue if it needs developers attention.",
-	// 		String(error),
-	// 		"TaskItemUtils.ts/applyIdToTaskItem"
-	// 	);
-	// 	return undefined;
-	// });
-	// return newIdToReturn;
-	// }
+
+	// Try to extract an ID from the title (legacy inline format)
+	const extractedTaskId = extractTaskId(task.title)?.[1];
+	if (extractedTaskId) return extractedTaskId;
+
+	// Otherwise, update the task line in the file which should return a new ID
+	const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
+	return newIdToReturn;
 };

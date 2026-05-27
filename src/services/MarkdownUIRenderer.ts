@@ -100,6 +100,8 @@ export class MarkdownUIRenderer {
 			return;
 		}
 
+		element.replaceChildren();
+
 		await MarkdownRenderer.render(
 			app,
 			taskDescText,
@@ -122,6 +124,9 @@ export class MarkdownUIRenderer {
 			if (!componentEl) {
 				return;
 			}
+
+			el.replaceChildren();
+
 			// Call Obsidian's MarkdownRenderer to render the subtaskText as markdown
 			await MarkdownRenderer.render(
 				app,

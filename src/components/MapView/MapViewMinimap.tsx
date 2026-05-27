@@ -24,16 +24,16 @@ export const MapViewMinimap: React.FC<MapViewMinimapProps> = ({ tagColors }) => 
 		if (!Array.isArray(nodeTags)) return "var(--xy-minimap-node-background-color, var(--xy-minimap-node-background-color-default))";
 
 		// Prepare a map for faster lookup
-		const tagColorMap = new Map(tagColors.map((t) => [t.name, t]));
+		const tagColorMap = new Map(tagColors.map((t) => [t.name.toLowerCase(), t]));
 
 		let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
 
 		for (const rawTag of nodeTags) {
-			const tagName = rawTag.replace('#', '');
+			const tagName = rawTag.toLowerCase();
 			let tagData = tagColorMap.get(tagName);
 
 			if (!tagData) {
-				tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+				tagColorMap.forEach((tagColor, tagNameKey) => {
 					const result = matchTagsWithWildcards(tagNameKey, tagName || '');
 					// Return the first match found
 					if (result) tagData = tagColor;

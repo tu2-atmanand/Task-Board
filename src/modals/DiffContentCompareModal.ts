@@ -53,10 +53,13 @@ export class DiffContentCompareModal extends Modal {
 		const newContentDiv = rightDiv.createDiv({
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
-		newContentDiv.innerHTML = this.getHighlightedDiff(
-			this.cachedTaskContent,
-			this.taskContentFromFile,
-			"left",
+		newContentDiv.insertAdjacentHTML(
+			"beforeend",
+			this.getHighlightedDiff(
+				this.cachedTaskContent,
+				this.taskContentFromFile,
+				"left",
+			),
 		);
 		new ButtonComponent(rightDiv)
 			.setButtonText("Keep this as it is")
@@ -73,10 +76,13 @@ export class DiffContentCompareModal extends Modal {
 		const oldContentDiv = leftDiv.createDiv({
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
-		oldContentDiv.innerHTML = this.getHighlightedDiff(
-			this.cachedTaskContent,
-			this.EditedTaskContent,
-			"right",
+		oldContentDiv.insertAdjacentHTML(
+			"beforeend",
+			this.getHighlightedDiff(
+				this.cachedTaskContent,
+				this.EditedTaskContent,
+				"right",
+			),
 		);
 		new ButtonComponent(leftDiv)
 			.setButtonText("Use this")
@@ -140,12 +146,14 @@ export class DiffContentCompareModal extends Modal {
 			debuInfoComparisonContainerLefttDiv.createDiv({
 				cls: "taskboard-diff-content-compare-modal-content",
 			});
-		debuInfoComparisonContainerLefttDivContent.innerHTML =
+		debuInfoComparisonContainerLefttDivContent.insertAdjacentHTML(
+			"beforeend",
 			this.getHighlightedDiff(
 				this.cachedTaskContent,
 				this.taskContentFromFile,
 				"left",
-			);
+			),
+		);
 
 		const debuInfoComparisonContainerRightDiv =
 			debuInfoComparisonContainer.createDiv({
@@ -158,12 +166,14 @@ export class DiffContentCompareModal extends Modal {
 			debuInfoComparisonContainerRightDiv.createDiv({
 				cls: "taskboard-diff-content-compare-modal-content",
 			});
-		debuInfoComparisonContainerRightDivContent.innerHTML =
+		debuInfoComparisonContainerRightDivContent.insertAdjacentHTML(
+			"beforeend",
 			this.getHighlightedDiff(
 				this.taskContentFromFile,
 				this.cachedTaskContent,
 				"right",
-			);
+			),
+		);
 
 		contentEl.createEl("p", {
 			text: "This 'Debug info' section is just provided to find out whether the Safe Guard genuinely captured the difference correctly or whether this was a false alarm. Will remove this section in the future, if this safe guard feature is working as expected.",

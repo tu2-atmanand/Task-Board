@@ -1,11 +1,11 @@
-// src/views/AddOrEditTaskView.tsx
+// src/views/TaskEditorView.tsx
 
 import { ItemView, WorkspaceLeaf, normalizePath } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { t } from "i18next";
 import TaskBoard from "../../main.js";
-import { AddOrEditTaskRC } from "../components/AddOrEditTaskRC.js";
+import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../interfaces/GlobalSettings.js";
 import { taskItemEmpty } from "../interfaces/Mapping.js";
 import { taskItem } from "../interfaces/TaskItem.js";
@@ -16,7 +16,7 @@ import { generateTaskId } from "../utils/TaskItemUtils.js";
 import { getFormattedTaskContent } from "../utils/taskLine/TaskContentFormatter.js";
 
 
-export class AddOrEditTaskView extends ItemView {
+export class TaskEditorView extends ItemView {
 	plugin: TaskBoard;
 	root: Root | null = null;
 	viewTypeId: string = "";
@@ -101,7 +101,7 @@ export class AddOrEditTaskView extends ItemView {
 		this.root = createRoot(container);
 		this.root.render(
 			<StrictMode>
-				<AddOrEditTaskRC
+				<TaskEditorRC
 					plugin={this.plugin}
 					root={container as HTMLElement}
 					isTaskNote={this.isTaskNote}

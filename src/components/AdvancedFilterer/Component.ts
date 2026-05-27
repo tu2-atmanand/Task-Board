@@ -29,7 +29,7 @@ import {
 	getTagSuggestions,
 	getFileSuggestions,
 } from "../../services/MultiSuggest.js";
-import { generateRandomTempTaskId } from "../../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import { BoardFiltersStoreModal } from "./LoadSavedFiltersModal.js";
 
 export class AdvancedFilterComponent extends Component {
@@ -684,15 +684,15 @@ export class AdvancedFilterComponent extends Component {
 
 			const propertyValue = propertySelect.getValue();
 			if (propertyValue === "priority" || propertyValue === "status") {
-				valueInput.style.display = "none";
-				dropdownInputContainer.style.display = valueActuallyNeeded
-					? "block"
-					: "none";
+				valueInput.hide();
+
+				if (valueActuallyNeeded) dropdownInputContainer.show();
+				else dropdownInputContainer.hide();
 			} else {
-				valueInput.style.display = valueActuallyNeeded
-					? "block"
-					: "none";
-				dropdownInputContainer.style.display = "none";
+				dropdownInputContainer.hide();
+
+				if (valueActuallyNeeded) valueInput.show();
+				else valueInput.hide();
 			}
 
 			if (!valueActuallyNeeded && filterData.value !== undefined) {
@@ -719,16 +719,16 @@ export class AdvancedFilterComponent extends Component {
 
 		valueInput.value = filterData.value || "";
 
-		let valueInputTimeout: NodeJS.Timeout;
+		// let valueInputTimeout: NodeJS.Timeout;
 		this.registerDomEvent(valueInput, "input", (event) => {
 			filterData.value = (event.target as HTMLInputElement).value;
 
-			this.saveStateToLocalStorage(false);
+			// this.saveStateToLocalStorage(false);
 
-			clearTimeout(valueInputTimeout);
-			valueInputTimeout = setTimeout(() => {
-				this.saveStateToLocalStorage(true);
-			}, 400);
+			// clearTimeout(valueInputTimeout);
+			// valueInputTimeout = setTimeout(() => {
+			// 	this.saveStateToLocalStorage(true);
+			// }, 400);
 		});
 
 		const removeFilterBtn = new ExtraButtonComponent(newFilterEl)
@@ -884,7 +884,7 @@ export class AdvancedFilterComponent extends Component {
 				break;
 			case "status":
 				// valueInput.type = "text";
-				valueInput.style.display = "none";
+				valueInput.hide();
 				// // First remove the older dropdown options present inside valueSelect
 				// if(valueSelect.selectEl.options.length > 0) {
 				// 	valueSelect.
@@ -919,13 +919,9 @@ export class AdvancedFilterComponent extends Component {
 						(option) => {
 							if (option.value.startsWith("__group_")) {
 								option.disabled = true;
-								option.style.cssText = `
-        color: var(--text-muted);
-        font-weight: var(--font-semibold);
-        background: var(--background-secondary);
-        pointer-events: none;
-        user-select: none;
-      `;
+								option.addClass(
+									"taskboard_customstatus_dropdown_option",
+								);
 							}
 						},
 					);
@@ -991,7 +987,7 @@ export class AdvancedFilterComponent extends Component {
 				// 	"compact-select",
 				// ]);
 				// valueInput.replaceWith(dropdownInput.selectEl);
-				valueInput.style.display = "none";
+				valueInput.hide();
 				valueSelect.addOptions(
 					getPriorityOptionsForDropdown().reduce(
 						(
@@ -1242,12 +1238,6 @@ export class AdvancedFilterComponent extends Component {
 		const finalConditionVal = conditionSelect.getValue();
 		let valueActuallyNeeded =
 			this.conditionsRequiringValue.includes(finalConditionVal);
-		console.log(
-			"finalConditionVal : ",
-			finalConditionVal,
-			"\nvalueActuallyNeeded : ",
-			valueActuallyNeeded,
-		);
 		// if (
 		// 	property === "completed" &&
 		// 	(finalConditionVal === "isTrue" || finalConditionVal === "isFalse")
@@ -1265,7 +1255,7 @@ export class AdvancedFilterComponent extends Component {
 
 		// if (valueSelect) {
 		// 	console.log("Removing dropdown input");
-		// 	valueInput.style.display = "none";
+		// 	valueInput.hide();
 		// 	// if (valueActuallyNeeded) {
 		// 	// } else {
 		// 	// 	console.log("Removing dropdown input - 2");
@@ -1278,13 +1268,15 @@ export class AdvancedFilterComponent extends Component {
 
 		const propertyValue = propertySelect.getValue();
 		if (propertyValue === "priority" || propertyValue === "status") {
-			valueInput.style.display = "none";
-			dropdownInputContainer.style.display = valueActuallyNeeded
-				? "block"
-				: "none";
+			valueInput.hide();
+
+			if (valueActuallyNeeded) dropdownInputContainer.show();
+			else dropdownInputContainer.hide();
 		} else {
-			dropdownInputContainer.style.display = "none";
-			valueInput.style.display = valueActuallyNeeded ? "block" : "none";
+			dropdownInputContainer.hide();
+
+			if (valueActuallyNeeded) valueInput.show();
+			else valueInput.hide();
 		}
 
 		if (valueActuallyNeeded) {
@@ -1334,12 +1326,6 @@ export class AdvancedFilterComponent extends Component {
 		let suggestions: string[] = [];
 
 		switch (property) {
-			// case "status":
-			// 	suggestions = getStatusSuggestions(
-			// 		this.pluginSettings.data
-			// 			.customStatuses
-			// 	);
-			// 	break;
 			case "tags":
 				suggestions = getTagSuggestions(this.app);
 				break;
@@ -1350,7 +1336,7 @@ export class AdvancedFilterComponent extends Component {
 
 		// Create callback to update filter data when suggestion is selected
 		const onSelectCallback = (value: string) => {
-			filterData.value = value;
+			filterData.value = value.replace("#", "");
 			this.saveStateToLocalStorage();
 		};
 
@@ -1361,7 +1347,7 @@ export class AdvancedFilterComponent extends Component {
 			onSelectCallback,
 			this.app,
 		);
-
+		multiSuggestInstance.setAutoDestroy(valueInput);
 		// Store instance in WeakMap for cleanup
 		this.multiSuggestInstances.set(valueInput, multiSuggestInstance);
 	}
@@ -1632,5 +1618,5 @@ export class AdvancedFilterComponent extends Component {
 }
 
 export function generateIdForFilters(): string {
-	return `id-${Date.now()}-${generateRandomTempTaskId()}`;
+	return generateRandomStringId(`filter_${Date.now()}`);
 }
