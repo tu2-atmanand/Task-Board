@@ -62,64 +62,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const columnListRef = useRef<HTMLDivElement | null>(null);
 	const boardListRef = useRef<HTMLDivElement | null>(null);
 
-	useEffect(() => {
-		if (
-			selectedViewIndex === -1 ||
-			!columnListRef.current ||
-			!allViewsData[selectedViewIndex] ||
-			allViewsData[selectedViewIndex].viewType !== viewTypeNames.kanban
-		)
-			return;
-
-		const sortable = Sortable.create(columnListRef.current, {
-			animation: 150,
-			handle: ".boardConfigModalColumnRowDragButton",
-			onEnd: (evt) => {
-				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
-
-				const updatedViewsData = [...allViewsData];
-				// const columns = updatedViewsData[selectedViewIndex].kanbanView!.columns;
-				const [movedItem] = updatedViewsData[selectedViewIndex].kanbanView!.columns.splice(evt.oldIndex, 1);
-				updatedViewsData[selectedViewIndex].kanbanView!.columns.splice(evt.newIndex, 0, movedItem);
-				updatedViewsData[selectedViewIndex].kanbanView!.columns.forEach((col, idx) => (col.index = idx + 1));
-
-				setAllViewsData(updatedViewsData);
-				setIsEdited(true);
-			},
-		});
-
-		return () => {
-			sortable.destroy();
-		};
-	}, [selectedViewIndex, allViewsData]);
-
-	// useEffect for view order sorting
-	useEffect(() => {
-		if (!boardListRef.current) return;
-
-		const sortableBoards = Sortable.create(boardListRef.current, {
-			animation: 150,
-			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
-			onEnd: (evt) => {
-				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
-					return;
-				}
-
-				// Reorder the views inside the allViewsData state based on the new order after drag-and-drop
-				const updatedViewsData = [...allViewsData];
-				const [movedBoard] = updatedViewsData.splice(evt.oldIndex, 1);
-				updatedViewsData.splice(evt.newIndex, 0, movedBoard);
-
-				setAllViewsData(updatedViewsData);
-				setIsEdited(true);
-			},
-		});
-
-		return () => {
-			sortableBoards.destroy();
-		};
-	}, [allViewsData, selectedViewIndex]);
-
 	// --------------------------------------------------------------
 	// ALL EVENT HANDLING LOGIC BELOW
 	// --------------------------------------------------------------
@@ -218,7 +160,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			forceFallback: true,
 			fallbackClass: "task-view-sortable-fallback",
 			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: (evt) => {
+			onEnd: (evt) => {
 				try {
 					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
@@ -238,7 +180,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
 					// }
 				} catch (error) {
-					bugReporterManagerInsatance.showNotice(36, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
+					bugReporterManagerInsatance.showNotice(36, "Error in Sortable onEnd", error as string, "BoardConfigModal.tsx/onEnd");
 				}
 			},
 		});
@@ -332,6 +274,33 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 		swimlaneModal.open();
 	};
+
+	// TaskBoardView Management - useEffect for view order sorting
+	useEffect(() => {
+		if (!boardListRef.current) return;
+
+		const sortableBoards = Sortable.create(boardListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
+					return;
+				}
+
+				// Reorder the views inside the allViewsData state based on the new order after drag-and-drop
+				const updatedViewsData = [...allViewsData];
+				const [movedBoard] = updatedViewsData.splice(evt.oldIndex, 1);
+				updatedViewsData.splice(evt.newIndex, 0, movedBoard);
+
+				setAllViewsData(updatedViewsData);
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortableBoards.destroy();
+		};
+	}, [allViewsData, selectedViewIndex]);
 
 	// TaskBoardView Management - Function to handle duplicating the currently selected view in the board configuration modal by creating a copy of the view data with a new name and adding it to the list of views in the state
 	const handleDuplicateCurrentView = async () => {
