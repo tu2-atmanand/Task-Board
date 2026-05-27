@@ -394,7 +394,6 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 		if (visibleProperties.includes(propertyName)) {
 			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
 			plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
-
 		} else {
 			let index = -1;
 			switch (propertyName) {
@@ -609,22 +608,32 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
 			});
 
-			// subTasksMenu.addItem((item) => {
-			// 	item.setTitle(t("hidden"))
-			// 	item.onClick(async () => {
-			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
-			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(async () => {
+					let visibleProperties = plugin.settings.data.globalSettings.visiblePropertiesList || [];
 
-			// 	})
-			// 	item.setChecked(!plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
-			// });
+					if (visibleProperties.includes(taskPropertiesNames.SubTasks)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasks), 1);
+					}
+
+					if (visibleProperties.includes(taskPropertiesNames.SubTasksMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasksMinimized), 1);
+					}
+
+					plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+					plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+			});
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("description"));
-			const subTasksMenu = item.setSubmenu()
+			const descriptionMenu = item.setSubmenu()
 
-			subTasksMenu.addItem((item) => {
+			descriptionMenu.addItem((item) => {
 				item.setTitle(t("visible"))
 				item.onClick(async () => {
 					togglePropertyNameInSettings(taskPropertiesNames.Description);
@@ -634,7 +643,7 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description));
 			});
 
-			subTasksMenu.addItem((item) => {
+			descriptionMenu.addItem((item) => {
 				item.setTitle(t("minimized"))
 				item.onClick(async () => {
 					togglePropertyNameInSettings(taskPropertiesNames.DescriptionMinimized);
@@ -642,6 +651,26 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 
 				})
 				item.setChecked(plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+			});
+
+			descriptionMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(async () => {
+					let visibleProperties = plugin.settings.data.globalSettings.visiblePropertiesList || [];
+
+					if (visibleProperties.includes(taskPropertiesNames.Description)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.Description), 1);
+					}
+
+					if (visibleProperties.includes(taskPropertiesNames.DescriptionMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.DescriptionMinimized), 1);
+					}
+
+					plugin.settings.data.globalSettings.visiblePropertiesList = visibleProperties;
+					plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) && !plugin.settings.data.globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
 			});
 		});
 

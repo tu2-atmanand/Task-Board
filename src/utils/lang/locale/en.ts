@@ -630,7 +630,8 @@ const en: Lang = {
 	"file-or-folder-path": "File or folder path",
 	"date-type": "Date type",
 	"name": "Name",
-	"column-config-drag-butn-info": "Drag this column to change its order"
+	"column-config-drag-butn-info": "Drag this column to change its order",
+	"hidden": "Hidden"
 };
 
 export default en;
