@@ -1481,7 +1481,7 @@ export const TaskEditorRC: React.FC<{
 								onChange={(e) =>
 									handleOnCompletionChange(Number(e.target.value))
 								}
-								className="boardConfigModalColumnRowContentColDatedVal"
+								className="boardConfigModalColumnRowContentNumericInput"
 							>
 								<option value={onCompletionOptions.NONE}>{t("none")}</option>
 								<option value={onCompletionOptions.keep}>{t("keep")}</option>

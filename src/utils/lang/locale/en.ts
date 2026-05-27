@@ -665,7 +665,11 @@ const en: Lang = {
 	"board-created-successfully": "A template task board has been created at the root of the vault.",
 	"embed-task-boards": "Embed task boards",
 	"embed-task-boards-info": "Embed your task boards (.taskboard files) inside your notes. Easy to take notes on your project boards and manage inside the single note itself.",
-	"interactions": "Interactions"
+	"interactions": "Interactions",
+	"file-or-folder-path": "File or folder path",
+	"date-type": "Date type",
+	"name": "Name",
+	"column-config-drag-butn-info": "Drag this column to change its order"
 };
 
 export default en;

@@ -2665,28 +2665,43 @@ body.taskboard-touch-dragging {
 
 .boardConfigModalColumnRow {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	justify-content: flex-start;
 	gap: 0.5em;
 	margin-block: 0.5em;
 	cursor: default;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 10px;
-	padding: 4px;
 	overflow-y: unset;
 	overflow-x: auto;
-	padding-top: 0.8rem;
 }
 
 .boardConfigModalColumnRow.Hidden {
 	opacity: 50%;
 }
 
+.boardConfigModalColumnRowHeader {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	background-color: var(--background-secondary);
+	padding: 0.3rem;
+	padding-inline-end: 0.7rem;
+}
+
+.boardConfigModalColumnRowHeaderLeftSec {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	align-items: center;
+}
+
 .boardConfigModalColumnRowDragButton {
 	cursor: grab;
 	align-self: center;
 	min-width: 30px;
-	min-height: max-content;
+	/* min-height: max-content; */
 	opacity: 50%;
 }
 
@@ -2701,11 +2716,14 @@ body.taskboard-touch-dragging {
 	color: var(--text-error);
 }
 
-.boardConfigModalAddColumnButton {
-	width: 50% !important;
-	align-self: self-end !important;
-	margin-bottom: 1em;
-	cursor: pointer;
+.boardConfigModalColumnRowContentColumnType {
+	/* width: 100%; */
+	/* min-width: 5em; */
+	max-width: 10em;
+	background-color: var(--background-secondary-alt);
+	padding: 0.2rem;
+	border-radius: 0.3rem;
+	padding-inline: 0.4rem;
 }
 
 .boardConfigModalColumnRowContent {
@@ -2715,12 +2733,20 @@ body.taskboard-touch-dragging {
 	gap: 0.5em;
 	max-width: 55vw;
 	flex-wrap: wrap;
+	padding: 0.4rem;
 }
 
-.boardConfigModalColumnRowContentColumnType button {
-	width: 100%;
-	min-width: 5em;
-	max-width: 8em;
+.boardConfigModalColumnRowContentProperty {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.boardConfigModalColumnRowContentPropertyLabel {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	line-height: var(--line-height-tight);
 }
 
 .boardConfigModalColumnRowContentColName {
@@ -2728,29 +2754,29 @@ body.taskboard-touch-dragging {
 	max-width: 200px;
 }
 
-.boardConfigModalColumnRowContentColDatedVal {
-	min-width: 110px !important;
-	max-width: 150px !important;
+.boardConfigModalColumnRowContentNumericInput {
+	min-width: 50px !important;
+	max-width: 90px !important;
 }
 
-.boardConfigModalColumnRowContentColDatedVal.border-red,
-.boardConfigModalColumnRowContentColDatedVal.border-red:hover,
-.boardConfigModalColumnRowContentColDatedVal.border-red:active,
-.boardConfigModalColumnRowContentColDatedVal.border-red:focus,
-.boardConfigModalColumnRowContentColDatedVal.border-red:focus-visible,
-.boardConfigModalColumnRowContentColDatedVal.border-red:focus-within {
+.boardConfigModalColumnRowContentNumericInput.border-red,
+.boardConfigModalColumnRowContentNumericInput.border-red:hover,
+.boardConfigModalColumnRowContentNumericInput.border-red:active,
+.boardConfigModalColumnRowContentNumericInput.border-red:focus,
+.boardConfigModalColumnRowContentNumericInput.border-red:focus-visible,
+.boardConfigModalColumnRowContentNumericInput.border-red:focus-within {
 	border-color: red;
 	border-width: 2px;
 }
 
-.boardConfigModalColumnRowContentColDatedVal:focus {
+.boardConfigModalColumnRowContentNumericInput:focus {
 	outline: none;
 	border-color: var(--interactive-accent);
 	box-shadow: 0 0 0 2px var(--interactive-accent-hover);
 }
 
 /* Style optgroup if using grouping */
-.boardConfigModalColumnRowContentColDatedVal optgroup {
+.boardConfigModalColumnRowContentNumericInput optgroup {
 	font-weight: var(--font-semibold);
 	color: var(--text-muted);
 	background: var(--background-secondary);
@@ -2793,6 +2819,13 @@ body.taskboard-touch-dragging {
 
 [data-rbd-drag-handle-context-id="0"] {
 	cursor: auto !important;
+}
+
+.boardConfigModalAddColumnButton {
+	width: 50% !important;
+	align-self: self-end !important;
+	margin-bottom: 1em;
+	cursor: pointer;
 }
 
 /* .modal-container.mod-dim {
@@ -2875,10 +2908,6 @@ body.taskboard-touch-dragging {
 	.boardConfigModalColumnRowContentColName {
 		min-width: 70px !important;
 		max-width: 150px !important;
-	}
-
-	.boardConfigModalColumnRow {
-		align-items: center;
 	}
 
 	.boardConfigModalColumnRowDragButton {
@@ -5673,9 +5702,19 @@ svg.react-flow__connectionline {
 
 /* src/modal/ConfigureColumnSortingModal.ts */
 
-.configureColumnSortingModalHome {}
+.configureColumnSortingModalHome {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
 
-.configureColumnSortingModalHomeSortingCriteriaList {}
+.configureColumnSortingModalHomeSortingCriteriaList {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	align-items: flex-start;
+	width: -webkit-fill-available;
+}
 
 .configureColumnSortingModalHomeSortingCriteriaListItemRow {
 	display: flex;
