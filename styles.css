@@ -827,14 +827,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 /* Drag and Drop Styling */
 
-/* Element being dragged: dim / scale */
-.task-item-dragging,
-.taskItem.task-item-dragging {
-	opacity: 0.5;
-	transform: scale(0.98);
-	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-}
-
 /* Dragged task item dimming effect */
 .task-item-dragging-dimmed {
 	opacity: 0.45 !important;
@@ -1642,6 +1634,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItem.task-item-dragging {
 	opacity: 0.5;
 	transform: scale(0.98);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 	outline: 1px dashed var(--interactive-accent);
 	outline-offset: -2px;
 }

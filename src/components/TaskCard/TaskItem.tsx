@@ -54,7 +54,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 		} else {
 			setShowSubtasks(false);
 		}
-	}, [plugin.settings.data]);
+	}, [plugin.settings.data.visiblePropertiesList]);
 
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
@@ -152,7 +152,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 				"TaskItem.tsx/Main title rendering useEffect",
 			);
 		}
-	}, [task.id, task.title, task.filePath, plugin.settings.data.searchQuery]);
+	}, [task.id, task.title, task.filePath]);
 
 	// useEffect(() => {
 	// 	const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
@@ -949,7 +949,14 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 		};
 
 		return dragDropTasksManagerInsatance.setupCardTouchHandlers(el, payload);
-	}, [task.id]);
+	}, [
+		task,
+		dataAttributeIndex,
+		columnData,
+		activeViewIndex,
+		activeBoardID,
+		swimlaneData
+	]);
 
 	// ========================================
 	// ALL RENDERING CODE
