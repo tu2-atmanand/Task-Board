@@ -320,12 +320,28 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const targetColumnContainer = tasksContainerRef.current;
 			// const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
 			if (!targetColumnContainer) {
-				throw `e.currentTarget not found : ${JSON.stringify(targetColumnContainer)}`;
+				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
 			}
 
-			dragDropTasksManagerInsatance.handleDropEvent(columnData, targetColumnContainer, swimlaneData);
-			dragDropTasksManagerInsatance.clearCurrentDragData();
-			dragDropTasksManagerInsatance.clearDesiredDropIndex();
+			// We will have to do this calculation here once again to ensure that we correctly captures the task index.
+			let pos = 0 // Default to top of the column
+			const hoveredElement = e.currentTarget;
+			const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
+			const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
+			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+			// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
+			if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
+				const clientY = e.clientY;
+				const rect = hoveredElement.getBoundingClientRect();
+				const midpoint = rect.top + rect.height / 2;
+				if (clientY < midpoint) {
+					pos = parseInt(draggedOverItemIndex, 10);
+				} else {
+					pos = parseInt(draggedOverItemIndex, 10) + 1;
+				}
+			}
+
+			dragDropTasksManagerInsatance.handleDropEvent(columnData, targetColumnContainer, swimlaneData, pos);
 
 			// clear any pending raf
 			if (rafRef.current) {

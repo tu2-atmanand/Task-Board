@@ -17,6 +17,9 @@ import {
 import {
 	updateTaskItemTags,
 	updateTaskItemProperty,
+	updateTaskItemDate,
+	updateTaskItemPriority,
+	updateTaskItemStatus,
 } from "../utils/UserTaskEvents.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import { compareTwoTags } from "../utils/algorithms/ScanningFilterer.js";
@@ -602,9 +605,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemDate } =
-			await import("../utils/UserTaskEvents.js");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -711,9 +711,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemPriority } =
-			await import("../utils/UserTaskEvents.js");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -762,9 +759,6 @@ class DragDropTasksManager {
 			);
 			return;
 		}
-
-		const { updateTaskItemStatus } =
-			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -841,9 +835,6 @@ class DragDropTasksManager {
 			);
 			return;
 		}
-
-		const { updateTaskItemDate } =
-			await import("../utils/UserTaskEvents.js");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -1025,9 +1016,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemPriority } =
-			await import("../utils/UserTaskEvents.js");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -1079,9 +1067,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemStatus } =
-			await import("../utils/UserTaskEvents.js");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -1125,9 +1110,6 @@ class DragDropTasksManager {
 		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
-		const { updateTaskItemStatus } =
-			await import("../utils/UserTaskEvents.js");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -1783,8 +1765,6 @@ class DragDropTasksManager {
 			tasksContainer as HTMLDivElement,
 			targetSwimlane,
 		);
-
-		this.clearDesiredDropIndex();
 	}
 
 	// --------------------------------------
@@ -2008,7 +1988,10 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
+		manualOrderIndex?: number,
 	): void {
+		if (manualOrderIndex) this.setDesiredDropIndex(manualOrderIndex);
+
 		// All checks before proceeding with the calculations...
 		if (!this.currentDragData) {
 			bugReporterManagerInsatance.addToLogs(
@@ -2173,6 +2156,9 @@ class DragDropTasksManager {
 				"This operation is not possible in the current version. Please request this idea to the developer.",
 			);
 		}
+
+		this.clearCurrentDragData();
+		this.clearDesiredDropIndex();
 	}
 }
 
