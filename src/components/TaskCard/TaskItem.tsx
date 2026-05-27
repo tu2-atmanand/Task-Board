@@ -427,7 +427,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 
 				if (!tagData) {
 					tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
-						const result = matchTagsWithWildcards(tagNameKey, tagName);
+						const result = matchTagsWithWildcards(tagNameKey, tagName || '');
 						// Return the first match found
 						if (result) tagData = tagColor;
 					});
@@ -1024,7 +1024,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 									})}
 
 									{/* Render frontmatter tags (read-only) */}
-									{task.frontmatterTags.map((tag: string) => {
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
 										const tagKey = `${task.id}-fm-${tag}`;
 										// Render frontmatter tags with different styling
 										return (
