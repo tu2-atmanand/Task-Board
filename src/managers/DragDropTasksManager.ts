@@ -1539,6 +1539,16 @@ class DragDropTasksManager {
 			cardWrapper.removeEventListener("touchmove", handleTouchMove);
 			cardWrapper.removeEventListener("touchend", handleTouchEnd);
 			cardWrapper.removeEventListener("touchcancel", handleTouchCancel);
+
+			// Fix: Clear any pending long-press timer to prevent drag after teardown
+			if (this.longPressTimer) {
+				window.clearTimeout(this.longPressTimer);
+				this.longPressTimer = null;
+			}
+			// Optionally, ensure drag state is fully cleared
+			if (this.touchDragActive) {
+				this.clearTouchDragState();
+			}
 		};
 	}
 

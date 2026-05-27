@@ -1059,7 +1059,9 @@ export class SettingsManager {
 						"<li><b>" +
 						t("enable") +
 						":</b> " +
-						t("drag-and-drop-enable"),
+						t("drag-and-drop-enable") +
+						"</li>" +
+						"</ul>",
 				),
 			)
 			.addToggle((toggle) =>
