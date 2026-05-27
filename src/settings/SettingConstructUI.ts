@@ -1045,36 +1045,39 @@ export class SettingsManager {
 					}),
 			);
 
-		new Setting(contentEl)
-			.setName(t("drag-and-drop"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("drag-and-drop-info") +
-						"<ul>" +
-						"<li><b>" +
-						t("disable") +
-						":</b> " +
-						t("drag-and-drop-disable") +
-						"</li>" +
-						"<li><b>" +
-						t("enable") +
-						":</b> " +
-						t("drag-and-drop-enable") +
-						"</li>" +
-						"</ul>",
-				),
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(enableDragnDropTouch)
-					.onChange(async (value) => {
-						this.globalSettings!.enableDragnDropTouch = value;
-						await this.saveSettings();
+		if (Platform.isMobile) {
+			new Setting(contentEl)
+				.setName(t("drag-and-drop"))
+				.setDesc(
+					createFragmentWithHTML(
+						t("drag-and-drop-info") +
+							"<ul>" +
+							"<li><b>" +
+							t("disable") +
+							":</b> " +
+							t("drag-and-drop-disable") +
+							"</li>" +
+							"<li><b>" +
+							t("enable") +
+							":</b> " +
+							t("drag-and-drop-enable") +
+							"</li>" +
+							"</ul>",
+					),
+				)
+				.addToggle((toggle) =>
+					toggle
+						.setValue(enableDragnDropTouch)
+						.onChange(async (value) => {
+							this.globalSettings!.enableDragnDropTouch = value;
+							await this.saveSettings();
 
-						this.openReloadNoticeIfNeeded();
-					}),
-			)
-			.setVisibility(Platform.isMobile);
+							this.openReloadNoticeIfNeeded();
+						}),
+				);
+			// Unoffical API, doesnt work
+			// .setVisibility(Platform.isMobile);
+		}
 
 		// Lazy loading settings for Kanban view
 		// @deprecated - v1.9.0
