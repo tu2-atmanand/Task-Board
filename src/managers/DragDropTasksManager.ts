@@ -1,10 +1,13 @@
 import TaskBoard from "main";
-import { Notice } from "obsidian";
+import { Notice, Platform } from "obsidian";
 import { ColumnData } from "src/interfaces/BoardConfigs";
 import { colTypeNames, statusTypeNames } from "src/interfaces/Enums";
 import { taskItem } from "src/interfaces/TaskItem";
 import {
+	updateTaskItemDate,
+	updateTaskItemPriority,
 	updateTaskItemProperty,
+	updateTaskItemStatus,
 	updateTaskItemTags,
 } from "src/utils/UserTaskEvents";
 import { eventEmitter } from "src/services/EventEmitter";
@@ -19,6 +22,24 @@ import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { getAllDatesInRelativeRange } from "src/utils/DateTimeCalculations";
 import { bugReporterManagerInsatance } from "./BugReporter";
 import { openDateInputModal } from "src/services/OpenModals";
+
+type RectLike = Pick<DOMRect, "left" | "top" | "width" | "height">;
+type DragImageOffset = { x: number; y: number };
+
+function clamp(value: number, min: number, max: number): number {
+	return Math.min(Math.max(value, min), max);
+}
+
+function calculateDragImageOffset(
+	rect: RectLike,
+	clientX: number,
+	clientY: number,
+): DragImageOffset {
+	return {
+		x: clamp(clientX - rect.left, 0, Math.max(0, rect.width)),
+		y: clamp(clientY - rect.top, 0, Math.max(0, rect.height)),
+	};
+}
 
 export interface currentDragDataPayload {
 	task: taskItem;
@@ -41,10 +62,30 @@ class DragDropTasksManager {
 	private desiredDropIndex: number | null = null;
 	// private clonedDraggedElement: HTMLElement | null = null;
 	// private dropIndicator: HTMLElement | null = null; // deprecated
+	private targetColumnData: ColumnData | null = null;
+	private targetColumnContainer: HTMLDivElement | null = null;
 
-	// Auto-scroll state
-	private scrollIntervalId: number | null = null;
+	// Auto-scroll state (unified for desktop + touch)
+	private autoScrollRAFId: number | null = null;
+	private autoScrollLastX: number = 0;
+	private autoScrollLastY: number = 0;
+	private autoScrollActive: boolean = false;
 	private isAutoScrolling: boolean = false;
+	private autoScrollDragOverHandler: ((e: DragEvent) => void) | null = null;
+
+	// Touch drag state
+	private touchDragActive: boolean = false;
+	private touchDragGhost: HTMLElement | null = null;
+	private touchDragElement: HTMLElement | null = null;
+	private touchStartX: number = 0;
+	private touchStartY: number = 0;
+	private longPressTimer: number | null = null;
+	private readonly LONG_PRESS_DELAY: number = 350;
+	private readonly TOUCH_MOVE_THRESHOLD: number = 10;
+	private boundContextMenuBlocker = (e: Event) => {
+		e.preventDefault();
+		e.stopPropagation();
+	};
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -105,146 +146,240 @@ class DragDropTasksManager {
 	clearCurrentDragData() {
 		this.currentDragData = null;
 		this.stopAutoScroll();
-		// if (this.clonedDraggedElement) {
-		// 	document.body.removeChild(this.clonedDraggedElement);
-		// 	this.clonedDraggedElement = null;
-		// }
+	}
+
+	/**
+	 * Creates an improved drag image by cloning the source element and setting
+	 * it as the native drag image. This produces a full-card preview instead of
+	 * the browser's default thumbnail.
+	 */
+	setElementDragImage(
+		event: DragEvent,
+		sourceElement: HTMLElement,
+		className?: string,
+	): HTMLElement | null {
+		const dataTransfer = event.dataTransfer;
+		if (!dataTransfer || typeof dataTransfer.setDragImage !== "function") {
+			return null;
+		}
+
+		const doc = sourceElement.ownerDocument;
+		const body = doc.body;
+		if (!body) return null;
+
+		const rect = sourceElement.getBoundingClientRect();
+		const dragImage = sourceElement.cloneNode(true) as HTMLElement;
+		dragImage.classList.add("taskboard-drag-image");
+		if (className) dragImage.classList.add(className);
+		dragImage.style.width = `${Math.max(0, rect.width)}px`;
+		dragImage.style.height = `${Math.max(0, rect.height)}px`;
+
+		body.appendChild(dragImage);
+
+		const offset = calculateDragImageOffset(
+			rect,
+			event.clientX,
+			event.clientY,
+		);
+		dataTransfer.setDragImage(dragImage, offset.x, offset.y);
+
+		(doc.defaultView ?? window).setTimeout(() => {
+			dragImage.remove();
+		}, 0);
+
+		return dragImage;
+	}
+
+	/**
+	 * Whether touch-based drag should be enabled on this device.
+	 */
+	shouldEnableTouchDrag(): boolean {
+		if (!this.plugin?.settings.data.globalSettings.enableDragnDropTouch)
+			return false;
+
+		if (Platform.isMobile) return true;
+		if (
+			typeof navigator?.maxTouchPoints === "number" &&
+			navigator.maxTouchPoints > 0
+		)
+			return true;
+
+		return Boolean(
+			window?.matchMedia?.("(any-pointer: coarse)")?.matches ||
+			window?.matchMedia?.("(pointer: coarse)")?.matches,
+		);
 	}
 
 	// --------------------------------------
-	// Auto-scroll functionality for horizontal panning during drag
+	// Auto-scroll functionality (unified for desktop + touch)
+	// Uses a single requestAnimationFrame loop, pointer position tracked
+	// at document level (capture) to avoid stopPropagation blocking.
 	// --------------------------------------
 
 	/**
-	 * Start auto-scroll monitoring during drag
-	 * Called from dragstart event handler
+	 * Start auto-scroll for native HTML5 drag (desktop).
+	 * Tracks mouse position via document-level dragover (capture phase)
+	 * so it cannot be blocked by stopPropagation in child handlers.
 	 */
 	startAutoScroll(): void {
 		if (this.isAutoScrolling) return;
-
 		this.isAutoScrolling = true;
+		this.autoScrollActive = true;
 
-		const taskBoardViewSection = document.querySelector(
-			".taskBoardViewSectionWrapper ",
+		const trackPosition = (e: DragEvent) => {
+			this.autoScrollLastX = e.clientX;
+			this.autoScrollLastY = e.clientY;
+		};
+		this.autoScrollDragOverHandler = trackPosition;
+		document.addEventListener(
+			"dragover",
+			trackPosition as EventListener,
+			true,
 		);
 
-		if (taskBoardViewSection) {
-			const handleDragOver = (e: Event) => {
-				// e.preventDefault();
-				// e.stopImmediatePropagation();
-				// e.stopPropagation();
+		// Auto-cleanup on drag end
+		document.addEventListener("dragend", () => this.stopAutoScroll(), {
+			once: true,
+		});
 
-				this.handleAutoScroll(
-					e as DragEvent,
-					taskBoardViewSection as Element,
-				);
-			};
-			const handleDragEnd = () => {
-				this.stopAutoScroll();
-				taskBoardViewSection.removeEventListener(
-					"dragover",
-					handleDragOver,
-				);
-				taskBoardViewSection.removeEventListener(
-					"dragend",
-					handleDragEnd,
-				);
-			};
-
-			taskBoardViewSection.addEventListener("dragover", handleDragOver);
-			taskBoardViewSection.addEventListener("dragend", handleDragEnd);
-		}
+		this.startAutoScrollLoop();
 	}
 
 	/**
-	 * Handle auto-scroll based on mouse position during drag
-	 * @param e - The drag event
-	 */
-	private handleAutoScroll(
-		e: DragEvent,
-		taskBoardViewSection: Element,
-	): void {
-		if (!this.plugin) return;
-
-		const edgePercent =
-			this.plugin.settings.data.globalSettings
-				.dragAutoScrollEdgePercent || 20;
-		const scrollSpeed = 5;
-		const viewportWidth =
-			taskBoardViewSection?.clientWidth ?? window.innerWidth;
-		const viewportHeight =
-			taskBoardViewSection?.clientHeight ?? window.innerHeight;
-		const horizontalEdgeThreshold = (viewportWidth * edgePercent) / 100;
-		const verticalEdgeThreshold = (viewportHeight * edgePercent) / 100;
-
-		const clientX = e.clientX;
-		const clientY = e.clientY;
-
-		// Try to find the horizontal scroll container (works for both normal kanban and swimlanes)
-		const horizontalContainer = document.querySelector(
-			".columnsContainer, .swimlanesContainer",
-		) as HTMLElement;
-		if (horizontalContainer) {
-			// Horizontal scroll (left/right)
-			if (clientX < horizontalEdgeThreshold) {
-				const scrollLeft = horizontalContainer.scrollLeft;
-				if (scrollLeft > 0) {
-					horizontalContainer.scrollLeft = Math.max(
-						0,
-						scrollLeft - scrollSpeed,
-					);
-				}
-			} else if (clientX > viewportWidth - horizontalEdgeThreshold) {
-				const scrollLeft = horizontalContainer.scrollLeft;
-				const maxScrollLeft =
-					horizontalContainer.scrollWidth -
-					horizontalContainer.clientWidth;
-				if (scrollLeft < maxScrollLeft) {
-					horizontalContainer.scrollLeft = Math.min(
-						maxScrollLeft,
-						scrollLeft + scrollSpeed,
-					);
-				}
-			}
-		}
-
-		// Vertical scroll for swimlanes (top/bottom)
-		// Find the swimlanes container for vertical scrolling
-		const swimlanesContainer = document.querySelector(
-			".swimlanesContainer",
-		) as HTMLElement;
-		if (swimlanesContainer) {
-			if (clientY < verticalEdgeThreshold) {
-				const scrollTop = swimlanesContainer.scrollTop;
-				if (scrollTop > 0) {
-					swimlanesContainer.scrollTop = Math.max(
-						0,
-						scrollTop - scrollSpeed,
-					);
-				}
-			} else if (clientY > viewportHeight - verticalEdgeThreshold) {
-				const scrollTop = swimlanesContainer.scrollTop;
-				const maxScrollTop =
-					swimlanesContainer.scrollHeight -
-					swimlanesContainer.clientHeight;
-				if (scrollTop < maxScrollTop) {
-					swimlanesContainer.scrollTop = Math.min(
-						maxScrollTop,
-						scrollTop + scrollSpeed,
-					);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Stop auto-scroll monitoring
+	 * Stop auto-scroll for native HTML5 drag (desktop).
 	 */
 	stopAutoScroll(): void {
 		this.isAutoScrolling = false;
-		if (this.scrollIntervalId !== null) {
-			clearInterval(this.scrollIntervalId);
-			this.scrollIntervalId = null;
+		this.autoScrollActive = false;
+		if (this.autoScrollDragOverHandler) {
+			document.removeEventListener(
+				"dragover",
+				this.autoScrollDragOverHandler as EventListener,
+				true,
+			);
+			this.autoScrollDragOverHandler = null;
+		}
+		this.stopAutoScrollLoop();
+	}
+
+	/**
+	 * Start auto-scroll for touch drag.
+	 * Position is fed directly from touchmove events into autoScrollLastX/Y.
+	 */
+	startTouchAutoScroll(): void {
+		this.autoScrollActive = true;
+		this.startAutoScrollLoop();
+	}
+
+	/**
+	 * Stop auto-scroll for touch drag.
+	 */
+	stopTouchAutoScroll(): void {
+		this.autoScrollActive = false;
+		this.stopAutoScrollLoop();
+	}
+
+	/**
+	 * Unified requestAnimationFrame loop that checks the last known pointer
+	 * position against the board edges and scrolls the appropriate containers.
+	 *
+	 * DOM layout reference:
+	 *   Normal: .kanbanBoard > .columnsContainer (overflow-x) > .TaskBoardColumnsSection
+	 *   Swimlanes: .kanbanBoard (overflow-x) > .swimlanesContainer (overflow-y) > .swimlaneRow > ...
+	 *
+	 * Scroll targets:
+	 *   - .columnsContainer — horizontal scroll in normal columns layout
+	 *   - .kanbanBoard — horizontal scroll in swimlanes / fallback
+	 *   - .swimlanesContainer — vertical scroll across swimlane rows
+	 */
+	private startAutoScrollLoop(): void {
+		if (this.autoScrollRAFId !== null) return;
+
+		const step = () => {
+			if (!this.autoScrollActive) {
+				this.stopAutoScrollLoop();
+				return;
+			}
+
+			const boardEl = document.querySelector(".kanbanBoard");
+			if (!boardEl) {
+				this.autoScrollRAFId = window.requestAnimationFrame(step);
+				return;
+			}
+
+			const rect = boardEl.getBoundingClientRect();
+			const edgePercent =
+				this.plugin?.settings.data.globalSettings
+					.dragAutoScrollEdgePercent || 20;
+			const edgeWidth = rect.width * (edgePercent / 100);
+			const edgeHeight = rect.height * (edgePercent / 100);
+			const scrollSpeed = 8;
+
+			let scrollX = 0;
+			let scrollY = 0;
+
+			if (this.autoScrollLastX < rect.left + edgeWidth) {
+				scrollX = -scrollSpeed;
+			} else if (this.autoScrollLastX > rect.right - edgeWidth) {
+				scrollX = scrollSpeed;
+			}
+
+			if (this.autoScrollLastY < rect.top + edgeHeight) {
+				scrollY = -scrollSpeed;
+			} else if (this.autoScrollLastY > rect.bottom - edgeHeight) {
+				scrollY = scrollSpeed;
+			}
+
+			if (scrollX !== 0 || scrollY !== 0) {
+				// Gather all plausible scroll containers (safe to try all — out-of-range scroll is a no-op)
+				const scrollTargets: HTMLElement[] = [];
+
+				const columnsContainer = document.querySelector(
+					".columnsContainer",
+				) as HTMLElement;
+				if (columnsContainer) scrollTargets.push(columnsContainer);
+
+				const swimlanesContainer = document.querySelector(
+					".swimlanesContainer",
+				) as HTMLElement;
+				if (swimlanesContainer) scrollTargets.push(swimlanesContainer);
+
+				const kanbanBoard = boardEl as HTMLElement;
+				if (scrollTargets.indexOf(kanbanBoard) === -1)
+					scrollTargets.push(kanbanBoard);
+
+				for (const el of scrollTargets) {
+					if (scrollX !== 0) {
+						el.scrollLeft = Math.max(
+							0,
+							Math.min(
+								el.scrollLeft + scrollX,
+								el.scrollWidth - el.clientWidth,
+							),
+						);
+					}
+					if (scrollY !== 0) {
+						el.scrollTop = Math.max(
+							0,
+							Math.min(
+								el.scrollTop + scrollY,
+								el.scrollHeight - el.clientHeight,
+							),
+						);
+					}
+				}
+			}
+
+			this.autoScrollRAFId = window.requestAnimationFrame(step);
+		};
+
+		this.autoScrollRAFId = window.requestAnimationFrame(step);
+	}
+
+	private stopAutoScrollLoop(): void {
+		if (this.autoScrollRAFId !== null) {
+			window.cancelAnimationFrame(this.autoScrollRAFId);
+			this.autoScrollRAFId = null;
 		}
 	}
 	// --------------------------------------
@@ -469,8 +604,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -577,9 +710,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemPriority } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -628,9 +758,6 @@ class DragDropTasksManager {
 			);
 			return;
 		}
-
-		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -707,8 +834,6 @@ class DragDropTasksManager {
 			);
 			return;
 		}
-
-		const { updateTaskItemDate } = await import("src/utils/UserTaskEvents");
 
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
@@ -890,9 +1015,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemPriority } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -944,9 +1066,6 @@ class DragDropTasksManager {
 			return;
 		}
 
-		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -990,9 +1109,6 @@ class DragDropTasksManager {
 		sourceColumnSwimlaneData: swimlaneDataProp | undefined,
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
-		const { updateTaskItemStatus } =
-			await import("src/utils/UserTaskEvents");
-
 		const oldTask = currentDragData.task;
 		let newTask = { ...oldTask } as taskItem;
 
@@ -1208,7 +1324,7 @@ class DragDropTasksManager {
 		// draggedTaskItem.classList.add("task-item-dragging-dimmed");
 
 		// Add dragging class after a small delay to not affect the drag image
-		requestAnimationFrame(() => {
+		window.requestAnimationFrame(() => {
 			// e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
 			draggedTaskItem.classList.add("task-item-dragging");
 		});
@@ -1308,6 +1424,343 @@ class DragDropTasksManager {
 		// });
 	}
 
+	/**
+	 * Clear column dragover feedback classes from all columns and swimlane columns.
+	 */
+	private clearDragoverFeedback(): void {
+		document
+			.querySelectorAll(".tasksContainer.drag-over-allowed")
+			.forEach((el) => {
+				el.classList.remove("drag-over-allowed");
+			});
+		document
+			.querySelectorAll(".tasksContainer.drag-over-not-allowed")
+			.forEach((el) => {
+				el.classList.remove("drag-over-not-allowed");
+			});
+	}
+
+	// --------------------------------------
+	// Touch drag support for mobile / touch devices
+	// --------------------------------------
+
+	/**
+	 * Attach touch event handlers to a card element for touch-based drag support.
+	 * Called from React component's useEffect.
+	 * Returns a cleanup function to remove the listeners.
+	 */
+	setupCardTouchHandlers(
+		cardWrapper: HTMLElement,
+		dragData: currentDragDataPayload,
+	): () => void {
+		const cleanup = () => {};
+
+		if (!this.shouldEnableTouchDrag()) return cleanup;
+
+		const handleTouchStart = (e: TouchEvent) => {
+			if (e.touches.length !== 1) return;
+			const touch = e.touches[0];
+			this.touchStartX = touch.clientX;
+			this.touchStartY = touch.clientY;
+			this.longPressTimer = window.setTimeout(() => {
+				this.initiateTouchDrag(
+					cardWrapper,
+					dragData,
+					touch.clientX,
+					touch.clientY,
+				);
+			}, this.LONG_PRESS_DELAY);
+		};
+
+		const handleTouchMove = (e: TouchEvent) => {
+			if (e.touches.length !== 1) return;
+			const touch = e.touches[0];
+
+			if (!this.touchDragActive && this.longPressTimer) {
+				const dx = Math.abs(touch.clientX - this.touchStartX);
+				const dy = Math.abs(touch.clientY - this.touchStartY);
+				if (
+					dx > this.TOUCH_MOVE_THRESHOLD ||
+					dy > this.TOUCH_MOVE_THRESHOLD
+				) {
+					window.clearTimeout(this.longPressTimer);
+					this.longPressTimer = null;
+				}
+				return;
+			}
+
+			if (this.touchDragActive) {
+				e.preventDefault();
+				this.autoScrollLastX = touch.clientX;
+				this.autoScrollLastY = touch.clientY;
+				this.updateTouchDragGhost(touch.clientX, touch.clientY);
+				// this.clearDragoverFeedback();
+
+				// @todo - BUG : The below function is not able to find the correct column container at the cusor position. As well as, it adds a little lagginess providing a bad experience. If we dont do the below thing, that the dragging experience is much smoother.
+				// @see - https://github.com/tu2-atmanand/Task-Board/issues/820
+				// this.updateTouchDropTargetFeedback(
+				// 	touch.clientX,
+				// 	touch.clientY,
+				// );
+			}
+		};
+
+		const handleTouchEnd = (e: TouchEvent) => {
+			if (this.longPressTimer) {
+				window.clearTimeout(this.longPressTimer);
+				this.longPressTimer = null;
+			}
+
+			if (!this.touchDragActive) return;
+
+			const touch = e.changedTouches[0];
+			if (touch) {
+				this.handleTouchDrop(touch.clientX, touch.clientY);
+			}
+
+			this.clearTouchDragState();
+		};
+
+		const handleTouchCancel = () => {
+			this.clearTouchDragState();
+		};
+
+		cardWrapper.addEventListener("touchstart", handleTouchStart, {
+			passive: true,
+		});
+		cardWrapper.addEventListener("touchmove", handleTouchMove, {
+			passive: false,
+		});
+		cardWrapper.addEventListener("touchend", handleTouchEnd);
+		cardWrapper.addEventListener("touchcancel", handleTouchCancel);
+
+		return () => {
+			cardWrapper.removeEventListener("touchstart", handleTouchStart);
+			cardWrapper.removeEventListener("touchmove", handleTouchMove);
+			cardWrapper.removeEventListener("touchend", handleTouchEnd);
+			cardWrapper.removeEventListener("touchcancel", handleTouchCancel);
+
+			// Fix: Clear any pending long-press timer to prevent drag after teardown
+			if (this.longPressTimer) {
+				window.clearTimeout(this.longPressTimer);
+				this.longPressTimer = null;
+			}
+			// Optionally, ensure drag state is fully cleared
+			if (this.touchDragActive) {
+				this.clearTouchDragState();
+			}
+		};
+	}
+
+	private initiateTouchDrag(
+		cardWrapper: HTMLElement,
+		dragData: currentDragDataPayload,
+		x: number,
+		y: number,
+	): void {
+		this.touchDragActive = true;
+		this.touchDragElement = cardWrapper;
+		this.setCurrentDragData(dragData);
+
+		document.addEventListener(
+			"contextmenu",
+			this.boundContextMenuBlocker,
+			true,
+		);
+		document.body.classList.add("taskboard-touch-dragging");
+
+		cardWrapper.classList.add("task-item-dragging");
+		this.touchDragGhost = this.createTouchDragGhost(cardWrapper, x, y);
+		navigator.vibrate?.(50);
+		this.startTouchAutoScroll();
+	}
+
+	private createTouchDragGhost(
+		sourceEl: HTMLElement,
+		x: number,
+		y: number,
+	): HTMLElement {
+		const ghost = sourceEl.cloneNode(true) as HTMLElement;
+		ghost.classList.add("taskboard-touch-ghost");
+		ghost.style.cssText = `
+			position: fixed;
+			left: ${x}px;
+			top: ${y}px;
+			width: ${sourceEl.offsetWidth}px;
+			pointer-events: none;
+			z-index: 10000;
+			opacity: 0.85;
+			transform: translate(-50%, -50%) rotate(3deg);
+			box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+		`;
+		const doc = sourceEl.ownerDocument;
+		doc.body.appendChild(ghost);
+		return ghost;
+	}
+
+	private updateTouchDragGhost(x: number, y: number): void {
+		if (this.touchDragGhost) {
+			this.touchDragGhost.style.left = `${x}px`;
+			this.touchDragGhost.style.top = `${y}px`;
+		}
+	}
+
+	private removeTouchDragGhost(): void {
+		if (this.touchDragGhost) {
+			this.touchDragGhost.remove();
+			this.touchDragGhost = null;
+		}
+	}
+
+	private clearTouchDragState(): void {
+		this.touchDragActive = false;
+		document.removeEventListener(
+			"contextmenu",
+			this.boundContextMenuBlocker,
+			true,
+		);
+		document.body.classList.remove("taskboard-touch-dragging");
+		this.removeTouchDragGhost();
+		this.stopTouchAutoScroll();
+
+		if (this.longPressTimer) {
+			window.clearTimeout(this.longPressTimer);
+			this.longPressTimer = null;
+		}
+
+		this.clearDragoverFeedback();
+
+		if (this.touchDragElement) {
+			this.touchDragElement.classList.remove("task-item-dragging");
+			this.touchDragElement = null;
+		}
+
+		this.clearAllDragStyling();
+		this.clearCurrentDragData();
+	}
+
+	/**
+	 * Update column drop target feedback based on touch coordinates.
+	 */
+	private updateTouchDropTargetFeedback(x: number, y: number): void {
+		// window.requestAnimationFrame(() => {
+		this.clearDragoverFeedback();
+
+		const elementUnder = document.elementFromPoint(x, y);
+		if (!elementUnder) return;
+
+		const columnEl = (elementUnder as HTMLElement).closest(
+			".TaskBoardColumnsSection",
+		) as HTMLElement | null;
+		if (!columnEl) return;
+
+		const tasksContainer = columnEl.querySelector(
+			".tasksContainer",
+		) as HTMLElement | null;
+		if (!tasksContainer) return;
+
+		const boardConfigs = this.plugin?.settings.data.boardConfigs;
+		if (!boardConfigs) return;
+
+		const columnId = columnEl.getAttribute("data-column-id");
+		if (!columnId) return;
+
+		const currentDragData = this.getCurrentDragData();
+		if (!currentDragData) return;
+		const targetColumnData = boardConfigs[
+			currentDragData.currentBoardIndex
+		]?.columns.find((c) => String(c.id) === columnId);
+
+		if (!targetColumnData) return;
+		const isDropAllowed = this.isTaskDropAllowed(
+			currentDragData.sourceColumnData,
+			targetColumnData,
+		);
+
+		if (isDropAllowed) {
+			tasksContainer.classList.add("drag-over-allowed");
+			tasksContainer.classList.remove("drag-over-not-allowed");
+		} else {
+			tasksContainer.classList.add("drag-over-not-allowed");
+			tasksContainer.classList.remove("drag-over-allowed");
+		}
+		// });
+	}
+
+	/**
+	 * Handle the drop action at the end of a touch drag.
+	 */
+	private handleTouchDrop(x: number, y: number): void {
+		const elementUnder = document.elementFromPoint(x, y);
+		if (!elementUnder) return;
+
+		const columnEl = (elementUnder as HTMLElement).closest(
+			".TaskBoardColumnsSection",
+		) as HTMLElement | null;
+		if (!columnEl) return;
+
+		const tasksContainer = columnEl.querySelector(
+			".tasksContainer",
+		) as HTMLElement | null;
+		if (!tasksContainer) return;
+
+		const currentDragData = this.getCurrentDragData();
+		if (!currentDragData) return;
+
+		const columnId = columnEl.getAttribute("data-column-id");
+		if (!columnId) return;
+
+		const boardConfigs = this.plugin?.settings.data.boardConfigs;
+		if (!boardConfigs) return;
+
+		const targetColumnData = boardConfigs[
+			currentDragData.currentBoardIndex
+		]?.columns.find((c) => String(c.id) === columnId);
+		if (!targetColumnData) return;
+
+		// Determine swimlane data from the column element's data attributes
+		let targetSwimlane: swimlaneDataProp | undefined;
+		const swimlaneValue = columnEl.getAttribute("data-swimlane-value");
+		if (swimlaneValue) {
+			targetSwimlane = {
+				value: swimlaneValue,
+				property: columnEl.getAttribute("data-swimlane-property") ?? "",
+			};
+		}
+
+		// Find insertion index if hovering over a task card
+		const taskCardEl = (elementUnder as HTMLElement).closest(
+			"[data-taskitem-index]",
+		) as HTMLElement | null;
+		if (
+			taskCardEl &&
+			targetColumnData.sortCriteria?.some(
+				(c) => c.criteria === "manualOrder",
+			)
+		) {
+			const rect = taskCardEl.getBoundingClientRect();
+			const midpoint = rect.top + rect.height / 2;
+			const idx = parseInt(
+				taskCardEl.getAttribute("data-taskitem-index") ?? "0",
+				10,
+			);
+			const insertAt = y < midpoint ? idx : idx + 1;
+			this.setDesiredDropIndex(insertAt);
+		} else {
+			this.clearDesiredDropIndex();
+		}
+
+		// Call the existing drop handler
+		this.handleDropEvent(
+			new DragEvent("drop"),
+			targetColumnData,
+			tasksContainer as HTMLDivElement,
+			targetSwimlane,
+		);
+
+		this.clearDesiredDropIndex();
+	}
+
 	// --------------------------------------
 	// Main manager functions to handle various drag and drop related triggers.
 	// --------------------------------------
@@ -1333,44 +1786,11 @@ class DragDropTasksManager {
 
 		e.dataTransfer.effectAllowed = "move";
 
-		// Set a drag image from the whole task element so the preview is the full card
-		// NOTE : The below code worked and then it just stopped working. Also, a long back it worked during screen recording then stopped working. So, its not dependent on the code, but the platform and some other unknown factor.
-		// const clone = e.targetNode?.parentNode?.cloneNode(true) as HTMLElement;
-		// clone.setAttribute(
-		// 	"style",
-		// 	"position: absolute; left: 0px; top: 0px; z-index: -1",
-		// );
-		// console.log(clone);
-		// document.body.appendChild(clone);
-		// this.clonedDraggedElement = clone;
-		// const rectangle = clone.getBoundingClientRect();
-		// e.dataTransfer.setDragImage(clone, rectangle.width/2, rectangle.height/2);
-
-		// TODO : I probably wont need this anymore since I am using the singleton manager to hold the current drag data.
-		// provide a JSON payload so drop handlers can inspect
-		// try {
-		// 	e.dataTransfer.setData(
-		// 		"application/json",
-		// 		JSON.stringify({
-		// 			taskId: currentDragData.task.id,
-		// 			sourceColumnId: currentDragData.sourceColumnData?.id,
-		// 			sourceIndex: dragIndex,
-		// 		})
-		// 	);
-		// } catch (err) {
-		// 	// some browsers may throw on setData for complex types
-		// 				bugReporterManagerInsatance.addToLogs(
-		// 					180,
-		// 					`Could not set JSON dataTransfer payload: ${String(err)}`,
-		// 					"DragDropTasksManager.ts",
-		// 				);
-		// 	try {
-		// 		e.dataTransfer.setData("text/plain", currentDragData.task.id);
-		// 	} catch {}
-		// }
+		// Set improved drag image (full card clone instead of browser default thumbnail)
+		this.setElementDragImage(e, draggedTaskItem, "taskboard-drag-image");
 
 		// Visual dim / dragging class
-		this.dimDraggedTaskItem(draggedTaskItem);
+		// this.dimDraggedTaskItem(draggedTaskItem);
 	}
 
 	/**
@@ -1398,13 +1818,13 @@ class DragDropTasksManager {
 		// 	cardEl.getAttribute("data-taskitem-id")
 		// );
 		// Dont show the drop indicator for the same dragged task card.
-		if (
-			this.currentDragData &&
-			cardEl.getAttribute("data-taskitem-id") ===
-				this.currentDragData.task.id
-		) {
-			return;
-		}
+		// if (
+		// 	this.currentDragData &&
+		// 	cardEl.getAttribute("data-taskitem-id") ===
+		// 		this.currentDragData.task.id
+		// ) {
+		// 	return;
+		// }
 
 		// From here we should call below function to handle dragover styling on the column container.
 		// The below function will return true or false based on whether drop is allowed or not.
@@ -1440,7 +1860,6 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
 	): boolean {
-		// console.log("DragDropTasksManager : handleDragOver called...");
 		e.preventDefault();
 
 		const sourceColumnData = this.currentDragData
@@ -1454,6 +1873,9 @@ class DragDropTasksManager {
 			);
 			return false;
 		}
+
+		this.targetColumnData = targetColumnData;
+		this.targetColumnContainer = targetColumnContainer;
 
 		// Check if drop is allowed
 		const isDropAllowed = this.isTaskDropAllowed(
@@ -1528,8 +1950,14 @@ class DragDropTasksManager {
 		targetColumnData: ColumnData,
 		targetColumnContainer: HTMLDivElement,
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
+		manualOrderIndex?: number,
 	): void {
 		e.preventDefault();
+
+		this.targetColumnData = targetColumnData;
+		this.targetColumnContainer = targetColumnContainer;
+
+		if (manualOrderIndex) this.setDesiredDropIndex(manualOrderIndex);
 
 		// All checks before proceeding with the calculations...
 		if (!this.currentDragData) {
@@ -1695,6 +2123,10 @@ class DragDropTasksManager {
 				"This operation is not possible in the current version. Please request this idea to the developer.",
 			);
 		}
+
+		// Clear manager payload (drag finished)
+		this.clearCurrentDragData();
+		this.clearDesiredDropIndex();
 	}
 }
 

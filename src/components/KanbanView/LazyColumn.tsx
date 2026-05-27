@@ -18,7 +18,7 @@ import { isRootFilterStateEmpty } from 'src/utils/algorithms/BoardFilterer';
 import { dragDropTasksManagerInsatance } from 'src/managers/DragDropTasksManager';
 import { taskCardStyleNames } from 'src/interfaces/GlobalSettings';
 import TaskItemV2 from './TaskItemV2';
-import { AlertOctagon } from 'lucide-react';
+import { AlertOctagon, EllipsisVertical, MenuIcon } from 'lucide-react';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
 
 type CustomCSSProperties = CSSProperties & {
@@ -685,17 +685,45 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
 			}
 
-			// We are basically doing same thing from the handleDrop function below.
-			dragDropTasksManagerInsatance.handleDropEvent(
-				e.nativeEvent,
-				columnData,
-				targetColumnContainer,
-				swimlaneData
-			);
+			let pos = 0 // Default to top of the column
+			const hoveredElement = e.currentTarget;
+			const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
+			const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
+			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+			// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
+			if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
+				const clientY = e.clientY;
+				const rect = hoveredElement.getBoundingClientRect();
+				const midpoint = rect.top + rect.height / 2;
+				if (clientY < midpoint) {
+					pos = parseInt(draggedOverItemIndex, 10);
+				} else {
+					pos = parseInt(draggedOverItemIndex, 10) + 1;
+				}
 
-			// Clear manager payload (drag finished)
-			dragDropTasksManagerInsatance.clearCurrentDragData();
-			dragDropTasksManagerInsatance.clearDesiredDropIndex();
+				// Store desired drop index in manager
+				dragDropTasksManagerInsatance.setDesiredDropIndex(pos);
+
+				dragDropTasksManagerInsatance.handleDropEvent(
+					e.nativeEvent,
+					columnData,
+					targetColumnContainer,
+					swimlaneData,
+					pos
+				);
+
+			} else {
+				dragDropTasksManagerInsatance.handleDropEvent(
+					e.nativeEvent,
+					columnData,
+					targetColumnContainer,
+					swimlaneData
+				);
+			}
+
+
+			// Throttle updates via RAF
+			scheduleSetInsertIndex(null);
 
 			// const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
 			// if (isNaN(dragIndex) || dragIndex === dropIndex) return;
@@ -805,10 +833,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				targetColumnContainer,
 				swimlaneData
 			);
-
-			// Clear manager payload (drag finished)
-			dragDropTasksManagerInsatance.clearCurrentDragData();
-			dragDropTasksManagerInsatance.clearDesiredDropIndex();
 			// }
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
@@ -850,6 +874,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				data-column-type={columnData.colType}
 				data-column-tag-name={tagData?.name}
 				data-column-tag-color={tagData?.color}
+				data-swimlane-property={swimlaneData?.property ?? ""}
+				data-swimlane-value={swimlaneData?.value}
 			>
 				{columnData.minimized && !hideColumnHeader ? (
 					// Minimized view
@@ -875,8 +901,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 										</div>
 									)}
 								</div>
-								<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-									{allTasks?.length ?? 0}
+								<div className='taskBoardColumnSecHeaderBtnSec'>
+									<div className='taskBoardColumnSecHeaderBtnSecMenuBtn' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+										<EllipsisVertical className='taskBoardColumnSecHeaderBtnSecMenuIcon' size={18} />
+									</div>
+									<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+										{allTasks?.length ?? 0}
+									</div>
 								</div>
 							</div>
 						)}

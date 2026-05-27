@@ -1,6 +1,13 @@
 // /src/views/TaskBoardSettingConstructUI.ts
 
-import { App, Notice, Setting, normalizePath, setIcon } from "obsidian";
+import {
+	App,
+	Notice,
+	Platform,
+	Setting,
+	normalizePath,
+	setIcon,
+} from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "src/interfaces/Icons";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
@@ -913,6 +920,7 @@ export class SettingsManager {
 			tagColorsType,
 			showTaskWithoutMetadata,
 			taskCardStyle,
+			enableDragnDropTouch,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -971,6 +979,102 @@ export class SettingsManager {
 					await this.saveSettings();
 				}),
 			);
+
+		new Setting(contentEl).setName(t("interactions")).setHeading();
+
+		new Setting(contentEl)
+			.setName(t("edit-button-mode"))
+			.setDesc(t("edit-button-mode-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.Modal]: t(
+							"use-edit-task-modal-feature",
+						),
+						[EditButtonMode.ViewInSplitTab]: t("task-editor-tab"),
+						[EditButtonMode.ViewInWindow]: t(
+							"use-edit-task-window-feature",
+						),
+						[EditButtonMode.TasksPluginModal]:
+							t("tasks-plugin-modal"),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split",
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window",
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview",
+						),
+					})
+					.setValue(this.globalSettings!.editButtonAction)
+					.onChange(async (value) => {
+						this.globalSettings!.editButtonAction =
+							value as EditButtonMode;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("double-click-card-action"))
+			.setDesc(t("double-click-card-action-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[EditButtonMode.None]: t("none"),
+						[EditButtonMode.Modal]: t(
+							"use-edit-task-window-feature",
+						),
+						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
+						[EditButtonMode.NoteInSplit]: t(
+							"open-note-in-right-split",
+						),
+						[EditButtonMode.NoteInWindow]: t(
+							"open-note-in-new-window",
+						),
+						[EditButtonMode.NoteInHover]: t(
+							"open-note-in-hover-preview",
+						),
+					})
+					.setValue(this.globalSettings!.doubleClickCardToEdit)
+					.onChange(async (value) => {
+						this.globalSettings!.doubleClickCardToEdit =
+							value as EditButtonMode;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("drag-and-drop"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("drag-and-drop-info") +
+						"<ul>" +
+						"<li><b>" +
+						t("disable") +
+						":</b> " +
+						t("drag-and-drop-disable") +
+						"</li>" +
+						"<li><b>" +
+						t("enable") +
+						":</b> " +
+						t("drag-and-drop-enable") +
+						"</li>" +
+						"</ul>",
+				),
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(enableDragnDropTouch)
+					.onChange(async (value) => {
+						this.globalSettings!.enableDragnDropTouch = value;
+						await this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
+					}),
+			)
+			.setVisibility(Platform.isMobile);
 
 		// Lazy loading settings for Kanban view
 		// @deprecated - v1.9.0
@@ -2258,69 +2362,6 @@ export class SettingsManager {
 			autoAddCancelledDate,
 			autoAddCompletedDate,
 		} = this.globalSettings!;
-
-		new Setting(contentEl)
-			.setName(t("edit-button-mode"))
-			.setDesc(t("edit-button-mode-info"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[EditButtonMode.Modal]: t(
-							"use-edit-task-modal-feature",
-						),
-						[EditButtonMode.ViewInSplitTab]: t("task-editor-tab"),
-						[EditButtonMode.ViewInWindow]: t(
-							"use-edit-task-window-feature",
-						),
-						[EditButtonMode.TasksPluginModal]:
-							t("tasks-plugin-modal"),
-						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
-						[EditButtonMode.NoteInSplit]: t(
-							"open-note-in-right-split",
-						),
-						[EditButtonMode.NoteInWindow]: t(
-							"open-note-in-new-window",
-						),
-						[EditButtonMode.NoteInHover]: t(
-							"open-note-in-hover-preview",
-						),
-					})
-					.setValue(this.globalSettings!.editButtonAction)
-					.onChange(async (value) => {
-						this.globalSettings!.editButtonAction =
-							value as EditButtonMode;
-						await this.saveSettings();
-					}),
-			);
-
-		new Setting(contentEl)
-			.setName(t("double-click-card-action"))
-			.setDesc(t("double-click-card-action-info"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOptions({
-						[EditButtonMode.None]: t("none"),
-						[EditButtonMode.Modal]: t(
-							"use-edit-task-window-feature",
-						),
-						[EditButtonMode.NoteInTab]: t("open-note-in-new-tab"),
-						[EditButtonMode.NoteInSplit]: t(
-							"open-note-in-right-split",
-						),
-						[EditButtonMode.NoteInWindow]: t(
-							"open-note-in-new-window",
-						),
-						[EditButtonMode.NoteInHover]: t(
-							"open-note-in-hover-preview",
-						),
-					})
-					.setValue(this.globalSettings!.doubleClickCardToEdit)
-					.onChange(async (value) => {
-						this.globalSettings!.doubleClickCardToEdit =
-							value as EditButtonMode;
-						await this.saveSettings();
-					}),
-			);
 
 		new Setting(contentEl)
 			.setName(t("restrict-task-completion-to-child-tasks-and-sub-tasks"))
