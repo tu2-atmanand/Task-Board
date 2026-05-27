@@ -11,7 +11,7 @@ import {
 	ViewUpdate,
 	WidgetType,
 } from "@codemirror/view";
-import { Extension, Range, StateField } from "@codemirror/state";
+import { Extension, Range, StateField, EditorState } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "../../../main.js";
 import { taskPropertiesNames } from "../../interfaces/Enums.js";
@@ -21,6 +21,7 @@ import {
 	TaskRegularExpressions,
 } from "../../regularExpressions/TasksPluginRegularExpr.js";
 import { isTaskLine } from "../../utils/CheckBoxUtils.js";
+import { Component, editorLivePreviewField } from "obsidian";
 
 /**
  * Widget for showing placeholder text when properties are hidden
@@ -381,6 +382,11 @@ const propertyHidingField = StateField.define<DecorationSet>({
 	provide: (f) => EditorView.decorations.from(f),
 });
 
+function isLivePreview(state: EditorState): boolean {
+	// @ts-ignore some strange private field not being assignable
+	return state.field(editorLivePreviewField);
+}
+
 /**
  * View plugin for task property hiding
  */
@@ -394,15 +400,20 @@ const propertyHidingPlugin = (plugin: TaskBoard) =>
 			}
 
 			update(update: ViewUpdate) {
-				if (
-					update.docChanged ||
-					update.selectionSet ||
-					update.viewportChanged
-				) {
-					this.decorations = createPropertyDecorations(
-						update.view,
-						plugin,
-					);
+				if (isLivePreview(update.state)) {
+					if (
+						update.docChanged ||
+						update.selectionSet ||
+						update.viewportChanged
+					) {
+						this.decorations = createPropertyDecorations(
+							update.view,
+							plugin,
+						);
+					}
+				} else {
+					// When user switches to source mode, remove all decorations.
+					this.decorations = Decoration.none;
 				}
 			}
 		},
