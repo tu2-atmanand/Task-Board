@@ -722,22 +722,32 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
 			});
 
-			// subTasksMenu.addItem((item) => {
-			// 	item.setTitle(t("hidden"))
-			// 	item.onClick(async () => {
-			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
-			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(async () => {
+					let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
 
-			// 	})
-			// 	item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
-			// });
+					if (visibleProperties.includes(taskPropertiesNames.SubTasks)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasks), 1);
+					}
+
+					if (visibleProperties.includes(taskPropertiesNames.SubTasksMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasksMinimized), 1);
+					}
+
+					plugin.settings.data.visiblePropertiesList = visibleProperties;
+					plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+			});
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("description"));
-			const subTasksMenu = item.setSubmenu()
+			const descriptionMenu = item.setSubmenu()
 
-			subTasksMenu.addItem((item) => {
+			descriptionMenu.addItem((item) => {
 				item.setTitle(t("visible"))
 				item.onClick(async () => {
 					togglePropertyNameInSettings(taskPropertiesNames.Description);
@@ -747,7 +757,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description));
 			});
 
-			subTasksMenu.addItem((item) => {
+			descriptionMenu.addItem((item) => {
 				item.setTitle(t("minimized"))
 				item.onClick(async () => {
 					togglePropertyNameInSettings(taskPropertiesNames.DescriptionMinimized);
@@ -755,6 +765,26 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 				})
 				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+			});
+
+			descriptionMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(async () => {
+					let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
+
+					if (visibleProperties.includes(taskPropertiesNames.Description)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.Description), 1);
+					}
+
+					if (visibleProperties.includes(taskPropertiesNames.DescriptionMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.DescriptionMinimized), 1);
+					}
+
+					plugin.settings.data.visiblePropertiesList = visibleProperties;
+					plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
 			});
 		});
 
