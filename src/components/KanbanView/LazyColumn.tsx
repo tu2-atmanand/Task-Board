@@ -4,7 +4,7 @@ import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from '
 import { CSSProperties } from 'react';
 import { Menu, Notice, Platform } from 'obsidian';
 import { t } from 'i18next';
-import { AlertOctagon } from 'lucide-react';
+import { AlertOctagon, EllipsisVertical, MenuIcon } from 'lucide-react';
 import TaskBoard from '../../../main.js';
 import { Board, KanbanView, ColumnData, RootFilterState } from '../../interfaces/BoardConfigs.js';
 import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
@@ -697,8 +697,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 										</div>
 									)}
 								</div>
-								<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-									{allTasks?.length ?? 0}
+								<div className='taskBoardColumnSecHeaderBtnSec'>
+									<div className='taskBoardColumnSecHeaderBtnSecMenuBtn' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+										<EllipsisVertical className='taskBoardColumnSecHeaderBtnSecMenuIcon' size={18} />
+									</div>
+									<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+										{allTasks?.length ?? 0}
+									</div>
 								</div>
 							</div>
 						)}

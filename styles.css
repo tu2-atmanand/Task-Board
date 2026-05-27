@@ -673,15 +673,44 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--background-modifier-error);
 }
 
+.taskBoardColumnSecHeaderBtnSec {
+	display: flex;
+	flex-direction: row;
+	gap: 7px;
+	align-content: center;
+	align-items: center;
+}
+
+.taskBoardColumnSecHeaderBtnSecMenuBtn {
+	color: var(--bases-table-header-color);
+	/* padding-block: 3px; */
+	/* border: 1px solid var(--tab-text-color); */
+	/* border-radius: 5px; */
+	/* padding: 3px; */
+	display: flex;
+	cursor: pointer;
+	text-align: center;
+	align-items: center;
+}
+
 .taskBoardColumnSecHeaderTitleSecColumnCount {
-	color: var(--text-muted);
-	font-size: 0.9em;
+	color: var(--bases-table-header-color);
+	font-size: var(--font-smaller);
 	font-weight: 500;
 	padding-block: 3px;
-	border: 1px solid var(--text-muted);
+	border: 1px solid var(--tab-text-color);
 	border-radius: 5px;
 	padding-inline: 7px;
 	cursor: pointer;
+	text-align: center;
+	align-items: center;
+	justify-content: center;
+}
+
+.taskBoardColumnMinimized .taskBoardColumnSecHeaderTitleSecColumnCount {
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	transform: rotate(180deg);
 }
 
 .taskBoardColumnSecHeaderTitleSecColumnCount.active {
@@ -771,6 +800,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	padding: 5px;
 	padding: 10px 5px;
 	height: 100%;
 	gap: 10px;
@@ -782,6 +812,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	transform: rotate(180deg);
 	color: var(--foreground-primary);
 	font-size: 1.1em;
+	color: var(--bases-table-header-color);
 	font-weight: 600;
 	text-align: center;
 	flex: 1;
