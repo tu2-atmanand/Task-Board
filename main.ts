@@ -52,7 +52,6 @@ import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { parse } from "date-fns";
-import { getHideClassForProperty } from "src/utils/UIHelpers";
 
 export default class TaskBoard extends Plugin {
 	app: App;

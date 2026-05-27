@@ -691,7 +691,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
 			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
 			// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
-			debugger;
 			if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
 				const clientY = e.clientY;
 				const rect = hoveredElement.getBoundingClientRect();
