@@ -953,6 +953,23 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		dragDropTasksManagerInsatance.clearCurrentDragData();
 	}, []);
 
+	// Set up touch event handlers for touch devices
+	useEffect(() => {
+		const el = taskItemRef.current;
+		if (!el || !columnData) return () => { };
+
+		const payload: currentDragDataPayload = {
+			task,
+			taskIndex: String(dataAttributeIndex),
+			sourceColumnData: columnData,
+			currentViewIndex: activeViewIndex,
+			currentBoardID: activeBoardID,
+			swimlaneData: swimlaneData,
+		};
+
+		return dragDropTasksManagerInsatance.setupCardTouchHandlers(el, payload);
+	}, [task.id]);
+
 	// ========================================
 	// ALL RENDERING CODE
 	// ========================================

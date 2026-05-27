@@ -929,16 +929,27 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	}, [task, columnData]);
 
 	const handleDragEnd = useCallback(() => {
-
-		// Remove dim effect from this dragged task and clear manager state
-		if (taskItemRef.current) {
-			dragDropTasksManagerInsatance.removeDimFromDraggedTaskItem(taskItemRef.current);
-		}
-
 		// Clear manager drag payload and any styling on columns/task-items
 		dragDropTasksManagerInsatance.clearAllDragStyling();
 		dragDropTasksManagerInsatance.clearCurrentDragData();
 	}, []);
+
+	// Set up touch event handlers for touch devices
+	useEffect(() => {
+		const el = taskItemRef.current;
+		if (!el || !columnData) return () => { };
+
+		const payload: currentDragDataPayload = {
+			task,
+			taskIndex: String(dataAttributeIndex),
+			sourceColumnData: columnData,
+			currentViewIndex: activeViewIndex,
+			currentBoardID: activeBoardID,
+			swimlaneData: swimlaneData,
+		};
+
+		return dragDropTasksManagerInsatance.setupCardTouchHandlers(el, payload);
+	}, [task.id]);
 
 	// ========================================
 	// ALL RENDERING CODE
@@ -965,7 +976,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && (task.tags.length > 0 || task.frontmatterTags.length > 0) && (
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
-									{task.tags.map((tag: string) => {
+									{task.tags.map((tag: string, index: number) => {
 										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
 
@@ -988,7 +999,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 											return null;
 										}
 
-										const tagKey = `${task.id}-${tag}`;
+										const tagKey = `${task.id}-${tag}-${index}`;
 										// Render the remaining tags
 										return (
 											<div
@@ -1294,6 +1305,8 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
 
+	const isCardDraggable = (Platform.isDesktopApp || dragDropTasksManagerInsatance.shouldEnableTouchDrag()) && activeViewType === viewTypeNames.kanban;
+
 	// ========================================
 	// RETURN STATEMENT
 	// ========================================
@@ -1306,7 +1319,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 				style={{ backgroundColor: getCardBgBasedOnTag() }}
 				onDoubleClick={handleDoubleClickOnCard}
 				onContextMenu={handleMenuButtonClicked}
-				draggable={Platform.isDesktopApp && activeViewType === viewTypeNames.kanban}
+				draggable={isCardDraggable}
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>
@@ -1317,7 +1330,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, a
 
 					{/* Drag Handle and Task Menu button */}
 					{
-						Platform.isDesktopApp && activeViewType !== viewTypeNames.map ? (
+						Platform.isDesktop && activeViewType !== viewTypeNames.map ? (
 							<div className="taskItemDragBtn">
 								<Grip size={18} enableBackground={0} opacity={0.4} />
 							</div>
