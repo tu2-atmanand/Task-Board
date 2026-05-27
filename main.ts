@@ -23,7 +23,7 @@ import { t } from "i18next";
 import {
 	taskPropertyHidingExtension,
 	getTaskPropertyRegexPatterns,
-} from "./src/editor-extensions/task-operations/property-hiding.js";
+} from "./src/services/editor_extensions/PropertiesHiding.js";
 import {
 	VIEW_TYPE_TASKBOARD,
 	TASKBOARD_FILE_EXTENSION,
