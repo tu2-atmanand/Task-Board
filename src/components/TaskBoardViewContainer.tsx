@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
 import { t } from 'i18next';
 import TaskBoard from '../../main.js';
-import { Board, RootFilterState, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
+import { AdvancedFilter, Board, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
 import { DEFAULT_DATE_FORMAT } from '../interfaces/Constants.js';
 import { taskPropertiesNames, viewTypeNames, viewsPanelPropertiesToShow } from '../interfaces/Enums.js';
 import { funnelIcon, ScanVaultIcon } from '../interfaces/Icons.js';
@@ -163,7 +163,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
 		if (allTasks && boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
-			const viewFilter = boardData.views[currentViewIndex].viewFilter; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
+			const viewFilter = boardData.views[currentViewIndex].viewFilters; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
 			console.log("Current view : ", currentView);
 			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
@@ -413,22 +413,22 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				);
 
 				// Set initial filter state
-				if (currentBoardConfig!.views[currentViewIndex].viewFilter) {
+				if (currentBoardConfig!.views[currentViewIndex].viewFilters) {
 					setTimeout(() => {
 						// Use type assertion to resolve non-null issues
-						// const filterState = filterModal.liveFilterState as RootFilterState;
+						// const filterState = filterModal.liveFilterState as Filter;
 						if (filterModal.taskFilterComponent) {
-							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilter);
+							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilters);
 						}
 					}, 100);
 				}
 
 				// Set the close callback - mainly used for handling cancel actions
-				filterModal.filterCloseCallback = async (filterState) => {
-					if (filterState) {
+				filterModal.filterCloseCallback = async (filtersState) => {
+					if (filtersState) {
 						// Save the filter state to the board
 						let updatedcurrentBoardData = boardData;
-						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
+						updatedcurrentBoardData!.views[currentViewIndex].viewFilters = filtersState;
 						setCurrentBoardData(updatedcurrentBoardData);
 						plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
@@ -469,17 +469,17 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					// Wait for component to be created and loaded
 					setTimeout(() => {
 						if (popover.taskFilterComponent) {
-							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilter!);
+							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilters!);
 						}
 					}, 100);
 				}
 
 				// Set up close callback to save filter state
-				popover.onClose = async (filterState?: RootFilterState) => {
-					if (filterState) {
+				popover.onClose = async (filtersState?: AdvancedFilter) => {
+					if (filtersState) {
 						// Save the filter state to the board
 						let updatedcurrentBoardData = boardData;
-						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
+						updatedcurrentBoardData!.views[currentViewIndex].viewFilters = filtersState;
 						setCurrentBoardData(updatedcurrentBoardData);
 						plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 

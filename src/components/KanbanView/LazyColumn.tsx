@@ -6,7 +6,7 @@ import { Menu, Notice, Platform } from 'obsidian';
 import { t } from 'i18next';
 import { AlertOctagon, EllipsisVertical, MenuIcon } from 'lucide-react';
 import TaskBoard from '../../../main.js';
-import { Board, KanbanView, ColumnData, RootFilterState } from '../../interfaces/BoardConfigs.js';
+import { Board, KanbanView, ColumnData, Filter, AdvancedFilter } from '../../interfaces/BoardConfigs.js';
 import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
 import { taskItem } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
@@ -483,16 +483,16 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new AdvancedFilterModal(
-							plugin, true, activeBoardData.id, columnData.name, columnData.filters
+							plugin, true, activeBoardData.id, columnData.name, columnData.columnFilters
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
-						filterModal.filterCloseCallback = async (filterState) => {
+						filterModal.filterCloseCallback = async (filterState: AdvancedFilter | undefined) => {
 							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
-									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].columnFilters = filterState;
 
 									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
@@ -519,16 +519,16 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							true, // forColumn is true
 							activeBoardData.id,
 							columnData.name,
-							columnData.filters
+							columnData.columnFilters
 						);
 
 						// Set up close callback to save filter state
-						popover.onClose = async (filterState?: RootFilterState) => {
+						popover.onClose = async (filterState?: AdvancedFilter) => {
 							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
-									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].columnFilters = filterState;
 
 									plugin.taskBoardFileManager.saveBoard(newBoardData);
 

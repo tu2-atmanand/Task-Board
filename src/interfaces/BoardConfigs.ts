@@ -31,41 +31,88 @@ export interface columnSortingCriteria {
 	uid: string;
 }
 
-// --- Interfaces (from focus.md and example HTML) ---
-// (Using 'any' for property types for now, will refine based on focus.md property list)
-export interface Filter {
+// ---------------------------------------------------
+//              ADVANCED FILTER
+// ---------------------------------------------------
+
+/**
+ * The basic entity or reference point, against which we compare the tasks based on their properties.
+ * The task will pass through the {@link AdvancedFilter}, only if it satisfies this FilterCriterion.
+ */
+export interface FilterCriterion {
 	id: string;
 	property: string; // e.g., 'content', 'dueDate', 'priority'
 	condition: string; // e.g., 'isSet', 'equals', 'contains'
 	value?: any;
 }
 
-export interface FilterGroup {
+/**
+ * A collection of {@link FilterCriterion} combined together with either of the following Boolean logic :
+ * - OR
+ * - AND
+ * - NOT
+ */
+export interface FilterCriterionGroup {
 	id: string;
 	groupCondition: "all" | "any" | "none"; // How filters within this group are combined
+	filters: FilterCriterion[];
+}
+
+/**
+ * A collection of {@link FilterCriterionGroup} combined together with either of the following Boolean logic :
+ * - OR
+ * - AND
+ * - NOT
+ *
+ * This is a single complete filter which user can apply to either Board, View or Column.
+ * This can also be stored inside the {@link FiltersWarehouse} so it can be accessed by other Boards, Views or Columns.
+ */
+export interface Filter {
+	id: string;
+	name: string;
+	status: boolean;
+	description?: string;
+	rootCondition: "all" | "any" | "none"; // How FilterCriterionGroup are combined
+	filterGroups: FilterCriterionGroup[];
+}
+
+/**
+ * A collection of {@link Filter}s arranged in a list format.
+ * The order of the Filter inside this list doesnt mean anything.
+ * Its just an feature for user to arrange their filters.
+ */
+export interface AdvancedFilter {
 	filters: Filter[];
+	rootCondition: "all" | "any" | "none";
 }
 
-export interface RootFilterState {
-	rootCondition: "all" | "any" | "none"; // How filter groups are combined
-	filterGroups: FilterGroup[];
+/**
+ * All the {@link Filter} shared from Boards, Views and Columns from across your vault will be stored at plugin level, in this FiltersWarehouse.
+ * So, other Boards, Views and Columns can import them.
+ */
+export type FiltersWarehouse = Filter[];
+
+/**
+ * @deprecated From version 2.0.0 onwards we are moving towards {@link AdvancedFilters}.
+ * Use {@link FiltersWarehouse} instead.
+ */
+export interface SavedFilterConfig {
+	id: string;
+	name: string;
+	description?: string;
+	filterState: Filter;
+	createdAt: string;
+	updatedAt: string;
 }
 
-// Represents a single filter condition UI row from focus.md
-export interface FilterConditionItem {
-	property: string; // e.g., 'content', 'dueDate', 'priority', 'tags.myTag'
-	operator: string; // e.g., 'contains', 'is', '>=', 'isEmpty'
-	value?: any; // Value for the condition, type depends on property and operator
+/**
+ * @deprecated From version 2.0.0 onwards we are moving towards {@link AdvancedFilters}.
+ * Use {@link FiltersWarehouse} instead.
+ */
+export interface FilterConfigSettings {
+	enableSavedFilters: boolean;
+	savedConfigs: SavedFilterConfig[];
 }
-
-// Represents a group of filter conditions in the UI from focus.md
-export interface FilterGroupItem {
-	logicalOperator: "AND" | "OR"; // How conditions/groups within this group are combined
-	items: (FilterConditionItem | FilterGroupItem)[]; // Can contain conditions or nested groups
-}
-
-// Top-level filter configuration from the UI from focus.md
-export type FilterConfig = FilterGroupItem;
 
 // Define the structure of Board, Column, and the Data read from JSON
 export type ColumnData = {
@@ -90,7 +137,6 @@ export type ColumnData = {
 	limit?: number;
 	sortCriteria?: columnSortingCriteria[];
 	tasksIdManualOrder?: string[];
-	filters?: RootFilterState;
 	range?: {
 		// Keep it for few versions, this is required while settings migrations
 		tag: string;
@@ -99,23 +145,13 @@ export type ColumnData = {
 			to: number;
 		};
 	};
+	columnFilters?: AdvancedFilter;
+
+	/**
+	 * @deprecated - From version 2.0.0 onwards, will be using {@link AdvancedFilter} instead of a single {@link Filter}. Use {@link ColumnData.columnFilters} instead.
+	 */
+	filters?: Filter;
 };
-
-// Define saved filter configuration interface
-export interface SavedFilterConfig {
-	id: string;
-	name: string;
-	description?: string;
-	filterState: RootFilterState;
-	createdAt: string;
-	updatedAt: string;
-}
-
-// Define filter configuration settings
-export interface FilterConfigSettings {
-	enableSavedFilters: boolean;
-	savedConfigs: SavedFilterConfig[];
-}
 
 export type swimlaneConfigs = {
 	enabled: boolean;
@@ -171,21 +207,31 @@ export interface TaskBoardViewType {
 	viewType: string;
 	description?: string;
 	showFilteredTags: boolean;
-	viewFilter: RootFilterState;
 	taskCount: {
 		pending: number;
 		completed: number;
 	};
+	viewFilters: AdvancedFilter;
 
 	// All configurations specific to the kanban view
 	kanbanView?: KanbanView;
 
-	// All configurations specific to the map view
+	/**
+	 * All configurations specific to the map view
+	 */
 	mapView?: MapView;
 
 	// More views will be added in the future
+
+	/**
+	 * @deprecated From version 2.0.0 onwards RootFilterState will be deprecated. Use {@link TaskBoardViewType.viewFilters} instead.
+	 */
+	viewFilter?: RootFilterState;
 }
 
+/**
+ * The complete data stored inside a .taskboard file inside the vault for a board.
+ */
 export type Board = {
 	id: string;
 	/**
@@ -198,16 +244,8 @@ export type Board = {
 	revision: number;
 	name: string;
 	description?: string;
-	filterConfig?: FilterConfigSettings;
 
 	views: TaskBoardViewType[];
-	/**
-	 * @deprecated - Its getting difficult to find the index using the viewId.
-	 * Instead we can simply store the viewIndex itself inside the view data
-	 * and easily fetch it, becauase view index is also rarely going to change
-	 * when user will change it.
-	 */
-	lastViewId?: string;
 	lastViewIndex: number;
 	viewsPanel: {
 		isOpen: boolean;
@@ -215,10 +253,41 @@ export type Board = {
 		propertiesToShow: string[];
 		buttonsBelt: boolean;
 	};
+	boardFilters: AdvancedFilter;
 
-	// TODO : Below two settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
+	// TODO : Below settings has been deprecated since version `1.8.0`. Only kept here because of migrations. Remove it while removing the migrations.
+	/**
+	 * @deprecated Its getting difficult to find the index using the viewId.
+	 * Instead we are simply storing the index inside {@link Board.lastViewIndex} itself
+	 * and easily fetch it, becauase view index is also rarely going to change.
+	 */
+	lastViewId?: string;
+	/**
+	 * A single {@link Filter}.
+	 * 
+	 * @deprecated This has been replaced by a more advanced design now to have multiple Filters instead of single one. Use {@link Board.boardFilters} instead.
+	 */
+	boardFilter?: RootFilterState;
+	/**
+	 * A complete {@link Filter} can be stored inside this filterConfig for future reference. You can give name and description to this filter.
+	 *
+	 * @deprecated We will no longer going to save filters inside board-level. Instead they will be used at plugin level.
+	 * Use {@link FiltersWarehouse} instead.
+	 */
+	filterConfig?: FilterConfigSettings;
+	/**
+	 * A list of tags.
+	 *
+	 * @deprecated We are moving towards {@link AdvancedFilter}.
+	 */
 	filters?: string[];
+	/**
+	 * @deprecated We are moving towards {@link AdvancedFilter}.
+	 */
 	filterPolarity?: string;
+	/**
+	 * @deprecated Use {@link Board.revision} instead.
+	 */
 	pluginVersion?: string;
 };
 
@@ -335,6 +404,10 @@ export const DEFAULT_BOARD: Board = {
 					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
+			viewFilters: {
+				filters: [],
+				rootCondition: "all",
+			},
 		},
 		{
 			viewId: "3103563483",
@@ -408,6 +481,10 @@ export const DEFAULT_BOARD: Board = {
 					maxHeight: "300px",
 					headerUIType: HeaderUITypeOptions.horizontal,
 				},
+			},
+			viewFilters: {
+				filters: [],
+				rootCondition: "all",
 			},
 		},
 		{
@@ -493,6 +570,10 @@ export const DEFAULT_BOARD: Board = {
 					headerUIType: HeaderUITypeOptions.horizontal,
 				},
 			},
+			viewFilters: {
+				filters: [],
+				rootCondition: "all",
+			},
 		},
 		{
 			viewId: "3103563485",
@@ -516,6 +597,10 @@ export const DEFAULT_BOARD: Board = {
 				},
 				nodesData: {},
 			},
+			viewFilters: {
+				filters: [],
+				rootCondition: "all",
+			},
 		},
 	],
 	viewsPanel: {
@@ -527,4 +612,39 @@ export const DEFAULT_BOARD: Board = {
 		],
 		buttonsBelt: true,
 	},
+	boardFilters: {
+		filters: [],
+		rootCondition: "all",
+	},
 };
+
+// -------------------------------------------------------
+//      ALL DEPRECATED Interfaces and Typings
+// -------------------------------------------------------
+
+export interface FilterGroup {
+	id: string;
+	groupCondition: "all" | "any" | "none"; // How filters within this group are combined
+	filters: FilterCriterion[];
+}
+
+export interface RootFilterState {
+	rootCondition: "all" | "any" | "none"; // How filter groups are combined
+	filterGroups: FilterGroup[];
+}
+
+// Represents a single filter condition UI row
+export interface FilterConditionItem {
+	property: string; // e.g., 'content', 'dueDate', 'priority', 'tags.myTag'
+	operator: string; // e.g., 'contains', 'is', '>=', 'isEmpty'
+	value?: any; // Value for the condition, type depends on property and operator
+}
+
+// Represents a group of filter conditions in the UI from focus.md
+export interface FilterGroupItem {
+	logicalOperator: "AND" | "OR"; // How conditions/groups within this group are combined
+	items: (FilterConditionItem | FilterGroupItem)[]; // Can contain conditions or nested groups
+}
+
+// Top-level filter configuration from the UI from focus.md
+export type FilterConfig = FilterGroupItem;

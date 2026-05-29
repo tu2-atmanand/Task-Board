@@ -5,14 +5,11 @@ import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
-import { RootFilterState } from "../../interfaces/BoardConfigs.js";
+import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
 
-export class AdvancedFilterPopover
-	extends Component
-	implements CloseableComponent
-{
+export class AdvancedFilterPopover extends Component implements CloseableComponent {
 	private plugin: TaskBoard;
 	private app: App;
 	public forColumn: boolean;
@@ -22,16 +19,16 @@ export class AdvancedFilterPopover
 	private win: Window;
 	private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
-	public onClose: ((filterState?: RootFilterState) => void) | null = null;
+	public onClose: ((filterState?: AdvancedFilter) => void) | null = null;
 	private columnOrBoardName?: string;
-	private initialFilterState?: RootFilterState;
+	private existingFilters?: AdvancedFilter;
 
 	constructor(
 		plugin: TaskBoard,
 		forColumn: boolean,
 		currentBoardID: string,
 		columnOrBoardName?: string,
-		initialFilterState?: RootFilterState,
+		existingFilters?: AdvancedFilter,
 	) {
 		super();
 		this.plugin = plugin;
@@ -39,7 +36,7 @@ export class AdvancedFilterPopover
 		this.forColumn = forColumn;
 		this.currentBoardID = currentBoardID;
 		this.columnOrBoardName = columnOrBoardName;
-		this.initialFilterState = initialFilterState;
+		this.existingFilters = existingFilters;
 		this.win = plugin.app.workspace.containerEl.win || window;
 
 		this.scrollParent = this.win;
@@ -89,7 +86,7 @@ export class AdvancedFilterPopover
 			this.plugin,
 			this.app,
 			this.currentBoardID,
-			this.initialFilterState,
+			this.existingFilters,
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();
@@ -215,10 +212,10 @@ export class AdvancedFilterPopover
 			this.popperInstance = null;
 		}
 
-		let filterState: RootFilterState | undefined = undefined;
+		let filtersState: AdvancedFilter | undefined = undefined;
 		if (this.taskFilterComponent) {
 			try {
-				filterState = this.taskFilterComponent.getFilterState();
+				filtersState = this.taskFilterComponent.getFiltersState();
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					116,
@@ -246,7 +243,7 @@ export class AdvancedFilterPopover
 
 		if (this.onClose) {
 			try {
-				this.onClose(filterState);
+				this.onClose(filtersState);
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					117,

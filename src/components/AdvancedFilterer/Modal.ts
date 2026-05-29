@@ -1,18 +1,18 @@
 import { t } from "i18next";
 import { Modal } from "obsidian";
 import TaskBoard from "../../../main.js";
-import { RootFilterState } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
+import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
 
 export class AdvancedFilterModal extends Modal {
 	private plugin: TaskBoard;
 	private currentBoardID: string;
 	public taskFilterComponent: AdvancedFilterComponent | null;
 	private columnOrBoardName?: string;
-	private initialFilterState?: RootFilterState;
+	private existingFilters?: AdvancedFilter;
 	public filterCloseCallback:
-		| ((filterState?: RootFilterState) => void)
+		| ((filterState?: AdvancedFilter) => void)
 		| null = null;
 
 	constructor(
@@ -20,13 +20,13 @@ export class AdvancedFilterModal extends Modal {
 		forColumn: boolean,
 		currentBoardID: string,
 		columnOrBoardName?: string,
-		initialFilterState?: RootFilterState,
+		existingFilters?: AdvancedFilter,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.currentBoardID = currentBoardID;
 		this.columnOrBoardName = columnOrBoardName;
-		this.initialFilterState = initialFilterState;
+		this.existingFilters = existingFilters;
 
 		this.taskFilterComponent = null;
 
@@ -35,7 +35,9 @@ export class AdvancedFilterModal extends Modal {
 				t("column-filters-for") + " - " + this.columnOrBoardName,
 			);
 		} else {
-			this.setTitle(t("view-filters-for") + " - " + this.columnOrBoardName);
+			this.setTitle(
+				t("view-filters-for") + " - " + this.columnOrBoardName,
+			);
 		}
 	}
 
@@ -48,7 +50,7 @@ export class AdvancedFilterModal extends Modal {
 			this.plugin,
 			this.app,
 			this.currentBoardID,
-			this.initialFilterState,
+			this.existingFilters,
 		);
 		// Ensure the component is properly loaded
 		this.taskFilterComponent.onload();
@@ -57,10 +59,10 @@ export class AdvancedFilterModal extends Modal {
 	onClose() {
 		const { contentEl } = this;
 
-		let filterState: RootFilterState | undefined = undefined;
+		let filtersState: AdvancedFilter | undefined = undefined;
 		if (this.taskFilterComponent) {
 			try {
-				filterState = this.taskFilterComponent.getFilterState();
+				filtersState = this.taskFilterComponent.getFiltersState();
 				this.taskFilterComponent.onunload();
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
@@ -75,7 +77,7 @@ export class AdvancedFilterModal extends Modal {
 
 		if (this.filterCloseCallback) {
 			try {
-				this.filterCloseCallback(filterState);
+				this.filterCloseCallback(filtersState);
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					115,

@@ -1,7 +1,8 @@
 import {
 	ColumnData,
-	RootFilterState,
+	Filter,
 	FilterConfigSettings,
+	RootFilterState,
 	swimlaneConfigs,
 } from "../../interfaces/BoardConfigs.js";
 import {

@@ -1,5 +1,3 @@
-// /src/components/BoardFilters/ViewTaskFilter.ts
-
 import { t } from "i18next";
 import {
 	Component,
@@ -13,10 +11,10 @@ import {
 import Sortable from "sortablejs";
 import TaskBoard from "../../../main.js";
 import {
-	RootFilterState,
-	FilterGroup,
 	Filter,
-	SavedFilterConfig,
+	FilterCriterionGroup,
+	FilterCriterion,
+	AdvancedFilter,
 } from "../../interfaces/BoardConfigs.js";
 import {
 	getCustomStatusOptionsForDropdown,
@@ -30,20 +28,19 @@ import {
 	getFileSuggestions,
 } from "../../services/MultiSuggest.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
-import { BoardFiltersStoreModal } from "./LoadSavedFiltersModal.js";
 
 export class AdvancedFilterComponent extends Component {
 	private hostEl: HTMLElement;
-	private rootFilterState!: RootFilterState;
+	private advancedFilter!: AdvancedFilter;
 	private plugin: TaskBoard;
 	private app: App;
 	private currentBoardID: string;
-	private filterGroupsContainerEl!: HTMLElement;
+	private initialFilterState?: AdvancedFilter;
 
-	// Sortable instances
-	private groupsSortable?: Sortable;
+	private expandedFilters = new WeakMap<Filter, boolean>();
 
-	// WeakMap to store MultiSuggest instances for cleanup
+	private groupsSortableInstances = new Map<Filter, Sortable>();
+
 	private multiSuggestInstances = new WeakMap<
 		HTMLInputElement,
 		MultiSuggest
@@ -73,96 +70,66 @@ export class AdvancedFilterComponent extends Component {
 		plugin: TaskBoard,
 		app: App,
 		currentBoardID: string,
-		private initialFilterState?: RootFilterState,
+		initialFilterState?: AdvancedFilter,
 	) {
 		super();
 		this.hostEl = hostEl;
 		this.plugin = plugin;
 		this.app = app;
 		this.currentBoardID = currentBoardID;
+		this.initialFilterState = initialFilterState;
 	}
 
 	onload() {
-		// If initial filter state is provided (for column filters), use it
 		if (this.initialFilterState) {
-			this.rootFilterState = this.initialFilterState;
+			this.advancedFilter = JSON.parse(
+				JSON.stringify(this.initialFilterState),
+			);
 
-			// Clean up any invalid filter groups in the initial state
-			if (
-				this.rootFilterState.filterGroups &&
-				Array.isArray(this.rootFilterState.filterGroups)
-			) {
-				this.rootFilterState.filterGroups =
-					this.rootFilterState.filterGroups.filter(
+			this.advancedFilter.filters = this.advancedFilter.filters.filter(
+				(filter) =>
+					filter &&
+					typeof filter === "object" &&
+					filter.name !== undefined,
+			);
+
+			this.advancedFilter.filters.forEach((filter) => {
+				if (filter.filterGroups && Array.isArray(filter.filterGroups)) {
+					filter.filterGroups = filter.filterGroups.filter(
 						(groupData) =>
 							groupData &&
 							typeof groupData === "object" &&
 							groupData.groupCondition &&
 							Array.isArray(groupData.filters),
 					);
-			}
+				} else {
+					filter.filterGroups = [];
+				}
+			});
 		} else {
-			/**
-			 * Otherwise, load from localStorage (for board filters)
-			 * This is a feature where, if there are no filters applied to the board or column, the last used filters will be auto-populated for ease of user.
-			 * @todo For now, will be disablig this feature. Will see about this in the future.
-			 */
-			// const savedState = this.leafId
-			// 	? this.app.loadLocalStorage(
-			// 			`task-board-view-filter-${this.leafId}`
-			// 	  )
-			// 	: this.app.loadLocalStorage("task-board-view-filter");
-			// console.log("savedState", savedState, this.leafId);
-			// if (
-			// 	savedState &&
-			// 	typeof (savedState as any).rootCondition === "string" &&
-			// 	Array.isArray((savedState as any).filterGroups)
-			// ) {
-			// 	// Basic validation passed
-			// 	this.rootFilterState = savedState as RootFilterState;
-			// } else {
-			// 	if (savedState) {
-			// 		// If it exists but failed validation
-			// 		bugreporterInstance.addToLogs(
-			// 			"Task Filter: Invalid data in local storage. Resetting to default state."
-			// 		);
-			// 	}
-			// 	// Initialize with default state
-			// 	this.rootFilterState = {
-			// 		rootCondition: "any",
-			// 		filterGroups: [],
-			// 	};
-			// }
-
-			// Initialize with default state
-			this.rootFilterState = {
-				rootCondition: "any",
-				filterGroups: [],
+			this.advancedFilter = {
+				filters: [],
+				rootCondition: "all",
 			};
 		}
 
-		// Render first to initialize DOM elements
 		this.render();
 	}
 
 	onunload() {
-		// Destroy sortable instances
-		this.groupsSortable?.destroy();
-		this.filterGroupsContainerEl
-			?.querySelectorAll(".filters-list")
-			.forEach((listEl) => {
-				if ((listEl as any).sortableInstance) {
-					((listEl as any).sortableInstance as Sortable).destroy();
-				}
-			});
+		this.groupsSortableInstances.forEach((instance) => instance.destroy());
+		this.groupsSortableInstances.clear();
 
-		// Clear the host element
-		this.hostEl.empty(); // Obsidian's way to clear innerHTML and managed children
+		this.multiSuggestInstances = new WeakMap();
+
+		this.hostEl.empty();
 	}
 
 	close() {
 		this.onunload();
 	}
+
+	// ===================== RENDERING =====================
 
 	private render(): void {
 		this.hostEl.empty();
@@ -172,17 +139,22 @@ export class AdvancedFilterComponent extends Component {
 			cls: "task-filter-main-panel",
 		});
 		const rootFilterSetupSection = mainPanel.createDiv({
-			attr: { id: "root-filter-setup-section" },
+			cls: "root-filter-setup-section",
 		});
-		rootFilterSetupSection.addClass("root-filter-setup-section");
 
-		// Root Condition Section
-		const rootConditionSection = rootFilterSetupSection.createDiv({});
-		rootConditionSection.addClass("root-condition-section");
+		this.renderRootConditionSection(rootFilterSetupSection);
+		this.renderFiltersList(rootFilterSetupSection);
+		this.renderActionButtons(rootFilterSetupSection);
+	}
+
+	private renderRootConditionSection(container: HTMLElement): void {
+		const rootConditionSection = container.createDiv({
+			cls: "root-condition-section",
+		});
 
 		rootConditionSection.createEl("label", {
 			text: t("match"),
-			attr: { for: "task-filter-root-condition" },
+			attr: { for: "advanced-filter-root-condition" },
 			cls: ["compact-text", "root-condition-label"],
 		});
 
@@ -194,31 +166,319 @@ export class AdvancedFilterComponent extends Component {
 				all: t("all"),
 				none: t("none"),
 			})
-			.setValue(this.rootFilterState.rootCondition)
+			.setValue(this.advancedFilter.rootCondition)
 			.onChange((value) => {
-				this.rootFilterState.rootCondition = value as
+				this.advancedFilter.rootCondition = value as
 					| "all"
 					| "any"
 					| "none";
-				this.saveStateToLocalStorage();
-				this.updateGroupSeparators();
 			});
-
 		rootConditionDropdown.selectEl.toggleClass("compact-select", true);
 
 		rootConditionSection.createEl("span", {
 			cls: ["compact-text", "root-condition-span"],
+			text: t("filter"),
+		});
+	}
+
+	private renderFiltersList(container: HTMLElement): void {
+		const filtersListContainer = container.createDiv({
+			cls: "advanced-filters-list",
+		});
+
+		this.advancedFilter.filters.forEach((filter, index) => {
+			const filterEl = this.createFilterListItem(filter, index);
+			filtersListContainer.appendChild(filterEl);
+		});
+	}
+
+	private renderActionButtons(container: HTMLElement): void {
+		const actionSection = container.createDiv({
+			cls: "add-filter-section",
+		});
+
+		actionSection.createEl(
+			"div",
+			{
+				cls: ["add-filter-btn", "compact-btn"],
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "add-filter-btn-icon",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "plus");
+					},
+				);
+				el.createEl("span", {
+					cls: "add-filter-btn-text",
+					text: t("add-filter"),
+				});
+
+				this.registerDomEvent(el, "click", () => {
+					this.addNewFilter();
+				});
+			},
+		);
+
+		if (this.plugin) {
+			const configSection = actionSection.createDiv({
+				cls: "filter-config-section",
+			});
+
+			configSection.createEl(
+				"div",
+				{
+					cls: ["load-filter-config-btn", "compact-btn"],
+				},
+				(el) => {
+					el.createEl(
+						"span",
+						{
+							cls: "load-filter-config-btn-icon",
+						},
+						(iconEl) => {
+							setIcon(iconEl, "folder-open");
+							setTooltip(el, t("load-saved-filter"));
+						},
+					);
+
+					this.registerDomEvent(el, "click", async () => {
+						this.openFiltersWarehouseModal();
+					});
+				},
+			);
+		}
+	}
+
+	private createFilterListItem(filter: Filter, index: number): HTMLElement {
+		const container = createEl("div", {
+			cls: "advanced-filter-list-item",
+		});
+
+		const topSection = container.createDiv({
+			cls: "advanced-filter-top-section",
+		});
+
+		const leftSection = topSection.createDiv({
+			cls: "advanced-filter-top-left",
+		});
+		leftSection.createEl("span", {
+			cls: "filter-name-text",
+			text: filter.name || "Untitled filter",
+		});
+		if (filter.description) {
+			leftSection.createEl("span", {
+				cls: "filter-description-text",
+				text: filter.description,
+			});
+		}
+
+		const rightSection = topSection.createDiv({
+			cls: "advanced-filter-top-right",
+		});
+		const toggleBtn = new ExtraButtonComponent(rightSection)
+			.setIcon(filter.status ? "toggle-left" : "toggle-right")
+			.setTooltip(filter.status ? t("disable") : t("activate"))
+			.onClick(() => {
+				filter.status = !filter.status;
+				toggleBtn.setIcon(
+					filter.status ? "toggle-left" : "toggle-right",
+				);
+				toggleBtn.setTooltip(
+					filter.status ? t("disable") : t("activate"),
+				);
+			});
+		toggleBtn.extraSettingsEl.addClass("filter-toggle-btn");
+
+		const bottomSection = container.createDiv({
+			cls: "advanced-filter-bottom-section",
+		});
+
+		const expandableArea = container.createDiv({
+			cls: "advanced-filter-expandable-area",
+		});
+		expandableArea.style.display = "none";
+
+		const expandBtn = bottomSection.createEl("button", {
+			cls: ["expand-filter-btn", "compact-btn"],
+			text: "Expand to edit",
+		});
+
+		this.registerDomEvent(expandBtn, "click", () => {
+			const isExpanded = expandableArea.style.display !== "none";
+			if (isExpanded) {
+				this.collapseFilter(filter, expandableArea, expandBtn);
+			} else {
+				this.expandFilter(filter, expandableArea, expandBtn);
+			}
+		});
+
+		return container;
+	}
+
+	// ===================== FILTER EXPAND / COLLAPSE =====================
+
+	private collapseFilter(
+		filter: Filter,
+		expandableArea: HTMLElement,
+		expandBtn: HTMLButtonElement,
+	): void {
+		expandableArea.style.display = "none";
+		expandBtn.textContent = "Expand to edit";
+		this.expandedFilters.set(filter, false);
+	}
+
+	private expandFilter(
+		filter: Filter,
+		expandableArea: HTMLElement,
+		expandBtn: HTMLButtonElement,
+	): void {
+		if (expandableArea.children.length === 0) {
+			this.renderExpandedFilterContent(filter, expandableArea);
+		}
+		expandableArea.style.display = "block";
+		expandBtn.textContent = "Minimize";
+		this.expandedFilters.set(filter, true);
+	}
+
+	private renderExpandedFilterContent(
+		filter: Filter,
+		container: HTMLElement,
+	): void {
+		const nameSetting = container.createDiv({
+			cls: "filter-name-setting",
+		});
+		nameSetting.createEl("label", {
+			text: "Filter name",
+			cls: "compact-text",
+		});
+		const nameInput = nameSetting.createEl("input", {
+			cls: ["compact-input", "filter-name-input"],
+			attr: { placeholder: "Enter filter name" },
+		});
+		nameInput.value = filter.name;
+		this.registerDomEvent(nameInput, "input", () => {
+			filter.name = nameInput.value;
+			const listItem = container.closest(".advanced-filter-list-item");
+			if (listItem) {
+				const nameText = listItem.querySelector(".filter-name-text");
+				if (nameText) {
+					nameText.textContent = filter.name || "Untitled filter";
+				}
+			}
+		});
+
+		const descSetting = container.createDiv({
+			cls: "filter-desc-setting",
+		});
+		descSetting.createEl("label", {
+			text: "Filter description",
+			cls: "compact-text",
+		});
+		const descInput = descSetting.createEl("input", {
+			cls: ["compact-input", "filter-desc-input"],
+			attr: { placeholder: "Enter filter description" },
+		});
+		descInput.value = filter.description || "";
+		this.registerDomEvent(descInput, "input", () => {
+			filter.description = descInput.value || undefined;
+			const listItem = container.closest(".advanced-filter-list-item");
+			if (listItem) {
+				const descText = listItem.querySelector(
+					".filter-description-text",
+				);
+				if (descText) {
+					if (filter.description) {
+						descText.textContent = filter.description;
+						descText.removeAttribute("style");
+					} else {
+						(descText as HTMLElement).style.display = "none";
+					}
+				} else if (filter.description) {
+					const leftSection = listItem.querySelector(
+						".advanced-filter-top-left",
+					);
+					if (leftSection) {
+						const newDesc = leftSection.createEl("span", {
+							cls: "filter-description-text",
+							text: filter.description,
+						});
+						newDesc.addClass("filter-description-text");
+					}
+				}
+			}
+		});
+
+		const innerSection = container.createDiv({
+			cls: "filter-inner-section",
+		});
+
+		const filterRootConditionSection = innerSection.createDiv({
+			cls: "root-condition-section",
+		});
+		filterRootConditionSection.createEl("label", {
+			text: t("match"),
+			cls: ["compact-text", "root-condition-label"],
+		});
+
+		const filterRootConditionDropdown = new DropdownComponent(
+			filterRootConditionSection,
+		)
+			.addOptions({
+				any: t("any"),
+				all: t("all"),
+				none: t("none"),
+			})
+			.setValue(filter.rootCondition)
+			.onChange((value) => {
+				filter.rootCondition = value as "all" | "any" | "none";
+				this.updateGroupSeparatorsForFilter(
+					filter,
+					filterGroupsContainerEl,
+				);
+			});
+		filterRootConditionDropdown.selectEl.toggleClass(
+			["compact-select", "root-condition-select"],
+			true,
+		);
+
+		filterRootConditionSection.createEl("span", {
+			cls: ["compact-text", "root-condition-span"],
 			text: t("filter-group"),
 		});
 
-		// Filter Groups Container
-		this.filterGroupsContainerEl = rootFilterSetupSection.createDiv({
-			attr: { id: "task-filter-groups-container" },
+		const filterGroupsContainerEl = innerSection.createDiv({
 			cls: "filter-groups-container",
 		});
 
-		// Add Filter Group Button Section
-		const addGroupSection = rootFilterSetupSection.createDiv({
+		const validGroups = (filter.filterGroups || []).filter(
+			(groupData) =>
+				groupData &&
+				typeof groupData === "object" &&
+				groupData.groupCondition &&
+				Array.isArray(groupData.filters),
+		);
+
+		if (validGroups.length !== (filter.filterGroups || []).length) {
+			filter.filterGroups = validGroups;
+		}
+
+		validGroups.forEach((groupData) => {
+			const groupElement = this.createFilterGroupElement(
+				groupData,
+				filter,
+				filterGroupsContainerEl,
+			);
+			filterGroupsContainerEl.appendChild(groupElement);
+		});
+
+		this.updateGroupSeparatorsForFilter(filter, filterGroupsContainerEl);
+		this.makeSortableGroupsForFilter(filter, filterGroupsContainerEl);
+
+		const addGroupSection = innerSection.createDiv({
 			cls: "add-group-section",
 		});
 
@@ -243,96 +503,109 @@ export class AdvancedFilterComponent extends Component {
 				});
 
 				this.registerDomEvent(el, "click", () => {
-					this.addFilterGroup();
+					this.addFilterGroupToFilter(
+						filter,
+						filterGroupsContainerEl,
+					);
 				});
 			},
 		);
 
-		// Filter Configuration Buttons Section (only show if plugin is available)
-		if (this.plugin) {
-			const configSection = addGroupSection.createDiv({
-				cls: "filter-config-section",
-			});
+		const filterActions = container.createDiv({
+			cls: "filter-actions-section",
+		});
 
-			// Save Configuration Button
-			configSection.createEl(
-				"div",
-				{
-					cls: ["save-filter-config-btn", "compact-btn"],
-				},
-				(el) => {
-					el.createEl(
-						"span",
-						{
-							cls: "save-filter-config-btn-icon",
-						},
-						(iconEl) => {
-							setIcon(iconEl, "save");
-							setTooltip(el, t("save-current-filter"));
-						},
-					);
-
-					this.registerDomEvent(el, "click", async () => {
-						this.openSaveConfigModal();
-					});
-				},
-			);
-
-			// Load Configuration Button
-			configSection.createEl(
-				"div",
-				{
-					cls: ["load-filter-config-btn", "compact-btn"],
-				},
-				(el) => {
-					el.createEl(
-						"span",
-						{
-							cls: "load-filter-config-btn-icon",
-						},
-						(iconEl) => {
-							setIcon(iconEl, "folder-open");
-							setTooltip(el, t("load-saved-filter"));
-						},
-					);
-
-					this.registerDomEvent(el, "click", async () => {
-						this.openLoadConfigModal();
-					});
-				},
-			);
-		}
-
-		// Re-populate filter groups from state
-		// Filter out null/undefined/invalid filter groups to prevent corruption issues
-		const validFilterGroups = this.rootFilterState.filterGroups.filter(
-			(groupData) =>
-				groupData &&
-				typeof groupData === "object" &&
-				groupData.groupCondition &&
-				Array.isArray(groupData.filters),
+		filterActions.createEl(
+			"div",
+			{
+				cls: ["compact-btn", "duplicate-filter-btn"],
+			},
+			(el) => {
+				el.createEl("span", {}, (iconEl) => setIcon(iconEl, "copy"));
+				el.createEl("span", {
+					text: "Duplicate",
+				});
+				this.registerDomEvent(el, "click", () => {
+					this.duplicateFilter(filter);
+				});
+			},
 		);
 
-		// If invalid groups were found, update the state to remove them
-		if (
-			validFilterGroups.length !==
-			this.rootFilterState.filterGroups.length
-		) {
-			this.rootFilterState.filterGroups = validFilterGroups;
-			this.saveStateToLocalStorage();
-		}
-
-		validFilterGroups.forEach((groupData) => {
-			const groupElement = this.createFilterGroupElement(groupData);
-			this.filterGroupsContainerEl.appendChild(groupElement);
-		});
-		this.updateGroupSeparators();
-		this.makeSortableGroups();
+		filterActions.createEl(
+			"div",
+			{
+				cls: ["compact-btn", "delete-filter-btn"],
+			},
+			(el) => {
+				el.createEl("span", {}, (iconEl) => setIcon(iconEl, "trash-2"));
+				el.createEl("span", {
+					text: t("delete"),
+				});
+				this.registerDomEvent(el, "click", () => {
+					this.removeFilter(filter, container);
+				});
+			},
+		);
 	}
 
-	// --- Filter Group Management ---
-	private createFilterGroupElement(groupData: FilterGroup): HTMLElement {
-		const newGroupEl = this.hostEl.createEl("div", {
+	// ===================== FILTER CRUD =====================
+
+	private addNewFilter(): void {
+		const existingCount = this.advancedFilter.filters.filter((f) =>
+			f.name.startsWith("New filter"),
+		).length;
+
+		const newFilter: Filter = {
+			id: generateIdForFilters(),
+			status: true,
+			name:
+				existingCount > 0
+					? `New filter ${existingCount + 1}`
+					: "New filter",
+			rootCondition: "all",
+			filterGroups: [],
+		};
+
+		this.advancedFilter.filters.push(newFilter);
+		this.render();
+	}
+
+	private duplicateFilter(filter: Filter): void {
+		const index = this.advancedFilter.filters.indexOf(filter);
+		if (index === -1) return;
+
+		const newFilter: Filter = JSON.parse(JSON.stringify(filter));
+		newFilter.name = `${filter.name} ${t("copy-suffix")}`;
+
+		this.advancedFilter.filters.splice(index + 1, 0, newFilter);
+		this.expandedFilters = new WeakMap();
+		this.groupsSortableInstances.forEach((instance) => instance.destroy());
+		this.groupsSortableInstances.clear();
+		this.render();
+	}
+
+	private removeFilter(
+		filter: Filter,
+		expandableContainer?: HTMLElement,
+	): void {
+		const index = this.advancedFilter.filters.indexOf(filter);
+		if (index === -1) return;
+
+		this.advancedFilter.filters.splice(index, 1);
+		this.expandedFilters = new WeakMap();
+		this.groupsSortableInstances.forEach((instance) => instance.destroy());
+		this.groupsSortableInstances.clear();
+		this.render();
+	}
+
+	// ===================== FILTER GROUP MANAGEMENT =====================
+
+	private createFilterGroupElement(
+		groupData: FilterCriterionGroup,
+		filter: Filter,
+		filterGroupsContainerEl: HTMLElement,
+	): HTMLElement {
+		const newGroupEl = createEl("div", {
 			attr: { id: groupData.id },
 			cls: ["filter-group"],
 		});
@@ -345,7 +618,6 @@ export class AdvancedFilterComponent extends Component {
 			cls: ["filter-group-header-left"],
 		});
 
-		// Drag Handle - kept as custom SVG for now
 		groupHeaderLeft.createDiv(
 			{
 				cls: "drag-handle-container",
@@ -377,7 +649,7 @@ export class AdvancedFilterComponent extends Component {
 			.onChange((value) => {
 				const selectedValue = value as "all" | "any" | "none";
 				groupData.groupCondition = selectedValue;
-				this.saveStateToLocalStorage();
+
 				this.updateFilterConjunctions(
 					newGroupEl.querySelector(".filters-list") as HTMLElement,
 					selectedValue,
@@ -407,12 +679,17 @@ export class AdvancedFilterComponent extends Component {
 					...f,
 					id: generateIdForFilters(),
 				}));
-				const duplicatedGroupData: FilterGroup = {
+				const duplicatedGroupData: FilterCriterionGroup = {
 					...groupData,
 					id: newGroupId,
 					filters: duplicatedFilters,
 				};
-				this.addFilterGroup(duplicatedGroupData, newGroupEl);
+				this.addFilterGroupToFilter(
+					filter,
+					filterGroupsContainerEl,
+					duplicatedGroupData,
+					newGroupEl,
+				);
 			});
 		duplicateGroupBtn.extraSettingsEl.addClasses([
 			"duplicate-group-btn",
@@ -436,11 +713,10 @@ export class AdvancedFilterComponent extends Component {
 					).destroy();
 				}
 
-				this.rootFilterState.filterGroups =
-					this.rootFilterState.filterGroups.filter(
-						(g) => g.id !== groupData.id,
-					);
-				this.saveStateToLocalStorage();
+				filter.filterGroups = filter.filterGroups.filter(
+					(g) => g.id !== groupData.id,
+				);
+
 				newGroupEl.remove();
 				const nextSibling = newGroupEl.nextElementSibling;
 				if (
@@ -461,7 +737,10 @@ export class AdvancedFilterComponent extends Component {
 						prevSibling.remove();
 					}
 				}
-				this.updateGroupSeparators();
+				this.updateGroupSeparatorsForFilter(
+					filter,
+					filterGroupsContainerEl,
+				);
 			});
 		removeGroupBtn.extraSettingsEl.addClasses([
 			"remove-group-btn",
@@ -514,16 +793,17 @@ export class AdvancedFilterComponent extends Component {
 		return newGroupEl;
 	}
 
-	private addFilterGroup(
-		groupDataToClone: FilterGroup | null = null,
+	private addFilterGroupToFilter(
+		filter: Filter,
+		filterGroupsContainerEl: HTMLElement,
+		groupDataToClone: FilterCriterionGroup | null = null,
 		insertAfterElement: HTMLElement | null = null,
 	): void {
-		// Ensure the container is initialized
-		if (!this.filterGroupsContainerEl) {
+		if (!filterGroupsContainerEl) {
 			bugReporterManagerInsatance.addToLogs(
 				168,
-				"filterGroupsContainerEl not initialized yet",
-				"ViewTaskFilter.ts/addFilterGroup",
+				"filterGroupsContainerEl not available",
+				"ViewTaskFilter.ts/addFilterGroupToFilter",
 			);
 			return;
 		}
@@ -532,7 +812,7 @@ export class AdvancedFilterComponent extends Component {
 			? groupDataToClone.id
 			: generateIdForFilters();
 
-		let newGroupData: FilterGroup;
+		let newGroupData: FilterCriterionGroup;
 		if (groupDataToClone && insertAfterElement) {
 			newGroupData = {
 				id: newGroupId,
@@ -551,25 +831,29 @@ export class AdvancedFilterComponent extends Component {
 		}
 
 		const groupIndex = insertAfterElement
-			? this.rootFilterState.filterGroups.findIndex(
+			? filter.filterGroups.findIndex(
 					(g) => g.id === insertAfterElement.id,
 				) + 1
-			: this.rootFilterState.filterGroups.length;
+			: filter.filterGroups.length;
 
-		this.rootFilterState.filterGroups.splice(groupIndex, 0, newGroupData);
-		this.saveStateToLocalStorage();
-		const newGroupElement = this.createFilterGroupElement(newGroupData);
+		filter.filterGroups.splice(groupIndex, 0, newGroupData);
+
+		const newGroupElement = this.createFilterGroupElement(
+			newGroupData,
+			filter,
+			filterGroupsContainerEl,
+		);
 
 		if (
 			insertAfterElement &&
-			insertAfterElement.parentNode === this.filterGroupsContainerEl
+			insertAfterElement.parentNode === filterGroupsContainerEl
 		) {
-			this.filterGroupsContainerEl.insertBefore(
+			filterGroupsContainerEl.insertBefore(
 				newGroupElement,
 				insertAfterElement.nextSibling,
 			);
 		} else {
-			this.filterGroupsContainerEl.appendChild(newGroupElement);
+			filterGroupsContainerEl.appendChild(newGroupElement);
 		}
 
 		if (
@@ -591,16 +875,17 @@ export class AdvancedFilterComponent extends Component {
 			);
 		}
 
-		this.updateGroupSeparators();
-		this.makeSortableGroups();
+		this.updateGroupSeparatorsForFilter(filter, filterGroupsContainerEl);
+		this.makeSortableGroupsForFilter(filter, filterGroupsContainerEl);
 	}
 
-	// --- Filter Item Management ---
+	// ===================== FILTER ITEM MANAGEMENT =====================
+
 	private createFilterItemElement(
-		filterData: Filter,
-		groupData: FilterGroup,
+		filterData: FilterCriterion,
+		groupData: FilterCriterionGroup,
 	): HTMLElement {
-		const newFilterEl = this.hostEl.createEl("div", {
+		const newFilterEl = createEl("div", {
 			attr: { id: filterData.id },
 			cls: ["filter-item"],
 		});
@@ -638,7 +923,7 @@ export class AdvancedFilterComponent extends Component {
 			cls: ["filter-value-input", "compact-input"],
 		});
 		valueInput.hide();
-		valueInput.addEventListener("click", () => {
+		this.registerDomEvent(valueInput, "click", () => {
 			this.isMultiSuggestDropdownActive = true;
 		});
 		const dropdownInputContainer = newFilterEl.createEl("div", {
@@ -652,8 +937,6 @@ export class AdvancedFilterComponent extends Component {
 
 		propertySelect.onChange((value) => {
 			filterData.property = value;
-			// this.saveStateToLocalStorage(false);
-			// setTimeout(() => this.saveStateToLocalStorage(true), 300);
 			this.updateFilterPropertyOptions(
 				newFilterEl,
 				filterData,
@@ -697,38 +980,25 @@ export class AdvancedFilterComponent extends Component {
 
 			if (!valueActuallyNeeded && filterData.value !== undefined) {
 				filterData.value = undefined;
-				this.saveStateToLocalStorage();
 				valueInput.value = "";
 			}
 		};
 
 		conditionSelect.onChange((newCondition) => {
 			filterData.condition = newCondition;
-			this.saveStateToLocalStorage(false);
-			setTimeout(() => this.saveStateToLocalStorage(true), 300);
 			toggleValueInputVisibility(newCondition, filterData.property);
 			if (
 				valueInput.style.display === "none" &&
 				valueInput.value !== ""
 			) {
-				// If input is hidden, value should be undefined as per toggleValueInputVisibility
-				// This part might need re-evaluation of logic if filterData.value should be set here.
-				// For now, assuming toggleValueInputVisibility handles setting filterData.value correctly.
+				// Input hidden, value handled by toggleValueInputVisibility
 			}
 		});
 
 		valueInput.value = filterData.value || "";
 
-		// let valueInputTimeout: NodeJS.Timeout;
 		this.registerDomEvent(valueInput, "input", (event) => {
 			filterData.value = (event.target as HTMLInputElement).value;
-
-			// this.saveStateToLocalStorage(false);
-
-			// clearTimeout(valueInputTimeout);
-			// valueInputTimeout = setTimeout(() => {
-			// 	this.saveStateToLocalStorage(true);
-			// }, 400);
 		});
 
 		const removeFilterBtn = new ExtraButtonComponent(newFilterEl)
@@ -738,7 +1008,7 @@ export class AdvancedFilterComponent extends Component {
 				groupData.filters = groupData.filters.filter(
 					(f) => f.id !== filterData.id,
 				);
-				this.saveStateToLocalStorage();
+
 				newFilterEl.remove();
 				this.updateFilterConjunctions(
 					newFilterEl.parentElement as HTMLElement,
@@ -764,18 +1034,17 @@ export class AdvancedFilterComponent extends Component {
 	}
 
 	private addFilterToGroup(
-		groupData: FilterGroup,
+		groupData: FilterCriterionGroup,
 		filtersListEl: HTMLElement,
 	): void {
 		const newFilterId = generateIdForFilters();
-		const newFilterData: Filter = {
+		const newFilterData: FilterCriterion = {
 			id: newFilterId,
 			property: "content",
 			condition: "contains",
 			value: "",
 		};
 		groupData.filters.push(newFilterData);
-		this.saveStateToLocalStorage();
 
 		const newFilterElement = this.createFilterItemElement(
 			newFilterData,
@@ -788,7 +1057,7 @@ export class AdvancedFilterComponent extends Component {
 
 	private updateFilterPropertyOptions(
 		filterItemEl: HTMLElement,
-		filterData: Filter,
+		filterData: FilterCriterion,
 		propertySelect: DropdownComponent,
 		conditionSelect: DropdownComponent,
 		valueInput: HTMLInputElement,
@@ -814,20 +1083,11 @@ export class AdvancedFilterComponent extends Component {
 				reminder: t("reminder"),
 				dependencies: t("dependencies"),
 				filePath: t("file-path"),
-				// project: t("project"),
 			});
 		}
 		propertySelect.setValue(property);
 
 		let conditionOptions: { value: string; text: string }[] = [];
-
-		// let dropdownInput: DropdownComponent | null = null;
-		// filterItemEl.removeChild(dropdownInputContainer);
-		// if (valueSelect) {
-		// dropdownInput.disabled = true;
-		// dropdownInput.type = "text";
-		// dropdownInput = null;
-		// }
 
 		switch (property) {
 			case "content":
@@ -883,13 +1143,7 @@ export class AdvancedFilterComponent extends Component {
 				];
 				break;
 			case "status":
-				// valueInput.type = "text";
 				valueInput.hide();
-				// // First remove the older dropdown options present inside valueSelect
-				// if(valueSelect.selectEl.options.length > 0) {
-				// 	valueSelect.
-				// }
-
 				const statusOptions = getCustomStatusOptionsForDropdown(
 					this.plugin.settings.data.customStatuses,
 					{ mode: "grouped" },
@@ -897,23 +1151,18 @@ export class AdvancedFilterComponent extends Component {
 				const optionsRecord: Record<string, string> = {};
 				if (statusOptions.type === "grouped") {
 					statusOptions.groups.forEach((group) => {
-						// Add visual group separator (disabled option)
 						optionsRecord[`__group_${group.type}__`] =
 							`── ${group.label} ──`;
-
-						// Add actual status options under the group
 						group.options.forEach((opt) => {
 							optionsRecord[opt.value] = opt.label;
 						});
 					});
 				} else {
-					// Fallback for flat output
 					statusOptions.options.forEach((opt) => {
 						optionsRecord[opt.value] = opt.label;
 					});
 				}
 				valueSelect.addOptions(optionsRecord);
-				// Disable and style group header options after DOM render
 				setTimeout(() => {
 					Array.from(valueSelect.selectEl.options).forEach(
 						(option) => {
@@ -933,8 +1182,6 @@ export class AdvancedFilterComponent extends Component {
 				);
 				valueSelect.onChange((newValue) => {
 					filterData.value = newValue;
-					// this.saveStateToLocalStorage(false);
-					// setTimeout(() => this.saveStateToLocalStorage(true), 300);
 				});
 
 				conditionOptions = [
@@ -980,13 +1227,6 @@ export class AdvancedFilterComponent extends Component {
 				];
 				break;
 			case "priority":
-				// valueSelect = new DropdownComponent(dropdownInputContainer);
-				// // valueInput.type = "dropdown";
-				// valueSelect.selectEl.addClasses([
-				// 	"filter-value-input",
-				// 	"compact-select",
-				// ]);
-				// valueInput.replaceWith(dropdownInput.selectEl);
 				valueInput.hide();
 				valueSelect.addOptions(
 					getPriorityOptionsForDropdown().reduce(
@@ -1006,22 +1246,7 @@ export class AdvancedFilterComponent extends Component {
 				);
 				valueSelect.onChange((newValue) => {
 					filterData.value = Number(newValue);
-					// this.saveStateToLocalStorage(false);
-					// setTimeout(() => this.saveStateToLocalStorage(true), 300);
 				});
-				// valueInput = dropdownInput;
-				// if (
-				// 	valueInput instanceof DropdownComponent &&
-				// 	valueInput.selectEl.options.length === 0
-				// ) {
-				// 	valueInput.addOptions(
-				// 		getPriorityOptionsForDropdown().map((opt) => ({
-				// 			value: String(opt.value),
-				// 			text: opt.text,
-				// 		}))
-				// 	);
-				// 	valueInput.setValue(property);
-				// }
 				conditionOptions = [
 					{
 						value: "is",
@@ -1221,50 +1446,26 @@ export class AdvancedFilterComponent extends Component {
 		);
 
 		const currentSelectedCondition = filterData.condition;
-		// let conditionChanged = false;
 		if (
 			conditionOptions.some(
 				(opt) => opt.value === currentSelectedCondition,
 			)
 		) {
 			conditionSelect.setValue(currentSelectedCondition);
-			// conditionChanged = true;
 		} else if (conditionOptions.length > 0) {
 			conditionSelect.setValue(conditionOptions[0].value);
 			filterData.condition = conditionOptions[0].value;
-			// conditionChanged = true;
 		}
 
 		const finalConditionVal = conditionSelect.getValue();
 		let valueActuallyNeeded =
 			this.conditionsRequiringValue.includes(finalConditionVal);
-		// if (
-		// 	property === "completed" &&
-		// 	(finalConditionVal === "isTrue" || finalConditionVal === "isFalse")
-		// ) {
-		// 	valueActuallyNeeded = false;
-		// }
 		if (
 			finalConditionVal === "isEmpty" ||
 			finalConditionVal === "isNotEmpty"
 		) {
 			valueActuallyNeeded = false;
 		}
-
-		let valueChanged = false;
-
-		// if (valueSelect) {
-		// 	console.log("Removing dropdown input");
-		// 	valueInput.hide();
-		// 	// if (valueActuallyNeeded) {
-		// 	// } else {
-		// 	// 	console.log("Removing dropdown input - 2");
-		// 	// 	filterItemEl.removeChild(dropdownInputContainer);
-		// 	// 	// dropdownInput.disabled = true;
-		// 	// 	dropdownInput.type = "text";
-		// 	// 	dropdownInput = null;
-		// 	// }
-		// }
 
 		const propertyValue = propertySelect.getValue();
 		if (propertyValue === "priority" || propertyValue === "status") {
@@ -1291,16 +1492,10 @@ export class AdvancedFilterComponent extends Component {
 			valueInput.value = "";
 			if (filterData.value !== undefined) {
 				filterData.value = undefined;
-				valueChanged = true;
 			}
 		}
 
-		// if (conditionChanged || valueChanged) {
-		// 	this.saveStateToLocalStorage();
-		// }
-
 		if (valueInput instanceof HTMLInputElement) {
-			// Setup MultiSuggest for appropriate properties
 			this.setupMultiSuggest(property, valueInput, filterData);
 		}
 	}
@@ -1308,15 +1503,13 @@ export class AdvancedFilterComponent extends Component {
 	private setupMultiSuggest(
 		property: string,
 		valueInput: HTMLInputElement,
-		filterData: Filter,
+		filterData: FilterCriterion,
 	): void {
-		// Only setup suggestions for specific properties
 		const propertiesWithSuggestions = ["tags", "filePath"];
 		if (!propertiesWithSuggestions.includes(property)) {
 			return;
 		}
 
-		// Clean up existing MultiSuggest instance if it exists
 		const existingInstance = this.multiSuggestInstances.get(valueInput);
 		if (existingInstance) {
 			existingInstance.close();
@@ -1334,13 +1527,10 @@ export class AdvancedFilterComponent extends Component {
 				break;
 		}
 
-		// Create callback to update filter data when suggestion is selected
 		const onSelectCallback = (value: string) => {
 			filterData.value = value.replace("#", "");
-			this.saveStateToLocalStorage();
 		};
 
-		// Initialize MultiSuggest with suggestions and store instance for cleanup
 		const multiSuggestInstance = new MultiSuggest(
 			valueInput,
 			new Set(suggestions),
@@ -1348,11 +1538,11 @@ export class AdvancedFilterComponent extends Component {
 			this.app,
 		);
 		multiSuggestInstance.setAutoDestroy(valueInput);
-		// Store instance in WeakMap for cleanup
 		this.multiSuggestInstances.set(valueInput, multiSuggestInstance);
 	}
 
-	// --- UI Updates (Conjunctions, Separators) ---
+	// ===================== UI UPDATES =====================
+
 	private updateFilterConjunctions(
 		filtersListEl: HTMLElement | null,
 		groupCondition: "all" | "any" | "none" = "all",
@@ -1387,13 +1577,16 @@ export class AdvancedFilterComponent extends Component {
 		});
 	}
 
-	private updateGroupSeparators(): void {
-		this.filterGroupsContainerEl
+	private updateGroupSeparatorsForFilter(
+		filter: Filter,
+		filterGroupsContainerEl: HTMLElement,
+	): void {
+		filterGroupsContainerEl
 			?.querySelectorAll(".filter-group-separator-container")
 			.forEach((sep) => sep.remove());
 
 		const groups = Array.from(
-			this.filterGroupsContainerEl?.children || [],
+			filterGroupsContainerEl?.children || [],
 		).filter((child) => child.classList.contains("filter-group"));
 
 		if (groups.length > 1) {
@@ -1406,7 +1599,7 @@ export class AdvancedFilterComponent extends Component {
 						cls: "filter-group-separator",
 					});
 
-					const rootCond = this.rootFilterState.rootCondition;
+					const rootCond = filter.rootCondition;
 					let separatorText = t("or");
 					if (rootCond === "all") separatorText = t("and");
 					else if (rootCond === "none") separatorText = t("and-not");
@@ -1421,15 +1614,19 @@ export class AdvancedFilterComponent extends Component {
 		}
 	}
 
-	// --- SortableJS Integration ---
-	private makeSortableGroups(): void {
-		if (this.groupsSortable) {
-			this.groupsSortable.destroy();
-			this.groupsSortable = undefined;
+	private makeSortableGroupsForFilter(
+		filter: Filter,
+		filterGroupsContainerEl: HTMLElement,
+	): void {
+		const existingInstance = this.groupsSortableInstances.get(filter);
+		if (existingInstance) {
+			existingInstance.destroy();
+			this.groupsSortableInstances.delete(filter);
 		}
-		if (!this.filterGroupsContainerEl) return;
 
-		this.groupsSortable = new Sortable(this.filterGroupsContainerEl, {
+		if (!filterGroupsContainerEl) return;
+
+		const sortable = new Sortable(filterGroupsContainerEl, {
 			animation: 150,
 			handle: ".drag-handle",
 			filter: ".filter-group-separator-container",
@@ -1443,177 +1640,76 @@ export class AdvancedFilterComponent extends Component {
 				)
 					return;
 
-				const movedGroup = this.rootFilterState.filterGroups.splice(
+				const movedGroup = filter.filterGroups.splice(
 					sortableEvent.oldDraggableIndex,
 					1,
 				)[0];
-				this.rootFilterState.filterGroups.splice(
+				filter.filterGroups.splice(
 					sortableEvent.newDraggableIndex,
 					0,
 					movedGroup,
 				);
-				this.saveStateToLocalStorage();
-				this.updateGroupSeparators();
+
+				this.updateGroupSeparatorsForFilter(
+					filter,
+					filterGroupsContainerEl,
+				);
 			},
 		});
+
+		this.groupsSortableInstances.set(filter, sortable);
 	}
 
-	// --- Filter State Management ---
-	private updateFilterState(
-		filterGroups: FilterGroup[],
-		rootCondition: "all" | "any" | "none",
-	): void {
-		this.rootFilterState.filterGroups = filterGroups;
-		this.rootFilterState.rootCondition = rootCondition;
-		this.saveStateToLocalStorage();
-	}
+	// ===================== STATE MANAGEMENT =====================
 
-	// Public method to get current filter state
-	public getFilterState(): RootFilterState {
-		// Handle case where rootFilterState might not be initialized
-		if (!this.rootFilterState) {
+	public getFiltersState(): AdvancedFilter {
+		if (!this.advancedFilter) {
 			return {
-				rootCondition: "any",
-				filterGroups: [],
+				filters: [],
+				rootCondition: "all",
 			};
 		}
-		return JSON.parse(JSON.stringify(this.rootFilterState));
+		return JSON.parse(JSON.stringify(this.advancedFilter));
 	}
 
-	// Public method to load filter state
-	public loadFilterState(state: RootFilterState): void {
-		// Safely destroy sortable instances
-		try {
-			if (this.groupsSortable) {
-				this.groupsSortable.destroy();
-				this.groupsSortable = undefined;
-			}
-		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(
-				169,
-				`Error destroying groups sortable: ${String(error)}`,
-				"ViewTaskFilter.ts/loadFilterState",
-			);
-			this.groupsSortable = undefined;
-		}
+	public loadFilterState(state: AdvancedFilter): void {
+		this.groupsSortableInstances.forEach((instance) => instance.destroy());
+		this.groupsSortableInstances.clear();
 
-		// Safely destroy filter list sortable instances
-		this.filterGroupsContainerEl
-			?.querySelectorAll(".filters-list")
-			.forEach((listEl) => {
-				try {
-					if ((listEl as any).sortableInstance) {
-						(
-							(listEl as any).sortableInstance as Sortable
-						).destroy();
-						(listEl as any).sortableInstance = undefined;
-					}
-				} catch (error) {
-					bugReporterManagerInsatance.addToLogs(
-						170,
-						`Error destroying filter list sortable: ${String(error)}`,
-						"ViewTaskFilter.ts/loadFilterState",
+		this.advancedFilter = JSON.parse(JSON.stringify(state));
+
+		if (
+			this.advancedFilter.filters &&
+			Array.isArray(this.advancedFilter.filters)
+		) {
+			this.advancedFilter.filters = this.advancedFilter.filters.filter(
+				(filter) =>
+					filter &&
+					typeof filter === "object" &&
+					filter.name !== undefined,
+			);
+			this.advancedFilter.filters.forEach((filter) => {
+				if (filter.filterGroups && Array.isArray(filter.filterGroups)) {
+					filter.filterGroups = filter.filterGroups.filter(
+						(groupData) =>
+							groupData &&
+							typeof groupData === "object" &&
+							groupData.groupCondition &&
+							Array.isArray(groupData.filters),
 					);
-					(listEl as any).sortableInstance = undefined;
 				}
 			});
-
-		this.rootFilterState = JSON.parse(JSON.stringify(state));
-
-		// Clean up any invalid filter groups that might exist in loaded state
-		if (
-			this.rootFilterState.filterGroups &&
-			Array.isArray(this.rootFilterState.filterGroups)
-		) {
-			this.rootFilterState.filterGroups =
-				this.rootFilterState.filterGroups.filter(
-					(groupData) =>
-						groupData &&
-						typeof groupData === "object" &&
-						groupData.groupCondition &&
-						Array.isArray(groupData.filters),
-				);
 		}
 
-		this.saveStateToLocalStorage();
-
+		this.expandedFilters = new WeakMap();
+		this.multiSuggestInstances = new WeakMap();
 		this.render();
 	}
 
-	/**
-	 * This feature is in disabled state, hence no need to store anything in localStorage.
-	 *
-	 * @todo See this if required sometime in future.
-	 */
-	private saveStateToLocalStorage(
-		triggerRealtimeUpdate: boolean = true,
-	): void {
-		// if (this.app) {
-		// 	this.app.saveLocalStorage(
-		// 		this.leafId
-		// 			? `task-board-view-filter-${this.leafId}`
-		// 			: "task-board-view-filter",
-		// 		this.rootFilterState
-		// 	);
-		// 	if (triggerRealtimeUpdate) {
-		// 		this.app.workspace.trigger(
-		// 			"task-board:filter-changed",
-		// 			this.rootFilterState,
-		// 			this.leafId || undefined
-		// 		);
-		// 	}
-		// }
-	}
+	// ===================== STUB METHODS =====================
 
-	// --- Filter Configuration Management ---
-	private openSaveConfigModal(): void {
-		if (!this.plugin) return;
-
-		const modal = new BoardFiltersStoreModal(
-			this.app,
-			this.plugin,
-			"save",
-			this.currentBoardID,
-			this.getFilterState(),
-			(config: SavedFilterConfig) => {
-				// Optional: Handle successful save
-				new Notice(
-					`${t("filter-configs-saved-successfully")} : ${config.name}`,
-				);
-			},
-		);
-		modal.setCloseCallback(() => {
-			this.isConfigModalOpen = false;
-		});
-		this.isConfigModalOpen = true;
-		modal.open();
-	}
-
-	private openLoadConfigModal(): void {
-		if (!this.plugin) return;
-
-		const modal = new BoardFiltersStoreModal(
-			this.app,
-			this.plugin,
-			"load",
-			this.currentBoardID,
-			undefined,
-			undefined,
-			(config: SavedFilterConfig) => {
-				// Load the configuration
-				this.loadFilterState(config.filterState);
-				new Notice(
-					`${t("filter-configuration-loaded-successfully")} : ${
-						config.name
-					}`,
-				);
-			},
-		);
-		modal.setCloseCallback(() => {
-			this.isConfigModalOpen = false;
-		});
-		this.isConfigModalOpen = true;
-		modal.open();
+	private async openFiltersWarehouseModal(): Promise<void> {
+		new Notice("Feature coming soon");
 	}
 }
 

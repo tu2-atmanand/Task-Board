@@ -1,6 +1,11 @@
+/**
+ * @deprecated This component has been deprecated and will be replaced by "Filters Warehouse" in the future.
+ * Dont use this component.
+ */
+
 import { t } from "i18next";
 import { App, Modal, Setting, Notice, DropdownComponent } from "obsidian";
-import type { RootFilterState, SavedFilterConfig, FilterGroup, Board } from "../../interfaces/BoardConfigs.js";
+import type { Filter, SavedFilterConfig, FilterCriterionGroup, Board } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import type TaskBoard from "../../../main.js";
@@ -9,7 +14,7 @@ export class BoardFiltersStoreModal extends Modal {
 	private plugin: TaskBoard;
 	private mode: "save" | "load";
 	private currentBoardID: string;
-	private currentFilterState?: RootFilterState;
+	private currentFilterState?: Filter;
 	private onSave?: (config: SavedFilterConfig) => void;
 	private onLoad?: (config: SavedFilterConfig) => void;
 
@@ -18,7 +23,7 @@ export class BoardFiltersStoreModal extends Modal {
 		plugin: TaskBoard,
 		mode: "save" | "load",
 		currentBoardID: string,
-		currentFilterState?: RootFilterState,
+		currentFilterState?: Filter,
 		onSave?: (config: SavedFilterConfig) => void,
 		onLoad?: (config: SavedFilterConfig) => void,
 	) {
@@ -216,7 +221,7 @@ export class BoardFiltersStoreModal extends Modal {
 
 		const groupCount = config.filterState.filterGroups.length;
 		const totalFilters = config.filterState.filterGroups.reduce(
-			(sum: number, group: FilterGroup) => sum + group.filters.length,
+			(sum: number, group: FilterCriterionGroup) => sum + group.filters.length,
 			0,
 		);
 

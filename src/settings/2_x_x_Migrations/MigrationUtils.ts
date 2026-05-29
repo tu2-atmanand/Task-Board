@@ -373,12 +373,15 @@ export async function createBoardFiles(
 					filterConfig: board.filterConfig,
 					views: [
 						{
-							viewId: generateRandomStringId('view'),
+							viewId: generateRandomStringId("view"),
 							viewIndex: 0,
 							viewName: "Kanban View",
 							viewType: viewTypeNames.kanban,
 							showFilteredTags: board.showFilteredTags,
-							viewFilter: board.boardFilter,
+							viewFilters: {
+								filters: [],
+								rootCondition: "all",
+							},
 							taskCount: {
 								pending: 0,
 								completed: 0,
@@ -389,10 +392,26 @@ export async function createBoardFiles(
 								showColumnTags: board.showColumnTags,
 								swimlanes: board.swimlanes,
 							},
+							viewFilter: {
+								filterGroups: [],
+								rootCondition: "all",
+							},
 						},
 					],
 					// lastViewId: "",
 					lastViewIndex: 0,
+					boardFilters: {
+						rootCondition: board.boardFilter.rootCondition,
+						filters: [
+							{
+								id: generateRandomStringId(),
+								name: "Migrated filter",
+								status: true,
+								rootCondition: board.boardFilter.rootCondition,
+								filterGroups: board.boardFilter.filterGroups,
+							},
+						],
+					},
 				};
 
 				// const lastViewId = boardContent.views[0]?.viewId ?? "";
@@ -539,15 +558,15 @@ export async function migrateMapViewData(
 					);
 					if (!mapViewExists) {
 						boardData.views.push({
-							viewId: generateRandomStringId('view'),
+							viewId: generateRandomStringId("view"),
 							viewIndex: viewsLength,
 							viewName: "Map View",
 							viewType: viewTypeNames.map,
 							mapView: newMapViewData,
 							showFilteredTags: true,
-							viewFilter: boardData.views[0]?.viewFilter ?? {
+							viewFilters: {
 								rootCondition: "none",
-								filterGroups: [],
+								filters: [],
 							},
 							taskCount: {
 								pending: 0,
