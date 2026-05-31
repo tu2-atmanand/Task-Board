@@ -51,25 +51,25 @@ export class AdvancedFilterPopover extends Component implements CloseableCompone
 		}
 
 		// Create content container
-		const contentEl = createDiv({ cls: "task-popover-content" });
+		const contentEl = createDiv({ cls: "advanced-filter-menu-container" });
 		// Prevent clicks inside the popover from bubbling up
 		this.registerDomEvent(contentEl, "click", (e) => {
 			e.stopPropagation();
 		});
 
 		const headerEl = contentEl.createDiv({
-			cls: "task-popover-content-header",
+			cls: "advanced-filter-menu-container-header",
 		});
 		// Add column filter heading if this is for a column
 		if (this.forColumn) {
 			headerEl.createEl("h3", {
 				text: t("column-filters-for") + " - " + this.columnOrBoardName,
-				cls: "task-popover-content-header-heading",
+				cls: "advanced-filter-menu-container-header-heading",
 			});
 		} else {
 			headerEl.createEl("h3", {
 				text: t("view-filters-for") + " - " + this.columnOrBoardName,
-				cls: "task-popover-content-header-heading",
+				cls: "advanced-filter-menu-container-header-heading",
 			});
 		}
 
@@ -77,7 +77,7 @@ export class AdvancedFilterPopover extends Component implements CloseableCompone
 		contentEl.createEl("hr");
 
 		const taskFilterContainer = contentEl.createDiv({
-			cls: "task-popover-content-body",
+			cls: "advanced-filter-menu-container-body",
 		});
 
 		// Create metadata editor, use compact mode
@@ -93,7 +93,7 @@ export class AdvancedFilterPopover extends Component implements CloseableCompone
 
 		// Create the popover
 		this.popoverRef = this.app.workspace.containerEl.createDiv({
-			cls: "filter-menu tg-menu bm-menu", // Borrowing some classes from IconMenu
+			cls: "advanced-filter-menu",
 		});
 		this.popoverRef.appendChild(contentEl);
 

@@ -7,6 +7,8 @@ import {
 	App,
 	setTooltip,
 	Notice,
+	ToggleComponent,
+	Menu,
 } from "obsidian";
 import Sortable from "sortablejs";
 import TaskBoard from "../../../main.js";
@@ -133,13 +135,13 @@ export class AdvancedFilterComponent extends Component {
 
 	private render(): void {
 		this.hostEl.empty();
-		this.hostEl.addClass("task-filter-root-container");
+		this.hostEl.addClass("advanced-filter-menu-container-body");
 
 		const mainPanel = this.hostEl.createDiv({
-			cls: "task-filter-main-panel",
+			cls: "advanced-filter-menu-container-body-main-panel",
 		});
 		const rootFilterSetupSection = mainPanel.createDiv({
-			cls: "root-filter-setup-section",
+			cls: "advanced-filter-menu-container-body-main-panel-configs",
 		});
 
 		this.renderRootConditionSection(rootFilterSetupSection);
@@ -149,7 +151,7 @@ export class AdvancedFilterComponent extends Component {
 
 	private renderRootConditionSection(container: HTMLElement): void {
 		const rootConditionSection = container.createDiv({
-			cls: "root-condition-section",
+			cls: "filters-root-condition-section",
 		});
 
 		rootConditionSection.createEl("label", {
@@ -177,7 +179,7 @@ export class AdvancedFilterComponent extends Component {
 
 		rootConditionSection.createEl("span", {
 			cls: ["compact-text", "root-condition-span"],
-			text: t("filter"),
+			text: t("of-the-below-enabled-filters"),
 		});
 	}
 
@@ -216,6 +218,7 @@ export class AdvancedFilterComponent extends Component {
 					cls: "add-filter-btn-text",
 					text: t("add-filter"),
 				});
+				setTooltip(el, t("create-new-filter"));
 
 				this.registerDomEvent(el, "click", () => {
 					this.addNewFilter();
@@ -223,34 +226,32 @@ export class AdvancedFilterComponent extends Component {
 			},
 		);
 
-		if (this.plugin) {
-			const configSection = actionSection.createDiv({
-				cls: "filter-config-section",
-			});
+		actionSection.createEl(
+			"div",
+			{
+				cls: ["load-filter-config-btn", "compact-btn"],
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "load-filter-config-btn-icon",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "warehouse");
+					},
+				);
+				el.createEl("span", {
+					cls: "load-filter-config-btn-text",
+					text: t("import-filter"),
+				});
+				setTooltip(el, t("import-filter-from-filter-warehouse"));
 
-			configSection.createEl(
-				"div",
-				{
-					cls: ["load-filter-config-btn", "compact-btn"],
-				},
-				(el) => {
-					el.createEl(
-						"span",
-						{
-							cls: "load-filter-config-btn-icon",
-						},
-						(iconEl) => {
-							setIcon(iconEl, "folder-open");
-							setTooltip(el, t("load-saved-filter"));
-						},
-					);
-
-					this.registerDomEvent(el, "click", async () => {
-						this.openFiltersWarehouseModal();
-					});
-				},
-			);
-		}
+				this.registerDomEvent(el, "click", async () => {
+					this.openFiltersWarehouseModal();
+				});
+			},
+		);
 	}
 
 	private createFilterListItem(filter: Filter, index: number): HTMLElement {
@@ -276,22 +277,81 @@ export class AdvancedFilterComponent extends Component {
 			});
 		}
 
-		const rightSection = topSection.createDiv({
+		const topRightSection = topSection.createDiv({
 			cls: "advanced-filter-top-right",
 		});
-		const toggleBtn = new ExtraButtonComponent(rightSection)
-			.setIcon(filter.status ? "toggle-left" : "toggle-right")
+		// Instead of an ExtraButtonComponent, will create a normal toggle component
+		// const toggleBtn = new ExtraButtonComponent(rightSection)
+		// 	.setIcon(filter.status ? "toggle-left" : "toggle-right")
+		// 	.setTooltip(filter.status ? t("disable") : t("activate"))
+		// 	.onClick(() => {
+		// 		filter.status = !filter.status;
+		// 		toggleBtn.setIcon(
+		// 			filter.status ? "toggle-left" : "toggle-right",
+		// 		);
+		// 		toggleBtn.setTooltip(
+		// 			filter.status ? t("disable") : t("activate"),
+		// 		);
+		// 	});
+
+		const filterToggleBtn = topRightSection.createDiv({
+			cls: "advanced-filter-top-right-toggle-btn",
+		});
+
+		new ToggleComponent(filterToggleBtn)
 			.setTooltip(filter.status ? t("disable") : t("activate"))
-			.onClick(() => {
+			.onChange(() => {
 				filter.status = !filter.status;
-				toggleBtn.setIcon(
-					filter.status ? "toggle-left" : "toggle-right",
-				);
-				toggleBtn.setTooltip(
-					filter.status ? t("disable") : t("activate"),
-				);
 			});
-		toggleBtn.extraSettingsEl.addClass("filter-toggle-btn");
+
+		const filterMenuBtn = topSection.createDiv({
+			cls: "advanced-filter-top-right-toggle-btn",
+		});
+
+		filterMenuBtn.createEl(
+			"div",
+			{
+				cls: ["filter-menu-btn", "compact-btn"],
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "filter-menu-btn-icon",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "ellipsis-vertical");
+					},
+				);
+				this.registerDomEvent(el, "click", () => {
+					const filterMenu = new Menu();
+
+					filterMenu.addItem((item) => {
+						item.setTitle(t("duplicate-filter"));
+						item.setIcon("copy");
+						item.onClick(async () => {
+							this.duplicateFilter(filter);
+						});
+					});
+
+					filterMenu.addItem((item) => {
+						item.setTitle(t("save-in-warehouse"));
+						item.setIcon("warehouse");
+						item.onClick(async () => {
+							this.duplicateFilter(filter);
+						});
+					});
+
+					filterMenu.addItem((item) => {
+						item.setTitle(t("delete-filter"));
+						item.setIcon("trash-2");
+						item.onClick(async () => {
+							this.removeFilter(filter, container);
+						});
+					});
+				});
+			},
+		);
 
 		const bottomSection = container.createDiv({
 			cls: "advanced-filter-bottom-section",
@@ -417,7 +477,7 @@ export class AdvancedFilterComponent extends Component {
 		});
 
 		const filterRootConditionSection = innerSection.createDiv({
-			cls: "root-condition-section",
+			cls: "criterion-group-condition-section",
 		});
 		filterRootConditionSection.createEl("label", {
 			text: t("match"),
@@ -447,11 +507,11 @@ export class AdvancedFilterComponent extends Component {
 
 		filterRootConditionSection.createEl("span", {
 			cls: ["compact-text", "root-condition-span"],
-			text: t("filter-group"),
+			text: t("of-the-below-criterion-groups"),
 		});
 
 		const filterGroupsContainerEl = innerSection.createDiv({
-			cls: "filter-groups-container",
+			cls: "criterion-group-container",
 		});
 
 		const validGroups = (filter.filterGroups || []).filter(
@@ -485,21 +545,21 @@ export class AdvancedFilterComponent extends Component {
 		addGroupSection.createEl(
 			"div",
 			{
-				cls: ["add-filter-group-btn", "compact-btn"],
+				cls: ["add-criterion-group-btn", "compact-btn"],
 			},
 			(el) => {
 				el.createEl(
 					"span",
 					{
-						cls: "add-filter-group-btn-icon",
+						cls: "add-criterion-group-btn-icon",
 					},
 					(iconEl) => {
 						setIcon(iconEl, "plus");
 					},
 				);
 				el.createEl("span", {
-					cls: "add-filter-group-btn-text",
-					text: t("add-filter-group"),
+					cls: "add-criterion-group-btn-text",
+					text: t("add-criterion-group"),
 				});
 
 				this.registerDomEvent(el, "click", () => {
@@ -511,41 +571,41 @@ export class AdvancedFilterComponent extends Component {
 			},
 		);
 
-		const filterActions = container.createDiv({
-			cls: "filter-actions-section",
-		});
+		// const filterActions = container.createDiv({
+		// 	cls: "filter-actions-section",
+		// });
 
-		filterActions.createEl(
-			"div",
-			{
-				cls: ["compact-btn", "duplicate-filter-btn"],
-			},
-			(el) => {
-				el.createEl("span", {}, (iconEl) => setIcon(iconEl, "copy"));
-				el.createEl("span", {
-					text: "Duplicate",
-				});
-				this.registerDomEvent(el, "click", () => {
-					this.duplicateFilter(filter);
-				});
-			},
-		);
+		// filterActions.createEl(
+		// 	"div",
+		// 	{
+		// 		cls: ["compact-btn", "duplicate-filter-btn"],
+		// 	},
+		// 	(el) => {
+		// 		el.createEl("span", {}, (iconEl) => setIcon(iconEl, "copy"));
+		// 		el.createEl("span", {
+		// 			text: "Duplicate",
+		// 		});
+		// 		this.registerDomEvent(el, "click", () => {
+		// 			this.duplicateFilter(filter);
+		// 		});
+		// 	},
+		// );
 
-		filterActions.createEl(
-			"div",
-			{
-				cls: ["compact-btn", "delete-filter-btn"],
-			},
-			(el) => {
-				el.createEl("span", {}, (iconEl) => setIcon(iconEl, "trash-2"));
-				el.createEl("span", {
-					text: t("delete"),
-				});
-				this.registerDomEvent(el, "click", () => {
-					this.removeFilter(filter, container);
-				});
-			},
-		);
+		// filterActions.createEl(
+		// 	"div",
+		// 	{
+		// 		cls: ["compact-btn", "delete-filter-btn"],
+		// 	},
+		// 	(el) => {
+		// 		el.createEl("span", {}, (iconEl) => setIcon(iconEl, "trash-2"));
+		// 		el.createEl("span", {
+		// 			text: t("delete"),
+		// 		});
+		// 		this.registerDomEvent(el, "click", () => {
+		// 			this.removeFilter(filter, container);
+		// 		});
+		// 	},
+		// );
 	}
 
 	// ===================== FILTER CRUD =====================
@@ -607,15 +667,15 @@ export class AdvancedFilterComponent extends Component {
 	): HTMLElement {
 		const newGroupEl = createEl("div", {
 			attr: { id: groupData.id },
-			cls: ["filter-group"],
+			cls: ["criterion-group"],
 		});
 
 		const groupHeader = newGroupEl.createDiv({
-			cls: ["filter-group-header"],
+			cls: ["criterion-group-header"],
 		});
 
 		const groupHeaderLeft = groupHeader.createDiv({
-			cls: ["filter-group-header-left"],
+			cls: ["criterion-group-header-left"],
 		});
 
 		groupHeaderLeft.createDiv(
@@ -663,16 +723,16 @@ export class AdvancedFilterComponent extends Component {
 
 		groupHeaderLeft.createEl("span", {
 			cls: ["compact-text"],
-			text: t("filter-in-this-group"),
+			text: t("criterion-in-this-group"),
 		});
 
 		const groupHeaderRight = groupHeader.createDiv({
-			cls: ["filter-group-header-right"],
+			cls: ["criterion-group-header-right"],
 		});
 
 		const duplicateGroupBtn = new ExtraButtonComponent(groupHeaderRight)
 			.setIcon("copy")
-			.setTooltip(t("duplicate-filter-group"))
+			.setTooltip(t("duplicate-criterion-group"))
 			.onClick(() => {
 				const newGroupId = generateIdForFilters();
 				const duplicatedFilters = groupData.filters.map((f) => ({
@@ -698,7 +758,7 @@ export class AdvancedFilterComponent extends Component {
 
 		const removeGroupBtn = new ExtraButtonComponent(groupHeaderRight)
 			.setIcon("trash-2")
-			.setTooltip(t("remove-filter-group"))
+			.setTooltip(t("remove-criterion-group"))
 			.onClick(() => {
 				const filtersListElForSortable = newGroupEl.querySelector(
 					".filters-list",
@@ -722,7 +782,7 @@ export class AdvancedFilterComponent extends Component {
 				if (
 					nextSibling &&
 					nextSibling.classList.contains(
-						"filter-group-separator-container",
+						"criterion-group-separator-container",
 					)
 				) {
 					nextSibling.remove();
@@ -731,7 +791,7 @@ export class AdvancedFilterComponent extends Component {
 					if (
 						prevSibling &&
 						prevSibling.classList.contains(
-							"filter-group-separator-container",
+							"criterion-group-separator-container",
 						)
 					) {
 						prevSibling.remove();
@@ -767,21 +827,21 @@ export class AdvancedFilterComponent extends Component {
 		groupFooter.createEl(
 			"div",
 			{
-				cls: ["add-filter-btn", "compact-btn"],
+				cls: ["add-criterion-btn", "compact-btn"],
 			},
 			(el) => {
 				el.createEl(
 					"span",
 					{
-						cls: "add-filter-btn-icon",
+						cls: "add-criterion-btn-icon",
 					},
 					(iconEl) => {
 						setIcon(iconEl, "plus");
 					},
 				);
 				el.createEl("span", {
-					cls: "add-filter-btn-text",
-					text: t("add-filter"),
+					cls: "add-criterion-btn-text",
+					text: t("add-criterion"),
 				});
 
 				this.registerDomEvent(el, "click", () => {
@@ -1582,21 +1642,21 @@ export class AdvancedFilterComponent extends Component {
 		filterGroupsContainerEl: HTMLElement,
 	): void {
 		filterGroupsContainerEl
-			?.querySelectorAll(".filter-group-separator-container")
+			?.querySelectorAll(".criterion-group-separator-container")
 			.forEach((sep) => sep.remove());
 
 		const groups = Array.from(
 			filterGroupsContainerEl?.children || [],
-		).filter((child) => child.classList.contains("filter-group"));
+		).filter((child) => child.classList.contains("criterion-group"));
 
 		if (groups.length > 1) {
 			groups.forEach((group, index) => {
 				if (index < groups.length - 1) {
 					const separatorContainer = createEl("div", {
-						cls: "filter-group-separator-container",
+						cls: "criterion-group-separator-container",
 					});
 					const separator = separatorContainer.createDiv({
-						cls: "filter-group-separator",
+						cls: "criterion-group-separator",
 					});
 
 					const rootCond = filter.rootCondition;
@@ -1629,7 +1689,7 @@ export class AdvancedFilterComponent extends Component {
 		const sortable = new Sortable(filterGroupsContainerEl, {
 			animation: 150,
 			handle: ".drag-handle",
-			filter: ".filter-group-separator-container",
+			filter: ".criterion-group-separator-container",
 			preventOnFilter: true,
 			ghostClass: "dragging-placeholder",
 			onEnd: (evt: Event) => {

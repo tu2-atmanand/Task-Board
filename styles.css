@@ -5103,115 +5103,22 @@ svg.react-flow__connectionline {
 }
 
 
-/* /src/components/BoardFilters */
+/* ----------------------------------------------------- */
+/*        src/components/AdvancedFilterer/*              */
+/* ----------------------------------------------------- */
 
-.filter-group-separator {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: var(--size-2-2) 0;
-	/* Use Obsidian size variable */
-	color: var(--text-muted);
-	/* Use Obsidian secondary text color */
-	font-size: var(--font-ui-smaller);
-	/* Use Obsidian font size variable */
-}
+/* ------------------- Popover.ts ---------------------- */
 
-.filter-group-separator::before,
-.filter-group-separator::after {
-	content: "";
-	flex-grow: 1;
-	height: 1px;
-	background-color: var(--background-modifier-border);
-	/* Use Obsidian border color */
-	margin: 0 var(--size-2-1);
-	/* Use Obsidian size variable */
-}
+.advanced-filter-menu-container {}
 
-.drag-handle {
-	cursor: grab;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-/* Smaller text and padding for buttons and inputs */
-.compact-btn {
-	padding: var(--size-2-1) var(--size-2-2);
-	/* Use Obsidian size variable */
-	box-shadow: unset !important;
-	border: unset !important;
-	--icon-size: var(--size-4-4);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--size-2-2);
-
-	-webkit-app-region: no-drag;
-	display: inline-flex;
-	overflow: hidden;
-	align-items: center;
-	color: var(--text-muted);
-	font-size: var(--font-ui-small);
-	border-radius: var(--button-radius);
-	padding: var(--size-2-2);
-	font-weight: var(--input-font-weight);
-	cursor: var(--cursor);
-	font-family: inherit;
-	gap: var(--size-2-2);
-
-	min-height: 30px;
-}
-
-.compact-btn:hover {
-	box-shadow: none;
-	opacity: var(--icon-opacity-hover);
-	background-color: var(--background-modifier-hover);
-	color: var(--text-normal);
-}
-
-.compact-input,
-.compact-select {
-	font-size: var(--font-ui-smaller);
-	/* Use Obsidian font size variable */
-	height: var(--input-height);
-	/* Use Obsidian input height variable */
-	border: 1px solid var(--background-modifier-border);
-	box-shadow: none;
-}
-
-.compact-select:hover {
-	box-shadow: none;
-}
-
-.compact-text {
-	font-size: var(--font-ui-smaller);
-	/* Use Obsidian font size variable */
-}
-
-/* Placeholder while dragging */
-.dragging-placeholder {
-	opacity: 0.5;
-	background-color: var(--background-modifier-hover);
-	/* Use Obsidian hover background color */
-}
-
-/* If needed, set styles for the root container of the filter component */
-.task-filter-root-container.task-popover-content {
-	padding: var(--size-2-2);
-	/* Use Obsidian size variable */
-	max-width: 100%;
-	max-height: 100%;
-}
-
-.task-popover-content.task-popover-content-header {
+.advanced-filter-menu-container.advanced-filter-menu-container-header {
 	padding: var(--size-2-2);
 	border-bottom: 1px solid var(--background-modifier-border);
 	display: flex;
 	align-items: center;
 }
 
-.task-popover-content-header-heading {
+.advanced-filter-menu-container-header-heading {
 	margin: 1rem;
 	padding: 0;
 	font-size: 14px;
@@ -5219,19 +5126,8 @@ svg.react-flow__connectionline {
 	color: var(--text-normal);
 }
 
-.task-popover-content hr {
-	margin: 0 !important;
-}
 
-.task-filter-main-panel {
-	max-width: 100%;
-	padding: var(--size-2-2);
-	/* Use Obsidian size variable */
-	border-radius: var(--radius-m);
-	/* Use Obsidian border radius variable */
-}
-
-.filter-menu {
+.advanced-filter-menu {
 	z-index: 50;
 	min-width: 600px;
 	background-color: var(--background-primary);
@@ -5240,17 +5136,98 @@ svg.react-flow__connectionline {
 	border: 1px solid var(--background-modifier-border);
 }
 
+.advanced-filter-menu-container hr {
+	margin: 0 !important;
+}
 
-/* rootFilterSetupSection in TS, corresponds to HTML's #root-filter-container */
-.root-filter-setup-section {
+/* ------------------- Component.ts -------------------- */
+
+.advanced-filter-menu-container-body {}
+
+.advanced-filter-menu-container-body-main-panel {
+	max-width: 100%;
+	padding: var(--size-2-2);
+	/* Use Obsidian size variable */
+	border-radius: var(--radius-m);
+	/* Use Obsidian border radius variable */
+}
+
+.advanced-filter-menu-container-body-main-panel-configs {
 	display: flex;
 	flex-direction: column;
 	gap: 0.75rem;
 	/* space-y-3 from HTML, Tailwind var(--space-3) */
 }
 
-/* Root Condition Section (div.flex.items-center.space-x-2.p-2.bg-slate-100.rounded-md.border.border-slate-200) */
-.root-condition-section {
+.filters-root-condition-section {}
+
+.root-condition-label {
+	/* compact-text already provides font-size */
+	font-weight: 500;
+	/* font-medium */
+	color: var(--text-normal);
+	/* text-slate-600 */
+}
+
+.compact-text {}
+
+.compact-select {}
+
+.root-condition-span {
+	/* compact-text already provides font-size */
+	color: var(--text-normal);
+	/* text-slate-600 */
+}
+
+.advanced-filters-list {}
+
+.advanced-filter-list-item {}
+
+.advanced-filter-top-section {}
+
+.advanced-filter-top-left {}
+
+.filter-name-text {}
+
+.filter-description-text {}
+
+.advanced-filter-top-right {}
+
+.filter-toggle-btn {}
+
+.advanced-filter-bottom-section {}
+
+.expand-filter-btn {}
+
+.compact-btn {}
+
+.advanced-filter-expandable-area {}
+
+.filter-name-setting {}
+
+.compact-text {}
+
+.compact-input {}
+
+.filter-name-input {}
+
+.filter-desc-setting {}
+
+.filter-desc-input {}
+
+.filter-inner-section {}
+
+.criterion-group-container {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-3);
+	/* space-y-3 from HTML */
+
+	max-height: 50vh;
+	overflow: auto;
+}
+
+.criterion-group-condition-section {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
@@ -5266,47 +5243,7 @@ svg.react-flow__connectionline {
 	/* border border-slate-200 */
 }
 
-.root-condition-label {
-	/* compact-text already provides font-size */
-	font-weight: 500;
-	/* font-medium */
-	color: var(--text-normal);
-	/* text-slate-600 */
-}
-
-.root-condition-select {
-	/* compact-select already provides base styling */
-	width: auto;
-	border: 1px solid var(--input-border-color, var(--background-modifier-border));
-	/* border border-slate-300 */
-	/* box-shadow: var(--shadow-s); /* shadow-sm */
-	/* Consider if needed */
-}
-
-.root-condition-select:focus {
-	border-color: var(--interactive-accent);
-	box-shadow: 0 0 0 1px var(--interactive-accent);
-}
-
-.root-condition-span {
-	/* compact-text already provides font-size */
-	color: var(--text-normal);
-	/* text-slate-600 */
-}
-
-/* Filter Groups Container (#filter-groups-container) */
-.filter-groups-container {
-	display: flex;
-	flex-direction: column;
-	gap: var(--size-2-3);
-	/* space-y-3 from HTML */
-
-	max-height: 50vh;
-	overflow: auto;
-}
-
-/* Filter Group (#filter-group-template) */
-.filter-group {
+.criterion-group {
 	padding: var(--size-2-3);
 	/* p-3 from HTML */
 	border: 1px solid var(--background-modifier-border);
@@ -5321,93 +5258,92 @@ svg.react-flow__connectionline {
 	/* space-y-2 from HTML */
 }
 
-.filter-group-header {
+.criterion-group-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 }
 
-.filter-group-header-left {
+.criterion-group-header-left {
 	display: flex;
 	align-items: center;
 	gap: 0.375rem;
 	/* space-x-1.5 from HTML */
 }
 
-.filter-group-header-left .drag-handle-container .svg-icon {
+.criterion-group-header-left .drag-handle-container .svg-icon {
 	color: var(--text-faint);
 	/* text-slate-400 */
 }
 
-.filter-group-header-left .drag-handle-container:hover .svg-icon {
+.criterion-group-header-left .drag-handle-container:hover .svg-icon {
 	color: var(--text-muted);
 	/* hover:text-slate-500 */
 }
 
-.filter-group-header-left .drag-handle-container {
+.criterion-group-header-left .drag-handle-container {
 	padding-right: var(--size-2-1);
 }
 
-.filter-group-header-left>.compact-text,
-.filter-group-header-left>span.compact-text {
+.criterion-group-header-left>.compact-text,
+.criterion-group-header-left>span.compact-text {
 	font-weight: 500;
 	/* font-medium */
 	color: var(--text-normal);
 	/* text-slate-600 */
 }
 
-.filter-group-header-left .group-condition-select.compact-select {
+.criterion-group-header-left .group-condition-select.compact-select {
 	border: 1px solid var(--input-border-color, var(--background-modifier-border));
 }
 
-.filter-group-header-left .group-condition-select.compact-select:focus {
+.criterion-group-header-left .group-condition-select.compact-select:focus {
 	border-color: var(--interactive-accent);
 	box-shadow: 0 0 0 1px var(--interactive-accent);
 }
 
-.filter-group-header-right {
+.criterion-group-header-right {
 	display: flex;
 	align-items: center;
 	gap: 0.25rem;
 	/* space-x-1 from HTML */
 }
 
-.filter-group-header-right .duplicate-group-btn.compact-icon-btn,
-.filter-group-header-right .remove-group-btn.compact-icon-btn {
+.criterion-group-header-right .duplicate-group-btn.compact-icon-btn,
+.criterion-group-header-right .remove-group-btn.compact-icon-btn {
 	border-radius: var(--radius-s);
 	/* rounded-md from Tailwind */
 }
 
-.filter-group-header-right .duplicate-group-btn.compact-icon-btn .svg-icon {
+.criterion-group-header-right .duplicate-group-btn.compact-icon-btn .svg-icon {
 	color: var(--text-muted);
 	/* text-slate-500 */
 }
 
-.filter-group-header-right .duplicate-group-btn.compact-icon-btn:hover .svg-icon {
+.criterion-group-header-right .duplicate-group-btn.compact-icon-btn:hover .svg-icon {
 	color: var(--interactive-accent);
 	/* hover:text-indigo-600 */
 }
 
-.filter-group-header-right .duplicate-group-btn.compact-icon-btn:hover {
+.criterion-group-header-right .duplicate-group-btn.compact-icon-btn:hover {
 	background-color: var(--background-modifier-hover);
 }
 
-.filter-group-header-right .remove-group-btn.compact-icon-btn .svg-icon {
+.criterion-group-header-right .remove-group-btn.compact-icon-btn .svg-icon {
 	color: var(--text-muted);
 	/* text-slate-500 */
 }
 
-.filter-group-header-right .remove-group-btn.compact-icon-btn:hover .svg-icon {
+.criterion-group-header-right .remove-group-btn.compact-icon-btn:hover .svg-icon {
 	color: var(--text-error);
 	/* hover:text-red-600 */
 }
 
-.filter-group-header-right .remove-group-btn.compact-icon-btn:hover {
+.criterion-group-header-right .remove-group-btn.compact-icon-btn:hover {
 	background-color: var(--background-error-hover,
 			var(--background-modifier-error-hover));
 }
 
-/* Filters List (.filters-list) */
 .filters-list {
 	display: flex;
 	flex-direction: column;
@@ -5425,23 +5361,6 @@ svg.react-flow__connectionline {
 	display: none;
 }
 
-/* Group Footer (.group-footer) */
-.group-footer {
-	/* HTML: <div class="pl-4 mt-1.5"> containing button */
-	/* TS creates .group-footer, then adds ButtonComponent to it. */
-	padding-left: 0.375rem;
-	/* Corresponds to pl-1.5 effectively if items inside .filters-list have margin/padding */
-	margin-top: 0.375rem;
-	/* mt-1.5 */
-}
-
-.add-filter-btn-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-/* Filter Item (#filter-item-template) */
 .filter-item {
 	display: flex;
 	align-items: center;
@@ -5520,7 +5439,36 @@ svg.react-flow__connectionline {
 			var(--background-modifier-error-hover));
 }
 
-/* Add Filter Group Button Section */
+.group-footer {
+	padding-left: 0.375rem;
+	margin-top: 0.375rem;
+}
+
+.criterion-group-separator-container {}
+
+.criterion-group-separator {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: var(--size-2-2) 0;
+	/* Use Obsidian size variable */
+	color: var(--text-muted);
+	/* Use Obsidian secondary text color */
+	font-size: var(--font-ui-smaller);
+	/* Use Obsidian font size variable */
+}
+
+.criterion-group-separator::before,
+.criterion-group-separator::after {
+	content: "";
+	flex-grow: 1;
+	height: 1px;
+	background-color: var(--background-modifier-border);
+	/* Use Obsidian border color */
+	margin: 0 var(--size-2-1);
+	/* Use Obsidian size variable */
+}
+
 .add-group-section {
 	margin-top: var(--size-2-1);
 	margin-bottom: var(--size-2-1);
@@ -5529,171 +5477,134 @@ svg.react-flow__connectionline {
 	justify-content: space-between;
 }
 
-.add-filter-group-btn-icon {
+.add-criterion-group-btn {}
+
+.add-criterion-group-btn-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-/* Filter Configuration Section */
-.filter-config-section {
+.add-criterion-group-btn-text {}
+
+.filter-actions-section {}
+
+.duplicate-filter-btn {}
+
+.delete-filter-btn {}
+
+.add-criterion,
+.add-filter-btn {}
+
+.add-criterion-icon,
+.add-filter-btn-icon {
 	display: flex;
-	gap: var(--size-4-2);
-	/* margin-top: var(--size-2-1); */
-	/* margin-bottom: var(--size-2-1); */
-	/* margin-left: var(--size-2-1); */
-	/* padding-top: var(--size-2-2); */
-	/* border-top: 1px solid var(--background-modifier-border); */
+	align-items: center;
+	justify-content: center;
 }
 
-.save-filter-config-btn,
+.add-criterion-btn-text,
+.add-filter-btn-text {}
+
 .load-filter-config-btn {
 	flex: 1;
 }
 
-.save-filter-config-btn-icon,
 .load-filter-config-btn-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 
-.save-filter-config-btn:hover {
-	background-color: var(--interactive-accent-hover);
-	color: var(--text-on-accent);
-}
-
 .load-filter-config-btn:hover {
 	background-color: var(--background-modifier-hover);
 }
 
-/* Filter Config Modal Styles */
-.filter-config-details {
-	margin-top: var(--size-4-3);
-	padding: var(--size-4-3);
-	border: 1px solid var(--background-modifier-border);
-	border-radius: var(--radius-l);
-	background: linear-gradient(135deg,
-			var(--background-secondary) 0%,
-			var(--background-primary-alt) 100%);
-	box-shadow: var(--shadow-s);
-	transition: all 0.2s ease-in-out;
+.root-condition-select {
+	/* compact-select already provides base styling */
+	width: auto;
+	border: 1px solid var(--input-border-color, var(--background-modifier-border));
+	/* border border-slate-300 */
+	/* box-shadow: var(--shadow-s); /* shadow-sm */
+	/* Consider if needed */
 }
 
-.filter-config-details:hover {
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-	transform: translateY(-1px);
+.root-condition-select:focus {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 1px var(--interactive-accent);
 }
 
-.filter-config-details h3 {
-	margin: 0 0 var(--size-4-2) 0;
-	font-size: var(--font-ui-medium);
-	font-weight: 600;
-	color: var(--text-accent);
+/* -------------------- Common Elements ------------------ */
+
+.drag-handle {
+	cursor: grab;
 	display: flex;
 	align-items: center;
-	gap: var(--size-2-2);
+	justify-content: center;
 }
 
-.filter-config-details p {
-	margin: var(--size-2-2) 0;
-	line-height: 1.5;
-	color: var(--text-normal);
+.dragging-placeholder {
+	opacity: 0.5;
+	background-color: var(--background-modifier-hover);
+	/* Use Obsidian hover background color */
 }
 
-.filter-config-meta {
-	font-size: var(--font-ui-smaller);
-	color: var(--text-muted);
-	margin: var(--size-2-1) 0;
+.compact-btn {
 	padding: var(--size-2-1) var(--size-2-2);
-	background-color: var(--background-modifier-form-field);
-	border-radius: var(--radius-s);
-	border-left: 3px solid var(--interactive-accent);
-}
+	/* Use Obsidian size variable */
+	box-shadow: unset !important;
+	border: unset !important;
+	--icon-size: var(--size-4-4);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-2-2);
 
-.filter-config-summary {
-	margin-top: var(--size-4-3);
-	padding: var(--size-4-2) 0 0 0;
-	border-top: 2px solid var(--background-modifier-border);
-}
-
-.filter-config-summary h4 {
-	margin: 0 0 var(--size-2-3) 0;
+	-webkit-app-region: no-drag;
+	display: inline-flex;
+	overflow: hidden;
+	align-items: center;
+	color: var(--text-muted);
 	font-size: var(--font-ui-small);
-	font-weight: 600;
-	color: var(--text-normal);
-	display: flex;
-	align-items: center;
-	gap: var(--size-2-1);
-}
-
-.filter-config-summary p {
-	margin: var(--size-2-1) 0;
-	font-size: var(--font-ui-smaller);
-	color: var(--text-muted);
-	padding: var(--size-2-1) var(--size-2-2);
-	background-color: var(--background-primary-alt);
-	border-radius: var(--radius-s);
-}
-
-.filter-config-buttons {
-	margin-top: var(--size-4-3);
-	padding-top: var(--size-4-2);
-}
-
-.filter-config-name-highlight {
-	background-color: var(--text-accent);
-	color: var(--text-on-accent);
-	padding: 0.125rem 0.25rem;
-	border-radius: var(--radius-s);
-	font-weight: 500;
-}
-
-/* Advanced filter container styles for ViewConfigModal */
-.advanced-filter-container {
-	margin-top: var(--size-4-2);
-	padding: var(--size-4-3);
-	border: 1px solid var(--background-modifier-border);
-	border-radius: var(--radius-m);
-	background-color: var(--background-secondary);
-}
-
-.advanced-filter-container .task-filter-root-container {
-	background-color: transparent;
-	border: none;
-	padding: 0;
-}
-
-.advanced-filter-container .task-filter-main-panel {
-	background-color: transparent;
-	border: none;
-	padding: 0;
-}
-
-/* Smaller styling for filters in modal */
-.task-board-view-config-modal .advanced-filter-container .filter-group {
-	padding: var(--size-4-2);
-	margin-bottom: var(--size-4-2);
-}
-
-.task-board-view-config-modal .advanced-filter-container .filter-item {
+	border-radius: var(--button-radius);
 	padding: var(--size-2-2);
+	font-weight: var(--input-font-weight);
+	cursor: var(--cursor);
+	font-family: inherit;
 	gap: var(--size-2-2);
+
+	min-height: 30px;
 }
 
-.task-board-view-config-modal .advanced-filter-container .compact-btn {
-	padding: var(--size-2-1) var(--size-2-2);
-	min-height: 26px;
+.compact-btn:hover {
+	box-shadow: none;
+	opacity: var(--icon-opacity-hover);
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
 }
 
-.task-board-view-config-modal .advanced-filter-container .compact-select,
-.task-board-view-config-modal .advanced-filter-container .compact-input {
+.compact-input,
+.compact-select {
 	font-size: var(--font-ui-smaller);
-	height: 28px;
+	/* Use Obsidian font size variable */
+	height: var(--input-height);
+	/* Use Obsidian input height variable */
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: none;
 }
 
+.compact-select:hover {
+	box-shadow: none;
+}
 
-/* src/modal/ConfigureColumnSortingModal.ts */
+.compact-text {
+	font-size: var(--font-ui-smaller);
+	/* Use Obsidian font size variable */
+}
+
+/* --------------------------------------------------- */
+/*    src/modal/ConfigureColumnSortingModal.ts         */
+/* --------------------------------------------------- */
 
 .configureColumnSortingModalHome {
 	display: flex;

@@ -311,7 +311,7 @@ const en: Lang = {
 	"created": "Created",
 	"updated": "Updated",
 	"filter-summary": "Filter summary",
-	"filter-group": "of the below filter group",
+	"of-the-below-criterion-groups": "of the below criterion groups",
 	"filter": "Filter",
 	"root-condition": "Root condition",
 	"filter-configuration-name-is-required": "Filter configuration name is required",
@@ -326,12 +326,13 @@ const en: Lang = {
 	"match": "Match",
 	"any": "any",
 	"all": "all",
-	"add-filter-group": "Add filter group",
+	"add-criterion": "Add criterion",
+	"add-criterion-group": "Add criterion group",
 	"save-current-filter": "Save for future",
 	"load-saved-filter": "Load saved filter",
-	"filter-in-this-group": "filter in this group",
-	"duplicate-filter-group": "Duplicate filter group",
-	"remove-filter-group": "Remove filter group",
+	"criterion-in-this-group": "criterion in this group",
+	"duplicate-criterion-group": "Duplicate criterion group",
+	"remove-criterion-group": "Remove criterion group",
 	"add-filter": "Add filter",
 	"or": "OR",
 	"and-not": "AND NOT",
@@ -670,7 +671,8 @@ const en: Lang = {
 	"date-type": "Date type",
 	"name": "Name",
 	"column-config-drag-butn-info": "Drag this column to change its order",
-	"hidden": "Hidden"
+	"hidden": "Hidden",
+	"of-the-below-enabled-filters": "of the below enabled filters"
 };
 
 export default en;
