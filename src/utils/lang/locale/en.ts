@@ -674,7 +674,12 @@ const en: Lang = {
 	"hidden": "Hidden",
 	"of-the-below-enabled-filters": "of the below enabled filters",
 	"expand-to-edit": "Expand to edit",
-	"import-filter": "Import filters"
+	"import-filter": "Import filters",
+	"duplicate-filter": "Duplicate filter",
+	"save-in-warehouse": "Save in warehouse",
+	"delete-filter": "Delete filter",
+	"board-level-filters": "Board level filters",
+	"board-level-filters-info": "Apply board level filters. All the tasks from your vault will first pass through this filters and then they will be shown inside the views under this board."
 };
 
 export default en;

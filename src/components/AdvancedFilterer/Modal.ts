@@ -8,8 +8,10 @@ import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
 export class AdvancedFilterModal extends Modal {
 	private plugin: TaskBoard;
 	private currentBoardID: string;
+	public parentFiltersAreActive: boolean;
+	public entity: "board" | "view" | "column";
 	public taskFilterComponent: AdvancedFilterComponent | null;
-	private columnOrBoardName?: string;
+	private columnOrViewOrBoardName?: string;
 	private existingFilters?: AdvancedFilter;
 	public filterCloseCallback:
 		| ((filterState?: AdvancedFilter) => void)
@@ -17,26 +19,33 @@ export class AdvancedFilterModal extends Modal {
 
 	constructor(
 		plugin: TaskBoard,
-		forColumn: boolean,
+		entity: "board" | "view" | "column",
 		currentBoardID: string,
-		columnOrBoardName?: string,
+		parentFiltersAreActive: boolean,
+		columnOrViewOrBoardName?: string,
 		existingFilters?: AdvancedFilter,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.currentBoardID = currentBoardID;
-		this.columnOrBoardName = columnOrBoardName;
+		this.parentFiltersAreActive = parentFiltersAreActive;
+		this.entity = entity;
+		this.columnOrViewOrBoardName = columnOrViewOrBoardName;
 		this.existingFilters = existingFilters;
 
 		this.taskFilterComponent = null;
 
-		if (forColumn) {
+		if (this.entity === "column") {
 			this.setTitle(
-				t("column-filters-for") + " - " + this.columnOrBoardName,
+				t("column-filters-for") + " - " + this.columnOrViewOrBoardName,
 			);
-		} else {
+		} else if (this.entity === "view") {
 			this.setTitle(
-				t("view-filters-for") + " - " + this.columnOrBoardName,
+				t("view-filters-for") + " - " + this.columnOrViewOrBoardName,
+			);
+		} else if (this.entity === "board") {
+			this.setTitle(
+				t("board-filters-for") + " - " + this.columnOrViewOrBoardName,
 			);
 		}
 	}
@@ -50,6 +59,8 @@ export class AdvancedFilterModal extends Modal {
 			this.plugin,
 			this.app,
 			this.currentBoardID,
+			this.parentFiltersAreActive,
+			this.entity,
 			this.existingFilters,
 		);
 		// Ensure the component is properly loaded

@@ -9,37 +9,43 @@ import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
 
-export class AdvancedFilterPopover extends Component implements CloseableComponent {
+export class AdvancedFilterPopover
+	extends Component
+	implements CloseableComponent
+{
 	private plugin: TaskBoard;
 	private app: App;
-	public forColumn: boolean;
+	public entity: "board" | "view" | "column";
 	public currentBoardID: string;
+	public parentFiltersAreActive: boolean;
 	public popoverRef: HTMLDivElement | null = null;
 	public taskFilterComponent!: AdvancedFilterComponent;
 	private win: Window;
-	private scrollParent: HTMLElement | Window;
+	// private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
 	public onClose: ((filterState?: AdvancedFilter) => void) | null = null;
-	private columnOrBoardName?: string;
+	private columnOrViewOrBoardName?: string;
 	private existingFilters?: AdvancedFilter;
 
 	constructor(
 		plugin: TaskBoard,
-		forColumn: boolean,
+		entity: "board" | "view" | "column",
 		currentBoardID: string,
-		columnOrBoardName?: string,
+		parentFiltersAreActive: boolean,
+		columnOrViewOrBoardName?: string,
 		existingFilters?: AdvancedFilter,
 	) {
 		super();
 		this.plugin = plugin;
 		this.app = plugin.app;
-		this.forColumn = forColumn;
+		this.entity = entity;
 		this.currentBoardID = currentBoardID;
-		this.columnOrBoardName = columnOrBoardName;
+		this.parentFiltersAreActive = parentFiltersAreActive;
+		this.columnOrViewOrBoardName = columnOrViewOrBoardName;
 		this.existingFilters = existingFilters;
 		this.win = plugin.app.workspace.containerEl.win || window;
 
-		this.scrollParent = this.win;
+		// this.scrollParent = this.win;
 	}
 
 	/**
@@ -60,18 +66,48 @@ export class AdvancedFilterPopover extends Component implements CloseableCompone
 		const headerEl = contentEl.createDiv({
 			cls: "advanced-filter-menu-container-header",
 		});
+
+		const leftSec = contentEl.createDiv({
+			cls: "advanced-filter-menu-container-header-leftSec",
+		});
 		// Add column filter heading if this is for a column
-		if (this.forColumn) {
-			headerEl.createEl("h3", {
-				text: t("column-filters-for") + " - " + this.columnOrBoardName,
+		if (this.entity === "column") {
+			leftSec.createEl("h3", {
+				text:
+					t("column-filters-for") +
+					" - " +
+					this.columnOrViewOrBoardName,
 				cls: "advanced-filter-menu-container-header-heading",
 			});
-		} else {
-			headerEl.createEl("h3", {
-				text: t("view-filters-for") + " - " + this.columnOrBoardName,
+		} else if (this.entity === "view") {
+			leftSec.createEl("h3", {
+				text:
+					t("view-filters-for") +
+					" - " +
+					this.columnOrViewOrBoardName,
+				cls: "advanced-filter-menu-container-header-heading",
+			});
+		} else if (this.entity === "board") {
+			leftSec.createEl("h3", {
+				text:
+					t("board-filters-for") +
+					" - " +
+					this.columnOrViewOrBoardName,
 				cls: "advanced-filter-menu-container-header-heading",
 			});
 		}
+
+		const rightSec = contentEl.createDiv({
+			cls: "advanced-filter-menu-container-header-rightSec",
+		});
+
+		const applyBtn = rightSec.createEl("button", {
+			cls: "advanced-filter-menu-container-header-rightSec-btn",
+			text: t("apply"),
+		});
+		this.plugin.registerDomEvent(applyBtn, "click", (evt: PointerEvent) => {
+			this.close();
+		});
 
 		// Add a horizontal rule
 		contentEl.createEl("hr");
@@ -86,6 +122,8 @@ export class AdvancedFilterPopover extends Component implements CloseableCompone
 			this.plugin,
 			this.app,
 			this.currentBoardID,
+			this.parentFiltersAreActive,
+			this.entity,
 			this.existingFilters,
 		);
 		// Ensure the component is properly loaded
@@ -165,16 +203,17 @@ export class AdvancedFilterPopover extends Component implements CloseableCompone
 	}
 
 	private clickOutside = (e: MouseEvent): void => {
-		if (this.taskFilterComponent.isMultiSuggestDropdownActive) {
-			this.taskFilterComponent.isMultiSuggestDropdownActive = false;
-			return;
-		}
+		// if (this.taskFilterComponent.somethingElseIsOpened) {
+		// 	// First outside click will make the other components to close and will keep this popover open. The second click will surely close it.
+		// 	this.taskFilterComponent.somethingElseIsOpened = false;
+		// 	return;
+		// }
 
 		if (
-			!this.taskFilterComponent.isMultiSuggestDropdownActive &&
-			!this.taskFilterComponent.isConfigModalOpen &&
+			!this.taskFilterComponent.somethingElseIsOpened &&
+			// !this.taskFilterComponent.isConfigModalOpen &&
 			this.popoverRef &&
-			!this.popoverRef.contains(e.target as Node)
+			!this.popoverRef.contains(e.target as Node) // This finds out if we are clicking out of the popover component
 		) {
 			// console.log("clickOutside - closing popover", {
 			// 	target: e.target,

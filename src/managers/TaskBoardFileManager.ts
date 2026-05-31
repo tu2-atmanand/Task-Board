@@ -791,6 +791,7 @@ export default class TaskBoardFileManager {
 			} else {
 				new Notice(
 					`Task Board: The board file "${normalizePath(filePath)}" has been deleted. Please close the corresponding tab if it's still open.`,
+					0,
 				);
 			}
 		} catch (error) {
@@ -846,6 +847,7 @@ export default class TaskBoardFileManager {
 			} else {
 				new Notice(
 					`Task Board: The board file has been moved/renamed to "${normalizePath(newFilePath)}". Please re-open the file to continue.`,
+					0,
 				);
 			}
 		} catch (error) {
@@ -1109,6 +1111,26 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
+	 * Migration for the following properties :
+	 * - Board.boardFilters
+	 *
+	 * @todo - Remove this migration while releasing the first beta version itself.
+	 * Also, assign the {@link CURRENT_REVISION} to 0.
+	 */
+	runMigrationForRevision_3(oldBoardData: Board): Board {
+		let newBoardData = { ...oldBoardData };
+
+		if (!oldBoardData?.boardFilters) {
+			newBoardData["boardFilters"] = {
+				filters: [],
+				rootCondition: "all",
+			};
+		}
+
+		return newBoardData;
+	}
+
+	/**
 	 * This function will be used to run a migration check whenever any board is loaded.
 	 * Based on the revision property in the board data, we can decide if we need to
 	 * run any migration steps to update the board data structure to be compatible with the
@@ -1143,6 +1165,8 @@ export default class TaskBoardFileManager {
 			// boardData = this.runMigrationForRevision_1(boardData);
 
 			updatedBoardData = this.runMigrationForRevision_2(updatedBoardData);
+
+			updatedBoardData = this.runMigrationForRevision_3(updatedBoardData);
 
 			// After applying necessary migrations, update the revision in the board data
 			updatedBoardData.revision = CURRENT_REVISION;

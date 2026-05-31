@@ -92,28 +92,6 @@ export interface AdvancedFilter {
  */
 export type FiltersWarehouse = Filter[];
 
-/**
- * @deprecated From version 2.0.0 onwards we are moving towards {@link AdvancedFilters}.
- * Use {@link FiltersWarehouse} instead.
- */
-export interface SavedFilterConfig {
-	id: string;
-	name: string;
-	description?: string;
-	filterState: Filter;
-	createdAt: string;
-	updatedAt: string;
-}
-
-/**
- * @deprecated From version 2.0.0 onwards we are moving towards {@link AdvancedFilters}.
- * Use {@link FiltersWarehouse} instead.
- */
-export interface FilterConfigSettings {
-	enableSavedFilters: boolean;
-	savedConfigs: SavedFilterConfig[];
-}
-
 // Define the structure of Board, Column, and the Data read from JSON
 export type ColumnData = {
 	id: number;
@@ -622,10 +600,17 @@ export const DEFAULT_BOARD: Board = {
 //      ALL DEPRECATED Interfaces and Typings
 // -------------------------------------------------------
 
+export interface Filter_Deprecated {
+	id: string;
+	property: string; // e.g., 'content', 'dueDate', 'priority'
+	condition: string; // e.g., 'isSet', 'equals', 'contains'
+	value?: any;
+}
+
 export interface FilterGroup {
 	id: string;
 	groupCondition: "all" | "any" | "none"; // How filters within this group are combined
-	filters: FilterCriterion[];
+	filters: Filter_Deprecated[];
 }
 
 export interface RootFilterState {
@@ -648,3 +633,25 @@ export interface FilterGroupItem {
 
 // Top-level filter configuration from the UI from focus.md
 export type FilterConfig = FilterGroupItem;
+
+/**
+ * @deprecated From version 2.0.0 onwards we are moving towards {@link AdvancedFilters}.
+ * Use {@link FiltersWarehouse} instead.
+ */
+export interface SavedFilterConfig {
+	id: string;
+	name: string;
+	description?: string;
+	filterState: RootFilterState;
+	createdAt: string;
+	updatedAt: string;
+}
+
+/**
+ * @deprecated From version 2.0.0 onwards we are moving towards {@link AdvancedFilters}.
+ * Use {@link FiltersWarehouse} instead.
+ */
+export interface FilterConfigSettings {
+	enableSavedFilters: boolean;
+	savedConfigs: SavedFilterConfig[];
+}

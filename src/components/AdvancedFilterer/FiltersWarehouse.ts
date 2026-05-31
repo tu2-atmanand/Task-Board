@@ -54,10 +54,7 @@ export class FiltersWarehouseModal extends Modal {
 		"onOrAfter",
 	];
 
-	constructor(
-		plugin: TaskBoard,
-		onImport?: (filters: Filter[]) => void,
-	) {
+	constructor(plugin: TaskBoard, onImport?: (filters: Filter[]) => void) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.onImport = onImport;
@@ -117,7 +114,8 @@ export class FiltersWarehouseModal extends Modal {
 		const leftSection = footer.createDiv({
 			cls: "filters-warehouse-footer-left",
 		});
-		leftSection.style.cssText = "display: flex; gap: var(--size-2-2); align-items: center;";
+		leftSection.style.cssText =
+			"display: flex; gap: var(--size-2-2); align-items: center;";
 
 		const importBtn = leftSection.createEl("button", {
 			cls: ["compact-btn"],
@@ -134,7 +132,8 @@ export class FiltersWarehouseModal extends Modal {
 		const rightSection = footer.createDiv({
 			cls: "filters-warehouse-footer-right",
 		});
-		rightSection.style.cssText = "display: flex; gap: var(--size-2-2); align-items: center;";
+		rightSection.style.cssText =
+			"display: flex; gap: var(--size-2-2); align-items: center;";
 
 		const closeBtn = rightSection.createEl("button", {
 			cls: ["compact-btn"],
@@ -265,17 +264,20 @@ export class FiltersWarehouseModal extends Modal {
 		});
 		expandableArea.hide();
 
-		const expandBtn = bottomSection.createEl("button", {
-			cls: ["expand-filter-btn", "compact-btn"],
-			text: "Expand to edit",
-		});
+		// const expandBtn = bottomSection.createEl("button", {
+		// 	cls: ["expand-filter-btn", "compact-btn"],
+		// 	text: "Expand to edit",
+		// });
 
-		expandBtn.addEventListener("click", () => {
+		// Render for the first time
+		this.collapseFilter(expandableArea, bottomSection);
+
+		this.plugin.registerDomEvent(bottomSection, "click", () => {
 			const isExpanded = this.expandedFilters.get(filter) ?? false;
 			if (isExpanded) {
-				this.collapseFilter(expandableArea, expandBtn);
+				this.collapseFilter(expandableArea, bottomSection);
 			} else {
-				this.expandFilter(filter, expandableArea, expandBtn);
+				this.expandFilter(filter, expandableArea, bottomSection);
 			}
 		});
 
@@ -284,13 +286,36 @@ export class FiltersWarehouseModal extends Modal {
 
 	private collapseFilter(
 		expandableArea: HTMLElement,
-		expandBtn: HTMLButtonElement,
+		expandBtn: HTMLDivElement,
 	): void {
 		expandableArea.style.maxHeight = "0";
 		expandableArea.style.opacity = "0";
 		expandableArea.style.paddingTop = "0";
 		expandableArea.style.paddingBottom = "0";
-		expandBtn.textContent = "Expand to edit";
+
+		expandBtn.replaceChildren();
+		expandBtn.createEl(
+			"div",
+			{
+				cls: ["expand-filter-btn", "compact-btn"],
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "add-criterion-group-btn-icon",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "chevron-down");
+					},
+				);
+				el.createEl("span", {
+					cls: "add-criterion-group-btn-text",
+					text: t("expand-to-edit"),
+				});
+			},
+		);
+
 		setTimeout(() => {
 			expandableArea.hide();
 		}, 300);
@@ -299,7 +324,7 @@ export class FiltersWarehouseModal extends Modal {
 	private expandFilter(
 		filter: Filter,
 		expandableArea: HTMLElement,
-		expandBtn: HTMLButtonElement,
+		expandBtn: HTMLDivElement,
 	): void {
 		if (expandableArea.children.length === 0) {
 			this.renderExpandedFilterContent(filter, expandableArea);
@@ -314,7 +339,30 @@ export class FiltersWarehouseModal extends Modal {
 		expandableArea.style.opacity = "1";
 		expandableArea.style.paddingTop = "var(--size-2-2)";
 		expandableArea.style.paddingBottom = "var(--size-2-2)";
-		expandBtn.textContent = "Minimize";
+
+		expandBtn.replaceChildren();
+		expandBtn.createEl(
+			"div",
+			{
+				cls: ["expand-filter-btn", "compact-btn"],
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "add-criterion-group-btn-icon",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "chevron-up");
+					},
+				);
+				el.createEl("span", {
+					cls: "add-criterion-group-btn-text",
+					text: t("minimize"),
+				});
+			},
+		);
+
 		this.expandedFilters.set(filter, true);
 	}
 
@@ -1203,8 +1251,7 @@ export class FiltersWarehouseModal extends Modal {
 					const rootCond = filter.rootCondition;
 					let separatorText = t("or");
 					if (rootCond === "all") separatorText = t("and");
-					else if (rootCond === "none")
-						separatorText = t("nor");
+					else if (rootCond === "none") separatorText = t("nor");
 
 					separator.textContent = separatorText.toUpperCase();
 					group.parentNode?.insertBefore(

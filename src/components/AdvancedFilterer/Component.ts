@@ -40,6 +40,8 @@ export class AdvancedFilterComponent extends Component {
 	private plugin: TaskBoard;
 	private app: App;
 	private currentBoardID: string;
+	private entity: "board" | "view" | "column";
+	private parentFiltersAreActive: boolean;
 	private initialFilterState?: AdvancedFilter;
 
 	private expandedFilters = new WeakMap<Filter, boolean>();
@@ -50,8 +52,17 @@ export class AdvancedFilterComponent extends Component {
 		HTMLInputElement,
 		MultiSuggest
 	>();
-	public isMultiSuggestDropdownActive = false;
-	public isConfigModalOpen = false;
+
+	// public isMultiSuggestDropdownActive = false;
+	// public isConfigModalOpen = false;
+	public _isSomethingElseIsOpened = false;
+	get somethingElseIsOpened() {
+		return this._isSomethingElseIsOpened;
+	}
+	set somethingElseIsOpened(value: boolean) {
+		this._isSomethingElseIsOpened = value;
+	}
+
 	public conditionsRequiringValue = [
 		"equals",
 		"contains",
@@ -75,6 +86,8 @@ export class AdvancedFilterComponent extends Component {
 		plugin: TaskBoard,
 		app: App,
 		currentBoardID: string,
+		parentFiltersAreActive: boolean,
+		entity: "board" | "view" | "column",
 		initialFilterState?: AdvancedFilter,
 	) {
 		super();
@@ -82,6 +95,8 @@ export class AdvancedFilterComponent extends Component {
 		this.plugin = plugin;
 		this.app = app;
 		this.currentBoardID = currentBoardID;
+		this.entity = entity;
+		this.parentFiltersAreActive = parentFiltersAreActive;
 		this.initialFilterState = initialFilterState;
 	}
 
@@ -147,9 +162,66 @@ export class AdvancedFilterComponent extends Component {
 			cls: "advanced-filter-menu-container-body-main-panel-configs",
 		});
 
+		this.renderBoardLevelFiltersWarning(rootFilterSetupSection);
 		this.renderRootConditionSection(rootFilterSetupSection);
 		this.renderFiltersList(rootFilterSetupSection);
 		this.renderActionButtons(rootFilterSetupSection);
+	}
+
+	private renderBoardLevelFiltersWarning(container: HTMLElement): void {
+		if (this.entity === "column" && this.parentFiltersAreActive) {
+			const viewLevelFiltersWarning = container.createDiv({
+				cls: "parent-level-filters-present-warning",
+			});
+			viewLevelFiltersWarning.createEl(
+				"span",
+				{
+					cls: "parent-level-filters-present-warning-icon",
+				},
+				(iconEl) => {
+					setIcon(iconEl, "info");
+				},
+			);
+			const viewLevelFiltersWarningMessage =
+				viewLevelFiltersWarning.createDiv({
+					cls: "parent-level-filters-present-warning-message",
+				});
+			viewLevelFiltersWarningMessage.createSpan({
+				cls: "parent-level-filters-present-warning-text",
+				text: "View level filters are active. Tasks will be first filtered through the view level filters. Read more here: ",
+			});
+			viewLevelFiltersWarningMessage.createEl("a", {
+				text: "Advanced filters",
+				href: "",
+			});
+		} else if (this.entity === "view" && this.parentFiltersAreActive) {
+			const boardLevelFiltersWarning = container.createDiv({
+				cls: "parent-level-filters-present-warning",
+				text: "",
+			});
+			boardLevelFiltersWarning.createEl(
+				"span",
+				{
+					cls: "parent-level-filters-present-warning-icon",
+				},
+				(iconEl) => {
+					setIcon(iconEl, "info");
+				},
+			);
+
+			const boardLevelFiltersWarningMessage =
+				boardLevelFiltersWarning.createDiv({
+					cls: "parent-level-filters-present-warning-message",
+				});
+			boardLevelFiltersWarningMessage.createSpan({
+				cls: "parent-level-filters-present-warning-text",
+				text: "Board level filters are active. Tasks will be first filtered through the board level filters. Read more here: ",
+			});
+			boardLevelFiltersWarningMessage.createEl("a", {
+				text: "Advanced filters",
+				href: "",
+			});
+		}
 	}
 
 	private renderRootConditionSection(container: HTMLElement): void {
@@ -251,6 +323,7 @@ export class AdvancedFilterComponent extends Component {
 				setTooltip(el, t("import-filter-from-filter-warehouse"));
 
 				this.registerDomEvent(el, "click", async () => {
+					this.somethingElseIsOpened = true;
 					this.openFiltersWarehouseModal();
 				});
 			},
@@ -327,6 +400,7 @@ export class AdvancedFilterComponent extends Component {
 					},
 				);
 				this.registerDomEvent(el, "click", (event: PointerEvent) => {
+					this.somethingElseIsOpened = true;
 					const filterMenu = new Menu();
 
 					filterMenu.addItem((item) => {
@@ -1085,7 +1159,7 @@ export class AdvancedFilterComponent extends Component {
 		});
 		valueInput.hide();
 		this.registerDomEvent(valueInput, "click", () => {
-			this.isMultiSuggestDropdownActive = true;
+			this.somethingElseIsOpened = true;
 		});
 		const dropdownInputContainer = newFilterEl.createEl("div", {
 			cls: ["filter-value-input-container"],
@@ -1824,6 +1898,7 @@ export class AdvancedFilterComponent extends Component {
 	// ===================== STATE MANAGEMENT =====================
 
 	public getFiltersState(): AdvancedFilter {
+		debugger;
 		if (!this.advancedFilter) {
 			return {
 				filters: [],
@@ -1879,12 +1954,15 @@ export class AdvancedFilterComponent extends Component {
 					);
 					this.advancedFilter.filters.push(filterCopy);
 				}
+				console.log("Imported filters :", this.advancedFilter);
 				this.expandedFilters = new WeakMap();
 				this.groupsSortableInstances.forEach((instance) =>
 					instance.destroy(),
 				);
 				this.groupsSortableInstances.clear();
 				this.render();
+
+				// this.somethingElseIsOpened = false;
 			},
 		);
 		warehouseModal.open();

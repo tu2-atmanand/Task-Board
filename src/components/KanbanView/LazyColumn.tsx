@@ -479,11 +479,12 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					// 	(col: ColumnData) => col.id === columnData.id
 					// );
 
+					const ViewFiltersPresent = activeBoardData.views[currentViewIndex].viewFilters.filters.some((filter) => filter.status);
 					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new AdvancedFilterModal(
-							plugin, true, activeBoardData.id, columnData.name, columnData.columnFilters
+							plugin, "column", activeBoardData.id, ViewFiltersPresent, columnData.name, columnData.columnFilters
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
@@ -512,12 +513,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
 							: { x: 100, y: 100 }; // Fallback position
 
+						const ViewFiltersPresent = activeBoardData.views[currentViewIndex].viewFilters.filters.some((filter) => filter.status);
+
 						// Create and show filter popover
-						// leafId is undefined for column filters (not tied to a specific leaf)
 						const popover = new AdvancedFilterPopover(
 							plugin,
-							true, // forColumn is true
+							"column",
 							activeBoardData.id,
+							ViewFiltersPresent,
 							columnData.name,
 							columnData.columnFilters
 						);

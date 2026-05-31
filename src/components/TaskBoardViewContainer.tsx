@@ -163,15 +163,23 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
 		if (allTasks && boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
-			const viewFilter = boardData.views[currentViewIndex].viewFilters; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
 			console.log("Current view : ", currentView);
+
+			const boardFilters = boardData.boardFilters;
+			const viewFilter = boardData.views[currentViewIndex].viewFilters; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
 			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: advancedFilterer(allTasks.Pending, viewFilter, dateFormat),
-				Completed: advancedFilterer(allTasks.Completed, viewFilter, dateFormat),
+				Pending: advancedFilterer(allTasks.Pending, boardFilters, dateFormat),
+				Completed: advancedFilterer(allTasks.Completed, boardFilters, dateFormat),
+			};
+
+			const viewLevelFilterTasks = {
+				...allTasks,
+				Pending: advancedFilterer(boardFilteredTasks.Pending, viewFilter, dateFormat),
+				Completed: advancedFilterer(boardFilteredTasks.Completed, viewFilter, dateFormat),
 			};
 
 			// Create a new board data object immutably
@@ -181,23 +189,23 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				newBoardData.views[currentViewIndex] = {
 					...newBoardData.views[currentViewIndex],
 					taskCount: {
-						pending: boardFilteredTasks.Pending.length,
-						completed: boardFilteredTasks.Completed.length,
+						pending: viewLevelFilterTasks.Pending.length,
+						completed: viewLevelFilterTasks.Completed.length,
 					},
 				};
 			}
 			setCurrentBoardData(newBoardData);
-			setFilteredTasks(boardFilteredTasks);
+			setFilteredTasks(viewLevelFilterTasks);
 
 			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
-				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+				const searchFiltered = handleSearchSubmit(viewLevelFilterTasks);
 				// setLoading(false);
-				return searchFiltered || boardFilteredTasks;
+				return searchFiltered || viewLevelFilterTasks;
 			}
 
 			// setLoading(false);
-			return boardFilteredTasks;
+			return viewLevelFilterTasks;
 		}
 		return { Pending: [], Completed: [] };
 	}, [allTasks, softRefreshCount]);
@@ -405,20 +413,20 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		try {
 			saveMapViewIfNeeded();
 
-			const currentBoardConfig = boardData;
+			const boardFiltersPresent = boardData.boardFilters.filters.some((filter) => filter.status);
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
 				const filterModal = new AdvancedFilterModal(
-					plugin, false, boardData.id, currentView?.viewName
+					plugin, "view", boardData.id, boardFiltersPresent, currentView?.viewName
 				);
 
 				// Set initial filter state
-				if (currentBoardConfig!.views[currentViewIndex].viewFilters) {
+				if (boardData!.views[currentViewIndex].viewFilters) {
 					setTimeout(() => {
 						// Use type assertion to resolve non-null issues
 						// const filterState = filterModal.liveFilterState as Filter;
 						if (filterModal.taskFilterComponent) {
-							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilters);
+							filterModal.taskFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters);
 						}
 					}, 100);
 				}
@@ -459,17 +467,18 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				// Create and show popover
 				const popover = new AdvancedFilterPopover(
 					plugin,
-					false, // forColumn = false since this is for board-level filter
+					"view",
 					boardData.id,
+					boardFiltersPresent,
 					currentView?.viewName || "View",
 				);
 
 				// Load existing filter state if available
-				if (currentBoardConfig!.views[currentViewIndex].viewFilter) {
+				if (boardData!.views[currentViewIndex].viewFilter) {
 					// Wait for component to be created and loaded
 					setTimeout(() => {
 						if (popover.taskFilterComponent) {
-							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilters!);
+							popover.taskFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters!);
 						}
 					}, 100);
 				}

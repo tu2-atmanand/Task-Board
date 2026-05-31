@@ -22,6 +22,7 @@ import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
 import { eventEmitter } from "../services/EventEmitter.js";
+import { AdvancedFilterModal } from "../components/AdvancedFilterer/index.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -395,6 +396,38 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);
 	};
+	// Board Management - Function to handle configuring the board level filters
+	const handleConfigureBoardLevelFilters = () => {
+		const filterModal = new AdvancedFilterModal(
+			plugin, "board", currentBoardData.id, false, currentBoardData.name
+		);
+
+		// Set initial filter state
+		if (currentBoardData!.views[currentViewIndex].viewFilters) {
+			setTimeout(() => {
+				// Use type assertion to resolve non-null issues
+				// const filterState = filterModal.liveFilterState as Filter;
+				if (filterModal.taskFilterComponent) {
+					filterModal.taskFilterComponent.loadFilterState(currentBoardData!.boardFilters);
+				}
+			}, 100);
+		}
+
+		// Set the close callback - mainly used for handling cancel actions
+		filterModal.filterCloseCallback = async (filtersState) => {
+			if (filtersState) {
+				// Save the filter state to the board
+				let updatedcurrentBoardData = currentBoardData;
+				updatedcurrentBoardData!.views[currentViewIndex].viewFilters = filtersState;
+				plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
+
+				// Refresh the board view
+				eventEmitter.emit('REFRESH_BOARD');
+			}
+		};
+
+		filterModal.open();
+	}
 
 	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
 	const handleDuplicateCurrentBoard = async () => {
@@ -593,6 +626,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 										setIsEdited(true);
 									}}
 								/>
+							</div>
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+									<div className="boardConfigModalSettingName">{t("board-level-filters")}</div>
+									<div className="boardConfigModalSettingDescription">{t("board-level-filters-info")}</div>
+								</div>
+								<button
+									className="boardConfigModalMainContentConfigureSwimlanesBtn"
+									onClick={handleConfigureBoardLevelFilters}
+								>{t("configure")}</button>
 							</div>
 						</div>
 					</div>

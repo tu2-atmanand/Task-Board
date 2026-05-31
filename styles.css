@@ -663,7 +663,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--foreground-primary);
 	text-align: center;
 	align-content: center;
-	font-size: 1.1em;
 	font-weight: 600;
 }
 
@@ -2724,7 +2723,7 @@ body.taskboard-touch-dragging {
 	flex-direction: row;
 	justify-content: flex-start;
 	gap: 0.5em;
-	max-width: 55vw;
+	/* max-width: 55vw; */
 	flex-wrap: wrap;
 	padding: 0.4rem;
 }
@@ -5107,6 +5106,74 @@ svg.react-flow__connectionline {
 /*        src/components/AdvancedFilterer/*              */
 /* ----------------------------------------------------- */
 
+/* -------------------- Common Elements ------------------ */
+
+.drag-handle {
+	cursor: grab;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.dragging-placeholder {
+	opacity: 0.5;
+	background-color: var(--background-modifier-hover);
+	/* Use Obsidian hover background color */
+}
+
+.compact-btn {
+	padding-inline: var(--size-2-2);
+	/* Use Obsidian size variable */
+	box-shadow: unset !important;
+	border: unset !important;
+	--icon-size: var(--size-4-4);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-2-2);
+
+	-webkit-app-region: no-drag;
+	display: inline-flex;
+	overflow: hidden;
+	align-items: center;
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+	border-radius: var(--button-radius);
+	font-weight: var(--input-font-weight);
+	cursor: var(--cursor);
+	font-family: inherit;
+	gap: var(--size-2-2);
+
+	min-height: 30px;
+}
+
+.compact-btn:hover {
+	box-shadow: none;
+	opacity: var(--icon-opacity-hover);
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+.compact-input,
+.compact-select {
+	font-size: var(--font-ui-smaller);
+	/* Use Obsidian font size variable */
+	height: var(--input-height);
+	/* Use Obsidian input height variable */
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: none;
+}
+
+.compact-select:hover {
+	box-shadow: none;
+}
+
+.compact-text {
+	font-size: var(--font-ui-smaller);
+	/* Use Obsidian font size variable */
+	min-width: fit-content;
+}
+
 /* ------------------- Popover.ts ---------------------- */
 
 .advanced-filter-menu-container {
@@ -5141,6 +5208,7 @@ svg.react-flow__connectionline {
 	box-shadow: var(--shadow-s);
 	border: 1px solid var(--background-modifier-border);
 	max-height: 80vh;
+	max-width: 80vw;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -5174,12 +5242,34 @@ svg.react-flow__connectionline {
 	/* space-y-3 from HTML, Tailwind var(--space-3) */
 }
 
+.parent-level-filters-present-warning {
+	display: flex;
+	border: 1px solid var(--code-property);
+	font-size: var(--font-smaller);
+	color: var(--code-property);
+	padding-block: 4px;
+	padding-inline: 6px;
+	border-radius: var(--radius-m);
+	overflow-wrap: break-word;
+	background: #2c7ea02e;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.7rem;
+}
+
+.parent-level-filters-present-warning-icon {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	align-self: center;
+}
+
 .filters-root-condition-section {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
 	padding: var(--size-2-2);
-	background-color: var(--background-secondary-alt, var(--background-modifier-hover));
+	background-color: var(--background-primary-alt);
 	border-radius: var(--radius-m);
 	border: 1px solid var(--background-modifier-border);
 	justify-content: center;
@@ -5265,7 +5355,7 @@ svg.react-flow__connectionline {
 	font-family: inherit;
 	font-size: var(--font-ui-smaller);
 	font-weight: var(--input-font-weight);
-	color: var(--text-muted);
+	color: var(--blockquote-border-color);
 	background: none;
 	border: none;
 	padding: var(--size-2-1) var(--size-2-2);
@@ -5724,74 +5814,6 @@ svg.react-flow__connectionline {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-}
-
-/* -------------------- Common Elements ------------------ */
-
-.drag-handle {
-	cursor: grab;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.dragging-placeholder {
-	opacity: 0.5;
-	background-color: var(--background-modifier-hover);
-	/* Use Obsidian hover background color */
-}
-
-.compact-btn {
-	padding-inline: var(--size-2-2);
-	/* Use Obsidian size variable */
-	box-shadow: unset !important;
-	border: unset !important;
-	--icon-size: var(--size-4-4);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: var(--size-2-2);
-
-	-webkit-app-region: no-drag;
-	display: inline-flex;
-	overflow: hidden;
-	align-items: center;
-	color: var(--text-muted);
-	font-size: var(--font-ui-small);
-	border-radius: var(--button-radius);
-	font-weight: var(--input-font-weight);
-	cursor: var(--cursor);
-	font-family: inherit;
-	gap: var(--size-2-2);
-
-	min-height: 30px;
-}
-
-.compact-btn:hover {
-	box-shadow: none;
-	opacity: var(--icon-opacity-hover);
-	background-color: var(--background-modifier-hover);
-	color: var(--text-normal);
-}
-
-.compact-input,
-.compact-select {
-	font-size: var(--font-ui-smaller);
-	/* Use Obsidian font size variable */
-	height: var(--input-height);
-	/* Use Obsidian input height variable */
-	border: 1px solid var(--background-modifier-border);
-	box-shadow: none;
-}
-
-.compact-select:hover {
-	box-shadow: none;
-}
-
-.compact-text {
-	font-size: var(--font-ui-smaller);
-	/* Use Obsidian font size variable */
-	min-width: fit-content;
 }
 
 /* --------------------------------------------------- */

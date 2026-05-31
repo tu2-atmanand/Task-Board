@@ -414,6 +414,23 @@ export async function createBoardFiles(
 					},
 				};
 
+				if (
+					board?.filterConfig &&
+					board.filterConfig?.savedConfigs &&
+					board.filterConfig.savedConfigs.length > 0
+				) {
+					board.filterConfig.savedConfigs.forEach((savedFilter) =>
+						boardContent.boardFilters.filters.push({
+							id: savedFilter.id,
+							name: savedFilter.name,
+							description: savedFilter.description ?? "",
+							rootCondition:
+								savedFilter.filterState.rootCondition,
+							filterGroups: savedFilter.filterState.filterGroups,
+							status: false,
+						}),
+					);
+				}
 				// const lastViewId = boardContent.views[0]?.viewId ?? "";
 				// boardContent.lastViewId = lastViewId;
 
