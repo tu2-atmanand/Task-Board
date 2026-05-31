@@ -672,7 +672,9 @@ const en: Lang = {
 	"name": "Name",
 	"column-config-drag-butn-info": "Drag this column to change its order",
 	"hidden": "Hidden",
-	"of-the-below-enabled-filters": "of the below enabled filters"
+	"of-the-below-enabled-filters": "of the below enabled filters",
+	"expand-to-edit": "Expand to edit",
+	"import-filter": "Import filters"
 };
 
 export default en;
