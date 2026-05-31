@@ -1,3 +1,4 @@
+import { Filter } from "./BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants.js";
 import {
 	EditButtonMode,
@@ -149,6 +150,7 @@ export interface globalSettingsData {
 		edgeType: mapViewEdgeType;
 	};
 	enableDragnDropTouch: boolean;
+	filtersWarehouse: Filter[];
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -463,6 +465,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			},
 		},
 		enableDragnDropTouch: false,
+		filtersWarehouse: [],
 	},
 };
 

@@ -14,5 +14,11 @@
 import { AdvancedFilterComponent } from "./Component.js";
 import { AdvancedFilterModal } from "./Modal.js";
 import { AdvancedFilterPopover } from "./Popover.js";
+import { FiltersWarehouseModal } from "./FiltersWarehouse.js";
 
-export { AdvancedFilterComponent, AdvancedFilterModal, AdvancedFilterPopover };
+export {
+	AdvancedFilterComponent,
+	AdvancedFilterModal,
+	AdvancedFilterPopover,
+	FiltersWarehouseModal,
+};

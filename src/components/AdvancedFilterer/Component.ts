@@ -1,3 +1,5 @@
+// src/components/AdvancedFilterer/Component.ts
+
 import { t } from "i18next";
 import {
 	Component,
@@ -24,6 +26,7 @@ import {
 	priorityDropDownOption,
 } from "../../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { FiltersWarehouseModal } from "./FiltersWarehouse.js";
 import {
 	MultiSuggest,
 	getTagSuggestions,
@@ -177,8 +180,8 @@ export class AdvancedFilterComponent extends Component {
 			});
 		rootConditionDropdown.selectEl.toggleClass("compact-select", true);
 
-		rootConditionSection.createEl("span", {
-			cls: ["compact-text", "root-condition-span"],
+		rootConditionSection.createEl("label", {
+			cls: ["compact-text", "root-condition-label"],
 			text: t("of-the-below-enabled-filters"),
 		});
 	}
@@ -323,7 +326,7 @@ export class AdvancedFilterComponent extends Component {
 						setIcon(iconEl, "ellipsis-vertical");
 					},
 				);
-				this.registerDomEvent(el, "click", () => {
+				this.registerDomEvent(el, "click", (event: PointerEvent) => {
 					const filterMenu = new Menu();
 
 					filterMenu.addItem((item) => {
@@ -338,7 +341,21 @@ export class AdvancedFilterComponent extends Component {
 						item.setTitle(t("save-in-warehouse"));
 						item.setIcon("warehouse");
 						item.onClick(async () => {
-							this.duplicateFilter(filter);
+							const warehouse =
+								this.plugin.settings.data.filtersWarehouse ||
+								[];
+							const filterCopy = JSON.parse(
+								JSON.stringify(filter),
+							);
+							warehouse.push(filterCopy);
+
+							this.plugin.settings.data.filtersWarehouse =
+								warehouse;
+							await this.plugin.saveSettings();
+
+							new Notice(
+								`Filter "${filter.name}" saved to warehouse.`,
+							);
 						});
 					});
 
@@ -349,6 +366,9 @@ export class AdvancedFilterComponent extends Component {
 							this.removeFilter(filter, container);
 						});
 					});
+
+					// Use native event if available (React event has nativeEvent property)
+					filterMenu.showAtMouseEvent(event);
 				});
 			},
 		);
@@ -360,19 +380,39 @@ export class AdvancedFilterComponent extends Component {
 		const expandableArea = container.createDiv({
 			cls: "advanced-filter-expandable-area",
 		});
-		expandableArea.style.display = "none";
+		expandableArea.hide();
 
-		const expandBtn = bottomSection.createEl("button", {
-			cls: ["expand-filter-btn", "compact-btn"],
-			text: "Expand to edit",
-		});
+		// const expandBtn = bottomSection.createEl(
+		// 	"div",
+		// 	{
+		// 		cls: ["expand-filter-btn", "compact-btn"],
+		// 	},
+		// 	(el) => {
+		// 		el.createEl(
+		// 			"span",
+		// 			{
+		// 				cls: "add-criterion-group-btn-icon",
+		// 			},
+		// 			(iconEl) => {
+		// 				setIcon(iconEl, "chevron-down");
+		// 			},
+		// 		);
+		// 		el.createEl("span", {
+		// 			cls: "add-criterion-group-btn-text",
+		// 			text: t("expand-to-edit"),
+		// 		});
+		// 	},
+		// );
 
-		this.registerDomEvent(expandBtn, "click", () => {
-			const isExpanded = expandableArea.style.display !== "none";
+		// Render for the first time
+		this.collapseFilter(filter, expandableArea, bottomSection);
+
+		this.registerDomEvent(bottomSection, "click", () => {
+			const isExpanded = this.expandedFilters.get(filter) ?? false;
 			if (isExpanded) {
-				this.collapseFilter(filter, expandableArea, expandBtn);
+				this.collapseFilter(filter, expandableArea, bottomSection);
 			} else {
-				this.expandFilter(filter, expandableArea, expandBtn);
+				this.expandFilter(filter, expandableArea, bottomSection);
 			}
 		});
 
@@ -384,23 +424,84 @@ export class AdvancedFilterComponent extends Component {
 	private collapseFilter(
 		filter: Filter,
 		expandableArea: HTMLElement,
-		expandBtn: HTMLButtonElement,
+		expandBtn: HTMLDivElement,
 	): void {
-		expandableArea.style.display = "none";
-		expandBtn.textContent = "Expand to edit";
+		expandableArea.style.maxHeight = "0";
+		expandableArea.style.opacity = "0";
+		expandableArea.style.paddingTop = "0";
+		expandableArea.style.paddingBottom = "0";
+
+		expandBtn.replaceChildren();
+		expandBtn.createEl(
+			"div",
+			{
+				cls: ["expand-filter-btn", "compact-btn"],
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "add-criterion-group-btn-icon",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "chevron-down");
+					},
+				);
+				el.createEl("span", {
+					cls: "add-criterion-group-btn-text",
+					text: t("expand-to-edit"),
+				});
+			},
+		);
+
 		this.expandedFilters.set(filter, false);
+		setTimeout(() => {
+			expandableArea.hide();
+		}, 300);
 	}
 
 	private expandFilter(
 		filter: Filter,
 		expandableArea: HTMLElement,
-		expandBtn: HTMLButtonElement,
+		expandBtn: HTMLDivElement,
 	): void {
 		if (expandableArea.children.length === 0) {
 			this.renderExpandedFilterContent(filter, expandableArea);
 		}
-		expandableArea.style.display = "block";
-		expandBtn.textContent = "Minimize";
+		expandableArea.show();
+		expandableArea.style.maxHeight = "0";
+		expandableArea.style.opacity = "0";
+		expandableArea.style.paddingTop = "0";
+		expandableArea.style.paddingBottom = "0";
+		void expandableArea.offsetHeight;
+		expandableArea.style.maxHeight = "2000px";
+		expandableArea.style.opacity = "1";
+		expandableArea.style.paddingTop = "var(--size-2-2)";
+		expandableArea.style.paddingBottom = "var(--size-2-2)";
+
+		expandBtn.replaceChildren();
+		expandBtn.createEl(
+			"div",
+			{
+				cls: ["expand-filter-btn", "compact-btn"],
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "add-criterion-group-btn-icon",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "chevron-up");
+					},
+				);
+				el.createEl("span", {
+					cls: "add-criterion-group-btn-text",
+					text: t("minimize"),
+				});
+			},
+		);
+
 		this.expandedFilters.set(filter, true);
 	}
 
@@ -412,7 +513,7 @@ export class AdvancedFilterComponent extends Component {
 			cls: "filter-name-setting",
 		});
 		nameSetting.createEl("label", {
-			text: "Filter name",
+			text: t("name"),
 			cls: "compact-text",
 		});
 		const nameInput = nameSetting.createEl("input", {
@@ -435,7 +536,7 @@ export class AdvancedFilterComponent extends Component {
 			cls: "filter-desc-setting",
 		});
 		descSetting.createEl("label", {
-			text: "Filter description",
+			text: t("description"),
 			cls: "compact-text",
 		});
 		const descInput = descSetting.createEl("input", {
@@ -455,7 +556,7 @@ export class AdvancedFilterComponent extends Component {
 						descText.textContent = filter.description;
 						descText.removeAttribute("style");
 					} else {
-						(descText as HTMLElement).style.display = "none";
+						(descText as HTMLElement).hide();
 					}
 				} else if (filter.description) {
 					const leftSection = listItem.querySelector(
@@ -505,8 +606,8 @@ export class AdvancedFilterComponent extends Component {
 			true,
 		);
 
-		filterRootConditionSection.createEl("span", {
-			cls: ["compact-text", "root-condition-span"],
+		filterRootConditionSection.createEl("label", {
+			cls: ["compact-text", "root-condition-label"],
 			text: t("of-the-below-criterion-groups"),
 		});
 
@@ -721,7 +822,7 @@ export class AdvancedFilterComponent extends Component {
 			true,
 		);
 
-		groupHeaderLeft.createEl("span", {
+		groupHeaderLeft.createEl("label", {
 			cls: ["compact-text"],
 			text: t("criterion-in-this-group"),
 		});
@@ -958,7 +1059,7 @@ export class AdvancedFilterComponent extends Component {
 		} else if (groupData.groupCondition === "none") {
 			newFilterEl.createEl("span", {
 				cls: ["filter-conjunction"],
-				text: t("and-not"),
+				text: t("nor"),
 			});
 		} else {
 			newFilterEl.createEl("span", {
@@ -1662,7 +1763,7 @@ export class AdvancedFilterComponent extends Component {
 					const rootCond = filter.rootCondition;
 					let separatorText = t("or");
 					if (rootCond === "all") separatorText = t("and");
-					else if (rootCond === "none") separatorText = t("and-not");
+					else if (rootCond === "none") separatorText = t("nor");
 
 					separator.textContent = separatorText.toUpperCase();
 					group.parentNode?.insertBefore(
@@ -1769,7 +1870,24 @@ export class AdvancedFilterComponent extends Component {
 	// ===================== STUB METHODS =====================
 
 	private async openFiltersWarehouseModal(): Promise<void> {
-		new Notice("Feature coming soon");
+		const warehouseModal = new FiltersWarehouseModal(
+			this.plugin,
+			(importedFilters: Filter[]) => {
+				for (const importedFilter of importedFilters) {
+					const filterCopy = JSON.parse(
+						JSON.stringify(importedFilter),
+					);
+					this.advancedFilter.filters.push(filterCopy);
+				}
+				this.expandedFilters = new WeakMap();
+				this.groupsSortableInstances.forEach((instance) =>
+					instance.destroy(),
+				);
+				this.groupsSortableInstances.clear();
+				this.render();
+			},
+		);
+		warehouseModal.open();
 	}
 }
 
