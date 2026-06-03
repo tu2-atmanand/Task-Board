@@ -10,7 +10,7 @@ export class AdvancedFilterModal extends Modal {
 	private currentBoardID: string;
 	public parentFiltersAreActive: boolean;
 	public entity: "board" | "view" | "column";
-	public taskFilterComponent: AdvancedFilterComponent | null;
+	public advancedFilterComponent: AdvancedFilterComponent | null;
 	private columnOrViewOrBoardName?: string;
 	private existingFilters?: AdvancedFilter;
 	public filterCloseCallback:
@@ -33,7 +33,7 @@ export class AdvancedFilterModal extends Modal {
 		this.columnOrViewOrBoardName = columnOrViewOrBoardName;
 		this.existingFilters = existingFilters;
 
-		this.taskFilterComponent = null;
+		this.advancedFilterComponent = null;
 
 		if (this.entity === "column") {
 			this.setTitle(
@@ -54,7 +54,7 @@ export class AdvancedFilterModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		this.taskFilterComponent = new AdvancedFilterComponent(
+		this.advancedFilterComponent = new AdvancedFilterComponent(
 			this.contentEl,
 			this.plugin,
 			this.app,
@@ -64,17 +64,17 @@ export class AdvancedFilterModal extends Modal {
 			this.existingFilters,
 		);
 		// Ensure the component is properly loaded
-		this.taskFilterComponent.onload();
+		this.advancedFilterComponent.onload();
 	}
 
 	onClose() {
 		const { contentEl } = this;
 
 		let filtersState: AdvancedFilter | undefined = undefined;
-		if (this.taskFilterComponent) {
+		if (this.advancedFilterComponent) {
 			try {
-				filtersState = this.taskFilterComponent.getFiltersState();
-				this.taskFilterComponent.onunload();
+				filtersState = this.advancedFilterComponent.getFiltersState();
+				this.advancedFilterComponent.onunload();
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					114,

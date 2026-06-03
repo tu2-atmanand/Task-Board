@@ -425,8 +425,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					setTimeout(() => {
 						// Use type assertion to resolve non-null issues
 						// const filterState = filterModal.liveFilterState as Filter;
-						if (filterModal.taskFilterComponent) {
-							filterModal.taskFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters);
+						if (filterModal.advancedFilterComponent) {
+							filterModal.advancedFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters);
 						}
 					}, 100);
 				}
@@ -477,8 +477,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				if (boardData!.views[currentViewIndex].viewFilter) {
 					// Wait for component to be created and loaded
 					setTimeout(() => {
-						if (popover.taskFilterComponent) {
-							popover.taskFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters!);
+						if (popover.advancedFilterComponent) {
+							popover.advancedFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters!);
 						}
 					}, 100);
 				}

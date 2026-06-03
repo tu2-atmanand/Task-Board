@@ -407,8 +407,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			setTimeout(() => {
 				// Use type assertion to resolve non-null issues
 				// const filterState = filterModal.liveFilterState as Filter;
-				if (filterModal.taskFilterComponent) {
-					filterModal.taskFilterComponent.loadFilterState(currentBoardData!.boardFilters);
+				if (filterModal.advancedFilterComponent) {
+					filterModal.advancedFilterComponent.loadFilterState(currentBoardData!.boardFilters);
 				}
 			}, 100);
 		}
@@ -418,7 +418,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			if (filtersState) {
 				// Save the filter state to the board
 				let updatedcurrentBoardData = currentBoardData;
-				updatedcurrentBoardData!.views[currentViewIndex].viewFilters = filtersState;
+				updatedcurrentBoardData!.boardFilters = filtersState;
 				plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
 				// Refresh the board view

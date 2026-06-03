@@ -25,6 +25,7 @@ import {
 export class FiltersWarehouseModal extends Modal {
 	private plugin: TaskBoard;
 	private onImport?: (filters: Filter[]) => void;
+	private onCancel?: () => void;
 	private selectedFilterIds = new Set<string>();
 
 	private expandedFilters = new WeakMap<Filter, boolean>();
@@ -54,10 +55,15 @@ export class FiltersWarehouseModal extends Modal {
 		"onOrAfter",
 	];
 
-	constructor(plugin: TaskBoard, onImport?: (filters: Filter[]) => void) {
+	constructor(
+		plugin: TaskBoard,
+		onImport?: (filters: Filter[]) => void,
+		onCancel?: () => void,
+	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.onImport = onImport;
+		this.onCancel = onCancel;
 	}
 
 	onOpen() {
@@ -170,6 +176,8 @@ export class FiltersWarehouseModal extends Modal {
 
 		(this as any)._importBtn = importBtn;
 		(this as any)._clearBtn = clearBtn;
+
+		if (this.onCancel) this.onCancel();
 	}
 
 	private updateActionButtonsState(
@@ -198,7 +206,11 @@ export class FiltersWarehouseModal extends Modal {
 			cls: "advanced-filter-top-left",
 		});
 
-		const checkbox = leftSection.createEl("input", {
+		const checkboxAndTitle = leftSection.createDiv({
+			cls: "advanced-filter-top-left-upper",
+		});
+
+		const checkbox = checkboxAndTitle.createEl("input", {
 			attr: { type: "checkbox" },
 			cls: "filters-warehouse-checkbox",
 		});
@@ -211,7 +223,7 @@ export class FiltersWarehouseModal extends Modal {
 			this.updateActionButtonsState();
 		});
 
-		leftSection.createEl("span", {
+		checkboxAndTitle.createEl("span", {
 			cls: "filter-name-text",
 			text: filter.name || "Untitled filter",
 		});

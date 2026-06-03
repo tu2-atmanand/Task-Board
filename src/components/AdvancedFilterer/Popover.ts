@@ -19,7 +19,7 @@ export class AdvancedFilterPopover
 	public currentBoardID: string;
 	public parentFiltersAreActive: boolean;
 	public popoverRef: HTMLDivElement | null = null;
-	public taskFilterComponent!: AdvancedFilterComponent;
+	public advancedFilterComponent!: AdvancedFilterComponent;
 	private win: Window;
 	// private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
@@ -117,7 +117,7 @@ export class AdvancedFilterPopover
 		});
 
 		// Create metadata editor, use compact mode
-		this.taskFilterComponent = new AdvancedFilterComponent(
+		this.advancedFilterComponent = new AdvancedFilterComponent(
 			taskFilterContainer,
 			this.plugin,
 			this.app,
@@ -127,7 +127,7 @@ export class AdvancedFilterPopover
 			this.existingFilters,
 		);
 		// Ensure the component is properly loaded
-		this.taskFilterComponent.onload();
+		this.advancedFilterComponent.onload();
 
 		// Create the popover
 		this.popoverRef = this.app.workspace.containerEl.createDiv({
@@ -252,9 +252,9 @@ export class AdvancedFilterPopover
 		}
 
 		let filtersState: AdvancedFilter | undefined = undefined;
-		if (this.taskFilterComponent) {
+		if (this.advancedFilterComponent) {
 			try {
-				filtersState = this.taskFilterComponent.getFiltersState();
+				filtersState = this.advancedFilterComponent.getFiltersState();
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					116,
@@ -276,8 +276,8 @@ export class AdvancedFilterPopover
 		// 	true
 		// );
 
-		if (this.taskFilterComponent) {
-			this.taskFilterComponent.onunload();
+		if (this.advancedFilterComponent) {
+			this.advancedFilterComponent.onunload();
 		}
 
 		if (this.onClose) {
