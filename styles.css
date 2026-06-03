@@ -5184,6 +5184,13 @@ svg.react-flow__connectionline {
 	flex: 1;
 }
 
+.advanced-filter-menu-container-header {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
 .advanced-filter-menu-container.advanced-filter-menu-container-header {
 	padding: var(--size-2-2);
 	border-bottom: 1px solid var(--background-modifier-border);
@@ -5197,6 +5204,10 @@ svg.react-flow__connectionline {
 	font-size: 14px;
 	font-weight: 600;
 	color: var(--text-normal);
+}
+
+.advanced-filter-menu-container-header-rightSec {
+	margin-inline: 1rem;
 }
 
 
@@ -5316,6 +5327,13 @@ svg.react-flow__connectionline {
 	min-width: 0;
 	flex-wrap: wrap;
 	flex-direction: column;
+}
+
+.advanced-filter-top-left-upper {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
 }
 
 .filter-name-text {
@@ -5469,7 +5487,7 @@ svg.react-flow__connectionline {
 	align-items: center;
 	gap: 0.5rem;
 	padding: 0.5rem;
-	background-color: var(--background-activated-file-dark);
+	background-color: var(--background-modifier-border-hover);
 	/* border-radius: var(--radius-m); */
 	/* border: 1px solid var(--background-modifier-border); */
 }
@@ -5496,7 +5514,7 @@ svg.react-flow__connectionline {
 	margin-inline: calc(-1 * var(--size-2-3));
 	margin-top: calc(-1 * var(--size-2-3));
 	padding: var(--size-2-3);
-	background-color: var(--background-modifier-hover);
+	background-color: var(--background-modifier-border-hover);
 }
 
 .criterion-group-header-left {
