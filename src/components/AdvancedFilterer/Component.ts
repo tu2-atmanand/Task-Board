@@ -55,13 +55,14 @@ export class AdvancedFilterComponent extends Component {
 
 	// public isMultiSuggestDropdownActive = false;
 	// public isConfigModalOpen = false;
-	public _isSomethingElseIsOpened = false;
-	get somethingElseIsOpened() {
-		return this._isSomethingElseIsOpened;
-	}
-	set somethingElseIsOpened(value: boolean) {
-		this._isSomethingElseIsOpened = value;
-	}
+	public isWarehouseModalOpened = false;
+	public somethingElseIsOpened = true;
+	// get somethingElseIsOpened() {
+	// 	return this._isSomethingElseIsOpened;
+	// }
+	// set somethingElseIsOpened(value: boolean) {
+	// 	this._isSomethingElseIsOpened = value;
+	// }
 
 	public conditionsRequiringValue = [
 		"equals",
@@ -323,7 +324,6 @@ export class AdvancedFilterComponent extends Component {
 				setTooltip(el, t("import-filter-from-filter-warehouse"));
 
 				this.registerDomEvent(el, "click", async () => {
-					this.somethingElseIsOpened = true;
 					this.openFiltersWarehouseModal();
 				});
 			},
@@ -375,6 +375,7 @@ export class AdvancedFilterComponent extends Component {
 		});
 
 		new ToggleComponent(filterToggleBtn)
+			.setValue(filter.status)
 			.setTooltip(filter.status ? t("disable") : t("activate"))
 			.onChange(() => {
 				filter.status = !filter.status;
@@ -1945,9 +1946,13 @@ export class AdvancedFilterComponent extends Component {
 	// ===================== STUB METHODS =====================
 
 	private async openFiltersWarehouseModal(): Promise<void> {
+		debugger;
+		this.isWarehouseModalOpened = true;
+
 		const warehouseModal = new FiltersWarehouseModal(
 			this.plugin,
 			(importedFilters: Filter[]) => {
+				debugger;
 				for (const importedFilter of importedFilters) {
 					const filterCopy = JSON.parse(
 						JSON.stringify(importedFilter),
@@ -1961,10 +1966,15 @@ export class AdvancedFilterComponent extends Component {
 				);
 				this.groupsSortableInstances.clear();
 				this.render();
-
-				// this.somethingElseIsOpened = false;
 			},
 		);
+
+		warehouseModal.setCloseCallback(() => {
+			debugger;
+			this.isWarehouseModalOpened = false;
+			this.somethingElseIsOpened = true;
+		});
+
 		warehouseModal.open();
 	}
 }

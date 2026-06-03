@@ -1,6 +1,6 @@
 // /src/components/BoardFilters/AdvancedFilterPopover.ts
 
-import { App } from "obsidian";
+import { App, setIcon, setTooltip } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import { t } from "i18next";
@@ -67,7 +67,7 @@ export class AdvancedFilterPopover
 			cls: "advanced-filter-menu-container-header",
 		});
 
-		const leftSec = contentEl.createDiv({
+		const leftSec = headerEl.createDiv({
 			cls: "advanced-filter-menu-container-header-leftSec",
 		});
 		// Add column filter heading if this is for a column
@@ -97,14 +97,27 @@ export class AdvancedFilterPopover
 			});
 		}
 
-		const rightSec = contentEl.createDiv({
+		const rightSec = headerEl.createDiv({
 			cls: "advanced-filter-menu-container-header-rightSec",
 		});
 
-		const applyBtn = rightSec.createEl("button", {
-			cls: "advanced-filter-menu-container-header-rightSec-btn",
-			text: t("apply"),
-		});
+		// const applyBtn = rightSec.createEl("button", {
+		// 	cls: "advanced-filter-menu-container-header-rightSec-btn",
+		// 	text: t("close"),
+		// });
+		const applyBtn = rightSec.createEl(
+			"div",
+			{
+				cls: [
+					"advanced-filter-menu-container-header-rightSec-btn",
+					"compact-btn",
+				],
+			},
+			(el) => {
+				setIcon(el, "x");
+				setTooltip(el, t("close-to-apply-changes"));
+			},
+		);
 		this.plugin.registerDomEvent(applyBtn, "click", (evt: PointerEvent) => {
 			this.close();
 		});
@@ -203,15 +216,23 @@ export class AdvancedFilterPopover
 	}
 
 	private clickOutside = (e: MouseEvent): void => {
-		// if (this.taskFilterComponent.somethingElseIsOpened) {
-		// 	// First outside click will make the other components to close and will keep this popover open. The second click will surely close it.
-		// 	this.taskFilterComponent.somethingElseIsOpened = false;
-		// 	return;
-		// }
+		debugger;
+		const warehouseOpened =
+			this.advancedFilterComponent.isWarehouseModalOpened;
 
 		if (
-			!this.taskFilterComponent.somethingElseIsOpened &&
-			// !this.taskFilterComponent.isConfigModalOpen &&
+			this.advancedFilterComponent.somethingElseIsOpened &&
+			!warehouseOpened
+		) {
+			// First outside click will make the other components to close and will keep this popover open. The second click will surely close it.
+			this.advancedFilterComponent.somethingElseIsOpened = false;
+			return;
+		}
+
+		if (
+			!warehouseOpened &&
+			!this.advancedFilterComponent.somethingElseIsOpened &&
+			// !this.advancedFilterComponent.isConfigModalOpen &&
 			this.popoverRef &&
 			!this.popoverRef.contains(e.target as Node) // This finds out if we are clicking out of the popover component
 		) {
