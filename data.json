@@ -30,7 +30,7 @@
         ]
       }
     },
-    "firstDayOfWeek": "Mon",
+    "firstDayOfWeek": "1",
     "showTaskWithoutMetadata": true,
     "ignoreFileNameDates": false,
     "taskPropertyFormat": "2",
@@ -248,13 +248,13 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2288,
+    "uniqueIdCounter": 2291,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
       "boardIndex": 1,
-      "settingTab": 0,
+      "settingTab": 7,
       "taskId": "",
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
     },
@@ -272,28 +272,10 @@
     },
     "searchQuery": "",
     "taskBoardFilesRegistry": {
-      "board_2553700948": {
-        "boardId": "board_2553700948",
-        "filePath": "TaskBoard-Template-1774097758616.taskboard",
-        "boardName": "My Project",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
       "board_329394": {
         "boardId": "board_329394",
-        "filePath": "TaskBoard-Template-1778937605497.taskboard",
+        "filePath": "My Project.taskboard",
         "boardName": "My Project",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_762849833": {
-        "boardId": "board_762849833",
-        "filePath": "TaskBoard-Template-1778856605183.taskboard",
-        "boardName": "My Project",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_2257753070": {
-        "boardId": "board_2257753070",
-        "filePath": "My Project (copy).taskboard",
-        "boardName": "My Project (copy)",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       },
       "board_1039059216": {
@@ -308,6 +290,139 @@
         "boardName": "A Test Board",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
-    }
+    },
+    "filtersWarehouse": [
+      {
+        "id": "filter_1780231276075_3763997378",
+        "status": true,
+        "name": "All tasks which are scheduled for June 2026 OR with tag \"#exam\"",
+        "rootCondition": "any",
+        "filterGroups": [
+          {
+            "id": "filter_1780231376283_4023786723",
+            "groupCondition": "all",
+            "filters": [
+              {
+                "id": "filter_1780231376285_2284389149",
+                "property": "scheduledDate",
+                "condition": "onOrAfter",
+                "value": "2026-06-01"
+              },
+              {
+                "id": "filter_1780231395923_372442592",
+                "property": "scheduledDate",
+                "condition": "onOrBefore",
+                "value": "2026-06-30"
+              }
+            ]
+          },
+          {
+            "id": "filter_1780231412787_3757740130",
+            "groupCondition": "all",
+            "filters": [
+              {
+                "id": "filter_1780231412787_3192844088",
+                "property": "tags",
+                "condition": "contains",
+                "value": "#exam"
+              }
+            ]
+          }
+        ],
+        "description": "All these tasks will be related to the upcoming semester exam."
+      },
+      {
+        "id": "filter_1780231530571_991496113",
+        "status": true,
+        "name": "All bugs",
+        "rootCondition": "all",
+        "filterGroups": [
+          {
+            "id": "filter_1780231555819_1683267699",
+            "groupCondition": "all",
+            "filters": [
+              {
+                "id": "filter_1780231555820_3912249243",
+                "property": "tags",
+                "condition": "contains",
+                "value": "bug"
+              },
+              {
+                "id": "filter_1780231562595_2824401141",
+                "property": "tags",
+                "condition": "contains",
+                "value": "vulnerability"
+              }
+            ]
+          }
+        ],
+        "description": "Task with the tag \"#bug\" or \"#vulnerability\""
+      },
+      {
+        "id": "filter_1780231583083_3304968090",
+        "status": true,
+        "name": "All feature requests for next three months",
+        "rootCondition": "all",
+        "filterGroups": [
+          {
+            "id": "filter_1780231607403_1025520177",
+            "groupCondition": "any",
+            "filters": [
+              {
+                "id": "filter_1780231607404_1444374694",
+                "property": "tags",
+                "condition": "contains",
+                "value": "feature"
+              },
+              {
+                "id": "filter_1780231616731_1371082266",
+                "property": "tags",
+                "condition": "contains",
+                "value": "feat"
+              }
+            ]
+          },
+          {
+            "id": "filter_1780231629523_1177040614",
+            "groupCondition": "all",
+            "filters": [
+              {
+                "id": "filter_1780231629524_3575847735",
+                "property": "scheduledDate",
+                "condition": "onOrAfter",
+                "value": "2026-05-31"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "filter_1780231678539_1044622487",
+        "status": true,
+        "name": "All tasks with the tag \"#learn\" OR \"#topic\"",
+        "rootCondition": "all",
+        "filterGroups": [
+          {
+            "id": "filter_1780231731139_691616165",
+            "groupCondition": "any",
+            "filters": [
+              {
+                "id": "filter_1780231731140_3855211575",
+                "property": "tags",
+                "condition": "contains",
+                "value": "topic"
+              },
+              {
+                "id": "filter_1780231740531_3523041867",
+                "property": "tags",
+                "condition": "contains",
+                "value": "learn"
+              }
+            ]
+          }
+        ],
+        "description": "These are the tasks I created when I found a new topic which I want to learn."
+      }
+    ]
   }
 }
