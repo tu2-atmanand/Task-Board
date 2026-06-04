@@ -1025,7 +1025,6 @@ export default class TaskBoardFileManager {
 	 */
 	clearRecentBoardsCache(): void {
 		this.recentBoardsData = {};
-		console.log("Cleared cached board data");
 	}
 
 	// --------------------------------------------------------------------
@@ -1296,9 +1295,9 @@ export default class TaskBoardFileManager {
 				this.recentBoardsData[registryEntry.filePath] =
 					updatedBoardData;
 
-				console.log(
-					`Saved board "${updatedBoardData.name}" to: ${registryEntry.filePath}`,
-				);
+				// console.log(
+				// 	`Saved board "${updatedBoardData.name}" to: ${registryEntry.filePath}`,
+				// );
 			}
 
 			return success;
@@ -1374,9 +1373,9 @@ export default class TaskBoardFileManager {
 				LEAFID_FILEPATH_MAPPING_KEY,
 				JSON.stringify(oldMappingData),
 			);
-			console.log(
-				`Stored filepath mapping: leaf ${leafID} -> ${filePath}`,
-			);
+			// console.log(
+			// 	`Stored filepath mapping: leaf ${leafID} -> ${filePath}`,
+			// );
 		} catch (error) {
 			console.error(
 				`Error storing filepath mapping for leaf ${leafID}:`,
@@ -1406,12 +1405,8 @@ export default class TaskBoardFileManager {
 				return undefined;
 			}
 
-			console.log("Mapping data : ", this.leafIdFilePathMapping);
 			const leafFilepath = this.leafIdFilePathMapping[leafID];
 			if (leafFilepath) {
-				console.log(
-					`Retrieved filepath mapping: leaf ${leafID} -> ${leafFilepath}`,
-				);
 				return leafFilepath;
 			} else {
 				console.warn(`No filepath mapping found for leaf ${leafID}`);
@@ -1452,10 +1447,6 @@ export default class TaskBoardFileManager {
 				);
 				if (created) {
 					createdCount++;
-					console.log(
-						`Created default board file: ${registryEntry.filePath}`,
-						defaultBoards[i].name,
-					);
 					new Notice(
 						`Created default board file: ${registryEntry.filePath} : ${defaultBoards[i].name}`,
 					);
@@ -1476,7 +1467,6 @@ export default class TaskBoardFileManager {
 	 * @returns All boards data as an object keyed by file path or an empty object if failed to load the boards.
 	 */
 	async loadAllBoards(): Promise<recentBoardsDataType | {}> {
-		console.log("loadAllBoards : Starting to load all boards...");
 		try {
 			let loadedBoardsData: recentBoardsDataType = {};
 
@@ -1501,9 +1491,6 @@ export default class TaskBoardFileManager {
 				if (boardData) {
 					// Cache the board data in memory using file path as key
 					loadedBoardsData[registryEntry.filePath] = boardData;
-					console.log(
-						`Loaded and cached board "${boardData.name}" from: ${registryEntry.filePath}`,
-					);
 				} else {
 					console.warn(
 						`Error loading board data from file: ${registryEntry.filePath}`,

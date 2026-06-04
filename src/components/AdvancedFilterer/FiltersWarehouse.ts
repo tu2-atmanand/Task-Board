@@ -1328,7 +1328,6 @@ export class FiltersWarehouseModal extends Modal {
 	}
 
 	private markAsEdited(): void {
-		console.log("Save button :", this._saveBtn);
 		this.edited = true;
 		if (this._saveBtn) {
 			this._saveBtn.show();

@@ -34,7 +34,6 @@ export function advancedFilterer(
 	const enabledFilters = advancedFilter.filters.filter(
 		(filter) => filter.status,
 	);
-	console.log("We have he following enabled filers : ", enabledFilters);
 	if (enabledFilters?.length === 0) return tasks;
 
 	const filtersRootCondition = advancedFilter.rootCondition;

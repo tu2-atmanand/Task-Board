@@ -1916,7 +1916,6 @@ export class AdvancedFilterComponent extends Component {
 	// ===================== STATE MANAGEMENT =====================
 
 	public getFiltersState(): AdvancedFilter {
-		debugger;
 		if (!this.advancedFilter) {
 			return {
 				filters: [],
@@ -1965,20 +1964,17 @@ export class AdvancedFilterComponent extends Component {
 	// ===================== STUB METHODS =====================
 
 	private async openFiltersWarehouseModal(): Promise<void> {
-		debugger;
 		this.isWarehouseModalOpened = true;
 
 		const warehouseModal = new FiltersWarehouseModal(
 			this.plugin,
 			(importedFilters: Filter[]) => {
-				debugger;
 				for (const importedFilter of importedFilters) {
 					const filterCopy = JSON.parse(
 						JSON.stringify(importedFilter),
 					);
 					this.advancedFilter.filters.push(filterCopy);
 				}
-				console.log("Imported filters :", this.advancedFilter);
 				this.expandedFilters = new WeakMap();
 				if (this.filtersSortableInstance) {
 					this.filtersSortableInstance.destroy();
@@ -1989,7 +1985,6 @@ export class AdvancedFilterComponent extends Component {
 		);
 
 		warehouseModal.setCloseCallback(() => {
-			debugger;
 			this.isWarehouseModalOpened = false;
 			this.somethingElseIsOpened = true;
 		});

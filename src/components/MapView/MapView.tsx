@@ -96,8 +96,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Load positions from the active board data
 	const loadAllNodesData = (): nodeDataType => {
-		console.log("loadAllNodesData called...");
-
 		try {
 			const list = currentView?.mapView?.nodesData ? currentView.mapView.nodesData : {};
 			// const map: Record<string, nodeDataType> = {};
@@ -115,7 +113,6 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Load viewport from the active board data
 	const loadViewport = (): viewPortType => {
-		console.log("loadViewport called...");
 		try {
 			const vp = currentView?.mapView?.viewPortData;
 			if (vp && typeof vp === 'object') {
@@ -411,7 +408,7 @@ const MapView: React.FC<MapViewProps> = ({
 
 	// Update nodes dynamically when computedNodes changes (ReactFlow team suggestion)
 	useEffect(() => {
-		console.log("[MapView] Updating nodes via setNodes - computedNodes length:", computedNodes.length);
+		// console.log("[MapView] Updating nodes via setNodes - computedNodes length:", computedNodes.length);
 		setNodes(computedNodes);
 	}, [computedNodes, setNodes]);
 
@@ -478,7 +475,7 @@ const MapView: React.FC<MapViewProps> = ({
 	// Calculate edges from dependsOn property
 	// TODO : Might be efficient to make use of the addEdge api of reactflow.
 	function getEdgesFromTasks(): Edge[] {
-		console.log("getEdgesFromTasks : How many times is this running and when...");
+		// console.log("getEdgesFromTasks : How many times is this running and when...");
 		const tasks: taskItem[] = allTasksFlattened;
 		const edges: Edge[] = [];
 		const idToTask = new Map<string, taskItem>();
@@ -952,7 +949,7 @@ const MapView: React.FC<MapViewProps> = ({
 			item.setTitle(t("toggle-animation"));
 			item.setIcon("sparkles");
 			item.onClick(() => {
-				console.log("Will be implemented in future...");
+				// console.log("Will be implemented in future...");
 			});
 			item.setDisabled(true);
 		});
@@ -961,7 +958,7 @@ const MapView: React.FC<MapViewProps> = ({
 			item.setTitle(t("change-color"));
 			item.setIcon("palette");
 			item.onClick(() => {
-				console.log("Will be implemented in future...");
+				// console.log("Will be implemented in future...");
 			});
 			item.setDisabled(true);
 		});
@@ -1093,7 +1090,6 @@ const MapView: React.FC<MapViewProps> = ({
 							// rendering
 							onlyRenderVisibleElements={mapViewSettings.renderVisibleNodes} // TODO : If this is true, then the initial render is faster, but while panning the experience is little laggy.
 							onInit={(instance) => {
-								console.log("Reactflow Initializing...");
 								// store reactflow instance for later programmatic viewport updates
 								// try {
 								// 	reactFlowInstanceRef.current = instance;

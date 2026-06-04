@@ -289,7 +289,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				}
 			}
 		} catch (err) {
-			console.log("While drag leave : ", err);
+			console.warn("Error while dragging over and leaving columns component : ", err);
 		}
 
 		// setIsDragOver(false);

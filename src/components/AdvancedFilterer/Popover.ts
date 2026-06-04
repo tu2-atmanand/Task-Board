@@ -216,7 +216,6 @@ export class AdvancedFilterPopover
 	}
 
 	private clickOutside = (e: MouseEvent): void => {
-		debugger;
 		const warehouseOpened =
 			this.advancedFilterComponent.isWarehouseModalOpened;
 

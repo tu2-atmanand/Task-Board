@@ -101,7 +101,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	useEffect(() => {
 		const fetchData = async () => {
-			console.log("TASK BOARD : Does this run while switching boards...");
+			// console.log("TASK BOARD : Does this run while switching boards...");
 			try {
 				// if (currentBoardData) {
 				// setCurrentBoardData(boardData);
@@ -157,14 +157,11 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		// Clamp currentViewIndex to valid range [0, views.length - 1]
 		const validIndex = Math.max(0, Math.min(currentViewIndex, boardData.views.length - 1));
 		setCurrentView(boardData.views[validIndex]);
-		console.log("Just updated the currentView state variable...");
 	}, [currentViewIndex, boardData?.views]);
 
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
 		if (allTasks && boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
-			console.log("Current view : ", currentView);
-
 			const boardFilters = boardData.boardFilters;
 			const viewFilter = boardData.views[currentViewIndex].viewFilters; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
 			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
@@ -237,7 +234,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// Register all the EMITE event listeners
 	useEffect(() => {
 		const refreshBoardListener = () => {
-			console.log("REFRESH_BOARD emitted............");
 			setHardRefreshCount((prev) => prev + 1);
 		}
 
@@ -302,7 +298,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}, []);
 
 	const saveMapViewIfNeeded = async () => {
-		console.log("Will store the map view data first...");
 		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
 			eventEmitter.emit("SAVE_MAP");
 			// setMapViewDataUpdated(false);
@@ -494,7 +489,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 						// Refresh the board view
 						sleep(100).then(() => {
-							console.log("REFRESH_BOARD emitting............");
 							eventEmitter.emit('REFRESH_BOARD');
 						})
 					}
@@ -806,7 +800,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	function handleViewSelect(index: number) {
 		saveMapViewIfNeeded();
 
-		console.log("Now will switch the view...");
 		if (index !== currentViewIndex) {
 			// Update the board's lastViewId to persist view selection
 			if (boardData?.views && index >= 0 && index < boardData.views.length) {
@@ -822,7 +815,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				setTimeout(() => {
 					// eventEmitter.emit("REFRESH_BOARD");
 					// plugin.saveSettings();
-					console.log("Will now going to save the view index :", updatedBoard.lastViewIndex);
 					plugin.taskBoardFileManager.saveBoard(updatedBoard);
 				}, 500);
 			}

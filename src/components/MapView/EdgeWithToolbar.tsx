@@ -1,4 +1,14 @@
-// /src/components/MapView/EdgeWithToolbar.tsx
+/**
+ * This component creates a custom edge which provides a nice toolbar 
+ * when left or right clicked on the edge. This functionalities are provided by 
+ * ReactFlow library itself.
+ * 
+ * @note - We are not making use of this functionality for now to keep the 
+ * implementation simple. Will think of using it in the future. Till then this 
+ * has been kept archived.
+ * 
+ * @path - /src/components/MapView/EdgeWithToolbar.tsx
+ */
 
 import React from 'react';
 import {
