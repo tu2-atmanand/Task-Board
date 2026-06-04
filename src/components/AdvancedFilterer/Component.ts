@@ -46,7 +46,7 @@ export class AdvancedFilterComponent extends Component {
 
 	private expandedFilters = new WeakMap<Filter, boolean>();
 
-	private groupsSortableInstances = new Map<Filter, Sortable>();
+	private filtersSortableInstance: Sortable | null = null;
 
 	private multiSuggestInstances = new WeakMap<
 		HTMLInputElement,
@@ -138,8 +138,10 @@ export class AdvancedFilterComponent extends Component {
 	}
 
 	onunload() {
-		this.groupsSortableInstances.forEach((instance) => instance.destroy());
-		this.groupsSortableInstances.clear();
+		if (this.filtersSortableInstance) {
+			this.filtersSortableInstance.destroy();
+			this.filtersSortableInstance = null;
+		}
 
 		this.multiSuggestInstances = new WeakMap();
 
@@ -268,6 +270,8 @@ export class AdvancedFilterComponent extends Component {
 			const filterEl = this.createFilterListItem(filter, index);
 			filtersListContainer.appendChild(filterEl);
 		});
+
+		this.makeFiltersSortable(filtersListContainer);
 	}
 
 	private renderActionButtons(container: HTMLElement): void {
@@ -342,10 +346,31 @@ export class AdvancedFilterComponent extends Component {
 		const leftSection = topSection.createDiv({
 			cls: "advanced-filter-top-left",
 		});
-		leftSection.createEl("span", {
+		const leftUpperSec = leftSection.createDiv({
+			cls: "advanced-filter-top-left-upper",
+		});
+		leftUpperSec.createDiv(
+			{
+				cls: "drag-handle-container",
+			},
+			(el) => {
+				el.createEl(
+					"span",
+					{
+						cls: "drag-handle",
+					},
+					(iconEl) => {
+						setIcon(iconEl, "grip-vertical");
+					},
+				);
+			},
+		);
+		leftUpperSec.createEl("span", {
 			cls: "filter-name-text",
 			text: filter.name || "Untitled filter",
 		});
+
+		// The description section
 		if (filter.description) {
 			leftSection.createEl("span", {
 				cls: "filter-description-text",
@@ -589,10 +614,10 @@ export class AdvancedFilterComponent extends Component {
 		});
 		nameSetting.createEl("label", {
 			text: t("name"),
-			cls: "compact-text",
+			cls: ["compact-text", "filter-configuration-label"],
 		});
 		const nameInput = nameSetting.createEl("input", {
-			cls: ["compact-input", "filter-name-input"],
+			cls: ["filter-name-input", "compact-input"],
 			attr: { placeholder: "Enter filter name" },
 		});
 		nameInput.value = filter.name;
@@ -612,10 +637,10 @@ export class AdvancedFilterComponent extends Component {
 		});
 		descSetting.createEl("label", {
 			text: t("description"),
-			cls: "compact-text",
+			cls: ["compact-text", "filter-configuration-label"],
 		});
 		const descInput = descSetting.createEl("input", {
-			cls: ["compact-input", "filter-desc-input"],
+			cls: ["filter-name-input", "compact-input"],
 			attr: { placeholder: "Enter filter description" },
 		});
 		descInput.value = filter.description || "";
@@ -712,7 +737,6 @@ export class AdvancedFilterComponent extends Component {
 		});
 
 		this.updateGroupSeparatorsForFilter(filter, filterGroupsContainerEl);
-		this.makeSortableGroupsForFilter(filter, filterGroupsContainerEl);
 
 		const addGroupSection = innerSection.createDiv({
 			cls: "add-group-section",
@@ -815,8 +839,10 @@ export class AdvancedFilterComponent extends Component {
 
 		this.advancedFilter.filters.splice(index + 1, 0, newFilter);
 		this.expandedFilters = new WeakMap();
-		this.groupsSortableInstances.forEach((instance) => instance.destroy());
-		this.groupsSortableInstances.clear();
+		if (this.filtersSortableInstance) {
+			this.filtersSortableInstance.destroy();
+			this.filtersSortableInstance = null;
+		}
 		this.render();
 	}
 
@@ -829,8 +855,10 @@ export class AdvancedFilterComponent extends Component {
 
 		this.advancedFilter.filters.splice(index, 1);
 		this.expandedFilters = new WeakMap();
-		this.groupsSortableInstances.forEach((instance) => instance.destroy());
-		this.groupsSortableInstances.clear();
+		if (this.filtersSortableInstance) {
+			this.filtersSortableInstance.destroy();
+			this.filtersSortableInstance = null;
+		}
 		this.render();
 	}
 
@@ -854,22 +882,25 @@ export class AdvancedFilterComponent extends Component {
 			cls: ["criterion-group-header-left"],
 		});
 
-		groupHeaderLeft.createDiv(
-			{
-				cls: "drag-handle-container",
-			},
-			(el) => {
-				el.createEl(
-					"span",
-					{
-						cls: "drag-handle",
-					},
-					(iconEl) => {
-						setIcon(iconEl, "grip-vertical");
-					},
-				);
-			},
-		);
+		// NOTE : We have removed the drag and sorting feature at criterion-group level.
+		// Its no longer required and is not that helpful compared to the one we have at
+		// filter-level.
+		// groupHeaderLeft.createDiv(
+		// 	{
+		// 		cls: "drag-handle-container",
+		// 	},
+		// 	(el) => {
+		// 		el.createEl(
+		// 			"span",
+		// 			{
+		// 				cls: "drag-handle",
+		// 			},
+		// 			(iconEl) => {
+		// 				setIcon(iconEl, "grip-vertical");
+		// 			},
+		// 		);
+		// 	},
+		// );
 
 		groupHeaderLeft.createEl("label", {
 			cls: ["compact-text"],
@@ -1112,7 +1143,6 @@ export class AdvancedFilterComponent extends Component {
 		}
 
 		this.updateGroupSeparatorsForFilter(filter, filterGroupsContainerEl);
-		this.makeSortableGroupsForFilter(filter, filterGroupsContainerEl);
 	}
 
 	// ===================== FILTER ITEM MANAGEMENT =====================
@@ -1850,23 +1880,17 @@ export class AdvancedFilterComponent extends Component {
 		}
 	}
 
-	private makeSortableGroupsForFilter(
-		filter: Filter,
-		filterGroupsContainerEl: HTMLElement,
-	): void {
-		const existingInstance = this.groupsSortableInstances.get(filter);
-		if (existingInstance) {
-			existingInstance.destroy();
-			this.groupsSortableInstances.delete(filter);
+	private makeFiltersSortable(containerEl: HTMLElement): void {
+		if (this.filtersSortableInstance) {
+			this.filtersSortableInstance.destroy();
+			this.filtersSortableInstance = null;
 		}
 
-		if (!filterGroupsContainerEl) return;
+		if (!containerEl) return;
 
-		const sortable = new Sortable(filterGroupsContainerEl, {
+		this.filtersSortableInstance = new Sortable(containerEl, {
 			animation: 150,
 			handle: ".drag-handle",
-			filter: ".criterion-group-separator-container",
-			preventOnFilter: true,
 			ghostClass: "dragging-placeholder",
 			onEnd: (evt: Event) => {
 				const sortableEvent = evt as any;
@@ -1876,24 +1900,17 @@ export class AdvancedFilterComponent extends Component {
 				)
 					return;
 
-				const movedGroup = filter.filterGroups.splice(
+				const movedFilter = this.advancedFilter.filters.splice(
 					sortableEvent.oldDraggableIndex,
 					1,
 				)[0];
-				filter.filterGroups.splice(
+				this.advancedFilter.filters.splice(
 					sortableEvent.newDraggableIndex,
 					0,
-					movedGroup,
-				);
-
-				this.updateGroupSeparatorsForFilter(
-					filter,
-					filterGroupsContainerEl,
+					movedFilter,
 				);
 			},
 		});
-
-		this.groupsSortableInstances.set(filter, sortable);
 	}
 
 	// ===================== STATE MANAGEMENT =====================
@@ -1910,8 +1927,10 @@ export class AdvancedFilterComponent extends Component {
 	}
 
 	public loadFilterState(state: AdvancedFilter): void {
-		this.groupsSortableInstances.forEach((instance) => instance.destroy());
-		this.groupsSortableInstances.clear();
+		if (this.filtersSortableInstance) {
+			this.filtersSortableInstance.destroy();
+			this.filtersSortableInstance = null;
+		}
 
 		this.advancedFilter = JSON.parse(JSON.stringify(state));
 
@@ -1961,10 +1980,10 @@ export class AdvancedFilterComponent extends Component {
 				}
 				console.log("Imported filters :", this.advancedFilter);
 				this.expandedFilters = new WeakMap();
-				this.groupsSortableInstances.forEach((instance) =>
-					instance.destroy(),
-				);
-				this.groupsSortableInstances.clear();
+				if (this.filtersSortableInstance) {
+					this.filtersSortableInstance.destroy();
+					this.filtersSortableInstance = null;
+				}
 				this.render();
 			},
 		);
