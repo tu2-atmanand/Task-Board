@@ -215,7 +215,8 @@ export class FiltersWarehouseModal extends Modal {
 
 		const hasSelection = this.selectedFilterIds.size > 0;
 		btnImport.disabled = !hasSelection;
-		if (hasSelection) btnClear.Show();
+		if (hasSelection) btnClear.show();
+		else btnClear.hide();
 	}
 
 	private createFilterListItem(filter: Filter, index: number): HTMLElement {
