@@ -10,6 +10,7 @@ import type {
 	Filter,
 	FilterCriterionGroup,
 	FilterCriterion,
+	FiltersWarehouse,
 } from "../../interfaces/BoardConfigs.js";
 import { generateIdForFilters } from "./Component.js";
 import {
@@ -27,6 +28,17 @@ export class FiltersWarehouseModal extends Modal {
 	private onImport?: (filters: Filter[]) => void;
 	private onCancel?: () => void;
 	private selectedFilterIds = new Set<string>();
+	private edited: boolean = false;
+	private _filtersWarehouseData: FiltersWarehouse;
+	get filtersWarehouseData() {
+		return this._filtersWarehouseData;
+	}
+	set filtersWarehouseData(newData: FiltersWarehouse) {
+		this.edited = true;
+		this._filtersWarehouseData = newData;
+	}
+
+	private _saveBtn: HTMLButtonElement | null = null;
 
 	private expandedFilters = new WeakMap<Filter, boolean>();
 
@@ -62,6 +74,7 @@ export class FiltersWarehouseModal extends Modal {
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
+		this._filtersWarehouseData = plugin.settings.data.filtersWarehouse;
 		this.onImport = onImport;
 		this.onCancel = onCancel;
 	}
@@ -129,26 +142,6 @@ export class FiltersWarehouseModal extends Modal {
 		});
 		importBtn.disabled = true;
 
-		const clearBtn = leftSection.createEl("button", {
-			cls: ["compact-btn"],
-			text: "Clear selections",
-		});
-		clearBtn.hide();
-
-		const rightSection = footer.createDiv({
-			cls: "filters-warehouse-footer-right",
-		});
-		rightSection.style.cssText =
-			"display: flex; gap: var(--size-2-2); align-items: center;";
-
-		const closeBtn = rightSection.createEl("button", {
-			cls: ["compact-btn"],
-			text: "Close",
-		});
-		closeBtn.addEventListener("click", () => {
-			this.close();
-		});
-
 		importBtn.addEventListener("click", () => {
 			const warehouse = this.plugin.settings.data.filtersWarehouse || [];
 			const selectedFilters = warehouse.filter((f) =>
@@ -162,6 +155,11 @@ export class FiltersWarehouseModal extends Modal {
 			}
 		});
 
+		const clearBtn = leftSection.createEl("button", {
+			cls: ["compact-btn"],
+			text: "Clear selections",
+		});
+		clearBtn.hide();
 		clearBtn.addEventListener("click", () => {
 			this.selectedFilterIds.clear();
 			contentEl
@@ -174,10 +172,37 @@ export class FiltersWarehouseModal extends Modal {
 			this.updateActionButtonsState(importBtn, clearBtn);
 		});
 
+		const rightSection = footer.createDiv({
+			cls: "filters-warehouse-footer-right",
+		});
+		rightSection.style.cssText =
+			"display: flex; gap: var(--size-2-2); align-items: center;";
+
+		const saveBtn = rightSection.createEl("button", {
+			cls: ["compact-btn"],
+			text: t("save-changes"),
+		});
+		saveBtn.hide();
+		saveBtn.addEventListener("click", () => {
+			this.saveWarehouse();
+		});
+		this._saveBtn = saveBtn;
+		if (this.edited) {
+			this._saveBtn.show();
+		}
+
+		// No need of a special close button. An Obsidian modal already has one at top-right corner.
+		// const closeBtn = rightSection.createEl("button", {
+		// 	cls: ["compact-btn"],
+		// 	text: "Close",
+		// });
+		// closeBtn.addEventListener("click", () => {
+		// 	this.close();
+		// });
+
 		(this as any)._importBtn = importBtn;
 		(this as any)._clearBtn = clearBtn;
-
-		if (this.onCancel) this.onCancel();
+		(this as any)._saveBtn = saveBtn;
 	}
 
 	private updateActionButtonsState(
@@ -190,7 +215,7 @@ export class FiltersWarehouseModal extends Modal {
 
 		const hasSelection = this.selectedFilterIds.size > 0;
 		btnImport.disabled = !hasSelection;
-		btnClear.style.display = hasSelection ? "" : "none";
+		if (hasSelection) btnClear.Show();
 	}
 
 	private createFilterListItem(filter: Filter, index: number): HTMLElement {
@@ -282,12 +307,12 @@ export class FiltersWarehouseModal extends Modal {
 		// });
 
 		// Render for the first time
-		this.collapseFilter(expandableArea, bottomSection);
+		this.collapseFilter(filter, expandableArea, bottomSection);
 
 		this.plugin.registerDomEvent(bottomSection, "click", () => {
 			const isExpanded = this.expandedFilters.get(filter) ?? false;
 			if (isExpanded) {
-				this.collapseFilter(expandableArea, bottomSection);
+				this.collapseFilter(filter, expandableArea, bottomSection);
 			} else {
 				this.expandFilter(filter, expandableArea, bottomSection);
 			}
@@ -297,6 +322,7 @@ export class FiltersWarehouseModal extends Modal {
 	}
 
 	private collapseFilter(
+		filter: Filter,
 		expandableArea: HTMLElement,
 		expandBtn: HTMLDivElement,
 	): void {
@@ -328,6 +354,7 @@ export class FiltersWarehouseModal extends Modal {
 			},
 		);
 
+		this.expandedFilters.set(filter, false);
 		setTimeout(() => {
 			expandableArea.hide();
 		}, 300);
@@ -403,7 +430,7 @@ export class FiltersWarehouseModal extends Modal {
 					nameText.textContent = filter.name || "Untitled filter";
 				}
 			}
-			this.saveWarehouse();
+			this.markAsEdited();
 		});
 
 		const descSetting = container.createDiv({
@@ -444,7 +471,7 @@ export class FiltersWarehouseModal extends Modal {
 					}
 				}
 			}
-			this.saveWarehouse();
+			this.markAsEdited();
 		});
 
 		const innerSection = container.createDiv({
@@ -474,7 +501,7 @@ export class FiltersWarehouseModal extends Modal {
 					filter,
 					filterGroupsContainerEl,
 				);
-				this.saveWarehouse();
+				this.markAsEdited();
 			});
 		filterRootConditionDropdown.selectEl.toggleClass(
 			["compact-select", "root-condition-select"],
@@ -584,7 +611,7 @@ export class FiltersWarehouseModal extends Modal {
 					newGroupEl.querySelector(".filters-list") as HTMLElement,
 					groupData.groupCondition,
 				);
-				this.saveWarehouse();
+				this.markAsEdited();
 			})
 			.setValue(groupData.groupCondition);
 		groupConditionSelect.selectEl.toggleClass(
@@ -632,7 +659,7 @@ export class FiltersWarehouseModal extends Modal {
 					filter,
 					filterGroupsContainerEl,
 				);
-				this.saveWarehouse();
+				this.markAsEdited();
 			});
 		removeGroupBtn.extraSettingsEl.addClasses([
 			"remove-group-btn",
@@ -711,7 +738,7 @@ export class FiltersWarehouseModal extends Modal {
 		);
 
 		this.updateGroupSeparatorsForFilter(filter, filterGroupsContainerEl);
-		this.saveWarehouse();
+		this.markAsEdited();
 	}
 
 	// ===================== FILTER ITEM MANAGEMENT =====================
@@ -784,7 +811,7 @@ export class FiltersWarehouseModal extends Modal {
 				valueSelect,
 				dropdownInputContainer,
 			);
-			this.saveWarehouse();
+			this.markAsEdited();
 		});
 
 		const toggleValueInputVisibility = (
@@ -824,14 +851,14 @@ export class FiltersWarehouseModal extends Modal {
 		conditionSelect.onChange((newCondition) => {
 			filterData.condition = newCondition;
 			toggleValueInputVisibility(newCondition, filterData.property);
-			this.saveWarehouse();
+			this.markAsEdited();
 		});
 
 		valueInput.value = filterData.value || "";
 
 		valueInput.addEventListener("input", (event) => {
 			filterData.value = (event.target as HTMLInputElement).value;
-			this.saveWarehouse();
+			this.markAsEdited();
 		});
 
 		const removeFilterBtn = new ExtraButtonComponent(newFilterEl)
@@ -846,7 +873,7 @@ export class FiltersWarehouseModal extends Modal {
 					newFilterEl.parentElement as HTMLElement,
 					groupData.groupCondition,
 				);
-				this.saveWarehouse();
+				this.markAsEdited();
 			});
 		removeFilterBtn.extraSettingsEl.addClasses([
 			"remove-filter-btn",
@@ -886,7 +913,7 @@ export class FiltersWarehouseModal extends Modal {
 		filtersListEl.appendChild(newFilterElement);
 
 		this.updateFilterConjunctions(filtersListEl, groupData.groupCondition);
-		this.saveWarehouse();
+		this.markAsEdited();
 	}
 
 	private updateFilterPropertyOptions(
@@ -992,7 +1019,7 @@ export class FiltersWarehouseModal extends Modal {
 					);
 					valueSelect.onChange((newValue) => {
 						filterData.value = newValue;
-						this.saveWarehouse();
+						this.markAsEdited();
 					});
 				}
 				setConditionOptions([
@@ -1021,7 +1048,7 @@ export class FiltersWarehouseModal extends Modal {
 					);
 					valueSelect.onChange((newValue) => {
 						filterData.value = Number(newValue);
-						this.saveWarehouse();
+						this.markAsEdited();
 					});
 				}
 				setConditionOptions([
@@ -1189,7 +1216,7 @@ export class FiltersWarehouseModal extends Modal {
 
 		const onSelectCallback = (value: string) => {
 			filterData.value = value.replace("#", "");
-			this.saveWarehouse();
+			this.markAsEdited();
 		};
 
 		const multiSuggestInstance = new MultiSuggest(
@@ -1283,12 +1310,27 @@ export class FiltersWarehouseModal extends Modal {
 		if (index === -1) return;
 
 		warehouse.splice(index, 1);
+		this._filtersWarehouseData = warehouse;
 		this.selectedFilterIds.delete(filter.id);
-		this.saveWarehouse();
+		this.markAsEdited();
 		this.render();
 	}
 
 	private saveWarehouse(): void {
-		this.plugin.saveSettings();
+		let newSettings = this.plugin.settings;
+		newSettings.data.filtersWarehouse = this.filtersWarehouseData;
+		this.plugin.saveSettings(newSettings);
+		if (this._saveBtn) {
+			this._saveBtn.hide();
+		}
+		this.edited = false;
+	}
+
+	private markAsEdited(): void {
+		console.log("Save button :", this._saveBtn);
+		this.edited = true;
+		if (this._saveBtn) {
+			this._saveBtn.show();
+		}
 	}
 }
