@@ -1143,6 +1143,11 @@ export default class TaskBoardFileManager {
 	runMigrationForRevision_4(oldBoardData: Board): Board {
 		let newBoardData = JSON.parse(JSON.stringify(oldBoardData)); // Deep clone to avoid mutations
 
+		// Ensure views array exists; initialize empty if missing
+		if (!newBoardData.views || !Array.isArray(newBoardData.views)) {
+			newBoardData.views = [];
+		}
+
 		// Process each view
 		if (newBoardData.views && Array.isArray(newBoardData.views)) {
 			newBoardData.views = newBoardData.views.map((view: any) => {
@@ -1157,12 +1162,17 @@ export default class TaskBoardFileManager {
 									id: generateRandomStringId("filter"),
 									name: "Migrated Filter",
 									status: true, // Enable the migrated filter
-									description: "Auto-migrated from legacy viewFilter",
-									rootCondition: deprecatedViewFilter.rootCondition || "all",
-									filterGroups: deprecatedViewFilter.filterGroups || [],
+									description:
+										"Auto-migrated from legacy viewFilter",
+									rootCondition:
+										deprecatedViewFilter.rootCondition ||
+										"all",
+									filterGroups:
+										deprecatedViewFilter.filterGroups || [],
 								},
 							],
-							rootCondition: deprecatedViewFilter.rootCondition || "all",
+							rootCondition:
+								deprecatedViewFilter.rootCondition || "all",
 						};
 					} else {
 						// No deprecated filter, create empty AdvancedFilter
@@ -1175,26 +1185,33 @@ export default class TaskBoardFileManager {
 
 				// Process kanban view columns
 				if (view.kanbanView && Array.isArray(view.kanbanView.columns)) {
-					view.kanbanView.columns = view.kanbanView.columns.map((column: any) => {
-						// Initialize columnFilters if missing
-						if (!column.columnFilters) {
-							// If deprecated filters (single Filter) exists, convert it to AdvancedFilter
-							if (column.filters && column.filters.filterGroups) {
-								const deprecatedFilter = column.filters;
-								column.columnFilters = {
-									filters: [deprecatedFilter], // Wrap the single filter in an array
-									rootCondition: deprecatedFilter.rootCondition || "all",
-								};
-							} else {
-								// No deprecated filter, create empty AdvancedFilter
-								column.columnFilters = {
-									filters: [],
-									rootCondition: "all",
-								};
+					view.kanbanView.columns = view.kanbanView.columns.map(
+						(column: any) => {
+							// Initialize columnFilters if missing
+							if (!column.columnFilters) {
+								// If deprecated filters (single Filter) exists, convert it to AdvancedFilter
+								if (
+									column.filters &&
+									column.filters.filterGroups
+								) {
+									const deprecatedFilter = column.filters;
+									column.columnFilters = {
+										filters: [deprecatedFilter], // Wrap the single filter in an array
+										rootCondition:
+											deprecatedFilter.rootCondition ||
+											"all",
+									};
+								} else {
+									// No deprecated filter, create empty AdvancedFilter
+									column.columnFilters = {
+										filters: [],
+										rootCondition: "all",
+									};
+								}
 							}
-						}
-						return column;
-					});
+							return column;
+						},
+					);
 				}
 
 				return view;

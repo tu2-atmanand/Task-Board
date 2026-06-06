@@ -479,7 +479,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					// 	(col: ColumnData) => col.id === columnData.id
 					// );
 
-					const ViewFiltersPresent = activeBoardData.views[currentViewIndex].viewFilters.filters.some((filter) => filter.status);
+					const viewFilters = activeBoardData.views?.[currentViewIndex]?.viewFilters;
+					const ViewFiltersPresent = !!viewFilters?.filters?.some((filter) => filter.status);
 					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
@@ -513,7 +514,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
 							: { x: 100, y: 100 }; // Fallback position
 
-						const ViewFiltersPresent = activeBoardData.views[currentViewIndex].viewFilters.filters.some((filter) => filter.status);
+						const ViewFiltersPresent = !!viewFilters?.filters?.some((filter) => filter.status);
 
 						// Create and show filter popover
 						const popover = new AdvancedFilterPopover(
