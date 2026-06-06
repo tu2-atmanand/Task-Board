@@ -214,7 +214,7 @@ export const columnSegregator = (
 
 				if (pathPatterns.length > 0) {
 					tasksToDisplay = pendingTasks.filter((task) => {
-						if (!task.filePath) {
+						if (!task?.filePath) {
 							return false;
 						}
 
