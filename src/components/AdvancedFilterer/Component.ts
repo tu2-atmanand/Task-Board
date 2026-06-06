@@ -31,6 +31,7 @@ import {
 	MultiSuggest,
 	getTagSuggestions,
 	getFileSuggestions,
+	getFolderSuggestions,
 } from "../../services/MultiSuggest.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 
@@ -1349,6 +1350,7 @@ export class AdvancedFilterComponent extends Component {
 				reminder: t("reminder"),
 				dependencies: t("dependencies"),
 				filePath: t("file-path"),
+				folderPath: t("folder-path"),
 			});
 		}
 		propertySelect.setValue(property);
@@ -1383,6 +1385,7 @@ export class AdvancedFilterComponent extends Component {
 				];
 				break;
 			case "filePath":
+			case "folderPath":
 				valueInput.type = "text";
 				conditionOptions = [
 					{
@@ -1771,7 +1774,7 @@ export class AdvancedFilterComponent extends Component {
 		valueInput: HTMLInputElement,
 		filterData: FilterCriterion,
 	): void {
-		const propertiesWithSuggestions = ["tags", "filePath"];
+		const propertiesWithSuggestions = ["tags", "filePath", "folderPath"];
 		if (!propertiesWithSuggestions.includes(property)) {
 			return;
 		}
@@ -1791,6 +1794,8 @@ export class AdvancedFilterComponent extends Component {
 			case "filePath":
 				suggestions = getFileSuggestions(this.app);
 				break;
+			case "folderPath":
+				suggestions = getFolderSuggestions(this.app);
 		}
 
 		const onSelectCallback = (value: string) => {

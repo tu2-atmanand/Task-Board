@@ -13,6 +13,7 @@ import { robustDateParser } from "../DateTimeCalculations.js";
 import { getAllTaskTags } from "../TaskItemUtils.js";
 import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
+import { normalizePath } from "obsidian";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -313,6 +314,10 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "filePath":
 		case "path":
 			return task.filePath || "";
+		case "folderPath":
+			const parts = task.filePath.split("/");
+			const folderPath = parts.slice(0, -1).join("/");
+			return normalizePath(folderPath) || "";
 		case "startTime":
 			return task.time ? task.time.split("-")[0].trim() : "";
 		case "reminder":
