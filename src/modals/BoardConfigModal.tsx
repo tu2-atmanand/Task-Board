@@ -403,7 +403,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 
 		// Set initial filter state
-		if (currentBoardData!.views[currentViewIndex].viewFilters) {
+		if (currentBoardData!.boardFilters) {
 			setTimeout(() => {
 				// Use type assertion to resolve non-null issues
 				// const filterState = filterModal.liveFilterState as Filter;
