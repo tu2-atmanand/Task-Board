@@ -1130,6 +1130,98 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
+	 * Migration for view-level and column-level filters:
+	 * - Ensures every view has `viewFilters` (AdvancedFilter)
+	 * - Ensures every column has `columnFilters` (AdvancedFilter)
+	 * - Converts deprecated `viewFilter` (RootFilterState) to `viewFilters` (AdvancedFilter)
+	 * - Converts deprecated column `filters` (Filter) to `columnFilters` (AdvancedFilter)
+	 *
+	 * This migration is needed because revision 3 only added `boardFilters` but didn't
+	 * initialize view-level and column-level filter structures, causing filter data
+	 * from older boards to be lost.
+	 */
+	runMigrationForRevision_4(oldBoardData: Board): Board {
+		let newBoardData = JSON.parse(JSON.stringify(oldBoardData)); // Deep clone to avoid mutations
+
+		// Ensure views array exists; initialize empty if missing
+		if (!newBoardData.views || !Array.isArray(newBoardData.views)) {
+			newBoardData.views = [];
+		}
+
+		// Process each view
+		if (newBoardData.views && Array.isArray(newBoardData.views)) {
+			newBoardData.views = newBoardData.views.map((view: any) => {
+				// Initialize viewFilters if missing
+				if (!view.viewFilters) {
+					// If deprecated viewFilter exists, convert it to AdvancedFilter
+					if (view.viewFilter && view.viewFilter.filterGroups) {
+						const deprecatedViewFilter = view.viewFilter;
+						view.viewFilters = {
+							filters: [
+								{
+									id: generateRandomStringId("filter"),
+									name: "Migrated Filter",
+									status: true, // Enable the migrated filter
+									description:
+										"Auto-migrated from legacy viewFilter",
+									rootCondition:
+										deprecatedViewFilter.rootCondition ||
+										"all",
+									filterGroups:
+										deprecatedViewFilter.filterGroups || [],
+								},
+							],
+							rootCondition:
+								deprecatedViewFilter.rootCondition || "all",
+						};
+					} else {
+						// No deprecated filter, create empty AdvancedFilter
+						view.viewFilters = {
+							filters: [],
+							rootCondition: "all",
+						};
+					}
+				}
+
+				// Process kanban view columns
+				if (view.kanbanView && Array.isArray(view.kanbanView.columns)) {
+					view.kanbanView.columns = view.kanbanView.columns.map(
+						(column: any) => {
+							// Initialize columnFilters if missing
+							if (!column.columnFilters) {
+								// If deprecated filters (single Filter) exists, convert it to AdvancedFilter
+								if (
+									column.filters &&
+									column.filters.filterGroups
+								) {
+									const deprecatedFilter = column.filters;
+									column.columnFilters = {
+										filters: [deprecatedFilter], // Wrap the single filter in an array
+										rootCondition:
+											deprecatedFilter.rootCondition ||
+											"all",
+									};
+								} else {
+									// No deprecated filter, create empty AdvancedFilter
+									column.columnFilters = {
+										filters: [],
+										rootCondition: "all",
+									};
+								}
+							}
+							return column;
+						},
+					);
+				}
+
+				return view;
+			});
+		}
+
+		return newBoardData;
+	}
+
+	/**
 	 * This function will be used to run a migration check whenever any board is loaded.
 	 * Based on the revision property in the board data, we can decide if we need to
 	 * run any migration steps to update the board data structure to be compatible with the
@@ -1166,6 +1258,8 @@ export default class TaskBoardFileManager {
 			updatedBoardData = this.runMigrationForRevision_2(updatedBoardData);
 
 			updatedBoardData = this.runMigrationForRevision_3(updatedBoardData);
+
+			updatedBoardData = this.runMigrationForRevision_4(updatedBoardData);
 
 			// After applying necessary migrations, update the revision in the board data
 			updatedBoardData.revision = CURRENT_REVISION;

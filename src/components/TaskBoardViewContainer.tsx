@@ -469,7 +469,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				);
 
 				// Load existing filter state if available
-				if (boardData!.views[currentViewIndex].viewFilter) {
+				if (boardData!.views[currentViewIndex].viewFilters) {
 					// Wait for component to be created and loaded
 					setTimeout(() => {
 						if (popover.advancedFilterComponent) {

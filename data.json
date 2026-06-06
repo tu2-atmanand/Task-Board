@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-beta-3",
+  "version": "2.0.0-beta-4",
   "data": {
     "lang": "en",
     "openOnStartup": false,
@@ -423,6 +423,7 @@
         ],
         "description": "These are the tasks I created when I found a new topic which I want to learn."
       }
-    ]
+    ],
+    "enableDragnDropTouch": false
   }
 }

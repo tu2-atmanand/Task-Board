@@ -788,7 +788,6 @@ class DragDropTasksManager {
 		plugin: TaskBoard,
 		task: taskItem,
 	): taskItem => {
-		const newTitle = task.title;
 		let newTask: taskItem = {
 			...task,
 			status: " ",
@@ -979,12 +978,13 @@ class DragDropTasksManager {
 		// STEP 3 - Add the target column tag if it doesn't already exist
 		let newTags = newTask.tags ?? [];
 		if (targetColumn.coltag) {
-			const targetTag = targetColumn.coltag.startsWith("#")
-				? targetColumn.coltag
-				: `#${targetColumn.coltag}`;
+			const columnTag = targetColumn.coltag;
 
-			if (!newTags.includes(targetTag)) {
-				newTags.push(targetTag);
+			const tagFound = newTags.some((tag: string) =>
+				compareTwoTags(tag, columnTag),
+			);
+			if (!tagFound) {
+				newTags.push(columnTag);
 			}
 		}
 
