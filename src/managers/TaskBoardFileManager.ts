@@ -791,6 +791,7 @@ export default class TaskBoardFileManager {
 			} else {
 				new Notice(
 					`Task Board: The board file "${normalizePath(filePath)}" has been deleted. Please close the corresponding tab if it's still open.`,
+					0,
 				);
 			}
 		} catch (error) {
@@ -846,6 +847,7 @@ export default class TaskBoardFileManager {
 			} else {
 				new Notice(
 					`Task Board: The board file has been moved/renamed to "${normalizePath(newFilePath)}". Please re-open the file to continue.`,
+					0,
 				);
 			}
 		} catch (error) {
@@ -1023,7 +1025,6 @@ export default class TaskBoardFileManager {
 	 */
 	clearRecentBoardsCache(): void {
 		this.recentBoardsData = {};
-		console.log("Cleared cached board data");
 	}
 
 	// --------------------------------------------------------------------
@@ -1109,6 +1110,26 @@ export default class TaskBoardFileManager {
 	}
 
 	/**
+	 * Migration for the following properties :
+	 * - Board.boardFilters
+	 *
+	 * @todo - Remove this migration while releasing the first beta version itself.
+	 * Also, assign the {@link CURRENT_REVISION} to 0.
+	 */
+	runMigrationForRevision_3(oldBoardData: Board): Board {
+		let newBoardData = { ...oldBoardData };
+
+		if (!oldBoardData?.boardFilters) {
+			newBoardData["boardFilters"] = {
+				filters: [],
+				rootCondition: "all",
+			};
+		}
+
+		return newBoardData;
+	}
+
+	/**
 	 * This function will be used to run a migration check whenever any board is loaded.
 	 * Based on the revision property in the board data, we can decide if we need to
 	 * run any migration steps to update the board data structure to be compatible with the
@@ -1143,6 +1164,8 @@ export default class TaskBoardFileManager {
 			// boardData = this.runMigrationForRevision_1(boardData);
 
 			updatedBoardData = this.runMigrationForRevision_2(updatedBoardData);
+
+			updatedBoardData = this.runMigrationForRevision_3(updatedBoardData);
 
 			// After applying necessary migrations, update the revision in the board data
 			updatedBoardData.revision = CURRENT_REVISION;
@@ -1272,9 +1295,9 @@ export default class TaskBoardFileManager {
 				this.recentBoardsData[registryEntry.filePath] =
 					updatedBoardData;
 
-				console.log(
-					`Saved board "${updatedBoardData.name}" to: ${registryEntry.filePath}`,
-				);
+				// console.log(
+				// 	`Saved board "${updatedBoardData.name}" to: ${registryEntry.filePath}`,
+				// );
 			}
 
 			return success;
@@ -1350,9 +1373,9 @@ export default class TaskBoardFileManager {
 				LEAFID_FILEPATH_MAPPING_KEY,
 				JSON.stringify(oldMappingData),
 			);
-			console.log(
-				`Stored filepath mapping: leaf ${leafID} -> ${filePath}`,
-			);
+			// console.log(
+			// 	`Stored filepath mapping: leaf ${leafID} -> ${filePath}`,
+			// );
 		} catch (error) {
 			console.error(
 				`Error storing filepath mapping for leaf ${leafID}:`,
@@ -1382,12 +1405,8 @@ export default class TaskBoardFileManager {
 				return undefined;
 			}
 
-			console.log("Mapping data : ", this.leafIdFilePathMapping);
 			const leafFilepath = this.leafIdFilePathMapping[leafID];
 			if (leafFilepath) {
-				console.log(
-					`Retrieved filepath mapping: leaf ${leafID} -> ${leafFilepath}`,
-				);
 				return leafFilepath;
 			} else {
 				console.warn(`No filepath mapping found for leaf ${leafID}`);
@@ -1428,10 +1447,6 @@ export default class TaskBoardFileManager {
 				);
 				if (created) {
 					createdCount++;
-					console.log(
-						`Created default board file: ${registryEntry.filePath}`,
-						defaultBoards[i].name,
-					);
 					new Notice(
 						`Created default board file: ${registryEntry.filePath} : ${defaultBoards[i].name}`,
 					);
@@ -1452,7 +1467,6 @@ export default class TaskBoardFileManager {
 	 * @returns All boards data as an object keyed by file path or an empty object if failed to load the boards.
 	 */
 	async loadAllBoards(): Promise<recentBoardsDataType | {}> {
-		console.log("loadAllBoards : Starting to load all boards...");
 		try {
 			let loadedBoardsData: recentBoardsDataType = {};
 
@@ -1477,9 +1491,6 @@ export default class TaskBoardFileManager {
 				if (boardData) {
 					// Cache the board data in memory using file path as key
 					loadedBoardsData[registryEntry.filePath] = boardData;
-					console.log(
-						`Loaded and cached board "${boardData.name}" from: ${registryEntry.filePath}`,
-					);
 				} else {
 					console.warn(
 						`Error loading board data from file: ${registryEntry.filePath}`,

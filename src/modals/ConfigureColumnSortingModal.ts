@@ -163,7 +163,6 @@ export class ConfigureColumnSortingModal extends Modal {
 								.addOption("scheduledDate", t("scheduled-date"))
 								.addOption("dueDate", t("due-date"))
 								.addOption("completedDate", t("completed-date"))
-								.addOption("recurrence", t("recurrence"))
 								.addOption("filePath", t("file-path"))
 								// .addOption("lineNumber", t("line Number"))
 								.setValue(sortCriteria.criteria)

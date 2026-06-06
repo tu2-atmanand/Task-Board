@@ -89,12 +89,12 @@ export function extractTaskNoteProperties(
 		settings.data.frontmatterFormatting;
 	let taskItemData: Partial<taskItem> = {};
 
-	console.log(
-		"Type of time :",
-		typeof frontmatter[
-			getCustomFrontmatterKey("time", frontmatterFormatting)
-		],
-	);
+	// console.log(
+	// 	"Type of time :",
+	// 	typeof frontmatter[
+	// 		getCustomFrontmatterKey("time", frontmatterFormatting)
+	// 	],
+	// );
 
 	let value: string | string[] | number | undefined = "";
 	// Extract id

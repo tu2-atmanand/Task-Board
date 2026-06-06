@@ -1,41 +1,52 @@
 import { t } from "i18next";
 import { Modal } from "obsidian";
 import TaskBoard from "../../../main.js";
-import { RootFilterState } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
+import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
 
 export class AdvancedFilterModal extends Modal {
 	private plugin: TaskBoard;
 	private currentBoardID: string;
-	public taskFilterComponent: AdvancedFilterComponent | null;
-	private columnOrBoardName?: string;
-	private initialFilterState?: RootFilterState;
+	public parentFiltersAreActive: boolean;
+	public entity: "board" | "view" | "column";
+	public advancedFilterComponent: AdvancedFilterComponent | null;
+	private columnOrViewOrBoardName?: string;
+	private existingFilters?: AdvancedFilter;
 	public filterCloseCallback:
-		| ((filterState?: RootFilterState) => void)
+		| ((filterState?: AdvancedFilter) => void)
 		| null = null;
 
 	constructor(
 		plugin: TaskBoard,
-		forColumn: boolean,
+		entity: "board" | "view" | "column",
 		currentBoardID: string,
-		columnOrBoardName?: string,
-		initialFilterState?: RootFilterState,
+		parentFiltersAreActive: boolean,
+		columnOrViewOrBoardName?: string,
+		existingFilters?: AdvancedFilter,
 	) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.currentBoardID = currentBoardID;
-		this.columnOrBoardName = columnOrBoardName;
-		this.initialFilterState = initialFilterState;
+		this.parentFiltersAreActive = parentFiltersAreActive;
+		this.entity = entity;
+		this.columnOrViewOrBoardName = columnOrViewOrBoardName;
+		this.existingFilters = existingFilters;
 
-		this.taskFilterComponent = null;
+		this.advancedFilterComponent = null;
 
-		if (forColumn) {
+		if (this.entity === "column") {
 			this.setTitle(
-				t("column-filters-for") + " - " + this.columnOrBoardName,
+				t("column-filters-for") + " - " + this.columnOrViewOrBoardName,
 			);
-		} else {
-			this.setTitle(t("view-filters-for") + " - " + this.columnOrBoardName);
+		} else if (this.entity === "view") {
+			this.setTitle(
+				t("view-filters-for") + " - " + this.columnOrViewOrBoardName,
+			);
+		} else if (this.entity === "board") {
+			this.setTitle(
+				t("board-filters-for") + " - " + this.columnOrViewOrBoardName,
+			);
 		}
 	}
 
@@ -43,25 +54,27 @@ export class AdvancedFilterModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		this.taskFilterComponent = new AdvancedFilterComponent(
+		this.advancedFilterComponent = new AdvancedFilterComponent(
 			this.contentEl,
 			this.plugin,
 			this.app,
 			this.currentBoardID,
-			this.initialFilterState,
+			this.parentFiltersAreActive,
+			this.entity,
+			this.existingFilters,
 		);
 		// Ensure the component is properly loaded
-		this.taskFilterComponent.onload();
+		this.advancedFilterComponent.onload();
 	}
 
 	onClose() {
 		const { contentEl } = this;
 
-		let filterState: RootFilterState | undefined = undefined;
-		if (this.taskFilterComponent) {
+		let filtersState: AdvancedFilter | undefined = undefined;
+		if (this.advancedFilterComponent) {
 			try {
-				filterState = this.taskFilterComponent.getFilterState();
-				this.taskFilterComponent.onunload();
+				filtersState = this.advancedFilterComponent.getFiltersState();
+				this.advancedFilterComponent.onunload();
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					114,
@@ -75,7 +88,7 @@ export class AdvancedFilterModal extends Modal {
 
 		if (this.filterCloseCallback) {
 			try {
-				this.filterCloseCallback(filterState);
+				this.filterCloseCallback(filtersState);
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					115,

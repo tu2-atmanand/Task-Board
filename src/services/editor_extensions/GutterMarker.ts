@@ -73,7 +73,7 @@ class TaskGutterMarker extends GutterMarker {
 				) => {
 					// This will be handled by the existing task saving logic
 					// The modal will update the file content automatically
-					console.log("Task updated via gutter marker:", updatedTask);
+					// console.log("Task updated via gutter marker:", updatedTask);
 				};
 
 				// Open the TaskEditorModal

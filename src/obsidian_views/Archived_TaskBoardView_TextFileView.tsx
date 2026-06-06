@@ -40,7 +40,6 @@ export class TaskBoardView extends TextFileView {
 	}
 
 	setViewData(data: string): void {
-		console.log("Running setViewData...");
 		try {
 			const board = JSON.parse(data) as Board;
 			this.boardName = board.name || "Unnamed Board";
@@ -61,12 +60,10 @@ export class TaskBoardView extends TextFileView {
 	}
 
 	getViewData(): string {
-		console.log("Running getViewData...");
 		return this.currentBoard ? JSON.stringify(this.currentBoard, null, "\t") : "{}";
 	}
 
 	clear(): void {
-		console.log("Running clear()...");
 		this.root?.unmount();
 		this.root = null;
 		const container = this.containerEl.children[1] as HTMLElement;
@@ -153,8 +150,7 @@ export class TaskBoardView extends TextFileView {
 	 * Obsidian's config folder. (.obsidian/workspace.json)
 	 */
 	getState() {
-		console.log("Running getState...");
-		console.log("Value of currentFilePath : ", this.currentFilePath);
+		// console.log("Value of currentFilePath : ", this.currentFilePath);
 		// Save the current filePath to the workspace state
 		return {
 			...super.getState(),
@@ -170,7 +166,6 @@ export class TaskBoardView extends TextFileView {
 	 * @param result 
 	 */
 	async setState(state: any, result: ViewStateResult): Promise<void> {
-		console.log(`Running setState...`);
 		const { filePath } = state;
 
 		// Check if a specific .taskboard file was clicked from File Navigator
@@ -247,7 +242,6 @@ export class TaskBoardView extends TextFileView {
 	 * an in-active leaf is brough to life.
 	 */
 	async onOpen() {
-		console.log("Running onOpen...");
 		if (Platform.isMobile) {
 			this.addAction(RefreshIcon, t("refresh-board-button"), async () => {
 				const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);

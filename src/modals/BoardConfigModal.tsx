@@ -2,7 +2,7 @@
 
 import { Modal, normalizePath, Notice } from "obsidian";
 import Sortable from "sortablejs";
-import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban } from "lucide-react";
+import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban, GripHorizontalIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
@@ -22,6 +22,7 @@ import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
 import { eventEmitter } from "../services/EventEmitter.js";
+import { AdvancedFilterModal } from "../components/AdvancedFilterer/index.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -61,64 +62,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
 	const boardListRef = useRef<HTMLDivElement | null>(null);
-
-	useEffect(() => {
-		if (
-			selectedViewIndex === -1 ||
-			!columnListRef.current ||
-			!allViewsData[selectedViewIndex] ||
-			allViewsData[selectedViewIndex].viewType !== viewTypeNames.kanban
-		)
-			return;
-
-		const sortable = Sortable.create(columnListRef.current, {
-			animation: 150,
-			handle: ".boardConfigModalColumnRowDragButton",
-			onEnd: (evt) => {
-				if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
-
-				const updatedViewsData = [...allViewsData];
-				// const columns = updatedViewsData[selectedViewIndex].kanbanView!.columns;
-				const [movedItem] = updatedViewsData[selectedViewIndex].kanbanView!.columns.splice(evt.oldIndex, 1);
-				updatedViewsData[selectedViewIndex].kanbanView!.columns.splice(evt.newIndex, 0, movedItem);
-				updatedViewsData[selectedViewIndex].kanbanView!.columns.forEach((col, idx) => (col.index = idx + 1));
-
-				setAllViewsData(updatedViewsData);
-				setIsEdited(true);
-			},
-		});
-
-		return () => {
-			sortable.destroy();
-		};
-	}, [selectedViewIndex, allViewsData]);
-
-	// useEffect for view order sorting
-	useEffect(() => {
-		if (!boardListRef.current) return;
-
-		const sortableBoards = Sortable.create(boardListRef.current, {
-			animation: 150,
-			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
-			onEnd: (evt) => {
-				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
-					return;
-				}
-
-				// Reorder the views inside the allViewsData state based on the new order after drag-and-drop
-				const updatedViewsData = [...allViewsData];
-				const [movedBoard] = updatedViewsData.splice(evt.oldIndex, 1);
-				updatedViewsData.splice(evt.newIndex, 0, movedBoard);
-
-				setAllViewsData(updatedViewsData);
-				setIsEdited(true);
-			},
-		});
-
-		return () => {
-			sortableBoards.destroy();
-		};
-	}, [allViewsData, selectedViewIndex]);
 
 	// --------------------------------------------------------------
 	// ALL EVENT HANDLING LOGIC BELOW
@@ -218,7 +161,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			forceFallback: true,
 			fallbackClass: "task-view-sortable-fallback",
 			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: (evt) => {
+			onEnd: (evt) => {
 				try {
 					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
 
@@ -238,7 +181,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
 					// }
 				} catch (error) {
-					bugReporterManagerInsatance.showNotice(36, "Error in Sortable onSort", error as string, "BoardConfigModal.tsx/onSort");
+					bugReporterManagerInsatance.showNotice(36, "Error in Sortable onEnd", error as string, "BoardConfigModal.tsx/onEnd");
 				}
 			},
 		});
@@ -333,6 +276,33 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		swimlaneModal.open();
 	};
 
+	// TaskBoardView Management - useEffect for view order sorting
+	useEffect(() => {
+		if (!boardListRef.current) return;
+
+		const sortableBoards = Sortable.create(boardListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
+					return;
+				}
+
+				// Reorder the views inside the allViewsData state based on the new order after drag-and-drop
+				const updatedViewsData = [...allViewsData];
+				const [movedBoard] = updatedViewsData.splice(evt.oldIndex, 1);
+				updatedViewsData.splice(evt.newIndex, 0, movedBoard);
+
+				setAllViewsData(updatedViewsData);
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortableBoards.destroy();
+		};
+	}, [allViewsData, selectedViewIndex]);
+
 	// TaskBoardView Management - Function to handle duplicating the currently selected view in the board configuration modal by creating a copy of the view data with a new name and adding it to the list of views in the state
 	const handleDuplicateCurrentView = async () => {
 		if (selectedViewIndex === -1) {
@@ -426,6 +396,38 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);
 	};
+	// Board Management - Function to handle configuring the board level filters
+	const handleConfigureBoardLevelFilters = () => {
+		const filterModal = new AdvancedFilterModal(
+			plugin, "board", currentBoardData.id, false, currentBoardData.name
+		);
+
+		// Set initial filter state
+		if (currentBoardData!.views[currentViewIndex].viewFilters) {
+			setTimeout(() => {
+				// Use type assertion to resolve non-null issues
+				// const filterState = filterModal.liveFilterState as Filter;
+				if (filterModal.advancedFilterComponent) {
+					filterModal.advancedFilterComponent.loadFilterState(currentBoardData!.boardFilters);
+				}
+			}, 100);
+		}
+
+		// Set the close callback - mainly used for handling cancel actions
+		filterModal.filterCloseCallback = async (filtersState) => {
+			if (filtersState) {
+				// Save the filter state to the board
+				let updatedcurrentBoardData = currentBoardData;
+				updatedcurrentBoardData!.boardFilters = filtersState;
+				plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
+
+				// Refresh the board view
+				eventEmitter.emit('REFRESH_BOARD');
+			}
+		};
+
+		filterModal.open();
+	}
 
 	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
 	const handleDuplicateCurrentBoard = async () => {
@@ -625,6 +627,16 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 									}}
 								/>
 							</div>
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+									<div className="boardConfigModalSettingName">{t("board-level-filters")}</div>
+									<div className="boardConfigModalSettingDescription">{t("board-level-filters-info")}</div>
+								</div>
+								<button
+									className="boardConfigModalMainContentConfigureSwimlanesBtn"
+									onClick={handleConfigureBoardLevelFilters}
+								>{t("configure")}</button>
+							</div>
 						</div>
 					</div>
 
@@ -745,379 +757,76 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 									>
 										{view.kanbanView!.columns.map((column: ColumnData, columnIndex: number) => (
 											<div key={column.id} className={`boardConfigModalColumnRow${column.active ? "" : " Hidden"}`}>
-												<RxDragHandleHorizontal className="boardConfigModalColumnRowDragButton" size={15} enableBackground={0} />
-												{column.active ? (
-													<EyeIcon
-														onClick={() => toggleActiveState(viewIndex, columnIndex)}
-														className="boardConfigModalColumnRowEyeButton"
-													/>
-												) : (
-													<EyeOffIcon
-														onClick={() => toggleActiveState(viewIndex, columnIndex)}
-														className="boardConfigModalColumnRowEyeButton"
-													/>
-												)}
+												{/* Header for the column configuration */}
+												<div className="boardConfigModalColumnRowHeader">
+													<div className="boardConfigModalColumnRowHeaderLeftSec">
+														<GripHorizontalIcon className="boardConfigModalColumnRowDragButton" size={20} enableBackground={0} aria-label={t("column-config-drag-butn-info")} />
+														<div className="boardConfigModalColumnRowIndex">{column.index}</div>
+														<div className="boardConfigModalColumnRowContentColumnType" aria-label={t("column-type")}>{columnTypeAndNameMapping[column.colType]}</div>
+														{column.active ? (
+															<EyeIcon
+																size={20}
+																aria-label={t("hide-column")}
+																onClick={() => toggleActiveState(viewIndex, columnIndex)}
+																className="boardConfigModalColumnRowEyeButton"
+															/>
+														) : (
+															<EyeOffIcon
+																size={20}
+																aria-label={t("show-column")}
+																onClick={() => toggleActiveState(viewIndex, columnIndex)}
+																className="boardConfigModalColumnRowEyeButton"
+															/>
+														)}
+													</div>
+													<div className="boardConfigModalColumnRowHeaderRightSec">
+														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
+													</div>
+												</div>
+
+												{/* Show column specific properties input fields */}
 												<div className="boardConfigModalColumnRowContent">
-													<button className="boardConfigModalColumnRowContentColumnType">{columnTypeAndNameMapping[column.colType]}</button>
-													<input
-														type="text"
-														placeholder={t("enter-column-name")}
-														aria-label={t("column-name")}
-														value={column.name || ""}
-														onChange={(e) =>
-															handleColumnChange(
-																viewIndex,
-																columnIndex,
-																"name",
-																e.target.value
-															)
-														}
-														className="boardConfigModalColumnRowContentColName"
-													/>
-													{column.colType === colTypeNames.allPending && (
-														<input
-															type="number"
-															placeholder={t("work-limit")}
-															aria-label={t("work-limit-info")}
-															value={getInputValue(getInputKey(column.id, "workLimit"), column.workLimit ?? 0)}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "workLimit")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "workLimit");
-																setInputValues(prev => ({
-																	...prev,
-																	[key]: value
-																}));
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"workLimit",
-																	value === "" ? 0 : Number(value),
-																);
-															}}
-															className="boardConfigModalColumnRowContentColName"
-														/>
-													)}
-													{column.colType === colTypeNames.namedTag && (
-														<>
-															<input
-																type="text"
-																ref={(el) => {
-																	multiSuggestInputFieldRefs.current[column.id] = el;
-																}}
-																placeholder={t("enter-tag")}
-																value={column.coltag || ""}
-																onChange={(e) => {
-																	const tagValue = e.target.value.startsWith('#') ? e.target.value.replace('#', '') : e.target.value;
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		"coltag",
-																		tagValue
-																	)
-																}
-																}
-																className="boardConfigModalColumnRowContentColName"
-															/>
-															<input
-																type="number"
-																placeholder={t("work-limit")}
-																aria-label={t("work-limit-info")}
-																value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
-																onChange={(e) => {
-																	setInputValues(prev => ({
-																		...prev,
-																		[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
-																	}));
-																}}
-																onBlur={(e) => {
-																	const value = e.target.value;
-																	const key = getInputKey(column.id, "namedTag-workLimit");
-																	setInputValues(prev => ({
-																		...prev,
-																		[key]: value
-																	}));
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		"workLimit",
-																		value === "" ? 0 : Number(value)
-																	);
-																}}
-																className="boardConfigModalColumnRowContentColName"
-															/>
-														</>
-													)}
-													{column.colType === colTypeNames.taskStatus && (
-														<>
-															<select
-																aria-label={t("task-status")}
-																value={column.taskStatus || " "}
-																onChange={(e) => {
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		colTypeNames.taskStatus,
-																		e.target.value
-																	)
-																}
-																}
-																className="boardConfigModalColumnRowContentColDatedVal"
-															>
-																{statusOptions.type === 'grouped' && statusOptions.groups.map((group) => (
-																	<optgroup key={group.type} label={group.label}>
-																		{group.options.map((opt) => (
-																			<option
-																				key={`${opt.value}-${group.type}`}
-																				value={opt.value}
-																				title={opt.tooltip}
-																			>
-																				{opt.label}
-																			</option>
-																		))}
-																	</optgroup>
-																))}
-															</select>
-															<input
-																type="number"
-																placeholder={t("work-limit")}
-																aria-label={t("work-limit-info")}
-																value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
-																onChange={(e) => {
-																	setInputValues(prev => ({
-																		...prev,
-																		[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
-																	}));
-																}}
-																onBlur={(e) => {
-																	const value = e.target.value;
-																	const key = getInputKey(column.id, "namedTag-workLimit");
-																	setInputValues(prev => ({
-																		...prev,
-																		[key]: value
-																	}));
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		"workLimit",
-																		value === "" ? 0 : Number(value)
-																	);
-																}}
-																className="boardConfigModalColumnRowContentColName"
-															/>
-														</>
-													)}
-													{column.colType === colTypeNames.taskPriority && (
-														<>
-															<select
-																aria-label="Select priority"
-																value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
-																onChange={(e) =>
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		colTypeNames.taskPriority,
-																		Number(e.target.value)
-																	)
-																}
-																className="boardConfigModalColumnRowContentPriorityDropdown"
-															>
-																{getPriorityOptionsForDropdown().map((option) => (
-																	<option key={option.value} value={option.value}>{option.text}</option>
-																))}
-															</select>
-															<input
-																type="number"
-																placeholder={t("work-limit")}
-																aria-label={t("work-limit-info")}
-																value={getInputValue(getInputKey(column.id, "taskPriority-workLimit"), column.workLimit || 0)}
-																onChange={(e) => {
-																	setInputValues(prev => ({
-																		...prev,
-																		[getInputKey(column.id, "taskPriority-workLimit")]: e.target.value
-																	}));
-																}}
-																onBlur={(e) => {
-																	const value = e.target.value;
-																	const key = getInputKey(column.id, "taskPriority-workLimit");
-																	setInputValues(prev => ({
-																		...prev,
-																		[key]: value
-																	}));
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		"workLimit",
-																		value === "" ? 0 : Number(value),
-																	);
-																}}
-																className="boardConfigModalColumnRowContentColName"
-															/>
-														</>
-													)}
-													{column.colType === colTypeNames.completed && (
-														<input
-															type="number"
-															placeholder={t("max-items")}
-															value={getInputValue(getInputKey(column.id, "limit"), column.limit || 20)}
-															onChange={(e) => {
-																setInputValues(prev => ({
-																	...prev,
-																	[getInputKey(column.id, "limit")]: e.target.value
-																}));
-															}}
-															onBlur={(e) => {
-																const value = e.target.value;
-																const key = getInputKey(column.id, "limit");
-																setInputValues(prev => ({
-																	...prev,
-																	[key]: value
-																}));
-																handleColumnChange(
-																	viewIndex,
-																	columnIndex,
-																	"limit",
-																	value === "" ? 0 : Number(value),
-																);
-															}}
-															className="boardConfigModalColumnRowContentColDatedVal"
-														/>
-													)}
-													{column.colType === colTypeNames.pathFiltered && (
+													<div className="boardConfigModalColumnRowContentProperty">
+														<div className="boardConfigModalColumnRowContentPropertyLabel">
+															{t("name")} :
+														</div>
 														<input
 															type="text"
-															ref={(el) => {
-																multiSuggestInputFieldRefs.current[column.id] = el;
-															}}
-															className="boardConfigModalColumnRowContentColName"
-															value={column.filePaths || ""}
+															placeholder={t("enter-column-name")}
+															aria-label={t("column-name")}
+															value={column.name || ""}
 															onChange={(e) =>
 																handleColumnChange(
 																	viewIndex,
 																	columnIndex,
-																	"filePaths",
+																	"name",
 																	e.target.value
 																)
 															}
-															placeholder={t("enter-path-pattern")}
+															className="boardConfigModalColumnRowContentColName"
 														/>
-													)}
-													{column.colType === colTypeNames.dated && (
-														<>
-															<input
-																required={true}
-																type="number"
-																placeholder={t("from") + "  (eg. = -365)"}
-																aria-label={t("from-tooltip")}
-																value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from ?? 0) ?? ""}
-																onChange={(e) => {
-																	setInputValues(prev => ({
-																		...prev,
-																		[getInputKey(column.id, "from")]: e.target.value
-																	}));
-																}}
-																onBlur={(e) => {
-																	const value = e.target.value;
-																	const key = getInputKey(column.id, "from");
-																	if (value === "") {
-																		setInputValues(prev => ({
-																			...prev,
-																			[key]: ""
-																		}));
-																	} else {
-																		setInputValues(prev => ({
-																			...prev,
-																			[key]: value
-																		}));
-																		handleColumnChange(
-																			viewIndex,
-																			columnIndex,
-																			"datedBasedColumn",
-																			{
-																				...column.datedBasedColumn,
-																				from: Number(value),
-																			}
-																		);
-																	}
-																}}
-																className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "from"), 0) ? " border-red" : ""}`}
-															/>
-															<input
-																type="number"
-																placeholder={t("to") + "  (eg. = 365)"}
-																aria-label={t("to-tooltip")}
-																value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to ?? 0) ?? ""}
-																onChange={(e) => {
-																	setInputValues(prev => ({
-																		...prev,
-																		[getInputKey(column.id, "to")]: e.target.value
-																	}));
-																}}
-																onBlur={(e) => {
-																	const value = e.target.value;
-																	const key = getInputKey(column.id, "to");
-																	if (value === "") {
-																		setInputValues(prev => ({
-																			...prev,
-																			[key]: ""
-																		}));
-																	} else {
-																		setInputValues(prev => ({
-																			...prev,
-																			[key]: value
-																		}));
-																		handleColumnChange(
-																			viewIndex,
-																			columnIndex,
-																			"datedBasedColumn",
-																			{
-																				...column.datedBasedColumn,
-																				to: Number(value),
-																			}
-																		);
-																	}
-																}}
-																className={`boardConfigModalColumnRowContentColDatedVal${isDatedInputUndefined(getInputKey(column.id, "to"), 0) ? " border-red" : ""}`}
-															/>
-															<select
-																aria-label="Select date type"
-																value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
-																onChange={(e) =>
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		"datedBasedColumn",
-																		{
-																			...column.datedBasedColumn,
-																			dateType: e.target.value,
-																		}
-																	)
-																}
-																className="boardConfigModalColumnRowContentColDatedVal"
-															>
-																<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
-																<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
-																<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
-															</select>
+													</div>
+
+													{/* Column specific properties input elements */}
+													{column.colType === colTypeNames.allPending && (
+														<div className="boardConfigModalColumnRowContentProperty">
+															<div className="boardConfigModalColumnRowContentPropertyLabel">
+																{t("work-limit")} :
+															</div>
 															<input
 																type="number"
 																placeholder={t("work-limit")}
 																aria-label={t("work-limit-info")}
-																value={getInputValue(getInputKey(column.id, "dated-workLimit"), column.workLimit || 0)}
+																value={getInputValue(getInputKey(column.id, "workLimit"), column.workLimit ?? 0)}
 																onChange={(e) => {
 																	setInputValues(prev => ({
 																		...prev,
-																		[getInputKey(column.id, "dated-workLimit")]: e.target.value
+																		[getInputKey(column.id, "workLimit")]: e.target.value
 																	}));
 																}}
 																onBlur={(e) => {
 																	const value = e.target.value;
-																	const key = getInputKey(column.id, "dated-workLimit");
+																	const key = getInputKey(column.id, "workLimit");
 																	setInputValues(prev => ({
 																		...prev,
 																		[key]: value
@@ -1129,37 +838,434 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																		value === "" ? 0 : Number(value),
 																	);
 																}}
-																className="boardConfigModalColumnRowContentColName"
+																className="boardConfigModalColumnRowContentNumericInput"
 															/>
+														</div>
+													)}
+													{column.colType === colTypeNames.namedTag && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("tag")} :
+																</div>
+																<input
+																	type="text"
+																	ref={(el) => {
+																		multiSuggestInputFieldRefs.current[column.id] = el;
+																	}}
+																	placeholder={t("enter-tag")}
+																	value={column.coltag || ""}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"coltag",
+																			e.target.value
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																/>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "namedTag-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value)
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.taskStatus && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("status")} :
+																</div>
+																<select
+																	aria-label={t("task-status")}
+																	value={column.taskStatus || " "}
+																	onChange={(e) => {
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			colTypeNames.taskStatus,
+																			e.target.value
+																		)
+																	}
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																>
+																	{statusOptions.type === 'grouped' && statusOptions.groups.map((group) => (
+																		<optgroup key={group.type} label={group.label}>
+																			{group.options.map((opt) => (
+																				<option
+																					key={`${opt.value}-${group.type}`}
+																					value={opt.value}
+																					title={opt.tooltip}
+																				>
+																					{opt.label}
+																				</option>
+																			))}
+																		</optgroup>
+																	))}
+																</select>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "taskStatus-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "taskStatus-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value.trim();
+																		const key = getInputKey(column.id, "taskStatus-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.taskPriority && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("priority")} :
+																</div>
+																<select
+																	aria-label="Select priority"
+																	value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			colTypeNames.taskPriority,
+																			Number(e.target.value)
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentPriorityDropdown"
+																>
+																	{getPriorityOptionsForDropdown().map((option) => (
+																		<option key={option.value} value={option.value}>{option.text}</option>
+																	))}
+																</select>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "taskPriority-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "taskPriority-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "taskPriority-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.completed && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("max-items")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("max-items")}
+																	value={getInputValue(getInputKey(column.id, "limit"), column.limit || 20)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "limit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "limit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"limit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.pathFiltered && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("file-or-folder-path")} :
+																</div>
+																<input
+																	type="text"
+																	ref={(el) => {
+																		multiSuggestInputFieldRefs.current[column.id] = el;
+																	}}
+																	className="boardConfigModalColumnRowContentColName"
+																	value={column.filePaths || ""}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"filePaths",
+																			e.target.value
+																		)
+																	}
+																	placeholder={t("enter-path-pattern")}
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.dated && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("date-type")} :
+																</div>
+																<select
+																	aria-label="Select date type"
+																	value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"datedBasedColumn",
+																			{
+																				...column.datedBasedColumn,
+																				dateType: e.target.value,
+																			}
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																>
+																	<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+																	<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+																	<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
+																</select>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("from")} :
+																</div>
+																<input
+																	required={true}
+																	type="number"
+																	placeholder={t("from") + "  (eg. = -365)"}
+																	aria-label={t("from-tooltip")}
+																	value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from ?? 0) ?? ""}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "from")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "from");
+																		if (value === "") {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: ""
+																			}));
+																		} else {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: value
+																			}));
+																			handleColumnChange(
+																				viewIndex,
+																				columnIndex,
+																				"datedBasedColumn",
+																				{
+																					...column.datedBasedColumn,
+																					from: Number(value),
+																				}
+																			);
+																		}
+																	}}
+																	className={`boardConfigModalColumnRowContentNumericInput${isDatedInputUndefined(getInputKey(column.id, "from"), 0) ? " border-red" : ""}`}
+																/>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("to")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("to") + "  (eg. = 365)"}
+																	aria-label={t("to-tooltip")}
+																	value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to ?? 0) ?? ""}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "to")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "to");
+																		if (value === "") {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: ""
+																			}));
+																		} else {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: value
+																			}));
+																			handleColumnChange(
+																				viewIndex,
+																				columnIndex,
+																				"datedBasedColumn",
+																				{
+																					...column.datedBasedColumn,
+																					to: Number(value),
+																				}
+																			);
+																		}
+																	}}
+																	className={`boardConfigModalColumnRowContentNumericInput${isDatedInputUndefined(getInputKey(column.id, "to"), 0) ? " border-red" : ""}`}
+																/>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "dated-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "dated-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "dated-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
 														</>
 													)}
 													{column.colType === colTypeNames.undated && (
 														<>
-															<select
-																aria-label="Select date type"
-																value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
-																onChange={(e) =>
-																	handleColumnChange(
-																		viewIndex,
-																		columnIndex,
-																		"datedBasedColumn",
-																		{
-																			from: 0,
-																			to: 0,
-																			dateType: e.target.value,
-																		}
-																	)
-																}
-																className="boardConfigModalColumnRowContentColDatedVal"
-															>
-																<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
-																<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
-																<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
-															</select>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("date-type")} :
+																</div>
+																<select
+																	aria-label="Select date type"
+																	value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"datedBasedColumn",
+																			{
+																				from: 0,
+																				to: 0,
+																				dateType: e.target.value,
+																			}
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																>
+																	<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+																	<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+																	<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
+																</select>
+															</div>
 														</>
 													)}
-													<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
 												</div>
+
 											</div>
 										))}
 									</div>

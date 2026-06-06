@@ -1,11 +1,11 @@
 // /src/components/BoardFilters/AdvancedFilterPopover.ts
 
-import { App } from "obsidian";
+import { App, setIcon, setTooltip } from "obsidian";
 import { CloseableComponent, Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
-import { RootFilterState } from "../../interfaces/BoardConfigs.js";
+import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
 
@@ -15,34 +15,37 @@ export class AdvancedFilterPopover
 {
 	private plugin: TaskBoard;
 	private app: App;
-	public forColumn: boolean;
+	public entity: "board" | "view" | "column";
 	public currentBoardID: string;
+	public parentFiltersAreActive: boolean;
 	public popoverRef: HTMLDivElement | null = null;
-	public taskFilterComponent!: AdvancedFilterComponent;
+	public advancedFilterComponent!: AdvancedFilterComponent;
 	private win: Window;
-	private scrollParent: HTMLElement | Window;
+	// private scrollParent: HTMLElement | Window;
 	private popperInstance: PopperInstance | null = null;
-	public onClose: ((filterState?: RootFilterState) => void) | null = null;
-	private columnOrBoardName?: string;
-	private initialFilterState?: RootFilterState;
+	public onClose: ((filterState?: AdvancedFilter) => void) | null = null;
+	private columnOrViewOrBoardName?: string;
+	private existingFilters?: AdvancedFilter;
 
 	constructor(
 		plugin: TaskBoard,
-		forColumn: boolean,
+		entity: "board" | "view" | "column",
 		currentBoardID: string,
-		columnOrBoardName?: string,
-		initialFilterState?: RootFilterState,
+		parentFiltersAreActive: boolean,
+		columnOrViewOrBoardName?: string,
+		existingFilters?: AdvancedFilter,
 	) {
 		super();
 		this.plugin = plugin;
 		this.app = plugin.app;
-		this.forColumn = forColumn;
+		this.entity = entity;
 		this.currentBoardID = currentBoardID;
-		this.columnOrBoardName = columnOrBoardName;
-		this.initialFilterState = initialFilterState;
+		this.parentFiltersAreActive = parentFiltersAreActive;
+		this.columnOrViewOrBoardName = columnOrViewOrBoardName;
+		this.existingFilters = existingFilters;
 		this.win = plugin.app.workspace.containerEl.win || window;
 
-		this.scrollParent = this.win;
+		// this.scrollParent = this.win;
 	}
 
 	/**
@@ -54,49 +57,94 @@ export class AdvancedFilterPopover
 		}
 
 		// Create content container
-		const contentEl = createDiv({ cls: "task-popover-content" });
+		const contentEl = createDiv({ cls: "advanced-filter-menu-container" });
 		// Prevent clicks inside the popover from bubbling up
 		this.registerDomEvent(contentEl, "click", (e) => {
 			e.stopPropagation();
 		});
 
 		const headerEl = contentEl.createDiv({
-			cls: "task-popover-content-header",
+			cls: "advanced-filter-menu-container-header",
+		});
+
+		const leftSec = headerEl.createDiv({
+			cls: "advanced-filter-menu-container-header-leftSec",
 		});
 		// Add column filter heading if this is for a column
-		if (this.forColumn) {
-			headerEl.createEl("h3", {
-				text: t("column-filters-for") + " - " + this.columnOrBoardName,
-				cls: "task-popover-content-header-heading",
+		if (this.entity === "column") {
+			leftSec.createEl("h3", {
+				text:
+					t("column-filters-for") +
+					" - " +
+					this.columnOrViewOrBoardName,
+				cls: "advanced-filter-menu-container-header-heading",
 			});
-		} else {
-			headerEl.createEl("h3", {
-				text: t("view-filters-for") + " - " + this.columnOrBoardName,
-				cls: "task-popover-content-header-heading",
+		} else if (this.entity === "view") {
+			leftSec.createEl("h3", {
+				text:
+					t("view-filters-for") +
+					" - " +
+					this.columnOrViewOrBoardName,
+				cls: "advanced-filter-menu-container-header-heading",
+			});
+		} else if (this.entity === "board") {
+			leftSec.createEl("h3", {
+				text:
+					t("board-filters-for") +
+					" - " +
+					this.columnOrViewOrBoardName,
+				cls: "advanced-filter-menu-container-header-heading",
 			});
 		}
+
+		const rightSec = headerEl.createDiv({
+			cls: "advanced-filter-menu-container-header-rightSec",
+		});
+
+		// const applyBtn = rightSec.createEl("button", {
+		// 	cls: "advanced-filter-menu-container-header-rightSec-btn",
+		// 	text: t("close"),
+		// });
+		const applyBtn = rightSec.createEl(
+			"div",
+			{
+				cls: [
+					"advanced-filter-menu-container-header-rightSec-btn",
+					"compact-btn",
+				],
+			},
+			(el) => {
+				setIcon(el, "x");
+				setTooltip(el, t("close-to-apply-changes"));
+			},
+		);
+		this.plugin.registerDomEvent(applyBtn, "click", (evt: PointerEvent) => {
+			this.close();
+		});
 
 		// Add a horizontal rule
 		contentEl.createEl("hr");
 
 		const taskFilterContainer = contentEl.createDiv({
-			cls: "task-popover-content-body",
+			cls: "advanced-filter-menu-container-body",
 		});
 
 		// Create metadata editor, use compact mode
-		this.taskFilterComponent = new AdvancedFilterComponent(
+		this.advancedFilterComponent = new AdvancedFilterComponent(
 			taskFilterContainer,
 			this.plugin,
 			this.app,
 			this.currentBoardID,
-			this.initialFilterState,
+			this.parentFiltersAreActive,
+			this.entity,
+			this.existingFilters,
 		);
 		// Ensure the component is properly loaded
-		this.taskFilterComponent.onload();
+		this.advancedFilterComponent.onload();
 
 		// Create the popover
 		this.popoverRef = this.app.workspace.containerEl.createDiv({
-			cls: "filter-menu tg-menu bm-menu", // Borrowing some classes from IconMenu
+			cls: "advanced-filter-menu",
 		});
 		this.popoverRef.appendChild(contentEl);
 
@@ -168,16 +216,24 @@ export class AdvancedFilterPopover
 	}
 
 	private clickOutside = (e: MouseEvent): void => {
-		if (this.taskFilterComponent.isMultiSuggestDropdownActive) {
-			this.taskFilterComponent.isMultiSuggestDropdownActive = false;
+		const warehouseOpened =
+			this.advancedFilterComponent.isWarehouseModalOpened;
+
+		if (
+			this.advancedFilterComponent.somethingElseIsOpened &&
+			!warehouseOpened
+		) {
+			// First outside click will make the other components to close and will keep this popover open. The second click will surely close it.
+			this.advancedFilterComponent.somethingElseIsOpened = false;
 			return;
 		}
 
 		if (
-			!this.taskFilterComponent.isMultiSuggestDropdownActive &&
-			!this.taskFilterComponent.isConfigModalOpen &&
+			!warehouseOpened &&
+			!this.advancedFilterComponent.somethingElseIsOpened &&
+			// !this.advancedFilterComponent.isConfigModalOpen &&
 			this.popoverRef &&
-			!this.popoverRef.contains(e.target as Node)
+			!this.popoverRef.contains(e.target as Node) // This finds out if we are clicking out of the popover component
 		) {
 			// console.log("clickOutside - closing popover", {
 			// 	target: e.target,
@@ -215,10 +271,10 @@ export class AdvancedFilterPopover
 			this.popperInstance = null;
 		}
 
-		let filterState: RootFilterState | undefined = undefined;
-		if (this.taskFilterComponent) {
+		let filtersState: AdvancedFilter | undefined = undefined;
+		if (this.advancedFilterComponent) {
 			try {
-				filterState = this.taskFilterComponent.getFilterState();
+				filtersState = this.advancedFilterComponent.getFiltersState();
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					116,
@@ -240,13 +296,13 @@ export class AdvancedFilterPopover
 		// 	true
 		// );
 
-		if (this.taskFilterComponent) {
-			this.taskFilterComponent.onunload();
+		if (this.advancedFilterComponent) {
+			this.advancedFilterComponent.onunload();
 		}
 
 		if (this.onClose) {
 			try {
-				this.onClose(filterState);
+				this.onClose(filtersState);
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					117,

@@ -2,9 +2,10 @@
 
 import { compareAsc } from "date-fns";
 import {
-	RootFilterState,
-	FilterGroup,
 	Filter,
+	FilterCriterionGroup,
+	FilterCriterion,
+	AdvancedFilter,
 } from "../../interfaces/BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
@@ -16,53 +17,40 @@ import { matchTagsWithWildcards } from "./ScanningFilterer.js";
 /**
  * Filters tasks based on the board's filter configuration
  * @param tasks - Array of tasks to filter
- * @param filterState - The root filter state containing all filter groups
+ * @param filters - All the filters
  * @param dateFormat - The date format string (e.g., DEFAULT_DATE_FORMAT)
  * @returns Filtered array of tasks
  */
 export function advancedFilterer(
 	tasks: taskItem[],
-	filterState: RootFilterState | undefined,
+	advancedFilter: AdvancedFilter | undefined,
 	dateFormat: string = DEFAULT_DATE_FORMAT,
 ): taskItem[] {
 	// TODO : This function runs more number of times than it should be running.
-	// If no filter state or no filter groups, return all tasks
-	if (
-		!filterState ||
-		!filterState.filterGroups ||
-		filterState.filterGroups.length === 0
-	) {
+	// Find only the filters which has been enabled by the user
+	if (!advancedFilter?.filters || !advancedFilter?.rootCondition)
 		return tasks;
-	}
 
-	// Apply filters based on root condition
-	const rootCondition = filterState.rootCondition;
-	const filterGroups = filterState.filterGroups;
+	const enabledFilters = advancedFilter.filters.filter(
+		(filter) => filter.status,
+	);
+	if (enabledFilters?.length === 0) return tasks;
 
-	return tasks.filter((task) => {
-		// Filter out null/undefined/invalid filter groups before processing
-		const validGroups = filterGroups.filter(
-			(group) =>
-				group && typeof group === "object" && group.groupCondition,
-		);
+	const filtersRootCondition = advancedFilter.rootCondition;
 
-		// If no valid groups after filtering, return true (no filtering applied)
-		if (validGroups.length === 0) {
-			return true;
-		}
-
-		const groupResults = validGroups.map((group) =>
-			evaluateFilterGroup(task, group, dateFormat),
+	return tasks.filter((task: taskItem) => {
+		const allFiltersResults = enabledFilters.map((filter: Filter) =>
+			evaluateFilter(task, filter, dateFormat),
 		);
 
 		// Combine group results based on root condition
-		switch (rootCondition) {
+		switch (filtersRootCondition) {
 			case "all":
-				return groupResults.every((result) => result);
+				return allFiltersResults.every((result) => result);
 			case "any":
-				return groupResults.some((result) => result);
+				return allFiltersResults.some((result) => result);
 			case "none":
-				return !groupResults.some((result) => result);
+				return !allFiltersResults.some((result) => result);
 			default:
 				return true;
 		}
@@ -70,11 +58,59 @@ export function advancedFilterer(
 }
 
 /**
- * Evaluates a single filter group against a task
+ * Evaluates a single filter against a task
  */
-function evaluateFilterGroup(
+function evaluateFilter(
 	task: taskItem,
-	group: FilterGroup,
+	filterState: Filter,
+	dateFormat: string,
+): boolean {
+	// If no filter state or no filter groups, return all tasks
+	if (
+		!filterState ||
+		!filterState.filterGroups ||
+		filterState.filterGroups.length === 0
+	) {
+		return true;
+	}
+
+	// Apply filters based on root condition
+	const rootCondition = filterState.rootCondition;
+	const filterGroups = filterState.filterGroups;
+
+	// Filter out null/undefined/invalid filter groups before processing
+	const validGroups = filterGroups.filter(
+		(group) => group && typeof group === "object" && group.groupCondition,
+	);
+
+	// If no valid groups after filtering, return true (no filtering applied)
+	if (validGroups.length === 0) {
+		return true;
+	}
+
+	const groupResults = validGroups.map((group) =>
+		evaluateFilterCriterionGroup(task, group, dateFormat),
+	);
+
+	// Combine group results based on root condition
+	switch (rootCondition) {
+		case "all":
+			return groupResults.every((result) => result);
+		case "any":
+			return groupResults.some((result) => result);
+		case "none":
+			return !groupResults.some((result) => result);
+		default:
+			return true;
+	}
+}
+
+/**
+ * Evaluates a single {@link FilterCriterionGroup} against a task
+ */
+function evaluateFilterCriterionGroup(
+	task: taskItem,
+	group: FilterCriterionGroup,
 	dateFormat: string,
 ): boolean {
 	// Safety check: validate group structure
@@ -89,7 +125,7 @@ function evaluateFilterGroup(
 	}
 
 	const filterResults = filters.map((filter) =>
-		evaluateFilter(task, filter, dateFormat),
+		evaluateFilterCriterion(task, filter, dateFormat),
 	);
 
 	// Combine filter results based on group condition
@@ -106,11 +142,11 @@ function evaluateFilterGroup(
 }
 
 /**
- * Evaluates a single filter against a task
+ * Evaluates a single {@link FilterCriterion} against a task
  */
-function evaluateFilter(
+function evaluateFilterCriterion(
 	task: taskItem,
-	filter: Filter,
+	filter: FilterCriterion,
 	dateFormat: string,
 ): boolean {
 	const { property, condition, value } = filter;
@@ -326,7 +362,7 @@ function compareDates(date1: any, date2: any, dateFormat: string): number {
  * @returns true if empty, false otherwise
  */
 export function isRootFilterStateEmpty(
-	filterState: RootFilterState | undefined,
+	filterState: Filter | undefined,
 ): boolean {
 	if (!filterState) return true;
 	if (!filterState.filterGroups || filterState.filterGroups.length === 0)

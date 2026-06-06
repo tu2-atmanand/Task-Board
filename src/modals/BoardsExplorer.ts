@@ -121,8 +121,6 @@ export class BoardsExplorerModal extends Modal {
 					cls: "boardsExplorerCard",
 				});
 
-				// Make card clickable
-				card.style.cursor = "pointer";
 				card.addEventListener("click", async () => {
 					await this.openBoard(boardId, board.filePath);
 					this.close();

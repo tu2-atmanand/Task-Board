@@ -335,7 +335,6 @@ export class SwimlanesConfigModal extends Modal {
 					this.plugin.settings.data.customStatuses,
 					{ mode: 'grouped', includePlaceholder: true }
 				);
-				console.log("statusOptions : ", statusOptions);
 
 				// Helper to create an option element
 				const createOption = (opt: StatusDropdownOption): HTMLOptionElement => {

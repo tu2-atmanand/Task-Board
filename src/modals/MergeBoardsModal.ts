@@ -262,6 +262,13 @@ export class MergeBoardsModal extends Modal {
 			// lastViewId: board1.lastViewId, // Use from first board
 			lastViewIndex: 0,
 			viewsPanel: board1.viewsPanel, // Use from first board
+			boardFilters: {
+				filters: [
+					...board1.boardFilters.filters,
+					...board2.boardFilters.filters,
+				],
+				rootCondition: board1.boardFilters.rootCondition,
+			},
 		};
 
 		return mergedBoard;

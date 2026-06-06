@@ -23,7 +23,7 @@ import { t } from "i18next";
 import {
 	taskPropertyHidingExtension,
 	getTaskPropertyRegexPatterns,
-} from "./src/editor-extensions/task-operations/property-hiding.js";
+} from "./src/services/editor_extensions/PropertiesHiding.js";
 import {
 	VIEW_TYPE_TASKBOARD,
 	TASKBOARD_FILE_EXTENSION,
@@ -1175,10 +1175,10 @@ export default class TaskBoard extends Plugin {
 		let allowedFiles = this.createQueue.filter((file: TFile) =>
 			fileTypeAllowedForScanning(this.settings.data, file),
 		);
-		console.log(
-			"Will be processing following created files : ",
-			allowedFiles,
-		);
+		// console.log(
+		// 	"Will be processing following created files : ",
+		// 	allowedFiles,
+		// );
 		const totalFilesLength = allowedFiles.length;
 
 		// this.plugin.vaultScanner.refreshTasksFromFiles(allowedFiles, false);
@@ -1239,7 +1239,7 @@ export default class TaskBoard extends Plugin {
 		const storedTime = this.app.loadLocalStorage(
 			OBSIDIAN_CLOSED_TIME_KEY,
 		) as string | undefined;
-		console.log("CLOSED TIME from localStorage : ", storedTime);
+		// console.log("CLOSED TIME from localStorage : ", storedTime);
 
 		let OBSIDIAN_CLOSED_TIME: Date | undefined;
 
@@ -1255,7 +1255,7 @@ export default class TaskBoard extends Plugin {
 				DEFAULT_DATE_TIME_FORMAT,
 				new Date(),
 			);
-			console.log("CLOSED TIME from cache file : ", OBSIDIAN_CLOSED_TIME);
+			// console.log("CLOSED TIME from cache file : ", OBSIDIAN_CLOSED_TIME);
 		}
 
 		if (OBSIDIAN_CLOSED_TIME) {
@@ -1270,10 +1270,10 @@ export default class TaskBoard extends Plugin {
 					);
 				});
 
-			console.log(
-				"All modified files found : ",
-				modifiedCreatedRenamedFiles,
-			);
+			// console.log(
+			// 	"All modified files found : ",
+			// 	modifiedCreatedRenamedFiles,
+			// );
 
 			// Find deleted files by comparing cache with current vault files
 			const currentFilesPaths = new Set(
@@ -1441,19 +1441,12 @@ export default class TaskBoard extends Plugin {
 		);
 		this.registerEvent(
 			this.app.vault.on("rename", (file, oldPath) => {
-				console.log(
-					"Following file has been renamed :",
-					file,
-					"\nOld Path:",
-					oldPath,
-				);
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForRename(file, oldPath);
 			}),
 		);
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
-				console.log("Following file has been deleted :", file);
 				// Queue the file for processing instead of processing immediately
 				this.queueFileForDeletion(file);
 			}),

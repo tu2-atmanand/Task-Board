@@ -115,8 +115,7 @@ export class TaskBoardView extends ItemView {
 	 * Obsidian's config folder. (.obsidian/workspace.json)
 	 */
 	getState() {
-		console.log("Running getState...");
-		console.log("Value of currentFilePath : ", this.currentFilePath);
+		// console.log("Value of currentFilePath : ", this.currentFilePath);
 		// Save the current filePath to the workspace state
 		return {
 			...super.getState(),
@@ -132,7 +131,6 @@ export class TaskBoardView extends ItemView {
 	 * @param result 
 	 */
 	async setState(state: any, result: ViewStateResult): Promise<void> {
-		console.log(`Running setState...`);
 		const { filePath } = state;
 
 		// Check if a specific .taskboard file was clicked from File Navigator
@@ -209,7 +207,6 @@ export class TaskBoardView extends ItemView {
 	 * an in-active leaf is brough to life.
 	 */
 	async onOpen() {
-		console.log("Running onOpen...");
 		if (Platform.isMobile) {
 			this.addAction(RefreshIcon, t("refresh-board-button"), async () => {
 				const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);

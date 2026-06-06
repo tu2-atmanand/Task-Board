@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
 import { t } from 'i18next';
 import TaskBoard from '../../main.js';
-import { Board, RootFilterState, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
+import { AdvancedFilter, Board, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
 import { DEFAULT_DATE_FORMAT } from '../interfaces/Constants.js';
 import { taskPropertiesNames, viewTypeNames, viewsPanelPropertiesToShow } from '../interfaces/Enums.js';
 import { funnelIcon, ScanVaultIcon } from '../interfaces/Icons.js';
@@ -101,7 +101,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 	useEffect(() => {
 		const fetchData = async () => {
-			console.log("TASK BOARD : Does this run while switching boards...");
+			// console.log("TASK BOARD : Does this run while switching boards...");
 			try {
 				// if (currentBoardData) {
 				// setCurrentBoardData(boardData);
@@ -157,21 +157,26 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		// Clamp currentViewIndex to valid range [0, views.length - 1]
 		const validIndex = Math.max(0, Math.min(currentViewIndex, boardData.views.length - 1));
 		setCurrentView(boardData.views[validIndex]);
-		console.log("Just updated the currentView state variable...");
 	}, [currentViewIndex, boardData?.views]);
 
 	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
 	const filteredAndSearchedTasks = useMemo(() => {
 		if (allTasks && boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
-			const viewFilter = boardData.views[currentViewIndex].viewFilter; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
-			console.log("Current view : ", currentView);
+			const boardFilters = boardData.boardFilters;
+			const viewFilter = boardData.views[currentViewIndex].viewFilters; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
 			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: advancedFilterer(allTasks.Pending, viewFilter, dateFormat),
-				Completed: advancedFilterer(allTasks.Completed, viewFilter, dateFormat),
+				Pending: advancedFilterer(allTasks.Pending, boardFilters, dateFormat),
+				Completed: advancedFilterer(allTasks.Completed, boardFilters, dateFormat),
+			};
+
+			const viewLevelFilterTasks = {
+				...allTasks,
+				Pending: advancedFilterer(boardFilteredTasks.Pending, viewFilter, dateFormat),
+				Completed: advancedFilterer(boardFilteredTasks.Completed, viewFilter, dateFormat),
 			};
 
 			// Create a new board data object immutably
@@ -181,23 +186,23 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				newBoardData.views[currentViewIndex] = {
 					...newBoardData.views[currentViewIndex],
 					taskCount: {
-						pending: boardFilteredTasks.Pending.length,
-						completed: boardFilteredTasks.Completed.length,
+						pending: viewLevelFilterTasks.Pending.length,
+						completed: viewLevelFilterTasks.Completed.length,
 					},
 				};
 			}
 			setCurrentBoardData(newBoardData);
-			setFilteredTasks(boardFilteredTasks);
+			setFilteredTasks(viewLevelFilterTasks);
 
 			// Apply search filter if search query exists
 			if (searchQuery.trim() !== "") {
-				const searchFiltered = handleSearchSubmit(boardFilteredTasks);
+				const searchFiltered = handleSearchSubmit(viewLevelFilterTasks);
 				// setLoading(false);
-				return searchFiltered || boardFilteredTasks;
+				return searchFiltered || viewLevelFilterTasks;
 			}
 
 			// setLoading(false);
-			return boardFilteredTasks;
+			return viewLevelFilterTasks;
 		}
 		return { Pending: [], Completed: [] };
 	}, [allTasks, softRefreshCount]);
@@ -229,7 +234,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	// Register all the EMITE event listeners
 	useEffect(() => {
 		const refreshBoardListener = () => {
-			console.log("REFRESH_BOARD emitted............");
 			setHardRefreshCount((prev) => prev + 1);
 		}
 
@@ -294,7 +298,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}, []);
 
 	const saveMapViewIfNeeded = async () => {
-		console.log("Will store the map view data first...");
 		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
 			eventEmitter.emit("SAVE_MAP");
 			// setMapViewDataUpdated(false);
@@ -405,30 +408,30 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		try {
 			saveMapViewIfNeeded();
 
-			const currentBoardConfig = boardData;
+			const boardFiltersPresent = boardData.boardFilters.filters.some((filter) => filter.status);
 			if (Platform.isMobile || Platform.isMacOS) {
 				// If its a mobile platform, then we will open a modal instead of popover.
 				const filterModal = new AdvancedFilterModal(
-					plugin, false, boardData.id, currentView?.viewName
+					plugin, "view", boardData.id, boardFiltersPresent, currentView?.viewName
 				);
 
 				// Set initial filter state
-				if (currentBoardConfig!.views[currentViewIndex].viewFilter) {
+				if (boardData!.views[currentViewIndex].viewFilters) {
 					setTimeout(() => {
 						// Use type assertion to resolve non-null issues
-						// const filterState = filterModal.liveFilterState as RootFilterState;
-						if (filterModal.taskFilterComponent) {
-							filterModal.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilter);
+						// const filterState = filterModal.liveFilterState as Filter;
+						if (filterModal.advancedFilterComponent) {
+							filterModal.advancedFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters);
 						}
 					}, 100);
 				}
 
 				// Set the close callback - mainly used for handling cancel actions
-				filterModal.filterCloseCallback = async (filterState) => {
-					if (filterState) {
+				filterModal.filterCloseCallback = async (filtersState) => {
+					if (filtersState) {
 						// Save the filter state to the board
 						let updatedcurrentBoardData = boardData;
-						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
+						updatedcurrentBoardData!.views[currentViewIndex].viewFilters = filtersState;
 						setCurrentBoardData(updatedcurrentBoardData);
 						plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
@@ -459,33 +462,33 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				// Create and show popover
 				const popover = new AdvancedFilterPopover(
 					plugin,
-					false, // forColumn = false since this is for board-level filter
+					"view",
 					boardData.id,
+					boardFiltersPresent,
 					currentView?.viewName || "View",
 				);
 
 				// Load existing filter state if available
-				if (currentBoardConfig!.views[currentViewIndex].viewFilter) {
+				if (boardData!.views[currentViewIndex].viewFilter) {
 					// Wait for component to be created and loaded
 					setTimeout(() => {
-						if (popover.taskFilterComponent) {
-							popover.taskFilterComponent.loadFilterState(currentBoardConfig!.views[currentViewIndex].viewFilter!);
+						if (popover.advancedFilterComponent) {
+							popover.advancedFilterComponent.loadFilterState(boardData!.views[currentViewIndex].viewFilters!);
 						}
 					}, 100);
 				}
 
 				// Set up close callback to save filter state
-				popover.onClose = async (filterState?: RootFilterState) => {
-					if (filterState) {
+				popover.onClose = async (filtersState?: AdvancedFilter) => {
+					if (filtersState) {
 						// Save the filter state to the board
 						let updatedcurrentBoardData = boardData;
-						updatedcurrentBoardData!.views[currentViewIndex].viewFilter = filterState;
+						updatedcurrentBoardData!.views[currentViewIndex].viewFilters = filtersState;
 						setCurrentBoardData(updatedcurrentBoardData);
 						plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
 						// Refresh the board view
 						sleep(100).then(() => {
-							console.log("REFRESH_BOARD emitting............");
 							eventEmitter.emit('REFRESH_BOARD');
 						})
 					}
@@ -722,22 +725,32 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
 			});
 
-			// subTasksMenu.addItem((item) => {
-			// 	item.setTitle(t("hidden"))
-			// 	item.onClick(async () => {
-			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
-			// 		togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(async () => {
+					let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
 
-			// 	})
-			// 	item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
-			// });
+					if (visibleProperties.includes(taskPropertiesNames.SubTasks)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasks), 1);
+					}
+
+					if (visibleProperties.includes(taskPropertiesNames.SubTasksMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasksMinimized), 1);
+					}
+
+					plugin.settings.data.visiblePropertiesList = visibleProperties;
+					plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+			});
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("description"));
-			const subTasksMenu = item.setSubmenu()
+			const descriptionMenu = item.setSubmenu()
 
-			subTasksMenu.addItem((item) => {
+			descriptionMenu.addItem((item) => {
 				item.setTitle(t("visible"))
 				item.onClick(async () => {
 					togglePropertyNameInSettings(taskPropertiesNames.Description);
@@ -747,7 +760,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description));
 			});
 
-			subTasksMenu.addItem((item) => {
+			descriptionMenu.addItem((item) => {
 				item.setTitle(t("minimized"))
 				item.onClick(async () => {
 					togglePropertyNameInSettings(taskPropertiesNames.DescriptionMinimized);
@@ -755,6 +768,26 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 
 				})
 				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+			});
+
+			descriptionMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(async () => {
+					let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
+
+					if (visibleProperties.includes(taskPropertiesNames.Description)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.Description), 1);
+					}
+
+					if (visibleProperties.includes(taskPropertiesNames.DescriptionMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.DescriptionMinimized), 1);
+					}
+
+					plugin.settings.data.visiblePropertiesList = visibleProperties;
+					plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
 			});
 		});
 
@@ -767,7 +800,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	function handleViewSelect(index: number) {
 		saveMapViewIfNeeded();
 
-		console.log("Now will switch the view...");
 		if (index !== currentViewIndex) {
 			// Update the board's lastViewId to persist view selection
 			if (boardData?.views && index >= 0 && index < boardData.views.length) {
@@ -783,7 +815,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				setTimeout(() => {
 					// eventEmitter.emit("REFRESH_BOARD");
 					// plugin.saveSettings();
-					console.log("Will now going to save the view index :", updatedBoard.lastViewIndex);
 					plugin.taskBoardFileManager.saveBoard(updatedBoard);
 				}, 500);
 			}

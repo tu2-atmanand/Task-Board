@@ -1,7 +1,23 @@
+import { Filter } from "./BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants.js";
-import { EditButtonMode, TagColorType, taskPropertiesNames, mapViewArrowDirection, mapViewScrollAction, mapViewEdgeType, taskPropertyFormatOptions, scanModeOptions, taskCardStyleNames, UniversalDateOptions, defaultTaskStatuses, DEFAULT_TASK_NOTE_FRONTMATTER_KEYS, NotificationService, mapViewBackgrounVariantTypes, mapViewNodeMapOrientation } from "./Enums.js";
+import {
+	EditButtonMode,
+	TagColorType,
+	taskPropertiesNames,
+	mapViewArrowDirection,
+	mapViewScrollAction,
+	mapViewEdgeType,
+	taskPropertyFormatOptions,
+	scanModeOptions,
+	taskCardStyleNames,
+	UniversalDateOptions,
+	defaultTaskStatuses,
+	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
+	NotificationService,
+	mapViewBackgrounVariantTypes,
+	mapViewNodeMapOrientation,
+} from "./Enums.js";
 import { taskItemKeyToNameMapping } from "./Mapping.js";
-
 
 export type ScanFilters = {
 	files: {
@@ -20,7 +36,7 @@ export type ScanFilters = {
 		polarity: number;
 		values: string[];
 	};
-}
+};
 
 export interface TagColor {
 	name: string;
@@ -133,6 +149,8 @@ export interface globalSettingsData {
 		renderVisibleNodes: boolean;
 		edgeType: mapViewEdgeType;
 	};
+	enableDragnDropTouch: boolean;
+	filtersWarehouse: Filter[];
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -446,6 +464,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					"This board contains dated type columns for managing time critical scheduled tasks.",
 			},
 		},
+		enableDragnDropTouch: false,
+		filtersWarehouse: [],
 	},
 };
 

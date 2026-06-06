@@ -293,11 +293,14 @@ export const columnSegregator = (
 	 * 		FILTERING BASED ON COLUMN ADVANCED FILTERS
 	 * -------------------------------------------------------------
 	 */
-	if (columnData?.filters && columnData.filters.filterGroups) {
+	if (
+		columnData?.columnFilters &&
+		columnData.columnFilters.filters.length > 0
+	) {
 		const dateFormat = settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 		tasksToDisplay = advancedFilterer(
 			tasksToDisplay,
-			columnData.filters,
+			columnData.columnFilters,
 			dateFormat,
 		);
 	}

@@ -4,9 +4,9 @@ import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from '
 import { CSSProperties } from 'react';
 import { Menu, Notice, Platform } from 'obsidian';
 import { t } from 'i18next';
-import { AlertOctagon } from 'lucide-react';
+import { AlertOctagon, EllipsisVertical, MenuIcon } from 'lucide-react';
 import TaskBoard from '../../../main.js';
-import { Board, KanbanView, ColumnData, RootFilterState } from '../../interfaces/BoardConfigs.js';
+import { Board, KanbanView, ColumnData, Filter, AdvancedFilter } from '../../interfaces/BoardConfigs.js';
 import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
 import { taskItem } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
@@ -289,7 +289,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				}
 			}
 		} catch (err) {
-			console.log("While drag leave : ", err);
+			console.warn("Error while dragging over and leaving columns component : ", err);
 		}
 
 		// setIsDragOver(false);
@@ -320,12 +320,28 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const targetColumnContainer = tasksContainerRef.current;
 			// const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
 			if (!targetColumnContainer) {
-				throw `e.currentTarget not found : ${JSON.stringify(targetColumnContainer)}`;
+				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
 			}
 
-			dragDropTasksManagerInsatance.handleDropEvent(columnData, targetColumnContainer, swimlaneData);
-			dragDropTasksManagerInsatance.clearCurrentDragData();
-			dragDropTasksManagerInsatance.clearDesiredDropIndex();
+			// We will have to do this calculation here once again to ensure that we correctly captures the task index.
+			let pos = 0 // Default to top of the column
+			const hoveredElement = e.currentTarget;
+			const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
+			const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
+			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+			// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
+			if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
+				const clientY = e.clientY;
+				const rect = hoveredElement.getBoundingClientRect();
+				const midpoint = rect.top + rect.height / 2;
+				if (clientY < midpoint) {
+					pos = parseInt(draggedOverItemIndex, 10);
+				} else {
+					pos = parseInt(draggedOverItemIndex, 10) + 1;
+				}
+			}
+
+			dragDropTasksManagerInsatance.handleDropEvent(columnData, targetColumnContainer, swimlaneData, pos);
 
 			// clear any pending raf
 			if (rafRef.current) {
@@ -463,20 +479,21 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					// 	(col: ColumnData) => col.id === columnData.id
 					// );
 
+					const ViewFiltersPresent = activeBoardData.views[currentViewIndex].viewFilters.filters.some((filter) => filter.status);
 					const columnIndex = columnData.index - 1;
 					if (Platform.isMobile || Platform.isMacOS) {
 						// If its a mobile platform, then we will open a modal instead of popover.
 						const filterModal = new AdvancedFilterModal(
-							plugin, true, activeBoardData.id, columnData.name, columnData.filters
+							plugin, "column", activeBoardData.id, ViewFiltersPresent, columnData.name, columnData.columnFilters
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
-						filterModal.filterCloseCallback = async (filterState) => {
+						filterModal.filterCloseCallback = async (filterState: AdvancedFilter | undefined) => {
 							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
-									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].columnFilters = filterState;
 
 									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
@@ -496,23 +513,25 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
 							: { x: 100, y: 100 }; // Fallback position
 
+						const ViewFiltersPresent = activeBoardData.views[currentViewIndex].viewFilters.filters.some((filter) => filter.status);
+
 						// Create and show filter popover
-						// leafId is undefined for column filters (not tied to a specific leaf)
 						const popover = new AdvancedFilterPopover(
 							plugin,
-							true, // forColumn is true
+							"column",
 							activeBoardData.id,
+							ViewFiltersPresent,
 							columnData.name,
-							columnData.filters
+							columnData.columnFilters
 						);
 
 						// Set up close callback to save filter state
-						popover.onClose = async (filterState?: RootFilterState) => {
+						popover.onClose = async (filterState?: AdvancedFilter) => {
 							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
-									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].filters = filterState;
+									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].columnFilters = filterState;
 
 									plugin.taskBoardFileManager.saveBoard(newBoardData);
 
@@ -670,6 +689,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				data-column-type={columnData.colType}
 				data-column-tag-name={tagData?.name}
 				data-column-tag-color={tagData?.color}
+				data-swimlane-property={swimlaneData?.property ?? ""}
+				data-swimlane-value={swimlaneData?.value}
 			>
 				{columnData.minimized && !hideColumnHeader ? (
 					// Minimized view
@@ -695,8 +716,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 										</div>
 									)}
 								</div>
-								<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
-									{allTasks?.length ?? 0}
+								<div className='taskBoardColumnSecHeaderBtnSec'>
+									<div className='taskBoardColumnSecHeaderBtnSecMenuBtn' onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+										<EllipsisVertical className='taskBoardColumnSecHeaderBtnSecMenuIcon' size={18} />
+									</div>
+									<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
+										{allTasks?.length ?? 0}
+									</div>
 								</div>
 							</div>
 						)}
