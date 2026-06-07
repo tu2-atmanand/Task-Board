@@ -189,8 +189,9 @@ export function extractTaskNoteProperties(
 		getCustomFrontmatterKey("priority", frontmatterFormatting),
 		"string",
 	);
-	if (typeof value === "number") {
-		taskItemData["priority"] = value;
+	if (value) {
+		const priorityNumber = getPriorityNumberForTaskNote(value);
+		taskItemData["priority"] = priorityNumber;
 	}
 
 	// Extract status
@@ -231,11 +232,13 @@ export function extractTaskNoteProperties(
  * @param priorityValue - Priority value from frontmatter
  * @returns number - Priority number (0-5)
  */
-export function mapPriorityNameFromFrontmatter(priorityValue: any): number {
+export function getPriorityNumberForTaskNote(priorityValue: any): number {
 	if (!priorityValue) return 0;
 
-	const priorityStr = String(priorityValue).trim().toLowerCase();
+	if (priorityValue.length === 1 && Number(priorityValue))
+		return Number(priorityValue);
 
+	const priorityStr = String(priorityValue).trim().toLowerCase();
 	// Map emojis to priority numbers
 	switch (priorityStr) {
 		case "highest":
@@ -254,13 +257,13 @@ export function mapPriorityNameFromFrontmatter(priorityValue: any): number {
 }
 
 /**
- * Get priority emoji from priority number
+ * Get priority name from priority number
  * @param priority - Priority number (1-5)
  * @returns string - Priority emoji
  */
 export function getPriorityNameForTaskNote(priority: number): string {
 	const priorityNames: { [key: number]: string } = {
-		0: "None",
+		0: "none",
 		1: "highest",
 		2: "high",
 		3: "medium",
