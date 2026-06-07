@@ -23,6 +23,7 @@ import {
 	MultiSuggest,
 	getTagSuggestions,
 	getFileSuggestions,
+	getFolderSuggestions,
 } from "src/services/MultiSuggest";
 import {
 	getPriorityOptionsForDropdown,
@@ -689,14 +690,12 @@ export class TaskFilterComponent extends Component {
 			const propertyValue = propertySelect.getValue();
 			if (propertyValue === "priority" || propertyValue === "status") {
 				valueInput.hide();
-				if (valueActuallyNeeded)
-					dropdownInputContainer.show()
+				if (valueActuallyNeeded) dropdownInputContainer.show();
 				else {
 					dropdownInputContainer.hide();
 				}
 			} else {
-				if (valueActuallyNeeded)
-					valueInput.show()
+				if (valueActuallyNeeded) valueInput.show();
 				else {
 					valueInput.hide();
 				}
@@ -823,6 +822,7 @@ export class TaskFilterComponent extends Component {
 				reminder: t("reminder"),
 				dependencies: t("dependencies"),
 				filePath: t("file-path"),
+				folderPath: t("folder-path"),
 				// project: t("project"),
 			});
 		}
@@ -866,6 +866,7 @@ export class TaskFilterComponent extends Component {
 				];
 				break;
 			case "filePath":
+			case "folderPath":
 				valueInput.type = "text";
 				conditionOptions = [
 					{
@@ -1278,13 +1279,11 @@ export class TaskFilterComponent extends Component {
 		const propertyValue = propertySelect.getValue();
 		if (propertyValue === "priority" || propertyValue === "status") {
 			valueInput.hide();
-			if (valueActuallyNeeded)
-				dropdownInputContainer.show()
+			if (valueActuallyNeeded) dropdownInputContainer.show();
 			else dropdownInputContainer.hide();
 		} else {
 			dropdownInputContainer.hide();
-			if (valueActuallyNeeded)
-				valueInput.show()
+			if (valueActuallyNeeded) valueInput.show();
 			else valueInput.hide();
 		}
 
@@ -1320,7 +1319,7 @@ export class TaskFilterComponent extends Component {
 		filterData: Filter,
 	): void {
 		// Only setup suggestions for specific properties
-		const propertiesWithSuggestions = ["tags", "filePath"];
+		const propertiesWithSuggestions = ["tags", "filePath", "folderPath"];
 
 		// Clean up existing MultiSuggest instance if it exists
 		const existingInstance = this.multiSuggestInstances.get(valueInput);
@@ -1348,6 +1347,8 @@ export class TaskFilterComponent extends Component {
 			case "filePath":
 				suggestions = getFileSuggestions(this.app);
 				break;
+			case "folderPath":
+				suggestions = getFolderSuggestions(this.app);
 		}
 
 		// Create callback to update filter data when suggestion is selected
@@ -1381,7 +1382,7 @@ export class TaskFilterComponent extends Component {
 			) as HTMLElement;
 			if (conjunctionElement) {
 				if (index !== 0) {
-					conjunctionElement.show()
+					conjunctionElement.show();
 					if (groupCondition === "any") {
 						conjunctionElement.textContent = t("or");
 					} else if (groupCondition === "none") {

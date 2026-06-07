@@ -11,6 +11,7 @@ import { getAllTaskTags } from "../TaskItemUtils";
 import { compareAsc } from "date-fns";
 import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
 import { robustDateParser } from "../DateTimeCalculations";
+import { normalizePath } from "obsidian";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -41,7 +42,8 @@ export function advancedFilterer(
 	return tasks.filter((task) => {
 		// Filter out null/undefined/invalid filter groups before processing
 		const validGroups = filterGroups.filter(
-			(group) => group && typeof group === "object" && group.groupCondition
+			(group) =>
+				group && typeof group === "object" && group.groupCondition,
 		);
 
 		// If no valid groups after filtering, return true (no filtering applied)
@@ -281,6 +283,10 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "filePath":
 		case "path":
 			return task.filePath || "";
+		case "folderPath":
+			const parts = task.filePath.split("/");
+			const folderPath = parts.slice(0, -1).join("/");
+			return normalizePath(folderPath) || "";
 		case "startTime":
 			return task.time ? task.time.split("-")[0].trim() : "";
 		case "reminder":
