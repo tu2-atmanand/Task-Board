@@ -7,7 +7,7 @@ import { swimlaneConfigs } from 'src/interfaces/BoardConfigs';
 import { HeaderUITypeOptions } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, StatusDropdownOption } from 'src/interfaces/Mapping';
 import TaskBoard from 'main';
-import { getFileSuggestions, getTagSuggestions, MultiSuggest } from 'src/services/MultiSuggest';
+import { getFileSuggestions, getFolderSuggestions, getTagSuggestions, MultiSuggest } from 'src/services/MultiSuggest';
 import { ClosePopupConfrimationModal } from './ClosePopupConfrimationModal';
 
 interface SwimlanesConfigModalProps {
@@ -119,6 +119,7 @@ export class SwimlanesConfigModal extends Modal {
 			{ value: 'priority', label: t('priority') },
 			{ value: 'status', label: t('status') },
 			{ value: 'filePath', label: t("file-path") },
+			{ value: 'folderPath', label: t("folder-path") },
 		];
 
 		new Setting(container)
@@ -280,7 +281,7 @@ export class SwimlanesConfigModal extends Modal {
 				);
 			} else if (this.property === 'filePath') {
 				const input = row.createEl('input', {
-					attr: { type: 'text', placeholder: t('enter-property-value') },
+					attr: { type: 'text', placeholder: t('enter-file-path') },
 					cls: 'swimlanesConfigSortRowInput',
 				});
 				input.value = sortRow.value ?? '';
@@ -291,6 +292,29 @@ export class SwimlanesConfigModal extends Modal {
 				});
 
 				const suggestions = getFileSuggestions(this.app);
+				const onSelectCallback = (value: string) => {
+					this.customSortOrder[rowIndex].value = value.trim();
+					this.edited = true;
+				};
+				const multiSuggestInstance = new MultiSuggest(
+					input,
+					new Set(suggestions),
+					onSelectCallback,
+					this.app,
+				);
+			} else if (this.property === 'folderPath') {
+				const input = row.createEl('input', {
+					attr: { type: 'text', placeholder: t('enter-folder-path') },
+					cls: 'swimlanesConfigSortRowInput',
+				});
+				input.value = sortRow.value ?? '';
+				input.addEventListener('input', (e) => {
+					const rawValue = (e.target as HTMLInputElement).value ?? "";
+					this.customSortOrder[rowIndex].value = normalizePath(rawValue);
+					this.edited = true;
+				});
+
+				const suggestions = getFolderSuggestions(this.app);
 				const onSelectCallback = (value: string) => {
 					this.customSortOrder[rowIndex].value = value.trim();
 					this.edited = true;

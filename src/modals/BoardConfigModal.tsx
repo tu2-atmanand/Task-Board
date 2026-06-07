@@ -13,7 +13,7 @@ import { SettingsManager } from "src/settings/SettingConstructUI";
 import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
-import { MultiSuggest, getFileSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
+import { MultiSuggest, getFileSuggestions, getFolderSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
 import { colTypeNames, HeaderUITypeOptions, UniversalDateOptions } from "src/interfaces/Enums";
 import { Board, ColumnData, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
@@ -354,7 +354,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			if (!fileInputElement) return;
 
 			if (filePathInputRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
-				const suggestionContent = getFileSuggestions(plugin.app);
+				const suggestionContent = [
+					...getFolderSuggestions(plugin.app),
+					...getFileSuggestions(plugin.app),
+				];
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
 					handleColumnChange(selectedBoardIndex, index, "filePaths", selectedPath);
