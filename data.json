@@ -254,7 +254,7 @@
     "lastViewHistory": {
       "viewedType": "kanban",
       "boardIndex": 1,
-      "settingTab": 7,
+      "settingTab": 0,
       "taskId": "",
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
     },
@@ -288,6 +288,18 @@
         "boardId": "board_3907751366",
         "filePath": "TaskBoard/A Test Board.taskboard",
         "boardName": "A Test Board",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
+      "board_2553700948": {
+        "boardId": "board_2553700948",
+        "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1774097758616.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
+      "board_762849833": {
+        "boardId": "board_762849833",
+        "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1778856605183.taskboard",
+        "boardName": "My Project",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
     },
@@ -424,6 +436,7 @@
         "description": "These are the tasks I created when I found a new topic which I want to learn."
       }
     ],
-    "enableDragnDropTouch": false
+    "enableDragnDropTouch": false,
+    "ribbonIconAction": "lastBoard"
   }
 }
