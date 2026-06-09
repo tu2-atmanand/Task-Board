@@ -118,7 +118,7 @@ export class AdvancedFilterPopover
 				setTooltip(el, t("close-to-apply-changes"));
 			},
 		);
-		this.plugin.registerDomEvent(applyBtn, "click", (evt: PointerEvent) => {
+		this.plugin.registerDomEvent(applyBtn, "click", (evt: MouseEvent) => {
 			this.close();
 		});
 

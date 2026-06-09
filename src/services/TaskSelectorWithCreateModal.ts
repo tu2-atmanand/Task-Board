@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import { SuggestModal, App } from "obsidian";
+import { SuggestModal, App, Notice } from "obsidian";
 import TaskBoard from "../../main.js";
 import createTaskCard from "../components/TaskCard/TaskCardImage.js";
 import { taskItem } from "../interfaces/TaskItem.js";

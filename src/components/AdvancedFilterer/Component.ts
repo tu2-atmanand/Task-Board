@@ -426,7 +426,7 @@ export class AdvancedFilterComponent extends Component {
 						setIcon(iconEl, "ellipsis-vertical");
 					},
 				);
-				this.registerDomEvent(el, "click", (event: PointerEvent) => {
+				this.registerDomEvent(el, "click", (event: MouseEvent) => {
 					this.somethingElseIsOpened = true;
 					const filterMenu = new Menu();
 

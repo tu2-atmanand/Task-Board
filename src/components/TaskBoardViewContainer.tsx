@@ -2,7 +2,7 @@
 
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { debounce, Platform, Menu, WorkspaceLeaf } from "obsidian";
+import { debounce, Platform, Menu, WorkspaceLeaf, Notice } from "obsidian";
 import { t } from 'i18next';
 import TaskBoard from '../../main.js';
 import { AdvancedFilter, Board, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
