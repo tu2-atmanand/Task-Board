@@ -199,7 +199,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 						values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
 						return values.includes(swimlaneItemValue.replace('#', '').toLocaleLowerCase());
-					} else if (property === "filePath") {
+					} else if (property === "filePath" || property === "folderPath") {
 						return swimlaneItemValue.endsWith("/") ? values[0].includes(swimlaneItemValue) : values[0] === swimlaneItemValue;
 					}
 
@@ -215,6 +215,10 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				swimlaneName = "No tags";
 			} else if (property === 'filePath') {
 				swimlaneName = swimlaneItemValue.split("/").pop() ?? swimlaneItemValue;
+			} else if (property === 'folderPath') {
+				const parts = swimlaneItemValue.split("/");
+				swimlaneName = parts.at(-2) ?? swimlaneItemValue;
+				swimlaneName = swimlaneName + "/";
 			}
 			const isSwimlaneMinimized = minimized?.includes(swimlaneName) ?? false;
 
@@ -521,6 +525,13 @@ function getPropertyValues(
 		case 'filePath':
 			if (task?.filePath)
 				values = [task.filePath];
+			break;
+		case 'folderPath':
+			if (task?.filePath) {
+				const parts = task.filePath.split("/");
+				const folderPath = parts.slice(0, -1).join("/");
+				values = [folderPath + "/" || ""];
+			}
 			break;
 
 		// case 'project':

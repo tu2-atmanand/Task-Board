@@ -56,7 +56,7 @@ export function getFolderSuggestions(app: App): string[] {
 	const folders = app.vault
 		.getAllLoadedFiles()
 		.filter((f) => f instanceof TFolder && f.path !== "/")
-		.map((f) => f.path);
+		.map((f) => f.path + "/");
 
 	return folders;
 }

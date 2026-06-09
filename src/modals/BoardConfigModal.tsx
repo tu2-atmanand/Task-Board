@@ -13,7 +13,7 @@ import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../interf
 import { viewTypeNames, colTypeNames, UniversalDateOptions } from "../interfaces/Enums.js";
 import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { getFileSuggestions, MultiSuggest, getTagSuggestions } from "../services/MultiSuggest.js";
+import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../services/MultiSuggest.js";
 import { SettingsManager } from "../settings/SettingConstructUI.js";
 import { generateRandomNumber, generateRandomStringId } from "../utils/TaskItemUtils.js";
 import { AddColumnModal } from "./AddColumnModal.js";
@@ -125,7 +125,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			if (!fileInputElement) return;
 
 			if (multiSuggestInputFieldRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
-				const suggestionContent = getFileSuggestions(plugin.app);
+				const suggestionContent = [
+					...getFolderSuggestions(plugin.app),
+					...getFileSuggestions(plugin.app),
+				];
 				const onSelectCallback = (selectedPath: string) => {
 					// setNewFilePath(selectedPath);
 					handleColumnChange(selectedViewIndex, index, "filePaths", selectedPath);

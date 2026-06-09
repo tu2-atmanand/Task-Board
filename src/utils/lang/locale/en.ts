@@ -679,7 +679,10 @@ const en: Lang = {
 	"save-in-warehouse": "Save in warehouse",
 	"delete-filter": "Delete filter",
 	"board-level-filters": "Board level filters",
-	"board-level-filters-info": "Apply board level filters. All the tasks from your vault will first pass through this filters and then they will be shown inside the views under this board."
+	"board-level-filters-info": "Apply board level filters. All the tasks from your vault will first pass through this filters and then they will be shown inside the views under this board.",
+	"folder-path": "Folder path",
+	"enter-file-path": "Enter full file path",
+	"enter-folder-path": "Enter full folder path"
 };
 
 export default en;
