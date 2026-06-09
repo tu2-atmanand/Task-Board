@@ -8,6 +8,7 @@
 import { around } from "monkey-around";
 import {
 	App,
+	Menu,
 	normalizePath,
 	Notice,
 	Plugin,
@@ -35,10 +36,12 @@ import {
 import {
 	taskPropertiesNames,
 	scanModeOptions,
+	RibbonIconActions,
 } from "./src/interfaces/Enums.js";
 import {
 	PluginDataJson,
 	DEFAULT_SETTINGS,
+	taskBoardFilesRegistryType,
 } from "./src/interfaces/GlobalSettings.js";
 import { TaskBoardIcon } from "./src/interfaces/Icons.js";
 import { bugReporterManagerInsatance } from "./src/managers/BugReporter.js";
@@ -329,8 +332,60 @@ export default class TaskBoard extends Plugin {
 		this.ribbonIconEl = this.addRibbonIcon(
 			TaskBoardIcon,
 			t("open-task-board") ?? "Open task board",
-			() => {
-				this.activateView("icon", false);
+			(evt: MouseEvent) => {
+				const registry: taskBoardFilesRegistryType =
+					this.settings.data.taskBoardFilesRegistry ?? {};
+				const registryValues = Object.values(registry);
+
+				switch (this.settings.data.ribbonIconAction) {
+					case RibbonIconActions.lastBoard:
+						if (registryValues.length > 0) {
+							eventEmitter.emit("OPEN_BOARD", {
+								layout: "tab",
+								filePath: registryValues[0].filePath,
+								duplicate: false,
+							});
+						} else {
+							this.activateView("icon", false);
+						}
+						break;
+					case RibbonIconActions.allBoardsMenu:
+						if (registryValues.length > 1) {
+							const allBoardsMenu = new Menu();
+
+							registryValues.forEach((board) => {
+								allBoardsMenu.addItem((item) => {
+									item.setTitle(board.boardName);
+									item.setIcon(TaskBoardIcon);
+									item.onClick(async () => {
+										eventEmitter.emit("OPEN_BOARD", {
+											layout: "tab",
+											filePath: board.filePath,
+											duplicate: false,
+										});
+									});
+								});
+							});
+
+							// Use native event if available (React event has nativeEvent property)
+							allBoardsMenu.showAtMouseEvent(evt);
+						} else if (registryValues.length > 0) {
+							eventEmitter.emit("OPEN_BOARD", {
+								layout: "tab",
+								filePath: registryValues[0].filePath,
+								duplicate: false,
+							});
+						} else {
+							this.activateView("icon", false);
+						}
+						break;
+					case RibbonIconActions.boardsExplorer:
+						openBoardsExplorerModal(this.plugin);
+						break;
+					default:
+						openBoardsExplorerModal(this.plugin);
+						break;
+				}
 
 				// this.app.workspace.ensureSideLeaf(VIEW_TYPE_TASKBOARD, "right", {
 				// 	active: true,
@@ -826,8 +881,8 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "open-task-boards-explorer",
-			name: t("open-task-boards-explorer"),
+			id: "open-boards-explorer",
+			name: t("open-boards-explorer"),
 			callback: () => {
 				openBoardsExplorerModal(this);
 			},

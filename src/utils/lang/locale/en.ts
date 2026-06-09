@@ -682,7 +682,14 @@ const en: Lang = {
 	"board-level-filters-info": "Apply board level filters. All the tasks from your vault will first pass through this filters and then they will be shown inside the views under this board.",
 	"folder-path": "Folder path",
 	"enter-file-path": "Enter full file path",
-	"enter-folder-path": "Enter full folder path"
+	"enter-folder-path": "Enter full folder path",
+	"open-boards-explorer": "Open boards explorer",
+	"last-viewed-board": "Last viewed board",
+	"all-boards-menu": "All boards menu",
+	"boards-explorer": "Boards explorer",
+	"refresh-boards": "Refresh boards",
+	"ribbon-icon-action": "Ribbon icon action",
+	"ribbon-icon-action-info": "Choose what does the ribbon icon of this plugin should do from the ribbon bar."
 };
 
 export default en;

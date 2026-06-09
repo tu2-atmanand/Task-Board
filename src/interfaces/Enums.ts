@@ -236,3 +236,9 @@ export enum viewsPanelPropertiesToShow {
 	CreatedDate = "createdDate",
 	ModifiedDate = "modifiedDate",
 }
+
+export enum RibbonIconActions {
+	lastBoard = "lastBoard",
+	allBoardsMenu = "menu",
+	boardsExplorer = "explorer",
+}

@@ -20,13 +20,16 @@ export class BoardsExplorerModal extends Modal {
 		this.plugin = plugin;
 		this.boardsRegistry = boardsRegistry;
 		this.onBoardSelect = onBoardSelect;
-		this.setTitle(t("boards-explorer-modal"));
+		this.setTitle(t("boards-explorer"));
 	}
 
 	async onOpen() {
 		const { contentEl } = this;
 
-		this.modalEl.setAttribute("data-type", "boards-explorer-modal");
+		this.modalEl.setAttribute(
+			"modal-type",
+			"task-board-boards-explorer-modal",
+		);
 
 		const modalContent = contentEl.createDiv({
 			cls: "boardsExplorerModalContent",
@@ -37,14 +40,32 @@ export class BoardsExplorerModal extends Modal {
 			cls: "boardsExplorerHeader",
 		});
 
-		headerSection.createEl("h2", {
-			text: t("your-boards"),
-			cls: "boardsExplorerHeaderTitle",
+		// headerSection.createEl("h2", {
+		// 	text: t("your-boards"),
+		// 	cls: "boardsExplorerHeaderTitle",
+		// });
+
+		const headerSecBottom = headerSection.createDiv({
+			cls: "boardsExplorerHeaderBottom",
 		});
 
-		headerSection.createEl("p", {
-			text: "Select a board to view or manage it",
+		headerSecBottom.createEl("p", {
+			text: "Click on a board to open it.",
 			cls: "boardsExplorerHeaderDescription",
+		});
+
+		const scanButton = headerSecBottom.createEl("button", {
+			text: t("refresh-boards"),
+			cls: "boardsExplorerScanButton",
+		});
+		scanButton.addEventListener("click", async () => {
+			if (!this.isScanning) {
+				await this.handleScanBoards(
+					mainContent,
+					headerSection,
+					scanButton,
+				);
+			}
 		});
 
 		// Main content area - this will hold the board grid or empty state
@@ -56,39 +77,18 @@ export class BoardsExplorerModal extends Modal {
 		// Initial render of board grid
 		this.renderBoardGrid(mainContent);
 
-		// Footer section with buttons
-		const footerSection = modalContent.createDiv({
-			cls: "boardsExplorerFooter",
-		});
+		// // Footer section with buttons
+		// const footerSection = modalContent.createDiv({
+		// 	cls: "boardsExplorerFooter",
+		// });
 
-		// Button container for horizontal layout
-		const buttonContainer = footerSection.createDiv({
-			cls: "boardsExplorerButtonContainer",
-		});
-
-		const scanButton = footerSection.createEl("button", {
-			text: "Scan boards",
-			cls: "boardsExplorerScanButton",
-		});
-
-		const closeButton = footerSection.createEl("button", {
-			text: "Close",
-			cls: "boardsExplorerCloseButton",
-		});
-
-		scanButton.addEventListener("click", async () => {
-			if (!this.isScanning) {
-				await this.handleScanBoards(
-					mainContent,
-					footerSection,
-					scanButton,
-				);
-			}
-		});
-
-		closeButton.addEventListener("click", () => {
-			this.close();
-		});
+		// const closeButton = footerSection.createEl("button", {
+		// 	text: t("close"),
+		// 	cls: "boardsExplorerCloseButton",
+		// });
+		// closeButton.addEventListener("click", () => {
+		// 	this.close();
+		// });
 	}
 
 	private renderBoardGrid(container: HTMLElement): void {

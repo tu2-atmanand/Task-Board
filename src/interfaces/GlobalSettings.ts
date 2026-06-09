@@ -16,6 +16,7 @@ import {
 	NotificationService,
 	mapViewBackgrounVariantTypes,
 	mapViewNodeMapOrientation,
+	RibbonIconActions,
 } from "./Enums.js";
 import { taskItemKeyToNameMapping } from "./Mapping.js";
 
@@ -151,6 +152,7 @@ export interface globalSettingsData {
 	};
 	enableDragnDropTouch: boolean;
 	filtersWarehouse: Filter[];
+	ribbonIconAction: string;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -466,6 +468,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		},
 		enableDragnDropTouch: false,
 		filtersWarehouse: [],
+		ribbonIconAction: RibbonIconActions.allBoardsMenu,
 	},
 };
 

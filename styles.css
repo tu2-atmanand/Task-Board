@@ -40,6 +40,10 @@
 	min-width: fit-content;
 }
 
+.modal[modal-type="task-board-boards-explorer-modal"] {
+	width: var(--dialog-max-width);
+}
+
 /* ------------------------------------------------------- */
 /*                The Task Board Config Modal              */
 /* ------------------------------------------------------- */
@@ -8626,7 +8630,9 @@ li[data-task=b]>p>input:checked {
 	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath d='M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z' /%3E%3C/svg%3E")
 }
 
-/* Boards Explorer Modal Styles */
+/* ---------------------------------------------------------- */
+/*                 Boards Explorer Modal                      */
+/* ---------------------------------------------------------- */
 
 .boardsExplorerModalContent {
 	display: flex;
@@ -8634,15 +8640,21 @@ li[data-task=b]>p>input:checked {
 	gap: 1.5rem;
 	min-height: 50vh;
 	max-height: 85vh;
-	padding: 1.5rem;
 }
 
 .boardsExplorerHeader {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: 0.4rem;
 	border-bottom: 2px solid var(--background-modifier-border);
 	padding-bottom: 1rem;
+}
+
+.boardsExplorerHeaderBottom {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	justify-content: space-between;
 }
 
 .boardsExplorerHeaderTitle {
@@ -8682,7 +8694,7 @@ li[data-task=b]>p>input:checked {
 	gap: 0.75rem;
 	position: relative;
 	overflow: hidden;
-	max-width: 50%;
+	max-width: 45%;
 	min-width: 350px;
 }
 
@@ -8832,7 +8844,7 @@ li[data-task=b]>p>input:checked {
 	margin-top: 0.5rem;
 }
 
-.boardsExplorerCloseButton {
+.boardsExplorerScanButton {
 	padding: 0.5rem 1rem;
 	border: 1px solid var(--background-modifier-border-focus);
 	border-radius: var(--radius-m);
@@ -8844,13 +8856,13 @@ li[data-task=b]>p>input:checked {
 	transition: all 0.2s ease;
 }
 
-.boardsExplorerCloseButton:hover {
+.boardsExplorerScanButton:hover {
 	background: var(--background-secondary-alt);
 	border-color: var(--interactive-accent);
 	color: var(--interactive-accent);
 }
 
-.boardsExplorerCloseButton:active {
+.boardsExplorerScanButton:active {
 	transform: scale(0.98);
 }
 
@@ -8870,7 +8882,6 @@ li[data-task=b]>p>input:checked {
 @media (max-width: 768px) {
 	.boardsExplorerModalContent {
 		min-height: 60vh;
-		padding: 1rem;
 	}
 
 	.boardsExplorerGrid {
@@ -8910,7 +8921,6 @@ li[data-task=b]>p>input:checked {
 	.boardsExplorerModalContent {
 		gap: 1rem;
 		max-height: 90vh;
-		padding: 0.75rem;
 	}
 
 	.boardsExplorerGrid {

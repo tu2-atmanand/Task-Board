@@ -28,6 +28,7 @@ import {
 	mapViewEdgeType,
 	EditButtonMode,
 	NotificationService,
+	RibbonIconActions,
 } from "../interfaces/Enums.js";
 import {
 	globalSettingsData,
@@ -313,6 +314,7 @@ export class SettingsManager {
 			autoAddUniqueID,
 			experimentalFeatures,
 			safeGuardFeature,
+			ribbonIconAction,
 		} = this.globalSettings!;
 
 		new Setting(contentEl)
@@ -494,6 +496,71 @@ export class SettingsManager {
 				}),
 			);
 
+		// Setting to show/Hide the Header of the task card
+		new Setting(contentEl)
+			.setName(t("open-board-on-obsidian-startup"))
+			.setDesc(t("open-board-on-obsidian-startup-info"))
+			.addToggle((toggle) =>
+				toggle.setValue(openOnStartup).onChange(async (value) => {
+					this.globalSettings!.openOnStartup = value;
+					await this.saveSettings();
+				}),
+			);
+
+		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
+		new Setting(contentEl)
+			.setName(t("show-modified-files-message-on-startup"))
+			.setDesc(t("show-modified-files-message-on-startup-info"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(showModifiedFilesNotice)
+					.onChange(async (value) => {
+						this.globalSettings!.showModifiedFilesNotice = value;
+						await this.saveSettings();
+					}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("ribbon-icon-action"))
+			.setDesc(t("ribbon-icon-action-info"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOptions({
+						[RibbonIconActions.lastBoard]: t("last-viewed-board"),
+						[RibbonIconActions.allBoardsMenu]: t("all-boards-menu"),
+						[RibbonIconActions.boardsExplorer]:
+							t("boards-explorer"),
+					})
+					.setValue(ribbonIconAction)
+					.onChange(async (value) => {
+						this.globalSettings!.ribbonIconAction =
+							value as RibbonIconActions;
+						await this.saveSettings();
+					}),
+			);
+
+		// New setting for updating language file
+		new Setting(contentEl)
+			.setName(t("update-language-translations"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("update-language-translations-info") +
+						" <a href='https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/'>" +
+						t("task-board-docs") +
+						".",
+				),
+			)
+			.addButton((button) =>
+				button.setButtonText("Update").onClick(async () => {
+					const result = await downloadAndApplyLanguageFile(
+						this.plugin,
+					);
+					if (result) {
+						this.openReloadNoticeIfNeeded();
+					}
+				}),
+			);
+
 		const tasksCachePathSettingsContainer = contentEl.createDiv({
 			cls: "task-board-single-setting-container",
 		});
@@ -610,52 +677,6 @@ export class SettingsManager {
 		};
 
 		renderTasksCachePathSetting();
-
-		// Setting to show/Hide the Header of the task card
-		new Setting(contentEl)
-			.setName(t("open-board-on-obsidian-startup"))
-			.setDesc(t("open-board-on-obsidian-startup-info"))
-			.addToggle((toggle) =>
-				toggle.setValue(openOnStartup).onChange(async (value) => {
-					this.globalSettings!.openOnStartup = value;
-					await this.saveSettings();
-				}),
-			);
-
-		// Setting to Scan the whole Vault to detect all tasks and re-write the tasks.json
-		new Setting(contentEl)
-			.setName(t("show-modified-files-message-on-startup"))
-			.setDesc(t("show-modified-files-message-on-startup-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(showModifiedFilesNotice)
-					.onChange(async (value) => {
-						this.globalSettings!.showModifiedFilesNotice = value;
-						await this.saveSettings();
-					}),
-			);
-
-		// New setting for updating language file
-		new Setting(contentEl)
-			.setName(t("update-language-translations"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("update-language-translations-info") +
-						" <a href='https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/'>" +
-						t("task-board-docs") +
-						".",
-				),
-			)
-			.addButton((button) =>
-				button.setButtonText("Update").onClick(async () => {
-					const result = await downloadAndApplyLanguageFile(
-						this.plugin,
-					);
-					if (result) {
-						this.openReloadNoticeIfNeeded();
-					}
-				}),
-			);
 
 		new Setting(contentEl)
 			.setName(t("import-export-configurations"))
