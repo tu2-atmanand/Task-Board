@@ -26,13 +26,13 @@ export class TaskEditorView extends ItemView {
 	isEdited: boolean;
 	isTaskNote: boolean;
 	activeNote: boolean;
-	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void;
+	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>;
 
 	constructor(
 		plugin: TaskBoard,
 		leaf: WorkspaceLeaf,
 		viewTypeId: string,
-		saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void,
+		saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>,
 		isTaskNote: boolean,
 		activeNote: boolean,
 		taskExists: boolean,
@@ -78,7 +78,7 @@ export class TaskEditorView extends ItemView {
 			if (this.taskExists) {
 				const data = await readDataOfVaultFile(this.plugin, this.filePath, true);
 
-				if (data == null) this.onClose();
+				if (data == null) await this.onClose();
 				else noteContent = data;
 
 				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
@@ -112,8 +112,8 @@ export class TaskEditorView extends ItemView {
 					filePath={this.filePath}
 					onSave={async (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => {
 						this.isEdited = false;
-						const formattedContent = await getFormattedTaskContent(updatedTask);
-						this.saveTask(updatedTask, quickAddPluginChoice, updatedNoteContent);
+						// const formattedContent = await getFormattedTaskContent(updatedTask);
+						await this.saveTask(updatedTask, quickAddPluginChoice, updatedNoteContent);
 						// Close the view leaf
 						this.app.workspace.detachLeavesOfType(this.viewTypeId);
 					}}

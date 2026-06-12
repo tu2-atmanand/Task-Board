@@ -689,7 +689,11 @@ const en: Lang = {
 	"boards-explorer": "Boards explorer",
 	"refresh-boards": "Refresh boards",
 	"ribbon-icon-action": "Ribbon icon action",
-	"ribbon-icon-action-info": "Choose what does the ribbon icon of this plugin should do from the ribbon bar."
+	"ribbon-icon-action-info": "Choose what does the ribbon icon of this plugin should do from the ribbon bar.",
+	"author-name": "Atmanand Gauns",
+	"task-board-filters-warehouse": "Task board filters warehouse",
+	"task-board-safe-guard": "Task board safe guard",
+	"task-board-cache": "Task board cache"
 };
 
 export default en;

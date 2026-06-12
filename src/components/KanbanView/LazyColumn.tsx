@@ -2,18 +2,18 @@
 
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { CSSProperties } from 'react';
-import { Menu, Notice, Platform } from 'obsidian';
+import { Menu, Notice, Platform, WorkspaceLeaf } from 'obsidian';
 import { t } from 'i18next';
-import { AlertOctagon, EllipsisVertical, MenuIcon } from 'lucide-react';
+import { AlertOctagon, EllipsisVertical } from 'lucide-react';
 import TaskBoard from '../../../main.js';
-import { Board, KanbanView, ColumnData, Filter, AdvancedFilter } from '../../interfaces/BoardConfigs.js';
+import { Board, KanbanView, ColumnData, AdvancedFilter } from '../../interfaces/BoardConfigs.js';
 import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
 import { taskItem } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { dragDropTasksManagerInsatance } from '../../managers/DragDropTasksManager.js';
 import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSortingModal.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
-import { isRootFilterStateEmpty } from '../../utils/algorithms/AdvancedFilterer.js';
+import { isAdvancedFilterEmpty } from '../../utils/algorithms/AdvancedFilterer.js';
 import { matchTagsWithWildcards } from '../../utils/algorithms/ScanningFilterer.js';
 import { AdvancedFilterModal } from '../AdvancedFilterer/index.js';
 import { AdvancedFilterPopover } from '../AdvancedFilterer/Popover.js';
@@ -26,6 +26,7 @@ type CustomCSSProperties = CSSProperties & {
 
 export interface LazyColumnProps {
 	plugin: TaskBoard;
+	currentLeaf: WorkspaceLeaf;
 	activeBoardData: Board;
 	currentViewIndex: number;
 	kanbanViewData: KanbanView;
@@ -40,6 +41,7 @@ export interface LazyColumnProps {
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
 	plugin,
+	currentLeaf,
 	activeBoardData,
 	currentViewIndex,
 	kanbanViewData,
@@ -80,7 +82,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			cancelAnimationFrame(rafRef.current);
 			rafRef.current = null;
 		}
-		rafRef.current = requestAnimationFrame(() => {
+		rafRef.current = window.requestAnimationFrame(() => {
 			insertIndexRef.current = pos;
 			setInsertIndex(pos);
 			rafRef.current = null;
@@ -117,7 +119,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 		if (scrollDifference < 1) return;
 
-		const htmlElement = document.documentElement;
+		const htmlElement = activeDocument.documentElement;
 
 		if (isScrollingDown) {
 			// User is scrolling down - hide navigation
@@ -160,23 +162,21 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		if (!container) return;
 
 		// Throttle scroll events for performance
-		let throttleTimeout: NodeJS.Timeout | null = null;
+		let throttleTimeout: number | null;
 		const throttledScroll = () => {
 			if (throttleTimeout) return;
-			throttleTimeout = setTimeout(() => {
+			throttleTimeout = window.setTimeout(() => {
 				handleScroll();
 
 				if (Platform.isMobile)
 					handleNavVisibility();
-
-				throttleTimeout = null;
 			}, 100);
 		};
 
 		container.addEventListener('scroll', throttledScroll);
 		return () => {
 			container.removeEventListener('scroll', throttledScroll);
-			if (throttleTimeout) clearTimeout(throttleTimeout);
+			if (throttleTimeout) window.clearTimeout(throttleTimeout);
 		};
 	}, [handleScroll]);
 
@@ -248,7 +248,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				}
 
 				const targetColumnContainer = tasksContainerRef.current as HTMLDivElement;
-				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent as DragEvent, e.currentTarget as HTMLDivElement, targetColumnContainer, columnData);
+				dragDropTasksManagerInsatance.handleCardDragOverEvent(e.nativeEvent, e.currentTarget, targetColumnContainer, columnData);
 			}
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(119, String(error), "LazyColumn.tsx/handleTaskItemDragOver");
@@ -264,7 +264,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		// setIsDragOver(true);
 		try {
 			// Get the target column container
-			const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
+			const targetColumnContainer = (e.currentTarget);
 			dragDropTasksManagerInsatance.handleColumnDragOverEvent(e.nativeEvent, columnData, targetColumnContainer);
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(120, String(error), "LazyColumn.tsx/handleDragOver");
@@ -295,7 +295,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		// setIsDragOver(false);
 		setInsertIndex(null);
 		// Let manager clean up the column highlight
-		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget as HTMLDivElement);
+		dragDropTasksManagerInsatance.handleDragLeaveEvent(e.currentTarget);
 		dragDropTasksManagerInsatance.clearDesiredDropIndex();
 	}, []);
 
@@ -320,7 +320,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const targetColumnContainer = tasksContainerRef.current;
 			// const targetColumnContainer = (e.currentTarget) as HTMLDivElement;
 			if (!targetColumnContainer) {
-				throw `tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`;
+				throw new Error(`tasksContainerRef.current not found : ${JSON.stringify(targetColumnContainer)}`);
 			}
 
 			// We will have to do this calculation here once again to ensure that we correctly captures the task index.
@@ -363,7 +363,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 			// Clean up navigation visibility class when component unmounts
 			// if (isNavHiddenRef.current) {
-			document.documentElement.classList.remove('is-hidden-nav');
+			activeDocument.documentElement.classList.remove('is-hidden-nav');
 			// isNavHiddenRef.current = false;
 			// }
 		};
@@ -388,7 +388,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	}
 
 	// Determine whether an advanced filter is applied (used by header count UI)
-	const isAdvancedFilterApplied = !isRootFilterStateEmpty(columnData.filters);
+	const isAdvancedFilterApplied = !isAdvancedFilterEmpty(columnData.columnFilters);
 
 	async function handleMinimizeColumn() {
 		// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
@@ -406,14 +406,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		if (columnIndex !== -1) {
 			let newBoardData = activeBoardData;
 			newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].minimized = !newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].minimized;
-			plugin.taskBoardFileManager.saveBoard(newBoardData);
+			await plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 			eventEmitter.emit('REFRESH_BOARD');
 		}
 		// }
 	}
 
-	async function handleAlertButtonClick() {
+	function handleAlertButtonClick() {
 		const message = "You have set a work limit of " + columnData.workLimit + " for this column. Dont be so hard on yourself. Limit your work to reduce workload burden.";
 		new Notice(message, 0);
 	}
@@ -451,7 +451,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 							// Update the column configuration
 							let newBoardData = activeBoardData;
 							newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex] = updatedColumnConfiguration;
-							plugin.taskBoardFileManager.saveBoard(newBoardData);
+							void plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 							// Refresh the board view
 							eventEmitter.emit('REFRESH_BOARD');
@@ -489,14 +489,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						);
 
 						// Set the close callback - mainly used for handling cancel actions
-						filterModal.filterCloseCallback = async (filterState: AdvancedFilter | undefined) => {
+						filterModal.filterCloseCallback = (filterState: AdvancedFilter | undefined) => {
 							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
 									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].columnFilters = filterState;
 
-									plugin.taskBoardFileManager.saveBoard(newBoardData);
+									void plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
@@ -509,7 +509,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						// Get the position of the menu (approximate column position)
 						// Use CSS.escape to properly escape the selector value
 						const escapedTag = columnData.coltag ? CSS.escape(columnData.coltag) : '';
-						const columnElement = document.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
+						const columnElement = activeDocument.querySelector(`[data-column-tag-name="${escapedTag}"]`) as HTMLElement;
 						const position = columnElement
 							? { x: columnElement.getBoundingClientRect().left, y: columnElement.getBoundingClientRect().top + 40 }
 							: { x: 100, y: 100 }; // Fallback position
@@ -527,14 +527,14 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						);
 
 						// Set up close callback to save filter state
-						popover.onClose = async (filterState?: AdvancedFilter) => {
+						popover.onClose = (filterState?: AdvancedFilter) => {
 							if (filterState) {
 								if (columnIndex !== -1) {
 									// Update the column filters
 									let newBoardData = activeBoardData;
 									newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].columnFilters = filterState;
 
-									plugin.taskBoardFileManager.saveBoard(newBoardData);
+									void plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 									// Refresh the board view
 									eventEmitter.emit('REFRESH_BOARD');
@@ -577,7 +577,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					let newBoardData = activeBoardData;
 					newBoardData.views[currentViewIndex].kanbanView!.columns[columnIndex].active = false;
 
-					plugin.taskBoardFileManager.saveBoard(newBoardData);
+					void plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 					// Refresh the board view
 					eventEmitter.emit('REFRESH_BOARD');
@@ -620,7 +620,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					let updatedBoardData = { ...activeBoardData };
 					if (updatedBoardData.views[currentViewIndex].kanbanView) {
 						updatedBoardData.views[currentViewIndex].kanbanView = updatedViewData;
-						plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+						void plugin.taskBoardFileManager.saveBoard(updatedBoardData);
 
 						eventEmitter.emit('REFRESH_BOARD');
 					}
@@ -699,9 +699,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						<div className={`taskBoardColumnSecHeaderTitleSecColumnCount ${isAdvancedFilterApplied ? 'active' : ''}`} onClick={(evt) => openColumnMenu(evt)} aria-label={t("open-column-menu")}>
 							{allTasks?.length ?? 0}
 						</div>
-						<div className="taskBoardColumnMinimizedTitle" onClick={async () => {
-							await handleMinimizeColumn();
-							eventEmitter.emit('REFRESH_BOARD');
+						<div className="taskBoardColumnMinimizedTitle" onClick={() => {
+							void handleMinimizeColumn();
 						}}>{columnData.name}</div>
 					</div>
 				) : (
@@ -768,6 +767,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																dataAttributeIndex: i,
 																plugin: plugin,
 																task: task,
+																parentComponent: currentLeaf.component,
 																activeBoardID: activeBoardData.id,
 																activeViewIndex: currentViewIndex,
 																activeViewType: viewTypeNames.kanban, // Since LazyColumn will be always rendered inside a Kanban view.

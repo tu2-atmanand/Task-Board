@@ -71,16 +71,22 @@ export const openAddNewTaskInCurrentFileModal = (
 	app: App,
 	plugin: TaskBoard,
 	activeFile: TFile,
-	cursorPosition?: { line: number; ch: number } | undefined,
+	cursorPosition?: { line: number; ch: number },
 ) => {
 	const AddTaskModal = new TaskEditorModal(
 		plugin,
-		(newTask: taskItem, quickAddPluginChoice: string) => {
-			addTaskInNote(plugin, newTask, true, cursorPosition).then(
+		async (newTask: taskItem, quickAddPluginChoice: string) => {
+			void addTaskInNote(plugin, newTask, true, cursorPosition).then(
 				(newId) => {
-					plugin.realTimeScanner.processAllUpdatedFiles(
-						newTask.filePath,
-					);
+					plugin.realTimeScanner
+						.processAllUpdatedFiles(newTask.filePath)
+						.catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"OpenModals.ts/openAddNewTaskInCurrentFileModal",
+							);
+						});
 				},
 			);
 
@@ -96,7 +102,6 @@ export const openAddNewTaskInCurrentFileModal = (
 			// @todo - I dont think I need to emit this here, since the processAllUpdatedFiles function will refresh the file and then it will emit this same signal anyways. And, until that, we dont have to refresh the view at all.
 			eventEmitter.emit("SOFT_REFRESH");
 			cursorPosition = undefined;
-			return true;
 		},
 		false,
 		true,
@@ -120,11 +125,13 @@ export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 			if (communityPlugins.isQuickAddPluginIntegrationEnabled()) {
 				// Call the API of QuickAdd plugin and pass the formatted content.
 				let completeTask = await getFormattedTaskContent(newTask);
-				const { formattedTaskContent, newId } =
-					await addIdToTaskContent(plugin, completeTask);
+				const { formattedTaskContent } = await addIdToTaskContent(
+					plugin,
+					completeTask,
+				);
 				completeTask = formattedTaskContent;
 
-				(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
+				communityPlugins.quickAddPlugin?.api.executeChoice(
 					quickAddPluginChoice,
 					{
 						value: completeTask + "\n",
@@ -132,9 +139,15 @@ export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 				);
 			} else {
 				await addTaskInNote(plugin, newTask, false).then((newId) => {
-					plugin.realTimeScanner.processAllUpdatedFiles(
-						newTask.filePath,
-					);
+					plugin.realTimeScanner
+						.processAllUpdatedFiles(newTask.filePath)
+						.catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"OpenModals.ts/openAddNewTaskModal",
+							);
+						});
 				});
 			}
 
@@ -167,7 +180,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 		async (
 			newTask: taskItem,
 			quickAddPluginChoice: string,
-			noteContent: string | undefined,
+			noteContent?: string,
 		) => {
 			if (!noteContent) {
 				bugReporterManagerInsatance.showNotice(
@@ -201,7 +214,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							}
 
 							// Required for Obsidian to create the folder and index it.
-							sleep(200);
+							await sleep(200);
 						}
 
 						await plugin.app.vault
@@ -211,10 +224,18 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								plugin.realTimeScanner.onFileModified(
 									newTask.filePath,
 								);
-								sleep(1000).then(() => {
+								window.setTimeout(() => {
 									// TODO : Is 1 seconds really required ?
-									plugin.realTimeScanner.processAllUpdatedFiles();
-								});
+									plugin.realTimeScanner
+										.processAllUpdatedFiles()
+										.catch((error) => {
+											bugReporterManagerInsatance.addToLogs(
+												217,
+												String(error),
+												"OpenModals.ts/openAddNewTaskNoteModal",
+											);
+										});
+								}, 1000);
 							});
 					} else {
 						const newName = getCurrentLocalDateTimeString();
@@ -238,9 +259,18 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 								plugin.realTimeScanner.onFileModified(
 									`Copy-${newTask.filePath}`,
 								);
-								sleep(1000).then(() => {
-									plugin.realTimeScanner.processAllUpdatedFiles();
-								});
+
+								window.setTimeout(() => {
+									plugin.realTimeScanner
+										.processAllUpdatedFiles()
+										.catch((error) => {
+											bugReporterManagerInsatance.addToLogs(
+												217,
+												String(error),
+												"OpenModals.ts/openAddNewTaskNoteModal",
+											);
+										});
+								}, 1000);
 							});
 					}
 				} catch (error) {
@@ -250,7 +280,6 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 						"OpenModals.ts/openAddNewTaskNoteModal/callback()",
 					);
 					new Notice(t("error-creating-task-note"), 5000);
-					return false;
 				}
 			}
 
@@ -266,13 +295,13 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 	AddTaskModal.open();
 };
 
-export const openEditTaskModal = async (
+export const openEditTaskModal = (
 	plugin: TaskBoard,
 	existingTask: taskItem,
 ) => {
 	const EditTaskModal = new TaskEditorModal(
 		plugin,
-		(updatedTask: taskItem) => {
+		async (updatedTask: taskItem) => {
 			let eventData: UpdateTaskEventData = {
 				taskID: existingTask.id,
 				state: true,
@@ -281,14 +310,24 @@ export const openEditTaskModal = async (
 
 			updatedTask.filePath = existingTask.filePath;
 			// Update the task in the file and JSON
-			updateTaskInFile(plugin, updatedTask, existingTask).then(
-				(newId) => {
-					plugin.realTimeScanner.processAllUpdatedFiles(
-						updatedTask.filePath,
-						existingTask.id,
-					);
-				},
-			);
+			updateTaskInFile(plugin, updatedTask, existingTask)
+				.then((newId) => {
+					plugin.realTimeScanner
+						.processAllUpdatedFiles(
+							updatedTask.filePath,
+							existingTask.id,
+						)
+						.catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"OpenModals.ts/openEditTaskModal",
+							);
+						});
+				})
+				.catch((error) => {
+					// No need to handle here, the function already handles this.
+				});
 
 			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 			// updateTaskInJson(plugin, updatedTask);
@@ -332,29 +371,45 @@ export const openEditTaskNoteModal = (
 						plugin,
 						updatedTask,
 					).then(() => {
-						sleep(1000).then(() => {
+						window.setTimeout(() => {
 							// TODO : Is 1 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
-							plugin.realTimeScanner.processAllUpdatedFiles(
-								updatedTask.filePath,
-								existingTask.id,
-							);
-						});
+							plugin.realTimeScanner
+								.processAllUpdatedFiles(
+									updatedTask.filePath,
+									existingTask.id,
+								)
+								.catch((error) => {
+									bugReporterManagerInsatance.addToLogs(
+										217,
+										String(error),
+										"OpenModals.ts/openEditTaskNoteModal",
+									);
+								});
+						}, 1000);
 					});
 				} else {
-					writeDataToVaultFile(
+					await writeDataToVaultFile(
 						plugin,
 						updatedTask.filePath,
 						newTaskContent,
 					).then(() => {
-						sleep(1000).then(() => {
+						window.setTimeout(() => {
 							// TODO : Is 1 sec really required ?
 							// This is required to rescan the updated file and refresh the board.
-							plugin.realTimeScanner.processAllUpdatedFiles(
-								updatedTask.filePath,
-								existingTask.id,
-							);
-						});
+							plugin.realTimeScanner
+								.processAllUpdatedFiles(
+									updatedTask.filePath,
+									existingTask.id,
+								)
+								.catch((error) => {
+									bugReporterManagerInsatance.addToLogs(
+										217,
+										String(error),
+										"OpenModals.ts/openEditTaskNoteModal",
+									);
+								});
+						}, 1000);
 					});
 				}
 
@@ -561,7 +616,7 @@ export const openScanFiltersModal = (
 	filterType: keyof ScanFilters,
 	onSave: (scanFilters: string[]) => void,
 ) => {
-	new ScanFilterModal(plugin, filterType, async (newValues) => {
+	new ScanFilterModal(plugin, filterType, (newValues) => {
 		onSave(newValues);
 	}).open();
 };
@@ -654,7 +709,7 @@ export const openEditTaskView = async (
 		matchLeaf.setEphemeralState({ viewTaskId: taskId });
 
 		// Reveal the leaf
-		workspace.revealLeaf(matchLeaf);
+		await workspace.revealLeaf(matchLeaf);
 
 		return leaves[0];
 	} else {
@@ -695,14 +750,22 @@ export const openEditTaskView = async (
 						) => {
 							if (!isTaskNote) {
 								// Update the task in the file and JSON
-								updateTaskInFile(
+								await updateTaskInFile(
 									plugin,
 									updatedTask,
 									task,
 								).then((newId) => {
-									plugin.realTimeScanner.processAllUpdatedFiles(
-										updatedTask.filePath,
-									);
+									plugin.realTimeScanner
+										.processAllUpdatedFiles(
+											updatedTask.filePath,
+										)
+										.catch((error) => {
+											bugReporterManagerInsatance.addToLogs(
+												217,
+												String(error),
+												"OpenModals.ts/openEditTaskView",
+											);
+										});
 								});
 							} else {
 								if (!updatedNoteContent) {
@@ -711,28 +774,43 @@ export const openEditTaskView = async (
 										plugin,
 										updatedTask,
 									).then(() => {
-										// This is required to rescan the updated file and refresh the board.
-										sleep(1000).then(() => {
+										window.setTimeout(() => {
 											// TODO : Is 1 sec really required ?
 											// This is required to rescan the updated file and refresh the board.
-											plugin.realTimeScanner.processAllUpdatedFiles(
-												updatedTask.filePath,
-											);
-										});
+											plugin.realTimeScanner
+												.processAllUpdatedFiles(
+													updatedTask.filePath,
+												)
+												.catch((error) => {
+													bugReporterManagerInsatance.addToLogs(
+														217,
+														String(error),
+														"OpenModals.ts/openEditTaskView",
+													);
+												});
+										}, 1000);
 									});
 								} else {
-									writeDataToVaultFile(
+									await writeDataToVaultFile(
 										plugin,
 										updatedTask.filePath,
 										updatedNoteContent,
 									).then(() => {
-										sleep(1000).then(() => {
+										window.setTimeout(() => {
 											// TODO : Is 1 sec really required ?
 											// This is required to rescan the updated file and refresh the board.
-											plugin.realTimeScanner.processAllUpdatedFiles(
-												updatedTask.filePath,
-											);
-										});
+											plugin.realTimeScanner
+												.processAllUpdatedFiles(
+													updatedTask.filePath,
+												)
+												.catch((error) => {
+													bugReporterManagerInsatance.addToLogs(
+														217,
+														String(error),
+														"OpenModals.ts/openEditTaskView",
+													);
+												});
+										}, 1000);
 									});
 								}
 							}
@@ -756,13 +834,23 @@ export const openEditTaskView = async (
 					) => {
 						if (!isTaskNote) {
 							// Update the task in the file and JSON
-							updateTaskInFile(plugin, updatedTask, task).then(
-								(newId) => {
-									plugin.realTimeScanner.processAllUpdatedFiles(
+							void updateTaskInFile(
+								plugin,
+								updatedTask,
+								task,
+							).then((newId) => {
+								plugin.realTimeScanner
+									.processAllUpdatedFiles(
 										updatedTask.filePath,
-									);
-								},
-							);
+									)
+									.catch((error) => {
+										bugReporterManagerInsatance.addToLogs(
+											217,
+											String(error),
+											"OpenModals.ts/openEditTaskView",
+										);
+									});
+							});
 						} else {
 							if (!updatedNoteContent) {
 								// Update frontmatter with task properties
@@ -770,27 +858,41 @@ export const openEditTaskView = async (
 									plugin,
 									updatedTask,
 								).then(() => {
-									// This is required to rescan the updated file and refresh the board.
-									sleep(1000).then(() => {
-										// This is required to rescan the updated file and refresh the board.
-										plugin.realTimeScanner.processAllUpdatedFiles(
-											updatedTask.filePath,
-										);
-									});
+									window.setTimeout(() => {
+										// This delay is required to rescan the updated file and refresh the board.
+										plugin.realTimeScanner
+											.processAllUpdatedFiles(
+												updatedTask.filePath,
+											)
+											.catch((error) => {
+												bugReporterManagerInsatance.addToLogs(
+													217,
+													String(error),
+													"OpenModals.ts/openEditTaskView",
+												);
+											});
+									}, 1000);
 								});
 							} else {
-								writeDataToVaultFile(
+								void writeDataToVaultFile(
 									plugin,
 									updatedTask.filePath,
 									updatedNoteContent,
 								).then(() => {
-									sleep(1000).then(() => {
-										// TODO : Is 1 sec really required ?
-										// This is required to rescan the updated file and refresh the board.
-										plugin.realTimeScanner.processAllUpdatedFiles(
-											updatedTask.filePath,
-										);
-									});
+									window.setTimeout(() => {
+										// This delay is required to rescan the updated file and refresh the board.
+										plugin.realTimeScanner
+											.processAllUpdatedFiles(
+												updatedTask.filePath,
+											)
+											.catch((error) => {
+												bugReporterManagerInsatance.addToLogs(
+													217,
+													String(error),
+													"OpenModals.ts/openEditTaskView",
+												);
+											});
+									}, 1000);
 								});
 							}
 						}
@@ -818,7 +920,7 @@ export const openEditTaskView = async (
 			});
 
 			// Reveal the leaf
-			workspace.revealLeaf(leaf);
+			await workspace.revealLeaf(leaf);
 		}
 		return leaf;
 	}
@@ -831,7 +933,7 @@ export const openDateInputModal = async (
 	initialValue?: string,
 ) => {
 	const datePicker = new DatePickerModal(plugin, dateName, initialValue);
-	datePicker.onDateSelected = async (date: string) => {
+	datePicker.onDateSelected = (date: string) => {
 		// newTask[dateType] = date;
 		// updateTaskItemDate(plugin, newTask, dateType, date);
 		onSelect(date);

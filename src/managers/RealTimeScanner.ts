@@ -21,7 +21,9 @@ export class RealTimeScanner {
 
 	async initializeStack() {
 		try {
-			const storedStack = localStorage.getItem(PENDING_SCAN_FILE_STACK);
+			const storedStack = this.app.loadLocalStorage(
+				PENDING_SCAN_FILE_STACK,
+			);
 			if (storedStack) {
 				this.taskBoardFileStack = JSON.parse(storedStack);
 			}
@@ -37,7 +39,7 @@ export class RealTimeScanner {
 
 	saveStack() {
 		try {
-			localStorage.setItem(
+			this.app.saveLocalStorage(
 				PENDING_SCAN_FILE_STACK,
 				JSON.stringify(this.taskBoardFileStack),
 			);
@@ -56,61 +58,67 @@ export class RealTimeScanner {
 	 * @param currentFile The file that was modified, or undefined if no file was modified.
 	 * @param updatedTaskId The ID of the task that was updated, or undefined if no task was updated.
 	 * @returns A Promise that resolves to a boolean indicating if the process was successful.
+	 *
+	 * @error_code 217
 	 */
 	async processAllUpdatedFiles(
-		currentFile?: TFile | string | undefined,
-		updatedTaskId?: string | undefined,
-	) {
-		// If a current file is provided, ensure it's included in the processing
-		let newFile: TFile | null | undefined = null;
-		if (currentFile && typeof currentFile === "string") {
-			newFile = this.plugin.app.vault.getFileByPath(currentFile);
-		} else {
-			newFile = currentFile as TFile | undefined;
-		}
-
-		const filesToProcess = this.taskBoardFileStack.slice();
-		const files = filesToProcess
-			.map((filePath) => this.getFileFromPath(filePath))
-			.filter((file) => !!file);
-
-		if (newFile) {
+		currentFile?: TFile | string,
+		updatedTaskId?: string,
+	): Promise<void> {
+		try {
 			// If a current file is provided, ensure it's included in the processing
-			const currentFilePath = newFile.path;
-			if (!filesToProcess.includes(currentFilePath)) {
-				filesToProcess.push(currentFilePath);
-				files.push(newFile);
-			}
-		}
-
-		let result = false;
-		if (filesToProcess.length > 0) {
-			// Send all files for scanning and updating tasks
-			result = await this.vaultScanner.refreshTasksFromFiles(
-				files,
-				false,
-			);
-
-			if (result) {
-				// Clear the stack to avoid re-processing during this run.
-				this.taskBoardFileStack = [];
-				// Save updated stack (which should now be empty)
-				this.saveStack();
-
-				// Reset the editorModified flag after the scan.
-				this.plugin.editorModified = false;
+			let newFile: TFile | null | undefined = null;
+			if (currentFile && typeof currentFile === "string") {
+				newFile = this.plugin.app.vault.getFileByPath(currentFile);
 			} else {
-				new Notice("Few files didnt got scanned...");
+				newFile = currentFile as TFile | undefined;
 			}
-		}
 
-		setTimeout(() => {
-			// This event emmitter will stop any loading animation of ongoing task-card.
-			eventEmitter.emit("UPDATE_TASK", {
-				taskID: updatedTaskId,
-				state: false,
-			});
-		}, 500);
+			const filesToProcess = this.taskBoardFileStack.slice();
+			const files = filesToProcess
+				.map((filePath) => this.getFileFromPath(filePath))
+				.filter((file) => !!file);
+
+			if (newFile) {
+				// If a current file is provided, ensure it's included in the processing
+				const currentFilePath = newFile.path;
+				if (!filesToProcess.includes(currentFilePath)) {
+					filesToProcess.push(currentFilePath);
+					files.push(newFile);
+				}
+			}
+
+			let result = false;
+			if (filesToProcess.length > 0) {
+				// Send all files for scanning and updating tasks
+				result = await this.vaultScanner.refreshTasksFromFiles(
+					files,
+					false,
+				);
+
+				if (result) {
+					// Clear the stack to avoid re-processing during this run.
+					this.taskBoardFileStack = [];
+					// Save updated stack (which should now be empty)
+					this.saveStack();
+
+					// Reset the editorModified flag after the scan.
+					this.plugin.editorModified = false;
+				} else {
+					new Notice("Few files didnt got scanned...");
+				}
+			}
+		} catch (error) {
+			throw new Error(String(error));
+		} finally {
+			window.setTimeout(() => {
+				// This event emmitter will stop any loading animation of ongoing task-card.
+				eventEmitter.emit("UPDATE_TASK", {
+					taskID: updatedTaskId,
+					state: false,
+				});
+			}, 500);
+		}
 	}
 
 	getFileFromPath(filePath: string): TFile | null {

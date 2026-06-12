@@ -32,7 +32,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 20;
-	private readonly MAX_USED_ID = 216; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
+	private readonly MAX_USED_ID = 219; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -95,7 +95,7 @@ class BugReporterManager {
 	/**
 	 * Format system information for the log file
 	 */
-	private formatSystemInfo(systemInfo: Record<string, any>): string {
+	private formatSystemInfo(systemInfo: Record<string, unknown>): string {
 		return Object.entries(systemInfo)
 			.map(([key, value]) => {
 				if (Array.isArray(value)) {
@@ -347,7 +347,7 @@ ${entry.bugContent}
 		});
 
 		// STEP 3 - Append the bug report to the task-board-logs.md file
-		this.appendBugReport(id, message, bugContent, context);
+		void this.appendBugReport(id, message, bugContent, context);
 	};
 
 	/**
@@ -364,7 +364,7 @@ ${entry.bugContent}
 		this.alreadyShownBugsIDs.push(id);
 
 		// STEP 3 - Append the bug report to the task-board-logs.md file
-		this.appendBugReport(id, "", bugContent, context);
+		void this.appendBugReport(id, "", bugContent, context);
 	};
 
 	async exportLogFile(): Promise<void> {
@@ -380,13 +380,11 @@ ${entry.bugContent}
 
 			// Desktop folder picker
 			if (
-				(window as any).electron &&
-				(window as any).electron.remote &&
-				(window as any).electron.remote.dialog
+				window?.electron &&
+				window.electron?.remote &&
+				window.electron.remote?.dialog
 			) {
-				let folderPaths: string[] = (
-					window as any
-				).electron.remote.dialog.showOpenDialogSync({
+				let folderPaths: string[] = window.electron.remote.dialog.showOpenDialogSync({
 					title: "Pick folder to export settings",
 					properties: ["openDirectory", "dontAddToRecent"],
 				});
@@ -405,15 +403,15 @@ ${entry.bugContent}
 				new Notice(`Log file exported to ${exportPath}`);
 			} else {
 				// Web: use file save dialog
-				let a = document.createElement("a");
+				let a = activeDocument.createElement("a");
 				a.href = URL.createObjectURL(
 					new Blob([data], { type: "application/json" }),
 				);
 				a.download = exportFileName;
-				document.body.appendChild(a);
+				activeDocument.body.appendChild(a);
 				a.click();
-				setTimeout(() => {
-					document.body.removeChild(a);
+				window.setTimeout(() => {
+					activeDocument.body.removeChild(a);
 					URL.revokeObjectURL(a.href);
 				}, 1000);
 				new Notice(
@@ -423,7 +421,7 @@ ${entry.bugContent}
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(
 				198,
-				`Failed to export the log file: ${err}`,
+				`Failed to export the log file: ${String(err)}`,
 				"BugReporter.ts/exportLogFile",
 			);
 		}

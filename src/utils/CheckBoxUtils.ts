@@ -16,7 +16,7 @@ import { TaskRegularExpressions } from "../regularExpressions/TasksPluginRegular
 export function checkboxStateSwitcher(
 	customStatuses: CustomStatus[],
 	symbol: string,
-): { newSymbol: string; newSymbolType: string } {
+): { newSymbol: string; newSymbolType: statusTypeNames } {
 	// Check if customStatuses is available and has entries
 	if (customStatuses?.length > 0) {
 		const oldStatus = customStatuses.find(
@@ -36,7 +36,7 @@ export function checkboxStateSwitcher(
 	}
 
 	new Notice(
-		"customStatuses are not available or empty. Please check your settings. Falling back to default behavior.",
+		"Custom statuses are not available or empty. Please check your settings. Falling back to default behavior.",
 	);
 	// Default fallback behavior
 	return symbol === "x" || symbol === "X"
@@ -92,8 +92,8 @@ export function isTaskCompleted(
 			// console.log("customStatus :", customStatus, "\nsymbol :", symbol);
 			if (
 				customStatus.symbol === symbol &&
-				(customStatus.type === "DONE" ||
-					customStatus.type === "CANCELLED")
+				(customStatus.type === statusTypeNames.DONE ||
+					customStatus.type === statusTypeNames.CANCELLED)
 			) {
 				flag = true;
 				return true;
@@ -106,8 +106,8 @@ export function isTaskCompleted(
 		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
 			if (
 				customStatus.symbol === titleOrSymbol &&
-				(customStatus.type === "DONE" ||
-					customStatus.type === "CANCELLED")
+				(customStatus.type === statusTypeNames.DONE ||
+					customStatus.type === statusTypeNames.CANCELLED)
 			) {
 				flag = true;
 				return true;
@@ -142,7 +142,7 @@ export function extractCheckboxSymbol(task: string): string {
 	const match = task.match(/\[(.)\]/); // Extract the symbol inside [ ]
 	if (!match || match.length < 2) return " ";
 
-	return match[1]!;
+	return match[1];
 }
 
 /**
@@ -169,7 +169,7 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 		// Fallback: try to read the vault's .obsidian/app.json to get tabSize / useTab
 		try {
 			const path = `${plugin.app.vault.configDir}/app.json`;
-			plugin.app.vault.adapter.read(path).then((content: string) => {
+			void plugin.app.vault.adapter.read(path).then((content: string) => {
 				const parsed = JSON.parse(content || "{}");
 				if (parsed?.useTab === undefined) {
 					// Obsidian has not initialized any settings, hence they will be undefined

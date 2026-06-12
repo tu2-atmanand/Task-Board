@@ -5417,6 +5417,19 @@ svg.react-flow__connectionline {
 	transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
 }
 
+.advanced-filter-expandable-area.expand {
+	max-height: 2000px;
+	opacity: 1;
+	padding-block: var(--size-2-2);
+}
+
+.advanced-filter-expandable-area.collapse {
+	max-height: 0;
+	opacity: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
 .filter-name-setting {
 	display: flex;
 	flex-direction: row;
@@ -8866,6 +8879,46 @@ li[data-task=b]>p>input:checked {
 	transform: scale(0.98);
 }
 
+.boardsExplorerLoadingBarContainer {
+	width: calc(100% + 40px);
+	margin: 0 -20px 12px -20px;
+	padding: 0 20px;
+	overflow: hidden;
+}
+
+.boardsExplorerLoadingBar {
+	width: 100%;
+	height: 4px;
+	background: linear-gradient(90deg,
+			#0066cc 0%,
+			#0066cc 20%,
+			transparent 20%,
+			transparent 40%,
+			#0066cc 40%,
+			#0066cc 60%,
+			transparent 60%,
+			transparent 80%,
+			#0066cc 80%,
+			#0066cc 100%);
+	background-size: 100px 4px;
+	animation: boardsExplorerLoadingPendulum 2s ease-in-out infinite;
+	border-radius: 2px;
+}
+
+@keyframes boardsExplorerLoadingPendulum {
+	0% {
+		background-position: -100px 0;
+	}
+
+	50% {
+		background-position: calc(100% + 100px) 0;
+	}
+
+	100% {
+		background-position: -100px 0;
+	}
+}
+
 /* Responsive design */
 @media (max-width: 1024px) {
 
@@ -9616,4 +9669,30 @@ li[data-task=b]>p>input:checked {
 	align-items: center;
 	justify-content: flex-end;
 	margin-top: 2rem;
+}
+
+
+/* ---------------------------------------------------- */
+/*                 SOME COMMON STYLES                   */
+/* ---------------------------------------------------- */
+
+.tb_opacity_1 {
+	opacity: 1;
+}
+
+.tb_opacity_0 {
+	opacity: 0;
+}
+
+.tb_padding_left_0 {
+	padding-left: 0;
+	padding-inline-start: 0;
+}
+
+.tb_color_white {
+	color: white;
+}
+
+.tb_color_white {
+	color: red;
 }

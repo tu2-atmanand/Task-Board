@@ -40,7 +40,7 @@ import { FrontmatterRenderer } from "./FrontmatterRenderer.js";
 export function createEmbeddableMarkdownEditor(
 	plugin: TaskBoard,
 	container: HTMLElement,
-	options: Partial<MarkdownEditorProps>
+	options: Partial<MarkdownEditorProps>,
 ): EmbeddableMarkdownEditor {
 	// Get the editor class
 	const EditorClass = resolveEditorPrototype(plugin.app);
@@ -51,26 +51,26 @@ export function createEmbeddableMarkdownEditor(
 		plugin.app,
 		EditorClass,
 		container,
-		options
+		options,
 	);
 }
 
 /**
  * Resolves the markdown editor prototype from the app
  */
-function resolveEditorPrototype(app: App): any {
+function resolveEditorPrototype(app: App): unknown {
 	// Create a temporary editor to resolve the prototype of ScrollableMarkdownEditor
 	const widgetEditorView = app.embedRegistry.embedByExtension.md(
 		{ app, containerEl: createDiv() },
 		null as unknown as TFile,
-		""
-	) as WidgetEditorView;
+		"",
+	);
 
 	// Mark as editable to instantiate the editor
 	widgetEditorView.editable = true;
 	widgetEditorView.showEditor();
 	const MarkdownEditor = Object.getPrototypeOf(
-		Object.getPrototypeOf(widgetEditorView.editMode!)
+		Object.getPrototypeOf(widgetEditorView.editMode),
 	);
 
 	// Unload to remove the temporary editor
@@ -91,7 +91,7 @@ interface MarkdownEditorProps {
 	onEnter: (
 		editor: EmbeddableMarkdownEditor,
 		mod: boolean,
-		shift: boolean
+		shift: boolean,
 	) => boolean;
 	// onEscape: (editor: EmbeddableMarkdownEditor) => void;
 	onSubmit: (editor: EmbeddableMarkdownEditor) => void;
@@ -145,7 +145,7 @@ export class EmbeddableMarkdownEditor {
 	get app(): App {
 		return this.editor.app;
 	}
-	get owner(): any {
+	get owner(): unknown {
 		return this.editor.owner;
 	}
 	get _loaded(): boolean {
@@ -162,9 +162,9 @@ export class EmbeddableMarkdownEditor {
 	constructor(
 		plugin: TaskBoard,
 		app: App,
-		EditorClass: any,
+		EditorClass: unknown,
 		container: HTMLElement,
-		options: Partial<MarkdownEditorProps>
+		options: Partial<MarkdownEditorProps>,
 	) {
 		this.plugin = plugin;
 		// Create the editor with the app instance
@@ -198,13 +198,13 @@ export class EmbeddableMarkdownEditor {
 		this.register(
 			around(app.workspace, {
 				setActiveLeaf:
-					(oldMethod: any) =>
-					(leaf: WorkspaceLeaf, ...args: any[]) => {
+					(oldMethod: unknown) =>
+					(leaf: WorkspaceLeaf, ...args: unknown[]) => {
 						if (!this.activeCM?.hasFocus) {
 							oldMethod.call(app.workspace, leaf, ...args);
 						}
 					},
-			})
+			}),
 		);
 
 		// Set up blur event handler
@@ -236,7 +236,7 @@ export class EmbeddableMarkdownEditor {
 			this.editor.editor.cm.dispatch({
 				selection: EditorSelection.range(
 					options.cursorLocation.anchor,
-					options.cursorLocation.head
+					options.cursorLocation.head,
 				),
 			});
 		}
@@ -261,7 +261,7 @@ export class EmbeddableMarkdownEditor {
 					paste: (event) => {
 						this.options.onPaste(event, this);
 					},
-				})
+				}),
 			);
 
 			// Add keyboard handlers
@@ -287,8 +287,8 @@ export class EmbeddableMarkdownEditor {
 						// 	},
 						// 	preventDefault: true,
 						// },
-					])
-				)
+					]),
+				),
 			);
 
 			return extensions;
@@ -311,8 +311,8 @@ export class EmbeddableMarkdownEditor {
 	 */
 	private createFrontmatterHidingExtension() {
 		// Helper function to build decorations for frontmatter
-		const buildDecorations = (state: any): DecorationSet => {
-			const decorations: any[] = [];
+		const buildDecorations = (state: unknown): DecorationSet => {
+			const decorations: unknown[] = [];
 			const doc = state.doc;
 			const text = doc.toString();
 
@@ -332,7 +332,7 @@ export class EmbeddableMarkdownEditor {
 						attributes: {
 							style: "display: none;",
 						},
-					}).range(start, end)
+					}).range(start, end),
 				);
 			}
 
@@ -368,7 +368,7 @@ export class EmbeddableMarkdownEditor {
 		const contentWithoutFrontmatter =
 			this.frontmatterRenderer.extractContentWithoutFrontmatter(
 				content,
-				frontmatterContent
+				frontmatterContent,
 			);
 
 		this.editor.set(contentWithoutFrontmatter, focus);
@@ -399,7 +399,7 @@ export class EmbeddableMarkdownEditor {
 		// Find or create a wrapper in the container
 		// We'll prepend the frontmatter UI to the container
 		const wrapper = this.containerEl.querySelector(
-			".taskboard-frontmatter-wrapper"
+			".taskboard-frontmatter-wrapper",
 		) as HTMLElement;
 
 		if (!wrapper) {
@@ -411,7 +411,7 @@ export class EmbeddableMarkdownEditor {
 			// Insert at the beginning of the container
 			this.containerEl.insertBefore(
 				this.frontmatterUIContainer,
-				this.containerEl.firstChild
+				this.containerEl.firstChild,
 			);
 		} else {
 			this.frontmatterUIContainer = wrapper;
@@ -422,7 +422,7 @@ export class EmbeddableMarkdownEditor {
 		const result = this.frontmatterRenderer.renderCollapsibleFrontmatter(
 			this.frontmatterUIContainer,
 			content,
-			this.options.file
+			this.options.file,
 		);
 
 		// If no frontmatter was rendered, remove the container
@@ -433,7 +433,7 @@ export class EmbeddableMarkdownEditor {
 	}
 
 	// Register cleanup callback
-	register(cb: any): void {
+	register(cb: unknown): void {
 		this.editor.register(cb);
 	}
 

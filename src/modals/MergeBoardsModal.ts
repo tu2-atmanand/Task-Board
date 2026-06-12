@@ -141,9 +141,11 @@ export class MergeBoardsModal extends Modal {
 		const actions = modalContent.createDiv({
 			cls: "mergeBoardsModalActions",
 		});
-		this.mergeButton = actions.createEl("button", { text: "Merge Boards" });
+		this.mergeButton = actions.createEl("button", {
+			text: t("merge-boards"),
+		});
 		this.mergeButton.addEventListener("click", () => {
-			this.handleMerge();
+			void this.handleMerge();
 		});
 
 		// Cancel Button
@@ -227,7 +229,7 @@ export class MergeBoardsModal extends Modal {
 			// Re-enable button
 			if (this.mergeButton) {
 				this.mergeButton.disabled = false;
-				this.mergeButton.textContent = "Merge Boards";
+				this.mergeButton.textContent = t("merge-boards");
 			}
 		}
 	}

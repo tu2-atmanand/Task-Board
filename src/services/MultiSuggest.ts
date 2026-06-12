@@ -87,7 +87,7 @@ export function getTagSuggestions(app: App): string[] {
 
 export function getQuickAddPluginChoices(
 	app: App,
-	quickAddPluginObj: any,
+	quickAddPluginObj: unknown,
 ): string[] {
 	try {
 		if (!quickAddPluginObj) {

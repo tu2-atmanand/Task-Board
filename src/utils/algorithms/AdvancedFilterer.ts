@@ -13,7 +13,6 @@ import { robustDateParser } from "../DateTimeCalculations.js";
 import { getAllTaskTags } from "../TaskItemUtils.js";
 import { getFormattedTaskContentSync } from "../taskLine/TaskContentFormatter.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
-import { normalizePath } from "obsidian";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -275,7 +274,10 @@ function evaluateFilterCriterion(
 /**
  * Gets the property value from a task based on property name
  */
-function getTaskPropertyValue(task: taskItem, property: string): any {
+function getTaskPropertyValue(
+	task: taskItem,
+	property: string,
+): string | string[] | number | boolean | undefined {
 	switch (property) {
 		case "content":
 			return getFormattedTaskContentSync(task);
@@ -314,10 +316,11 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
 		case "filePath":
 		case "path":
 			return task.filePath || "";
-		case "folderPath":
+		case "folderPath": {
 			const parts = task.filePath.split("/");
 			const folderPath = parts.slice(0, -1).join("/");
 			return folderPath + "/" || "";
+		}
 		case "startTime":
 			return task.time ? task.time.split("-")[0].trim() : "";
 		case "reminder":
@@ -342,7 +345,11 @@ function getTaskPropertyValue(task: taskItem, property: string): any {
  * Handles multiple date formats automatically
  * @returns -1 if date1 < date2, 0 if equal, 1 if date1 > date2
  */
-function compareDates(date1: any, date2: any, dateFormat: string): number {
+function compareDates(
+	date1: string | Date,
+	date2: string | Date,
+	dateFormat: string,
+): number {
 	if (!date1 || !date2) {
 		return 0;
 	}
@@ -365,6 +372,8 @@ function compareDates(date1: any, date2: any, dateFormat: string): number {
  * Checks if the root filter state is empty (no filter groups or filters)
  * @param filterState - The root filter state to check
  * @returns true if empty, false otherwise
+ *
+ * @deprecated We are no longer using the older Advanced Filter. Use {@link isAdvancedFilterEmpty} instead
  */
 export function isRootFilterStateEmpty(
 	filterState: Filter | undefined,
@@ -378,6 +387,30 @@ export function isRootFilterStateEmpty(
 			return false;
 		}
 	}
+
+	return true;
+}
+
+/**
+ * Checks if the {@link AdvancedFilter} is empty (no active {@link Filter} are present)
+ * @param advancedFilter - The complete advanced filter
+ *
+ * @returns true if empty, false otherwise
+ */
+export function isAdvancedFilterEmpty(
+	advancedFilter: AdvancedFilter | undefined,
+): boolean {
+	if (!advancedFilter) return true;
+
+	if (!advancedFilter?.filters || advancedFilter.filters.length === 0)
+		return true;
+
+	if (
+		!advancedFilter.filters.some(
+			(filter: Filter) => filter.status && filter.filterGroups.length > 0,
+		)
+	)
+		return false;
 
 	return true;
 }

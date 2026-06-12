@@ -148,7 +148,7 @@ export class AdvancedFilterPopover
 		});
 		this.popoverRef.appendChild(contentEl);
 
-		document.body.appendChild(this.popoverRef);
+		activeDocument.body.appendChild(this.popoverRef);
 
 		// Create a virtual element for Popper.js
 		const virtualElement = {

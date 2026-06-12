@@ -150,7 +150,8 @@ export class FrontmatterRenderer {
 		});
 		collapseIcon.replaceChildren();
 		const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-		collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+		// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+		collapseIcon.textContent = collapseIconSVG;
 
 		// Add "Properties" text
 		header.createSpan({
@@ -175,7 +176,8 @@ export class FrontmatterRenderer {
 			propertiesContainer.hide();
 			collapseIcon.replaceChildren();
 			const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
-			collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+			// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+			collapseIcon.textContent = collapseIconSVG;
 		}
 
 		// Render each property using PropertyWidget
@@ -190,12 +192,14 @@ export class FrontmatterRenderer {
 				propertiesContainer.hide();
 				collapseIcon.replaceChildren();
 				const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
-				collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				collapseIcon.textContent = collapseIconSVG;
 			} else {
 				propertiesContainer.show();
 				collapseIcon.replaceChildren();
 				const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-				collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				collapseIcon.textContent = collapseIconSVG;
 			}
 
 			frontmatterSection.toggleClass(
@@ -218,7 +222,7 @@ export class FrontmatterRenderer {
 	 */
 	private renderProperties(
 		containerEl: HTMLElement,
-		frontmatter: Record<string, any>,
+		frontmatter: Record<string, unknown>,
 		file?: TFile,
 	): void {
 		this.renderPropertiesSimple(containerEl, frontmatter);
@@ -336,7 +340,7 @@ export class FrontmatterRenderer {
 	 */
 	private renderPropertiesSimple(
 		containerEl: HTMLElement,
-		frontmatter: Record<string, any>,
+		frontmatter: Record<string, unknown>,
 	): void {
 		const propertiesToRender = Object.entries(frontmatter).filter(
 			([key]) => key !== "position",
@@ -373,7 +377,7 @@ export class FrontmatterRenderer {
 	 */
 	private renderPropertyValueSimple(
 		containerEl: HTMLElement,
-		value: any,
+		value: unknown,
 	): void {
 		if (Array.isArray(value)) {
 			const list = containerEl.createEl("ul", {

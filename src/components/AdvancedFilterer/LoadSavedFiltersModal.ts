@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 /**
  * @deprecated This component has been deprecated and will be replaced by "Filters Warehouse" in the future.
  * Dont use this component.
@@ -5,7 +6,12 @@
 
 import { t } from "i18next";
 import { App, Modal, Setting, Notice, DropdownComponent } from "obsidian";
-import type { Filter, SavedFilterConfig, FilterCriterionGroup, Board } from "../../interfaces/BoardConfigs.js";
+import type {
+	Filter,
+	SavedFilterConfig,
+	FilterCriterionGroup,
+	Board,
+} from "../../interfaces/BoardConfigs.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import type TaskBoard from "../../../main.js";
@@ -17,6 +23,7 @@ export class BoardFiltersStoreModal extends Modal {
 	private currentFilterState?: Filter;
 	private onSave?: (config: SavedFilterConfig) => void;
 	private onLoad?: (config: SavedFilterConfig) => void;
+	private detailsContainer: HTMLDivElement | null = null;
 
 	constructor(
 		app: App,
@@ -43,7 +50,7 @@ export class BoardFiltersStoreModal extends Modal {
 		if (this.mode === "save") {
 			this.renderSaveMode();
 		} else {
-			this.renderLoadMode();
+			void this.renderLoadMode();
 		}
 	}
 
@@ -83,7 +90,10 @@ export class BoardFiltersStoreModal extends Modal {
 				btn.setButtonText(t("save"))
 					.setCta()
 					.onClick(() => {
-						this.saveConfiguration(nameValue, descriptionValue);
+						void this.saveConfiguration(
+							nameValue,
+							descriptionValue,
+						);
 					});
 			})
 			.addButton((btn) => {
@@ -99,7 +109,9 @@ export class BoardFiltersStoreModal extends Modal {
 		contentEl.createEl("h2", { text: t("load-filter-configuration") });
 
 		const board: Board | null =
-			await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
+			await this.plugin.taskBoardFileManager.loadBoardUsingID(
+				this.currentBoardID,
+			);
 		if (board && !board?.filterConfig) {
 			board.filterConfig = {
 				enableSavedFilters: true,
@@ -136,7 +148,7 @@ export class BoardFiltersStoreModal extends Modal {
 
 				dropdown.onChange((value) => {
 					selectedConfigId = value;
-					this.updateConfigDetails(value);
+					void this.updateConfigDetails(value);
 				});
 			});
 
@@ -155,14 +167,14 @@ export class BoardFiltersStoreModal extends Modal {
 				btn.setButtonText(t("load"))
 					.setCta()
 					.onClick(() => {
-						this.loadConfiguration(selectedConfigId);
+						void this.loadConfiguration(selectedConfigId);
 					});
 			})
 			.addButton((btn) => {
 				btn.setButtonText(t("delete"))
 					.setWarning()
 					.onClick(() => {
-						this.deleteConfiguration(selectedConfigId);
+						void this.deleteConfiguration(selectedConfigId);
 					});
 			})
 			.addButton((btn) => {
@@ -172,19 +184,20 @@ export class BoardFiltersStoreModal extends Modal {
 			});
 
 		// Store references for updating
-		(this as any).detailsContainer = detailsContainer;
+		this.detailsContainer = detailsContainer;
 	}
 
 	private async updateConfigDetails(configId: string) {
-		const detailsContainer = (this as any).detailsContainer;
+		const detailsContainer = this.detailsContainer;
 		if (!detailsContainer) return;
 
 		detailsContainer.empty();
 
 		if (!configId) return;
 
-		const board =
-			await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
+		const board = await this.plugin.taskBoardFileManager.loadBoardUsingID(
+			this.currentBoardID,
+		);
 		if (board && !board.filterConfig) return;
 
 		const config = board!.filterConfig!.savedConfigs.find(
@@ -221,7 +234,8 @@ export class BoardFiltersStoreModal extends Modal {
 
 		const groupCount = config.filterState.filterGroups.length;
 		const totalFilters = config.filterState.filterGroups.reduce(
-			(sum: number, group: FilterCriterionGroup) => sum + group.filters.length,
+			(sum: number, group: FilterCriterionGroup) =>
+				sum + group.filters.length,
 			0,
 		);
 
@@ -259,7 +273,9 @@ export class BoardFiltersStoreModal extends Modal {
 
 		try {
 			const board =
-				await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
+				await this.plugin.taskBoardFileManager.loadBoardUsingID(
+					this.currentBoardID,
+				);
 			if (board && !board.filterConfig) {
 				board.filterConfig = {
 					enableSavedFilters: true,
@@ -290,8 +306,9 @@ export class BoardFiltersStoreModal extends Modal {
 			return;
 		}
 
-		const board =
-			await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
+		const board = await this.plugin.taskBoardFileManager.loadBoardUsingID(
+			this.currentBoardID,
+		);
 		if (!board || !board.filterConfig) return;
 
 		const config = board.filterConfig.savedConfigs.find(
@@ -325,7 +342,9 @@ export class BoardFiltersStoreModal extends Modal {
 			return;
 		}
 
-		const board = await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
+		const board = await this.plugin.taskBoardFileManager.loadBoardUsingID(
+			this.currentBoardID,
+		);
 		if (!board || !board.filterConfig) return;
 
 		const config = board.filterConfig.savedConfigs.find(
@@ -374,7 +393,9 @@ export class BoardFiltersStoreModal extends Modal {
 
 		try {
 			const board =
-				await this.plugin.taskBoardFileManager.loadBoardUsingID(this.currentBoardID);
+				await this.plugin.taskBoardFileManager.loadBoardUsingID(
+					this.currentBoardID,
+				);
 			if (!board || !board.filterConfig) return;
 
 			board.filterConfig.savedConfigs =

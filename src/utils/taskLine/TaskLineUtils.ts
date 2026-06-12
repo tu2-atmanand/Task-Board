@@ -48,7 +48,7 @@ export const addTaskInNote = async (
 	plugin: TaskBoard,
 	newTask: taskItem,
 	editorActive: boolean,
-	cursorPosition?: { line: number; ch: number } | undefined,
+	cursorPosition?: { line: number; ch: number },
 ): Promise<string | undefined> => {
 	const filePath = newTask.filePath.endsWith("md")
 		? newTask.filePath
@@ -84,7 +84,7 @@ export const addTaskInNote = async (
 		);
 		completeTask = formattedTaskContent;
 		if (completeTask === "")
-			throw "getSanitizedTaskContent returned empty string";
+			throw new Error("getSanitizedTaskContent returned empty string");
 
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file === null || !(file instanceof TFile)) return;
@@ -286,7 +286,7 @@ export const useTasksPluginToUpdateInFile = async (
 		// Prepare the updated task block
 		const completeOldTaskContent = await getFormattedTaskContent(oldTask);
 		if (completeOldTaskContent === "")
-			throw "getSanitizedTaskContent returned empty string";
+			throw new Error("getSanitizedTaskContent returned empty string");
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const { formattedTaskContent, newId } = await addIdToTaskContent(
@@ -329,7 +329,7 @@ export const useTasksPluginToUpdateInFile = async (
 					completeOldTaskContent,
 					newContent,
 				);
-			} else if ((twoTaskTitles.length = 1)) {
+			} else if (twoTaskTitles.length === 1) {
 				const { formattedTaskContent, newId } =
 					await addIdToTaskContent(plugin, tasksPluginApiOutput);
 				const tasksPluginApiOutputWithId = formattedTaskContent;
@@ -344,7 +344,7 @@ export const useTasksPluginToUpdateInFile = async (
 					completeOldTaskContent,
 					newContent,
 				);
-			} else if ((twoTaskTitles.length = 2)) {
+			} else if (twoTaskTitles.length === 2) {
 				// if (twoTaskTitles[1].trim().startsWith("- [x]")) {
 				newContent = `${twoTaskTitles[0]}${
 					oldTask.body.length > 0
@@ -536,7 +536,7 @@ export const archiveTask = async (
 	// Prepare the task content to be archived
 	const oldTaskContent = await getFormattedTaskContent(task);
 	if (oldTaskContent === "")
-		throw "getSanitizedTaskContent returned empty string";
+		throw new Error("getSanitizedTaskContent returned empty string");
 
 	if (archivedFilePath) {
 		try {
@@ -597,26 +597,28 @@ export const archiveTask = async (
 				plugin.app.vault.getAbstractFileByPath(archivedFilePath);
 			if (file === null || !(file instanceof TFile)) return;
 
-		// Archive the task to the specified file
-		await plugin.app.vault.process(file, (archivedFileContent) => {
-			// Add the task to the top of the archived file content
-			const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
-			return newArchivedContent;
-		});
+			// Archive the task to the specified file
+			await plugin.app.vault.process(file, (archivedFileContent) => {
+				// Add the task to the top of the archived file content
+				const newArchivedContent = `> ${t("archived-on")} ${new Date().toLocaleString()}\n${oldTaskContent}\n\n${archivedFileContent}`;
+				return newArchivedContent;
+			});
 
-		// Now delete the task from its original file only if archiving succeeded
-		const deletionSuccess = await deleteTaskFromFile(plugin, task);
-		if (deletionSuccess) {
-			plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
-		} else {
-			// Archiving succeeded but deletion failed
-			bugReporterManagerInsatance.showNotice(
-				64,
-				"Task was archived successfully but failed to delete from the original file. Please manually verify and delete the task from the source file if needed.",
-				"Archive succeeded but deletion failed",
-				"TaskItemUtils.ts/archiveTask",
-			);
-		}
+			// Now delete the task from its original file only if archiving succeeded
+			const deletionSuccess = await deleteTaskFromFile(plugin, task);
+			if (deletionSuccess) {
+				void plugin.realTimeScanner.processAllUpdatedFiles(
+					task.filePath,
+				);
+			} else {
+				// Archiving succeeded but deletion failed
+				bugReporterManagerInsatance.showNotice(
+					64,
+					"Task was archived successfully but failed to delete from the original file. Please manually verify and delete the task from the source file if needed.",
+					"Archive succeeded but deletion failed",
+					"TaskItemUtils.ts/archiveTask",
+				);
+			}
 			// 	archivedFilePath,
 			// 	true,
 			// );
@@ -631,7 +633,7 @@ export const archiveTask = async (
 			// 	newArchivedContent,
 			// );
 
-      // // Now delete the task from its original file
+			// // Now delete the task from its original file
 			// await deleteTaskFromFile(plugin, task).then(() => {
 			// 	plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 			// });
@@ -655,9 +657,11 @@ export const archiveTask = async (
 				oldTaskContent,
 				`%%${oldTaskContent}%%`,
 			);
-			
+
 			if (markSuccess) {
-				plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+				void plugin.realTimeScanner.processAllUpdatedFiles(
+					task.filePath,
+				);
 			} else {
 				bugReporterManagerInsatance.showNotice(
 					65,
@@ -731,7 +735,9 @@ export const replaceOldTaskWithNewTask = async (
 
 		const file = plugin.app.vault.getAbstractFileByPath(filePath);
 		if (file === null || !(file instanceof TFile))
-			throw `The file was either not found at the path or its not an instance of TFile.`;
+			throw new Error(
+				`The file was either not found at the path or its not an instance of TFile.`,
+			);
 
 		await plugin.app.vault.process(file, (fileContent: string): string => {
 			const lines = fileContent.split("\n");
@@ -847,7 +853,7 @@ export const replaceOldTaskWithNewTask = async (
 						oldTaskContent,
 						newTaskContent,
 						oldTaskContentFromFile,
-						async (userChoice) => {
+						(userChoice) => {
 							if (userChoice === "old") {
 								const before = linesBefore.join("\n");
 								const after = lines
@@ -860,7 +866,7 @@ export const replaceOldTaskWithNewTask = async (
 									after,
 								);
 								// Replace the old task block with the updated content
-								await writeDataToVaultFile(
+								void writeDataToVaultFile(
 									plugin,
 									filePath,
 									newContent,

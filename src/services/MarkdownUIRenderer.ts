@@ -33,13 +33,12 @@ export function createAndAppendElement<K extends keyof HTMLElementTagNameMap>(
 	//  so had to convert all of these to the equivalent but more elaborate document.createElement() and
 	//  appendChild() calls.
 
-	const el: HTMLElementTagNameMap[K] = document.createElement(tagName);
+	const el: HTMLElementTagNameMap[K] = activeDocument.createElement(tagName);
 	parentElement.appendChild(el);
 	return el;
 }
 
 export class MarkdownUIRenderer {
-	private readonly textRenderer: TextRenderer;
 	private readonly obsidianComponent: Component | null;
 	private readonly parentUlElement: HTMLElement;
 	// private readonly taskLayoutOptions: TaskLayoutOptions;
@@ -55,6 +54,7 @@ export class MarkdownUIRenderer {
 		if (!obsidianComponent) {
 			return;
 		}
+
 		await MarkdownRenderer.render(
 			app,
 			text,
@@ -76,7 +76,6 @@ export class MarkdownUIRenderer {
 	 * @param parentUlElement HTML element where the task shall be rendered.
 	 */
 	constructor({
-		textRenderer = MarkdownUIRenderer.obsidianMarkdownRenderer,
 		obsidianComponent,
 		parentUlElement,
 	}: {
@@ -84,12 +83,11 @@ export class MarkdownUIRenderer {
 		obsidianComponent: Component | null;
 		parentUlElement: HTMLElement;
 	}) {
-		this.textRenderer = textRenderer;
 		this.obsidianComponent = obsidianComponent;
 		this.parentUlElement = parentUlElement;
 	}
 
-	public static async renderTaskDisc(
+	public static async strictRender(
 		app: App,
 		taskDescText: string,
 		element: HTMLDivElement,
@@ -111,7 +109,7 @@ export class MarkdownUIRenderer {
 		);
 	}
 
-	static async renderSubtaskText(
+	public static async safeRender(
 		app: App,
 		subtaskText: string,
 		el: HTMLElement,
@@ -119,11 +117,11 @@ export class MarkdownUIRenderer {
 		taskItemComponent: Component | null,
 	) {
 		try {
-			// console.log("renderSubtaskText : Received following text : ", subtaskText);
+			// console.log("safeRender : Received following text : ", subtaskText);
 			let componentEl = taskItemComponent ?? new Component();
-			if (!componentEl) {
-				return;
-			}
+			// if (!componentEl) {
+			// 	return;
+			// }
 
 			el.replaceChildren();
 
@@ -139,7 +137,7 @@ export class MarkdownUIRenderer {
 			bugReporterManagerInsatance.addToLogs(
 				102,
 				String(error),
-				"MarkdownUIRenderer.ts/MarkdownUIRenderer.renderSubtaskText",
+				"MarkdownUIRenderer.ts/MarkdownUIRenderer.safeRender",
 			);
 		}
 	}

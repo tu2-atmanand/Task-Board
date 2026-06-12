@@ -58,9 +58,9 @@ export class BoardsExplorerModal extends Modal {
 			text: t("refresh-boards"),
 			cls: "boardsExplorerScanButton",
 		});
-		scanButton.addEventListener("click", async () => {
+		scanButton.addEventListener("click", () => {
 			if (!this.isScanning) {
-				await this.handleScanBoards(
+				void this.handleScanBoards(
 					mainContent,
 					headerSection,
 					scanButton,
@@ -121,8 +121,8 @@ export class BoardsExplorerModal extends Modal {
 					cls: "boardsExplorerCard",
 				});
 
-				card.addEventListener("click", async () => {
-					await this.openBoard(boardId, board.filePath);
+				card.addEventListener("click", () => {
+					void this.openBoard(boardId, board.filePath);
 					this.close();
 				});
 
@@ -170,7 +170,7 @@ export class BoardsExplorerModal extends Modal {
 				});
 
 				pathRow.createEl("span", {
-					text: "File Path:",
+					text: t("file-path") + " : ",
 					cls: "boardsExplorerCardRowLabel",
 				});
 
@@ -231,57 +231,10 @@ export class BoardsExplorerModal extends Modal {
 	}
 
 	private createLoadingBar(): HTMLElement {
-		const container = document.createElement("div");
-		container.className = "boardsExplorerLoadingBarContainer";
-
-		const style = document.createElement("style");
-		style.textContent = `
-			.boardsExplorerLoadingBarContainer {
-				width: calc(100% + 40px);
-				margin: 0 -20px 12px -20px;
-				padding: 0 20px;
-				overflow: hidden;
-			}
-
-			.boardsExplorerLoadingBar {
-				width: 100%;
-				height: 4px;
-				background: linear-gradient(
-					90deg,
-					#0066cc 0%,
-					#0066cc 20%,
-					transparent 20%,
-					transparent 40%,
-					#0066cc 40%,
-					#0066cc 60%,
-					transparent 60%,
-					transparent 80%,
-					#0066cc 80%,
-					#0066cc 100%
-				);
-				background-size: 100px 4px;
-				animation: boardsExplorerLoadingPendulum 2s ease-in-out infinite;
-				border-radius: 2px;
-			}
-
-			@keyframes boardsExplorerLoadingPendulum {
-				0% {
-					background-position: -100px 0;
-				}
-				50% {
-					background-position: calc(100% + 100px) 0;
-				}
-				100% {
-					background-position: -100px 0;
-				}
-			}
-		`;
-
-		container.appendChild(style);
-
-		const bar = document.createElement("div");
-		bar.className = "boardsExplorerLoadingBar";
-
+		const container = activeDocument.createElement("div");
+		container.addClass("boardsExplorerLoadingBarContainer");
+		const bar = activeDocument.createElement("div");
+		bar.addClass("boardsExplorerLoadingBar");
 		container.appendChild(bar);
 
 		return container;

@@ -6,7 +6,7 @@ import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban, GripHorizontalIc
 import React, { useEffect, useRef, useState } from "react";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
-import { RxDragHandleDots2, RxDragHandleHorizontal } from "react-icons/rx";
+import { RxDragHandleDots2 } from "react-icons/rx";
 import { t } from "i18next";
 import TaskBoard from "../../main.js";
 import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../interfaces/BoardConfigs.js";
@@ -80,7 +80,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Kanban Column - Function to handle adding a new column to the selected Kanban specific view using the data submitted from the add column modal
 	const handleAddColumn = (viewIndex: number, columnData: ColumnData) => {
-		const updatedViewsData: any = [...allViewsData];
+		const updatedViewsData: unknown = [...allViewsData];
 		updatedViewsData[viewIndex].kanbanView!.columns.push({
 			id: columnData.id,
 			index: updatedViewsData[viewIndex].kanbanView!.columns.length + 1,
@@ -199,13 +199,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		viewIndex: number,
 		columnIndex: number,
 		field: string,
-		value: any
+		value: unknown
 	) => {
 		// evt?.preventDefault();
 		// evt?.stopPropagation();
 		// console.log(`Updating column at viewIndex: ${viewIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
 		const updatedViewsData = [...allViewsData];
-		(updatedViewsData[viewIndex].kanbanView!.columns[columnIndex] as any)[field] = value;
+		updatedViewsData[viewIndex].kanbanView!.columns[columnIndex][field] = value;
 
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);
@@ -320,8 +320,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		};
 
 		// Regenerate IDs for all columns to ensure uniqueness
-		if (duplicatedView?.kanbanView && duplicatedView.kanbanView!.columns && duplicatedView.kanbanView!.columns.length > 0) {
-			duplicatedView.kanbanView!.columns = duplicatedView.kanbanView!.columns.map((column: ColumnData) => ({
+		if (duplicatedView?.kanbanView && duplicatedView.kanbanView.columns && duplicatedView.kanbanView.columns.length > 0) {
+			duplicatedView.kanbanView.columns = duplicatedView.kanbanView.columns.map((column: ColumnData) => ({
 				...column,
 				id: generateRandomNumber(), // Generate new numeric ID for each column
 			}));
@@ -406,23 +406,23 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 
 		// Set initial filter state
-		if (currentBoardData!.boardFilters) {
-			setTimeout(() => {
+		if (currentBoardData.boardFilters) {
+			window.setTimeout(() => {
 				// Use type assertion to resolve non-null issues
 				// const filterState = filterModal.liveFilterState as Filter;
 				if (filterModal.advancedFilterComponent) {
-					filterModal.advancedFilterComponent.loadFilterState(currentBoardData!.boardFilters);
+					filterModal.advancedFilterComponent.loadFilterState(currentBoardData.boardFilters);
 				}
 			}, 100);
 		}
 
 		// Set the close callback - mainly used for handling cancel actions
-		filterModal.filterCloseCallback = async (filtersState) => {
+		filterModal.filterCloseCallback = (filtersState) => {
 			if (filtersState) {
 				// Save the filter state to the board
 				let updatedcurrentBoardData = currentBoardData;
-				updatedcurrentBoardData!.boardFilters = filtersState;
-				plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
+				updatedcurrentBoardData.boardFilters = filtersState;
+				void plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
 
 				// Refresh the board view
 				eventEmitter.emit('REFRESH_BOARD');
@@ -433,7 +433,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	}
 
 	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
-	const handleDuplicateCurrentBoard = async () => {
+	const handleDuplicateCurrentBoard = () => {
 		const duplicatedBoard: Board = {
 			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
 			id: generateRandomStringId('board'),
@@ -453,9 +453,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			newFilePath = normalizePath(duplicatedBoard.name + ".taskboard");
 		}
 
-		await plugin.taskBoardFileManager.saveBoardToDisk(newFilePath, duplicatedBoard);
+		void plugin.taskBoardFileManager.saveBoardToDisk(newFilePath, duplicatedBoard);
 
-		setTimeout(() => {
+		window.setTimeout(() => {
 			eventEmitter.emit("OPEN_BOARD", {
 				layout: "tab",
 				filePath: newFilePath,
@@ -472,7 +472,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleToggleBoardSettings = (viewIndex: number, field: BooleanBoardProperties, value: boolean) => {
 		const updatedViewsData = [...allViewsData];
 		if (updatedViewsData[viewIndex]) {
-			(updatedViewsData[viewIndex] as any)[field] = value as boolean;
+			updatedViewsData[viewIndex][field] = value;
 		}
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);
@@ -480,7 +480,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleToggleKanbanViewSettings = (viewIndex: number, field: BooleanKanbanProperties, value: boolean) => {
 		const updatedViewsData = [...allViewsData];
 		if (updatedViewsData[viewIndex] && updatedViewsData[viewIndex].kanbanView) {
-			(updatedViewsData[viewIndex].kanbanView as any)[field] = value as boolean;
+			(updatedViewsData[viewIndex].kanbanView as unknown)[field] = value;
 		}
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);
@@ -518,7 +518,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// ALL RENDERING LOGIC BELOW
 	// --------------------------------------------------------------
 
-	const getViewTypeIconComponent = (viewTypeName: string | undefined, size: number) => {
+	const getViewTypeIconComponent = (viewTypeName: viewTypeNames | undefined, size: number) => {
 		let viewType = viewTypeName ?? currentBoardData.views[currentViewIndex].viewType;
 		switch (viewType) {
 			case viewTypeNames.kanban:
@@ -541,14 +541,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 	useEffect(() => {
 		if (isSidebarVisible) {
-			document.addEventListener("mousedown", handleClickOutside);
+			activeDocument.addEventListener("mousedown", handleClickOutside);
 		} else {
-			document.removeEventListener("mousedown", handleClickOutside);
+			activeDocument.removeEventListener("mousedown", handleClickOutside);
 		}
 		return () => {
 			if (isSidebarVisible) {
 				// Cleanup event listener when the component unmounts or sidebar visibility changes
-				document.removeEventListener("mousedown", handleClickOutside);
+				activeDocument.removeEventListener("mousedown", handleClickOutside);
 			}
 		}
 	}, [isSidebarVisible]);
@@ -573,7 +573,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			settingManager.cleanUp();
 			globalSettingsHTMLSection.current.empty();
 			// Render global settings
-			settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
+			void settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
 		}
 	}, [selectedViewIndex]);
 	const renderGlobalSettingsTab = (viewIndex: number) => {
@@ -647,7 +647,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<hr className="boardConfigModalHr-100" />
 
 						<div className="boardConfigModalDoubleBtnContainer">
-							<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
+							<button className="boardConfigModalDuplicateBoardBtn" onClick={() => handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
 						</div>
 					</div>
 				</div>
@@ -1282,7 +1282,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<div className="boardConfigModalMainContent-Active-BottomSec">
 					<hr className="boardConfigModalHr-100" />
 					<div className="boardConfigModalDoubleBtnContainer">
-						<button className="boardConfigModalDuplicateBoardBtn" onClick={handleDuplicateCurrentView}>{t("duplicate-this-view")}</button>
+						<button className="boardConfigModalDuplicateBoardBtn" onClick={() => handleDuplicateCurrentView}>{t("duplicate-this-view")}</button>
 						<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentView}>{t("delete-this-view")}</button>
 					</div>
 				</div>
@@ -1350,7 +1350,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
 								<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewView()}>{t("add-view")}</button>
 								<hr className="boardConfigModalHr-100" />
-								<button className="boardConfigModalSidebarSaveBtn" onClick={handleSave}>{t("save")}</button>
+								<button className="boardConfigModalSidebarSaveBtn" onClick={() => handleSave}>{t("save")}</button>
 							</div>
 						</div>
 
@@ -1365,7 +1365,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				)}
 			</div>
 
-			<button className="boardConfigModalSaveBtn-mobile" onClick={handleSave}>{t("save")}</button>
+			<button className="boardConfigModalSaveBtn-mobile" onClick={() => handleSave}>{t("save")}</button>
 		</>
 	);
 };

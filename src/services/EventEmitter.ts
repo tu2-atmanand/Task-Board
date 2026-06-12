@@ -24,7 +24,7 @@ class EventEmitter {
 	}
 
 	// Emit an event, calling all listeners
-	emit(event: string, data?: any) {
+	emit(event: string, data?: unknown) {
 		if (this.blockedEvents.has(event)) {
 			console.warn(
 				"[Task Board] [Event Emitter] : Blocked event is emitted : ",

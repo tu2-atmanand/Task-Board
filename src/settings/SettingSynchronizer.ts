@@ -16,7 +16,10 @@ import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
  * @param settings - The current settings object to migrate. Values from this object should be to the new objects.
  * @returns The migrated settings object
  */
-export function migrateSettings(defaults: any, settings: any): PluginDataJson {
+export function migrateSettings(
+	defaults: unknown,
+	settings: unknown,
+): PluginDataJson {
 	try {
 		if (settings == undefined) return defaults;
 
@@ -98,16 +101,15 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 
 		// Desktop folder picker
 		if (
-			(window as any).electron &&
-			(window as any).electron.remote &&
-			(window as any).electron.remote.dialog
+			window?.electron &&
+			window.electron?.remote &&
+			window.electron.remote?.dialog
 		) {
-			let folderPaths: string[] = (
-				window as any
-			).electron.remote.dialog.showOpenDialogSync({
-				title: "Pick folder to export settings",
-				properties: ["openDirectory", "dontAddToRecent"],
-			});
+			let folderPaths: string[] =
+				window.electron.remote.dialog.showOpenDialogSync({
+					title: "Pick folder to export settings",
+					properties: ["openDirectory", "dontAddToRecent"],
+				});
 			if (!folderPaths || folderPaths.length === 0) {
 				new Notice("Export cancelled or folder not selected.");
 				return;
@@ -123,15 +125,15 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 			new Notice(`Settings exported to ${exportPath}`);
 		} else {
 			// Web: use file save dialog
-			let a = document.createElement("a");
+			let a = activeDocument.createElement("a");
 			a.href = URL.createObjectURL(
 				new Blob([fileContent], { type: "application/json" }),
 			);
 			a.download = exportFileName;
-			document.body.appendChild(a);
+			activeDocument.body.appendChild(a);
 			a.click();
-			setTimeout(() => {
-				document.body.removeChild(a);
+			window.setTimeout(() => {
+				activeDocument.body.removeChild(a);
 				URL.revokeObjectURL(a.href);
 			}, 1000);
 			new Notice(
@@ -162,17 +164,16 @@ export async function importConfigurations(
 
 		// Desktop file picker
 		if (
-			(window as any).electron &&
-			(window as any).electron.remote &&
-			(window as any).electron.remote.dialog
+			window?.electron &&
+			window.electron?.remote &&
+			window.electron.remote?.dialog
 		) {
-			let filePaths: string[] = (
-				window as any
-			).electron.remote.dialog.showOpenDialogSync({
-				title: "Pick settings file to import",
-				properties: ["openFile", "dontAddToRecent"],
-				filters: [{ name, extensions }],
-			});
+			let filePaths: string[] =
+				window.electron.remote.dialog.showOpenDialogSync({
+					title: "Pick settings file to import",
+					properties: ["openFile", "dontAddToRecent"],
+					filters: [{ name, extensions }],
+				});
 			if (!filePaths || filePaths.length === 0) {
 				new Notice("Import cancelled or file not selected.");
 				return false;
@@ -182,19 +183,19 @@ export async function importConfigurations(
 		} else {
 			// Web file picker
 			await new Promise<void>((resolve) => {
-				let inputEl = document.createElement("input");
+				let inputEl = activeDocument.createElement("input");
 				inputEl.type = "file";
 				inputEl.accept = extensions
 					.map((e) => "." + e.toLowerCase())
 					.join(",");
-				inputEl.addEventListener("change", async () => {
+				inputEl.addEventListener("change", () => {
 					if (!inputEl.files || inputEl.files.length === 0) {
 						new Notice("Import cancelled or file not selected.");
 						resolve();
 						return;
 					}
 					const file = inputEl.files[0];
-					importedContent = await file.text();
+					importedContent = void file.text();
 					resolve();
 				});
 				inputEl.click();

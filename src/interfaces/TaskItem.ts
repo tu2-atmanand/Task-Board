@@ -46,7 +46,7 @@ export interface customFrontmatterCache extends FrontMatterCache {
 
 export interface noteItem {
 	filePath: string;
-	frontmatter: any; // The frontmatter of the note
+	frontmatter: unknown; // The frontmatter of the note
 	reminder: string; // A date-time value.
 }
 

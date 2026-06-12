@@ -2,6 +2,7 @@
 
 import { Modal, ButtonComponent } from "obsidian";
 import TaskBoard from "../../main.js";
+import { t } from "i18next";
 
 export type DiffSelection = "old" | "new";
 
@@ -33,13 +34,13 @@ export class DiffContentCompareModal extends Modal {
 			"data-type",
 			"task-board-diff-content-compare",
 		);
-		this.setTitle("Task Board Safe Guard");
+		this.setTitle(t("task-board-safe-guard"));
 
 		contentEl.classList.add("taskboard-diff-content-compare-modal");
 
 		contentEl.createEl("h2", { text: "Content mismatch detected" });
 		contentEl.createEl("p", {
-			text: "Looks like the task content in your file is a little different from the content you just edited through Task Board. Choose which version of content you would like to keep:",
+			text: "Looks like the task content in your file is a little different from the content you just edited through task board. Choose which version of content you would like to keep:",
 		});
 
 		const comparisonContainer = contentEl.createDiv({
@@ -53,13 +54,18 @@ export class DiffContentCompareModal extends Modal {
 		const newContentDiv = rightDiv.createDiv({
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
-		newContentDiv.insertAdjacentHTML(
-			"beforeend",
-			this.getHighlightedDiff(
-				this.cachedTaskContent,
-				this.taskContentFromFile,
-				"left",
-			),
+		// newContentDiv.insertAdjacentHTML(
+		// 	"beforeend",
+		// 	this.getHighlightedDiff(
+		// 		this.cachedTaskContent,
+		// 		this.taskContentFromFile,
+		// 		"left",
+		// 	),
+		// );
+		newContentDiv.textContent = this.getHighlightedDiff(
+			this.cachedTaskContent,
+			this.taskContentFromFile,
+			"left",
 		);
 		new ButtonComponent(rightDiv)
 			.setButtonText("Keep this as it is")
@@ -76,13 +82,18 @@ export class DiffContentCompareModal extends Modal {
 		const oldContentDiv = leftDiv.createDiv({
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
-		oldContentDiv.insertAdjacentHTML(
-			"beforeend",
-			this.getHighlightedDiff(
-				this.cachedTaskContent,
-				this.EditedTaskContent,
-				"right",
-			),
+		// oldContentDiv.insertAdjacentHTML(
+		// 	"beforeend",
+		// 	this.getHighlightedDiff(
+		// 		this.cachedTaskContent,
+		// 		this.EditedTaskContent,
+		// 		"right",
+		// 	),
+		// );
+		oldContentDiv.textContent = this.getHighlightedDiff(
+			this.cachedTaskContent,
+			this.EditedTaskContent,
+			"right",
 		);
 		new ButtonComponent(leftDiv)
 			.setButtonText("Use this")
@@ -93,9 +104,10 @@ export class DiffContentCompareModal extends Modal {
 			});
 
 		const noteOnSetting = contentEl.createEl("p", {
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			text: "NOTE : If you think this safe guard modal shown is irrelevant and its also popping-up too many times, you can by-pass it and disable this from the settings under the 'general' tab.",
 		});
-		noteOnSetting.style.color = "red";
+		noteOnSetting.addClass("tb_color_white");
 
 		const infoDiv = contentEl.createDiv({
 			cls: "taskboard-diff-content-compare-modal-info",
@@ -108,10 +120,10 @@ export class DiffContentCompareModal extends Modal {
 				text: "Green highlighted content indicates the characters which are different by comparing the content you just now edited and the content from the task-board-cache..",
 			});
 			ul.createEl("li", {
-				text: "Select the version of content you want Task Board to write in your note.",
+				text: "Select the version of content you want task board to write in your note.",
 			});
 			ul.createEl("li", {
-				text: "If the content shown on left-side is completely different from the content of the task you just edited. This probably means that, Task Board couldnt able to find the task you just edited through its cache inside the current file at the particular line. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below to close this modal, to avoid updating any data. And scan the file using file-menu option or update the task manually.",
+				text: "If the content shown on left-side is completely different from the content of the task you just edited. This probably means that, task board couldnt able to find the task you just edited through its cache inside the current file at the particular line. Either some other plugin updated the content or during sync the content was tempered. Use the abort button below to close this modal, to avoid updating any data. And scan the file using file-menu option or update the task manually.",
 			});
 		});
 
@@ -127,7 +139,7 @@ export class DiffContentCompareModal extends Modal {
 
 		contentEl.createEl("hr");
 
-		contentEl.createEl("h2", { text: "Debug Info" });
+		contentEl.createEl("h2", { text: "Debug info" });
 		contentEl.createEl("p", {
 			text: "Here is why this modal was shown in the first place. If you think this modal shown was unnecessary and if possible kindly share this information with the developer to improve the plugin.",
 		});
@@ -146,37 +158,48 @@ export class DiffContentCompareModal extends Modal {
 			debuInfoComparisonContainerLefttDiv.createDiv({
 				cls: "taskboard-diff-content-compare-modal-content",
 			});
-		debuInfoComparisonContainerLefttDivContent.insertAdjacentHTML(
-			"beforeend",
+		// debuInfoComparisonContainerLefttDivContent.insertAdjacentHTML(
+		// 	"beforeend",
+		// 	this.getHighlightedDiff(
+		// 		this.cachedTaskContent,
+		// 		this.taskContentFromFile,
+		// 		"left",
+		// 	),
+		// );
+		debuInfoComparisonContainerLefttDivContent.textContent =
 			this.getHighlightedDiff(
 				this.cachedTaskContent,
 				this.taskContentFromFile,
 				"left",
-			),
-		);
-
+			);
 		const debuInfoComparisonContainerRightDiv =
 			debuInfoComparisonContainer.createDiv({
 				cls: "taskboard-diff-content-compare-modal-side",
 			});
 		debuInfoComparisonContainerRightDiv.createEl("h3", {
-			text: "Task Board Cache",
+			text: t("task-board-cache"),
 		});
 		const debuInfoComparisonContainerRightDivContent =
 			debuInfoComparisonContainerRightDiv.createDiv({
 				cls: "taskboard-diff-content-compare-modal-content",
 			});
-		debuInfoComparisonContainerRightDivContent.insertAdjacentHTML(
-			"beforeend",
+		// debuInfoComparisonContainerRightDivContent.insertAdjacentHTML(
+		// 	"beforeend",
+		// 	this.getHighlightedDiff(
+		// 		this.taskContentFromFile,
+		// 		this.cachedTaskContent,
+		// 		"right",
+		// 	),
+		// );
+		debuInfoComparisonContainerRightDivContent.textContent =
 			this.getHighlightedDiff(
 				this.taskContentFromFile,
 				this.cachedTaskContent,
 				"right",
-			),
-		);
+			);
 
 		contentEl.createEl("p", {
-			text: "This 'Debug info' section is just provided to find out whether the Safe Guard genuinely captured the difference correctly or whether this was a false alarm. Will remove this section in the future, if this safe guard feature is working as expected.",
+			text: "This 'debug info' section is just provided to find out whether the safe guard genuinely captured the difference correctly or whether this was a false alarm. Will remove this section in the future, if this safe guard feature is working as expected.",
 		});
 	}
 
@@ -264,7 +287,7 @@ export class DiffContentCompareModal extends Modal {
 			.replace(/&/g, "&amp;")
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;")
-			.replace(/\"/g, "&quot;")
+			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&#039;");
 	}
 }

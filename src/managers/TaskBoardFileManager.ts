@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 /**
  * @name TaskBoardFileManager.ts
  * @path /src/managers/TaskBoardFileManager.ts
@@ -5,9 +6,13 @@
  * This replaces the previous approach of storing all board data in data.json
  */
 
-import { App, TFile, Notice, normalizePath } from "obsidian";
+import { App, TFile, Notice, normalizePath, WorkspaceLeaf } from "obsidian";
 import TaskBoard from "../../main.js";
-import { Board } from "../interfaces/BoardConfigs.js";
+import {
+	Board,
+	ColumnData,
+	TaskBoardViewType,
+} from "../interfaces/BoardConfigs.js";
 import {
 	CURRENT_REVISION,
 	LEAFID_FILEPATH_MAPPING_KEY,
@@ -37,7 +42,7 @@ export default class TaskBoardFileManager {
 	 */
 	private recentBoardsData: recentBoardsDataType = {};
 	private taskBoardFilesRegistry: taskBoardFilesRegistryType = {};
-	private debouncedSaveBoardTimers: Map<string, NodeJS.Timeout> = new Map(); // Track debounce timers per board
+	private debouncedSaveBoardTimers: Map<string, number> = new Map(); // Track debounce timers per board
 
 	/**
 	 * @deprecated
@@ -70,13 +75,13 @@ export default class TaskBoardFileManager {
 			// Check if file exists
 			const fileExists = await this.app.vault.adapter.exists(filePath);
 			if (!fileExists) {
-				throw `TaskBoard file not found: ${filePath}`;
+				throw new Error(`TaskBoard file not found: ${filePath}`);
 			}
 
 			// Read the file
 			const fileContent = await this.app.vault.adapter.read(filePath);
 			if (!fileContent) {
-				throw `TaskBoard file is empty: ${filePath}`;
+				throw new Error(`TaskBoard file is empty: ${filePath}`);
 			}
 
 			// Parse JSON content
@@ -107,7 +112,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				192,
-				`Error loading board from file ${filePath} : ${error}`,
+				`Error loading board from file ${filePath} : ${String(error)}`,
 				"TaskBoardFileManager.ts/loadBoardFromDisk",
 			);
 			return null;
@@ -131,7 +136,7 @@ export default class TaskBoardFileManager {
 			// Check if file exists
 			const fileExists = await this.app.vault.adapter.exists(filePath);
 			if (!fileExists) {
-				throw `TaskBoard file not found: ${filePath}`;
+				throw new Error(`TaskBoard file not found: ${filePath}`);
 			}
 
 			// Read the file
@@ -139,7 +144,7 @@ export default class TaskBoardFileManager {
 			const decodedData = new TextDecoder().decode(file);
 
 			if (!decodedData) {
-				throw `TaskBoard file is empty: ${filePath}`;
+				throw new Error(`TaskBoard file is empty: ${filePath}`);
 			}
 
 			// Parse JSON content
@@ -168,7 +173,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				193,
-				`Error loading board from file ${filePath} : ${error}`,
+				`Error loading board from file ${filePath} : ${String(error)}`,
 				"TaskBoardFileManager.ts/loadBoardFromDisk",
 			);
 			return null;
@@ -183,7 +188,7 @@ export default class TaskBoardFileManager {
 	async loadBoardUsingID(boardId: string): Promise<Board | null> {
 		try {
 			if (!boardId || boardId.trim() === "") {
-				throw `No board ID provided to load the board`;
+				throw new Error(`No board ID provided to load the board`);
 			}
 
 			// Search for board by ID in the cached data
@@ -195,11 +200,11 @@ export default class TaskBoardFileManager {
 				return cachedBoard;
 			}
 
-			throw `Board with ID "${boardId}" not found in cache`;
+			throw new Error(`Board with ID "${boardId}" not found in cache`);
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				194,
-				`Error loading board with ID ${boardId}: ${error}`,
+				`Error loading board with ID ${boardId}: ${String(error)}`,
 				"TaskBoardFileManager.ts/loadBoardFromDisk",
 			);
 			return null;
@@ -216,7 +221,9 @@ export default class TaskBoardFileManager {
 	async loadBoardUsingPath(filePath: string): Promise<Board | undefined> {
 		try {
 			if (!filePath || filePath.trim() === "") {
-				throw `No board file path provided to load the board`;
+				throw new Error(
+					`No board file path provided to load the board`,
+				);
 			}
 
 			// Check if board is already cached in memory by file path
@@ -225,7 +232,11 @@ export default class TaskBoardFileManager {
 				// 	`Board "${this.recentBoardsData[filePath].name}" already exists in cache for file: ${filePath}`,
 				// );
 				const foundBoard = this.recentBoardsData[filePath];
-				this.addNewBoardToRegistry(foundBoard.id, filePath, foundBoard);
+				void this.addNewBoardToRegistry(
+					foundBoard.id,
+					filePath,
+					foundBoard,
+				);
 
 				return this.recentBoardsData[filePath];
 			}
@@ -237,18 +248,18 @@ export default class TaskBoardFileManager {
 				// Cache the board data in memory using file path as key
 				this.recentBoardsData[filePath] = boardData;
 				// Update the registry to move this board on top
-				this.addNewBoardToRegistry(boardData.id, filePath, boardData);
+				void this.addNewBoardToRegistry(boardData.id, filePath, boardData);
 				// console.log(
 				// 	`Loaded and cached board "${boardData.name}" from: ${filePath}`,
 				// );
 				return boardData;
 			}
 
-			throw `Board data is not valid : ${boardData}`;
+			throw new Error(`Board data is not valid : ${boardData}`);
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				204,
-				`Error loading board with file ${filePath}: ${error}`,
+				`Error loading board with file ${filePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/loadBoardFromDisk",
 			);
 			return undefined;
@@ -276,7 +287,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				205,
-				`Error saving board to file ${filePath}: ${error}`,
+				`Error saving board to file ${filePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/loadBoardFromDisk",
 			);
 			return false;
@@ -319,7 +330,7 @@ export default class TaskBoardFileManager {
 				// Update existing file with binary data
 				const file = this.app.vault.getAbstractFileByPath(filePath);
 				if (!file || !(file instanceof TFile)) {
-					throw `Cannot find file at the path to update`;
+					throw new Error(`Cannot find file at the path to update`);
 				}
 				await this.app.vault.modifyBinary(
 					file,
@@ -332,7 +343,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				206,
-				`Error saving board to file ${filePath}: ${error}`,
+				`Error saving board to file ${filePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/saveBoardToDiskEncoded",
 			);
 			return false;
@@ -353,7 +364,7 @@ export default class TaskBoardFileManager {
 	): Promise<boolean> {
 		try {
 			if (!updatedBoardData.id || updatedBoardData.id.trim() === "") {
-				throw `Board data does not contain a valid ID.`;
+				throw new Error(`Board data does not contain a valid ID.`);
 			}
 
 			let filepathLocal: string;
@@ -380,7 +391,9 @@ export default class TaskBoardFileManager {
 						!registryEntry.filePath ||
 						registryEntry.filePath.trim() === ""
 					) {
-						throw `No file path configured for board ID.`;
+						throw new Error(
+							`No file path configured for board ID.`,
+						);
 					}
 
 					filepathLocal = registryEntry.filePath;
@@ -417,7 +430,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				207,
-				`Error saving board with ID ${updatedBoardData.id}: ${error}`,
+				`Error saving board with ID ${updatedBoardData.id}: ${String(error)}`,
 				"TaskBoardFileManager.ts/saveBoard",
 			);
 			return false;
@@ -440,24 +453,26 @@ export default class TaskBoardFileManager {
 		const boardId = updatedBoardData.id;
 
 		if (!boardId || boardId.trim() === "") {
-			throw `Cannot debounce save: Board data does not contain a valid ID`;
+			throw new Error(
+				`Cannot debounce save: Board data does not contain a valid ID`,
+			);
 		}
 
 		// Clear any existing timer for this board
 		const existingTimer = this.debouncedSaveBoardTimers.get(boardId);
 		if (existingTimer) {
-			clearTimeout(existingTimer);
+			window.clearTimeout(existingTimer);
 		}
 
 		// Set a new timer to save after the debounce delay
-		const newTimer = setTimeout(async () => {
+		const newTimer = window.setTimeout(() => {
 			try {
-				await this.saveBoard(updatedBoardData, filePath);
+				void this.saveBoard(updatedBoardData, filePath);
 				this.debouncedSaveBoardTimers.delete(boardId);
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					208,
-					`Error in debounced save for board ID ${boardId} and filePath ${filePath}: ${error}`,
+					`Error in debounced save for board ID ${boardId} and filePath ${filePath}: ${String(error)}`,
 					"TaskBoardFileManager.ts/debouncedSaveBoard",
 				);
 				this.debouncedSaveBoardTimers.delete(boardId);
@@ -473,7 +488,7 @@ export default class TaskBoardFileManager {
 	 */
 	clearAllDebouncedSaves(): void {
 		this.debouncedSaveBoardTimers.forEach((timer) => {
-			clearTimeout(timer);
+			window.clearTimeout(timer);
 		});
 		this.debouncedSaveBoardTimers.clear();
 	}
@@ -493,7 +508,7 @@ export default class TaskBoardFileManager {
 		// Cancel any pending debounced save for this board
 		const existingTimer = this.debouncedSaveBoardTimers.get(boardId);
 		if (existingTimer) {
-			clearTimeout(existingTimer);
+			window.clearTimeout(existingTimer);
 			this.debouncedSaveBoardTimers.delete(boardId);
 		}
 
@@ -562,7 +577,7 @@ export default class TaskBoardFileManager {
 				[boardId]: newEntry,
 				...updatedTaskBoardFilesRegistry,
 			};
-			this.plugin.saveSettings(this.plugin.settings);
+			void this.plugin.saveSettings(this.plugin.settings);
 			this.taskBoardFilesRegistry =
 				this.plugin.settings.data.taskBoardFilesRegistry;
 
@@ -572,7 +587,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				209,
-				`Error adding board to registry: ${error}`,
+				`Error adding board to registry: ${String(error)}`,
 				"TaskBoardFileManager.ts/addNewBoardToRegistry",
 			);
 		}
@@ -612,13 +627,13 @@ export default class TaskBoardFileManager {
 			}
 
 			if (flag) {
-				this.plugin.saveSettings();
+				void this.plugin.saveSettings();
 				this.taskBoardFilesRegistry = updatedTaskBoardFilesRegistry;
 			}
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				209,
-				`Error removing board from registry: ${error}`,
+				`Error removing board from registry: ${String(error)}`,
 				"TaskBoardFileManager.ts/removeBoardFromRegistry",
 			);
 		}
@@ -635,7 +650,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				210,
-				`Error checking if file exists ${filePath}: ${error}`,
+				`Error checking if file exists ${filePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/addNewBoardToRegistry",
 			);
 			return false;
@@ -670,7 +685,7 @@ export default class TaskBoardFileManager {
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					212,
-					`Error validating board files from the registry: ${error}`,
+					`Error validating board files from the registry: ${String(error)}`,
 					"TaskBoardFileManager.ts/validateBoardFiles",
 				);
 			}
@@ -722,13 +737,13 @@ export default class TaskBoardFileManager {
 			// Cache the board data in memory using file path as key
 			this.recentBoardsData[filePath] = boardData;
 			// Update the registry to move this board on top
-			this.addNewBoardToRegistry(boardData.id, filePath, boardData);
+			void this.addNewBoardToRegistry(boardData.id, filePath, boardData);
 
 			return await this.saveBoardToDisk(filePath, boardData);
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				211,
-				`Error creating new board file ${filePath}: ${error}`,
+				`Error creating new board file ${filePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/createNewBoardFile",
 			);
 			return false;
@@ -744,7 +759,7 @@ export default class TaskBoardFileManager {
 		try {
 			const file = this.app.vault.getAbstractFileByPath(filePath);
 			if (!file || !(file instanceof TFile)) {
-				throw `Cannot find file to delete.`;
+				throw new Error(`Cannot find file to delete.`);
 			}
 
 			// Remove from the fileRegistry and the recentBoardsCache
@@ -754,7 +769,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				195,
-				`Error deleting board file ${filePath}: ${error}`,
+				`Error deleting board file ${filePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/loadBoardFromDisk",
 			);
 			return false;
@@ -783,7 +798,7 @@ export default class TaskBoardFileManager {
 			const leaves =
 				this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 			const leafToClose = leaves.find(
-				(leaf) => (leaf as any).taskboardFilePath === filePath,
+				(leaf) => leaf.taskboardFilePath === filePath,
 			);
 
 			if (leafToClose) {
@@ -797,7 +812,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				215,
-				`Error handling board file deletion for ${filePath}: ${error}`,
+				`Error handling board file deletion for ${filePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/onBoardFileDelete",
 			);
 		}
@@ -817,7 +832,7 @@ export default class TaskBoardFileManager {
 			// Get the boardId using the old file path
 			const boardId = this.getBoardIdhUsingBoardFilepath(oldFilePath);
 			if (!boardId) {
-				throw `Board ID not found for file: ${oldFilePath}`;
+				throw new Error(`Board ID not found for file: ${oldFilePath}`);
 			}
 
 			// Get the board data from cache
@@ -839,7 +854,7 @@ export default class TaskBoardFileManager {
 			const leaves =
 				this.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD);
 			const leafToClose = leaves.find(
-				(leaf) => (leaf as any).taskboardFilePath === oldFilePath,
+				(leaf) => leaf.taskboardFilePath === oldFilePath,
 			);
 
 			if (leafToClose) {
@@ -853,7 +868,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				216,
-				`Error handling board file rename for ${oldFilePath} to ${newFilePath}: ${error}`,
+				`Error handling board file rename for ${oldFilePath} to ${newFilePath}: ${String(error)}`,
 				"TaskBoardFileManager.ts/onBoardFileRenamed",
 			);
 		}
@@ -877,7 +892,7 @@ export default class TaskBoardFileManager {
 						file instanceof TFile &&
 						file.extension === TASKBOARD_FILE_EXTENSION,
 				)
-				.map((file) => (file as TFile).path);
+				.map((file) => file.path);
 
 			// console.log(
 			// 	`Found ${taskboardFiles.length} .taskboard files:`,
@@ -887,7 +902,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				214,
-				`Error getting all .taskboard files: ${error}`,
+				`Error getting all .taskboard files: ${String(error)}`,
 				"TaskBoardFileManager.ts/addNewBoardToRegistry",
 			);
 			return [];
@@ -923,7 +938,7 @@ export default class TaskBoardFileManager {
 		if (Object.keys(newTaskBoardFilesRegistry).length > 0) {
 			this.plugin.settings.data.taskBoardFilesRegistry =
 				newTaskBoardFilesRegistry;
-			this.plugin.saveSettings();
+			void this.plugin.saveSettings();
 			this.taskBoardFilesRegistry = newTaskBoardFilesRegistry;
 		}
 
@@ -957,7 +972,9 @@ export default class TaskBoardFileManager {
 			)[0];
 
 			if (!firstItemFromRegistry?.filePath) {
-				throw `First registry entry does not have a valid filePath.`;
+				throw new Error(
+					`First registry entry does not have a valid filePath.`,
+				);
 			}
 
 			let boardData: Board | undefined;
@@ -979,7 +996,7 @@ export default class TaskBoardFileManager {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				215,
-				`Error loading the last opened board: ${error}`,
+				`Error loading the last opened board: ${String(error)}`,
 				"TaskBoardFileManager.ts/addNewBoardToRegistry",
 			);
 			return undefined;
@@ -1042,7 +1059,9 @@ export default class TaskBoardFileManager {
 	runMigrationForRevision_0(oldBoardData: Board): Board {
 		if (oldBoardData.revision < CURRENT_REVISION) {
 			let newBoardData = { ...oldBoardData };
+			// eslint-disable-next-line @typescript-eslint/no-deprecated
 			if (oldBoardData?.pluginVersion) {
+				// eslint-disable-next-line @typescript-eslint/no-deprecated
 				delete newBoardData.pluginVersion;
 			}
 
@@ -1068,7 +1087,9 @@ export default class TaskBoardFileManager {
 	 */
 	runMigrationForRevision_1(oldBoardData: Board): Board {
 		let newBoardData = { ...oldBoardData };
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		if (oldBoardData?.pluginVersion) {
+			// eslint-disable-next-line @typescript-eslint/no-deprecated
 			delete newBoardData.pluginVersion;
 		}
 
@@ -1090,7 +1111,9 @@ export default class TaskBoardFileManager {
 	 */
 	runMigrationForRevision_2(oldBoardData: Board): Board {
 		let newBoardData = { ...oldBoardData };
+		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		if (oldBoardData?.lastViewId) {
+			// eslint-disable-next-line @typescript-eslint/no-deprecated
 			delete newBoardData.lastViewId;
 		}
 
@@ -1141,7 +1164,7 @@ export default class TaskBoardFileManager {
 	 * from older boards to be lost.
 	 */
 	runMigrationForRevision_4(oldBoardData: Board): Board {
-		let newBoardData = JSON.parse(JSON.stringify(oldBoardData)); // Deep clone to avoid mutations
+		let newBoardData: Board = JSON.parse(JSON.stringify(oldBoardData)); // Deep clone to avoid mutations
 
 		// Ensure views array exists; initialize empty if missing
 		if (!newBoardData.views || !Array.isArray(newBoardData.views)) {
@@ -1149,73 +1172,81 @@ export default class TaskBoardFileManager {
 		}
 
 		// Process each view
-		if (newBoardData.views && Array.isArray(newBoardData.views)) {
-			newBoardData.views = newBoardData.views.map((view: any) => {
-				// Initialize viewFilters if missing
-				if (!view.viewFilters) {
-					// If deprecated viewFilter exists, convert it to AdvancedFilter
-					if (view.viewFilter && view.viewFilter.filterGroups) {
-						const deprecatedViewFilter = view.viewFilter;
-						view.viewFilters = {
-							filters: [
-								{
-									id: generateRandomStringId("filter"),
-									name: "Migrated Filter",
-									status: true, // Enable the migrated filter
-									description:
-										"Auto-migrated from legacy viewFilter",
-									rootCondition:
-										deprecatedViewFilter.rootCondition ||
-										"all",
-									filterGroups:
-										deprecatedViewFilter.filterGroups || [],
-								},
-							],
-							rootCondition:
-								deprecatedViewFilter.rootCondition || "all",
-						};
-					} else {
-						// No deprecated filter, create empty AdvancedFilter
-						view.viewFilters = {
-							filters: [],
-							rootCondition: "all",
-						};
-					}
-				}
-
-				// Process kanban view columns
-				if (view.kanbanView && Array.isArray(view.kanbanView.columns)) {
-					view.kanbanView.columns = view.kanbanView.columns.map(
-						(column: any) => {
-							// Initialize columnFilters if missing
-							if (!column.columnFilters) {
-								// If deprecated filters (single Filter) exists, convert it to AdvancedFilter
-								if (
-									column.filters &&
-									column.filters.filterGroups
-								) {
-									const deprecatedFilter = column.filters;
-									column.columnFilters = {
-										filters: [deprecatedFilter], // Wrap the single filter in an array
+		if (newBoardData?.views && Array.isArray(newBoardData.views)) {
+			newBoardData.views = newBoardData.views.map(
+				(view: TaskBoardViewType) => {
+					// Initialize viewFilters if missing
+					if (!view.viewFilters) {
+						// If deprecated viewFilter exists, convert it to AdvancedFilter
+						// eslint-disable-next-line @typescript-eslint/no-deprecated
+						if (view.viewFilter && view.viewFilter.filterGroups) {
+							// eslint-disable-next-line @typescript-eslint/no-deprecated
+							const deprecatedViewFilter = view.viewFilter;
+							view.viewFilters = {
+								filters: [
+									{
+										id: generateRandomStringId("filter"),
+										name: "Migrated Filter",
+										status: true, // Enable the migrated filter
+										description:
+											"Auto-migrated from legacy viewFilter",
 										rootCondition:
-											deprecatedFilter.rootCondition ||
+											deprecatedViewFilter.rootCondition ||
 											"all",
-									};
-								} else {
-									// No deprecated filter, create empty AdvancedFilter
-									column.columnFilters = {
-										filters: [],
-										rootCondition: "all",
-									};
-								}
-							}
-							return column;
-						},
-					);
-				}
+										filterGroups:
+											deprecatedViewFilter.filterGroups ||
+											[],
+									},
+								],
+								rootCondition:
+									deprecatedViewFilter.rootCondition || "all",
+							};
+						} else {
+							// No deprecated filter, create empty AdvancedFilter
+							view.viewFilters = {
+								filters: [],
+								rootCondition: "all",
+							};
+						}
+					}
 
-				return view;
-			});
+					// Process kanban view columns
+					if (
+						view.kanbanView &&
+						Array.isArray(view.kanbanView.columns)
+					) {
+						view.kanbanView.columns = view.kanbanView.columns.map(
+							(column: ColumnData) => {
+								// Initialize columnFilters if missing
+								if (!column.columnFilters) {
+									// If deprecated filters (single Filter) exists, convert it to AdvancedFilter
+									if (
+										column.filters &&
+										column.filters.filterGroups
+									) {
+										const deprecatedFilter = column.filters;
+										column.columnFilters = {
+											filters: [deprecatedFilter], // Wrap the single filter in an array
+											rootCondition:
+												deprecatedFilter.rootCondition ||
+												"all",
+										};
+									} else {
+										// No deprecated filter, create empty AdvancedFilter
+										column.columnFilters = {
+											filters: [],
+											rootCondition: "all",
+										};
+									}
+								}
+								return column;
+							},
+						);
+					}
+
+					return view;
+				},
+			);
 		}
 
 		return newBoardData;
@@ -1264,13 +1295,13 @@ export default class TaskBoardFileManager {
 			// After applying necessary migrations, update the revision in the board data
 			updatedBoardData.revision = CURRENT_REVISION;
 
-			this.saveBoard(updatedBoardData, filePath);
+			void this.saveBoard(updatedBoardData, filePath);
 
 			return updatedBoardData;
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				213,
-				`Error applying migration to board data: ${error}`,
+				`Error applying migration to board data: ${String(error)}`,
 				"TaskBoardFileManager.ts/applyMigrationIfNeeded",
 			);
 			return boardData; // Return original data if migration fails to prevent data loss
@@ -1323,14 +1354,16 @@ export default class TaskBoardFileManager {
 
 			// Validate board index
 			if (boardIndex < 0 || boardIndex > boardsArray.length - 1) {
-				throw `Invalid board index: ${boardIndex}. Available boards: ${boardsArray.length}`;
+				throw new Error(
+					`Invalid board index: ${boardIndex}. Available boards: ${boardsArray.length}`,
+				);
 			}
 
 			return boardsArray[boardIndex] || null;
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				216,
-				`Error loading board at index ${boardIndex}: ${error}`,
+				`Error loading board at index ${boardIndex}: ${String(error)}`,
 				"TaskBoardFileManager.ts/loadBoardUsingIndex",
 			);
 			return null;

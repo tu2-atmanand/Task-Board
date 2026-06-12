@@ -16,7 +16,7 @@ export async function getObsidianDebugInfo(app: App) {
 	// This is an empty string if it's the default theme
 	const themeName = app.customCss.theme;
 	const themeManifest = app.customCss.themes[themeName];
-	const numSnippets = app.customCss.snippets.filter((snippet: any) =>
+	const numSnippets = app.customCss.snippets.filter((snippet: unknown) =>
 		app.customCss.enabledSnippets.has(snippet)
 	).length;
 	const plugins = app.plugins.plugins;
@@ -38,7 +38,7 @@ export async function getObsidianDebugInfo(app: App) {
 		"Snippets enabled": numSnippets,
 		"Plugins installed": Object.keys(app.plugins.manifests).length,
 		"Plugins enabled": Object.values(plugins).map(
-			(plugin) => `${plugin!.manifest.name} v${plugin!.manifest.version}`
+			(plugin) => `${plugin.manifest.name} v${plugin.manifest.version}`
 		),
 	};
 }
@@ -56,7 +56,7 @@ export async function getWebViewVersion() {
  * Get the information about the Obsidian app and the system.
  * This is the same as the "SYSTEM INFO" section in the result of the "Show debug info" command.
  */
-export async function getSystemInfo(): Promise<any> {
+export async function getSystemInfo(): Promise<unknown> {
 	if (window.electron) {
 		// eslint-disable-next-line @typescript-eslint/no-require-imports
 		const os = require("os") as typeof import("os");
@@ -70,7 +70,7 @@ export async function getSystemInfo(): Promise<any> {
 
 	const appInfo = await window.Capacitor.Plugins.App.getInfo();
 	const deviceInfo = await window.Capacitor.Plugins.Device.getInfo();
-	const info: any = {
+	const info: unknown = {
 		"Obsidian version": `${appInfo.version} (${appInfo.build})`,
 		"API version": apiVersion,
 		"Operating system": `${deviceInfo.platform} ${deviceInfo.osVersion} (${deviceInfo.manufacturer} ${deviceInfo.model})`,

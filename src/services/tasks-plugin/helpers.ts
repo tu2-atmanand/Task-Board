@@ -4,7 +4,10 @@ import TaskBoard from "../../../main.js";
 import { CustomStatus } from "../../interfaces/GlobalSettings.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { getFormattedTaskContent, addIdToTaskContent } from "../../utils/taskLine/TaskContentFormatter.js";
+import {
+	getFormattedTaskContent,
+	addIdToTaskContent,
+} from "../../utils/taskLine/TaskContentFormatter.js";
 import { replaceOldTaskWithNewTask } from "../../utils/taskLine/TaskLineUtils.js";
 import { eventEmitter } from "../EventEmitter.js";
 import { TasksPluginApi } from "./api.js";
@@ -99,7 +102,7 @@ export async function openTasksPluginEditModal(
 		// Prepare the updated task block
 		const completeOldTaskContent = await getFormattedTaskContent(oldTask);
 		if (completeOldTaskContent === "")
-			throw "getSanitizedTaskContent returned empty string";
+			throw new Error("getSanitizedTaskContent returned empty string");
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const tasksPluginApiOutput = await tasksPlugin.editTaskLineModal(
@@ -177,8 +180,16 @@ export async function openTasksPluginEditModal(
 				return;
 			}
 
-			plugin.realTimeScanner.processAllUpdatedFiles(oldTask.filePath);
-			setTimeout(() => {
+			plugin.realTimeScanner
+				.processAllUpdatedFiles(oldTask.filePath)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						217,
+						String(error),
+						"helpers.ts/openTasksPluginEditModal",
+					);
+				});
+			window.setTimeout(() => {
 				// This event emmitter will stop any loading animation of ongoing task-card.
 				eventEmitter.emit("UPDATE_TASK", {
 					taskID: oldTask.id,

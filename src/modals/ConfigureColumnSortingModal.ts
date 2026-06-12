@@ -95,7 +95,7 @@ export class ConfigureColumnSortingModal extends Modal {
 			forceFallback: true,
 			fallbackClass: "task-board-sortable-fallback",
 			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: async () => {
+			onSort: () => {
 				// Use stable uid attributes on DOM rows to determine new order
 				const uidsInDom = Array.from(sortingCriteriaList.children).map(
 					(child) => child.getAttribute("data-uid"),
@@ -104,7 +104,7 @@ export class ConfigureColumnSortingModal extends Modal {
 				const newOrder: ColumnData["sortCriteria"] = [];
 				uidsInDom.forEach((uid, idx) => {
 					if (!uid) return;
-					const found = existing.find((c) => (c as any).uid === uid);
+					const found = existing.find((c) => c.uid === uid);
 					if (found) {
 						found.priority = idx + 1;
 						newOrder.push(found);
@@ -129,7 +129,7 @@ export class ConfigureColumnSortingModal extends Modal {
 						cls: "configureColumnSortingModalHomeSortingCriteriaListItemRow",
 						attr: {
 							"data-criteria-name": sortCriteria.criteria,
-							"data-uid": (sortCriteria as any).uid,
+							"data-uid": sortCriteria.uid,
 						},
 					});
 
@@ -257,7 +257,7 @@ export class ConfigureColumnSortingModal extends Modal {
 						})
 						.addButton((del) =>
 							del
-								.setButtonText("delete")
+								.setButtonText(t("delete"))
 								.setIcon("trash")
 								.setClass(
 									"configureColumnSortingModalHomeSortingCriteriaListItemDeleteCriterion",
@@ -301,7 +301,7 @@ export class ConfigureColumnSortingModal extends Modal {
 			text: t("add-new-sorting-criterion"),
 			cls: "configureColumnSortingModalHomeAddSortingBtn",
 		});
-		addNewSortingButton.addEventListener("click", async () => {
+		addNewSortingButton.addEventListener("click", () => {
 			if (
 				this.columnConfiguration.sortCriteria?.some(
 					(c) => c.criteria === "manualOrder",

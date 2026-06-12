@@ -10,7 +10,7 @@ function getTaskPropertyValue(
 	task: taskItem,
 	criteria: string,
 	startTimeConfig: string,
-): any {
+): unknown {
 	switch (criteria) {
 		case "content":
 			return task.title;
@@ -69,7 +69,11 @@ function getTaskPropertyValue(
  * Returns: -1 if date1 < date2, 0 if equal, 1 if date1 > date2
  * Handles empty/null dates by placing them at the end for ascending order
  */
-function compareDates(date1: any, date2: any, order: "asc" | "desc"): number {
+function compareDates(
+	date1: string,
+	date2: string,
+	order: "asc" | "desc",
+): number {
 	// Handle empty/null values
 	const hasDate1 = date1 && date1 !== "";
 	const hasDate2 = date2 && date2 !== "";
@@ -94,7 +98,11 @@ function compareDates(date1: any, date2: any, order: "asc" | "desc"): number {
  * Compares two time strings (e.g., "09:00", "9:00", or "09:00-10:00")
  * Returns: -1 if time1 < time2, 0 if equal, 1 if time1 > time2
  */
-function compareTimes(time1: any, time2: any, order: "asc" | "desc"): number {
+function compareTimes(
+	time1: string,
+	time2: string,
+	order: "asc" | "desc",
+): number {
 	// Handle empty/null values
 	const hasTime1 = time1 && time1 !== "";
 	const hasTime2 = time2 && time2 !== "";
@@ -142,8 +150,8 @@ function compareTimes(time1: any, time2: any, order: "asc" | "desc"): number {
  * Compares two values based on their type
  */
 function compareValues(
-	value1: any,
-	value2: any,
+	value1: string | number,
+	value2: string | number,
 	criteria: string,
 	order: "asc" | "desc",
 ): number {
@@ -294,7 +302,7 @@ export function columnSortingAlgorithm(
 	// Apply sorting criteria in reverse order (lowest priority first)
 	// This ensures that the highest priority criteria has the final say
 	for (let i = orderedCriteria.length - 1; i >= 0; i--) {
-		const criterion = orderedCriteria[i]!;
+		const criterion = orderedCriteria[i];
 		if (!criterion) continue;
 
 		sortedTasks = sortedTasks.sort((taskA, taskB) => {

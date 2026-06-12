@@ -6,11 +6,11 @@ import TaskBoardViewContainer from "./TaskBoardViewContainer.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 
 export class TaskBoardEmbedComponent extends Component {
-	plugin: TaskBoard;
-	file: TFile;
-	linkText?: string;
-	root: Root | null = null;
+	private plugin: TaskBoard;
+	private root: Root | null = null;
 	protected contentEl: HTMLElement;
+	public file: TFile;
+	public linkText?: string;
 
 	constructor(contentEl: HTMLElement, plugin: TaskBoard, file: TFile, linkText?: string) {
 		super();
@@ -41,7 +41,7 @@ export class TaskBoardEmbedComponent extends Component {
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				196,
-				`Error loading task board for embed: ${error}`,
+				`Error loading task board for embed: ${String(error)}`,
 				"TaskBoardEmbedComponent.tsx/loadFile",
 			);
 			this.contentEl.createEl("div", { text: "Error loading task board" });

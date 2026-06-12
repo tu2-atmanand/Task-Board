@@ -40,7 +40,7 @@ const MigrationModalContent: React.FC<{
 		setLogs((prev) => [...prev, logEntry]);
 
 		// Auto-scroll to bottom
-		setTimeout(() => {
+		window.setTimeout(() => {
 			if (terminalRef.current) {
 				terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
 			}
@@ -130,7 +130,7 @@ const MigrationModalContent: React.FC<{
 			}
 
 			// Show Notice to reload Obsidian and make the "Reload Obsidian" button visible
-			showReloadObsidianNotice(plugin);
+			void showReloadObsidianNotice(plugin);
 
 			// Capture all logs after migration completes and all logs are added
 			result.logs = [...logsRef.current];
@@ -213,7 +213,7 @@ const MigrationModalContent: React.FC<{
 				<div className="migration-button-container">
 					<button
 						className="migration-run-button"
-						onClick={handleStartMigration}
+						onClick={() => handleStartMigration}
 						disabled={isRunning}
 					>
 						{isRunning ? "Running..." : "Run migrations"}

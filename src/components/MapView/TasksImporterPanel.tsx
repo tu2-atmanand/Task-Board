@@ -11,6 +11,7 @@ import { eventEmitter } from '../../services/EventEmitter.js';
 import { applyIdToTaskItem } from '../../utils/TaskItemUtils.js';
 import TaskItem from '../TaskCard/TaskItem.js';
 import { t } from '../../utils/lang/helper.js';
+import { Component } from 'obsidian';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
@@ -34,6 +35,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 	const [searchQuery, setSearchQuery] = useState('');
 	const [importedTaskIds, setImportedTaskIds] = useState<Set<string>>(new Set());
 	const tasksContentRef = useRef<HTMLDivElement>(null);
+
+	const dummyComponent = new Component();
 
 	// Lazy loading configs
 	// Lazy loading configs
@@ -76,13 +79,20 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 				// Add to imported set
 				setImportedTaskIds(prev => new Set(prev).add(task.id));
 				// Trigger re-scan to update the map view, adding delay for task-note
-				sleep(500).then(async () => {
-					await plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+				window.setTimeout(() => {
+					plugin.realTimeScanner.processAllUpdatedFiles(task.filePath).then(() => {
+						// Emit event to refresh the board and notify about the newly imported task
+						eventEmitter.emit('TASK_IMPORTED_TO_MAP', newId);
+						eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with SOFT_REFRESH only.
+					}).catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"TasksImporterPanel.ts/handleImportTask",
+						);
+					});
 
-					// Emit event to refresh the board and notify about the newly imported task
-					eventEmitter.emit('TASK_IMPORTED_TO_MAP', newId);
-					eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with SOFT_REFRESH only.
-				})
+				}, 500);
 			}
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
@@ -121,10 +131,10 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 		if (!container) return;
 
 		// Throttle scroll events for performance
-		let throttleTimeout: NodeJS.Timeout | null = null;
+		let throttleTimeout: number | null = null;
 		const throttledScroll = () => {
 			if (throttleTimeout) return;
-			throttleTimeout = setTimeout(() => {
+			throttleTimeout = window.setTimeout(() => {
 				handleScroll();
 				throttleTimeout = null;
 			}, 100);
@@ -133,7 +143,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 		container.addEventListener('scroll', throttledScroll);
 		return () => {
 			container.removeEventListener('scroll', throttledScroll);
-			if (throttleTimeout) clearTimeout(throttleTimeout);
+			if (throttleTimeout) window.clearTimeout(throttleTimeout);
 		};
 	}, [handleScroll]);
 
@@ -155,9 +165,9 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 			}
 		};
 
-		document.addEventListener('keydown', handleEscape);
+		activeDocument.addEventListener('keydown', handleEscape);
 		return () => {
-			document.removeEventListener('keydown', handleEscape);
+			activeDocument.removeEventListener('keydown', handleEscape);
 		};
 	}, [isVisible, onClose]);
 
@@ -215,12 +225,13 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 									<div
 										key={task.id}
 										className="tasksImporterPanelTaskItemWrapper"
-										onClick={() => handleImportTask(task)}
+										onClick={() => void handleImportTask(task)}
 									>
 										<TaskItem
 											key={task.id}
 											dataAttributeIndex={0} // TODO : No need of this data in this case.
 											plugin={plugin}
+											parentComponent={dummyComponent}
 											task={task}
 											activeViewIndex={activeViewIndex}
 											activeViewType={viewTypeNames.map}

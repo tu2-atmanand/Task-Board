@@ -234,16 +234,20 @@ class DragDropTasksManager {
 			this.autoScrollLastY = e.clientY;
 		};
 		this.autoScrollDragOverHandler = trackPosition;
-		document.addEventListener(
+		activeDocument.addEventListener(
 			"dragover",
 			trackPosition as EventListener,
 			true,
 		);
 
 		// Auto-cleanup on drag end
-		document.addEventListener("dragend", () => this.stopAutoScroll(), {
-			once: true,
-		});
+		activeDocument.addEventListener(
+			"dragend",
+			() => this.stopAutoScroll(),
+			{
+				once: true,
+			},
+		);
 
 		this.startAutoScrollLoop();
 	}
@@ -255,7 +259,7 @@ class DragDropTasksManager {
 		this.isAutoScrolling = false;
 		this.autoScrollActive = false;
 		if (this.autoScrollDragOverHandler) {
-			document.removeEventListener(
+			activeDocument.removeEventListener(
 				"dragover",
 				this.autoScrollDragOverHandler as EventListener,
 				true,
@@ -304,7 +308,7 @@ class DragDropTasksManager {
 				return;
 			}
 
-			const boardEl = document.querySelector(".kanbanBoard");
+			const boardEl = activeDocument.querySelector(".kanbanBoard");
 			if (!boardEl) {
 				this.autoScrollRAFId = window.requestAnimationFrame(step);
 				return;
@@ -336,12 +340,12 @@ class DragDropTasksManager {
 				// Gather all plausible scroll containers (safe to try all — out-of-range scroll is a no-op)
 				const scrollTargets: HTMLElement[] = [];
 
-				const columnsContainer = document.querySelector(
+				const columnsContainer = activeDocument.querySelector(
 					".columnsContainer",
 				) as HTMLElement;
 				if (columnsContainer) scrollTargets.push(columnsContainer);
 
-				const swimlanesContainer = document.querySelector(
+				const swimlanesContainer = activeDocument.querySelector(
 					".swimlanesContainer",
 				) as HTMLElement;
 				if (swimlanesContainer) scrollTargets.push(swimlanesContainer);
@@ -408,7 +412,7 @@ class DragDropTasksManager {
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		// This means, user either wants to change the order of the taskItems within the column or is changing the swimlanes.
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			this.plugin!,
 			currentDragData,
 			sourceColumnData,
@@ -439,24 +443,39 @@ class DragDropTasksManager {
 			);
 
 			if (isThisTaskNote) {
-				updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
-					sleep(1000).then(() => {
-						plugin.realTimeScanner.processAllUpdatedFiles(
-							oldTask.filePath,
-							oldTask.id,
-						);
-					});
-				});
+				void updateFrontmatterInMarkdownFile(plugin, newTask).then(
+					() => {
+						window.setTimeout(() => {
+							plugin.realTimeScanner
+								.processAllUpdatedFiles(
+									oldTask.filePath,
+									oldTask.id,
+								)
+								.catch((error) => {
+									bugReporterManagerInsatance.addToLogs(
+										217,
+										String(error),
+										"OpenModals.ts/openAddNewTaskInCurrentFileModal",
+									);
+								});
+						}, 1000);
+					},
+				);
 			} else {
-				updateTaskInFile(plugin, newTask, oldTask).then(() => {
-					plugin.realTimeScanner.processAllUpdatedFiles(
-						oldTask.filePath,
-						oldTask.id,
-					);
+				void updateTaskInFile(plugin, newTask, oldTask).then(() => {
+					plugin.realTimeScanner
+						.processAllUpdatedFiles(oldTask.filePath, oldTask.id)
+						.catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"OpenModals.ts/openAddNewTaskInCurrentFileModal",
+							);
+						});
 				});
 			}
 		} else {
-			setTimeout(() => {
+			window.setTimeout(() => {
 				eventEmitter.emit("REFRESH_BOARD");
 			}, 200);
 		}
@@ -493,13 +512,13 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
 		// -----------------------------------------------
 		// STEP 1 - If the target column has "manualOrder" sorting criteria, update the task-order-config in the target column.
 		// This is moved above STEP-1 because, the parent function is async.
 		// ----------------------------------------------
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -606,9 +625,9 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -656,22 +675,18 @@ class DragDropTasksManager {
 			// const datePicker = new DatePickerModal(plugin, dateType);
 			// datePicker.onDateSelected = async (date: string | null) => {};
 
-			openDateInputModal(
-				plugin,
-				dateType,
-				async (date: string | null) => {
-					if (date) {
-						// newTask[dateType] = date;
-						updateTaskItemDate(
-							plugin,
-							oldTask,
-							newTask,
-							dateType,
-							date,
-						);
-					}
-				},
-			);
+			void openDateInputModal(plugin, dateType, (date: string | null) => {
+				if (date) {
+					// newTask[dateType] = date;
+					updateTaskItemDate(
+						plugin,
+						oldTask,
+						newTask,
+						dateType,
+						date,
+					);
+				}
+			});
 
 			// datePicker.open();
 		} else {
@@ -712,9 +727,9 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -729,7 +744,7 @@ class DragDropTasksManager {
 		);
 
 		// Extract the priority value from the source column
-		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
+		const targetColumnPrioirty = targetColumn.taskPriority || 0;
 
 		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
@@ -761,9 +776,9 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -778,10 +793,14 @@ class DragDropTasksManager {
 		);
 
 		// Extract the status value from the source column
-		const targetColumnStatusValue =
-			(targetColumn.taskStatus as string) || "";
+		const targetColumnStatusValue = targetColumn.taskStatus || "";
 
-		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
+		void updateTaskItemStatus(
+			plugin,
+			oldTask,
+			newTask,
+			targetColumnStatusValue,
+		);
 	};
 
 	handleTaskMove_DONE_to_TODO = (
@@ -836,9 +855,9 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -901,22 +920,18 @@ class DragDropTasksManager {
 			// };
 			// datePicker.open();
 
-			openDateInputModal(
-				plugin,
-				dateType,
-				async (date: string | null) => {
-					if (date) {
-						// newTask[dateType] = date;
-						updateTaskItemDate(
-							plugin,
-							oldTask,
-							newTask,
-							dateType,
-							date,
-						);
-					}
-				},
-			);
+			void openDateInputModal(plugin, dateType, (date: string | null) => {
+				if (date) {
+					// newTask[dateType] = date;
+					updateTaskItemDate(
+						plugin,
+						oldTask,
+						newTask,
+						dateType,
+						date,
+					);
+				}
+			});
 		} else {
 			// This code-block should technically not run, since we are not allowing to drop task in dated type column with a range of dates.
 			bugReporterManagerInsatance.showNotice(
@@ -953,10 +968,10 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
 		// STEP 1 - Check if the target column has 'manualOrder' sorting criteria.
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -1017,9 +1032,9 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -1038,7 +1053,7 @@ class DragDropTasksManager {
 		}
 
 		// Extract the priority value from the source column
-		const targetColumnPrioirty = (targetColumn.taskPriority as number) || 0;
+		const targetColumnPrioirty = targetColumn.taskPriority || 0;
 
 		updateTaskItemPriority(plugin, oldTask, newTask, targetColumnPrioirty);
 	};
@@ -1068,9 +1083,9 @@ class DragDropTasksManager {
 		}
 
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -1089,10 +1104,14 @@ class DragDropTasksManager {
 		}
 
 		// Extract the status value from the source column
-		const targetColumnStatusValue =
-			(targetColumn.taskStatus as string) || "";
+		const targetColumnStatusValue = targetColumn.taskStatus || "";
 
-		updateTaskItemStatus(plugin, oldTask, newTask, targetColumnStatusValue);
+		void updateTaskItemStatus(
+			plugin,
+			oldTask,
+			newTask,
+			targetColumnStatusValue,
+		);
 	};
 
 	/**
@@ -1111,10 +1130,10 @@ class DragDropTasksManager {
 		targetColumnSwimlaneData: swimlaneDataProp | undefined,
 	): Promise<void> => {
 		const oldTask = currentDragData.task;
-		let newTask = { ...oldTask } as taskItem;
+		let newTask = { ...oldTask };
 
 		// STEP 1 - Check if the target column has 'manualOrder' sorting criteria.
-		this.handleTasksOrderChange(
+		void this.handleTasksOrderChange(
 			plugin,
 			currentDragData,
 			targetColumn,
@@ -1134,7 +1153,7 @@ class DragDropTasksManager {
 		);
 
 		// FINALLY - Update the task in the note.
-		updateTaskItemStatus(
+		void updateTaskItemStatus(
 			plugin,
 			oldTask,
 			newTask,
@@ -1201,7 +1220,7 @@ class DragDropTasksManager {
 			);
 
 		if (!newBoardData) {
-			throw "Board data not found";
+			throw new Error("Board data not found");
 		}
 
 		newBoardData.views[
@@ -1209,7 +1228,7 @@ class DragDropTasksManager {
 		].kanbanView!.columns[targetColumnData.index - 1] =
 			updatedTargetColumnData;
 
-		plugin.taskBoardFileManager.saveBoard(newBoardData);
+		void plugin.taskBoardFileManager.saveBoard(newBoardData);
 	};
 
 	/**
@@ -1405,8 +1424,8 @@ class DragDropTasksManager {
 		// For column we can do this kind of heavy DOM traversing,
 		// since there will be less columns, so querySelecting them all is not so big issue.
 		const allColumnContainers = Array.from(
-			document.querySelectorAll(".tasksContainer"),
-		) as HTMLDivElement[];
+			activeDocument.querySelectorAll(".tasksContainer"),
+		);
 		allColumnContainers.forEach((container) => {
 			container.classList.remove(
 				"drag-over-allowed",
@@ -1436,12 +1455,12 @@ class DragDropTasksManager {
 	 * Clear column dragover feedback classes from all columns and swimlane columns.
 	 */
 	private clearDragoverFeedback(): void {
-		document
+		activeDocument
 			.querySelectorAll(".tasksContainer.drag-over-allowed")
 			.forEach((el) => {
 				el.classList.remove("drag-over-allowed");
 			});
-		document
+		activeDocument
 			.querySelectorAll(".tasksContainer.drag-over-not-allowed")
 			.forEach((el) => {
 				el.classList.remove("drag-over-not-allowed");
@@ -1523,7 +1542,7 @@ class DragDropTasksManager {
 
 			const touch = e.changedTouches[0];
 			if (touch) {
-				this.handleTouchDrop(touch.clientX, touch.clientY);
+				void this.handleTouchDrop(touch.clientX, touch.clientY);
 			}
 
 			this.clearTouchDragState();
@@ -1570,12 +1589,12 @@ class DragDropTasksManager {
 		this.touchDragElement = cardWrapper;
 		this.setCurrentDragData(dragData);
 
-		document.addEventListener(
+		activeDocument.addEventListener(
 			"contextmenu",
 			this.boundContextMenuBlocker,
 			true,
 		);
-		document.body.classList.add("taskboard-touch-dragging");
+		activeDocument.body.classList.add("taskboard-touch-dragging");
 
 		cardWrapper.classList.add("task-item-dragging");
 		this.touchDragGhost = this.createTouchDragGhost(cardWrapper, x, y);
@@ -1622,12 +1641,12 @@ class DragDropTasksManager {
 
 	private clearTouchDragState(): void {
 		this.touchDragActive = false;
-		document.removeEventListener(
+		activeDocument.removeEventListener(
 			"contextmenu",
 			this.boundContextMenuBlocker,
 			true,
 		);
-		document.body.classList.remove("taskboard-touch-dragging");
+		activeDocument.body.classList.remove("taskboard-touch-dragging");
 		this.removeTouchDragGhost();
 		this.stopTouchAutoScroll();
 
@@ -1657,17 +1676,15 @@ class DragDropTasksManager {
 		// window.requestAnimationFrame(() => {
 		this.clearDragoverFeedback();
 
-		const elementUnder = document.elementFromPoint(x, y);
+		const elementUnder = activeDocument.elementFromPoint(x, y);
 		if (!elementUnder) return;
 
 		const columnEl = (elementUnder as HTMLElement).closest(
 			".TaskBoardColumnsSection",
-		) as HTMLElement | null;
+		);
 		if (!columnEl) return;
 
-		const tasksContainer = columnEl.querySelector(
-			".tasksContainer",
-		) as HTMLElement | null;
+		const tasksContainer = columnEl.querySelector(".tasksContainer");
 		if (!tasksContainer) return;
 
 		const currentDragData = this.getCurrentDragData();
@@ -1707,17 +1724,15 @@ class DragDropTasksManager {
 	 * Handle the drop action at the end of a touch drag.
 	 */
 	private async handleTouchDrop(x: number, y: number): Promise<void> {
-		const elementUnder = document.elementFromPoint(x, y);
+		const elementUnder = activeDocument.elementFromPoint(x, y);
 		if (!elementUnder) return;
 
 		const columnEl = (elementUnder as HTMLElement).closest(
 			".TaskBoardColumnsSection",
-		) as HTMLElement | null;
+		);
 		if (!columnEl) return;
 
-		const tasksContainer = columnEl.querySelector(
-			".tasksContainer",
-		) as HTMLElement | null;
+		const tasksContainer = columnEl.querySelector(".tasksContainer");
 		if (!tasksContainer) return;
 
 		const currentDragData = this.getCurrentDragData();
@@ -1750,7 +1765,7 @@ class DragDropTasksManager {
 		// Find insertion index if hovering over a task card
 		const taskCardEl = (elementUnder as HTMLElement).closest(
 			"[data-taskitem-index]",
-		) as HTMLElement | null;
+		);
 		if (
 			taskCardEl &&
 			targetColumnData.sortCriteria?.some(
@@ -2006,7 +2021,7 @@ class DragDropTasksManager {
 		if (!this.currentDragData) {
 			bugReporterManagerInsatance.addToLogs(
 				142,
-				`No current drag data available for drop operation.\currentDragData=${JSON.stringify(this.currentDragData)}`,
+				`No current drag data available for drop operation.\ncurrentDragData=${JSON.stringify(this.currentDragData)}`,
 				"DragDropTasksManager.ts/handleDropEvent",
 			);
 			return;
@@ -2017,7 +2032,7 @@ class DragDropTasksManager {
 		if (!sourceColumnData) {
 			bugReporterManagerInsatance.addToLogs(
 				143,
-				`There was an error while capturing the source column data.\sourceColumnData=${JSON.stringify(sourceColumnData)}`,
+				`There was an error while capturing the source column data.\nsourceColumnData=${JSON.stringify(sourceColumnData)}`,
 				"DragDropTasksManager.ts/handleDropEvent",
 			);
 			return;
@@ -2063,7 +2078,13 @@ class DragDropTasksManager {
 					targetColumnData,
 					sourceColumnSwimlaneData,
 					targetColumnSwimlaneData,
-				);
+				).catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						218,
+						String(error),
+						"DragDropTasksManager.tshandleDropEvent/handleTaskMove_same_column",
+					);
+				});
 				return;
 			} else if (targetColumnData.colType === colTypeNames.namedTag) {
 				this.handleTaskMove_namedTag_to_namedTag(
@@ -2073,7 +2094,13 @@ class DragDropTasksManager {
 					targetColumnData,
 					sourceColumnSwimlaneData,
 					targetColumnSwimlaneData,
-				);
+				).catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						218,
+						String(error),
+						"DragDropTasksManager.tshandleDropEvent/handleTaskMove_namedTag_to_namedTag",
+					);
+				});
 			} else if (targetColumnData.colType === colTypeNames.dated) {
 				this.handleTaskMove_to_dated(
 					this.plugin!,
@@ -2082,7 +2109,13 @@ class DragDropTasksManager {
 					targetColumnData,
 					sourceColumnSwimlaneData,
 					targetColumnSwimlaneData,
-				);
+				).catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						218,
+						String(error),
+						"DragDropTasksManager.tshandleDropEvent/handleTaskMove_to_dated",
+					);
+				});
 			} else if (targetColumnData.colType === colTypeNames.taskPriority) {
 				this.handleTaskMove_priority_to_priority(
 					this.plugin!,
@@ -2091,7 +2124,13 @@ class DragDropTasksManager {
 					targetColumnData,
 					sourceColumnSwimlaneData,
 					targetColumnSwimlaneData,
-				);
+				).catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						218,
+						String(error),
+						"DragDropTasksManager.tshandleDropEvent/handleTaskMove_priority_to_priority",
+					);
+				});
 			} else if (targetColumnData.colType === colTypeNames.taskStatus) {
 				this.handleTaskMove_status_to_status(
 					this.plugin!,
@@ -2100,7 +2139,13 @@ class DragDropTasksManager {
 					targetColumnData,
 					sourceColumnSwimlaneData,
 					targetColumnSwimlaneData,
-				);
+				).catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						218,
+						String(error),
+						"DragDropTasksManager.tshandleDropEvent/handleTaskMove_status_to_status",
+					);
+				});
 			} else {
 				new Notice(
 					"This operation is not possible in the current version. Please request this idea to the developer.",
@@ -2116,7 +2161,13 @@ class DragDropTasksManager {
 				targetColumnData,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-			);
+			).catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					218,
+					String(error),
+					"DragDropTasksManager.tshandleDropEvent/handleTaskMove_to_completed",
+				);
+			});
 		} else if (targetColumnData.colType === colTypeNames.dated) {
 			// This means user is moving task to a dated column from any other type of column.
 			// This operation should basically add a date property to the task based on the target column's dateType
@@ -2127,7 +2178,13 @@ class DragDropTasksManager {
 				targetColumnData,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-			);
+			).catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					218,
+					String(error),
+					"DragDropTasksManager.tshandleDropEvent/handleTaskMove_to_dated",
+				);
+			});
 		} else if (targetColumnData.colType === colTypeNames.namedTag) {
 			// This means user is moving task to a namedTag column from any other type of column.
 			// This operation should basically add the target column's tag to the task
@@ -2138,7 +2195,13 @@ class DragDropTasksManager {
 				targetColumnData,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-			);
+			).catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					218,
+					String(error),
+					"DragDropTasksManager.tshandleDropEvent/handleTaskMove_to_namedTag",
+				);
+			});
 		} else if (targetColumnData.colType === colTypeNames.taskPriority) {
 			// This means user is moving task to a priority column from any other type of column.
 			// This operation should basically update the task's priority based on the target column's taskPriority
@@ -2149,7 +2212,13 @@ class DragDropTasksManager {
 				targetColumnData,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-			);
+			).catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					218,
+					String(error),
+					"DragDropTasksManager.tshandleDropEvent/handleTaskMove_to_priority",
+				);
+			});
 		} else if (targetColumnData.colType === colTypeNames.taskStatus) {
 			// This means user is moving task to a status column from any other type of column.
 			// This operation should basically update the task's status based on the target column's taskStatus
@@ -2160,7 +2229,13 @@ class DragDropTasksManager {
 				targetColumnData,
 				sourceColumnSwimlaneData,
 				targetColumnSwimlaneData,
-			);
+			).catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					218,
+					String(error),
+					"DragDropTasksManager.tshandleDropEvent/handleTaskMove_to_status",
+				);
+			});
 		} else {
 			new Notice(
 				"This operation is not possible in the current version. Please request this idea to the developer.",

@@ -17,6 +17,7 @@ import {
 	mapViewBackgrounVariantTypes,
 	mapViewNodeMapOrientation,
 	RibbonIconActions,
+	statusTypeNames,
 } from "./Enums.js";
 import { taskItemKeyToNameMapping } from "./Mapping.js";
 
@@ -50,7 +51,7 @@ export interface CustomStatus {
 	name: string; // The human-readable name of the status (e.g., "In Progress")
 	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
-	type: string; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+	type: statusTypeNames; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
 }
 
 export interface TaskBoardAction {
@@ -82,7 +83,7 @@ export interface globalSettingsData {
 	scanFilters: ScanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
-	taskPropertyFormat: string;
+	taskPropertyFormat: taskPropertyFormatOptions;
 	dailyNotesPluginComp: boolean;
 	dateFormat: string;
 	dateTimeFormat: string;
@@ -95,16 +96,16 @@ export interface globalSettingsData {
 	autoAddCancelledDate: boolean;
 	// scanVaultAtStartup: boolean; - @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
 	showModifiedFilesNotice: boolean;
-	scanMode: string;
+	scanMode: scanModeOptions;
 	columnWidth: string;
 	visiblePropertiesList: string[];
-	taskCardStyle: string;
+	taskCardStyle: taskCardStyleNames;
 	showVerticalScroll: boolean;
 	dragAutoScrollEdgePercent: number;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
-	universalDate: string;
+	universalDate: UniversalDateOptions;
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
@@ -124,7 +125,7 @@ export interface globalSettingsData {
 	frontmatterFormatting: FrontmatterFormattingInterface[];
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
-	notificationService: string;
+	notificationService: NotificationService;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	hiddenTaskProperties: taskPropertiesNames[];
@@ -140,8 +141,8 @@ export interface globalSettingsData {
 	};
 	boundTaskCompletionToChildTasks: boolean;
 	mapView: {
-		background: string;
-		mapOrientation: string;
+		background: mapViewBackgrounVariantTypes;
+		mapOrientation: mapViewNodeMapOrientation;
 		optimizedRender: boolean;
 		arrowDirection: mapViewArrowDirection;
 		animatedEdges: boolean;
@@ -152,7 +153,7 @@ export interface globalSettingsData {
 	};
 	enableDragnDropTouch: boolean;
 	filtersWarehouse: Filter[];
-	ribbonIconAction: string;
+	ribbonIconAction: RibbonIconActions;
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -261,49 +262,49 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				name: "Todo",
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: false,
-				type: "TODO",
+				type: statusTypeNames.TODO,
 			},
 			{
 				symbol: defaultTaskStatuses.scheduled,
 				name: "Ready to start",
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: false,
-				type: "TODO",
+				type: statusTypeNames.TODO,
 			},
 			{
 				symbol: defaultTaskStatuses.question,
 				name: "In Review",
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: false,
-				type: "TODO",
+				type: statusTypeNames.TODO,
 			},
 			{
 				symbol: defaultTaskStatuses.inprogress,
 				name: "In Progress",
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: true,
-				type: "IN_PROGRESS",
+				type: statusTypeNames.IN_PROGRESS,
 			},
 			{
 				symbol: defaultTaskStatuses.done,
 				name: "Done",
 				nextStatusSymbol: defaultTaskStatuses.todo,
 				availableAsCommand: true,
-				type: "DONE",
+				type: statusTypeNames.DONE,
 			},
 			{
 				symbol: defaultTaskStatuses.checked,
 				name: "Completed",
 				nextStatusSymbol: defaultTaskStatuses.todo,
 				availableAsCommand: true,
-				type: "DONE",
+				type: statusTypeNames.DONE,
 			},
 			{
 				symbol: defaultTaskStatuses.dropped,
 				name: "Cancelled",
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: true,
-				type: "CANCELLED",
+				type: statusTypeNames.CANCELLED,
 			},
 		],
 		compatiblePlugins: {

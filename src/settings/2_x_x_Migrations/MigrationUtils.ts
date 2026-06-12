@@ -22,6 +22,7 @@ import {
 	PluginDataJsonLegacy,
 	BoardLegacy,
 } from "./LegacyInterfacesAndTypings.js";
+import { MigrationModal } from "./MigrationModal.js";
 
 export interface MigrationStepResult {
 	stepName: string;
@@ -180,12 +181,10 @@ export async function checkForV1Data(
 // Function to open the MigrationModal
 export const openMigrationModal = (
 	plugin: TaskBoard,
-	onMigrationComplete?: (result: any) => void,
+	onMigrationComplete?: (result: unknown) => void,
 ) => {
 	// Dynamic import to avoid circular dependencies
-	import("./MigrationModal.js").then(({ MigrationModal }) => {
-		new MigrationModal(plugin, onMigrationComplete).open();
-	});
+	new MigrationModal(plugin, onMigrationComplete).open();
 };
 
 /**
@@ -204,7 +203,7 @@ export async function checkAndNotifyV2MigrationsRequired(
 					createFragment((f) => {
 						f.createDiv("bugReportNotice", (el) => {
 							el.createEl("h4", {
-								text: `⚠ Task Board migration required`,
+								text: `⚠ Task board migration required`,
 							});
 							el.createEl("p", {
 								text: `Task Board has been updated from version ${v1Check.version} (v1.x.x series) to version ${CURRENT_PLUGIN_VERSION} (v2.x.x series). You are required to run the migrations for this new version to work.`,
@@ -341,7 +340,9 @@ export async function createBoardFiles(
 				);
 				if (result) onProgress?.(`✓ Created directory: ${boardsDir}`);
 				else
-					throw "There was an error while creating the default directory for storing the board files.";
+					throw new Error(
+						"There was an error while creating the default directory for storing the board files.",
+					);
 			} catch (folderError) {
 				const errorMsg =
 					folderError instanceof Error
@@ -455,7 +456,7 @@ export async function createBoardFiles(
 						message: `Board file created successfully`,
 					});
 				} else {
-					throw `Failed to create the board.`;
+					throw new Error(`Failed to create the board.`);
 				}
 			} catch (boardError) {
 				const errorMsg =
@@ -505,7 +506,7 @@ export async function migrateMapViewData(
 		// Query localStorage for map view data using board name as key
 		// Note: localStorage in Obsidian is scoped per workspace
 		let mapViewData;
-		const mapViewPostionsDataStr = localStorage.getItem(
+		const mapViewPostionsDataStr = plugin.app.loadLocalStorage(
 			NODE_POSITIONS_STORAGE_KEY,
 		);
 		if (mapViewPostionsDataStr) {
@@ -571,7 +572,7 @@ export async function migrateMapViewData(
 					const viewsLength = boardData.views.length;
 
 					const mapViewExists = boardData.views.some(
-						(v: any) => v.type === "map",
+						(v: unknown) => v.type === "map",
 					);
 					if (!mapViewExists) {
 						boardData.views.push({
@@ -641,7 +642,7 @@ export async function migrateMapViewData(
  */
 export async function updateRegistryAndSettings(
 	plugin: TaskBoard,
-	oldPluginSettings: any,
+	oldPluginSettings: unknown,
 	onProgress?: (message: string) => void,
 ): Promise<{ success: boolean; error?: string }> {
 	try {

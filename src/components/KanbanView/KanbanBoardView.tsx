@@ -8,9 +8,11 @@ import type { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
 import { columnSegregator } from "../../utils/algorithms/ColumnSegregator.js";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer.js";
 import LazyColumn from "./LazyColumn.js";
+import { WorkspaceLeaf } from "obsidian";
 
 interface KanbanBoardProps {
 	plugin: TaskBoard;
+	currentLeaf: WorkspaceLeaf
 	currentBoardData: Board;
 	currentView: TaskBoardViewType;
 	currentViewIndex: number;
@@ -18,7 +20,7 @@ interface KanbanBoardProps {
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentLeaf, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
 	// console.log("Lets see how many times this is running....\ncurrentViewIndex = ", currentViewIndex, "\ncurrentViewName = ", currentView.viewName);
 	const [loading, setLoading] = useState(true);
 
@@ -61,6 +63,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 			<LazyColumn
 				key={`${column.id}-${index}`}
 				plugin={plugin}
+				currentLeaf={currentLeaf}
 				activeBoardData={currentBoardData}
 				kanbanViewData={currentView.kanbanView!}
 				currentViewIndex={currentViewIndex}
@@ -111,7 +114,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 		return null;
 	}, [freshInstall]);
 
-	const isSwimlanesEnabled = currentView.kanbanView!.swimlanes?.enabled === true;
+	const isSwimlanesEnabled = currentView.kanbanView.swimlanes?.enabled === true;
 
 	return (
 		<div className="kanbanBoard">
@@ -120,9 +123,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentBoardData, cur
 					{isSwimlanesEnabled ? (
 						<KanbanSwimlanesContainer
 							plugin={plugin}
+							currentLeaf={currentLeaf}
 							currentBoardData={currentBoardData}
 							currentViewIndex={currentViewIndex}
-							kanbanViewData={currentView!.kanbanView}
+							kanbanViewData={currentView.kanbanView}
 							tasksPerColumn={allTasksArrangedPerColumn}
 						/>
 					) : (

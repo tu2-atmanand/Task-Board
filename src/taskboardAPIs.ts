@@ -5,7 +5,6 @@ import TaskBoard from "../main.js";
 import { bugReporterManagerInsatance } from "./managers/BugReporter.js";
 import { TaskEditorModal } from "./modals/TaskEditorModal.js";
 
-
 /**
  * TaskBoardApi provides external plugins with a public API to interact with Task Board functionality.
  * This class exposes methods that allow other Obsidian plugins to integrate with Task Board features.
@@ -103,7 +102,7 @@ export class TaskBoardApi {
 		try {
 			const AddTaskModal = new TaskEditorModal(
 				plugin,
-				(newTask, quickAddPluginChoice) => {
+				async () => {
 					// Task save callback - handled by modal's onSave event
 				},
 				isTaskNote,

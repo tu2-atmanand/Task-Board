@@ -6,7 +6,6 @@ import { defaultTaskStatuses } from "../../interfaces/Enums.js";
 import {
 	PluginDataJson,
 	CustomStatus,
-	globalSettingsData,
 	FrontmatterFormattingInterface,
 } from "../../interfaces/GlobalSettings.js";
 import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
@@ -34,7 +33,7 @@ export function isTaskNotePresentInFrontmatter(
 	let tags: string[] = [];
 
 	if (Array.isArray(frontmatter.tags)) {
-		tags = frontmatter.tags.map((tag: any) => String(tag).trim());
+		tags = frontmatter.tags.map((tag: unknown) => String(tag).trim());
 	} else if (typeof frontmatter.tags === "string") {
 		tags = frontmatter.tags.split(",").map((tag: string) => tag.trim());
 	}
@@ -64,7 +63,7 @@ export function validateFrontmatterValue(
 	customKey: string,
 	valueType: "string" | "number" | "array",
 ): string | number | string[] | undefined {
-	const value = frontmatter[customKey];
+	const value = frontmatter[customKey] ?? "";
 
 	if (value && typeof value === valueType) {
 		return value;
@@ -196,7 +195,7 @@ export function extractTaskNoteProperties(
 		getCustomFrontmatterKey("priority", frontmatterFormatting),
 		"string",
 	);
-	if (value) {
+	if (value && typeof value === "string") {
 		const priorityNumber = getPriorityNumberForTaskNote(value);
 		taskItemData["priority"] = priorityNumber;
 	}
@@ -239,7 +238,7 @@ export function extractTaskNoteProperties(
  * @param priorityValue - Priority value from frontmatter
  * @returns number - Priority number (0-5)
  */
-export function getPriorityNumberForTaskNote(priorityValue: any): number {
+export function getPriorityNumberForTaskNote(priorityValue: string): number {
 	if (!priorityValue) return 0;
 
 	if (priorityValue.length === 1 && Number(priorityValue))
@@ -418,6 +417,8 @@ export function formatTaskNoteContent(
  * @param task - Task item with updated properties
  * @param forceId (Optional) - Whether to forcefully add ID property in frontmatter
  * @returns Promise<void>
+ * 
+ * @error_code 158
  */
 export async function updateFrontmatterInMarkdownFile(
 	plugin: TaskBoard,
@@ -510,7 +511,7 @@ export async function deleteTaskNote(
 			return;
 		}
 
-		await plugin.app.vault.trash(file, true);
+		await plugin.app.fileManager.trashFile(file);
 		new Notice(`Task note deleted: ${file.name}`);
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(

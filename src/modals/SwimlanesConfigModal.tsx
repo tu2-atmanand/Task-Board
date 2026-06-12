@@ -32,7 +32,7 @@ export class SwimlanesConfigModal extends Modal {
 	private customSortOrder: { value: string; index: number }[];
 	private maxHeight: string;
 	private groupAllRest: boolean;
-	private headerUIType: string;
+	private headerUIType: HeaderUITypeOptions;
 
 	private sortableInstance: Sortable | null = null;
 	private sortableListEl: HTMLElement | null = null;
@@ -498,7 +498,7 @@ export class SwimlanesConfigModal extends Modal {
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.hideEmptySwimlanes)
-					.onChange(async (value) => {
+					.onChange((value) => {
 						this.hideEmptySwimlanes = value;
 						this.edited = true;
 					}),)
@@ -519,7 +519,7 @@ export class SwimlanesConfigModal extends Modal {
 				});
 				dropdown
 					.setValue(this.headerUIType)
-					.onChange(async (value) => {
+					.onChange((value) => {
 						this.headerUIType =
 							value;
 						this.edited = true;

@@ -6,8 +6,6 @@ import type * as NodeUrl from "node:url";
 import type * as NodeZlib from "node:zlib";
 import { App, Platform } from "obsidian";
 
-
-import TaskBoard from "../../main.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 // import { configureWebWorker } from './z-worker-inline';
 
@@ -302,7 +300,7 @@ export function splitext(name: string) {
 /**
  * Checks and creates folders if they are not present.
  * Recursively checks each child folder if it exists of not.
- * 
+ *
  * @param plugin - The plugin's app instance
  * @param folderPath - Only the folder path. (Filename should not be present)
  * @returns - Void
@@ -328,7 +326,7 @@ export async function createFolderRecursively(
 			// If a file exists where a folder is expected, report and abort
 			// (this is unlikely but safer to surface)
 			// existing.type may not be available in all builds, so just check truthiness and skip create
-			if ((existing as any).path && !(existing as any).children) {
+			if (existing.path && !existing.children) {
 				bugReporterManagerInsatance.showNotice(
 					58,
 					`A file exists where a folder is expected: ${currentPath}`,

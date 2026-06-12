@@ -328,8 +328,8 @@ export class AdvancedFilterComponent extends Component {
 				});
 				setTooltip(el, t("import-filter-from-filter-warehouse"));
 
-				this.registerDomEvent(el, "click", async () => {
-					this.openFiltersWarehouseModal();
+				this.registerDomEvent(el, "click", () => {
+					void this.openFiltersWarehouseModal();
 				});
 			},
 		);
@@ -527,10 +527,8 @@ export class AdvancedFilterComponent extends Component {
 		expandableArea: HTMLElement,
 		expandBtn: HTMLDivElement,
 	): void {
-		expandableArea.style.maxHeight = "0";
-		expandableArea.style.opacity = "0";
-		expandableArea.style.paddingTop = "0";
-		expandableArea.style.paddingBottom = "0";
+		expandableArea.toggleClass("expand", false);
+		expandableArea.toggleClass("collapse", true);
 
 		expandBtn.replaceChildren();
 		expandBtn.createEl(
@@ -556,7 +554,7 @@ export class AdvancedFilterComponent extends Component {
 		);
 
 		this.expandedFilters.set(filter, false);
-		setTimeout(() => {
+		window.setTimeout(() => {
 			expandableArea.hide();
 		}, 300);
 	}
@@ -570,15 +568,8 @@ export class AdvancedFilterComponent extends Component {
 			this.renderExpandedFilterContent(filter, expandableArea);
 		}
 		expandableArea.show();
-		expandableArea.style.maxHeight = "0";
-		expandableArea.style.opacity = "0";
-		expandableArea.style.paddingTop = "0";
-		expandableArea.style.paddingBottom = "0";
-		void expandableArea.offsetHeight;
-		expandableArea.style.maxHeight = "2000px";
-		expandableArea.style.opacity = "1";
-		expandableArea.style.paddingTop = "var(--size-2-2)";
-		expandableArea.style.paddingBottom = "var(--size-2-2)";
+		expandableArea.toggleClass("collapse", false);
+		expandableArea.toggleClass("expand", true);
 
 		expandBtn.replaceChildren();
 		expandBtn.createEl(
@@ -919,7 +910,7 @@ export class AdvancedFilterComponent extends Component {
 				groupData.groupCondition = selectedValue;
 
 				this.updateFilterConjunctions(
-					newGroupEl.querySelector(".filters-list") as HTMLElement,
+					newGroupEl.querySelector(".filters-list"),
 					selectedValue,
 				);
 			})
@@ -973,10 +964,10 @@ export class AdvancedFilterComponent extends Component {
 				) as HTMLElement;
 				if (
 					filtersListElForSortable &&
-					(filtersListElForSortable as any).sortableInstance
+					filtersListElForSortable.sortableInstance
 				) {
 					(
-						(filtersListElForSortable as any)
+						filtersListElForSortable
 							.sortableInstance as Sortable
 					).destroy();
 				}
@@ -1278,7 +1269,7 @@ export class AdvancedFilterComponent extends Component {
 
 				newFilterEl.remove();
 				this.updateFilterConjunctions(
-					newFilterEl.parentElement as HTMLElement,
+					newFilterEl.parentElement,
 					groupData.groupCondition,
 				);
 			});
@@ -1411,7 +1402,7 @@ export class AdvancedFilterComponent extends Component {
 					},
 				];
 				break;
-			case "status":
+			case "status": {
 				valueInput.hide();
 				const statusOptions = getCustomStatusOptionsForDropdown(
 					this.plugin.settings.data.customStatuses,
@@ -1432,7 +1423,7 @@ export class AdvancedFilterComponent extends Component {
 					});
 				}
 				valueSelect.addOptions(optionsRecord);
-				setTimeout(() => {
+				window.setTimeout(() => {
 					Array.from(valueSelect.selectEl.options).forEach(
 						(option) => {
 							if (option.value.startsWith("__group_")) {
@@ -1461,6 +1452,7 @@ export class AdvancedFilterComponent extends Component {
 					},
 				];
 				break;
+			}
 			case "project":
 				valueInput.type = "text";
 				conditionOptions = [
@@ -1710,8 +1702,8 @@ export class AdvancedFilterComponent extends Component {
 		}
 
 		conditionSelect.selectEl.empty();
-		conditionOptions.forEach((opt) =>
-			conditionSelect.addOption(opt.value, opt.text),
+		conditionOptions.forEach(
+			(opt) => void conditionSelect.addOption(opt.value, opt.text),
 		);
 
 		const currentSelectedCondition = filterData.condition;
@@ -1764,7 +1756,7 @@ export class AdvancedFilterComponent extends Component {
 			}
 		}
 
-		if (valueInput instanceof HTMLInputElement) {
+		if (valueInput.instanceOf(HTMLInputElement)) {
 			this.setupMultiSuggest(property, valueInput, filterData);
 		}
 	}
@@ -1898,7 +1890,7 @@ export class AdvancedFilterComponent extends Component {
 			handle: ".drag-handle",
 			ghostClass: "dragging-placeholder",
 			onEnd: (evt: Event) => {
-				const sortableEvent = evt as any;
+				const sortableEvent = evt;
 				if (
 					sortableEvent.oldDraggableIndex === undefined ||
 					sortableEvent.newDraggableIndex === undefined

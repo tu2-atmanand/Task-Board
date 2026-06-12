@@ -2,7 +2,7 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Component, Notice, Platform, Menu, TFile, MenuItem } from 'obsidian';
+import { Notice, Platform, Menu, TFile, MenuItem, Component } from 'obsidian';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { t } from 'i18next';
@@ -41,16 +41,17 @@ export interface TaskCardProps {
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
+	parentComponent: Component; // This is only require for the Markdown.render API to track its lifecycle
 	activeBoardID: string;
 	activeViewIndex: number;
-	activeViewType: string;
+	activeViewType: viewTypeNames;
 	// These are optional as this TaskItem can be shown either on Kanban view or Map view.
 	kanbanViewData?: KanbanView;
 	columnIndex?: number;
 	swimlaneData?: swimlaneDataProp;
 }
 
-const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, activeBoardID, activeViewIndex, activeViewType, kanbanViewData, columnIndex, swimlaneData }) => {
+const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, parentComponent, activeBoardID, activeViewIndex, activeViewType, kanbanViewData, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
@@ -86,11 +87,11 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	// );
 	const taskIdKey = task.id; // for rendering unique title
 
-	const componentRef = useRef<Component | null>(null);
-	useEffect(() => {
-		// Initialize TaskBoardView Component on mount
-		componentRef.current = plugin.view;
-	}, []);
+	// const componentRef = useRef<Component | null>(null);
+	// useEffect(() => {
+	// 	// Initialize TaskBoardView Component on mount
+	// 	componentRef.current = plugin.view;
+	// }, []);
 
 
 	// Ref to access the DOM element of the task item
@@ -125,7 +126,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	// 			titleElement.empty();
 	// 			// Call the MarkdownUIRenderer to render the description
 	// 			console.log("Obsidian Renderer : Will render following task : ", cleanedTitle);
-	// MarkdownUIRenderer.renderTaskDisc(
+	// MarkdownUIRenderer.strictRender(
 	// 	plugin.app,
 	// 	cleanedTitle,
 	// 	titleElement,
@@ -143,19 +144,20 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	// ========================================
 	useEffect(() => {
 		const el = taskTitleRendererRef.current;
-		if (!el || !componentRef.current) return;
+		// if (!el || !componentRef.current) return;
+		if (!el) return;
 
 		try {
 			if (task.title === "") return;
 
 			const cleanedTitle = isTaskNote ? task.title : cleanTaskTitleLegacy(task);
 
-			MarkdownUIRenderer.renderTaskDisc(
+			void MarkdownUIRenderer.strictRender(
 				plugin.app,
 				cleanedTitle,
 				el,
 				task.filePath,
-				componentRef.current
+				parentComponent,
 			);
 
 			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
@@ -189,7 +191,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	// 			// 	strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
 	// 			// }
 
-	// MarkdownUIRenderer.renderSubtaskText(
+	// MarkdownUIRenderer.safeRender(
 	// 	plugin.app,
 	// 	strippedSubtaskText,
 	// 	element,
@@ -206,7 +208,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	// SUBTASKS RENDERING WITH STABLE useEffect
 	// ========================================
 	useEffect(() => {
-		if (!componentRef.current) return;
+		// if (!componentRef.current) return;
 
 		const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
 		for (const [index, subtaskText] of allSubTasks.entries()) {
@@ -218,12 +220,12 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			try {
 				const match = subtaskText.match(TaskRegularExpressions.taskRegex);
 				let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
-				MarkdownUIRenderer.renderSubtaskText(
+				void MarkdownUIRenderer.safeRender(
 					plugin.app,
 					strippedSubtaskText,
 					element,
 					task.filePath,
-					componentRef.current
+					parentComponent
 				);
 
 				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
@@ -265,12 +267,12 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 
 		container.empty();
 
-		MarkdownUIRenderer.renderTaskDisc(
+		void MarkdownUIRenderer.strictRender(
 			plugin.app,
 			descriptionContent,
 			container,
 			task.filePath,
-			componentRef.current
+			parentComponent
 		);
 
 		hookMarkdownLinkMouseEventHandlers(
@@ -316,20 +318,20 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		return null;
 	};
 
-	const toggleDescription = async () => {
+	const toggleDescription = () => {
 		const status = isDescriptionExpanded;
 		setIsDescriptionExpanded((prev) => !prev);
 
 		if (!status) {
-			await renderDescriptionSection();
+			renderDescriptionSection();
 			if (descriptionRef.current) {
 				descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
-				descriptionRef.current.style.opacity = "1"; // Add fade-in effect
+				descriptionRef.current.toggleClass('tb_opacity_1', true);
 			}
 		} else {
 			if (descriptionRef.current) {
-				descriptionRef.current.style.height = "0";
-				descriptionRef.current.style.opacity = "0"; // Add fade-out effect
+				descriptionRef.current.style.height = `0`;
+				descriptionRef.current.toggleClass('tb_opacity_0', true);
 			}
 			const uniqueKey = `${task.id}-desc`;
 			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
@@ -337,7 +339,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		}
 	};
 
-	// const renderDescriptionByDefault = async () => {
+	// const renderDescriptionByDefault = () => {
 	// 	if (showDescriptionSection) {
 	// 		await renderTaskDescriptionWithObsidianAPI();
 	// 		return true;
@@ -534,7 +536,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			// The component might be unmounted by the time this runs, but this is a safeguard.
 			// The event-based system should ideally handle the final state.
 			// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
-			setTimeout(() => {
+			window.setTimeout(() => {
 				setCardLoadingAnimation(false);
 				// const isTaskCompletedNow = isTaskNote
 				// 	? isTaskCompleted(task.status, true, plugin.settings)
@@ -583,18 +585,18 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 				handleSubTasksChange(plugin, task, updatedTask);
 			} else {
 				// If it's a task note, open the note for editing
-				handleTaskNoteBodyChange(plugin, task, updatedTask);
+				void handleTaskNoteBodyChange(plugin, task, updatedTask);
 			}
 		} finally {
 			// The component might be unmounted by the time this runs, but this is a safeguard.
 			// The event-based system should ideally handle the final state.
 			// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
-			setTimeout(() => setCardLoadingAnimation(false), 2000);
+			window.setTimeout(() => setCardLoadingAnimation(false), 2000);
 		}
 	};
 
 	const handleMouseEnter = (event: React.MouseEvent) => {
-		const element = document.getElementById('taskItemFooterBtns');
+		const element = activeDocument.getElementById('taskItemFooterBtns');
 		if (element && event.ctrlKey) {
 			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
 		}
@@ -673,16 +675,16 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			options.forEach((status) => {
 				statusMenu.addItem((item) => {
 					// Render status with markdown formatting
-					MarkdownUIRenderer.renderSubtaskText(
+					void MarkdownUIRenderer.safeRender(
 						plugin.app,
 						`- [${status.value}] ${status.label}`,
 						item.titleEl,
 						'',
-						null
+						parentComponent
 					);
 
 					item.onClick(() => {
-						updateTaskItemStatus(plugin, task, task, status.value);
+						void updateTaskItemStatus(plugin, task, task, status.value);
 					});
 				});
 			});
@@ -726,8 +728,8 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar-plus")
 			it.setTitle(t("start-date"));
-			it.onClick(async () => {
-				openDateInputModal(plugin, t("start"), (newDate: string) => {
+			it.onClick(() => {
+				void openDateInputModal(plugin, t("start"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
 				}, task.startDate)
 			});
@@ -735,8 +737,8 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar-clock")
 			it.setTitle(t("scheduled-date"));
-			it.onClick(async () => {
-				openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
+			it.onClick(() => {
+				void openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
 				}, task.scheduledDate)
 			});
@@ -744,8 +746,8 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		taskItemMenu.addItem((it) => {
 			it.setIcon("calendar")
 			it.setTitle(t("due-date"));
-			it.onClick(async () => {
-				openDateInputModal(plugin, t("due"), (newDate: string) => {
+			it.onClick(() => {
+				void openDateInputModal(plugin, t("due"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
 				}, task.due)
 			});
@@ -755,7 +757,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		taskItemMenu.addItem((item) => {
 			item.setIcon("clock");
 			item.setTitle(t("reminder"));
-			item.onClick(async () => {
+			item.onClick(() => {
 				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
 				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
 					updateTaskItemReminder(plugin, task, task, dateTime);
@@ -773,9 +775,9 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		taskItemMenu.addItem((item) => {
 			item.setIcon("copy");
 			item.setTitle(t("copy-task-title"));
-			item.onClick(async () => {
+			item.onClick(() => {
 				try {
-					await navigator.clipboard.writeText(cleanTaskTitleLegacy(task));
+					void navigator.clipboard.writeText(cleanTaskTitleLegacy(task));
 					new Notice(t("copy-task-title-successful"));
 				} catch (error) {
 					new Notice(t("copy-task-title-unsuccessful"));
@@ -785,7 +787,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		taskItemMenu.addItem((item) => {
 			item.setIcon("square-pen");
 			item.setTitle(t("open-task-editor"));
-			item.onClick(async () => {
+			item.onClick(() => {
 				handleEditTask(plugin, task, EditButtonMode.Modal);
 			});
 		});
@@ -816,14 +818,14 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		taskItemMenu.addItem((item) => {
 			item.setIcon("file-input");
 			item.setTitle(t("open-note"));
-			item.onClick(async () => {
+			item.onClick(() => {
 				handleEditTask(plugin, task, EditButtonMode.NoteInTab)
 			});
 		});
 		taskItemMenu.addItem((item) => {
 			item.setIcon("columns-2");
 			item.setTitle(t("open-note-to-right"));
-			item.onClick(async () => {
+			item.onClick(() => {
 				handleEditTask(plugin, task, EditButtonMode.NoteInSplit)
 			});
 		});
@@ -833,7 +835,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			item.setIcon("file-text");
 			item.setTitle(t("more-note-actions"));
 
-			const submenu = (item as any).setSubmenu();
+			const submenu = item.setSubmenu();
 
 			// Get the file for the task
 			const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
@@ -850,32 +852,33 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 				submenu.addItem((subItem: MenuItem) => {
 					subItem.setIcon("pencil");
 					subItem.setTitle(t("rename-note"));
-					subItem.onClick(async () => {
+					subItem.onClick(() => {
 						try {
 							// Modal-based rename
 							const currentName = file.basename;
-							const newName = await showTextInputModal(plugin.app, {
+							void showTextInputModal(plugin.app, {
 								title: t("rename-note"),
 								placeholder: t("rename-note-placeholder"),
 								initialValue: currentName,
-							});
+							}).then((newName: string | null) => {
+								if (newName && newName.trim() !== "" && newName !== currentName) {
+									// Ensure the new name has the correct extension
+									const extension = file.extension;
+									const finalName = newName.endsWith(`.${extension}`)
+										? newName
+										: `${newName}.${extension}`;
 
-							if (newName && newName.trim() !== "" && newName !== currentName) {
-								// Ensure the new name has the correct extension
-								const extension = file.extension;
-								const finalName = newName.endsWith(`.${extension}`)
-									? newName
-									: `${newName}.${extension}`;
+									// Construct the new path
+									const newPath = file.parent
+										? `${file.parent.path}/${finalName}`
+										: finalName;
 
-								// Construct the new path
-								const newPath = file.parent
-									? `${file.parent.path}/${finalName}`
-									: finalName;
+									// Rename the file
+									void plugin.app.vault.rename(file, newPath);
+									new Notice("File renamed successfully.");
+								}
+							})
 
-								// Rename the file
-								await plugin.app.vault.rename(file, newPath);
-								new Notice("File renamed successfully.");
-							}
 						} catch (error) {
 							new Notice("There was an error while renaming the file.");
 							bugReporterManagerInsatance.addToLogs(
@@ -890,8 +893,8 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 				submenu.addItem((subItem: MenuItem) => {
 					subItem.setIcon("trash");
 					subItem.setTitle(t("delete-note"));
-					subItem.onClick(async () => {
-						plugin.app.vault.trash(file, true).then(() => {
+					subItem.onClick(() => {
+						void plugin.app.fileManager.trashFile(file).then(() => {
 							new Notice("File deleted successfully. Moved to system trash.");
 						})
 						// handleDeleteTask(plugin, task, true);
@@ -927,7 +930,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 				swimlaneData: swimlaneData
 			};
 			// Delegate to manager for standardized behavior (sets current payload and dims element)
-			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent as DragEvent, el, payload);
+			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent, el, payload);
 		} catch (err) {
 			// fallback minimal behavior
 			// try {
@@ -1273,9 +1276,9 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	// Effect to load child tasks asynchronously
 	useEffect(() => {
 		if (task?.dependsOn && task.dependsOn.length > 0) {
-			const loadChildTasks = async () => {
+			const loadChildTasks = () => {
 				const childTasksMap: Record<string, taskItem | null> = {};
-				await Promise.all((task?.dependsOn ?? []).map(async (dependsOnId) => {
+				void Promise.all((task?.dependsOn ?? []).map(async (dependsOnId) => {
 					const childTask = await getTaskFromId(plugin, dependsOnId);
 					childTasksMap[dependsOnId] = childTask;
 				}));
@@ -1307,7 +1310,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 								// Simple version just showing the ID and a symbol
 								return (
 									<div key={`${task.id}-dep-${dependsOnId}`} className="taskItemChildTask">
-										<div className='taskItemChildTaskContent' onClick={(event) => handleOpenChildTaskModal(event, dependsOnId)}>
+										<div className='taskItemChildTaskContent' onClick={(event) => void handleOpenChildTaskModal(event, dependsOnId)}>
 											<span className='taskItemChildTaskSymbol' role="img" aria-label={t("child-task")}>{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
 											<span
 												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
@@ -1380,7 +1383,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
 									data-task={cardLoadingAnimation ? 'x' : task.status}
 									dir='auto'
-									onChange={handleMainCheckBoxClick}
+									onChange={() => handleMainCheckBoxClick}
 									onClick={(e) => {
 										if (cardLoadingAnimation) {
 											e.preventDefault();

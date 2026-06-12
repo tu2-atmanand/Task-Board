@@ -130,7 +130,7 @@ export const getCustomStatusOptionsForDropdown = (
 		if (!isValid) {
 			bugReporterManagerInsatance.addToLogs(
 				190,
-				`Invalid status at index ${index}: ${status}`,
+				`Invalid status at index ${index}: ${JSON.stringify(status)}`,
 				"Mapping.ts/getCustomStatusOptionsForDropdown",
 			);
 		}

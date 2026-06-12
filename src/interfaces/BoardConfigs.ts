@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 import {
 	viewTypeNames,
 	colTypeNames,
 	HeaderUITypeOptions,
 	defaultTaskStatuses,
 	viewsPanelPropertiesToShow,
+	UniversalDateOptions,
 } from "./Enums.js";
 
 export interface columnSortingCriteria {
@@ -43,7 +45,7 @@ export interface FilterCriterion {
 	id: string;
 	property: string; // e.g., 'content', 'dueDate', 'priority'
 	condition: string; // e.g., 'isSet', 'equals', 'contains'
-	value?: any;
+	value?: string;
 }
 
 /**
@@ -96,7 +98,7 @@ export type FiltersWarehouse = Filter[];
 export type ColumnData = {
 	id: number;
 	index: number;
-	colType: string;
+	colType: colTypeNames;
 	active: boolean;
 	collapsed?: boolean;
 	minimized?: boolean;
@@ -105,7 +107,7 @@ export type ColumnData = {
 	coltag?: string;
 	filePaths?: string;
 	datedBasedColumn?: {
-		dateType: string; // e.g., "due", "created", "scheduled"
+		dateType: UniversalDateOptions; // e.g., "due", "created", "scheduled"
 		from: number;
 		to: number;
 	};
@@ -143,7 +145,7 @@ export type swimlaneConfigs = {
 		index: number;
 	}[]; // This is only if user selects "custom" as the sort criteria.
 	groupAllRest?: boolean; // This will be only visible for customSortOrder. It will help user to decide if they want to group all the rest of the task below the custom sort order.
-	headerUIType: string;
+	headerUIType: HeaderUITypeOptions;
 	minimized: string[]; // This will store the names of the minimized swimlanes.
 };
 
@@ -182,7 +184,7 @@ export interface TaskBoardViewType {
 	viewId: string;
 	viewIndex: number;
 	viewName: string;
-	viewType: string;
+	viewType: viewTypeNames;
 	description?: string;
 	showFilteredTags: boolean;
 	taskCount: {
@@ -228,7 +230,7 @@ export type Board = {
 	viewsPanel: {
 		isOpen: boolean;
 		width: number;
-		propertiesToShow: string[];
+		propertiesToShow: viewsPanelPropertiesToShow[];
 		buttonsBelt: boolean;
 	};
 	boardFilters: AdvancedFilter;
@@ -242,7 +244,7 @@ export type Board = {
 	lastViewId?: string;
 	/**
 	 * A single {@link Filter}.
-	 * 
+	 *
 	 * @deprecated This has been replaced by a more advanced design now to have multiple Filters instead of single one. Use {@link Board.boardFilters} instead.
 	 */
 	boardFilter?: RootFilterState;
@@ -303,7 +305,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Undated Tasks",
 						index: 1,
 						datedBasedColumn: {
-							dateType: "due",
+							dateType: UniversalDateOptions.dueDate,
 							from: 0,
 							to: 0,
 						},
@@ -316,7 +318,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Over Due",
 						index: 2,
 						datedBasedColumn: {
-							dateType: "due",
+							dateType: UniversalDateOptions.dueDate,
 							from: -300,
 							to: -1,
 						},
@@ -329,7 +331,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Today",
 						index: 3,
 						datedBasedColumn: {
-							dateType: "due",
+							dateType: UniversalDateOptions.dueDate,
 							from: 0,
 							to: 0,
 						},
@@ -342,7 +344,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Tomorrow",
 						index: 4,
 						datedBasedColumn: {
-							dateType: "due",
+							dateType: UniversalDateOptions.dueDate,
 							from: 1,
 							to: 1,
 						},
@@ -355,7 +357,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Future",
 						index: 5,
 						datedBasedColumn: {
-							dateType: "due",
+							dateType: UniversalDateOptions.dueDate,
 							from: 2,
 							to: 300,
 						},
@@ -604,7 +606,7 @@ export interface Filter_Deprecated {
 	id: string;
 	property: string; // e.g., 'content', 'dueDate', 'priority'
 	condition: string; // e.g., 'isSet', 'equals', 'contains'
-	value?: any;
+	value?: unknown;
 }
 
 export interface FilterGroup {
@@ -622,7 +624,7 @@ export interface RootFilterState {
 export interface FilterConditionItem {
 	property: string; // e.g., 'content', 'dueDate', 'priority', 'tags.myTag'
 	operator: string; // e.g., 'contains', 'is', '>=', 'isEmpty'
-	value?: any; // Value for the condition, type depends on property and operator
+	value?: unknown; // Value for the condition, type depends on property and operator
 }
 
 // Represents a group of filter conditions in the UI from focus.md

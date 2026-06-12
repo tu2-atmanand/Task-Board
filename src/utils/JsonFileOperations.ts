@@ -202,7 +202,7 @@ const writeFileWithRetry = async (
 				`File write timeout due to following error: ${String(error)}....retrying again...`,
 				"TaskItemEventHandlers.ts/writeFileWithRetry",
 			);
-			await new Promise((resolve) => setTimeout(resolve, delay));
+			await new Promise((resolve) => window.setTimeout(resolve, delay));
 		}
 	}
 };
@@ -258,55 +258,43 @@ export const writeJsonCacheDataToDisk = async (
 };
 
 // Function to move the file from old path to new path
-export const moveTasksCacheFileToNewPath = (
+export const moveTasksCacheFileToNewPath = async (
 	app: App,
 	oldPath: string,
 	newPath: string,
-) => {
-	return new Promise<boolean>(async (resolve, reject) => {
-		if (
-			oldPath === newPath ||
-			(newPath !== "" && newPath.endsWith(".json") === false) ||
-			(oldPath !== "" && oldPath.endsWith(".json") === false)
-		) {
-			resolve(true);
-			return true;
-		}
+): Promise<boolean> => {
+	if (
+		oldPath === newPath ||
+		(newPath !== "" && newPath.endsWith(".json") === false) ||
+		(oldPath !== "" && oldPath.endsWith(".json") === false)
+	) {
+		return true;
+	}
 
-		// Check if the directory exists, create if not
-		const parts = newPath.split("/");
-		if (parts.length > 1) {
-			const dirPath = parts.slice(0, -1).join("/").trim();
-			if (!(await app.vault.adapter.exists(dirPath))) {
-				await createFolderRecursively(app, dirPath);
-			}
+	// Check if the directory exists, create if not
+	const parts = newPath.split("/");
+	if (parts.length > 1) {
+		const dirPath = parts.slice(0, -1).join("/").trim();
+		if (!(await app.vault.adapter.exists(dirPath))) {
+			await createFolderRecursively(app, dirPath);
 		}
+	}
 
-		if (newPath === "")
-			newPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
-		if (oldPath === "")
-			oldPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
-		app.vault.adapter
-			.rename(oldPath, newPath)
-			// .then(() => {
-			// 	// Update the tasksCacheFilePath in globalSettings
-			// 	plugin.settings.data.tasksCacheFilePath =
-			// 		newPath;
-			// 	// Save the updated settings
-			// 	return plugin.saveSettings();
-			// })
-			.then(() => resolve(true))
-			.catch((error) => {
-				bugReporterManagerInsatance.showNotice(
-					73,
-					"Failed to move tasks.json file to new path",
-					String(error),
-					"JsonFileOperations.ts/moveTasksCacheFileToNewPath",
-				);
-				reject(error);
-				return false;
-			});
+	if (newPath === "")
+		newPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
+	if (oldPath === "")
+		oldPath = `${app.vault.configDir}/plugins/task-board/tasks.json`;
+	await app.vault.adapter.rename(oldPath, newPath).catch((error) => {
+		bugReporterManagerInsatance.showNotice(
+			73,
+			"Failed to move tasks.json file to new path",
+			String(error),
+			"JsonFileOperations.ts/moveTasksCacheFileToNewPath",
+		);
+		return false;
 	});
+
+	return true;
 };
 
 // Helper function to load tasks from tasks.json and merge them
@@ -319,6 +307,7 @@ export const loadTasksAndMerge = async (
 		if (hardRefresh) {
 			allTasks = await loadJsonCacheDataFromDisk(plugin);
 		} else {
+			// eslint-disable-next-line @typescript-eslint/no-deprecated
 			allTasks = await loadJsonCacheData(plugin);
 		}
 		// const pendingTasks: taskItem[] = [];

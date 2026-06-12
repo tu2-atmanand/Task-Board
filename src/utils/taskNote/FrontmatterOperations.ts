@@ -14,7 +14,7 @@ import {
 	getPriorityNameForTaskNote,
 } from "./TaskNoteUtils.js";
 import { FrontmatterFormattingInterface } from "../../interfaces/GlobalSettings.js";
-import { compareTwoTags} from "../algorithms/ScanningFilterer.js";
+import { compareTwoTags } from "../algorithms/ScanningFilterer.js";
 
 /**
  * Extract frontmatter from file content
@@ -67,11 +67,11 @@ export function extractFrontmatterFromFile(
 
 		return frontmatterAsObject;
 	} catch (error) {
-		// bugReporterManagerInsatance.addToLogs(
-		// 	176,
-		// 	`Failed to parse frontmatter: ${String(error)}`,
-		// 	"FrontmatterOperations.ts/extractFrontmatterFromFile",
-		// );
+		bugReporterManagerInsatance.addToLogs(
+			176,
+			`Failed to parse frontmatter: ${String(error)}`,
+			"FrontmatterOperations.ts/extractFrontmatterFromFile",
+		);
 		return undefined;
 	}
 }
@@ -133,7 +133,7 @@ export function extractFrontmatterTags(
 	if (frontmatter.tags) {
 		if (Array.isArray(frontmatter.tags)) {
 			// If tags is an array, process each tag
-			tags = frontmatter.tags.map((tag: any) => {
+			tags = frontmatter.tags.map((tag: unknown) => {
 				const tagStr = String(tag).trim();
 				// Ensure tags start with # if they don't already
 				return tagStr.replace("#", "");
@@ -309,7 +309,7 @@ export function updateFrontmatterProperties(
 	const oldFrontmatter = existingFrontmatter;
 
 	// Step 1: Build a temporary object with all the updated values
-	const tempUpdates: Record<string, any> = {};
+	const tempUpdates: Record<string, unknown> = {};
 
 	if (task.title) {
 		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] =
