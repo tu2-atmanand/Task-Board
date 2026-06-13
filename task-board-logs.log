@@ -1,0 +1,56 @@
+# Task Board Logs
+
+## System Information
+
+- **Obsidian version**: 1.12.7
+- **Installer version**: 1.12.7
+- **Operating system**: Windows 10 Home Single Language 10.0.19045
+- **Use [[Wikilinks]]**: true
+- **Base color scheme**: dark
+- **Community theme**: none
+- **Snippets enabled**: 0
+- **Plugins installed**: 56
+- **Plugins enabled**: 
+  - Task Board v2.0.0-beta-4
+  - Advanced Debug Mode v1.9.1
+  - Edit History v0.3.0
+  - Plugin Reloader v0.0.3
+
+## Recent Bug Reports
+
+Timestamp : 2026-06-10T19:16:16
+ID : 26
+Message : Child task not found
+Context : TaskEditorModal.tsx/EditTaskContent/handleOpenChildTaskModal
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+The child task with ID 12b153 was not found in pending tasks.
+```
+
+-------------
+
+Timestamp : 2026-06-13T22:35:50
+ID : 180
+Message : There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer
+Context : LazyColumn.tsx/return
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+{}
+```
+
+-------------
+
+Timestamp : 2026-06-13T23:02:57
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```

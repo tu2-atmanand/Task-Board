@@ -55,9 +55,11 @@
       "priority",
       "filePath",
       "tags",
-      "dependsOn"
+      "dependsOn",
+      "descriptionMinimized",
+      "subTasksMinimized"
     ],
-    "taskCardStyle": "bases",
+    "taskCardStyle": "emoji",
     "showVerticalScroll": false,
     "dragAutoScrollEdgePercent": 15,
     "tagColors": [
@@ -248,8 +250,8 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2291,
-    "experimentalFeatures": false,
+    "uniqueIdCounter": 2293,
+    "experimentalFeatures": true,
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
