@@ -121,7 +121,10 @@ export const loadJsonCacheDataFromDisk = async (
 			path = plugin.settings.data.tasksCacheFilePath;
 		}
 		const data: string = await plugin.app.vault.adapter.read(path);
-		const cacheData: jsonCacheData = JSON.parse(data);
+		// JSON.parse() is untyped by default, so we narrow it to `unknown`
+		// before we cast to the known cache structure used by the plugin.
+		const parsedData: unknown = JSON.parse(data);
+		const cacheData = parsedData as jsonCacheData;
 		// const allTasks = {
 		// 	Pending: cacheData.Pending,
 		// 	Completed: cacheData.Completed,

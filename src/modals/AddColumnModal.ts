@@ -99,7 +99,7 @@ export class AddColumnModal extends Modal {
 
 		colTypeSelect.addEventListener("change", (event: Event) => {
 			const target = event.target as HTMLSelectElement;
-			this.colType = target.value;
+			this.colType = target.value as colTypeNames;
 		});
 
 		// Name Field

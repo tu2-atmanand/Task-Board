@@ -85,7 +85,8 @@ export default class TaskBoardFileManager {
 			}
 
 			// Parse JSON content
-			let boardData: Board = JSON.parse(fileContent);
+			const parsedData: unknown = JSON.parse(fileContent);
+			let boardData = parsedData as Board;
 
 			// Same Board ID ChecK : Check if board with this ID already exists in registry
 			// This is to ensure that, when a .taskboard file has been simply duplicated externally
@@ -148,7 +149,8 @@ export default class TaskBoardFileManager {
 			}
 
 			// Parse JSON content
-			let boardData: Board = JSON.parse(decodedData);
+			const parsedData: unknown = JSON.parse(decodedData);
+			let boardData = parsedData as Board;
 
 			// Check if board with this ID already exists in registry
 			const existingRegistryEntry = Object.entries(
@@ -248,7 +250,11 @@ export default class TaskBoardFileManager {
 				// Cache the board data in memory using file path as key
 				this.recentBoardsData[filePath] = boardData;
 				// Update the registry to move this board on top
-				void this.addNewBoardToRegistry(boardData.id, filePath, boardData);
+				void this.addNewBoardToRegistry(
+					boardData.id,
+					filePath,
+					boardData,
+				);
 				// console.log(
 				// 	`Loaded and cached board "${boardData.name}" from: ${filePath}`,
 				// );
@@ -1164,7 +1170,8 @@ export default class TaskBoardFileManager {
 	 * from older boards to be lost.
 	 */
 	runMigrationForRevision_4(oldBoardData: Board): Board {
-		let newBoardData: Board = JSON.parse(JSON.stringify(oldBoardData)); // Deep clone to avoid mutations
+		const parsedData: unknown = JSON.parse(JSON.stringify(oldBoardData)); // Deep clone to avoid mutations=
+		let newBoardData = parsedData as Board;
 
 		// Ensure views array exists; initialize empty if missing
 		if (!newBoardData.views || !Array.isArray(newBoardData.views)) {
@@ -1593,7 +1600,7 @@ export default class TaskBoardFileManager {
 	 * as per the file paths stored in the task board file path registry saved in the global settings.
 	 * @returns All boards data as an object keyed by file path or an empty object if failed to load the boards.
 	 */
-	async loadAllBoards(): Promise<recentBoardsDataType | {}> {
+	async loadAllBoards(): Promise<recentBoardsDataType | undefined> {
 		try {
 			let loadedBoardsData: recentBoardsDataType = {};
 
@@ -1629,7 +1636,7 @@ export default class TaskBoardFileManager {
 			return loadedBoardsData;
 		} catch (error) {
 			console.error(`Error loading all boards:`, error);
-			return {};
+			return;
 		}
 	}
 }

@@ -166,7 +166,7 @@ function evaluateFilterCriterion(
 	// Evaluate based on condition
 	switch (condition) {
 		case "isNotEmpty":
-			if (Array.isArray(taskValue && taskValue.length > 0)) return true;
+			if (Array.isArray(taskValue) && taskValue.length > 0) return true;
 			else if (taskValue && taskValue !== "") return true;
 			else if (taskValue) return true;
 			else return false;
@@ -198,7 +198,7 @@ function evaluateFilterCriterion(
 			}
 			if (Array.isArray(taskValue)) {
 				return taskValue.some((item) =>
-					matchTagsWithWildcards(value, item),
+					matchTagsWithWildcards(String(value), item),
 				);
 			}
 			return false;
@@ -210,7 +210,7 @@ function evaluateFilterCriterion(
 			}
 			if (Array.isArray(taskValue)) {
 				return !taskValue.some((item) =>
-					matchTagsWithWildcards(value, item),
+					matchTagsWithWildcards(String(value), item),
 				);
 			}
 			return true;
@@ -241,12 +241,20 @@ function evaluateFilterCriterion(
 		case "<=":
 			return Number(taskValue) <= Number(value);
 		case "before":
+			if (typeof taskValue !== "string" || typeof value !== "string")
+				return false;
 			return compareDates(taskValue, value, dateFormat) < 0;
 		case "after":
+			if (typeof taskValue !== "string" || typeof value !== "string")
+				return false;
 			return compareDates(taskValue, value, dateFormat) > 0;
 		case "onOrBefore":
+			if (typeof taskValue !== "string" || typeof value !== "string")
+				return false;
 			return compareDates(taskValue, value, dateFormat) <= 0;
 		case "onOrAfter":
+			if (typeof taskValue !== "string" || typeof value !== "string")
+				return false;
 			return compareDates(taskValue, value, dateFormat) >= 0;
 		case "hasTag":
 			if (Array.isArray(taskValue)) {

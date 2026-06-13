@@ -206,7 +206,8 @@ export async function importConfigurations(
 			}
 		}
 
-		const importedData: PluginDataJson = JSON.parse(importedContent);
+		const parsedData: unknown = JSON.parse(importedContent);
+		const importedData = parsedData as PluginDataJson;
 
 		// Get current settings and defaults
 		// const currentData = plugin.settings; // No use, current settings will be overwritten, hence will use the DEFAULT_SETTINGS

@@ -74,7 +74,7 @@ export function checkFrontMatterFilters(
 			const valueMatch = filterString.match(/"[^"]+":\s*([^,\]]+)/);
 			if (valueMatch) {
 				const filterValue = valueMatch[1]?.trim() || "";
-				const frontmatterValue = frontmatter[key];
+				const frontmatterValue = frontmatter[key] as unknown;
 				if (Array.isArray(frontmatterValue)) {
 					return frontmatterValue.includes(filterValue); // Check if the filterValue is in the list
 				} else {
@@ -322,7 +322,7 @@ export async function verifySubtasksAndChildtasksAreComplete(
  * @param settingsTags - Tags from settings which may include wildcards
  * @param userInputTags - Tags from user input to match against settings tags
  * @returns An array of matching tags or null if no match is found
- * 
+ *
  * @todo Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace("#", "") operation. Deprecate that operation in future version such as 2.1.0.
  */
 export function matchTagsWithWildcards(
@@ -379,7 +379,7 @@ export function matchTagsWithWildcards(
  * @param tag2 - The second tag
  *
  * @returns - TRUE if both the tags are same based on the above rule. Else it will return FALSE.
- * 
+ *
  * @todo - Will be storing all the tags without the '#' suffix, so we dont have to do the extra replace("#", "") operation. Deprecate that operation in future version such as 2.1.0.
  */
 export function compareTwoTags(tag1: string, tag2: string): boolean {

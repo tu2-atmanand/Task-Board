@@ -215,7 +215,7 @@ export async function getObsidianIndentationSettingAsync(
 		try {
 			const path = `${plugin.app.vault.configDir}/app.json`;
 			const content: string = await plugin.app.vault.adapter.read(path);
-			const parsed = JSON.parse(content || "{}");
+			const parsed: unknown = JSON.parse(content);
 			const tabSize =
 				typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
 			const useTab = !!parsed?.useTab;

@@ -12,7 +12,7 @@ import {
 	ToggleComponent,
 	Menu,
 } from "obsidian";
-import Sortable from "sortablejs";
+import Sortable, { SortableEvent } from "sortablejs";
 import TaskBoard from "../../../main.js";
 import {
 	Filter,
@@ -104,9 +104,10 @@ export class AdvancedFilterComponent extends Component {
 
 	onload() {
 		if (this.initialFilterState) {
-			this.advancedFilter = JSON.parse(
+			const parsedData: unknown = JSON.parse(
 				JSON.stringify(this.initialFilterState),
 			);
+			this.advancedFilter = parsedData as AdvancedFilter;
 
 			this.advancedFilter.filters = this.advancedFilter.filters.filter(
 				(filter) =>
@@ -445,9 +446,11 @@ export class AdvancedFilterComponent extends Component {
 							const warehouse =
 								this.plugin.settings.data.filtersWarehouse ||
 								[];
-							const filterCopy = JSON.parse(
+
+							const parsedData: unknown = JSON.parse(
 								JSON.stringify(filter),
 							);
+							const filterCopy = parsedData as Filter;
 							warehouse.push(filterCopy);
 
 							this.plugin.settings.data.filtersWarehouse =
@@ -826,7 +829,8 @@ export class AdvancedFilterComponent extends Component {
 		const index = this.advancedFilter.filters.indexOf(filter);
 		if (index === -1) return;
 
-		const newFilter: Filter = JSON.parse(JSON.stringify(filter));
+		const parsedData: unknown = JSON.parse(JSON.stringify(filter));
+		const newFilter = parsedData as Filter;
 		newFilter.name = `${filter.name} ${t("copy-suffix")}`;
 
 		this.advancedFilter.filters.splice(index + 1, 0, newFilter);
@@ -959,19 +963,6 @@ export class AdvancedFilterComponent extends Component {
 			.setIcon("trash-2")
 			.setTooltip(t("remove-criterion-group"))
 			.onClick(() => {
-				const filtersListElForSortable = newGroupEl.querySelector(
-					".filters-list",
-				) as HTMLElement;
-				if (
-					filtersListElForSortable &&
-					filtersListElForSortable.sortableInstance
-				) {
-					(
-						filtersListElForSortable
-							.sortableInstance as Sortable
-					).destroy();
-				}
-
 				filter.filterGroups = filter.filterGroups.filter(
 					(g) => g.id !== groupData.id,
 				);
@@ -1506,7 +1497,7 @@ export class AdvancedFilterComponent extends Component {
 						getPriorityOptionsForDropdown()[0].value.toString(),
 				);
 				valueSelect.onChange((newValue) => {
-					filterData.value = Number(newValue);
+					filterData.value = newValue;
 				});
 				conditionOptions = [
 					{
@@ -1889,7 +1880,7 @@ export class AdvancedFilterComponent extends Component {
 			animation: 150,
 			handle: ".drag-handle",
 			ghostClass: "dragging-placeholder",
-			onEnd: (evt: Event) => {
+			onEnd: (evt: SortableEvent) => {
 				const sortableEvent = evt;
 				if (
 					sortableEvent.oldDraggableIndex === undefined ||
@@ -1919,7 +1910,10 @@ export class AdvancedFilterComponent extends Component {
 				rootCondition: "all",
 			};
 		}
-		return JSON.parse(JSON.stringify(this.advancedFilter));
+		const parsedData: unknown = JSON.parse(
+			JSON.stringify(this.advancedFilter),
+		);
+		return parsedData as AdvancedFilter;
 	}
 
 	public loadFilterState(state: AdvancedFilter): void {
@@ -1928,7 +1922,8 @@ export class AdvancedFilterComponent extends Component {
 			this.filtersSortableInstance = null;
 		}
 
-		this.advancedFilter = JSON.parse(JSON.stringify(state));
+		const parsedData: unknown = JSON.parse(JSON.stringify(state));
+		this.advancedFilter = parsedData as AdvancedFilter;
 
 		if (
 			this.advancedFilter.filters &&
@@ -1967,9 +1962,10 @@ export class AdvancedFilterComponent extends Component {
 			this.plugin,
 			(importedFilters: Filter[]) => {
 				for (const importedFilter of importedFilters) {
-					const filterCopy = JSON.parse(
+					const parsedData: unknown = JSON.parse(
 						JSON.stringify(importedFilter),
 					);
+					const filterCopy = parsedData as Filter;
 					this.advancedFilter.filters.push(filterCopy);
 				}
 				this.expandedFilters = new WeakMap();

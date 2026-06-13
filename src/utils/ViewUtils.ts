@@ -156,7 +156,8 @@ export function duplicateViewInBoard(board: Board, viewIndex: number): boolean {
 	}
 
 	const originalView = board.views[viewIndex];
-	const newView: TaskBoardViewType = JSON.parse(JSON.stringify(originalView));
+	const parsedData: unknown = JSON.parse(JSON.stringify(originalView));
+	const newView= parsedData as TaskBoardViewType;
 
 	// Generate new view ID
 	newView.viewId = generateRandomStringId("view");

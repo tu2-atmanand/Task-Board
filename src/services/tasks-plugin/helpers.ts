@@ -12,6 +12,13 @@ import { replaceOldTaskWithNewTask } from "../../utils/taskLine/TaskLineUtils.js
 import { eventEmitter } from "../EventEmitter.js";
 import { TasksPluginApi } from "./api.js";
 
+type TasksPluginStatusSettings = {
+	statusSettings?: {
+		coreStatuses?: CustomStatus[];
+		customStatuses?: CustomStatus[];
+	};
+};
+
 export async function isTasksPluginEnabled(plugin: TaskBoard) {
 	try {
 		const tasksPluginO = new TasksPluginApi(plugin);
@@ -40,17 +47,21 @@ export async function fetchTasksPluginCustomStatuses(
 
 			// Read the file content
 			const data: string = await plugin.app.vault.adapter.read(path);
-			const parsedData = JSON.parse(data);
+			// Treat the plugin data as an explicit structure instead of relying on
+			// the implicit `any` that JSON.parse() introduces.
+			const parsedData = JSON.parse(data) as unknown;
+			const statusSettings = (parsedData as Partial<TasksPluginStatusSettings>)
+				.statusSettings;
 
 			// Extract coreStatuses from the JSON
 			const coreStatuses: CustomStatus[] =
-				parsedData?.statusSettings?.coreStatuses || [];
+				statusSettings?.coreStatuses ?? [];
 
 			// Extract customStatuses from the JSON
 			const customStatuses: CustomStatus[] =
-				parsedData?.statusSettings?.customStatuses || [];
+				statusSettings?.customStatuses ?? [];
 
-			const statusMap = new Map();
+			const statusMap = new Map<string, CustomStatus>();
 			coreStatuses.forEach((status: CustomStatus) =>
 				statusMap.set(status.symbol, status),
 			);
@@ -138,7 +149,7 @@ export async function openTasksPluginEditModal(
 					completeOldTaskContent,
 					newContent,
 				);
-			} else if ((twoTaskTitles.length = 1)) {
+			} else if (twoTaskTitles.length === 1) {
 				const { formattedTaskContent, newId } =
 					await addIdToTaskContent(plugin, tasksPluginApiOutput);
 				const tasksPluginApiOutputWithId = formattedTaskContent;
@@ -153,7 +164,7 @@ export async function openTasksPluginEditModal(
 					completeOldTaskContent,
 					newContent,
 				);
-			} else if ((twoTaskTitles.length = 2)) {
+			} else if (twoTaskTitles.length === 2) {
 				newContent = `${twoTaskTitles[0]}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`

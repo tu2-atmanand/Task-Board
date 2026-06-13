@@ -948,9 +948,9 @@ export default class TaskBoard extends Plugin {
 					const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 
 					// Create a deep copy of DEFAULT_BOARD and update its properties
-					const newBoard: Board = JSON.parse(
+					const newBoard= JSON.parse(
 						JSON.stringify(DEFAULT_BOARD),
-					);
+					) as Board;
 					newBoard.id = boardId;
 
 					// Save the board to disk

@@ -609,6 +609,12 @@ export interface Filter_Deprecated {
 	value?: unknown;
 }
 
+/**
+ * This stores multiple criterion.
+ * This has been deprecated, use {@link FilterCriterionGroup} instead.
+ * 
+ * @deprecated To implement the new Advanced Filter architecture, this interface has been replaced with {@link FilterCriterionGroup}.
+ */
 export interface FilterGroup {
 	id: string;
 	groupCondition: "all" | "any" | "none"; // How filters within this group are combined
@@ -617,7 +623,7 @@ export interface FilterGroup {
 
 export interface RootFilterState {
 	rootCondition: "all" | "any" | "none"; // How filter groups are combined
-	filterGroups: FilterGroup[];
+	filterGroups: FilterCriterionGroup[]; // Since FilterGroup = FilterCriterionGroup, hence using the new interface here
 }
 
 // Represents a single filter condition UI row

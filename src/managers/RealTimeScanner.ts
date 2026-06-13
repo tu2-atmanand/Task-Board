@@ -23,9 +23,10 @@ export class RealTimeScanner {
 		try {
 			const storedStack = this.app.loadLocalStorage(
 				PENDING_SCAN_FILE_STACK,
-			);
+			) as string;
 			if (storedStack) {
-				this.taskBoardFileStack = JSON.parse(storedStack);
+				const parsedData: unknown = JSON.parse(storedStack);
+				this.taskBoardFileStack = parsedData as string[];
 			}
 			// this.startScanTimer();
 		} catch (error) {

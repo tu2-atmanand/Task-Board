@@ -101,7 +101,7 @@ export function getTaskPropertyRegexPatterns(
 					.TaskFormatRegularExpWithGlobal.dependsOnRegex;
 
 			case taskPropertiesNames.Reminder:
-				return /\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/g;
+				return /\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/g;
 
 			default:
 				return /(?:)/g;

@@ -241,12 +241,12 @@ export class MergeBoardsModal extends Modal {
 		// Combine filterConfig
 		const combinedFilterConfig = {
 			enableSavedFilters:
-				board1.filterConfig?.enableSavedFilters ||
-				board2.filterConfig?.enableSavedFilters ||
+				board1.boardFilters?.enableSavedFilters ||
+				board2.boardFilters?.enableSavedFilters ||
 				false,
 			savedConfigs: [
-				...(board1.filterConfig?.savedConfigs || []),
-				...(board2.filterConfig?.savedConfigs || []),
+				...(board1.boardFilters?.savedConfigs || []),
+				...(board2.boardFilters?.savedConfigs || []),
 			],
 		};
 

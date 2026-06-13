@@ -1,15 +1,19 @@
 // /src/services/ EventEmitter.ts
 
+type EventListener<T = unknown> = (data: T) => void;
+
 class EventEmitter {
-	private events: { [key: string]: Function[] } = Object.create(null);
+	private events: Record<string, Array<EventListener<unknown>>> = {};
 	private readonly blockedEvents = new Set([
 		"__proto__",
 		"constructor",
 		"prototype",
 	]);
 
-	// Add an event listener
-	on(event: string, listener: Function) {
+	// Keep the listener payload generic at the call site, but store the handler
+	// internally as `unknown` so the event bus remains compatible with the
+	// existing callback signatures used across the plugin.
+	on<T>(event: string, listener: EventListener<T>) {
 		if (this.blockedEvents.has(event)) {
 			console.warn(
 				"[Task Board] [Event Emitter] : Blocked event is registered : ",
@@ -20,11 +24,11 @@ class EventEmitter {
 		if (!this.events[event]) {
 			this.events[event] = [];
 		}
-		this.events[event].push(listener);
+		this.events[event].push(listener as EventListener<unknown>);
 	}
 
 	// Emit an event, calling all listeners
-	emit(event: string, data?: unknown) {
+	emit<T>(event: string, data?: T) {
 		if (this.blockedEvents.has(event)) {
 			console.warn(
 				"[Task Board] [Event Emitter] : Blocked event is emitted : ",
@@ -38,7 +42,7 @@ class EventEmitter {
 	}
 
 	// Remove an event listener
-	off(event: string, listener: Function) {
+	off<T>(event: string, listener: EventListener<T>) {
 		if (this.blockedEvents.has(event)) {
 			console.warn(
 				"[Task Board] [Event Emitter] : Blocked event is un-registered : ",
@@ -48,7 +52,8 @@ class EventEmitter {
 		}
 		if (this.events[event]) {
 			this.events[event] = this.events[event].filter(
-				(registeredListener) => registeredListener !== listener,
+				(registeredListener) =>
+					registeredListener !== (listener as EventListener<unknown>),
 			);
 		}
 	}

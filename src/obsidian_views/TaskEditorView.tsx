@@ -13,7 +13,6 @@ import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousR
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../utils/MarkdownFileOperations.js";
 import { generateTaskId } from "../utils/TaskItemUtils.js";
-import { getFormattedTaskContent } from "../utils/taskLine/TaskContentFormatter.js";
 
 
 export class TaskEditorView extends ItemView {

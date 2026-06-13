@@ -63,7 +63,7 @@ export function validateFrontmatterValue(
 	customKey: string,
 	valueType: "string" | "number" | "array",
 ): string | number | string[] | undefined {
-	const value = frontmatter[customKey] ?? "";
+	const value = frontmatter[customKey] as unknown ?? "";
 
 	if (value && typeof value === valueType) {
 		return value;
@@ -442,7 +442,7 @@ export async function updateFrontmatterInMarkdownFile(
 					forceId,
 				);
 				for (const key of Object.keys(updated)) {
-					existing[key] = updated[key];
+					existing[key] = updated[key] as unknown;
 				}
 			},
 		);

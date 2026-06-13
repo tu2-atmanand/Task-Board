@@ -31,9 +31,10 @@ export class ConfigureColumnSortingModal extends Modal {
 		// Deep-copy columnConfiguration to avoid mutating caller's object (avoid stale/unsaved changes)
 		// This ensures that edits in the modal don't affect the original object until Save is clicked
 		try {
-			this.columnConfiguration = JSON.parse(
+			const parsedData: unknown = JSON.parse(
 				JSON.stringify(columnConfiguration),
 			);
+			this.columnConfiguration = parsedData as ColumnData;
 		} catch (e) {
 			// Fallback to shallow copy if stringify fails
 			this.columnConfiguration = { ...columnConfiguration };

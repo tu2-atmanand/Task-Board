@@ -70,8 +70,12 @@ export default class EditTagsModal extends Modal {
 		saveBtn.addEventListener("click", () => {
 			const tags = Array.from(
 				this.tagsContainer!.querySelectorAll(".tag-pill"),
-			).map((el: unknown) => el.getAttribute("data-tag"));
-			this.onSave(tags);
+			).map((el: Element) => el.getAttribute("data-tag"));
+
+			const validTags = tags.filter(
+				(tag: unknown) => typeof tag === "string",
+			);
+			this.onSave(validTags);
 			this.close();
 		});
 
@@ -85,7 +89,7 @@ export default class EditTagsModal extends Modal {
 		// avoid duplicates
 		const exists = Array.from(
 			this.tagsContainer.querySelectorAll(".tag-pill"),
-		).some((el: unknown) => el.getAttribute("data-tag") === normalized);
+		).some((el: Element) => el.getAttribute("data-tag") === normalized);
 		if (exists) return;
 		const pill = this.tagsContainer.createDiv({ cls: "tag-pill" });
 		pill.setAttr("data-tag", normalized);

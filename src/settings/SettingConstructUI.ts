@@ -456,7 +456,7 @@ export class SettingsManager {
 					})
 					.setValue(scanMode)
 					.onChange((value) => {
-						this.globalSettings.scanMode = value;
+						this.globalSettings.scanMode = value as scanModeOptions;
 						void this.saveSettings();
 
 						this.openReloadNoticeIfNeeded();
@@ -527,7 +527,8 @@ export class SettingsManager {
 					})
 					.setValue(ribbonIconAction)
 					.onChange((value) => {
-						this.globalSettings.ribbonIconAction = value;
+						this.globalSettings.ribbonIconAction =
+							value as RibbonIconActions;
 						void this.saveSettings();
 					}),
 			);
@@ -925,7 +926,8 @@ export class SettingsManager {
 					})
 					.setValue(taskCardStyle)
 					.onChange((value) => {
-						this.globalSettings.taskCardStyle = value;
+						this.globalSettings.taskCardStyle =
+							value as taskCardStyleNames;
 						void this.saveSettings();
 					}),
 			);
@@ -952,7 +954,7 @@ export class SettingsManager {
 						this.globalSettings.columnWidth = value;
 						void this.saveSettings();
 					})
-					.setPlaceholder("300px"),
+					.setPlaceholder("300"),
 			);
 
 		// Setting to show/Hide the Vertical ScrollBar of each Column
@@ -1699,7 +1701,7 @@ export class SettingsManager {
 			let preview = "";
 			switch (this.globalSettings.taskPropertyFormat) {
 				// Default
-				case "1": {
+				case taskPropertyFormatOptions.default: {
 					if (
 						this.globalSettings.compatiblePlugins.dayPlannerPlugin
 					) {
@@ -1710,7 +1712,7 @@ export class SettingsManager {
 					break;
 				}
 				// Tasks Plugin
-				case "2": {
+				case taskPropertyFormatOptions.tasksPlugin: {
 					if (
 						this.globalSettings.compatiblePlugins.dayPlannerPlugin
 					) {
@@ -1725,7 +1727,7 @@ export class SettingsManager {
 					break;
 				}
 				// Dataview Plugin
-				case "3": {
+				case taskPropertyFormatOptions.dataviewPlugin: {
 					if (
 						this.globalSettings.compatiblePlugins.dayPlannerPlugin
 					) {
@@ -1736,7 +1738,7 @@ export class SettingsManager {
 					break;
 				}
 				// Obsidian Native
-				case "4": {
+				case taskPropertyFormatOptions.obsidianNative: {
 					if (
 						this.globalSettings.compatiblePlugins.dayPlannerPlugin
 					) {
@@ -1775,7 +1777,8 @@ export class SettingsManager {
 
 				dropdown.setValue(taskPropertyFormat);
 				dropdown.onChange((value) => {
-					this.globalSettings.taskPropertyFormat = value;
+					this.globalSettings.taskPropertyFormat =
+						value as taskPropertyFormatOptions;
 					void this.saveSettings();
 					updatePreview();
 
@@ -1953,7 +1956,8 @@ export class SettingsManager {
 				});
 
 				const inputEl = text.inputEl;
-				inputEl.placeholder = "e.g., taskNote";
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
+				inputEl.placeholder = "E.g., taskNote";
 			});
 
 		const folderSuggestions = getFolderSuggestions(this.app);
@@ -1972,8 +1976,9 @@ export class SettingsManager {
 				});
 
 				const inputEl = text.inputEl;
-				inputEl.placeholder = "e.g., Task Notes/";
-				const onSelectCallback = async (selectedPath: string) => {
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
+				inputEl.placeholder = "E.g., Task Notes/";
+				const onSelectCallback = (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.taskNoteDefaultLocation =
 							selectedPath;
@@ -2004,8 +2009,9 @@ export class SettingsManager {
 				});
 
 				const inputEl = text.inputEl;
+				// eslint-disable-next-line obsidianmd/ui/sentence-case
 				inputEl.placeholder = "e.g., TaskBoard/TaskNotes";
-				const onSelectCallback = async (selectedPath: string) => {
+				const onSelectCallback = (selectedPath: string) => {
 					if (this.globalSettings) {
 						this.globalSettings.archivedTBNotesFolderPath =
 							selectedPath;
@@ -2041,7 +2047,7 @@ export class SettingsManager {
 			forceFallback: true,
 			fallbackClass: "task-board-sortable-fallback",
 			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: async () => {
+			onSort: () => {
 				const newOrder = Array.from(
 					frontmatterFormattingContainer.children,
 				)
@@ -2175,7 +2181,7 @@ export class SettingsManager {
 			showMinimap,
 			renderVisibleNodes,
 			edgeType,
-		} = this.globalSettings?.mapView;
+		} = this.globalSettings.mapView;
 
 		new Setting(contentEl)
 			.setName(
@@ -2250,7 +2256,8 @@ export class SettingsManager {
 					})
 					.setValue(background)
 					.onChange((value) => {
-						this.globalSettings.mapView.background = value;
+						this.globalSettings.mapView.background =
+							value as mapViewBackgrounVariantTypes;
 						void this.saveSettings();
 					}),
 			);
@@ -2266,7 +2273,8 @@ export class SettingsManager {
 					})
 					.setValue(mapOrientation)
 					.onChange((value) => {
-						this.globalSettings.mapView.mapOrientation = value;
+						this.globalSettings.mapView.mapOrientation =
+							value as mapViewNodeMapOrientation;
 						void this.saveSettings();
 					}),
 			);
@@ -2484,9 +2492,7 @@ export class SettingsManager {
 						this.app,
 						communityPlugins.quickAddPlugin,
 					);
-					const onSelectCallback = async (
-						selectedChoiceName: string,
-					) => {
+					const onSelectCallback = (selectedChoiceName: string) => {
 						if (this.globalSettings) {
 							this.globalSettings.quickAddPluginDefaultChoice =
 								selectedChoiceName;
@@ -2527,7 +2533,8 @@ export class SettingsManager {
 
 				dropdown.setValue(notificationService);
 				dropdown.onChange((value) => {
-					this.globalSettings.notificationService = value;
+					this.globalSettings.notificationService =
+						value as NotificationService;
 					void this.saveSettings();
 				});
 			});
@@ -2562,7 +2569,8 @@ export class SettingsManager {
 					})
 					.setValue(this.globalSettings.universalDate)
 					.onChange((value) => {
-						this.globalSettings.universalDate = value;
+						this.globalSettings.universalDate =
+							value as UniversalDateOptions;
 						void this.saveSettings();
 					}),
 			);
@@ -2598,6 +2606,7 @@ export class SettingsManager {
 						this.globalSettings.dateFormat = value;
 						void this.saveSettings();
 					})
+					// eslint-disable-next-line obsidianmd/ui/sentence-case
 					.setPlaceholder("yyyy-MM-dd"),
 			)
 			.addButton((btn) => {
@@ -2690,6 +2699,7 @@ export class SettingsManager {
 						this.globalSettings.dateTimeFormat = value;
 						void this.saveSettings();
 					})
+					// eslint-disable-next-line obsidianmd/ui/sentence-case
 					.setPlaceholder("yyyy-MM-dd/HH:mm"),
 			)
 			.addButton((btn) => {
@@ -2768,7 +2778,7 @@ export class SettingsManager {
 						this.globalSettings.defaultStartTime = value;
 						void this.saveSettings();
 					})
-					.setPlaceholder("eg.: 00:00 or 23:59"),
+					.setPlaceholder("Eg.: 00:00 or 23:59"),
 			);
 
 		// Text input for the taskCompletionDateTimePattern

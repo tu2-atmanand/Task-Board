@@ -1,6 +1,6 @@
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { t } from "../utils/lang/helper.js";
-import { defaultTaskStatuses } from "./Enums.js";
+import { defaultTaskStatuses, statusTypeNames } from "./Enums.js";
 import { CustomStatus } from "./GlobalSettings.js";
 import { taskItem } from "./TaskItem.js";
 
@@ -125,7 +125,7 @@ export const getCustomStatusOptionsForDropdown = (
 			typeof status.symbol === "string" &&
 			typeof status.name === "string" &&
 			status.name.trim() !== "" &&
-			typeof status.type === "string";
+			typeof status.type === typeof statusTypeNames;
 
 		if (!isValid) {
 			bugReporterManagerInsatance.addToLogs(
@@ -206,7 +206,7 @@ export const getCustomStatusOptionsForDropdown = (
 			}
 			return acc;
 		},
-		[] as Array<{ type: string; statuses: CustomStatus[] }>,
+		[] as Array<{ type: statusTypeNames; statuses: CustomStatus[] }>,
 	);
 
 	const groups: GroupedStatusOptions[] = grouped.map((group) => ({

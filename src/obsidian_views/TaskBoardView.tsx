@@ -40,7 +40,7 @@ export class TaskBoardView extends ItemView {
 		return this.boardName;
 	}
 
-	onPaneMenu(menu: Menu, source: "more-options" | "tab-header" | string): void {
+	onPaneMenu(menu: Menu, source: "more-options" | "tab-header"): void {
 		if (source === "more-options") {
 			menu.addItem((item) => {
 				item.setTitle(t("quick-actions"));
@@ -210,7 +210,8 @@ export class TaskBoardView extends ItemView {
 		if (Platform.isMobile) {
 			this.addAction(RefreshIcon, t("refresh-board-button"), async () => {
 				const fileStackString = this.app.loadLocalStorage(PENDING_SCAN_FILE_STACK);
-				const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
+				const parsedData: unknown = JSON.parse(fileStackString as string);
+				const fileStack = fileStackString ? parsedData as string[] : null;
 
 				if (fileStack && fileStack.length > 0) {
 					await this.plugin.realTimeScanner.processAllUpdatedFiles();

@@ -45,7 +45,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 }) => {
 	const [allViewsData, setAllViewsData] = useState<TaskBoardViewType[]>(() => {
 		try {
-			return currentBoardData.views ? JSON.parse(JSON.stringify(currentBoardData.views)) : [];
+			const parsedData: unknown = JSON.parse(JSON.stringify(currentBoardData.views));
+			return currentBoardData.views ? parsedData as TaskBoardViewType[] : [];
 		} catch (e) {
 			bugReporterManagerInsatance.showNotice(34, "Error parsing boards data", e as string, "BoardConfigModal.tsx/allViewsData");
 			return [];
@@ -80,7 +81,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Kanban Column - Function to handle adding a new column to the selected Kanban specific view using the data submitted from the add column modal
 	const handleAddColumn = (viewIndex: number, columnData: ColumnData) => {
-		const updatedViewsData: unknown = [...allViewsData];
+		const updatedViewsData: TaskBoardViewType[] = [...allViewsData];
 		updatedViewsData[viewIndex].kanbanView!.columns.push({
 			id: columnData.id,
 			index: updatedViewsData[viewIndex].kanbanView!.columns.length + 1,
@@ -91,8 +92,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			coltag: columnData.coltag,
 			datedBasedColumn: {
 				dateType: plugin.settings.data.universalDate,
-				from: "",
-				to: ""
+				from: 0,
+				to: 0
 			},
 			taskStatus: columnData.taskStatus,
 			taskPriority: columnData.taskPriority,
@@ -313,8 +314,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			return;
 		}
 		const viewToDuplicate = allViewsData[selectedViewIndex];
+		const parsedData: unknown = JSON.parse(JSON.stringify(viewToDuplicate)); // Deep copy
 		const duplicatedView: TaskBoardViewType = {
-			...JSON.parse(JSON.stringify(viewToDuplicate)), // Deep copy
+			...parsedData as TaskBoardViewType,
 			viewId: generateRandomStringId('view'),
 			viewName: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
 		};
@@ -434,8 +436,9 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
 	const handleDuplicateCurrentBoard = () => {
+		const parsedData: unknown = JSON.parse(JSON.stringify(activeBoardData)); // Deep copy
 		const duplicatedBoard: Board = {
-			...JSON.parse(JSON.stringify(activeBoardData)), // Deep copy
+			...parsedData as Board,
 			id: generateRandomStringId('board'),
 			name: `${activeBoardData.name} ${t("copy-suffix")}`,
 			views: activeBoardData.views ? activeBoardData.views.map((view: TaskBoardViewType) => ({
@@ -480,7 +483,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const handleToggleKanbanViewSettings = (viewIndex: number, field: BooleanKanbanProperties, value: boolean) => {
 		const updatedViewsData = [...allViewsData];
 		if (updatedViewsData[viewIndex] && updatedViewsData[viewIndex].kanbanView) {
-			(updatedViewsData[viewIndex].kanbanView as unknown)[field] = value;
+			updatedViewsData[viewIndex].kanbanView[field] = value;
 		}
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);

@@ -510,7 +510,8 @@ export async function migrateMapViewData(
 			NODE_POSITIONS_STORAGE_KEY,
 		);
 		if (mapViewPostionsDataStr) {
-			mapViewData = JSON.parse(mapViewPostionsDataStr);
+			const parsedData: unknown = JSON.parse(mapViewPostionsDataStr as string);
+			mapViewData = parsedData as MapView;
 		} else {
 			onProgress?.(
 				`⚠ No map view data found in the LocalStorge. Safely moving for the next operation.`,

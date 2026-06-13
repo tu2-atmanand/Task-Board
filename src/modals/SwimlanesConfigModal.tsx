@@ -521,7 +521,7 @@ export class SwimlanesConfigModal extends Modal {
 					.setValue(this.headerUIType)
 					.onChange((value) => {
 						this.headerUIType =
-							value;
+							value as HeaderUITypeOptions;
 						this.edited = true;
 					})
 			});
