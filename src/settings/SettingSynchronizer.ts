@@ -23,18 +23,22 @@ export function migrateSettings(
 	try {
 		if (settings == undefined) return defaults;
 
+		const s = settings as Record<string, unknown>;
+		const d = defaults as Record<string, unknown>;
+
 		for (const key in defaults) {
 			if (!(key in settings)) {
 				// This is a cumpulsory migration which will be required in every new version update, since a new field should be added into the users settings.
-				settings[key] = defaults[key];
+				s[key] = d[key];
 			}
 
 			if (key === "scanFilters") {
-				if (settings[key]?.tags && settings[key].tags.length > 0) {
-					const cleanedTags: string[] = settings[key].tags.map(
+				const scanFilter = s[key] as { tags: string[] };
+				if (scanFilter?.tags && scanFilter.tags.length > 0) {
+					const cleanedTags: string[] = scanFilter.tags.map(
 						(tag: string) => tag.trim().replace("#", ""),
 					);
-					settings[key].tags = cleanedTags;
+					scanFilter.tags = cleanedTags;
 				}
 			}
 
@@ -47,7 +51,7 @@ export function migrateSettings(
 			 * This is migration is only applied to replace the older settings available in users configs with the new settings as per the new Settinsg section added in the global settings.
 			 */
 			if (key === "customStatuses") {
-				settings[key] = DEFAULT_SETTINGS.data.customStatuses;
+				s[key] = DEFAULT_SETTINGS.data.customStatuses;
 			}
 
 			// -----------------------------------
@@ -58,9 +62,9 @@ export function migrateSettings(
 			 *
 			 * Because of the name change, we had to do this migration.
 			 */
-			if (key === "frontmatter" && settings["frontMatter"]) {
-				settings[key] = settings["frontMatter"];
-				delete settings["frontMatter"];
+			if (key === "frontmatter" && s["frontMatter"]) {
+				s[key] = s["frontMatter"];
+				delete s["frontMatter"];
 			}
 
 			// -------------------------------------
@@ -70,14 +74,14 @@ export function migrateSettings(
 			 * This is a cumpulsory case, which will recursively iterate all the object type settings.
 			 */
 			if (
-				typeof defaults[key] === "object" &&
-				defaults[key] !== null &&
-				!Array.isArray(defaults[key])
+				typeof d[key] === "object" &&
+				d[key] !== null &&
+				!Array.isArray(d[key])
 			) {
-				migrateSettings(defaults[key], settings[key]);
+				migrateSettings(d[key], s[key]);
 			}
 		}
-		return settings;
+		return s as PluginDataJson;
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			181,
@@ -100,16 +104,15 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 		const fileContent = JSON.stringify(data, null, 2);
 
 		// Desktop folder picker
-		if (
-			window?.electron &&
-			window.electron?.remote &&
-			window.electron.remote?.dialog
-		) {
-			let folderPaths: string[] =
-				window.electron.remote.dialog.showOpenDialogSync({
+		if ((window.electron as Record<string, unknown>)?.remote) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+			const dialog = (window.electron as Record<string, unknown>).remote.dialog?.showOpenDialogSync;
+			let folderPaths: string[] | undefined =
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				dialog?.({
 					title: "Pick folder to export settings",
 					properties: ["openDirectory", "dontAddToRecent"],
-				});
+				}) as string[] | undefined;
 			if (!folderPaths || folderPaths.length === 0) {
 				new Notice("Export cancelled or folder not selected.");
 				return;
@@ -163,17 +166,16 @@ export async function importConfigurations(
 		let name = "JSON Files";
 
 		// Desktop file picker
-		if (
-			window?.electron &&
-			window.electron?.remote &&
-			window.electron.remote?.dialog
-		) {
-			let filePaths: string[] =
-				window.electron.remote.dialog.showOpenDialogSync({
+		if ((window.electron)?.remote) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+			const dialog = (window.electron).remote.dialog?.showOpenDialogSync;
+			let filePaths: string[] | undefined =
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				dialog?.({
 					title: "Pick settings file to import",
 					properties: ["openFile", "dontAddToRecent"],
 					filters: [{ name, extensions }],
-				});
+				}) as string[] | undefined;
 			if (!filePaths || filePaths.length === 0) {
 				new Notice("Import cancelled or file not selected.");
 				return false;

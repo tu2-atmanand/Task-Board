@@ -1,6 +1,6 @@
 import { App, Modal, Setting, Notice, TFile, setIcon } from "obsidian";
 import TaskBoard from "../../main.js";
-import { Board } from "../interfaces/BoardConfigs.js";
+import { AdvancedFilter, Board } from "../interfaces/BoardConfigs.js";
 import TaskBoardFileManager from "../managers/TaskBoardFileManager.js";
 import { MultiSuggest } from "../services/MultiSuggest.js";
 import { generateRandomStringId } from "../utils/TaskItemUtils.js";
@@ -238,18 +238,6 @@ export class MergeBoardsModal extends Modal {
 		// Generate new ID
 		const newId = generateRandomStringId("board");
 
-		// Combine filterConfig
-		const combinedFilterConfig = {
-			enableSavedFilters:
-				board1.boardFilters?.enableSavedFilters ||
-				board2.boardFilters?.enableSavedFilters ||
-				false,
-			savedConfigs: [
-				...(board1.boardFilters?.savedConfigs || []),
-				...(board2.boardFilters?.savedConfigs || []),
-			],
-		};
-
 		// Combine views
 		const combinedViews = [...board1.views, ...board2.views];
 
@@ -259,7 +247,6 @@ export class MergeBoardsModal extends Modal {
 			revision: board1?.revision ?? CURRENT_REVISION,
 			name: this.newBoardName,
 			description: board1.description,
-			filterConfig: combinedFilterConfig,
 			views: combinedViews,
 			// lastViewId: board1.lastViewId, // Use from first board
 			lastViewIndex: 0,

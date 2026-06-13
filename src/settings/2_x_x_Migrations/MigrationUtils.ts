@@ -65,7 +65,7 @@ export async function readDataFile(
 	}
 
 	const dataContent = await app.vault.adapter.read(normalizedPath);
-	const data: PluginDataJsonLegacy = JSON.parse(dataContent);
+	const data = JSON.parse(dataContent) as PluginDataJsonLegacy;
 	return data;
 }
 
@@ -171,7 +171,7 @@ export async function checkForV1Data(
 	} catch (error) {
 		bugReporterManagerInsatance.addToLogs(
 			200,
-			`Error checking for v1 data: ${error}`,
+			`Error checking for v1 data: ${String(error)}`,
 			"2_x_x_Migrations/MigrationUtils.ts/checkForV1Data",
 		);
 		return { hasV1Data: false };
@@ -505,13 +505,15 @@ export async function migrateMapViewData(
 
 		// Query localStorage for map view data using board name as key
 		// Note: localStorage in Obsidian is scoped per workspace
-		let mapViewData;
+		let mapViewData: unknown;
 		const mapViewPostionsDataStr = plugin.app.loadLocalStorage(
 			NODE_POSITIONS_STORAGE_KEY,
 		);
 		if (mapViewPostionsDataStr) {
-			const parsedData: unknown = JSON.parse(mapViewPostionsDataStr as string);
-			mapViewData = parsedData as MapView;
+			const parsedData: unknown = JSON.parse(
+				mapViewPostionsDataStr as string,
+			);
+			mapViewData = parsedData;
 		} else {
 			onProgress?.(
 				`⚠ No map view data found in the LocalStorge. Safely moving for the next operation.`,
@@ -568,7 +570,8 @@ export async function migrateMapViewData(
 							y: 0,
 							zoom: 0.5,
 						},
-						nodesData: mapViewData[boardIndexKey], // ✅ Safely accessed now
+						// Runtime safety checks above ensure mapViewData is a non-null object with boardIndexKey
+						nodesData: (mapViewData as Record<string, unknown>)[boardIndexKey],
 					};
 					const viewsLength = boardData.views.length;
 

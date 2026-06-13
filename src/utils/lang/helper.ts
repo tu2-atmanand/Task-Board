@@ -43,7 +43,7 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 				`${pluginFolder}/locales/${lang}.json`,
 			);
 			const file = await plugin.app.vault.adapter.read(filePath);
-			const parsed = JSON.parse(file);
+			const parsed = JSON.parse(file) as unknown;
 
 			// Add the loaded translations to i18next
 			i18next.addResourceBundle(lang, "translation", parsed, true, true);

@@ -8,7 +8,18 @@ import {
 	normalizePath,
 	setIcon,
 } from "obsidian";
-import Pickr from "@simonwep/pickr";
+import PickrImport from "@simonwep/pickr";
+
+interface PickrColor {
+	toRGBA(): number[];
+}
+interface PickrInstance {
+	on(event: string, cb: (...args: unknown[]) => void): this;
+	destroy(): void;
+	hide(): void;
+}
+type PickrConstructor = new (options: Record<string, unknown>) => PickrInstance;
+const Pickr = PickrImport as unknown as PickrConstructor;
 import Sortable from "sortablejs";
 import { isValid, parse, format, differenceInHours } from "date-fns";
 import { t } from "i18next";
@@ -284,7 +295,7 @@ export class SettingsManager {
 		this.reloadNoticeAlreadyShown = false;
 
 		//Destroy all Pickr instances
-		this.allPickrs.forEach((pickr) => pickr.destroy());
+		this.allPickrs.forEach((pickr) => (pickr as PickrInstance).destroy());
 
 		//find all the div with calls picr-app using query-selector and remove them from the main window
 		const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
@@ -1269,14 +1280,14 @@ export class SettingsManager {
 
 									pickr
 										.on("change", (color: unknown) => {
-											const rgbaColor = `rgba(${color
+											const rgbaColor = `rgba(${(color as PickrColor)
 												.toRGBA()
 												.map((v: number, i: number) =>
 													i < 3 ? Math.round(v) : v,
 												)
 												.join(", ")})`;
 											tag.color = rgbaColor;
-											colorInputRef.setValue(rgbaColor);
+											(colorInputRef as { setValue: (val: string) => void }).setValue(rgbaColor);
 										})
 										.on("hide", () => {
 											renderTagColors();
@@ -2933,7 +2944,7 @@ const paypalButton = (link: string): HTMLElement => {
 // };
 
 const buyMeACoffeeButton = (link: string, img: HTMLElement): HTMLElement => {
-	const a = document.createElement("a");
+	const a = activeDocument.createElement("a");
 	a.setAttribute("href", link);
 	a.addClass("buymeacoffee-tu2-atmanand-img");
 	a.appendChild(img);
@@ -2956,7 +2967,7 @@ const buyMeACoffeeButton = (link: string, img: HTMLElement): HTMLElement => {
 // };
 
 const kofiButton = (link: string, img: HTMLElement): HTMLElement => {
-	const a = document.createElement("a");
+	const a = activeDocument.createElement("a");
 	a.setAttribute("href", link);
 	a.addClass("buymeacoffee-tu2-atmanand-img");
 	a.appendChild(img);

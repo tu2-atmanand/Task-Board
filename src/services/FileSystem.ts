@@ -216,8 +216,9 @@ export class WebPickedFile implements PickedFile {
 	// 	return callback(new ZipReader(new BlobReader(this.file)));
 	// }
 
+	// Use file.name instead of this.file.toString() to avoid [object Object] default stringification
 	toString(): string {
-		return this.file.toString();
+		return this.file.name;
 	}
 }
 

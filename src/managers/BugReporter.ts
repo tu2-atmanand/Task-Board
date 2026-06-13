@@ -100,10 +100,10 @@ class BugReporterManager {
 			.map(([key, value]) => {
 				if (Array.isArray(value)) {
 					return `- **${key}**: \n${value
-						.map((v) => `  - ${v}`)
+						.map((v: unknown) => `  - ${String(v)}`)
 						.join("\n")}`;
 				}
-				return `- **${key}**: ${value}`;
+				return `- **${key}**: ${String(value)}`;
 			})
 			.join("\n");
 	}
@@ -384,7 +384,8 @@ ${entry.bugContent}
 				window.electron?.remote &&
 				window.electron.remote?.dialog
 			) {
-				let folderPaths: string[] = window.electron.remote.dialog.showOpenDialogSync({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+				let folderPaths: string[] | undefined = window.electron.remote.dialog.showOpenDialogSync({
 					title: "Pick folder to export settings",
 					properties: ["openDirectory", "dontAddToRecent"],
 				});

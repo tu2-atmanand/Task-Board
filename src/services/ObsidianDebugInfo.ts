@@ -17,7 +17,7 @@ export async function getObsidianDebugInfo(app: App) {
 	const themeName = app.customCss.theme;
 	const themeManifest = app.customCss.themes[themeName];
 	const numSnippets = app.customCss.snippets.filter((snippet: unknown) =>
-		app.customCss.enabledSnippets.has(snippet)
+		app.customCss.enabledSnippets.has(String(snippet)),
 	).length;
 	const plugins = app.plugins.plugins;
 
@@ -27,7 +27,7 @@ export async function getObsidianDebugInfo(app: App) {
 		"Use [[Wikilinks]]": !app.vault.getConfig("useMarkdownLinks"),
 		// This entry is not in Obsidian's built-in "Show debug info" command.
 		// It replaces the "Base theme" entry for identifying the color scheme even if it's set to be "adapt to system"
-		"Base color scheme": document.body.hasClass("theme-dark")
+		"Base color scheme": activeDocument.body.hasClass("theme-dark")
 			? "dark"
 			: "light",
 		// This entry is not in Obsidian's built-in "Show debug info" command
@@ -38,39 +38,66 @@ export async function getObsidianDebugInfo(app: App) {
 		"Snippets enabled": numSnippets,
 		"Plugins installed": Object.keys(app.plugins.manifests).length,
 		"Plugins enabled": Object.values(plugins).map(
-			(plugin) => `${plugin.manifest.name} v${plugin.manifest.version}`
+			(plugin) => `${plugin.manifest.name} v${plugin.manifest.version}`,
 		),
 	};
 }
 
-export async function getWebViewVersion() {
+// Capacitor plugins return untyped results; use a concise interface for the shape we access
+interface CapacitorDeviceInfo {
+	webViewVersion?: string;
+	platform?: string;
+	osVersion?: string;
+	manufacturer?: string;
+	model?: string;
+}
+interface CapacitorAppInfo {
+	version?: string;
+	build?: string;
+}
+
+export async function getWebViewVersion(): Promise<string | null> {
 	if (!Platform.isMobileApp) {
 		return null;
 	}
 
-	const deviceInfo = await window.Capacitor.Plugins.Device.getInfo();
-	return deviceInfo.webViewVersion;
+	const plugins = (window.Capacitor as Record<string, unknown>)
+		.Plugins as Record<string, unknown>;
+	const deviceInfo = await (
+		plugins.Device as { getInfo: () => Promise<CapacitorDeviceInfo> }
+	).getInfo();
+	return deviceInfo.webViewVersion ?? null;
 }
 
 /**
  * Get the information about the Obsidian app and the system.
  * This is the same as the "SYSTEM INFO" section in the result of the "Show debug info" command.
  */
-export async function getSystemInfo(): Promise<unknown> {
+export async function getSystemInfo(): Promise<Record<string, unknown>> {
 	if (window.electron) {
-		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		// eslint-disable-next-line @typescript-eslint/no-require-imports, import/no-nodejs-modules, no-undef
 		const os = require("os") as typeof import("os");
+		const electron = window.electron;
+		const ipcRenderer = electron.ipcRenderer as {
+			sendSync: (channel: string) => string;
+		};
+		const remote = electron.remote as { app: { getVersion: () => string } };
 		return {
-			"Obsidian version": window.electron.ipcRenderer.sendSync("version"),
-			// @ts-ignore
-			"Installer version": window.electron.remote.app.getVersion(),
+			"Obsidian version": ipcRenderer.sendSync("version"),
+			"Installer version": remote.app.getVersion(),
 			"Operating system": os.version() + " " + os.release(),
 		};
 	}
 
-	const appInfo = await window.Capacitor.Plugins.App.getInfo();
-	const deviceInfo = await window.Capacitor.Plugins.Device.getInfo();
-	const info: unknown = {
+	const apps = (window.Capacitor as Record<string, unknown>)
+		.Plugins as Record<string, unknown>;
+	const appInfo = await (
+		apps.App as { getInfo: () => Promise<CapacitorAppInfo> }
+	).getInfo();
+	const deviceInfo = await (
+		apps.Device as { getInfo: () => Promise<CapacitorDeviceInfo> }
+	).getInfo();
+	const info: Record<string, unknown> = {
 		"Obsidian version": `${appInfo.version} (${appInfo.build})`,
 		"API version": apiVersion,
 		"Operating system": `${deviceInfo.platform} ${deviceInfo.osVersion} (${deviceInfo.manufacturer} ${deviceInfo.model})`,

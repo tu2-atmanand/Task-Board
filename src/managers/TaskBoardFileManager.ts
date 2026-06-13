@@ -6,7 +6,7 @@
  * This replaces the previous approach of storing all board data in data.json
  */
 
-import { App, TFile, Notice, normalizePath, WorkspaceLeaf } from "obsidian";
+import { App, TFile, Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../main.js";
 import {
 	Board,
@@ -770,7 +770,7 @@ export default class TaskBoardFileManager {
 
 			// Remove from the fileRegistry and the recentBoardsCache
 
-			await this.app.vault.trash(file, false);
+			await this.app.fileManager.trashFile(file);
 			return true;
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
@@ -1065,9 +1065,7 @@ export default class TaskBoardFileManager {
 	runMigrationForRevision_0(oldBoardData: Board): Board {
 		if (oldBoardData.revision < CURRENT_REVISION) {
 			let newBoardData = { ...oldBoardData };
-			// eslint-disable-next-line @typescript-eslint/no-deprecated
 			if (oldBoardData?.pluginVersion) {
-				// eslint-disable-next-line @typescript-eslint/no-deprecated
 				delete newBoardData.pluginVersion;
 			}
 
@@ -1093,9 +1091,7 @@ export default class TaskBoardFileManager {
 	 */
 	runMigrationForRevision_1(oldBoardData: Board): Board {
 		let newBoardData = { ...oldBoardData };
-		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		if (oldBoardData?.pluginVersion) {
-			// eslint-disable-next-line @typescript-eslint/no-deprecated
 			delete newBoardData.pluginVersion;
 		}
 
@@ -1117,9 +1113,7 @@ export default class TaskBoardFileManager {
 	 */
 	runMigrationForRevision_2(oldBoardData: Board): Board {
 		let newBoardData = { ...oldBoardData };
-		// eslint-disable-next-line @typescript-eslint/no-deprecated
 		if (oldBoardData?.lastViewId) {
-			// eslint-disable-next-line @typescript-eslint/no-deprecated
 			delete newBoardData.lastViewId;
 		}
 
@@ -1185,9 +1179,7 @@ export default class TaskBoardFileManager {
 					// Initialize viewFilters if missing
 					if (!view.viewFilters) {
 						// If deprecated viewFilter exists, convert it to AdvancedFilter
-						// eslint-disable-next-line @typescript-eslint/no-deprecated
 						if (view.viewFilter && view.viewFilter.filterGroups) {
-							// eslint-disable-next-line @typescript-eslint/no-deprecated
 							const deprecatedViewFilter = view.viewFilter;
 							view.viewFilters = {
 								filters: [

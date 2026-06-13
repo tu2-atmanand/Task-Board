@@ -145,9 +145,10 @@ export const handleTaskNote2NormalNote = async (
 			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
 		if (frontmatter && frontmatter.tags) {
 			// Remove taskNote tag from frontmatter
-			let tags = Array.isArray(frontmatter.tags)
-				? [...frontmatter.tags]
-				: [frontmatter.tags];
+			const rawTags = frontmatter.tags as unknown;
+			let tags = Array.isArray(rawTags)
+				? [...(rawTags as unknown[])]
+				: [rawTags];
 			tags = tags.filter(
 				(tag: string) =>
 					tag.includes(plugin.settings.data.taskNoteIdentifierTag) ===

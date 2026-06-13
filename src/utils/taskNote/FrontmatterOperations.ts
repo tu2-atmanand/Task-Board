@@ -181,14 +181,14 @@ function orderFrontmatterProperties(
 		const key = format.key;
 		// If the key exists in the frontmatter object, add it to the ordered object
 		if (key in frontmatterObj) {
-			orderedFrontmatter[key] = frontmatterObj[key];
+			orderedFrontmatter[key] = frontmatterObj[key] as unknown;
 		}
 	}
 
 	// Add any additional properties from the frontmatter object that aren't in the formatted list
 	for (const [key, value] of Object.entries(frontmatterObj)) {
 		if (!(key in orderedFrontmatter) && !customKeys.has(key)) {
-			orderedFrontmatter[key] = value;
+			orderedFrontmatter[key] = value as unknown;
 		}
 	}
 
@@ -199,7 +199,7 @@ function orderFrontmatterProperties(
 			if (key === "index__") continue;
 			// Skip keys that are already in the ordered frontmatter
 			if (!(key in orderedFrontmatter)) {
-				orderedFrontmatter[key] = value;
+				orderedFrontmatter[key] = value as unknown;
 			}
 		}
 	}
@@ -321,12 +321,12 @@ export function updateFrontmatterProperties(
 
 	// Ensure taskNote tag exists and respect removed tags (task.tags is source of truth)
 	const tagsKey = getCustomFrontmatterKey("tags", frontmatterFormatting);
-	const existingTagsRaw = existingFrontmatter?.[tagsKey];
+	const existingTagsRaw = existingFrontmatter?.[tagsKey as keyof customFrontmatterCache] as unknown;
 
 	// Normalize existing tags to array of strings
 	let existingTags: string[] = [];
 	if (Array.isArray(existingTagsRaw)) {
-		existingTags = existingTagsRaw.filter(Boolean);
+		existingTags = existingTagsRaw.filter(Boolean) as string[];
 	} else if (typeof existingTagsRaw === "string" && existingTagsRaw.length) {
 		existingTags = existingTagsRaw
 			.split(",")

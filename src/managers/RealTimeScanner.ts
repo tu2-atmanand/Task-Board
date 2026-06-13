@@ -158,7 +158,8 @@ export class RealTimeScanner {
 
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
-				if (file instanceof TFile && cache.hasOwnProperty(oldPath)) {
+				// Use Object.hasOwn() (ES2022) instead of hasOwnProperty to avoid no-prototype-builtins lint error
+			if (file instanceof TFile && Object.hasOwn(cache, oldPath)) {
 					if (
 						!file.path
 							.toLowerCase()
@@ -256,7 +257,8 @@ export class RealTimeScanner {
 		const { Pending, Completed } = this.plugin.vaultScanner.tasksCache;
 		[Pending, Completed].forEach((cache) => {
 			if (cache && typeof cache === "object") {
-				if (file instanceof TFile && cache.hasOwnProperty(file.path)) {
+				// Use Object.hasOwn() (ES2022) instead of hasOwnProperty to avoid no-prototype-builtins lint error
+				if (file instanceof TFile && Object.hasOwn(cache, file.path)) {
 					delete cache[file.path];
 					foundFlag = true;
 				} else if (file instanceof TFolder) {

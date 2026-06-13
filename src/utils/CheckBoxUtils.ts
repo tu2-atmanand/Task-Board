@@ -169,16 +169,17 @@ export function getObsidianIndentationSetting(plugin: TaskBoard): string {
 		// Fallback: try to read the vault's .obsidian/app.json to get tabSize / useTab
 		try {
 			const path = `${plugin.app.vault.configDir}/app.json`;
+			// Cast JSON.parse result to avoid unsafe any access
 			void plugin.app.vault.adapter.read(path).then((content: string) => {
-				const parsed = JSON.parse(content || "{}");
-				if (parsed?.useTab === undefined) {
+				const parsed = JSON.parse(content || "{}") as Record<string, unknown>;
+				if (parsed.useTab === undefined) {
 					// Obsidian has not initialized any settings, hence they will be undefined
 					// So return the following default settings of Obsidian.
 					return `\t`;
 				} else {
-					if (typeof parsed?.tabSize === "number") {
-						const tabSize = parsed.tabSize;
-						return parsed?.useTab ? `\t` : " ".repeat(tabSize);
+					if (typeof parsed.tabSize === "number") {
+						const tabSize: number = parsed.tabSize;
+						return parsed.useTab ? `\t` : " ".repeat(tabSize);
 					}
 
 					return `\t`;
@@ -215,10 +216,11 @@ export async function getObsidianIndentationSettingAsync(
 		try {
 			const path = `${plugin.app.vault.configDir}/app.json`;
 			const content: string = await plugin.app.vault.adapter.read(path);
-			const parsed: unknown = JSON.parse(content);
+			// Cast JSON.parse result to avoid unsafe any access
+			const parsed = JSON.parse(content) as Record<string, unknown>;
 			const tabSize =
-				typeof parsed?.tabSize === "number" ? parsed.tabSize : 4;
-			const useTab = !!parsed?.useTab;
+				typeof parsed.tabSize === "number" ? parsed.tabSize : 4;
+			const useTab = !!parsed.useTab;
 			return useTab ? `\t` : " ".repeat(tabSize);
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(

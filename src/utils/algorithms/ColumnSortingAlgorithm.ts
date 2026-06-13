@@ -150,8 +150,8 @@ function compareTimes(
  * Compares two values based on their type
  */
 function compareValues(
-	value1: string | number,
-	value2: string | number,
+	value1: unknown,
+	value2: unknown,
 	criteria: string,
 	order: "asc" | "desc",
 ): number {
@@ -245,9 +245,9 @@ function compareValues(
 		const arr1 = Array.isArray(value1) ? value1 : [];
 		const arr2 = Array.isArray(value2) ? value2 : [];
 
-		// Compare arrays by their first element (or length if you prefer)
-		const str1 = arr1.length > 0 ? arr1[0].toLowerCase() : "";
-		const str2 = arr2.length > 0 ? arr2[0].toLowerCase() : "";
+		// Convert first element to string for safe comparison
+		const str1 = arr1.length > 0 ? String(arr1[0]).toLowerCase() : "";
+		const str2 = arr2.length > 0 ? String(arr2[0]).toLowerCase() : "";
 
 		if (str1 === "" && str2 === "") return 0;
 		if (str1 === "") return 1;
@@ -256,9 +256,9 @@ function compareValues(
 		return str1.localeCompare(str2);
 	}
 
-	// Handle string criteria
-	const str1 = String(value1 || "").toLowerCase();
-	const str2 = String(value2 || "").toLowerCase();
+	// Handle string criteria — narrow type to primitives before stringifying
+	const str1 = (value1 == null ? "" : typeof value1 === "string" || typeof value1 === "number" ? String(value1) : "").toLowerCase();
+	const str2 = (value2 == null ? "" : typeof value2 === "string" || typeof value2 === "number" ? String(value2) : "").toLowerCase();
 
 	if (str1 === "" && str2 === "") return 0;
 	if (str1 === "") return 1;
