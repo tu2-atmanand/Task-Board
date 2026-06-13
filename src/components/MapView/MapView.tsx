@@ -16,7 +16,7 @@ import {
 	ControlButton,
 } from '@xyflow/react';
 // import '@xyflow/react/dist/style.css';
-import { debounce, Menu, Notice, Platform, WorkspaceLeaf } from 'obsidian';
+import { Component, debounce, Menu, Notice, Platform, View, WorkspaceLeaf } from 'obsidian';
 import { PanelLeftOpenIcon } from 'lucide-react';
 import { t } from 'i18next';
 import TaskBoard from '../../../main.js';
@@ -36,7 +36,7 @@ import { TasksImporterPanel } from './TasksImporterPanel.js';
 
 type MapViewProps = {
 	plugin: TaskBoard;
-	currentLeaf: WorkspaceLeaf;
+	parentComponent: View | Component;
 	activeBoardData: Board;
 	currentView: TaskBoardViewType;
 	currentViewIndex: number;
@@ -51,7 +51,7 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, currentLeaf, activeBoardData, currentView, currentViewIndex, filteredTasks, focusOnTaskId
+	plugin, parentComponent, activeBoardData, currentView, currentViewIndex, filteredTasks, focusOnTaskId
 }) => {
 	plugin.settings.data.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.mapView;
@@ -381,7 +381,7 @@ const MapView: React.FC<MapViewProps> = ({
 							dataAttributeIndex={0}
 							plugin={plugin}
 							task={task}
-							parentComponent={currentLeaf.component}
+							parentComponent={parentComponent}
 							activeViewType={viewTypeNames.map}
 							activeViewIndex={currentViewIndex}
 							activeBoardID={activeBoardData.id}

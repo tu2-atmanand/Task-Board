@@ -8,11 +8,11 @@ import type { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
 import { columnSegregator } from "../../utils/algorithms/ColumnSegregator.js";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer.js";
 import LazyColumn from "./LazyColumn.js";
-import { WorkspaceLeaf } from "obsidian";
+import { Component, View } from "obsidian";
 
 interface KanbanBoardProps {
 	plugin: TaskBoard;
-	currentLeaf: WorkspaceLeaf
+	parentComponent: Component | View;
 	currentBoardData: Board;
 	currentView: TaskBoardViewType;
 	currentViewIndex: number;
@@ -20,7 +20,7 @@ interface KanbanBoardProps {
 	freshInstall: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentLeaf, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, parentComponent, currentBoardData, currentView, currentViewIndex, filteredAndSearchedTasks, freshInstall }) => {
 	// console.log("Lets see how many times this is running....\ncurrentViewIndex = ", currentViewIndex, "\ncurrentViewName = ", currentView.viewName);
 	const [loading, setLoading] = useState(true);
 
@@ -63,7 +63,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentLeaf, currentB
 			<LazyColumn
 				key={`${column.id}-${index}`}
 				plugin={plugin}
-				currentLeaf={currentLeaf}
+				parentComponent={parentComponent}
 				activeBoardData={currentBoardData}
 				kanbanViewData={currentView.kanbanView!}
 				currentViewIndex={currentViewIndex}
@@ -123,7 +123,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, currentLeaf, currentB
 					{isSwimlanesEnabled ? (
 						<KanbanSwimlanesContainer
 							plugin={plugin}
-							currentLeaf={currentLeaf}
+							parentComponent={parentComponent}
 							currentBoardData={currentBoardData}
 							currentViewIndex={currentViewIndex}
 							kanbanViewData={currentView.kanbanView}

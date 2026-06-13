@@ -488,6 +488,7 @@ export default class TaskBoard extends Plugin {
 		// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
 		this.registerMonkeyPatchForTaskboardFiles();
 
+		// feature : Embed `.taskboard` files inside notes
 		if (this.settings.data.experimentalFeatures) {
 			// @ts-ignore
 			const embedRegistry = this.app.embedRegistry as EmbedRegistry;
@@ -496,7 +497,7 @@ export default class TaskBoard extends Plugin {
 			) {
 				embedRegistry?.registerExtension(
 					TASKBOARD_FILE_EXTENSION,
-					(context, file, _) => {
+					(context, file, subPath) => {
 						return new TaskBoardEmbedComponent(
 							context.containerEl,
 							this,
@@ -948,7 +949,7 @@ export default class TaskBoard extends Plugin {
 					const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 
 					// Create a deep copy of DEFAULT_BOARD and update its properties
-					const newBoard= JSON.parse(
+					const newBoard = JSON.parse(
 						JSON.stringify(DEFAULT_BOARD),
 					) as Board;
 					newBoard.id = boardId;

@@ -2,7 +2,7 @@
 
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { CSSProperties } from 'react';
-import { Menu, Notice, Platform, WorkspaceLeaf } from 'obsidian';
+import { Component, Menu, Notice, Platform, View, WorkspaceLeaf } from 'obsidian';
 import { t } from 'i18next';
 import { AlertOctagon, EllipsisVertical } from 'lucide-react';
 import TaskBoard from '../../../main.js';
@@ -26,7 +26,7 @@ type CustomCSSProperties = CSSProperties & {
 
 export interface LazyColumnProps {
 	plugin: TaskBoard;
-	currentLeaf: WorkspaceLeaf;
+	parentComponent: Component | View;
 	activeBoardData: Board;
 	currentViewIndex: number;
 	kanbanViewData: KanbanView;
@@ -41,7 +41,7 @@ export interface LazyColumnProps {
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
 	plugin,
-	currentLeaf,
+	parentComponent,
 	activeBoardData,
 	currentViewIndex,
 	kanbanViewData,
@@ -767,7 +767,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																dataAttributeIndex: i,
 																plugin: plugin,
 																task: task,
-																parentComponent: currentLeaf.component,
+																parentComponent: parentComponent,
 																activeBoardID: activeBoardData.id,
 																activeViewIndex: currentViewIndex,
 																activeViewType: viewTypeNames.kanban, // Since LazyColumn will be always rendered inside a Kanban view.

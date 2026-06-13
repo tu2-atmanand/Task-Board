@@ -1,4 +1,4 @@
-import { Component, TFile } from "obsidian";
+import { Component, TFile, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import TaskBoard from "../../main.js";

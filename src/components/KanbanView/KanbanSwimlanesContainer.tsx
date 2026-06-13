@@ -12,11 +12,11 @@ import { eventEmitter } from '../../services/EventEmitter.js';
 import { getAllTaskTags } from '../../utils/TaskItemUtils.js';
 import LazyColumn from './LazyColumn.js';
 import { getStatusNameFromStatusSymbol } from '../../utils/taskNote/TaskNoteUtils.js';
-import { WorkspaceLeaf } from 'obsidian';
+import { Component, View } from 'obsidian';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
-	currentLeaf: WorkspaceLeaf;
+	parentComponent: Component | View;
 	currentBoardData: Board;
 	currentViewIndex: number;
 	kanbanViewData: KanbanView;
@@ -32,7 +32,7 @@ interface SwimlaneRow {
 
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	plugin,
-	currentLeaf,
+	parentComponent,
 	currentBoardData,
 	currentViewIndex,
 	kanbanViewData,
@@ -251,7 +251,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			<LazyColumn
 				key={`outside-${column.id}-${index}`}
 				plugin={plugin}
-				currentLeaf={currentLeaf}
+				parentComponent={parentComponent}
 				activeBoardData={currentBoardData}
 				kanbanViewData={kanbanViewData}
 				currentViewIndex={currentViewIndex}
@@ -364,7 +364,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								<LazyColumn
 									key={`header-${column.id}`}
 									plugin={plugin}
-									currentLeaf={currentLeaf}
+									parentComponent={parentComponent}
 									activeBoardData={currentBoardData}
 									kanbanViewData={kanbanViewData}
 									currentViewIndex={currentViewIndex}
@@ -407,7 +407,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												<LazyColumn
 													key={`${swimlane.swimlaneValue}-${column.id}`}
 													plugin={plugin}
-													currentLeaf={currentLeaf}
+													parentComponent={parentComponent}
 													activeBoardData={currentBoardData}
 													kanbanViewData={kanbanViewData}
 													currentViewIndex={currentViewIndex}
@@ -452,7 +452,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												<LazyColumn
 													key={`${swimlane.swimlaneValue}-${column.id}`}
 													plugin={plugin}
-													currentLeaf={currentLeaf}
+													parentComponent={parentComponent}
 													activeBoardData={currentBoardData}
 													kanbanViewData={kanbanViewData}
 													currentViewIndex={currentViewIndex}

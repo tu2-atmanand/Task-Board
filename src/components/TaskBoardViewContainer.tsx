@@ -2,7 +2,7 @@
 
 import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { debounce, Platform, Menu, WorkspaceLeaf, Notice } from "obsidian";
+import { debounce, Platform, Menu, WorkspaceLeaf, Notice, Component } from "obsidian";
 import { t } from 'i18next';
 import TaskBoard from '../../main.js';
 import { AdvancedFilter, Board, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
@@ -20,7 +20,7 @@ import { AdvancedFilterPopover } from './AdvancedFilterer/Popover.js';
 import MapView from './MapView/MapView.js';
 import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 
-const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf }> = ({ plugin, currentBoardData, currentLeaf }) => {
+const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined }> = ({ plugin, currentBoardData, currentLeaf }) => {
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
 	const [currentViewIndex, setCurrentViewIndex] = useState<number>(() => {
 		// Clamp lastViewIndex to valid range [0, views.length - 1] or default to 0
@@ -1433,7 +1433,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 							currentView.viewType === viewTypeNames.kanban ? (
 								<KanbanBoardView
 									plugin={plugin}
-									currentLeaf={currentLeaf}
+									parentComponent={currentLeaf ? currentLeaf.view : new Component()}
 									currentBoardData={boardData}
 									currentView={currentView}
 									currentViewIndex={currentViewIndex}
@@ -1463,7 +1463,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 								) : (
 									<MapView
 										plugin={plugin}
-										currentLeaf={currentLeaf}
+										parentComponent={currentLeaf ? currentLeaf.view : new Component()}
 										activeBoardData={boardData}
 										currentView={currentView}
 										currentViewIndex={currentViewIndex}
