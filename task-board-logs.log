@@ -15,6 +15,7 @@
   - Advanced Debug Mode v1.9.1
   - Edit History v0.3.0
   - Plugin Reloader v0.0.3
+  - Tasks v7.22.0
 
 ## Recent Bug Reports
 
@@ -45,6 +46,97 @@ Version : 2.0.0-beta-4
 -------------
 
 Timestamp : 2026-06-13T23:02:57
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-14T10:18:57
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-14T10:49:30
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-14T11:25:37
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-14T11:29:27
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-14T11:30:27
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-14T11:34:48
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-06-14T11:43:03
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown

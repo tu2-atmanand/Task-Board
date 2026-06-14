@@ -55,11 +55,9 @@
       "priority",
       "filePath",
       "tags",
-      "dependsOn",
-      "descriptionMinimized",
-      "subTasksMinimized"
+      "dependsOn"
     ],
-    "taskCardStyle": "emoji",
+    "taskCardStyle": "bases",
     "showVerticalScroll": false,
     "dragAutoScrollEdgePercent": 15,
     "tagColors": [
@@ -147,7 +145,7 @@
     "compatiblePlugins": {
       "dailyNotesPlugin": false,
       "dayPlannerPlugin": false,
-      "tasksPlugin": false,
+      "tasksPlugin": true,
       "reminderPlugin": false,
       "quickAddPlugin": false
     },
@@ -250,7 +248,7 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2293,
+    "uniqueIdCounter": 2294,
     "experimentalFeatures": true,
     "safeGuardFeature": true,
     "lastViewHistory": {
@@ -274,6 +272,12 @@
     },
     "searchQuery": "",
     "taskBoardFilesRegistry": {
+      "board_2553700948": {
+        "boardId": "board_2553700948",
+        "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1774097758616.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
       "board_329394": {
         "boardId": "board_329394",
         "filePath": "My Project.taskboard",
@@ -290,12 +294,6 @@
         "boardId": "board_3907751366",
         "filePath": "TaskBoard/A Test Board.taskboard",
         "boardName": "A Test Board",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_2553700948": {
-        "boardId": "board_2553700948",
-        "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1774097758616.taskboard",
-        "boardName": "My Project",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       },
       "board_762849833": {
