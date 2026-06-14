@@ -359,7 +359,6 @@ declare module "obsidian" {
 		customCss: unknown;
 
 		viewRegistry: unknown;
-		embedRegistry: EmbedRegistry;
 
 		/** @public */
 		metadataCache: ExtendedMetadataCache;

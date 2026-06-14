@@ -575,6 +575,12 @@ export default class TaskBoard extends Plugin {
 						},
 					);
 				}
+
+				this.register(() => {
+					embedRegistry?.unregisterExtension(
+						TASKBOARD_FILE_EXTENSION,
+					);
+				});
 			}
 		} catch (error) {
 			bugReporterManagerInsatance.showNotice(

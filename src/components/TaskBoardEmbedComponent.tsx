@@ -1,11 +1,12 @@
-import { Component, TFile, WorkspaceLeaf } from "obsidian";
+import { Component, TFile } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import TaskBoard from "../../main.js";
 import TaskBoardViewContainer from "./TaskBoardViewContainer.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { EmbedComponent } from "obsidian-typings";
 
-export class TaskBoardEmbedComponent extends Component {
+export class TaskBoardEmbedComponent extends Component implements EmbedComponent {
 	private plugin: TaskBoard;
 	private root: Root | null = null;
 	protected contentEl: HTMLElement;
@@ -21,23 +22,24 @@ export class TaskBoardEmbedComponent extends Component {
 		this.linkText = linkText;
 	}
 
-	async loadFile() {
+	loadFile() {
 		try {
-			const boardData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(this.file.path);
-			if (boardData) {
-				this.root = createRoot(this.contentEl);
-				this.root.render(
-					<StrictMode>
-						<TaskBoardViewContainer
-							plugin={this.plugin}
-							currentBoardData={boardData}
-							currentLeaf={undefined}
-						/>
-					</StrictMode>
-				);
-			} else {
-				this.contentEl.createEl("div", { text: "Failed to load task board" });
-			}
+			void this.plugin.taskBoardFileManager.loadBoardUsingPath(this.file.path).then((boardData) => {
+				if (boardData) {
+					this.root = createRoot(this.contentEl);
+					this.root.render(
+						<StrictMode>
+							<TaskBoardViewContainer
+								plugin={this.plugin}
+								currentBoardData={boardData}
+								currentLeaf={undefined}
+							/>
+						</StrictMode>
+					);
+				} else {
+					this.contentEl.createEl("div", { text: "Failed to load task board" });
+				}
+			})
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				196,
