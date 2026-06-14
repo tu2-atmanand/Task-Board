@@ -104,7 +104,7 @@ import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponen
 export default class TaskBoard extends Plugin {
 	app: App;
 	// plugin: TaskBoard;
-	view: TaskBoardView | null;
+	// view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: VaultScanner;
 	realTimeScanner: RealTimeScanner;
@@ -150,7 +150,7 @@ export default class TaskBoard extends Plugin {
 		// this.plugin = this;
 		this.app = app;
 		// this.plugin.app = app;
-		this.view = null;
+		// this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.vaultScanner = new VaultScanner(this.app, this);
 		this.realTimeScanner = new RealTimeScanner(
@@ -479,11 +479,15 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerTaskBoardView() {
-		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
-			// eslint-disable-next-line obsidianmd/no-view-references-in-plugin
-			this.view = new TaskBoardView(this, leaf);
-			return new TaskBoardView(this, leaf);
-		});
+		this.registerView(
+			VIEW_TYPE_TASKBOARD,
+			(leaf) => new TaskBoardView(this, leaf),
+			// {
+			// 	// eslint-disable-next-line obsidianmd/no-view-references-in-plugin
+			// 	// this.view = new TaskBoardView(this, leaf);
+			// 	// return new TaskBoardView(this, leaf);
+			// }
+		);
 
 		this.registerExtensions(
 			[TASKBOARD_FILE_EXTENSION],
