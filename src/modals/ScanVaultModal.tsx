@@ -115,7 +115,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
 		// Initialize Obsidian Component on mount
-		componentRef.current = plugin.view;
+		// componentRef.current = plugin.view;
+		componentRef.current = new Component();
 	}, []);
 
 	const taskRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});

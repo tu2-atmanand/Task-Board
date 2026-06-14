@@ -131,7 +131,7 @@ export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 				);
 				completeTask = formattedTaskContent;
 
-				communityPlugins.quickAddPlugin?.api.executeChoice(
+				await communityPlugins.quickAddPlugin?.api.executeChoice(
 					quickAddPluginChoice,
 					{
 						value: completeTask + "\n",

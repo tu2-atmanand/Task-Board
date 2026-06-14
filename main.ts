@@ -104,7 +104,7 @@ import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponen
 export default class TaskBoard extends Plugin {
 	app: App;
 	// plugin: TaskBoard;
-	view: TaskBoardView | null;
+	// view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: VaultScanner;
 	realTimeScanner: RealTimeScanner;
@@ -150,7 +150,7 @@ export default class TaskBoard extends Plugin {
 		// this.plugin = this;
 		this.app = app;
 		// this.plugin.app = app;
-		this.view = null;
+		// this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.vaultScanner = new VaultScanner(this.app, this);
 		this.realTimeScanner = new RealTimeScanner(
@@ -226,6 +226,11 @@ export default class TaskBoard extends Plugin {
 			this.registerReadingModePostProcessor();
 
 			void this.taskBoardFileManager.validateBoardFiles();
+
+			// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
+			this.registerMonkeyPatchForTaskboardFiles();
+
+			this.registerEmbedRegistry();
 
 			window.setTimeout(
 				() => void this.findModifiedFilesOnAppAbsense(),
@@ -474,39 +479,20 @@ export default class TaskBoard extends Plugin {
 	}
 
 	registerTaskBoardView() {
-		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
-			// eslint-disable-next-line obsidianmd/no-view-references-in-plugin
-			this.view = new TaskBoardView(this, leaf);
-			return new TaskBoardView(this, leaf);
-		});
+		this.registerView(
+			VIEW_TYPE_TASKBOARD,
+			(leaf) => new TaskBoardView(this, leaf),
+			// {
+			// 	// eslint-disable-next-line obsidianmd/no-view-references-in-plugin
+			// 	// this.view = new TaskBoardView(this, leaf);
+			// 	// return new TaskBoardView(this, leaf);
+			// }
+		);
 
 		this.registerExtensions(
 			[TASKBOARD_FILE_EXTENSION],
 			VIEW_TYPE_TASKBOARD,
 		);
-
-		// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
-		this.registerMonkeyPatchForTaskboardFiles();
-
-		if (this.settings.data.experimentalFeatures) {
-			// @ts-ignore
-			const embedRegistry = this.app.embedRegistry as EmbedRegistry;
-			if (
-				!embedRegistry?.isExtensionRegistered(TASKBOARD_FILE_EXTENSION)
-			) {
-				embedRegistry?.registerExtension(
-					TASKBOARD_FILE_EXTENSION,
-					(context, file, _) => {
-						return new TaskBoardEmbedComponent(
-							context.containerEl,
-							this,
-							file,
-							context.containerEl.getAttr("alt") || undefined,
-						);
-					},
-				);
-			}
-		}
 
 		// Register TaskEditor view (can be opened in tabs or popout windows)
 		// this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {
@@ -563,6 +549,41 @@ export default class TaskBoard extends Plugin {
 		// Register cleanup handler to unregister the patch when plugin unloads
 		// This prevents memory leaks and ensures the patch is properly removed
 		this.register(unregisterPatch);
+	}
+
+	private registerEmbedRegistry() {
+		try {
+			// feature : Embed `.taskboard` files inside notes
+			if (this.settings.data.experimentalFeatures) {
+				// @ts-ignore
+				const embedRegistry = this.app.embedRegistry as EmbedRegistry;
+				if (
+					embedRegistry &&
+					!embedRegistry?.isExtensionRegistered(
+						TASKBOARD_FILE_EXTENSION,
+					)
+				) {
+					embedRegistry?.registerExtension(
+						TASKBOARD_FILE_EXTENSION,
+						(context, file, subPath) => {
+							return new TaskBoardEmbedComponent(
+								context.containerEl,
+								this,
+								file,
+								context.containerEl.getAttr("alt") || undefined,
+							);
+						},
+					);
+				}
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(
+				220,
+				"Failed to enable the embed boards feature",
+				`Below error message might provide more information about the issue: \nERROR : ${String(error)}`,
+				"main.ts/registerEmbedRegistry",
+			);
+		}
 	}
 
 	registerEditorExtensions() {
@@ -940,7 +961,7 @@ export default class TaskBoard extends Plugin {
 		this.addCommand({
 			id: "create-template-board",
 			name: t("create-template-board"),
-			callback: async () => {
+			callback: () => {
 				try {
 					// Generate unique ID and filename for the new template board
 					const boardId = generateRandomStringId("board");
@@ -948,40 +969,39 @@ export default class TaskBoard extends Plugin {
 					const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 
 					// Create a deep copy of DEFAULT_BOARD and update its properties
-					const newBoard= JSON.parse(
+					const newBoard = JSON.parse(
 						JSON.stringify(DEFAULT_BOARD),
 					) as Board;
 					newBoard.id = boardId;
 
 					// Save the board to disk
-					const saveSuccess =
-						await this.taskBoardFileManager.createNewBoardFile(
-							filePath,
-							newBoard,
-						);
+					void this.taskBoardFileManager
+						.createNewBoardFile(filePath, newBoard)
+						.then((saveSuccess: boolean) => {
+							if (!saveSuccess) {
+								bugReporterManagerInsatance.showNotice(
+									187,
+									"Failed to create template board",
+									"saveBoardToDisk returned false",
+									"main.ts/registerCommands/create-template-board",
+								);
+								return;
+							}
 
-					if (!saveSuccess) {
-						bugReporterManagerInsatance.showNotice(
-							187,
-							"Failed to create template board",
-							"saveBoardToDisk returned false",
-							"TaskBoardView.tsx/handleCreateTemplateBoard",
-						);
-						return;
-					}
+							// Show success notice
+							new Notice(t("board-created-successfully"));
 
-					// Show success notice
-					new Notice(t("board-created-successfully"));
+							const file =
+								this.app.vault.getAbstractFileByPath(filePath);
+							if (file && file instanceof TFile) {
+								revealFileFolderInExplorer(this, file);
+							}
 
-					const file = this.app.vault.getAbstractFileByPath(filePath);
-					if (file && file instanceof TFile) {
-						revealFileFolderInExplorer(this, file);
-					}
-
-					// Open the newly created board after some dalay.
-					window.setTimeout(() => {
-						void this.activateView("tab", false, filePath);
-					}, 400);
+							// Open the newly created board after some dalay.
+							window.setTimeout(() => {
+								void this.activateView("tab", false, filePath);
+							}, 400);
+						});
 				} catch (error) {
 					bugReporterManagerInsatance.showNotice(
 						187,

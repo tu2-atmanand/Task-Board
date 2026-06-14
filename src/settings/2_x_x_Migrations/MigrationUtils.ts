@@ -5,6 +5,8 @@ import {
 	Board,
 	DEFAULT_BOARD,
 	MapView,
+	nodeDataType,
+	TaskBoardViewType,
 } from "../../interfaces/BoardConfigs.js";
 import {
 	CURRENT_PLUGIN_VERSION,
@@ -12,7 +14,10 @@ import {
 	NODE_POSITIONS_STORAGE_KEY,
 } from "../../interfaces/Constants.js";
 import { viewTypeNames } from "../../interfaces/Enums.js";
-import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
+import {
+	DEFAULT_SETTINGS,
+	PluginDataJson,
+} from "../../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { createFolderRecursively } from "../../services/FileSystem.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
@@ -505,7 +510,7 @@ export async function migrateMapViewData(
 
 		// Query localStorage for map view data using board name as key
 		// Note: localStorage in Obsidian is scoped per workspace
-		let mapViewData: unknown;
+		let mapViewData: Record<number, nodeDataType> = {};
 		const mapViewPostionsDataStr = plugin.app.loadLocalStorage(
 			NODE_POSITIONS_STORAGE_KEY,
 		);
@@ -513,7 +518,7 @@ export async function migrateMapViewData(
 			const parsedData: unknown = JSON.parse(
 				mapViewPostionsDataStr as string,
 			);
-			mapViewData = parsedData;
+			mapViewData = parsedData as Record<number, nodeDataType>;
 		} else {
 			onProgress?.(
 				`⚠ No map view data found in the LocalStorge. Safely moving for the next operation.`,
@@ -549,7 +554,7 @@ export async function migrateMapViewData(
 					await sleep(500);
 					continue;
 				}
-				const boardIndexKey = String(board.boardIndex);
+				const boardIndexKey = Number(board.boardIndex);
 
 				if (
 					mapViewData &&
@@ -571,12 +576,13 @@ export async function migrateMapViewData(
 							zoom: 0.5,
 						},
 						// Runtime safety checks above ensure mapViewData is a non-null object with boardIndexKey
-						nodesData: (mapViewData as Record<string, unknown>)[boardIndexKey],
+						nodesData: mapViewData[boardIndexKey],
 					};
 					const viewsLength = boardData.views.length;
 
 					const mapViewExists = boardData.views.some(
-						(v: unknown) => v.type === "map",
+						(v: TaskBoardViewType) =>
+							v.viewType === viewTypeNames.map,
 					);
 					if (!mapViewExists) {
 						boardData.views.push({
@@ -646,17 +652,17 @@ export async function migrateMapViewData(
  */
 export async function updateRegistryAndSettings(
 	plugin: TaskBoard,
-	oldPluginSettings: unknown,
+	oldPluginSettings: PluginDataJson,
 	onProgress?: (message: string) => void,
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		onProgress?.("Updating plugin settings...");
 		await sleep(500);
 
-		const migratedSettings = migrateSettings(
-			DEFAULT_SETTINGS,
-			oldPluginSettings,
-		);
+		const migratedSettings = migrateSettings(DEFAULT_SETTINGS, {
+			version: oldPluginSettings.version,
+			data: oldPluginSettings.data,
+		});
 
 		if (migratedSettings.version === "") {
 			// There was an error while migrating the settings. => ABORT
@@ -768,7 +774,7 @@ export async function migrateVersion1_to_Version2(
 
 		// Step 4: Update the main settings file (data.json) and the registry inside it.
 		onStepStart?.(4, 4, "Finalizing migration...");
-		const modifiedOldPluginSettings = {
+		const modifiedOldPluginSettings: PluginDataJson = {
 			version: oldPluginSettings.version,
 			data: oldPluginSettings.data.globalSettings,
 		};

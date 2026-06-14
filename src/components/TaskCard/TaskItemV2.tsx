@@ -2,7 +2,7 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Notice, Platform, Menu, TFile, MenuItem, Component } from 'obsidian';
+import { Notice, Platform, Menu, TFile, MenuItem, Component, View } from 'obsidian';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { t } from 'i18next';
@@ -41,7 +41,7 @@ export interface TaskCardProps {
 	dataAttributeIndex: number;
 	plugin: TaskBoard;
 	task: taskItem;
-	parentComponent: Component; // This is only require for the Markdown.render API to track its lifecycle
+	parentComponent: Component | View; // This is only require for the Markdown.render API to track its lifecycle
 	activeBoardID: string;
 	activeViewIndex: number;
 	activeViewType: viewTypeNames;

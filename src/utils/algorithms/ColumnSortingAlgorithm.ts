@@ -10,7 +10,7 @@ function getTaskPropertyValue(
 	task: taskItem,
 	criteria: string,
 	startTimeConfig: string,
-): unknown {
+): string | string[] | number | undefined {
 	switch (criteria) {
 		case "content":
 			return task.title;
@@ -150,12 +150,12 @@ function compareTimes(
  * Compares two values based on their type
  */
 function compareValues(
-	value1: unknown,
-	value2: unknown,
+	value1: string | string[] | number,
+	value2: string | string[] | number,
 	criteria: string,
 	order: "asc" | "desc",
 ): number {
-	// Handle date criteria
+	// Handle date/date-time type properties
 	if (
 		[
 			"dueDate",
@@ -164,41 +164,28 @@ function compareValues(
 			"createdDate",
 			"completedDate",
 			"completed",
-		].includes(criteria)
+		].includes(criteria) &&
+		typeof value1 === "string" &&
+		typeof value2 === "string"
 	) {
 		return compareDates(value1, value2, order);
 	}
 
-	// Handle time criteria
-	if (criteria === "time") {
+	// Handle time properties
+	if (
+		criteria === "time" &&
+		typeof value1 === "string" &&
+		typeof value2 === "string"
+	) {
 		return compareTimes(value1, value2, order);
 	}
 
-	// Handle priority - special case where lower numbers are higher priority
-	// Priority scale: 1 (highest) -> 5 (lowest) -> 0 (none)
-	// if (criteria === "priority") {
-	// 	const hasValue1 = value1 !== undefined && value1 !== null;
-	// 	const hasValue2 = value2 !== undefined && value2 !== null;
-
-	// 	if (!hasValue1 && !hasValue2) return 0;
-
-	// 	const isNone1 = value1 === 0;
-	// 	const isNone2 = value2 === 0;
-
-	// 	if (isNone1 && isNone2) return 0;
-	// 	// Place none (0) at the bottom always for both orders
-	// 	if (isNone1) return 1;
-	// 	if (isNone2) return -1;
-
-	// 	// if (order === "asc") {
-	// 	// 	return value1 - value2; // lower number higher priority first
-	// 	// } else {
-	// 	// 	return value2 - value1; // higher number lower priority first
-	// 	// }
-	// 	return value2 - value1; // lower number higher priority first
-	// }
-
-	if (criteria === "priority") {
+	// Handle numeric properties - Specifically for task.priority property.
+	if (
+		criteria === "priority" &&
+		typeof value1 === "number" &&
+		typeof value2 === "number"
+	) {
 		const hasValue1 = value1 !== undefined && value1 !== null;
 		const hasValue2 = value2 !== undefined && value2 !== null;
 
@@ -224,12 +211,8 @@ function compareValues(
 		}
 	}
 
-	// Handle numeric criteria
-	if (
-		criteria === "lineNumber" ||
-		criteria === "id" ||
-		typeof value1 === "number"
-	) {
+	// Handle numeric properties
+	if (typeof value1 === "number" && typeof value2 === "number") {
 		const num1 = Number(value1);
 		const num2 = Number(value2);
 
@@ -257,8 +240,20 @@ function compareValues(
 	}
 
 	// Handle string criteria — narrow type to primitives before stringifying
-	const str1 = (value1 == null ? "" : typeof value1 === "string" || typeof value1 === "number" ? String(value1) : "").toLowerCase();
-	const str2 = (value2 == null ? "" : typeof value2 === "string" || typeof value2 === "number" ? String(value2) : "").toLowerCase();
+	const str1 = (
+		value1 == null
+			? ""
+			: typeof value1 === "string" || typeof value1 === "number"
+				? String(value1)
+				: ""
+	).toLowerCase();
+	const str2 = (
+		value2 == null
+			? ""
+			: typeof value2 === "string" || typeof value2 === "number"
+				? String(value2)
+				: ""
+	).toLowerCase();
 
 	if (str1 === "" && str2 === "") return 0;
 	if (str1 === "") return 1;
@@ -269,7 +264,8 @@ function compareValues(
 
 /**
  * Sorts tasks based on multiple sorting criteria.
- * Criteria are applied in reverse priority order (lowest priority first, highest priority last)
+ *
+ * For {@link taskItem.priority} - Criteria are applied in reverse priority order (lowest priority first, highest priority last)
  * to ensure that the highest priority criteria has the final say in the sort order.
  *
  * @param tasksToDisplay - Array of tasks to sort
@@ -316,6 +312,8 @@ export function columnSortingAlgorithm(
 				criterion.criteria,
 				startTimeConfig,
 			);
+
+			if (!valueA || !valueB) return 0;
 
 			// if (criterion.criteria === "time") {
 			// 	console.log("valueA :", valueA, "\nvalueB :", valueB);

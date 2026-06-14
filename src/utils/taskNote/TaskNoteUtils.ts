@@ -66,8 +66,9 @@ export function validateFrontmatterValue(
 	const value = frontmatter[customKey] as unknown ?? "";
 
 	if (value && typeof value === valueType) {
-		return value;
+		return value as string | number | string[];
 	}
+	return undefined;
 }
 
 /**

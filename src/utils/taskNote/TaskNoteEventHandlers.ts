@@ -146,13 +146,11 @@ export const handleTaskNote2NormalNote = async (
 		if (frontmatter && frontmatter.tags) {
 			// Remove taskNote tag from frontmatter
 			const rawTags = frontmatter.tags as unknown;
-			let tags = Array.isArray(rawTags)
-				? [...(rawTags as unknown[])]
-				: [rawTags];
-			tags = tags.filter(
-				(tag: string) =>
-					tag.includes(plugin.settings.data.taskNoteIdentifierTag) ===
-					false,
+			let tagsArray = Array.isArray(rawTags)
+				? [...(rawTags as string[])]
+				: [rawTags as string];
+			tagsArray = tagsArray.filter((tag: string) =>
+				tag.includes(plugin.settings.data.taskNoteIdentifierTag),
 			);
 
 			// If no other tags remain, we could remove the tags property entirely
