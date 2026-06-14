@@ -5,7 +5,10 @@ import type TaskBoard from "../../main.js";
 export interface QuickAddPlugin extends Plugin {
 	app: App;
 	api: {
-		executeChoice: (choice: string, { value: string }) => void;
+		executeChoice(
+			choiceName: string,
+			variables?: { [key: string]: unknown },
+		): Promise<void>;
 	};
 }
 
@@ -26,8 +29,8 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 		return !!this.reminderPlugin;
 	}
 
-	get quickAddPlugin() {
-		return (this.app.plugins.plugins["quickadd"] as QuickAddPlugin) ?? null;
+	get quickAddPlugin(): QuickAddPlugin {
+		return (this.app.plugins.plugins.quickAdd as QuickAddPlugin) ?? null;
 	}
 
 	isQuickAddPluginEnabled() {

@@ -6,6 +6,7 @@ import { BugReporterModal } from "../modals/BugReporterModal.js";
 import { fsPromises } from "../services/FileSystem.js";
 import { getObsidianDebugInfo } from "../services/ObsidianDebugInfo.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
+import { ElectronOpenDialogReturnValue } from "obsidian-typings";
 
 /**
  * Interface for bug report entries
@@ -32,7 +33,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 20;
-	private readonly MAX_USED_ID = 219; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
+	private readonly MAX_USED_ID = 220; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -382,18 +383,23 @@ ${entry.bugContent}
 			if (
 				window?.electron &&
 				window.electron?.remote &&
-				window.electron.remote?.dialog
+				window.electron.dialog
 			) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-				let folderPaths: string[] | undefined = window.electron.remote.dialog.showOpenDialogSync({
-					title: "Pick folder to export settings",
-					properties: ["openDirectory", "dontAddToRecent"],
-				});
-				if (!folderPaths || folderPaths.length === 0) {
+				let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
+					await window.electron.dialog.showOpenDialog({
+						title: "Pick folder to export log file",
+						properties: ["openDirectory", "dontAddToRecent"],
+					});
+				if (
+					pickFolderDialogReturn.canceled ||
+					!pickFolderDialogReturn?.filePaths ||
+					pickFolderDialogReturn.filePaths.length === 0
+				) {
 					new Notice("Export cancelled or folder not selected.");
 					return;
 				}
-				const folderPath = folderPaths[0];
+				const folderPath = pickFolderDialogReturn.filePaths[0];
 				const exportPath =
 					folderPath.endsWith("/") || folderPath.endsWith("\\")
 						? folderPath + exportFileName

@@ -131,7 +131,7 @@ export class TaskBoardView extends ItemView {
 	 * @param result 
 	 */
 	async setState(state: unknown, result: ViewStateResult): Promise<void> {
-		const { filePath } = state;
+		const filePath = (state as Record<string, unknown>).filePath as string | undefined;
 
 		// Check if a specific .taskboard file was clicked from File Navigator
 		const clickedFilePath = this.leaf.taskboardFilePath as string | undefined;
@@ -140,11 +140,11 @@ export class TaskBoardView extends ItemView {
 			const clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
 			if (clickedFileData) {
 				this.currentFilePath = clickedFilePath;
-				state = {
-					...state,
-					filePath: this.currentFilePath
-				};
-				this.renderBoard(clickedFileData);
+			state = {
+				...(state as Record<string, unknown>),
+				filePath: this.currentFilePath
+			};
+			this.renderBoard(clickedFileData);
 			} else {
 				bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
 			}
@@ -156,21 +156,21 @@ export class TaskBoardView extends ItemView {
 				);
 				if (boardData) {
 					this.currentFilePath = filePath;
-					state = {
-						...state,
-						filePath: this.currentFilePath
-					};
-					this.renderBoard(boardData);
-				} else {
-					bugReporterManagerInsatance.showNotice(
-						183,
-						`There was an issue with opening the task board file : ${filePath}`,
-						"boardData is undefined",
-						"TaskBoardView.tsx/setState"
-					);
-				}
+				state = {
+					...(state as Record<string, unknown>),
+					filePath: this.currentFilePath
+				};
+				this.renderBoard(boardData);
+			} else {
+				bugReporterManagerInsatance.showNotice(
+					183,
+					`There was an issue with opening the task board file : ${filePath}`,
+					"boardData is undefined",
+					"TaskBoardView.tsx/setState"
+				);
 			}
-			else {
+		}
+		else {
 				// This will run when user has clicked on the Ribbon icon or running the "Open task board" command.
 				// We need to get the last opened board.
 				const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
@@ -183,11 +183,11 @@ export class TaskBoardView extends ItemView {
 						const firstItemFromRegistry = registryEntries[0];
 						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
-							state = {
-								...state,
-								filePath: this.currentFilePath,
-							};
-						}
+						state = {
+							...(state as Record<string, unknown>),
+							filePath: this.currentFilePath,
+						};
+					}
 					}
 
 					this.renderBoard(lastViewedBoardData);

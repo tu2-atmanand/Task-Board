@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-deprecated */
 import {
 	ColumnData,
+	Filter,
 	FilterConfigSettings,
 	RootFilterState,
 	swimlaneConfigs,
@@ -12,6 +13,14 @@ import {
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
+	RibbonIconActions,
+	taskPropertyFormatOptions,
+	scanModeOptions,
+	taskCardStyleNames,
+	mapViewBackgrounVariantTypes,
+	mapViewNodeMapOrientation,
+	NotificationService,
+	UniversalDateOptions,
 } from "../../interfaces/Enums.js";
 import {
 	ScanFilters,
@@ -19,6 +28,7 @@ import {
 	CustomStatus,
 	FrontmatterFormattingInterface,
 	TaskBoardAction,
+	taskBoardFilesRegistryType,
 } from "../../interfaces/GlobalSettings.js";
 
 export type BoardLegacy = {
@@ -49,7 +59,7 @@ export interface globalSettingsDataLegacy {
 	scanFilters: ScanFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
-	taskPropertyFormat: string;
+	taskPropertyFormat: taskPropertyFormatOptions;
 	dateFormat: string;
 	dateTimeFormat: string;
 	dailyNotesPluginComp: boolean;
@@ -62,16 +72,16 @@ export interface globalSettingsDataLegacy {
 	autoAddCancelledDate: boolean;
 	// scanVaultAtStartup: boolean; -- @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
 	showModifiedFilesNotice: boolean;
-	scanMode: string;
+	scanMode: scanModeOptions;
 	columnWidth: string;
 	visiblePropertiesList: string[];
-	taskCardStyle: string;
+	taskCardStyle: taskCardStyleNames;
 	showVerticalScroll: boolean;
 	dragAutoScrollEdgePercent: number;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
 	doubleClickCardToEdit: EditButtonMode;
-	universalDate: string;
+	universalDate: UniversalDateOptions;
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
 	tagColorsType: TagColorType;
@@ -91,7 +101,7 @@ export interface globalSettingsDataLegacy {
 	frontmatterFormatting: FrontmatterFormattingInterface[];
 	showFrontmatterTagsOnCards: boolean;
 	tasksCacheFilePath: string;
-	notificationService: string;
+	notificationService: NotificationService;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	hiddenTaskProperties: taskPropertiesNames[];
@@ -100,15 +110,17 @@ export interface globalSettingsDataLegacy {
 	experimentalFeatures: boolean;
 	safeGuardFeature: boolean;
 	lastViewHistory: {
-		viewedType: string;
-		boardIndex: number;
+		viewedType?: string;
+		boardIndex?: number;
 		settingTab: number;
 		taskId?: string;
+		// New setting introduced in 2.x.x series
+		boardFilePath: string;
 	};
 	boundTaskCompletionToChildTasks: boolean;
 	mapView: {
-		background: string;
-		mapOrientation: string;
+		background: mapViewBackgrounVariantTypes;
+		mapOrientation: mapViewNodeMapOrientation;
 		optimizedRender: boolean;
 		arrowDirection: mapViewArrowDirection;
 		animatedEdges: boolean;
@@ -117,6 +129,12 @@ export interface globalSettingsDataLegacy {
 		renderVisibleNodes: boolean;
 		edgeType: mapViewEdgeType;
 	};
+
+	// These are new settings introduced in v2.x.x, hence adding here for the setting synchronization utility to work properly.
+	taskBoardFilesRegistry: taskBoardFilesRegistryType;
+	enableDragnDropTouch: boolean;
+	filtersWarehouse: Filter[];
+	ribbonIconAction: RibbonIconActions;
 }
 
 export interface PluginDataJsonLegacy {

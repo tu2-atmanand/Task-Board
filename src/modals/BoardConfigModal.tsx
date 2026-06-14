@@ -206,7 +206,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// evt?.stopPropagation();
 		// console.log(`Updating column at viewIndex: ${viewIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
 		const updatedViewsData = [...allViewsData];
-		updatedViewsData[viewIndex].kanbanView!.columns[columnIndex][field] = value;
+		(updatedViewsData[viewIndex].kanbanView!.columns[columnIndex] as Record<string, unknown>)[field] = value;
 
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);

@@ -8,13 +8,15 @@
 import {
 	App,
 	Editor,
+	MarkdownFileInfo,
 	MarkdownScrollableEditView,
 	Scope,
 	TFile,
+	Workspace,
 	WorkspaceLeaf,
 } from "obsidian";
 
-import { EditorSelection, Prec } from "@codemirror/state";
+import { EditorSelection, Prec, Range } from "@codemirror/state";
 import {
 	EditorView,
 	keymap,
@@ -89,13 +91,14 @@ interface MarkdownEditorProps {
 	placeholder?: string;
 	enableFrontmatterUI?: boolean; // Enable enhanced frontmatter UI
 	file?: TFile; // Optional file for context in property rendering
+	singleLine?: boolean;
 
 	onEnter: (
 		editor: EmbeddableMarkdownEditor,
 		mod: boolean,
 		shift: boolean,
 	) => boolean;
-	// onEscape: (editor: EmbeddableMarkdownEditor) => void;
+	onEscape?: (editor: EmbeddableMarkdownEditor) => void;
 	onSubmit: (editor: EmbeddableMarkdownEditor) => void;
 	onBlur: (editor: EmbeddableMarkdownEditor) => void;
 	onPaste: (e: ClipboardEvent, editor: EmbeddableMarkdownEditor) => void;
@@ -183,7 +186,7 @@ export class EmbeddableMarkdownEditor {
 		const self = this;
 
 		// Use monkey-around to safely patch the method
-		const uninstaller = around(EditorClass.prototype, {
+		const uninstaller = around((EditorClass as { prototype: object }).prototype, {
 			buildLocalExtensions: (originalMethod: unknown) =>
 				function (this: object) {
 					const extensions = (originalMethod as (this: object) => unknown[]).call(this);
@@ -212,7 +215,7 @@ export class EmbeddableMarkdownEditor {
 								},
 								focusin: () => {
 									app.keymap.pushScope(self.scope);
-									app.workspace.activeEditor = self.owner;
+									app.workspace.activeEditor = self.owner as MarkdownFileInfo | null;
 								},
 							}),
 						);
@@ -241,7 +244,7 @@ export class EmbeddableMarkdownEditor {
 							{
 								key: "Escape",
 								run: () => {
-									(self.options.onEscape as (editor: EmbeddableMarkdownEditor) => void)(self);
+									self.options.onEscape?.(self);
 									return true;
 								},
 								preventDefault: true,
@@ -292,9 +295,10 @@ export class EmbeddableMarkdownEditor {
 		this.scope.register(["Mod"], "Enter", () => true);
 
 		// Set up the editor relationship for commands to work
-		if (this.owner) {
-			this.owner.editMode = this;
-			this.owner.editor = this.editor.editor;
+		const ownerRecord = this.owner as Record<string, unknown> | undefined;
+		if (ownerRecord) {
+			ownerRecord.editMode = this;
+			ownerRecord.editor = this.editor.editor;
 		}
 
 		// Set initial content
@@ -307,7 +311,7 @@ export class EmbeddableMarkdownEditor {
 					(oldMethod: unknown) =>
 					(leaf: WorkspaceLeaf, ...args: unknown[]) => {
 						if (!this.activeCM?.hasFocus) {
-							(oldMethod as (this: App, leaf: WorkspaceLeaf, ...args: unknown[]) => void).call(app.workspace, leaf, ...args);
+							(oldMethod as (this: Workspace, leaf: WorkspaceLeaf, ...args: unknown[]) => void).call(app.workspace, leaf, ...args);
 						}
 					},
 			}),
@@ -315,7 +319,7 @@ export class EmbeddableMarkdownEditor {
 
 		// Set up blur event handler
 		const contentDOM =
-			(this.editor.editor as Record<string, unknown>)?.cm as Record<string, unknown> | undefined;
+			(this.editor.editor as unknown as Record<string, unknown>)?.cm as Record<string, unknown> | undefined;
 		if (
 			this.options.onBlur !== defaultProperties.onBlur &&
 			contentDOM?.contentDOM
@@ -330,7 +334,7 @@ export class EmbeddableMarkdownEditor {
 		if (contentDOM?.contentDOM) {
 			(contentDOM.contentDOM as HTMLElement).addEventListener("focusin", () => {
 				app.keymap.pushScope(this.scope);
-				app.workspace.activeEditor = this.owner;
+				app.workspace.activeEditor = this.owner as MarkdownFileInfo | null;
 			});
 		}
 
@@ -420,7 +424,7 @@ export class EmbeddableMarkdownEditor {
 	private createFrontmatterHidingExtension() {
 		// Helper function to build decorations for frontmatter
 		const buildDecorations = (state: unknown): DecorationSet => {
-			const decorations: unknown[] = [];
+			const decorations: Range<Decoration>[] = [];
 			const editorState = state as { doc: { toString: () => string } };
 			const doc = editorState.doc;
 			const text = doc.toString();
@@ -543,7 +547,7 @@ export class EmbeddableMarkdownEditor {
 
 	// Register cleanup callback
 	register(cb: unknown): void {
-		this.editor.register(cb);
+		this.editor.register(cb as () => unknown);
 	}
 
 	// Clean up method that ensures proper destruction

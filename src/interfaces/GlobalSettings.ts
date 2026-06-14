@@ -133,7 +133,6 @@ export interface globalSettingsData {
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
 	safeGuardFeature: boolean;
-	taskBoardFilesRegistry: taskBoardFilesRegistryType;
 	lastViewHistory: {
 		boardFilePath: string;
 		settingTab: number;
@@ -151,6 +150,8 @@ export interface globalSettingsData {
 		renderVisibleNodes: boolean;
 		edgeType: mapViewEdgeType;
 	};
+	// New settings introduced in 2.x.x series
+	taskBoardFilesRegistry: taskBoardFilesRegistryType;
 	enableDragnDropTouch: boolean;
 	filtersWarehouse: Filter[];
 	ribbonIconAction: RibbonIconActions;

@@ -8,6 +8,7 @@ import {
 } from "../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
+import { ElectronOpenDialogReturnValue } from "obsidian-typings";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
@@ -17,11 +18,11 @@ import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
  * @returns The migrated settings object
  */
 export function migrateSettings(
-	defaults: unknown,
-	settings: unknown,
+	defaults: Partial<PluginDataJson>,
+	settings: Partial<PluginDataJson>,
 ): PluginDataJson {
 	try {
-		if (settings == undefined) return defaults;
+		if (settings == undefined) return defaults as PluginDataJson;
 
 		const s = settings as Record<string, unknown>;
 		const d = defaults as Record<string, unknown>;
@@ -78,10 +79,10 @@ export function migrateSettings(
 				d[key] !== null &&
 				!Array.isArray(d[key])
 			) {
-				migrateSettings(d[key], s[key]);
+				migrateSettings(d[key], s[key] as Partial<PluginDataJson>);
 			}
 		}
-		return s as PluginDataJson;
+		return s as unknown as PluginDataJson;
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			181,
@@ -89,8 +90,8 @@ export function migrateSettings(
 			JSON.stringify(error),
 			"SettingSynchronizer.ts",
 		);
-		if (settings != undefined) return settings;
-		else return defaults;
+		if (settings != undefined) return settings as PluginDataJson;
+		else return defaults as PluginDataJson;
 	}
 }
 
@@ -104,20 +105,26 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 		const fileContent = JSON.stringify(data, null, 2);
 
 		// Desktop folder picker
-		if ((window.electron as Record<string, unknown>)?.remote) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-			const dialog = (window.electron as Record<string, unknown>).remote.dialog?.showOpenDialogSync;
-			let folderPaths: string[] | undefined =
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-				dialog?.({
+		if (
+			window?.electron &&
+			window.electron?.remote &&
+			window.electron.dialog
+		) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+			let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
+				await window.electron.dialog.showOpenDialog({
 					title: "Pick folder to export settings",
 					properties: ["openDirectory", "dontAddToRecent"],
-				}) as string[] | undefined;
-			if (!folderPaths || folderPaths.length === 0) {
+				});
+			if (
+				pickFolderDialogReturn.canceled ||
+				!pickFolderDialogReturn?.filePaths ||
+				pickFolderDialogReturn.filePaths.length === 0
+			) {
 				new Notice("Export cancelled or folder not selected.");
 				return;
 			}
-			const folderPath = folderPaths[0];
+			const folderPath = pickFolderDialogReturn.filePaths[0];
 			const exportPath =
 				folderPath.endsWith("/") || folderPath.endsWith("\\")
 					? folderPath + exportFileName
@@ -165,22 +172,29 @@ export async function importConfigurations(
 		let extensions = ["json"];
 		let name = "JSON Files";
 
-		// Desktop file picker
-		if ((window.electron)?.remote) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-			const dialog = (window.electron).remote.dialog?.showOpenDialogSync;
-			let filePaths: string[] | undefined =
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-				dialog?.({
+		// Desktop folder picker
+		if (
+			window?.electron &&
+			window.electron?.remote &&
+			window.electron.dialog
+		) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+			let pickFileDialogReturn: ElectronOpenDialogReturnValue =
+				await window.electron.dialog.showOpenDialog({
 					title: "Pick settings file to import",
-					properties: ["openFile", "dontAddToRecent"],
-					filters: [{ name, extensions }],
-				}) as string[] | undefined;
-			if (!filePaths || filePaths.length === 0) {
+					properties: ["openDirectory", "dontAddToRecent"],
+				});
+			if (
+				pickFileDialogReturn.canceled ||
+				!pickFileDialogReturn?.filePaths ||
+				pickFileDialogReturn.filePaths.length === 0
+			) {
 				new Notice("Import cancelled or file not selected.");
 				return false;
 			}
-			const pickedFile = new NodePickedFile(filePaths[0]);
+			const pickedFile = new NodePickedFile(
+				pickFileDialogReturn.filePaths[0],
+			);
 			importedContent = await pickedFile.readText();
 		} else {
 			// Web file picker
