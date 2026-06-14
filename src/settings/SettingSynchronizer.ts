@@ -146,9 +146,7 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 				activeDocument.body.removeChild(a);
 				URL.revokeObjectURL(a.href);
 			}, 1000);
-			new Notice(
-				"Settings exported. Check the folder where you downloaded the file.",
-			);
+			new Notice(`Settings exported to ${exportFileName}. Check the folder where you saved the file.`);
 		}
 	} catch (err) {
 		new Notice("Failed to export settings.");

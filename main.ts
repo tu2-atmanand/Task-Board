@@ -849,25 +849,15 @@ export default class TaskBoard extends Plugin {
 			});
 
 			if (modified && textNode.parentElement) {
-				// Create a temporary element to hold the HTML
-				const tempDiv = activeDocument.createElement("div");
-				// Use insertAdjacentHTML with proper sanitization (content already escaped via regex)
-				// tempDiv.replaceChildren();
-				// tempDiv.insertAdjacentHTML("beforeend", content);
+				const parser = new DOMParser();
+				const parsedDocument = parser.parseFromString(
+					content,
+					"text/html",
+				);
 
-				// Approach 1
-				tempDiv.textContent = content;
-
-				// Approach 2 - Parse HTML string into DOM nodes safely
-				// const parser = new DOMParser();
-				// const doc = parser.parseFromString(content, "text/html");
-				// // Replace content using node-based methods (no innerHTML/insertAdjacentHTML)
-				// tempDiv.replaceChildren(...Array.from(doc.body.childNodes));
-
-				// Replace the text node with the new content
-				while (tempDiv.firstChild) {
+				while (parsedDocument.body.firstChild) {
 					textNode.parentNode?.insertBefore(
-						tempDiv.firstChild,
+						parsedDocument.body.firstChild,
 						textNode,
 					);
 				}

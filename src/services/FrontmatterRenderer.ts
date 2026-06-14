@@ -10,7 +10,7 @@
  * In the current version, this FrontmatterRenderer is using a simple custom styling method to render the properties.
  */
 
-import { App, Component, Notice, TFile } from "obsidian";
+import { App, Component, Notice, setIcon, TFile } from "obsidian";
 import TaskBoard from "../../main.js";
 import { extractFrontmatterFromContent } from "../utils/taskNote/FrontmatterOperations.js";
 
@@ -148,10 +148,17 @@ export class FrontmatterRenderer {
 		const collapseIcon = header.createSpan({
 			cls: "taskboard-frontmatter-collapse-icon",
 		});
-		collapseIcon.replaceChildren();
-		const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-		// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
-		collapseIcon.textContent = collapseIconSVG;
+		// collapseIcon.replaceChildren();
+		// const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+		// // collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+		// collapseIcon.appendChild(
+		// 	createSvg("svg", {
+		// 		cls: "taskboard-frontmatter-collapse-icon",
+
+		// 	}),
+		// );
+
+		setIcon(collapseIcon, "chevron-down"); // or 'chevron-up' for expanded state
 
 		// Add "Properties" text
 		header.createSpan({
@@ -175,9 +182,10 @@ export class FrontmatterRenderer {
 		if (this.isFrontmatterContainerCollapsed) {
 			propertiesContainer.hide();
 			collapseIcon.replaceChildren();
-			const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
-			// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
-			collapseIcon.textContent = collapseIconSVG;
+			// const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
+			// // collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+			// collapseIcon.textContent = collapseIconSVG;
+			setIcon(collapseIcon, "chevron-right");
 		}
 
 		// Render each property using PropertyWidget
@@ -190,16 +198,18 @@ export class FrontmatterRenderer {
 
 			if (this.isFrontmatterContainerCollapsed) {
 				propertiesContainer.hide();
-				collapseIcon.replaceChildren();
-				const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
-				// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
-				collapseIcon.textContent = collapseIconSVG;
+				// collapseIcon.replaceChildren();
+				// const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
+				// // collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				// collapseIcon.textContent = collapseIconSVG;
+				setIcon(collapseIcon, "chevron-down");
 			} else {
 				propertiesContainer.show();
-				collapseIcon.replaceChildren();
-				const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-				// collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
-				collapseIcon.textContent = collapseIconSVG;
+				// collapseIcon.replaceChildren();
+				// const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+				// // collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				// collapseIcon.textContent = collapseIconSVG;
+				setIcon(collapseIcon, "chevron-down");
 			}
 
 			frontmatterSection.toggleClass(

@@ -1460,14 +1460,14 @@ export const TaskEditorRC: React.FC<{
 							/>
 							{/* Render tags with cross icon */}
 							<div className="EditTaskModalHome-taskItemTags">
-								{tags.map((tag: string) => {
+								{tags.map((tag: string, index: number) => {
 									const customTagData = globalSettings.tagColors.find(t => compareTwoTags(t.name, tag));
 									const tagColor = customTagData?.color;
 									const backgroundColor = tagColor ? updateRGBAOpacity(tagColor, 0.1) : `var(--tag-background)`;
 									const borderColor = tagColor ? updateRGBAOpacity(tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
-											key={tag}
+											key={`${tag}_${index}`}
 											className="EditTaskModalHome-taskItemTagsPreview"
 											style={{
 												color: tagColor,

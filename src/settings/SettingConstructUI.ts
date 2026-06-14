@@ -687,16 +687,17 @@ export class SettingsManager {
 			.setName(t("import-export-configurations"))
 			.setDesc(t("import-export-configurations-info"))
 			.addButton((button) =>
-				button.setButtonText(t("import")).onClick(async () => {
-					const result = await importConfigurations(this.plugin);
-					if (result) {
-						this.openReloadNoticeIfNeeded();
-					}
+				button.setButtonText(t("import")).onClick(() => {
+					void importConfigurations(this.plugin).then((result) => {
+						if (result) {
+							this.openReloadNoticeIfNeeded();
+						}
+					});
 				}),
 			)
 			.addButton((button) =>
-				button.setButtonText(t("export")).onClick(async () => {
-					await exportConfigurations(this.plugin);
+				button.setButtonText(t("export")).onClick(() => {
+					void exportConfigurations(this.plugin);
 				}),
 			);
 
@@ -704,8 +705,8 @@ export class SettingsManager {
 			.setName(t("export-logs"))
 			.setDesc(t("export-logs-info"))
 			.addButton((button) =>
-				button.setButtonText(t("export")).onClick(async () => {
-					await bugReporterManagerInsatance.exportLogFile();
+				button.setButtonText(t("export")).onClick(() => {
+					void bugReporterManagerInsatance.exportLogFile();
 				}),
 			);
 
@@ -1280,14 +1281,22 @@ export class SettingsManager {
 
 									pickr
 										.on("change", (color: unknown) => {
-											const rgbaColor = `rgba(${(color as PickrColor)
+											const rgbaColor = `rgba(${(
+												color as PickrColor
+											)
 												.toRGBA()
 												.map((v: number, i: number) =>
 													i < 3 ? Math.round(v) : v,
 												)
 												.join(", ")})`;
 											tag.color = rgbaColor;
-											(colorInputRef as { setValue: (val: string) => void }).setValue(rgbaColor);
+											(
+												colorInputRef as {
+													setValue: (
+														val: string,
+													) => void;
+												}
+											).setValue(rgbaColor);
 										})
 										.on("hide", () => {
 											renderTagColors();

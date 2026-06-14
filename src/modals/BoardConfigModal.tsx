@@ -513,6 +513,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		// Find and return the updated current view data
 		// const updatedCurrentBoard = allViewsData.find(view => view.id === currentBoardData.id);
 		// if (updatedCurrentBoard) {
+
 		onSave(boardToSave);
 		// }
 	};
@@ -1353,7 +1354,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
 								<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewView()}>{t("add-view")}</button>
 								<hr className="boardConfigModalHr-100" />
-								<button className="boardConfigModalSidebarSaveBtn" onClick={() => handleSave}>{t("save")}</button>
+								<button
+									className="boardConfigModalSidebarSaveBtn"
+									onClick={() => {
+										void handleSave();
+									}}
+								>
+									{t("save")}
+								</button>
 							</div>
 						</div>
 
@@ -1368,7 +1376,14 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				)}
 			</div>
 
-			<button className="boardConfigModalSaveBtn-mobile" onClick={() => handleSave}>{t("save")}</button>
+			<button
+				className="boardConfigModalSaveBtn-mobile"
+				onClick={() => {
+					void handleSave();
+				}}
+			>
+				{t("save")}
+			</button>
 		</>
 	);
 };

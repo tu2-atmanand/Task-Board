@@ -186,10 +186,10 @@ function evaluateFilterCriterion(
 			);
 		case "equals":
 		case "is":
-			return taskValue === value;
+			return taskValue == value;
 		case "notEquals":
 		case "isNot":
-			return taskValue !== value;
+			return taskValue != value;
 		case "contains":
 			if (typeof taskValue === "string") {
 				return taskValue
@@ -400,7 +400,7 @@ export function isRootFilterStateEmpty(
 }
 
 /**
- * Checks if the {@link AdvancedFilter} is empty (no active {@link Filter} are present)
+ * Checks if the {@link AdvancedFilter} is empty (no "active" {@link Filter} are present)
  * @param advancedFilter - The complete advanced filter
  *
  * @returns true if empty, false otherwise
@@ -414,7 +414,7 @@ export function isAdvancedFilterEmpty(
 		return true;
 
 	if (
-		!advancedFilter.filters.some(
+		advancedFilter.filters.some(
 			(filter: Filter) => filter.status && filter.filterGroups.length > 0,
 		)
 	)

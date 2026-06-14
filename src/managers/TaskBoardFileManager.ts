@@ -472,17 +472,17 @@ export default class TaskBoardFileManager {
 
 		// Set a new timer to save after the debounce delay
 		const newTimer = window.setTimeout(() => {
-			try {
-				void this.saveBoard(updatedBoardData, filePath);
-				this.debouncedSaveBoardTimers.delete(boardId);
-			} catch (error) {
-				bugReporterManagerInsatance.addToLogs(
-					208,
-					`Error in debounced save for board ID ${boardId} and filePath ${filePath}: ${String(error)}`,
-					"TaskBoardFileManager.ts/debouncedSaveBoard",
-				);
-				this.debouncedSaveBoardTimers.delete(boardId);
-			}
+			void this.saveBoard(updatedBoardData, filePath)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						208,
+						`Error in debounced save for board ID ${boardId} and filePath ${filePath}: ${String(error)}`,
+						"TaskBoardFileManager.ts/debouncedSaveBoard",
+					);
+				})
+				.finally(() => {
+					this.debouncedSaveBoardTimers.delete(boardId);
+				});
 		}, delayMs);
 
 		// Store the timer for potential cancellation

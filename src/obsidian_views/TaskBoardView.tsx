@@ -140,11 +140,11 @@ export class TaskBoardView extends ItemView {
 			const clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
 			if (clickedFileData) {
 				this.currentFilePath = clickedFilePath;
-			state = {
-				...(state as Record<string, unknown>),
-				filePath: this.currentFilePath
-			};
-			this.renderBoard(clickedFileData);
+				state = {
+					...(state as Record<string, unknown>),
+					filePath: this.currentFilePath
+				};
+				this.renderBoard(clickedFileData);
 			} else {
 				bugReporterManagerInsatance.showNotice(183, `There was an issue with opening the task board file : ${clickedFilePath}`, "clickedFileData is undefined", "TaskBoardView.tsx/onOpen");
 			}
@@ -156,21 +156,21 @@ export class TaskBoardView extends ItemView {
 				);
 				if (boardData) {
 					this.currentFilePath = filePath;
-				state = {
-					...(state as Record<string, unknown>),
-					filePath: this.currentFilePath
-				};
-				this.renderBoard(boardData);
-			} else {
-				bugReporterManagerInsatance.showNotice(
-					183,
-					`There was an issue with opening the task board file : ${filePath}`,
-					"boardData is undefined",
-					"TaskBoardView.tsx/setState"
-				);
+					state = {
+						...(state as Record<string, unknown>),
+						filePath: this.currentFilePath
+					};
+					this.renderBoard(boardData);
+				} else {
+					bugReporterManagerInsatance.showNotice(
+						183,
+						`There was an issue with opening the task board file : ${filePath}`,
+						"boardData is undefined",
+						"TaskBoardView.tsx/setState"
+					);
+				}
 			}
-		}
-		else {
+			else {
 				// This will run when user has clicked on the Ribbon icon or running the "Open task board" command.
 				// We need to get the last opened board.
 				const lastViewedBoardData = await this.plugin.taskBoardFileManager.getLastOpenedBoard();
@@ -183,11 +183,11 @@ export class TaskBoardView extends ItemView {
 						const firstItemFromRegistry = registryEntries[0];
 						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
-						state = {
-							...(state as Record<string, unknown>),
-							filePath: this.currentFilePath,
-						};
-					}
+							state = {
+								...(state as Record<string, unknown>),
+								filePath: this.currentFilePath,
+							};
+						}
 					}
 
 					this.renderBoard(lastViewedBoardData);
@@ -307,26 +307,29 @@ export class TaskBoardView extends ItemView {
 		// Create path elements
 		let currentPath = '';
 
-		// Add folder parts
-		folderParts.forEach((part, index) => {
-			if (part) {
-				currentPath += part;
-				const folderPath = currentPath;
-				const folderSpan = titleContainer.createSpan({ text: part, cls: 'taskboard-path-folder' });
-				folderSpan.addEventListener('click', () => {
-					const folder = this.app.vault.getAbstractFileByPath(folderPath);
-					if (folder instanceof TFolder) {
-						revealFileFolderInExplorer(this.plugin, folder);
-					}
-				});
+		// Add folder parts - Only show if the screen width is sufficiently large
+		// Else will only show the fileName
+		if (this.leaf.width > 500) {
+			folderParts.forEach((part, index) => {
+				if (part) {
+					currentPath += part;
+					const folderPath = currentPath;
+					const folderSpan = titleContainer.createSpan({ text: part, cls: 'taskboard-path-folder' });
+					folderSpan.addEventListener('click', () => {
+						const folder = this.app.vault.getAbstractFileByPath(folderPath);
+						if (folder instanceof TFolder) {
+							revealFileFolderInExplorer(this.plugin, folder);
+						}
+					});
 
-				// Add separator
-				if (index < folderParts.length - 1 || fileName) {
-					titleContainer.createSpan({ text: '/', cls: 'taskboard-path-separator' });
+					// Add separator
+					if (index < folderParts.length - 1 || fileName) {
+						titleContainer.createSpan({ text: '/', cls: 'taskboard-path-separator' });
+					}
+					currentPath += '/';
 				}
-				currentPath += '/';
-			}
-		});
+			});
+		}
 
 		// Add file name
 		if (fileName) {
@@ -446,6 +449,10 @@ export class TaskBoardView extends ItemView {
 				"TaskBoardView.tsx/handleCreateTemplateBoard",
 			);
 		}
+	}
+
+	onResize(): void {
+		this.renderCustomViewHeader();
 	}
 
 	async onClose() {

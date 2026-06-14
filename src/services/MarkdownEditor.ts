@@ -186,103 +186,116 @@ export class EmbeddableMarkdownEditor {
 		const self = this;
 
 		// Use monkey-around to safely patch the method
-		const uninstaller = around((EditorClass as { prototype: object }).prototype, {
-			buildLocalExtensions: (originalMethod: unknown) =>
-				function (this: object) {
-					const extensions = (originalMethod as (this: object) => unknown[]).call(this);
+		const uninstaller = around(
+			(EditorClass as { prototype: object }).prototype,
+			{
+				buildLocalExtensions: (originalMethod: unknown) =>
+					function (this: object) {
+						const extensions = (
+							originalMethod as (this: object) => unknown[]
+						).call(this);
 
-					// Only add our custom extensions if this is our editor instance
-					if (this === self.editor) {
-						// Add placeholder if configured
-						if (self.options.placeholder) {
+						// Only add our custom extensions if this is our editor instance
+						if (this === self.editor) {
+							// Add placeholder if configured
+							if (self.options.placeholder) {
+								extensions.push(
+									placeholder(self.options.placeholder),
+								);
+							}
+
+							// Add paste, blur, and focus event handlers
 							extensions.push(
-								placeholder(self.options.placeholder),
+								EditorView.domEventHandlers({
+									paste: (event) => {
+										self.options.onPaste(event, self);
+									},
+									blur: () => {
+										// Always trigger blur callback and let it handle the logic
+										app.keymap.popScope(self.scope);
+										if (self.options.onBlur) {
+											self.options.onBlur(self);
+										}
+									},
+									focusin: () => {
+										app.keymap.pushScope(self.scope);
+										app.workspace.activeEditor =
+											self.owner as MarkdownFileInfo | null;
+									},
+								}),
+							);
+
+							// Add keyboard handlers
+							const keyBindings = [
+								{
+									key: "Enter",
+									run: () => {
+										return self.options.onEnter(
+											self,
+											false,
+											false,
+										);
+									},
+									shift: () =>
+										self.options.onEnter(self, false, true),
+								},
+								{
+									key: "Mod-Enter",
+									run: () =>
+										self.options.onEnter(self, true, false),
+									shift: () =>
+										self.options.onEnter(self, true, true),
+								},
+								{
+									key: "Escape",
+									run: () => {
+										self.options.onEscape?.(self);
+										return true;
+									},
+									preventDefault: true,
+								},
+							];
+
+							// For single line mode, prevent Enter key from creating new lines
+							if (self.options.singleLine) {
+								keyBindings[0] = {
+									key: "Enter",
+									run: () => {
+										// In single line mode, Enter should trigger onEnter
+										return self.options.onEnter(
+											self,
+											false,
+											false,
+										);
+									},
+									shift: () => {
+										// Even with shift, still call onEnter in single line mode
+										return self.options.onEnter(
+											self,
+											false,
+											true,
+										);
+									},
+								};
+							}
+
+							extensions.push(
+								Prec.highest(keymap.of(keyBindings)),
 							);
 						}
 
-						// Add paste, blur, and focus event handlers
-						extensions.push(
-							EditorView.domEventHandlers({
-								paste: (event) => {
-									self.options.onPaste(event, self);
-								},
-								blur: () => {
-									// Always trigger blur callback and let it handle the logic
-									app.keymap.popScope(self.scope);
-									if (self.options.onBlur) {
-										self.options.onBlur(self);
-									}
-								},
-								focusin: () => {
-									app.keymap.pushScope(self.scope);
-									app.workspace.activeEditor = self.owner as MarkdownFileInfo | null;
-								},
-							}),
-						);
-
-						// Add keyboard handlers
-						const keyBindings = [
-							{
-								key: "Enter",
-								run: () => {
-									return self.options.onEnter(
-										self,
-										false,
-										false,
-									);
-								},
-								shift: () =>
-									self.options.onEnter(self, false, true),
-							},
-							{
-								key: "Mod-Enter",
-								run: () =>
-									self.options.onEnter(self, true, false),
-								shift: () =>
-									self.options.onEnter(self, true, true),
-							},
-							{
-								key: "Escape",
-								run: () => {
-									self.options.onEscape?.(self);
-									return true;
-								},
-								preventDefault: true,
-							},
-						];
-
-						// For single line mode, prevent Enter key from creating new lines
-						if (self.options.singleLine) {
-							keyBindings[0] = {
-								key: "Enter",
-								run: () => {
-									// In single line mode, Enter should trigger onEnter
-									return self.options.onEnter(
-										self,
-										false,
-										false,
-									);
-								},
-								shift: () => {
-									// Even with shift, still call onEnter in single line mode
-									return self.options.onEnter(
-										self,
-										false,
-										true,
-									);
-								},
-							};
-						}
-
-						extensions.push(Prec.highest(keymap.of(keyBindings)));
-					}
-
-					return extensions;
-				},
-		});
+						return extensions;
+					},
+			},
+		);
+		plugin.register(uninstaller);
 
 		// Create the editor with the app instance
-		this.editor = new (EditorClass as new (app: App, container: HTMLElement, opts: Record<string, unknown>) => MarkdownScrollableEditView)(app, container, {
+		this.editor = new (EditorClass as new (
+			app: App,
+			container: HTMLElement,
+			opts: Record<string, unknown>,
+		) => MarkdownScrollableEditView)(app, container, {
 			app,
 			// This mocks the MarkdownView functions, required for proper scrolling
 			onMarkdownScroll: () => {},
@@ -311,31 +324,45 @@ export class EmbeddableMarkdownEditor {
 					(oldMethod: unknown) =>
 					(leaf: WorkspaceLeaf, ...args: unknown[]) => {
 						if (!this.activeCM?.hasFocus) {
-							(oldMethod as (this: Workspace, leaf: WorkspaceLeaf, ...args: unknown[]) => void).call(app.workspace, leaf, ...args);
+							(
+								oldMethod as (
+									this: Workspace,
+									leaf: WorkspaceLeaf,
+									...args: unknown[]
+								) => void
+							).call(app.workspace, leaf, ...args);
 						}
 					},
 			}),
 		);
 
 		// Set up blur event handler
-		const contentDOM =
-			(this.editor.editor as unknown as Record<string, unknown>)?.cm as Record<string, unknown> | undefined;
+		const contentDOM = (
+			this.editor.editor as unknown as Record<string, unknown>
+		)?.cm as Record<string, unknown> | undefined;
 		if (
 			this.options.onBlur !== defaultProperties.onBlur &&
 			contentDOM?.contentDOM
 		) {
-			(contentDOM.contentDOM as HTMLElement).addEventListener("blur", () => {
-				app.keymap.popScope(this.scope);
-				if (this._loaded) this.options.onBlur(this);
-			});
+			(contentDOM.contentDOM as HTMLElement).addEventListener(
+				"blur",
+				() => {
+					app.keymap.popScope(this.scope);
+					if (this._loaded) this.options.onBlur(this);
+				},
+			);
 		}
 
 		// Set up focus event handler
 		if (contentDOM?.contentDOM) {
-			(contentDOM.contentDOM as HTMLElement).addEventListener("focusin", () => {
-				app.keymap.pushScope(this.scope);
-				app.workspace.activeEditor = this.owner as MarkdownFileInfo | null;
-			});
+			(contentDOM.contentDOM as HTMLElement).addEventListener(
+				"focusin",
+				() => {
+					app.keymap.pushScope(this.scope);
+					app.workspace.activeEditor = this
+						.owner as MarkdownFileInfo | null;
+				},
+			);
 		}
 
 		// Apply custom class if provided

@@ -1595,12 +1595,13 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: row;
 	gap: 1em;
 	align-items: center;
-	font-size: var(--font-ui-smaller);
 	max-width: 100%;
 }
 
 .taskItemFooterPropertyContainerLabel {
 	color: var(--text-muted);
+	font-size: 0.65rem;
+	color: var(--canvas-card-label-color);
 }
 
 .taskItemFooterPropertyContainerValue {
@@ -1608,6 +1609,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+	font-size: 0.75rem;
 	/* max-width: calc(var(--task-board-column-width) - 5rem); */
 }
 
@@ -3089,11 +3091,15 @@ body.taskboard-touch-dragging {
 
 /* Hidden Properties in Live Editor and Reading Mode */
 .taskboard-hidden-property {
+	display: inline-block;
+	overflow: hidden;
+	white-space: nowrap;
+	vertical-align: middle;
 	opacity: 0;
 	transform: scaleX(0);
 	width: 0;
 	/* Smooth transition for both properties */
-	transition: opacity 0.2s ease-in, width 0.2s ease-in;
+	transition: opacity 0.2s ease-in, width 0.2s ease-in, transform 0.2s ease-in;
 }
 
 /* Show hidden properties on line hover for easier editing */
