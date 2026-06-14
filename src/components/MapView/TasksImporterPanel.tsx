@@ -225,7 +225,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 									<div
 										key={task.id}
 										className="tasksImporterPanelTaskItemWrapper"
-										onClick={() => void handleImportTask(task)}
+										onClick={() => { void handleImportTask(task); }}
 									>
 										<TaskItem
 											key={task.id}

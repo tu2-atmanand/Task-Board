@@ -1262,7 +1262,7 @@ export const TaskEditorRC: React.FC<{
 								{taskExists && (
 									<div className="EditTaskModalHomePreviewHeaderBtnSec">
 										<button className="EditTaskModalTabHeaderOpenMapBtn"
-											onClick={() => handleOpenTaskInMapView}
+											onClick={() => { void handleOpenTaskInMapView(); }}
 											aria-label={t("open-in-map-view")}>
 											<Network height={17} />
 										</button>
@@ -1315,7 +1315,7 @@ export const TaskEditorRC: React.FC<{
 								<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
 								<div
 									className="EditTaskModalChildTaskAddBtn"
-									onClick={() => void handleOpenChildTaskSelector()}
+									onClick={() => { void handleOpenChildTaskSelector(); }}
 									aria-label={t("child-tasks-section-description")}
 								>
 									{t("add-child-task")}

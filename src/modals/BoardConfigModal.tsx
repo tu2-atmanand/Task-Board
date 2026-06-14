@@ -1286,7 +1286,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				<div className="boardConfigModalMainContent-Active-BottomSec">
 					<hr className="boardConfigModalHr-100" />
 					<div className="boardConfigModalDoubleBtnContainer">
-						<button className="boardConfigModalDuplicateBoardBtn" onClick={() => handleDuplicateCurrentView}>{t("duplicate-this-view")}</button>
+						<button className="boardConfigModalDuplicateBoardBtn" onClick={() => { void handleDuplicateCurrentView(); }}>{t("duplicate-this-view")}</button>
 						<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentView}>{t("delete-this-view")}</button>
 					</div>
 				</div>

@@ -213,7 +213,7 @@ const MigrationModalContent: React.FC<{
 				<div className="migration-button-container">
 					<button
 						className="migration-run-button"
-						onClick={() => handleStartMigration}
+						onClick={() => { void handleStartMigration(); }}
 						disabled={isRunning}
 					>
 						{isRunning ? "Running..." : "Run migrations"}

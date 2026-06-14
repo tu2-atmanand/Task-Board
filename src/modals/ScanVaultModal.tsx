@@ -179,7 +179,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 				<div className="scanVaultModalHomeSecondSectionProgressBarContainer">
 					<progress max="100" value={progress} style={{ width: "100%", height: '35px' }}></progress>
 				</div>
-				<button className="scanVaultModalHomeSecondSectionButton" onClick={() => runScan} disabled={isRunning}>
+				<button className="scanVaultModalHomeSecondSectionButton" onClick={() => { void runScan(); }} disabled={isRunning}>
 					{isRunning ? progress.toFixed(0) : t("run")}
 				</button>
 			</div>
