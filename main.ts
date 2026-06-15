@@ -194,6 +194,7 @@ export default class TaskBoard extends Plugin {
 
 		// Register the Kanban view
 		this.registerTaskBoardView();
+		this.registerEmbedRegistry();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
@@ -229,8 +230,6 @@ export default class TaskBoard extends Plugin {
 
 			// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
 			this.registerMonkeyPatchForTaskboardFiles();
-
-			this.registerEmbedRegistry();
 
 			window.setTimeout(
 				() => void this.findModifiedFilesOnAppAbsense(),
