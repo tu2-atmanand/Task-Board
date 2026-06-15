@@ -2,7 +2,7 @@
 
 import { Modal, normalizePath, Notice } from "obsidian";
 import Sortable from "sortablejs";
-import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban, GripHorizontalIcon } from "lucide-react";
+import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban, GripHorizontalIcon, Copy } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
@@ -696,6 +696,28 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 					<h2 className="boardConfigModalMainContent-Active-Heading">{view.viewName} {t("configurations")}</h2>
 					<hr className="boardConfigModalHr-50" />
 					<div className="boardConfigModalMainContent-Active-Body">
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+								<div className="boardConfigModalSettingName">{t("view-id")}</div>
+								<div className="boardConfigModalSettingDescription">{t("view-id-info")}</div>
+							</div>
+							<div className="boardConfigModalMainContent-Active-Body-ViewId">
+								<div className="boardConfigModalMainContent-Active-Body-ViewIdValue">{view.viewId}</div>
+								<Copy className="boardConfigModalMainContent-Active-Body-ViewIdCopyButton" onClick={() => {
+									try {
+										void navigator.clipboard.writeText(view.viewId);
+										new Notice(t("copy-view-id-successful"));
+									} catch (error) {
+										bugReporterManagerInsatance.addToLogs(
+											221,
+											String(error),
+											"BoardConfigModal.tsx/renderViewSettings/copy-view-id",
+										);
+										new Notice(t("copy-task-title-unsuccessful"));
+									}
+								}} />
+							</div>
+						</div>
 						<div className="boardConfigModalMainContent-Active-Body-InputItems">
 							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
 								<div className="boardConfigModalSettingName">{t("view-name")}</div>

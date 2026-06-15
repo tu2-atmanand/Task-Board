@@ -20,11 +20,17 @@ import { AdvancedFilterPopover } from './AdvancedFilterer/Popover.js';
 import MapView from './MapView/MapView.js';
 import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 
-const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined }> = ({ plugin, currentBoardData, currentLeaf }) => {
+const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined, viewId: string }> = ({ plugin, currentBoardData, currentLeaf, viewId }) => {
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
 	const [currentViewIndex, setCurrentViewIndex] = useState<number>(() => {
 		// Clamp lastViewIndex to valid range [0, views.length - 1] or default to 0
 		if (!currentBoardData?.views?.length) return 0;
+
+		if (viewId) {
+			const foundView = currentBoardData.views.find((view) => view.viewId === viewId)
+			if (foundView) return foundView.viewIndex;
+		}
+
 		return Math.max(0, Math.min(currentBoardData.lastViewIndex, currentBoardData.views.length - 1));
 	});
 	const [currentView, setCurrentView] = useState<TaskBoardViewType | undefined>(() => {

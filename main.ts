@@ -567,10 +567,10 @@ export default class TaskBoard extends Plugin {
 						TASKBOARD_FILE_EXTENSION,
 						(context, file, subPath) => {
 							return new TaskBoardEmbedComponent(
-								context.containerEl,
 								this,
+								context,
 								file,
-								context.containerEl.getAttr("alt") || undefined,
+								subPath,
 							);
 						},
 					);

@@ -494,6 +494,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	transition: flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	overflow: hidden;
+	max-height: inherit;
 }
 
 .taskBoardViewSectionWrapper--shifted {
@@ -506,12 +507,13 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* margin-block-end: 20px; */
 	/* padding-block-end: 3.4rem; */
 	width: 100%;
+	max-height: -webkit-fill-available;
 	flex: 1;
 }
 
 .taskBoardViewSection-mobile {
 	/* height: 100%; */
-	max-height: 92%;
+	/* max-height: 92%; */
 	/* margin-block-end: 20px; */
 	padding-block-end: 4.2rem;
 	width: 100%;
@@ -535,13 +537,37 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 /* Task Board Embed Styles */
 .task-board-embed {
-	max-height: 600px;
-	overflow: auto;
+	/* heith will be set dynamically using the dimensions mentioned by the user in the embed link. */
+	/* max-height: 600px; */
+	overflow-x: auto;
+	/* overflow-y: hidden; */
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
-	padding: 8px;
-	background-color: var(--background-primary);
+	background-color: transparent;
+	max-height: var(--task-board-embed-wdith);
 }
+
+.task-board-embed .taskBoardView {
+	margin: 6px;
+}
+
+.task-board-embed .taskBoardView .taskBoardMainContent {
+	max-height: calc(var(--task-board-embed-wdith) - 15px);
+}
+
+.task-board-embed .taskBoardView .taskBoardMainContent .taskBoardViewSectionWrapper .taskBoardViewSection .kanbanBoard {
+	max-height: calc(var(--task-board-embed-wdith) - 60px);
+}
+
+.task-board-embed .taskBoardView .taskBoardMainContent .taskBoardViewSectionWrapper .taskBoardViewSection .taskBoardMapViewWrapper {
+	max-height: calc(var(--task-board-embed-wdith) - 60px);
+}
+
+.task-board-embed .taskBoardView .taskBoardMainContent .taskBoardViewSectionWrapper .taskBoardViewSection .taskBoardMapViewWrapper .taskBoardMapView{
+	max-height: inherit;
+}
+
+
 
 /* Custom view header path elements */
 .taskboard-path-folder,
@@ -574,6 +600,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .kanbanBoard {
 	height: 100%;
 	/* max-height: 90%; */
+	max-height: inherit;
 }
 
 .columnsContainer {
@@ -581,6 +608,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow-x: auto;
 	/* padding-block: 4px; */
 	height: 100%;
+	max-height: inherit;
 }
 
 .loadingContainer {
@@ -1296,26 +1324,24 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskItemTag {
-	/* Custom tag styling */
 	font-size: 0.7rem;
 	/* font-weight: 500; */
 	/* line-height: 1; */
 	margin-right: 2px;
-	display: inline-block;
+	display: flex;
 	white-space: nowrap;
-
-	/* Default tag styling */
 	background-color: var(--tag-background);
 	border: var(--tag-border-width) solid var(--tag-border-color);
 	border-radius: var(--tag-radius);
 	color: var(--tag-color);
 	font-weight: var(--tag-weight);
 	text-decoration: var(--tag-decoration);
-	padding-top: 0.15em;
-	padding-right: 0.65em;
-	padding-bottom: 0.25em;
-	padding-left: 0.65em;
+	/* padding-top: 0.15em; */
+	/* padding-right: 0.65em; */
+	padding-block: 0.25em;
+	padding-inline: 0.65em;
 	line-height: 1;
+	align-items: center;
 }
 
 .taskItemTagFrontmatter {
@@ -1699,6 +1725,7 @@ body.taskboard-touch-dragging {
 .taskBoardMapViewContainer {
 	width: 100%;
 	height: 80vh;
+	max-height: inherit;
 	display: flex;
 	flex-direction: column;
 	align-items: center;

@@ -265,6 +265,7 @@ export class TaskBoardView extends ItemView {
 					plugin={this.plugin}
 					currentBoardData={currentBoardData}
 					currentLeaf={this.leaf}
+					viewId=""
 				/>
 			</StrictMode>
 		);
