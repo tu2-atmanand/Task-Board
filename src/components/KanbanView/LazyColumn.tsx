@@ -1,14 +1,14 @@
 // src/components/KanbanView/LazyColumn.tsx
 
 import React, { memo, useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { CSSProperties } from 'react';
-import { Component, Menu, Notice, Platform, View, WorkspaceLeaf } from 'obsidian';
+import { type CSSProperties } from 'react';
+import { Component, Menu, Notice, Platform, View } from 'obsidian';
 import { t } from 'i18next';
 import { AlertOctagon, EllipsisVertical } from 'lucide-react';
 import TaskBoard from '../../../main.js';
-import { Board, KanbanView, ColumnData, AdvancedFilter } from '../../interfaces/BoardConfigs.js';
+import type { Board, KanbanView, ColumnData, AdvancedFilter } from '../../interfaces/BoardConfigs.js';
 import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
-import { taskItem } from '../../interfaces/TaskItem.js';
+import type { taskItem } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { dragDropTasksManagerInsatance } from '../../managers/DragDropTasksManager.js';
 import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSortingModal.js';
@@ -17,8 +17,9 @@ import { isAdvancedFilterEmpty } from '../../utils/algorithms/AdvancedFilterer.j
 import { matchTagsWithWildcards } from '../../utils/algorithms/ScanningFilterer.js';
 import { AdvancedFilterModal } from '../AdvancedFilterer/index.js';
 import { AdvancedFilterPopover } from '../AdvancedFilterer/Popover.js';
-import TaskItem, { swimlaneDataProp } from '../TaskCard/TaskItem.js';
+import TaskItem, { type swimlaneDataProp } from '../TaskCard/TaskItem.js';
 import TaskItemV2 from '../TaskCard/TaskItemV2.js';
+import { DEFAULT_SETTINGS } from '../../interfaces/GlobalSettings.js';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -141,6 +142,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	// Scroll event handler
 	const handleScroll = useCallback(() => {
+		debugger;
 		const container = tasksContainerRef.current;
 		if (!container) return;
 
@@ -183,7 +185,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// -------------------------------------------------
 	// ALL DRAG AND DROP RELATED FUNCTIONS
 	//
-	// All these drag-drop handlers has been moved at the top of this file
+	// All these drag-drop handler function must be kept here at the top of this file
 	// so that useCallback can be initiazlied BEFORE any early returns
 	// -------------------------------------------------
 
@@ -374,7 +376,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// 	return null;
 	// }
 
-	const columnWidth = plugin.settings.data.columnWidth || '273px';
+	const columnWidth = plugin.settings.data.columnWidth || DEFAULT_SETTINGS.data.columnWidth;
 
 	// Extra code to provide special data-types for theme support.
 	const tagColors = plugin.settings.data.tagColors;

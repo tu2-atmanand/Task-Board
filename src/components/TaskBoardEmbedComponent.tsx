@@ -1,10 +1,10 @@
 import { Component, TFile } from "obsidian";
-import { Root, createRoot } from "react-dom/client";
+import { type Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import TaskBoard from "../../main.js";
 import TaskBoardViewContainer from "./TaskBoardViewContainer.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { EmbedComponent, EmbedContext } from "obsidian-typings";
+import { type EmbedComponent, type EmbedContext } from "obsidian-typings";
 
 export const MAX_EMBED_Height = 400;
 export const MAX_EMBED_WIDTH = 'max-content';

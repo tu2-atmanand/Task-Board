@@ -23,19 +23,19 @@
 
 import { around } from "monkey-around";
 import {
-	App,
+	type App,
 	Menu,
 	normalizePath,
 	Notice,
 	Plugin,
-	PluginManifest,
+	type PluginManifest,
 	TAbstractFile,
 	TFile,
 	TFolder,
-	ViewState,
+	type ViewState,
 	WorkspaceLeaf,
 } from "obsidian";
-import { EmbedRegistry } from "obsidian-typings";
+import { type EmbedRegistry } from "obsidian-typings";
 import { parse } from "date-fns";
 import { t } from "i18next";
 import {
@@ -56,9 +56,9 @@ import {
 	RibbonIconActions,
 } from "./src/interfaces/Enums.js";
 import {
-	PluginDataJson,
+	type PluginDataJson,
 	DEFAULT_SETTINGS,
-	taskBoardFilesRegistryType,
+	type taskBoardFilesRegistryType,
 } from "./src/interfaces/GlobalSettings.js";
 import { TaskBoardIcon } from "./src/interfaces/Icons.js";
 import { bugReporterManagerInsatance } from "./src/managers/BugReporter.js";
@@ -94,7 +94,7 @@ import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
 import { TaskBoardApi } from "./src/taskboardAPIs.js";
 import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.js";
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
-import { Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
+import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
 import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent.js";
 

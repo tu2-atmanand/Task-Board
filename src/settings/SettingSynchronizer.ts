@@ -3,12 +3,12 @@ import { Notice } from "obsidian";
 import TaskBoard from "../../main.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import {
-	PluginDataJson,
+	type PluginDataJson,
 	DEFAULT_SETTINGS,
 } from "../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
-import { ElectronOpenDialogReturnValue } from "obsidian-typings";
+import { type ElectronOpenDialogReturnValue } from "obsidian-typings";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.

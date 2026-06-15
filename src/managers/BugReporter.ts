@@ -6,7 +6,7 @@ import { BugReporterModal } from "../modals/BugReporterModal.js";
 import { fsPromises } from "../services/FileSystem.js";
 import { getObsidianDebugInfo } from "../services/ObsidianDebugInfo.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
-import { ElectronOpenDialogReturnValue } from "obsidian-typings";
+import { type ElectronOpenDialogReturnValue } from "obsidian-typings";
 
 /**
  * Interface for bug report entries
