@@ -11,52 +11,12 @@
 - **Snippets enabled**: 0
 - **Plugins installed**: 56
 - **Plugins enabled**: 
-  - Task Board v2.0.0-beta-4
+  - Task Board v2.0.0-beta-5
   - Advanced Debug Mode v1.9.1
-  - Edit History v0.3.0
   - Plugin Reloader v0.0.3
   - Tasks v7.22.0
 
 ## Recent Bug Reports
-
-Timestamp : 2026-06-10T19:16:16
-ID : 26
-Message : Child task not found
-Context : TaskEditorModal.tsx/EditTaskContent/handleOpenChildTaskModal
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-The child task with ID 12b153 was not found in pending tasks.
-```
-
--------------
-
-Timestamp : 2026-06-13T22:35:50
-ID : 180
-Message : There was an issue rendering a particular column. This might cause the whole tab to go blank. Try, closing and opening Task Board again. If the issue still persists, please report this to the developer
-Context : LazyColumn.tsx/return
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-{}
-```
-
--------------
-
-Timestamp : 2026-06-13T23:02:57
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
 
 Timestamp : 2026-06-14T10:18:57
 ID : 197
@@ -145,4 +105,175 @@ Version : 2.0.0-beta-4
 #### Bug Content
 ```log
 No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-14T22:37:24
+ID : 141
+Message : 
+Context : DragDropTasksManager.ts/handleColumnDragOverEvent
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No source column data available for dragover.
+SourceColumn=null
+```
+
+-------------
+
+Timestamp : 2026-06-14T22:37:25
+ID : 142
+Message : 
+Context : DragDropTasksManager.ts/handleDropEvent
+Version : 2.0.0-beta-4
+
+#### Bug Content
+```log
+No current drag data available for drop operation.
+currentDragData=null
+```
+
+-------------
+
+Timestamp : 2026-06-15T00:03:36
+ID : 196
+Message : 
+Context : TaskBoardEmbedComponent.tsx/loadFile
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
+```
+
+-------------
+
+Timestamp : 2026-06-15T00:04:23
+ID : 196
+Message : 
+Context : TaskBoardEmbedComponent.tsx/loadFile
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
+```
+
+-------------
+
+Timestamp : 2026-06-15T00:06:35
+ID : 196
+Message : 
+Context : TaskBoardEmbedComponent.tsx/loadFile
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
+```
+
+-------------
+
+Timestamp : 2026-06-15T00:08:04
+ID : 196
+Message : 
+Context : TaskBoardEmbedComponent.tsx/loadFile
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
+```
+
+-------------
+
+Timestamp : 2026-06-15T00:34:29
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-06-15T09:45:16
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-06-15T10:12:58
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-06-15T10:19:59
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-06-15T10:48:42
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-15T11:07:44
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-06-15T11:13:28
+ID : 17
+Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+ERROR: Same id is present on two tasks
 ```
