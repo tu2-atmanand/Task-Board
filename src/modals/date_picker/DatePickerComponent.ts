@@ -221,7 +221,7 @@ export class DatePickerComponent extends Component {
 		});
 
 		// Month/Year display
-		const monthYear = header.createDiv({
+		header.createDiv({
 			cls: "calendar-month-year",
 			text: format(currentDate, "MMMM yyyy"),
 		});

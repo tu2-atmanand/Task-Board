@@ -4,10 +4,20 @@ import TaskBoard from "../../../main.js";
 import { CustomStatus } from "../../interfaces/GlobalSettings.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { getFormattedTaskContent, addIdToTaskContent } from "../../utils/taskLine/TaskContentFormatter.js";
+import {
+	getFormattedTaskContent,
+	addIdToTaskContent,
+} from "../../utils/taskLine/TaskContentFormatter.js";
 import { replaceOldTaskWithNewTask } from "../../utils/taskLine/TaskLineUtils.js";
 import { eventEmitter } from "../EventEmitter.js";
 import { TasksPluginApi } from "./api.js";
+
+type TasksPluginStatusSettings = {
+	statusSettings?: {
+		coreStatuses?: CustomStatus[];
+		customStatuses?: CustomStatus[];
+	};
+};
 
 export async function isTasksPluginEnabled(plugin: TaskBoard) {
 	try {
@@ -37,17 +47,21 @@ export async function fetchTasksPluginCustomStatuses(
 
 			// Read the file content
 			const data: string = await plugin.app.vault.adapter.read(path);
-			const parsedData = JSON.parse(data);
+			// Treat the plugin data as an explicit structure instead of relying on
+			// the implicit `any` that JSON.parse() introduces.
+			const parsedData = JSON.parse(data) as unknown;
+			const statusSettings = (parsedData as Partial<TasksPluginStatusSettings>)
+				.statusSettings;
 
 			// Extract coreStatuses from the JSON
 			const coreStatuses: CustomStatus[] =
-				parsedData?.statusSettings?.coreStatuses || [];
+				statusSettings?.coreStatuses ?? [];
 
 			// Extract customStatuses from the JSON
 			const customStatuses: CustomStatus[] =
-				parsedData?.statusSettings?.customStatuses || [];
+				statusSettings?.customStatuses ?? [];
 
-			const statusMap = new Map();
+			const statusMap = new Map<string, CustomStatus>();
 			coreStatuses.forEach((status: CustomStatus) =>
 				statusMap.set(status.symbol, status),
 			);
@@ -99,7 +113,7 @@ export async function openTasksPluginEditModal(
 		// Prepare the updated task block
 		const completeOldTaskContent = await getFormattedTaskContent(oldTask);
 		if (completeOldTaskContent === "")
-			throw "getSanitizedTaskContent returned empty string";
+			throw new Error("getSanitizedTaskContent returned empty string");
 
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const tasksPluginApiOutput = await tasksPlugin.editTaskLineModal(
@@ -135,7 +149,7 @@ export async function openTasksPluginEditModal(
 					completeOldTaskContent,
 					newContent,
 				);
-			} else if ((twoTaskTitles.length = 1)) {
+			} else if (twoTaskTitles.length === 1) {
 				const { formattedTaskContent, newId } =
 					await addIdToTaskContent(plugin, tasksPluginApiOutput);
 				const tasksPluginApiOutputWithId = formattedTaskContent;
@@ -150,7 +164,7 @@ export async function openTasksPluginEditModal(
 					completeOldTaskContent,
 					newContent,
 				);
-			} else if ((twoTaskTitles.length = 2)) {
+			} else if (twoTaskTitles.length === 2) {
 				newContent = `${twoTaskTitles[0]}${
 					oldTask.body.length > 0
 						? `\n${oldTask.body.join("\n")}`
@@ -177,8 +191,16 @@ export async function openTasksPluginEditModal(
 				return;
 			}
 
-			plugin.realTimeScanner.processAllUpdatedFiles(oldTask.filePath);
-			setTimeout(() => {
+			plugin.realTimeScanner
+				.processAllUpdatedFiles(oldTask.filePath)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						217,
+						String(error),
+						"helpers.ts/openTasksPluginEditModal",
+					);
+				});
+			window.setTimeout(() => {
 				// This event emmitter will stop any loading animation of ongoing task-card.
 				eventEmitter.emit("UPDATE_TASK", {
 					taskID: oldTask.id,

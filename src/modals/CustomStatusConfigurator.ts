@@ -3,14 +3,14 @@ import { Modal, Setting, TextComponent } from "obsidian";
 import type { Plugin } from "obsidian";
 import { statusTypeNames } from "../interfaces/Enums.js";
 import { CustomStatus } from "../interfaces/GlobalSettings.js";
-import { StatusType, StatusConfiguration } from "../interfaces/StatusConfiguration.js";
+import { StatusConfiguration } from "../interfaces/StatusConfiguration.js";
 
 export class CustomStatusModal extends Modal {
 	statusSymbol: string;
 	statusName: string;
 	statusNextSymbol: string;
 	statusAvailableAsCommand: boolean;
-	type: StatusType;
+	type: statusTypeNames;
 
 	saved: boolean = false;
 	error: boolean = false;
@@ -21,14 +21,14 @@ export class CustomStatusModal extends Modal {
 		isCoreStatus: boolean,
 	) {
 		super(plugin.app);
-		const status = statusType as any;
+		let status = statusType;
 		this.statusSymbol = status.symbol;
 		this.statusName = status.name;
 		this.statusNextSymbol = status.nextStatusSymbol;
 		this.statusAvailableAsCommand = status.availableAsCommand;
-		// Ensure type is a valid StatusType enum value
+		// Ensure type is a valid statusTypeNames enum value
 		if (typeof status.type === "string") {
-			this.type = status.type as StatusType;
+			this.type = status.type;
 		} else {
 			this.type = status.type;
 		}
@@ -57,12 +57,10 @@ export class CustomStatusModal extends Modal {
 		const settingDiv = contentEl.createDiv();
 		//const title = this.title ?? '...';
 
-		let statusSymbolText: TextComponent;
 		new Setting(settingDiv)
 			.setName(t("task-status-symbol"))
 			.setDesc(t("task-status-symbol-info"))
 			.addText((text) => {
-				statusSymbolText = text;
 				text.setValue(this.statusSymbol).onChange((v) => {
 					this.statusSymbol = v;
 				});
@@ -72,12 +70,10 @@ export class CustomStatusModal extends Modal {
 				// Show any error if the initial value loaded is incorrect.
 			});
 
-		let statusNameText: TextComponent;
 		new Setting(settingDiv)
 			.setName(t("task-status-name"))
 			.setDesc(t("task-status-name-info"))
 			.addText((text) => {
-				statusNameText = text;
 				text.setValue(this.statusName).onChange((v) => {
 					this.statusName = v;
 				});
@@ -100,17 +96,15 @@ export class CustomStatusModal extends Modal {
 					dropdown.addOption(s, s);
 				});
 				dropdown.setValue(this.type).onChange((v) => {
-					this.type = v as StatusType;
+					this.type = v as statusTypeNames;
 				});
 			});
 
-		let statusNextSymbolText: TextComponent;
 		new Setting(settingDiv)
 			.setName(t("cycle-to-following-status"))
 			.setDesc(t("cycle-to-following-status-info"))
 			.addText((text) => {
-				text.setPlaceholder("eg.: /");
-				statusNextSymbolText = text;
+				text.setPlaceholder("Eg.: /");
 				text.setValue(this.statusNextSymbol).onChange((v) => {
 					this.statusNextSymbol = v;
 				});
@@ -145,7 +139,7 @@ export class CustomStatusModal extends Modal {
 	//     titleSpan.prepend(iconEl);
 	// }
 	onOpen() {
-		this.display();
+		void this.display();
 	}
 
 	static setValidationError(textInput: TextComponent) {

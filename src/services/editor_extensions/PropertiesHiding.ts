@@ -32,7 +32,7 @@ class HiddenPropertyWidget extends WidgetType {
 	}
 
 	toDOM() {
-		const span = document.createElement("span");
+		const span = activeDocument.createElement("span");
 		span.className = "taskboard-hidden-property-placeholder";
 		span.textContent = "...";
 		span.title = `Hidden: ${this.content}`;
@@ -101,7 +101,7 @@ export function getTaskPropertyRegexPatterns(
 					.TaskFormatRegularExpWithGlobal.dependsOnRegex;
 
 			case taskPropertiesNames.Reminder:
-				return /\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/g;
+				return /\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/g;
 
 			default:
 				return /(?:)/g;

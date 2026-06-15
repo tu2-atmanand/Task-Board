@@ -10,6 +10,7 @@ import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "../../../main.js";
 import { TaskEditorModal } from "../../modals/TaskEditorModal.js";
 import { isTaskLine } from "../../utils/CheckBoxUtils.js";
+import { t } from "i18next";
 
 // Task icon marker
 class TaskGutterMarker extends GutterMarker {
@@ -22,7 +23,7 @@ class TaskGutterMarker extends GutterMarker {
 		text: string,
 		lineNum: number,
 		view: EditorView,
-		plugin: TaskBoard
+		plugin: TaskBoard,
 	) {
 		super();
 		this.text = text;
@@ -37,12 +38,12 @@ class TaskGutterMarker extends GutterMarker {
 		// 	".cm-scroller"
 		// ) as HTMLDivElement;
 		const scroller = this.view.scrollDOM;
-		if (scroller) scroller.style.paddingLeft = "0";
+		if (scroller) scroller.addClass("tb_padding_left_0");
 
 		const markerEl = createEl("div");
 		const button = new ExtraButtonComponent(markerEl)
 			.setIcon("edit")
-			.setTooltip("Edit Task")
+			.setTooltip(t("edit-task"))
 			.onClick(() => {
 				const lineText = this.view.state.doc.line(this.lineNum).text;
 				const file = this.plugin.app.workspace.getActiveFile();
@@ -52,7 +53,7 @@ class TaskGutterMarker extends GutterMarker {
 				// Check if the line is in a codeblock or frontmatter
 				const line = this.view.state.doc.line(this.lineNum);
 				const syntaxNode = syntaxTree(this.view.state).resolveInner(
-					line.from + 1
+					line.from + 1,
 				);
 				const nodeProps = syntaxNode.type.prop(tokenClassNodeProp);
 
@@ -67,9 +68,9 @@ class TaskGutterMarker extends GutterMarker {
 				}
 
 				// Create a save callback for the modal
-				const saveTask = (
-					updatedTask: any,
-					quickAddPluginChoice: string
+				const saveTask = async (
+					updatedTask: unknown,
+					quickAddPluginChoice: string,
 				) => {
 					// This will be handled by the existing task saving logic
 					// The modal will update the file content automatically
@@ -84,7 +85,7 @@ class TaskGutterMarker extends GutterMarker {
 					true, // activeNote
 					true, // taskExists (we're editing an existing task)
 					undefined, // task - let the modal parse it from the line
-					file.path // filePath
+					file.path, // filePath
 				);
 				modal.open();
 				return true;
@@ -114,7 +115,7 @@ export function taskGutterExtension(app: App, plugin: TaskBoard): Extension {
 
 				// Check if the line is in a codeblock or frontmatter
 				const syntaxNode = syntaxTree(view.state).resolveInner(
-					line.from + 1
+					line.from + 1,
 				);
 				const nodeProps = syntaxNode.type.prop(tokenClassNodeProp);
 

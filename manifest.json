@@ -1,8 +1,8 @@
 {
 	"id": "task-board",
 	"name": "Task Board",
-	"version": "2.0.0-beta-4",
-	"minAppVersion": "1.4.13",
+	"version": "2.0.0-beta-5",
+	"minAppVersion": "1.10.0",
 	"description": "Manage all your tasks throughout your vault from a single board and much more...",
 	"author": "Atmanand Gauns",
 	"authorUrl": "https://github.com/tu2-atmanand",

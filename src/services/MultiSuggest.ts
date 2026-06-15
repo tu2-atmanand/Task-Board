@@ -85,9 +85,15 @@ export function getTagSuggestions(app: App): string[] {
 	return tagsArray;
 }
 
+// Define expected shape of QuickAdd plugin choices for type safety
+interface QuickAddChoice {
+	type: string;
+	name: string;
+}
+
 export function getQuickAddPluginChoices(
 	app: App,
-	quickAddPluginObj: any,
+	quickAddPluginObj: unknown,
 ): string[] {
 	try {
 		if (!quickAddPluginObj) {
@@ -96,7 +102,8 @@ export function getQuickAddPluginChoices(
 		const quickAddPlugin = app.plugins.getPlugin("quickadd");
 		if (!quickAddPlugin) return [];
 
-		const choices = quickAddPluginObj.settings.choices;
+		const settings = (quickAddPluginObj as Record<string, unknown>).settings as Record<string, unknown>;
+		const choices = settings.choices as Record<string, QuickAddChoice>;
 
 		return Object.keys(choices)
 			.filter((key) => choices[key].type === "Capture")
@@ -141,18 +148,15 @@ export function getYAMLPropertySuggestions(app: App): string[] {
 			const metadata = app.metadataCache.getFileCache(file);
 			if (metadata && metadata.frontmatter) {
 				// console.log("Frontmatter:", metadata.frontmatter, "\nFile:", file.path);
-				Object.keys(metadata.frontmatter).forEach((key) => {
-					const value = metadata.frontmatter
-						? metadata.frontmatter[key]
-						: null;
-					if (Array.isArray(value)) {
-						value.forEach((val) => {
-							yamlPropertiesSet.add(`["${key}": ${val}]`);
-						});
-					} else {
-						yamlPropertiesSet.add(`["${key}": ${value}]`);
-					}
+			// metadata.frontmatter values are unknown; cast safely for template literals
+			Object.keys(metadata.frontmatter).forEach((key) => {
+				// Cast frontmatter to avoid any-typed access from Obsidian's API
+			const raw = (metadata.frontmatter as Record<string, unknown>)?.[key];
+				const values = Array.isArray(raw) ? raw : [raw];
+				values.forEach((val) => {
+					yamlPropertiesSet.add(`["${key}": ${String(val)}]`);
 				});
+			});
 			}
 		}
 	});

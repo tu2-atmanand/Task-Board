@@ -1,24 +1,41 @@
 /**
+ * Task Board - Plugin for Obsidian
+ * Copyright (c) 2025-2026 tu2-atmanand
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  * @name main.ts
  * @path /main.ts
- * The entry-point of this plugin. Initializes the plugin, initializes all the required
+ * @description The entry-point of this plugin. Initializes the plugin, initializes all the required
  * internal managers and utils.
  */
 
 import { around } from "monkey-around";
 import {
-	App,
+	type App,
 	Menu,
 	normalizePath,
 	Notice,
 	Plugin,
-	PluginManifest,
+	type PluginManifest,
 	TAbstractFile,
 	TFile,
 	TFolder,
+	type ViewState,
 	WorkspaceLeaf,
 } from "obsidian";
-import { EmbedRegistry } from "obsidian-typings";
+import { type EmbedRegistry } from "obsidian-typings";
 import { parse } from "date-fns";
 import { t } from "i18next";
 import {
@@ -39,9 +56,9 @@ import {
 	RibbonIconActions,
 } from "./src/interfaces/Enums.js";
 import {
-	PluginDataJson,
+	type PluginDataJson,
 	DEFAULT_SETTINGS,
-	taskBoardFilesRegistryType,
+	type taskBoardFilesRegistryType,
 } from "./src/interfaces/GlobalSettings.js";
 import { TaskBoardIcon } from "./src/interfaces/Icons.js";
 import { bugReporterManagerInsatance } from "./src/managers/BugReporter.js";
@@ -77,9 +94,8 @@ import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
 import { TaskBoardApi } from "./src/taskboardAPIs.js";
 import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.js";
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
-import { Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
+import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
-import { getHideClassForProperty } from "./src/utils/UIHelpers.js";
 import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent.js";
 
 /**
@@ -87,8 +103,8 @@ import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponen
  */
 export default class TaskBoard extends Plugin {
 	app: App;
-	plugin: TaskBoard;
-	view: TaskBoardView | null;
+	// plugin: TaskBoard;
+	// view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
 	vaultScanner: VaultScanner;
 	realTimeScanner: RealTimeScanner;
@@ -120,9 +136,9 @@ export default class TaskBoard extends Plugin {
 	private renameQueue: Array<{ file: TFile; oldPath: string }> = [];
 	private deleteQueue: TFile[] = [];
 	private createQueue: TFile[] = [];
-	private renameProcessingTimer: NodeJS.Timeout | null = null;
-	private deleteProcessingTimer: NodeJS.Timeout | null = null;
-	private createProcessingTimer: NodeJS.Timeout | null = null;
+	private renameProcessingTimer: number | null = null;
+	private deleteProcessingTimer: number | null = null;
+	private createProcessingTimer: number | null = null;
 	private currentProgressNotice: Notice | null = null;
 	private readonly QUEUE_DELAY = 2000; // Delay in ms before starting to process queue
 	private readonly PROCESSING_INTERVAL = 100; // Delay between processing each file
@@ -131,18 +147,18 @@ export default class TaskBoard extends Plugin {
 
 	constructor(app: App, menifest: PluginManifest) {
 		super(app, menifest);
-		this.plugin = this;
+		// this.plugin = this;
 		this.app = app;
-		this.plugin.app = app;
-		this.view = null;
+		// this.plugin.app = app;
+		// this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.vaultScanner = new VaultScanner(this.app, this.plugin);
+		this.vaultScanner = new VaultScanner(this.app, this);
 		this.realTimeScanner = new RealTimeScanner(
 			this.app,
-			this.plugin,
+			this,
 			this.vaultScanner,
 		);
-		this.taskBoardFileManager = new TaskBoardFileManager(this.plugin);
+		this.taskBoardFileManager = new TaskBoardFileManager(this);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
 		// this.fileUpdatedUsingModal = "";
@@ -153,11 +169,11 @@ export default class TaskBoard extends Plugin {
 	}
 
 	get api(): ReturnType<typeof TaskBoardApi.GetApi> {
-		return TaskBoardApi.GetApi(this.app, this.plugin);
+		return TaskBoardApi.GetApi(this.app, this);
 	}
 
 	async onload() {
-		console.log("Task Board : Loading...");
+		// console.log("Task Board : Loading...");
 
 		// this.getLanguage();
 		await loadTranslationsOnStartup(this);
@@ -178,24 +194,25 @@ export default class TaskBoard extends Plugin {
 
 		// Register the Kanban view
 		this.registerTaskBoardView();
+		this.registerEmbedRegistry();
 
 		// Register events and commands only on Layout is ready
 		this.app.workspace.onLayoutReady(() => {
-			this.compatiblePluginsAvailabilityCheck();
+			void this.compatiblePluginsAvailabilityCheck();
 
 			dragDropTasksManagerInsatance.setPlugin(this);
 
 			//Creates a Icon on Ribbon Bar (after i18n is initialized)
-			this.getRibbonIcon();
+			void this.getRibbonIcon();
 
 			// Creating Few Events
 			this.registerEvents();
 
 			// Register few commands
-			this.registerCommands();
+			void this.registerCommands();
 
 			// For non-realtime scanning and scanning last modified files
-			this.createLocalStorageAndScanModifiedFiles();
+			void this.createLocalStorageAndScanModifiedFiles();
 
 			// Run openAtStartup if openOnStartup is true
 			this.openAtStartup();
@@ -209,18 +226,22 @@ export default class TaskBoard extends Plugin {
 			// Register markdown post processor for hiding task properties
 			this.registerReadingModePostProcessor();
 
-			this.taskBoardFileManager.validateBoardFiles();
+			void this.taskBoardFileManager.validateBoardFiles();
 
-			setTimeout(() => this.findModifiedFilesOnAppAbsense(), 5000);
+			// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
+			this.registerMonkeyPatchForTaskboardFiles();
+
+			window.setTimeout(
+				() => void this.findModifiedFilesOnAppAbsense(),
+				5000,
+			);
 		});
 	}
 
 	onunload() {
-		console.log("Task Board : Uninstalling...");
-
+		// console.log("Task Board : Uninstalling...");
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
 		// onUnloadSave(this.plugin);
-
 		// Obsidian already does this, no need to manually detach.
 		// this.app.workspace.detachLeavesOfType(VIEW_TYPE_TASKBOARD);
 	}
@@ -316,12 +337,12 @@ export default class TaskBoard extends Plugin {
 					},
 				});
 
-				this.app.workspace.revealLeaf(leaf);
+				void this.app.workspace.revealLeaf(leaf);
 			}
-		} catch (error) {
+		} catch (error: unknown) {
 			bugReporterManagerInsatance.addToLogs(
 				202,
-				`Error opening the board: ${error}`,
+				`Error opening the board: ${String(error)}`,
 				"main.ts/activateView",
 			);
 		}
@@ -346,7 +367,7 @@ export default class TaskBoard extends Plugin {
 								duplicate: false,
 							});
 						} else {
-							this.activateView("icon", false);
+							void this.activateView("icon", false);
 						}
 						break;
 					case RibbonIconActions.allBoardsMenu:
@@ -376,14 +397,14 @@ export default class TaskBoard extends Plugin {
 								duplicate: false,
 							});
 						} else {
-							this.activateView("icon", false);
+							void this.activateView("icon", false);
 						}
 						break;
 					case RibbonIconActions.boardsExplorer:
-						openBoardsExplorerModal(this.plugin);
+						openBoardsExplorerModal(this);
 						break;
 					default:
-						openBoardsExplorerModal(this.plugin);
+						openBoardsExplorerModal(this);
 						break;
 				}
 
@@ -407,13 +428,14 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async loadSettings() {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
 			await this.loadData(),
 		);
 		// this.migrateSettings(DEFAULT_SETTINGS, this.settings);
-		this.saveSettings();
+		void this.saveSettings();
 	}
 
 	async saveSettings(newSetting?: PluginDataJson) {
@@ -449,45 +471,27 @@ export default class TaskBoard extends Plugin {
 	// 	}
 	// }
 
-	createLocalStorageAndScanModifiedFiles() {
+	async createLocalStorageAndScanModifiedFiles() {
 		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
-		this.realTimeScanner.initializeStack();
-		this.realTimeScanner.processAllUpdatedFiles();
+		await this.realTimeScanner.initializeStack();
+		await this.realTimeScanner.processAllUpdatedFiles();
 	}
 
 	registerTaskBoardView() {
-		this.registerView(VIEW_TYPE_TASKBOARD, (leaf) => {
-			this.view = new TaskBoardView(this, leaf);
-			return this.view;
-		});
+		this.registerView(
+			VIEW_TYPE_TASKBOARD,
+			(leaf) => new TaskBoardView(this, leaf),
+			// {
+			// 	// eslint-disable-next-line obsidianmd/no-view-references-in-plugin
+			// 	// this.view = new TaskBoardView(this, leaf);
+			// 	// return new TaskBoardView(this, leaf);
+			// }
+		);
 
 		this.registerExtensions(
 			[TASKBOARD_FILE_EXTENSION],
 			VIEW_TYPE_TASKBOARD,
 		);
-
-		// Monkey-patch WorkspaceLeaf.setViewState to intercept .taskboard file clicks
-		this.registerMonkeyPatchForTaskboardFiles();
-
-		if (this.settings.data.experimentalFeatures) {
-			// @ts-ignore
-			const embedRegistry = this.app.embedRegistry as EmbedRegistry;
-			if (
-				!embedRegistry?.isExtensionRegistered(TASKBOARD_FILE_EXTENSION)
-			) {
-				embedRegistry?.registerExtension(
-					TASKBOARD_FILE_EXTENSION,
-					(context, file, _) => {
-						return new TaskBoardEmbedComponent(
-							context.containerEl,
-							this,
-							file,
-							context.containerEl.getAttr("alt") || undefined,
-						) as any;
-					},
-				);
-			}
-		}
 
 		// Register TaskEditor view (can be opened in tabs or popout windows)
 		// this.registerView(VIEW_TYPE_ADD_OR_EDIT_TASK, (leaf) => {
@@ -518,7 +522,11 @@ export default class TaskBoard extends Plugin {
 		// This allows multiple plugins to patch the same method without conflicts
 		const unregisterPatch = around(WorkspaceLeaf.prototype, {
 			setViewState: (next) =>
-				function (this: WorkspaceLeaf, state: any, eState?: any) {
+				function (
+					this: WorkspaceLeaf,
+					state: ViewState,
+					eState?: unknown,
+				) {
 					const isTaskBoardView = state.type === VIEW_TYPE_TASKBOARD;
 					const filePath = state.state?.file as string | undefined;
 					const isTaskboardFile =
@@ -526,7 +534,7 @@ export default class TaskBoard extends Plugin {
 
 					if (isTaskBoardView && isTaskboardFile) {
 						// Store the file path directly on the leaf instance for immediate access
-						(this as any).taskboardFilePath = filePath;
+						this.taskboardFilePath = filePath;
 
 						// Also set ephemeral state for safety
 						this.setEphemeralState({ taskboardFilePath: filePath });
@@ -540,6 +548,47 @@ export default class TaskBoard extends Plugin {
 		// Register cleanup handler to unregister the patch when plugin unloads
 		// This prevents memory leaks and ensures the patch is properly removed
 		this.register(unregisterPatch);
+	}
+
+	private registerEmbedRegistry() {
+		try {
+			// feature : Embed `.taskboard` files inside notes
+			if (this.settings.data.experimentalFeatures) {
+				// @ts-ignore
+				const embedRegistry = this.app.embedRegistry as EmbedRegistry;
+				if (
+					embedRegistry &&
+					!embedRegistry?.isExtensionRegistered(
+						TASKBOARD_FILE_EXTENSION,
+					)
+				) {
+					embedRegistry?.registerExtension(
+						TASKBOARD_FILE_EXTENSION,
+						(context, file, subPath) => {
+							return new TaskBoardEmbedComponent(
+								this,
+								context,
+								file,
+								subPath,
+							);
+						},
+					);
+				}
+
+				this.register(() => {
+					embedRegistry?.unregisterExtension(
+						TASKBOARD_FILE_EXTENSION,
+					);
+				});
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(
+				220,
+				"Failed to enable the embed boards feature",
+				`Below error message might provide more information about the issue: \nERROR : ${String(error)}`,
+				"main.ts/registerEmbedRegistry",
+			);
+		}
 	}
 
 	registerEditorExtensions() {
@@ -589,7 +638,7 @@ export default class TaskBoard extends Plugin {
 			// METHOD 1
 			// ---------------------------------------------------------
 			// Find the view container or root element to apply CSS classes
-			// const viewContainer = document.querySelector(`.markdown-rendered`);
+			// const viewContainer = activeDocument.querySelector(`.markdown-rendered`);
 
 			// if (viewContainer) {
 			// 	// Remove all existing hide classes
@@ -611,13 +660,13 @@ export default class TaskBoard extends Plugin {
 			// METHOD 2
 			// ---------------------------------------------------------
 			const styleId = "task-board-hide-task-properties-style";
-			let styleEl = document.getElementById(
+			let styleEl = activeDocument.getElementById(
 				styleId,
 			) as HTMLStyleElement | null;
 			if (!styleEl) {
-				styleEl = document.createElement("style");
+				styleEl = activeDocument.createElement("style");
 				styleEl.id = styleId;
-				document.head.appendChild(styleEl);
+				activeDocument.head.appendChild(styleEl);
 			}
 			let css = "";
 			const fadeInCSS =
@@ -642,9 +691,10 @@ export default class TaskBoard extends Plugin {
 						css +=
 							"span:hover .task-description>span>a.tag { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
 						css += fadeInCSS;
-					// css +=
-					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-					// css += fadeOutCSS;
+						// css +=
+						// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
+						// css += fadeOutCSS;
+						break;
 					case taskPropertiesNames.CreatedDate:
 						css +=
 							".task-created { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
@@ -768,7 +818,7 @@ export default class TaskBoard extends Plugin {
 		hiddenProperties: taskPropertiesNames[],
 	) {
 		// Process text nodes to find and hide specific patterns
-		const walker = document.createTreeWalker(
+		const walker = activeDocument.createTreeWalker(
 			element,
 			NodeFilter.SHOW_TEXT,
 			null,
@@ -798,16 +848,15 @@ export default class TaskBoard extends Plugin {
 			});
 
 			if (modified && textNode.parentElement) {
-				// Create a temporary element to hold the HTML
-				const tempDiv = document.createElement("div");
-				// Use insertAdjacentHTML with proper sanitization (content already escaped via regex)
-				tempDiv.replaceChildren();
-				tempDiv.insertAdjacentHTML("beforeend", content);
+				const parser = new DOMParser();
+				const parsedDocument = parser.parseFromString(
+					content,
+					"text/html",
+				);
 
-				// Replace the text node with the new content
-				while (tempDiv.firstChild) {
+				while (parsedDocument.body.firstChild) {
 					textNode.parentNode?.insertBefore(
-						tempDiv.firstChild,
+						parsedDocument.body.firstChild,
 						textNode,
 					);
 				}
@@ -819,7 +868,7 @@ export default class TaskBoard extends Plugin {
 	openAtStartup() {
 		if (!this.settings.data.openOnStartup) return;
 
-		this.activateView("icon", false);
+		void this.activateView("icon", false);
 	}
 
 	registerTaskBoardStatusBar() {
@@ -834,14 +883,14 @@ export default class TaskBoard extends Plugin {
 			id: "add-new-task",
 			name: t("add-new-task"),
 			callback: () => {
-				openAddNewTaskModal(this.plugin);
+				openAddNewTaskModal(this);
 			},
 		});
 		this.addCommand({
 			id: "add-new-task-note",
 			name: t("add-new-task-note"),
 			callback: () => {
-				openAddNewTaskNoteModal(this.app, this.plugin);
+				openAddNewTaskNoteModal(this.app, this);
 			},
 		});
 		this.addCommand({
@@ -854,7 +903,7 @@ export default class TaskBoard extends Plugin {
 				if (activeEditor && activeFile) {
 					openAddNewTaskInCurrentFileModal(
 						this.app,
-						this.plugin,
+						this,
 						activeFile,
 						activeEditor?.getCursor(),
 					);
@@ -867,17 +916,17 @@ export default class TaskBoard extends Plugin {
 			},
 		});
 		this.addCommand({
-			id: "open-task-board",
+			id: "open-recent-board",
 			name: t("open-task-board"),
 			callback: () => {
-				this.activateView("tab", false);
+				void this.activateView("tab", false);
 			},
 		});
 		this.addCommand({
-			id: "open-task-board-new-window",
+			id: "open-recent-board-new-window",
 			name: t("open-task-board-in-new-window"),
 			callback: () => {
-				this.activateView("window", false);
+				void this.activateView("window", false);
 			},
 		});
 		this.addCommand({
@@ -891,7 +940,7 @@ export default class TaskBoard extends Plugin {
 			id: "open-scan-vault-modal",
 			name: t("open-scan-vault-modal"),
 			callback: () => {
-				openScanVaultModal(this.plugin);
+				openScanVaultModal(this);
 			},
 		});
 		this.addCommand({
@@ -907,7 +956,7 @@ export default class TaskBoard extends Plugin {
 		this.addCommand({
 			id: "create-template-board",
 			name: t("create-template-board"),
-			callback: async () => {
+			callback: () => {
 				try {
 					// Generate unique ID and filename for the new template board
 					const boardId = generateRandomStringId("board");
@@ -915,40 +964,39 @@ export default class TaskBoard extends Plugin {
 					const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 
 					// Create a deep copy of DEFAULT_BOARD and update its properties
-					const newBoard: Board = JSON.parse(
+					const newBoard = JSON.parse(
 						JSON.stringify(DEFAULT_BOARD),
-					);
+					) as Board;
 					newBoard.id = boardId;
 
 					// Save the board to disk
-					const saveSuccess =
-						await this.plugin.taskBoardFileManager.createNewBoardFile(
-							filePath,
-							newBoard,
-						);
+					void this.taskBoardFileManager
+						.createNewBoardFile(filePath, newBoard)
+						.then((saveSuccess: boolean) => {
+							if (!saveSuccess) {
+								bugReporterManagerInsatance.showNotice(
+									187,
+									"Failed to create template board",
+									"saveBoardToDisk returned false",
+									"main.ts/registerCommands/create-template-board",
+								);
+								return;
+							}
 
-					if (!saveSuccess) {
-						bugReporterManagerInsatance.showNotice(
-							187,
-							"Failed to create template board",
-							"saveBoardToDisk returned false",
-							"TaskBoardView.tsx/handleCreateTemplateBoard",
-						);
-						return;
-					}
+							// Show success notice
+							new Notice(t("board-created-successfully"));
 
-					// Show success notice
-					new Notice(t("board-created-successfully"));
+							const file =
+								this.app.vault.getAbstractFileByPath(filePath);
+							if (file && file instanceof TFile) {
+								revealFileFolderInExplorer(this, file);
+							}
 
-					const file = this.app.vault.getAbstractFileByPath(filePath);
-					if (file && file instanceof TFile) {
-						revealFileFolderInExplorer(this.plugin, file);
-					}
-
-					// Open the newly created board after some dalay.
-					setTimeout(() => {
-						this.activateView("tab", false, filePath);
-					}, 400);
+							// Open the newly created board after some dalay.
+							window.setTimeout(() => {
+								void this.activateView("tab", false, filePath);
+							}, 400);
+						});
 				} catch (error) {
 					bugReporterManagerInsatance.showNotice(
 						187,
@@ -965,7 +1013,7 @@ export default class TaskBoard extends Plugin {
 				id: "open-migration-modal",
 				name: "Open migration modal",
 				callback: () => {
-					openMigrationModal(this.plugin);
+					openMigrationModal(this);
 				},
 			});
 		}
@@ -1002,11 +1050,11 @@ export default class TaskBoard extends Plugin {
 
 			// Clear existing timer and set a new one
 			if (this.renameProcessingTimer) {
-				clearTimeout(this.renameProcessingTimer);
+				window.clearTimeout(this.renameProcessingTimer);
 			}
 
-			this.renameProcessingTimer = setTimeout(() => {
-				this.processRenameQueue();
+			this.renameProcessingTimer = window.setTimeout(() => {
+				void this.processRenameQueue();
 			}, this.QUEUE_DELAY);
 		}
 	}
@@ -1048,7 +1096,7 @@ export default class TaskBoard extends Plugin {
 				const { file, oldPath } = allowedFiles.shift()!;
 
 				if (file.extension === TASKBOARD_FILE_EXTENSION) {
-					this.taskBoardFileManager.onBoardFileRenamed(
+					await this.taskBoardFileManager.onBoardFileRenamed(
 						file.path,
 						oldPath,
 					);
@@ -1080,7 +1128,7 @@ export default class TaskBoard extends Plugin {
 				// Add delay between processing each file to prevent blocking UI
 				if (allowedFiles.length > 0) {
 					await new Promise((resolve) =>
-						setTimeout(resolve, this.PROCESSING_INTERVAL),
+						window.setTimeout(resolve, this.PROCESSING_INTERVAL),
 					);
 				}
 			}
@@ -1089,7 +1137,7 @@ export default class TaskBoard extends Plugin {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
 
-			this.plugin.vaultScanner.saveTasksToJsonCache();
+			await this.vaultScanner.saveTasksToJsonCache();
 			eventEmitter.emit("REFRESH_BOARD");
 
 			if (processed > 20) {
@@ -1100,7 +1148,7 @@ export default class TaskBoard extends Plugin {
 		}
 
 		if (this.renameProcessingTimer)
-			clearTimeout(this.renameProcessingTimer);
+			window.clearTimeout(this.renameProcessingTimer);
 	}
 
 	/**
@@ -1113,8 +1161,8 @@ export default class TaskBoard extends Plugin {
 
 			// Clear existing timer and set a new one
 			if (!this.deleteProcessingTimer) {
-				this.deleteProcessingTimer = setTimeout(() => {
-					this.processDeleteQueue();
+				this.deleteProcessingTimer = window.setTimeout(() => {
+					void this.processDeleteQueue();
 				}, this.QUEUE_DELAY);
 			} else {
 				// NOTE : I think there is no need to remove the Timout created, in 2 seconds, all the Obsidians triggers should finish, for the Task Board's processing to start.
@@ -1154,7 +1202,9 @@ export default class TaskBoard extends Plugin {
 				const file = allowedFiles.shift()!;
 
 				if (file.extension === TASKBOARD_FILE_EXTENSION) {
-					this.taskBoardFileManager.onBoardFileDelete(file.path);
+					await this.taskBoardFileManager.onBoardFileDelete(
+						file.path,
+					);
 					continue;
 				}
 
@@ -1179,7 +1229,7 @@ export default class TaskBoard extends Plugin {
 				// Add delay between processing each file to prevent blocking UI
 				if (allowedFiles.length > 0) {
 					await new Promise((resolve) =>
-						setTimeout(resolve, this.PROCESSING_INTERVAL),
+						window.setTimeout(resolve, this.PROCESSING_INTERVAL),
 					);
 				}
 			}
@@ -1187,7 +1237,7 @@ export default class TaskBoard extends Plugin {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
 
-			this.plugin.vaultScanner.saveTasksToJsonCache();
+			await this.vaultScanner.saveTasksToJsonCache();
 			eventEmitter.emit("SOFT_REFRESH");
 
 			if (processed > 20) {
@@ -1208,8 +1258,8 @@ export default class TaskBoard extends Plugin {
 
 		// Clear existing timer and set a new one
 		if (!this.createProcessingTimer) {
-			this.createProcessingTimer = setTimeout(() => {
-				this.processCreateQueue();
+			this.createProcessingTimer = window.setTimeout(() => {
+				void this.processCreateQueue();
 			}, this.QUEUE_DELAY);
 		} else {
 			// NOTE : I think there is no need to remove the Timout created, in 2 seconds, all the Obsidians triggers should finish, for the Task Board's processing to start.
@@ -1270,7 +1320,7 @@ export default class TaskBoard extends Plugin {
 			// Add delay between processing each file to prevent blocking UI
 			if (allowedFiles.length > 0) {
 				await new Promise((resolve) =>
-					setTimeout(resolve, this.PROCESSING_INTERVAL),
+					window.setTimeout(resolve, this.PROCESSING_INTERVAL),
 				);
 			}
 		}
@@ -1320,8 +1370,8 @@ export default class TaskBoard extends Plugin {
 				.filter((file) => {
 					filesScannedCount++;
 					return (
-						file.stat.mtime > OBSIDIAN_CLOSED_TIME!.getTime() ||
-						file.stat.ctime > OBSIDIAN_CLOSED_TIME!.getTime()
+						file.stat.mtime > OBSIDIAN_CLOSED_TIME.getTime() ||
+						file.stat.ctime > OBSIDIAN_CLOSED_TIME.getTime()
 					);
 				});
 
@@ -1345,18 +1395,18 @@ export default class TaskBoard extends Plugin {
 			const deletedFilesList = [...deletedFiles];
 
 			const changed_files = modifiedCreatedRenamedFiles.filter((file) =>
-				fileTypeAllowedForScanning(this.plugin.settings.data, file),
+				fileTypeAllowedForScanning(this.settings.data, file),
 			);
 			const totalFilesLength =
 				changed_files.length + deletedFilesList.length;
 
 			if (totalFilesLength > 0) {
 				const scanAllModifiedFiles = () => {
-					this.plugin.vaultScanner
+					void this.vaultScanner
 						.refreshTasksFromFiles(changed_files, false)
 						.then(async () => {
 							if (deletedFilesList.length > 0) {
-								await this.plugin.vaultScanner.deleteCacheForFiles(
+								await this.vaultScanner.deleteCacheForFiles(
 									deletedFilesList,
 								);
 							}
@@ -1388,7 +1438,7 @@ export default class TaskBoard extends Plugin {
 								el.createEl("button", {
 									text: t("scan-them"),
 									cls: "ignoreBugButton",
-									onclick: async () => {
+									onclick: () => {
 										try {
 											modifiedFilesNotice.hide();
 
@@ -1421,9 +1471,9 @@ export default class TaskBoard extends Plugin {
 												if (
 													modifiedFilesQueueLength > 0
 												) {
-													await new Promise(
+													void new Promise(
 														(resolve) =>
-															setTimeout(
+															window.setTimeout(
 																resolve,
 																this
 																	.PROCESSING_INTERVAL,
@@ -1472,16 +1522,14 @@ export default class TaskBoard extends Plugin {
 	 */
 	registerEvents() {
 		this.registerEvent(
-			this.app.vault.on("modify", async (file: TAbstractFile) => {
-				if (
-					fileTypeAllowedForScanning(this.plugin.settings.data, file)
-				) {
+			this.app.vault.on("modify", (file: TAbstractFile) => {
+				if (fileTypeAllowedForScanning(this.settings.data, file)) {
 					if (file instanceof TFile) {
 						if (
-							this.plugin.settings.data.scanMode ===
+							this.settings.data.scanMode ===
 							scanModeOptions.REAL_TIME
 						) {
-							this.vaultScanner.refreshTasksFromFiles(
+							void this.vaultScanner.refreshTasksFromFiles(
 								[file],
 								false,
 							);
@@ -1515,24 +1563,24 @@ export default class TaskBoard extends Plugin {
 			}),
 		);
 
-		if (this.plugin.settings.data.scanMode !== scanModeOptions.MANUAL) {
+		if (this.settings.data.scanMode !== scanModeOptions.MANUAL) {
 			// Listen for editor-blur event and trigger scanning if the editor was modified
 			this.registerEvent(
 				this.app.workspace.on(
 					"active-leaf-change",
 					(leaf: WorkspaceLeaf | null) => {
-						this.onFileModifiedAndLostFocus();
+						void this.onFileModifiedAndLostFocus();
 						eventEmitter.emit("SAVE_MAP");
 					},
 				),
 			);
 			this.registerDomEvent(window, "blur", () => {
-				this.onFileModifiedAndLostFocus();
+				void this.onFileModifiedAndLostFocus();
 				eventEmitter.emit("SAVE_MAP");
 			});
 			this.registerDomEvent(window, "focus", () => {
-				setTimeout(() => {
-					this.onFileModifiedAndLostFocus();
+				window.setTimeout(() => {
+					void this.onFileModifiedAndLostFocus();
 					eventEmitter.emit("SAVE_MAP");
 				}, 200);
 			});
@@ -1548,12 +1596,12 @@ export default class TaskBoard extends Plugin {
 			}),
 		);
 
-		// const closeButton = document.querySelector<HTMLElement>(
+		// const closeButton = activeDocument.querySelector<HTMLElement>(
 		// 	".titlebar-button.mod-close"
 		// );
 		// if (closeButton) {
 		// 	this.registerDomEvent(closeButton, "mouseenter", () => {
-		// 		onUnloadSave(this.plugin);
+		// 		onUnloadSave(this);
 		// 	});
 		// }
 
@@ -1586,11 +1634,11 @@ export default class TaskBoard extends Plugin {
 							.onClick(() => {
 								if (
 									fileTypeAllowedForScanning(
-										this.plugin.settings.data,
+										this.settings.data,
 										file,
 									)
 								) {
-									this.vaultScanner.refreshTasksFromFiles(
+									void this.vaultScanner.refreshTasksFromFiles(
 										[file],
 										true,
 									);
@@ -1606,7 +1654,7 @@ export default class TaskBoard extends Plugin {
 									this.settings.data.scanFilters.files.values.push(
 										file.path,
 									);
-									this.saveSettings();
+									void this.saveSettings();
 								});
 						});
 					}
@@ -1619,7 +1667,7 @@ export default class TaskBoard extends Plugin {
 									this.settings.data.scanFilters.files.values.push(
 										file.path,
 									);
-									this.saveSettings();
+									void this.saveSettings();
 								});
 						});
 					}
@@ -1644,7 +1692,7 @@ export default class TaskBoard extends Plugin {
 									this.settings.data.scanFilters.folders.values.push(
 										file.path,
 									);
-									this.saveSettings();
+									void this.saveSettings();
 								});
 						});
 					}
@@ -1657,7 +1705,7 @@ export default class TaskBoard extends Plugin {
 									this.settings.data.scanFilters.folders.values.push(
 										file.path,
 									);
-									this.saveSettings();
+									void this.saveSettings();
 								});
 						});
 					}
@@ -1691,7 +1739,7 @@ export default class TaskBoard extends Plugin {
 				// 				.setIcon(RefreshIcon)
 				// 				.setSection("action")
 				// 				.onClick(() => {
-				// 					onUnloadSave(this.plugin);
+				// 					onUnloadSave(this);
 				// 				});
 				// 		});
 				// }
@@ -1722,7 +1770,7 @@ export default class TaskBoard extends Plugin {
 			filePath: string;
 			duplicate: boolean;
 		}) => {
-			this.activateView(data.layout, data.duplicate, data.filePath);
+			void this.activateView(data.layout, data.duplicate, data.filePath);
 		};
 
 		eventEmitter.on("OPEN_BOARD", openBoardCallback);
@@ -1746,12 +1794,12 @@ export default class TaskBoard extends Plugin {
 
 	async compatiblePluginsAvailabilityCheck() {
 		// Check if the Tasks plugin is installed and fetch the custom statuses
-		// await fetchTasksPluginCustomStatuses(this.plugin);
-		const tasksPlug = await isTasksPluginEnabled(this.plugin);
-		this.plugin.settings.data.compatiblePlugins.tasksPlugin = tasksPlug;
+		// await fetchTasksPluginCustomStatuses(this);
+		const tasksPlug = await isTasksPluginEnabled(this);
+		this.settings.data.compatiblePlugins.tasksPlugin = tasksPlug;
 
 		// Check if the Reminder plugin is installed
-		isReminderPluginInstalled(this.plugin);
+		isReminderPluginInstalled(this);
 	}
 
 	private async runOnPluginUpdate() {
@@ -1804,7 +1852,7 @@ export default class TaskBoard extends Plugin {
 
 			// make the localStorage flag, 'manadatoryScan' to True
 			if (previousVersion === "" || runMandatoryScan) {
-				localStorage.setItem(MANDATORY_SCAN_KEY, "true");
+				this.app.saveLocalStorage(MANDATORY_SCAN_KEY, "true");
 			}
 
 			this.settings.version = currentVersion;
@@ -1813,7 +1861,7 @@ export default class TaskBoard extends Plugin {
 			this.settings = migrateSettings(DEFAULT_SETTINGS, this.settings);
 
 			this.settings.version = currentVersion;
-			this.saveSettings();
+			void this.saveSettings();
 
 			// new Notice(
 			// 	t("plugin-updated-notice", {
@@ -1846,7 +1894,9 @@ export default class TaskBoard extends Plugin {
 					0,
 				);
 			} else {
-				throw "Task Board: There was an issue while creating the template board file. Please check the logs.";
+				throw new Error(
+					"Task Board: There was an issue while creating the template board file. Please check the logs.",
+				);
 			}
 		} catch (error) {
 			bugReporterManagerInsatance.showNotice(

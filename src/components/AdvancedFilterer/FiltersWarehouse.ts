@@ -39,6 +39,8 @@ export class FiltersWarehouseModal extends Modal {
 	}
 
 	private _saveBtn: HTMLButtonElement | null = null;
+	private _importBtn: HTMLButtonElement | null = null;
+	private _clearBtn: HTMLButtonElement | null = null;
 
 	private expandedFilters = new WeakMap<Filter, boolean>();
 
@@ -83,7 +85,7 @@ export class FiltersWarehouseModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		this.setTitle("Task Board Filters Warehouse");
+		this.setTitle(t("task-board-filters-warehouse"));
 
 		this.render();
 	}
@@ -127,14 +129,10 @@ export class FiltersWarehouseModal extends Modal {
 		const footer = contentEl.createDiv({
 			cls: "filters-warehouse-footer",
 		});
-		footer.style.cssText =
-			"position: sticky; bottom: 0; background: var(--background-primary); border-top: 1px solid var(--background-modifier-border); padding: var(--size-4-2); margin-top: var(--size-4-2); display: flex; justify-content: space-between; align-items: center; gap: var(--size-2-2);";
 
 		const leftSection = footer.createDiv({
 			cls: "filters-warehouse-footer-left",
 		});
-		leftSection.style.cssText =
-			"display: flex; gap: var(--size-2-2); align-items: center;";
 
 		const importBtn = leftSection.createEl("button", {
 			cls: ["compact-btn"],
@@ -175,8 +173,6 @@ export class FiltersWarehouseModal extends Modal {
 		const rightSection = footer.createDiv({
 			cls: "filters-warehouse-footer-right",
 		});
-		rightSection.style.cssText =
-			"display: flex; gap: var(--size-2-2); align-items: center;";
 
 		const saveBtn = rightSection.createEl("button", {
 			cls: ["compact-btn"],
@@ -200,18 +196,18 @@ export class FiltersWarehouseModal extends Modal {
 		// 	this.close();
 		// });
 
-		(this as any)._importBtn = importBtn;
-		(this as any)._clearBtn = clearBtn;
-		(this as any)._saveBtn = saveBtn;
+		this._importBtn = importBtn;
+		this._clearBtn = clearBtn;
+		this._saveBtn = saveBtn;
 	}
 
 	private updateActionButtonsState(
 		importBtn?: HTMLButtonElement,
 		clearBtn?: HTMLButtonElement,
 	): void {
-		const btnImport = importBtn || (this as any)._importBtn;
-		const btnClear = clearBtn || (this as any)._clearBtn;
-		if (!btnImport) return;
+		const btnImport = importBtn || this._importBtn;
+		const btnClear = clearBtn || this._clearBtn;
+		if (!btnImport || !btnClear) return;
 
 		const hasSelection = this.selectedFilterIds.size > 0;
 		btnImport.disabled = !hasSelection;
@@ -327,10 +323,8 @@ export class FiltersWarehouseModal extends Modal {
 		expandableArea: HTMLElement,
 		expandBtn: HTMLDivElement,
 	): void {
-		expandableArea.style.maxHeight = "0";
-		expandableArea.style.opacity = "0";
-		expandableArea.style.paddingTop = "0";
-		expandableArea.style.paddingBottom = "0";
+		expandableArea.toggleClass("expand", false);
+		expandableArea.toggleClass("collapse", true);
 
 		expandBtn.replaceChildren();
 		expandBtn.createEl(
@@ -356,7 +350,7 @@ export class FiltersWarehouseModal extends Modal {
 		);
 
 		this.expandedFilters.set(filter, false);
-		setTimeout(() => {
+		window.setTimeout(() => {
 			expandableArea.hide();
 		}, 300);
 	}
@@ -370,15 +364,8 @@ export class FiltersWarehouseModal extends Modal {
 			this.renderExpandedFilterContent(filter, expandableArea);
 		}
 		expandableArea.show();
-		expandableArea.style.maxHeight = "0";
-		expandableArea.style.opacity = "0";
-		expandableArea.style.paddingTop = "0";
-		expandableArea.style.paddingBottom = "0";
-		void expandableArea.offsetHeight;
-		expandableArea.style.maxHeight = "2000px";
-		expandableArea.style.opacity = "1";
-		expandableArea.style.paddingTop = "var(--size-2-2)";
-		expandableArea.style.paddingBottom = "var(--size-2-2)";
+		expandableArea.toggleClass("collapse", false);
+		expandableArea.toggleClass("expand", true);
 
 		expandBtn.replaceChildren();
 		expandBtn.createEl(
@@ -465,7 +452,7 @@ export class FiltersWarehouseModal extends Modal {
 						".advanced-filter-top-left",
 					);
 					if (leftSection) {
-						const newDesc = leftSection.createEl("span", {
+						leftSection.createEl("span", {
 							cls: "filter-description-text",
 							text: filter.description,
 						});
@@ -609,7 +596,7 @@ export class FiltersWarehouseModal extends Modal {
 			.onChange((value) => {
 				groupData.groupCondition = value as "all" | "any" | "none";
 				this.updateFilterConjunctions(
-					newGroupEl.querySelector(".filters-list") as HTMLElement,
+					newGroupEl.querySelector(".filters-list"),
 					groupData.groupCondition,
 				);
 				this.markAsEdited();
@@ -788,7 +775,7 @@ export class FiltersWarehouseModal extends Modal {
 		valueInput.hide();
 		valueInput.addEventListener("click", () => {
 			this.isMultiSuggestDropdownActive = true;
-			setTimeout(() => {
+			window.setTimeout(() => {
 				this.isMultiSuggestDropdownActive = false;
 			}, 100);
 		});
@@ -871,7 +858,7 @@ export class FiltersWarehouseModal extends Modal {
 				);
 				newFilterEl.remove();
 				this.updateFilterConjunctions(
-					newFilterEl.parentElement as HTMLElement,
+					newFilterEl.parentElement,
 					groupData.groupCondition,
 				);
 				this.markAsEdited();
@@ -1001,7 +988,7 @@ export class FiltersWarehouseModal extends Modal {
 						});
 					}
 					valueSelect.addOptions(optionsRecord);
-					setTimeout(() => {
+					window.setTimeout(() => {
 						Array.from(valueSelect.selectEl.options).forEach(
 							(option) => {
 								if (option.value.startsWith("__group_")) {
@@ -1048,7 +1035,7 @@ export class FiltersWarehouseModal extends Modal {
 							getPriorityOptionsForDropdown()[0].value.toString(),
 					);
 					valueSelect.onChange((newValue) => {
-						filterData.value = Number(newValue);
+						filterData.value = newValue;
 						this.markAsEdited();
 					});
 				}
@@ -1132,8 +1119,8 @@ export class FiltersWarehouseModal extends Modal {
 		}
 
 		conditionSelect.selectEl.empty();
-		conditionOptions.forEach((opt) =>
-			conditionSelect.addOption(opt.value, opt.text),
+		conditionOptions.forEach(
+			(opt) => void conditionSelect.addOption(opt.value, opt.text),
 		);
 
 		const currentSelectedCondition = filterData.condition;
@@ -1184,7 +1171,7 @@ export class FiltersWarehouseModal extends Modal {
 			}
 		}
 
-		if (valueInput instanceof HTMLInputElement) {
+		if (valueInput.instanceOf(HTMLInputElement)) {
 			this.setupMultiSuggest(property, valueInput, filterData);
 		}
 	}
@@ -1320,7 +1307,7 @@ export class FiltersWarehouseModal extends Modal {
 	private saveWarehouse(): void {
 		let newSettings = this.plugin.settings;
 		newSettings.data.filtersWarehouse = this.filtersWarehouseData;
-		this.plugin.saveSettings(newSettings);
+		void this.plugin.saveSettings(newSettings);
 		if (this._saveBtn) {
 			this._saveBtn.hide();
 		}

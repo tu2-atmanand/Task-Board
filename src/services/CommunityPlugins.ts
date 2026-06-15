@@ -1,6 +1,16 @@
-import { TFile, TFolder } from "obsidian";
+import { App, Plugin, TFile, TFolder } from "obsidian";
 import { TaskBoardSubmodule } from "./subModules.js";
 import type TaskBoard from "../../main.js";
+
+export interface QuickAddPlugin extends Plugin {
+	app: App;
+	api: {
+		executeChoice(
+			choiceName: string,
+			variables?: { [key: string]: unknown },
+		): Promise<void>;
+	};
+}
 
 export class CommunityPlugins extends TaskBoardSubmodule {
 	get fileExplorerPlugin() {
@@ -19,8 +29,8 @@ export class CommunityPlugins extends TaskBoardSubmodule {
 		return !!this.reminderPlugin;
 	}
 
-	get quickAddPlugin() {
-		return this.app.plugins.plugins["quickadd"] ?? null;
+	get quickAddPlugin(): QuickAddPlugin {
+		return (this.app.plugins.plugins.quickAdd as QuickAddPlugin) ?? null;
 	}
 
 	isQuickAddPluginEnabled() {
@@ -48,10 +58,13 @@ export function isReminderPluginInstalled(plugin: TaskBoard) {
 		reminderPlugin.isReminderPluginEnabled();
 }
 
-export function revealFileFolderInExplorer(plugin: TaskBoard, abstractFile: TFile | TFolder) {
+export function revealFileFolderInExplorer(
+	plugin: TaskBoard,
+	abstractFile: TFile | TFolder,
+) {
 	const communityPlugins = new CommunityPlugins(plugin);
 
-	if(communityPlugins.isFileExplorerPluginEnabled()) {
+	if (communityPlugins.isFileExplorerPluginEnabled()) {
 		communityPlugins.fileExplorerPlugin?.revealInFolder(abstractFile);
 	}
 }

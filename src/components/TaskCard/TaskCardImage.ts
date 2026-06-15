@@ -29,22 +29,22 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		? isTaskCompleted(task.status, true, plugin.settings)
 		: isTaskCompleted(task.title, false, plugin.settings);
 
-	const container = document.createElement("div");
+	const container = activeDocument.createElement("div");
 	container.className = "taskItemContainer";
 
-	const card = document.createElement("div");
+	const card = activeDocument.createElement("div");
 	card.className = `taskItem${isThisTaskCompleted ? " completed" : ""}`;
 	card.setAttribute("data-task-id", String(task.id));
 
-	const colorIndicator = document.createElement("div");
+	const colorIndicator = activeDocument.createElement("div");
 	colorIndicator.className = "colorIndicator";
 	card.appendChild(colorIndicator);
 
-	const main = document.createElement("div");
+	const main = activeDocument.createElement("div");
 	main.className = "taskItemMainContent";
 
 	// Header
-	const header = document.createElement("div");
+	const header = activeDocument.createElement("div");
 	header.className = "taskItemHeader";
 
 	if (
@@ -53,20 +53,20 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		) &&
 		task.filePath
 	) {
-		const topFile = document.createElement("div");
+		const topFile = activeDocument.createElement("div");
 		topFile.className = "taskitemHeaderTopFilename";
 		topFile.setAttribute("aria-label", task.filePath);
-		const val = document.createElement("div");
+		const val = activeDocument.createElement("div");
 		val.className = "taskitemHeaderTopFilenameValue";
 		val.textContent = task.filePath.split("/").pop() || "";
 		topFile.appendChild(val);
 		header.appendChild(topFile);
 	}
 
-	const headerBottom = document.createElement("div");
+	const headerBottom = activeDocument.createElement("div");
 	headerBottom.className = "taskItemHeaderBottom";
 
-	const headerLeft = document.createElement("div");
+	const headerLeft = activeDocument.createElement("div");
 	headerLeft.className = "taskItemHeaderLeft";
 
 	if (
@@ -75,9 +75,9 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		) &&
 		task.priority > 0
 	) {
-		const pr = document.createElement("div");
+		const pr = activeDocument.createElement("div");
 		pr.className = "taskItemPrio";
-		pr.textContent = priorityEmojis[task.priority as number] || "";
+		pr.textContent = priorityEmojis[task.priority] || "";
 		headerLeft.appendChild(pr);
 	}
 
@@ -87,11 +87,11 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		) &&
 		(task.tags.length > 0 || task.frontmatterTags.length > 0)
 	) {
-		const tagsDiv = document.createElement("div");
+		const tagsDiv = activeDocument.createElement("div");
 		tagsDiv.className = "taskItemTags";
 
 		task.tags.forEach((tag) => {
-			const tagEl = document.createElement("div");
+			const tagEl = activeDocument.createElement("div");
 			tagEl.className = "taskItemTag";
 			const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 			const isCardBg =
@@ -107,7 +107,7 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 			const dimmedTagColor = customTag
 				? updateRGBAOpacity(customTag.color, 0.1)
 				: undefined;
-			if (isTagBg && tagColor) tagEl.style.color = "white";
+			if (isTagBg && tagColor) tagEl.addClass("tb_color_white ");
 			if (isTagBg) tagEl.style.backgroundColor = tagColor ?? "";
 			else if (dimmedTagColor)
 				tagEl.style.backgroundColor = dimmedTagColor;
@@ -117,7 +117,7 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		});
 
 		task.frontmatterTags.forEach((tag) => {
-			const fm = document.createElement("div");
+			const fm = activeDocument.createElement("div");
 			fm.className = "taskItemTagFrontmatter";
 			fm.title = "Tag from note's frontmatter (read-only)";
 			fm.textContent = tag;
@@ -129,7 +129,7 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 
 	headerBottom.appendChild(headerLeft);
 
-	const headerRight = document.createElement("div");
+	const headerRight = activeDocument.createElement("div");
 	headerRight.className = "taskItemHeaderRight";
 	if (
 		globalSettings.visiblePropertiesList?.includes(
@@ -137,12 +137,12 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		) &&
 		task.legacyId
 	) {
-		const idCont = document.createElement("div");
+		const idCont = activeDocument.createElement("div");
 		idCont.className = "taskItemPropertyID";
-		const label = document.createElement("div");
+		const label = activeDocument.createElement("div");
 		label.className = "taskItemPropertyIDLabel";
 		label.textContent = "ID";
-		const value = document.createElement("div");
+		const value = activeDocument.createElement("div");
 		value.className = "taskItemPropertyIDValue";
 		value.textContent = String(task.legacyId);
 		idCont.appendChild(label);
@@ -155,9 +155,9 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	main.appendChild(header);
 
 	// Body (title)
-	const body = document.createElement("div");
+	const body = activeDocument.createElement("div");
 	body.className = "taskItemMainBody";
-	const titleWrap = document.createElement("div");
+	const titleWrap = activeDocument.createElement("div");
 	titleWrap.className = "taskItemMainBodyTitleNsubTasks";
 
 	if (
@@ -165,7 +165,7 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 			taskPropertiesNames.Checkbox,
 		)
 	) {
-		const cb = document.createElement("input");
+		const cb = activeDocument.createElement("input");
 		cb.type = "checkbox";
 		cb.checked = task.status === " " ? false : true;
 		cb.className = "taskItemCheckbox";
@@ -173,9 +173,9 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		titleWrap.appendChild(cb);
 	}
 
-	const bodyContent = document.createElement("div");
+	const bodyContent = activeDocument.createElement("div");
 	bodyContent.className = "taskItemBodyContent";
-	const title = document.createElement("div");
+	const title = activeDocument.createElement("div");
 	title.className = "taskItemTitle";
 	title.textContent = task.title || "";
 	bodyContent.appendChild(title);
@@ -184,7 +184,7 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	main.appendChild(body);
 
 	// Footer
-	const footer = document.createElement("div");
+	const footer = activeDocument.createElement("div");
 	footer.className = "taskItemFooter";
 	if (
 		globalSettings.visiblePropertiesList?.includes(
@@ -192,9 +192,9 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		) &&
 		task.status
 	) {
-		const stat = document.createElement("div");
+		const stat = activeDocument.createElement("div");
 		stat.className = "taskItemFooterPropertyContainerEmoji";
-		const val = document.createElement("div");
+		const val = activeDocument.createElement("div");
 		val.className = "taskItemFooterPropertyContainerValue";
 		val.textContent = getStatusNameFromStatusSymbol(
 			task.status,
@@ -209,9 +209,9 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		) &&
 		task.filePath
 	) {
-		const fp = document.createElement("div");
+		const fp = activeDocument.createElement("div");
 		fp.className = "taskItemFooterPropertyContainerEmoji";
-		const val = document.createElement("div");
+		const val = activeDocument.createElement("div");
 		val.className = "taskItemFooterPropertyContainerValue";
 		val.setAttribute("aria-label", task.filePath);
 		val.textContent = task.filePath.split("/").pop() || "";

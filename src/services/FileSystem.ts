@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable import/no-nodejs-modules */
 // import { BlobReader, configure, Reader, ZipReader } from '@zip.js/zip.js';
 import type * as NodeFS from "node:fs";
 import type * as NodeOS from "node:os";
 import type * as NodePath from "node:path";
 import type * as NodeUrl from "node:url";
 import type * as NodeZlib from "node:zlib";
-import { App, Platform } from "obsidian";
+import { App, Platform, TFile } from "obsidian";
+import { Buffer } from "node:buffer";
 
-
-import TaskBoard from "../../main.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 // import { configureWebWorker } from './z-worker-inline';
 
@@ -73,7 +74,7 @@ export function nodeBufferToArrayBuffer(
 }
 
 export class NodePickedFile implements PickedFile {
-	readonly type: "file" = "file";
+	readonly type = "file";
 	readonly filepath: string;
 
 	readonly fullpath: string;
@@ -124,7 +125,7 @@ export class NodePickedFile implements PickedFile {
 }
 
 export class NodePickedFolder implements PickedFolder {
-	readonly type: "folder" = "folder";
+	readonly type = "folder";
 	readonly filepath: string;
 
 	readonly name: string;
@@ -162,7 +163,7 @@ export class NodePickedFolder implements PickedFolder {
 }
 
 export class WebPickedFile implements PickedFile {
-	readonly type: "file" = "file";
+	readonly type = "file";
 	readonly file: File;
 
 	readonly fullpath: string;
@@ -215,8 +216,9 @@ export class WebPickedFile implements PickedFile {
 	// 	return callback(new ZipReader(new BlobReader(this.file)));
 	// }
 
+	// Use file.name instead of this.file.toString() to avoid [object Object] default stringification
 	toString(): string {
-		return this.file.toString();
+		return this.file.name;
 	}
 }
 
@@ -302,7 +304,7 @@ export function splitext(name: string) {
 /**
  * Checks and creates folders if they are not present.
  * Recursively checks each child folder if it exists of not.
- * 
+ *
  * @param plugin - The plugin's app instance
  * @param folderPath - Only the folder path. (Filename should not be present)
  * @returns - Void
@@ -328,7 +330,7 @@ export async function createFolderRecursively(
 			// If a file exists where a folder is expected, report and abort
 			// (this is unlikely but safer to surface)
 			// existing.type may not be available in all builds, so just check truthiness and skip create
-			if ((existing as any).path && !(existing as any).children) {
+			if (existing.path && existing instanceof TFile) {
 				bugReporterManagerInsatance.showNotice(
 					58,
 					`A file exists where a folder is expected: ${currentPath}`,

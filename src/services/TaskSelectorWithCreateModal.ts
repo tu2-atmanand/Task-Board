@@ -212,7 +212,7 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 			taskData["id"] = generateRandomStringId();
 			let completeTask: taskItem = taskData as taskItem;
 			// Create the task
-			const result = await createNewInlineTask(this.plugin, completeTask);
+			await createNewInlineTask(this.plugin, completeTask);
 
 			new Notice(
 				t("A new task created successfully : ", {

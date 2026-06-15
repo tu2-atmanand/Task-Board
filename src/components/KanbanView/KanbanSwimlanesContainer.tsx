@@ -12,9 +12,11 @@ import { eventEmitter } from '../../services/EventEmitter.js';
 import { getAllTaskTags } from '../../utils/TaskItemUtils.js';
 import LazyColumn from './LazyColumn.js';
 import { getStatusNameFromStatusSymbol } from '../../utils/taskNote/TaskNoteUtils.js';
+import { Component, View } from 'obsidian';
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
+	parentComponent: Component | View;
 	currentBoardData: Board;
 	currentViewIndex: number;
 	kanbanViewData: KanbanView;
@@ -30,6 +32,7 @@ interface SwimlaneRow {
 
 const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	plugin,
+	parentComponent,
 	currentBoardData,
 	currentViewIndex,
 	kanbanViewData,
@@ -248,6 +251,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			<LazyColumn
 				key={`outside-${column.id}-${index}`}
 				plugin={plugin}
+				parentComponent={parentComponent}
 				activeBoardData={currentBoardData}
 				kanbanViewData={kanbanViewData}
 				currentViewIndex={currentViewIndex}
@@ -298,7 +302,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// 	);
 	// }
 
-	async function handleSwimlaneMinimize(rowIndex: number) {
+	function handleSwimlaneMinimize(rowIndex: number) {
 		try {
 			const swimlaneName = swimlanes[rowIndex]?.swimlaneName;
 			if (!swimlaneName) return;
@@ -324,7 +328,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 			}
 
 
-			await plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+			void plugin.taskBoardFileManager.saveBoard(updatedBoardData);
 			eventEmitter.emit('REFRESH_BOARD');
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(
@@ -360,6 +364,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 								<LazyColumn
 									key={`header-${column.id}`}
 									plugin={plugin}
+									parentComponent={parentComponent}
 									activeBoardData={currentBoardData}
 									kanbanViewData={kanbanViewData}
 									currentViewIndex={currentViewIndex}
@@ -402,6 +407,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												<LazyColumn
 													key={`${swimlane.swimlaneValue}-${column.id}`}
 													plugin={plugin}
+													parentComponent={parentComponent}
 													activeBoardData={currentBoardData}
 													kanbanViewData={kanbanViewData}
 													currentViewIndex={currentViewIndex}
@@ -446,6 +452,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												<LazyColumn
 													key={`${swimlane.swimlaneValue}-${column.id}`}
 													plugin={plugin}
+													parentComponent={parentComponent}
 													activeBoardData={currentBoardData}
 													kanbanViewData={kanbanViewData}
 													currentViewIndex={currentViewIndex}
@@ -501,14 +508,16 @@ function getPropertyValues(
 
 	switch (property) {
 		case 'tags':
-			const allTags = getAllTaskTags(task);
-			if (allTags && allTags.length > 0) {
-				values = allTags.map((tag: string) => {
-					if (typeof tag === 'string') return tag.replace('#', '');
-					return '';
-				}).filter((v: string) => v.trim());
+			{
+				const allTags = getAllTaskTags(task);
+				if (allTags && allTags.length > 0) {
+					values = allTags.map((tag: string) => {
+						if (typeof tag === 'string') return tag.replace('#', '');
+						return '';
+					}).filter((v: string) => v.trim());
+				}
+				break;
 			}
-			break;
 
 		case 'priority':
 			if (typeof task.priority === 'number') {

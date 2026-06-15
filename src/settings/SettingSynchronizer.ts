@@ -3,11 +3,12 @@ import { Notice } from "obsidian";
 import TaskBoard from "../../main.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import {
-	PluginDataJson,
+	type PluginDataJson,
 	DEFAULT_SETTINGS,
 } from "../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
+import { type ElectronOpenDialogReturnValue } from "obsidian-typings";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
@@ -16,22 +17,29 @@ import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
  * @param settings - The current settings object to migrate. Values from this object should be to the new objects.
  * @returns The migrated settings object
  */
-export function migrateSettings(defaults: any, settings: any): PluginDataJson {
+export function migrateSettings(
+	defaults: Partial<PluginDataJson>,
+	settings: Partial<PluginDataJson>,
+): PluginDataJson {
 	try {
-		if (settings == undefined) return defaults;
+		if (settings == undefined) return defaults as PluginDataJson;
+
+		const s = settings as Record<string, unknown>;
+		const d = defaults as Record<string, unknown>;
 
 		for (const key in defaults) {
 			if (!(key in settings)) {
 				// This is a cumpulsory migration which will be required in every new version update, since a new field should be added into the users settings.
-				settings[key] = defaults[key];
+				s[key] = d[key];
 			}
 
 			if (key === "scanFilters") {
-				if (settings[key]?.tags && settings[key].tags.length > 0) {
-					const cleanedTags: string[] = settings[key].tags.map(
+				const scanFilter = s[key] as { tags: string[] };
+				if (scanFilter?.tags && scanFilter.tags.length > 0) {
+					const cleanedTags: string[] = scanFilter.tags.map(
 						(tag: string) => tag.trim().replace("#", ""),
 					);
-					settings[key].tags = cleanedTags;
+					scanFilter.tags = cleanedTags;
 				}
 			}
 
@@ -44,7 +52,7 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			 * This is migration is only applied to replace the older settings available in users configs with the new settings as per the new Settinsg section added in the global settings.
 			 */
 			if (key === "customStatuses") {
-				settings[key] = DEFAULT_SETTINGS.data.customStatuses;
+				s[key] = DEFAULT_SETTINGS.data.customStatuses;
 			}
 
 			// -----------------------------------
@@ -55,9 +63,9 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			 *
 			 * Because of the name change, we had to do this migration.
 			 */
-			if (key === "frontmatter" && settings["frontMatter"]) {
-				settings[key] = settings["frontMatter"];
-				delete settings["frontMatter"];
+			if (key === "frontmatter" && s["frontMatter"]) {
+				s[key] = s["frontMatter"];
+				delete s["frontMatter"];
 			}
 
 			// -------------------------------------
@@ -67,14 +75,14 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			 * This is a cumpulsory case, which will recursively iterate all the object type settings.
 			 */
 			if (
-				typeof defaults[key] === "object" &&
-				defaults[key] !== null &&
-				!Array.isArray(defaults[key])
+				typeof d[key] === "object" &&
+				d[key] !== null &&
+				!Array.isArray(d[key])
 			) {
-				migrateSettings(defaults[key], settings[key]);
+				migrateSettings(d[key], s[key] as Partial<PluginDataJson>);
 			}
 		}
-		return settings;
+		return s as unknown as PluginDataJson;
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			181,
@@ -82,8 +90,8 @@ export function migrateSettings(defaults: any, settings: any): PluginDataJson {
 			JSON.stringify(error),
 			"SettingSynchronizer.ts",
 		);
-		if (settings != undefined) return settings;
-		else return defaults;
+		if (settings != undefined) return settings as PluginDataJson;
+		else return defaults as PluginDataJson;
 	}
 }
 
@@ -98,21 +106,25 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 
 		// Desktop folder picker
 		if (
-			(window as any).electron &&
-			(window as any).electron.remote &&
-			(window as any).electron.remote.dialog
+			window?.electron &&
+			window.electron?.remote &&
+			window.electron.dialog
 		) {
-			let folderPaths: string[] = (
-				window as any
-			).electron.remote.dialog.showOpenDialogSync({
-				title: "Pick folder to export settings",
-				properties: ["openDirectory", "dontAddToRecent"],
-			});
-			if (!folderPaths || folderPaths.length === 0) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+			let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
+				await window.electron.dialog.showOpenDialog({
+					title: "Pick folder to export settings",
+					properties: ["openDirectory", "dontAddToRecent"],
+				});
+			if (
+				pickFolderDialogReturn.canceled ||
+				!pickFolderDialogReturn?.filePaths ||
+				pickFolderDialogReturn.filePaths.length === 0
+			) {
 				new Notice("Export cancelled or folder not selected.");
 				return;
 			}
-			const folderPath = folderPaths[0];
+			const folderPath = pickFolderDialogReturn.filePaths[0];
 			const exportPath =
 				folderPath.endsWith("/") || folderPath.endsWith("\\")
 					? folderPath + exportFileName
@@ -123,20 +135,18 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 			new Notice(`Settings exported to ${exportPath}`);
 		} else {
 			// Web: use file save dialog
-			let a = document.createElement("a");
+			let a = activeDocument.createElement("a");
 			a.href = URL.createObjectURL(
 				new Blob([fileContent], { type: "application/json" }),
 			);
 			a.download = exportFileName;
-			document.body.appendChild(a);
+			activeDocument.body.appendChild(a);
 			a.click();
-			setTimeout(() => {
-				document.body.removeChild(a);
+			window.setTimeout(() => {
+				activeDocument.body.removeChild(a);
 				URL.revokeObjectURL(a.href);
 			}, 1000);
-			new Notice(
-				"Settings exported. Check the folder where you downloaded the file.",
-			);
+			new Notice(`Settings exported to ${exportFileName}. Check the folder where you saved the file.`);
 		}
 	} catch (err) {
 		new Notice("Failed to export settings.");
@@ -160,41 +170,46 @@ export async function importConfigurations(
 		let extensions = ["json"];
 		let name = "JSON Files";
 
-		// Desktop file picker
+		// Desktop folder picker
 		if (
-			(window as any).electron &&
-			(window as any).electron.remote &&
-			(window as any).electron.remote.dialog
+			window?.electron &&
+			window.electron?.remote &&
+			window.electron.dialog
 		) {
-			let filePaths: string[] = (
-				window as any
-			).electron.remote.dialog.showOpenDialogSync({
-				title: "Pick settings file to import",
-				properties: ["openFile", "dontAddToRecent"],
-				filters: [{ name, extensions }],
-			});
-			if (!filePaths || filePaths.length === 0) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+			let pickFileDialogReturn: ElectronOpenDialogReturnValue =
+				await window.electron.dialog.showOpenDialog({
+					title: "Pick settings file to import",
+					properties: ["openDirectory", "dontAddToRecent"],
+				});
+			if (
+				pickFileDialogReturn.canceled ||
+				!pickFileDialogReturn?.filePaths ||
+				pickFileDialogReturn.filePaths.length === 0
+			) {
 				new Notice("Import cancelled or file not selected.");
 				return false;
 			}
-			const pickedFile = new NodePickedFile(filePaths[0]);
+			const pickedFile = new NodePickedFile(
+				pickFileDialogReturn.filePaths[0],
+			);
 			importedContent = await pickedFile.readText();
 		} else {
 			// Web file picker
 			await new Promise<void>((resolve) => {
-				let inputEl = document.createElement("input");
+				let inputEl = activeDocument.createElement("input");
 				inputEl.type = "file";
 				inputEl.accept = extensions
 					.map((e) => "." + e.toLowerCase())
 					.join(",");
-				inputEl.addEventListener("change", async () => {
+				inputEl.addEventListener("change", () => {
 					if (!inputEl.files || inputEl.files.length === 0) {
 						new Notice("Import cancelled or file not selected.");
 						resolve();
 						return;
 					}
 					const file = inputEl.files[0];
-					importedContent = await file.text();
+					importedContent = void file.text();
 					resolve();
 				});
 				inputEl.click();
@@ -205,7 +220,8 @@ export async function importConfigurations(
 			}
 		}
 
-		const importedData: PluginDataJson = JSON.parse(importedContent);
+		const parsedData: unknown = JSON.parse(importedContent);
+		const importedData = parsedData as PluginDataJson;
 
 		// Get current settings and defaults
 		// const currentData = plugin.settings; // No use, current settings will be overwritten, hence will use the DEFAULT_SETTINGS

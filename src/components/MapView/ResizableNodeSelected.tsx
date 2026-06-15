@@ -1,13 +1,12 @@
-import { memo, FC } from 'react';
+import { memo, FC, ReactElement } from 'react';
 import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
 import { t } from 'i18next';
 import { CircleArrowRightIcon, CircleArrowDownIcon } from 'lucide-react';
 import TaskBoard from '../../../main.js';
 import { mapViewNodeMapOrientation } from '../../interfaces/Enums.js';
-import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 // import { nodeSize } from './MapView';
 
-interface dataProps extends React.ReactElement<unknown, string> {
+interface dataProps extends ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };
 }
 
@@ -31,24 +30,24 @@ const ResizableNodeSelected: FC<NodeProps & ResizableNodeSelectedProps> = ({ id,
 				}}
 				isVisible={selected}
 				autoScale={true}
-				// onResizeEnd={(newSize, params) => {
-				// 	// console.log('Node resized to:', newSize, "\nparams:", params, "\nNode ID:", id);
-				// 	try {
-				// 		console.log("Data :", data);
-				// 		// const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
-				// 		// sizeData[id] = {
-				// 		// 	width: params.width ?? data.label.props.plugin.settings.data.columnWidth ?? 300
-				// 		// 	// height: params.height ?? 30 
-				// 		// };
-				// 		// localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));
-				// 	} catch (e) {
-				// 		bugReporterManagerInsatance.addToLogs(
-				// 			127,
-				// 			String(e),
-				// 			"ResizableNodeSelected.tsx/return()",
-				// 		);
-				// 	}
-				// }}
+			// onResizeEnd={(newSize, params) => {
+			// 	// console.log('Node resized to:', newSize, "\nparams:", params, "\nNode ID:", id);
+			// 	try {
+			// 		console.log("Data :", data);
+			// 		// const sizeData: Record<string, nodeSize> = JSON.parse(localStorage.getItem(NODE_SIZE_STORAGE_KEY) || '{}');
+			// 		// sizeData[id] = {
+			// 		// 	width: params.width ?? data.label.props.plugin.settings.data.columnWidth ?? 300
+			// 		// 	// height: params.height ?? 30 
+			// 		// };
+			// 		// localStorage.setItem(NODE_SIZE_STORAGE_KEY, JSON.stringify(sizeData));
+			// 	} catch (e) {
+			// 		bugReporterManagerInsatance.addToLogs(
+			// 			127,
+			// 			String(e),
+			// 			"ResizableNodeSelected.tsx/return()",
+			// 		);
+			// 	}
+			// }}
 			/>
 
 			{orientationHorizontal && (

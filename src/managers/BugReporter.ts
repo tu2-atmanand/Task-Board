@@ -6,6 +6,7 @@ import { BugReporterModal } from "../modals/BugReporterModal.js";
 import { fsPromises } from "../services/FileSystem.js";
 import { getObsidianDebugInfo } from "../services/ObsidianDebugInfo.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
+import { type ElectronOpenDialogReturnValue } from "obsidian-typings";
 
 /**
  * Interface for bug report entries
@@ -32,7 +33,7 @@ class BugReporterManager {
 	private alreadyShownBugsIDs: number[] = [];
 	private LOG_FILE_PATH = "";
 	private readonly MAX_RECENT_LOGS = 20;
-	private readonly MAX_USED_ID = 216; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
+	private readonly MAX_USED_ID = 221; // This constant will not be used anywhere, its simply to keep track of the the recent ID used.
 
 	private constructor() {
 		// Private constructor to enforce singleton pattern
@@ -95,15 +96,15 @@ class BugReporterManager {
 	/**
 	 * Format system information for the log file
 	 */
-	private formatSystemInfo(systemInfo: Record<string, any>): string {
+	private formatSystemInfo(systemInfo: Record<string, unknown>): string {
 		return Object.entries(systemInfo)
 			.map(([key, value]) => {
 				if (Array.isArray(value)) {
 					return `- **${key}**: \n${value
-						.map((v) => `  - ${v}`)
+						.map((v: unknown) => `  - ${String(v)}`)
 						.join("\n")}`;
 				}
-				return `- **${key}**: ${value}`;
+				return `- **${key}**: ${String(value)}`;
 			})
 			.join("\n");
 	}
@@ -347,7 +348,7 @@ ${entry.bugContent}
 		});
 
 		// STEP 3 - Append the bug report to the task-board-logs.md file
-		this.appendBugReport(id, message, bugContent, context);
+		void this.appendBugReport(id, message, bugContent, context);
 	};
 
 	/**
@@ -364,7 +365,7 @@ ${entry.bugContent}
 		this.alreadyShownBugsIDs.push(id);
 
 		// STEP 3 - Append the bug report to the task-board-logs.md file
-		this.appendBugReport(id, "", bugContent, context);
+		void this.appendBugReport(id, "", bugContent, context);
 	};
 
 	async exportLogFile(): Promise<void> {
@@ -380,21 +381,25 @@ ${entry.bugContent}
 
 			// Desktop folder picker
 			if (
-				(window as any).electron &&
-				(window as any).electron.remote &&
-				(window as any).electron.remote.dialog
+				window?.electron &&
+				window.electron?.remote &&
+				window.electron.dialog
 			) {
-				let folderPaths: string[] = (
-					window as any
-				).electron.remote.dialog.showOpenDialogSync({
-					title: "Pick folder to export settings",
-					properties: ["openDirectory", "dontAddToRecent"],
-				});
-				if (!folderPaths || folderPaths.length === 0) {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+				let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
+					await window.electron.dialog.showOpenDialog({
+						title: "Pick folder to export log file",
+						properties: ["openDirectory", "dontAddToRecent"],
+					});
+				if (
+					pickFolderDialogReturn.canceled ||
+					!pickFolderDialogReturn?.filePaths ||
+					pickFolderDialogReturn.filePaths.length === 0
+				) {
 					new Notice("Export cancelled or folder not selected.");
 					return;
 				}
-				const folderPath = folderPaths[0];
+				const folderPath = pickFolderDialogReturn.filePaths[0];
 				const exportPath =
 					folderPath.endsWith("/") || folderPath.endsWith("\\")
 						? folderPath + exportFileName
@@ -405,15 +410,15 @@ ${entry.bugContent}
 				new Notice(`Log file exported to ${exportPath}`);
 			} else {
 				// Web: use file save dialog
-				let a = document.createElement("a");
+				let a = activeDocument.createElement("a");
 				a.href = URL.createObjectURL(
 					new Blob([data], { type: "application/json" }),
 				);
 				a.download = exportFileName;
-				document.body.appendChild(a);
+				activeDocument.body.appendChild(a);
 				a.click();
-				setTimeout(() => {
-					document.body.removeChild(a);
+				window.setTimeout(() => {
+					activeDocument.body.removeChild(a);
 					URL.revokeObjectURL(a.href);
 				}, 1000);
 				new Notice(
@@ -423,7 +428,7 @@ ${entry.bugContent}
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(
 				198,
-				`Failed to export the log file: ${err}`,
+				`Failed to export the log file: ${String(err)}`,
 				"BugReporter.ts/exportLogFile",
 			);
 		}

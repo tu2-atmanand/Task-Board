@@ -30,7 +30,9 @@ export const readDataOfVaultFile = async (
 			// 	`File not found at path: ${filePath}`,
 			// 	"MarkdownFileOperations.ts/readDataOfVaultFile",
 			// );
-			throw `File not found at path: ${filePath}, file object : ${JSON.stringify(file)}`;
+			throw new Error(
+				`File not found at path: ${filePath}, file object : ${JSON.stringify(file)}`,
+			);
 		}
 	} catch (error) {
 		if (showBugNotice) {
@@ -76,7 +78,7 @@ export const writeDataToVaultFile = async (
 			// 	`File not found at path.\nPath: ${filePath}`,
 			// 	"MarkdownFileOperations.ts/writeDataToVaultFile",
 			// );
-			throw `File not found at path: ${filePath}`;
+			throw new Error(`File not found at path: ${filePath}`);
 		}
 		return;
 	} catch (error) {

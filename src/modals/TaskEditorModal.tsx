@@ -25,13 +25,13 @@ export class TaskEditorModal extends Modal {
 	isEdited: boolean;
 	isTaskNote: boolean;
 	activeNote: boolean;
-	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void;
+	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>;
 
 	public waitForClose: Promise<string>;
 	private resolvePromise: (input: string) => void = (input: string) => { };
 	private rejectPromise: (reason?: unknown) => void = (reason?: unknown) => { };
 
-	constructor(plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void, isTaskNote: boolean, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
+	constructor(plugin: TaskBoard, saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>, isTaskNote: boolean, activeNote: boolean, taskExists: boolean, task?: taskItem, filePath?: string) {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.filePath = filePath ? filePath : "";
@@ -106,7 +106,7 @@ export class TaskEditorModal extends Modal {
 				this.isEdited = false;
 				const formattedContent = await getFormattedTaskContent(updatedTask);
 				this.resolvePromise(formattedContent);
-				this.saveTask(updatedTask, quickAddPluginChoice, updatedNoteContent);
+				void this.saveTask(updatedTask, quickAddPluginChoice, updatedNoteContent);
 				this.close();
 			}}
 			onClose={() => this.close()}
@@ -142,7 +142,6 @@ export class TaskEditorModal extends Modal {
 			this.handleCloseAttempt();
 		} else {
 			this.modalEl.addClass("slide-out");
-			sleep(300);
 			this.resolvePromise("");
 			this.onClose();
 			super.close();

@@ -16,7 +16,7 @@ import {
 	ControlButton,
 } from '@xyflow/react';
 // import '@xyflow/react/dist/style.css';
-import { debounce, Menu, Notice, Platform } from 'obsidian';
+import { Component, debounce, Menu, Notice, Platform, View, WorkspaceLeaf } from 'obsidian';
 import { PanelLeftOpenIcon } from 'lucide-react';
 import { t } from 'i18next';
 import TaskBoard from '../../../main.js';
@@ -36,6 +36,7 @@ import { TasksImporterPanel } from './TasksImporterPanel.js';
 
 type MapViewProps = {
 	plugin: TaskBoard;
+	parentComponent: View | Component;
 	activeBoardData: Board;
 	currentView: TaskBoardViewType;
 	currentViewIndex: number;
@@ -50,7 +51,7 @@ const nodeTypes = {
 
 
 const MapView: React.FC<MapViewProps> = ({
-	plugin, activeBoardData, currentView, currentViewIndex, filteredTasks, focusOnTaskId
+	plugin, parentComponent, activeBoardData, currentView, currentViewIndex, filteredTasks, focusOnTaskId
 }) => {
 	plugin.settings.data.lastViewHistory.taskId = ""; // Clear the taskId after focusing once
 	const mapViewSettings = plugin.settings.data.mapView;
@@ -180,7 +181,7 @@ const MapView: React.FC<MapViewProps> = ({
 				};
 			}
 			// console.log("Will now going to save the view index :", newBoardData.lastViewIndex);
-			plugin.taskBoardFileManager.saveBoard(newBoardData);
+			void plugin.taskBoardFileManager.saveBoard(newBoardData);
 
 			mapDataUpdated.current = false;
 			viewPortDataUpdated.current = false;
@@ -380,6 +381,7 @@ const MapView: React.FC<MapViewProps> = ({
 							dataAttributeIndex={0}
 							plugin={plugin}
 							task={task}
+							parentComponent={parentComponent}
 							activeViewType={viewTypeNames.map}
 							activeViewIndex={currentViewIndex}
 							activeBoardID={activeBoardData.id}
@@ -641,32 +643,29 @@ const MapView: React.FC<MapViewProps> = ({
 				updatedTargetTask.title = updatedTargetTaskTitle;
 
 				// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
-				updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
-					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
-					setTimeout(() => {
-						// This event emmitter will stop any loading animation of ongoing task-card.
-						eventEmitter.emit("UPDATE_TASK", {
-							taskID: updatedTargetTask.id,
-							state: false,
-						});
-					}, 500);
+				void updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
+					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath).catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"OpenModals.ts/openAddNewTaskInCurrentFileModal",
+						);
+					});
 				});
 			} else {
-				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
-					// This is required to rescan the updated file and refresh the board.
-					sleep(500).then(() => {
+				void updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
+					// This delay is required to rescan the updated file and refresh the board.
+					window.setTimeout(() => {
 						plugin.realTimeScanner.processAllUpdatedFiles(
 							updatedTargetTask.filePath
-						);
-
-						setTimeout(() => {
-							// This event emmitter will stop any loading animation of ongoing task-card.
-							eventEmitter.emit("UPDATE_TASK", {
-								taskID: updatedTargetTask.id,
-								state: false,
-							});
-						}, 500);
-					});
+						).catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"OpenModals.ts/openAddNewTaskInCurrentFileModal",
+							);
+						});
+					}, 500);
 				});
 			}
 		}
@@ -770,7 +769,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setIcon("eye-off");
 				item.onClick(() => {
 					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.transparent;
-					plugin.saveSettings();
+					void plugin.saveSettings();
 
 					// Refresh the board view
 					eventEmitter.emit('REFRESH_BOARD');
@@ -783,7 +782,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setIcon("grip");
 				item.onClick(() => {
 					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.dots;
-					plugin.saveSettings();
+					void plugin.saveSettings();
 
 					eventEmitter.emit('REFRESH_BOARD');
 				})
@@ -795,7 +794,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setIcon("grid-3x3");
 				item.onClick(() => {
 					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.lines;
-					plugin.saveSettings();
+					void plugin.saveSettings();
 
 					eventEmitter.emit('REFRESH_BOARD');
 				})
@@ -807,7 +806,7 @@ const MapView: React.FC<MapViewProps> = ({
 				item.setIcon("x");
 				item.onClick(() => {
 					plugin.settings.data.mapView.background = mapViewBackgrounVariantTypes.cross;
-					plugin.saveSettings();
+					void plugin.saveSettings();
 
 					eventEmitter.emit('REFRESH_BOARD');
 				})
@@ -821,7 +820,7 @@ const MapView: React.FC<MapViewProps> = ({
 			item.setIcon("map");
 			item.onClick(async () => {
 				plugin.settings.data.mapView.showMinimap = !plugin.settings.data.mapView.showMinimap;
-				plugin.saveSettings();
+				void plugin.saveSettings();
 
 				eventEmitter.emit('REFRESH_BOARD');
 			})
@@ -833,7 +832,7 @@ const MapView: React.FC<MapViewProps> = ({
 			item.setIcon("worm");
 			item.onClick(async () => {
 				plugin.settings.data.mapView.animatedEdges = !plugin.settings.data.mapView.animatedEdges;
-				plugin.saveSettings();
+				void plugin.saveSettings();
 
 				eventEmitter.emit('REFRESH_BOARD');
 			})
@@ -894,35 +893,37 @@ const MapView: React.FC<MapViewProps> = ({
 				updatedTargetTask.title = updatedTargetTaskTitle;
 
 				await updateTaskInFile(plugin, updatedTargetTask, targetTask);
-				sleep(100).then(() => {
-					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath);
+				new Notice(t("dependency-deleted"));
+				// This delay is required to rescan the updated file and refresh the board.
+				window.setTimeout(() => {
+					plugin.realTimeScanner.processAllUpdatedFiles(
+						updatedTargetTask.filePath
+					).catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"OpenModals.ts/openAddNewTaskInCurrentFileModal",
+						);
+						throw new Error(String(error));
+					});
+				}, 500);
+			} else {
+				void updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
 					new Notice(t("dependency-deleted"));
 
-					setTimeout(() => {
-						// This event emmitter will stop any loading animation of ongoing task-card.
-						eventEmitter.emit("UPDATE_TASK", {
-							taskID: updatedTargetTask.id,
-							state: false,
-						});
-					}, 500);
-				})
-				// eventEmitter.emit('REFRESH_BOARD');
-			} else {
-				updateFrontmatterInMarkdownFile(plugin, updatedTargetTask).then(() => {
-					// This is required to rescan the updated file and refresh the board.
-					sleep(500).then(() => {
+					// This delay is required to rescan the updated file and refresh the board.
+					window.setTimeout(() => {
 						plugin.realTimeScanner.processAllUpdatedFiles(
 							updatedTargetTask.filePath
-						);
-						new Notice(t("dependency-deleted"));
-						setTimeout(() => {
-							// This event emmitter will stop any loading animation of ongoing task-card.
-							eventEmitter.emit("UPDATE_TASK", {
-								taskID: updatedTargetTask.id,
-								state: false,
-							});
-						}, 500);
-					});
+						).catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"OpenModals.ts/openAddNewTaskInCurrentFileModal",
+							);
+							throw new Error(String(error));
+						});
+					}, 500);
 				});
 			}
 		} catch (err) {
@@ -940,8 +941,8 @@ const MapView: React.FC<MapViewProps> = ({
 		menu.addItem((item) => {
 			item.setTitle(t("delete-dependency"));
 			item.setIcon("trash");
-			item.onClick(async () => {
-				deleteEdge(event, edge);
+			item.onClick(() => {
+				void deleteEdge(event, edge);
 			});
 		});
 
@@ -1055,7 +1056,7 @@ const MapView: React.FC<MapViewProps> = ({
 							edges={edges}
 							nodeTypes={nodeTypes}
 							onEdgeClick={handleEdgeClick}
-							onEdgeContextMenu={deleteEdge}
+							onEdgeContextMenu={() => void deleteEdge}
 							onNodesChange={onNodesChange}
 							onNodeDragStop={(event, node, nodes) => {
 								handlenodePositionChange(nodes);
@@ -1106,7 +1107,7 @@ const MapView: React.FC<MapViewProps> = ({
 										};
 										// Validate the new viewport before setting
 										if (Number.isFinite(newVp.x) && Number.isFinite(newVp.y) && Number.isFinite(newVp.zoom)) {
-											instance.setViewport(newVp);
+											void instance.setViewport(newVp);
 											// setViewport(newVp);
 											viewPortData.current = newVp;
 											// console.log("We are running the debouncedSetViewportStorage from here.");
@@ -1119,10 +1120,10 @@ const MapView: React.FC<MapViewProps> = ({
 								// Use current viewport if valid for this board, otherwise fall back to defaults
 								const currentVpForBoard = viewPortData.current;
 								if (currentVpForBoard && Number.isFinite(currentVpForBoard.x) && Number.isFinite(currentVpForBoard.y) && Number.isFinite(currentVpForBoard.zoom) && currentVpForBoard.zoom > 0) {
-									instance.setViewport(currentVpForBoard);
+									void instance.setViewport(currentVpForBoard);
 								} else {
 									const defaultVp: viewPortType = { x: 10, y: 10, zoom: 1.5 };
-									instance.setViewport(defaultVp);
+									void instance.setViewport(defaultVp);
 									// setViewport(defaultVp);
 									viewPortData.current = defaultVp;
 								}

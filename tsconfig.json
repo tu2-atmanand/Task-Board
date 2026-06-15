@@ -43,6 +43,7 @@
 		// "noEmit": true,
 	},
 	"include": [
-		"src"
+		"src",
+		"main.ts"
 	]
 }

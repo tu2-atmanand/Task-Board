@@ -277,7 +277,7 @@ export const sanitizeStatus = (
 	globalSettings: globalSettingsData,
 	oldTitle: string,
 	newStatusSymbol: string,
-	newStatusType: string,
+	newStatusType: statusTypeNames,
 ): string => {
 	const oldStatusValuematch = oldTitle.match(/\[(.)\]/); // Extract the symbol inside [ ]
 	let newTitle = oldTitle;
@@ -355,11 +355,20 @@ export const sanitizeCreatedDate = (
 		globalSettings.dateFormat,
 	);
 	if (formattedCreatedDate) {
-		if (globalSettings?.taskPropertyFormat === "1") {
+		if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			createdDateWithFormat = `➕${formattedCreatedDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			createdDateWithFormat = `➕ ${formattedCreatedDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			createdDateWithFormat = `[created:: ${formattedCreatedDate}]`;
 		} else {
 			createdDateWithFormat = `@created(${formattedCreatedDate})`;
@@ -422,11 +431,20 @@ export const sanitizeStartDate = (
 		globalSettings.dateFormat,
 	);
 	if (formattedStartDate) {
-		if (globalSettings?.taskPropertyFormat === "1") {
+		if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			startDateWithFormat = `🛫${formattedStartDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			startDateWithFormat = `🛫 ${formattedStartDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			startDateWithFormat = `[start:: ${formattedStartDate}]`;
 		} else {
 			startDateWithFormat = `@start(${formattedStartDate})`;
@@ -491,11 +509,20 @@ export const sanitizeScheduledDate = (
 		globalSettings.dateFormat,
 	);
 	if (formattedScheduledDate) {
-		if (globalSettings?.taskPropertyFormat === "1") {
+		if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			scheduledDateWithFormat = `⏳${formattedScheduledDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			scheduledDateWithFormat = `⏳ ${formattedScheduledDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			scheduledDateWithFormat = `[scheduled:: ${formattedScheduledDate}]`;
 		} else {
 			scheduledDateWithFormat = `@scheduled(${formattedScheduledDate})`;
@@ -561,11 +588,20 @@ export const sanitizeDueDate = (
 		globalSettings.dateFormat,
 	);
 	if (formattedDueDate) {
-		if (globalSettings?.taskPropertyFormat === "1") {
+		if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			dueDateWithFormat = `📅${formattedDueDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			dueDateWithFormat = `📅 ${formattedDueDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			dueDateWithFormat = `[due:: ${formattedDueDate}]`;
 		} else {
 			dueDateWithFormat = `@due(${formattedDueDate})`;
@@ -609,7 +645,7 @@ export const sanitizeCompletionDate = (
 	cursorLocation?: cursorLocationInterface,
 ): string => {
 	const completionDateRegex =
-		/\[completion::[^\]]+\]|\@completion\(.*?\)|✅\s*.*?(?=\s|$)/;
+		/\[completion::[^\]]+\]|@completion\(.*?\)|✅\s*.*?(?=\s|$)/;
 	const extractedCompletionDateMatch = title.match(completionDateRegex);
 
 	if (!completionDate) {
@@ -626,11 +662,20 @@ export const sanitizeCompletionDate = (
 		globalSettings.dateTimeFormat,
 	);
 	if (formattedCompletionDate) {
-		if (globalSettings?.taskPropertyFormat === "1") {
+		if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			completedWitFormat = `✅${formattedCompletionDate} `;
-		} else if (globalSettings?.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			completedWitFormat = `✅ ${formattedCompletionDate} `;
-		} else if (globalSettings?.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			completedWitFormat = `[completion:: ${formattedCompletionDate}] `;
 		} else {
 			completedWitFormat = `@completion(${formattedCompletionDate}) `;
@@ -696,11 +741,20 @@ export const sanitizeCancelledDate = (
 		globalSettings.dateTimeFormat,
 	);
 	if (formattedCancelledDate) {
-		if (globalSettings?.taskPropertyFormat === "1") {
+		if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			cancelledWithFormat = `❌${formattedCancelledDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			cancelledWithFormat = `❌ ${formattedCancelledDate}`;
-		} else if (globalSettings?.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			cancelledWithFormat = `[cancelled:: ${formattedCancelledDate}]`;
 		} else {
 			cancelledWithFormat = `@cancelled(${formattedCancelledDate})`;
@@ -794,11 +848,20 @@ export const sanitizeTime = (
 		return newTitle;
 	} else {
 		let newTimeWithFormat: string = "";
-		if (globalSettings.taskPropertyFormat === "1") {
+		if (
+			globalSettings.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			newTimeWithFormat = `⏰[${newTime}]`;
-		} else if (globalSettings.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			newTimeWithFormat = `⏰ ${newTime}`;
-		} else if (globalSettings.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			newTimeWithFormat = `[time:: ${newTime}]`;
 		} else {
 			newTimeWithFormat = `@time(${newTime})`;
@@ -911,9 +974,15 @@ export const sanitizePriority = (
 	if (extractedPriorityMatch.value === 0) {
 		if (newPriority > 0) {
 			let priorityWithFormat: string = "";
-			if (globalSettings?.taskPropertyFormat === "3") {
+			if (
+				globalSettings?.taskPropertyFormat ===
+				taskPropertyFormatOptions.dataviewPlugin
+			) {
 				priorityWithFormat = `[priority:: ${newPriority}]`;
-			} else if (globalSettings?.taskPropertyFormat === "4") {
+			} else if (
+				globalSettings?.taskPropertyFormat ===
+				taskPropertyFormatOptions.tasksPlugin
+			) {
 				priorityWithFormat = `@priority(${newPriority})`;
 			} else {
 				priorityWithFormat = priorityEmojis[newPriority];
@@ -1105,8 +1174,8 @@ export const sanitizeReminder = (
 
 	const reminderRegex =
 		globalSettings.notificationService === NotificationService.ObsidApp
-			? /\(\@\d{2}:\d{2}\)/
-			: /\(\@\d{4}-\d{2}-\d{2} \d{2}:\d{2}\)/;
+			? /\(@\d{2}:\d{2}\)/
+			: /\(@\d{4}-\d{2}-\d{2} \d{2}:\d{2}\)/;
 
 	if (!newReminder) {
 		return title.replace(reminderRegex, "").trimEnd();
@@ -1157,15 +1226,24 @@ export const sanitizeDependsOn = (
 		return title;
 	} else {
 		let dependsOnFormat: string = "";
-		if (globalSettings?.taskPropertyFormat === "1") {
+		if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.default
+		) {
 			dependsOnFormat =
 				dependesOnIds.length > 0 ? `⛔${dependesOnIds.join(", ")}` : "";
-		} else if (globalSettings?.taskPropertyFormat === "2") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.tasksPlugin
+		) {
 			dependsOnFormat =
 				dependesOnIds.length > 0
 					? `⛔ ${dependesOnIds.join(", ")}`
 					: "";
-		} else if (globalSettings?.taskPropertyFormat === "3") {
+		} else if (
+			globalSettings?.taskPropertyFormat ===
+			taskPropertyFormatOptions.dataviewPlugin
+		) {
 			dependsOnFormat =
 				dependesOnIds.length > 0
 					? `[dependsOn:: ${dependesOnIds.join(", ")}]`
@@ -1210,17 +1288,17 @@ export const sanitizeDependsOn = (
 // 	let dueDateWithFormat: string = "";
 // 	let completedWitFormat: string = "";
 // 	if (updatedTask.due || updatedTask.completion) {
-// 		if (globalSettings?.taskPropertyFormat === "1") {
+// 		if (globalSettings?.taskPropertyFormat === taskPropertyFormatOptions.default) {
 // 			dueDateWithFormat = updatedTask.due ? ` 📅${updatedTask.due}` : "";
 // 			completedWitFormat = updatedTask.completion
 // 				? ` ✅${updatedTask.completion} `
 // 				: "";
-// 		} else if (globalSettings?.taskPropertyFormat === "2") {
+// 		} else if (globalSettings?.taskPropertyFormat === taskPropertyFormatOptions.tasksPlugin) {
 // 			dueDateWithFormat = updatedTask.due ? ` 📅 ${updatedTask.due}` : "";
 // 			completedWitFormat = updatedTask.completion
 // 				? ` ✅ ${updatedTask.completion} `
 // 				: "";
-// 		} else if (globalSettings?.taskPropertyFormat === "3") {
+// 		} else if (globalSettings?.taskPropertyFormat === taskPropertyFormatOptions.dataviewPlugin) {
 // 			dueDateWithFormat = updatedTask.due
 // 				? ` [due:: ${updatedTask.due}]`
 // 				: "";
@@ -1346,7 +1424,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				// Remove time (handles both formats)
 				if (task.time) {
 					const timeRegex =
-						/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|\@time\(.*?\))/g;
+						/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|@time\(.*?\))/g;
 					const timeMatch = cleanedTitle.match(timeRegex);
 					if (timeMatch) {
 						cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
@@ -1446,7 +1524,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		plugin.settings.data.showTaskWithoutMetadata
 	) {
 		const reminderRegex =
-			/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
+			/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
 		const reminderMatch = cleanedTitle.match(reminderRegex);
 		if (reminderMatch) {
 			cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
@@ -1503,7 +1581,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	// Remove time (handles both formats)
 	if (task.time) {
 		const timeRegex =
-			/\s*(⏰\s*\[.*?\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(.*?)|\[time::.*?\]|\@time\(.*?\))/g;
+			/\s*(⏰\s*\[.*?\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(.*?)|\[time::.*?\]|@time\(.*?\))/g;
 		const timeMatch = cleanedTitle.match(timeRegex);
 		if (timeMatch) {
 			cleanedTitle = cleanedTitle.replace(timeMatch[0], "");
@@ -1596,7 +1674,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	// Remove reminder if it exists
 	if (task.reminder) {
 		const reminderRegex =
-			/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
+			/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
 		const reminderMatch = cleanedTitle.match(reminderRegex);
 		if (reminderMatch) {
 			cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();

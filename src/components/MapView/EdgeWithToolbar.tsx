@@ -1,3 +1,4 @@
+/* eslint-disable obsidianmd/rule-custom-message */
 /**
  * This component creates a custom edge which provides a nice toolbar 
  * when left or right clicked on the edge. This functionalities are provided by 
@@ -129,7 +130,7 @@ export function EdgeWithToolbar(props: EdgeProps) {
 				>
 					<button
 						className="edge-toolbar-button edge-toolbar-delete"
-						onClick={deleteEdge}
+						onClick={() => { void deleteEdge(); }}
 						title="Delete connection"
 						aria-label="Delete edge"
 					>

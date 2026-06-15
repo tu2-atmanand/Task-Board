@@ -40,7 +40,7 @@ export class TaskBoardView extends ItemView {
 		return this.boardName;
 	}
 
-	onPaneMenu(menu: Menu, source: "more-options" | "tab-header" | string): void {
+	onPaneMenu(menu: Menu, source: "more-options" | "tab-header"): void {
 		if (source === "more-options") {
 			menu.addItem((item) => {
 				item.setTitle(t("quick-actions"));
@@ -130,18 +130,18 @@ export class TaskBoardView extends ItemView {
 	 * @param state 
 	 * @param result 
 	 */
-	async setState(state: any, result: ViewStateResult): Promise<void> {
-		const { filePath } = state;
+	async setState(state: unknown, result: ViewStateResult): Promise<void> {
+		const filePath = (state as Record<string, unknown>).filePath as string | undefined;
 
 		// Check if a specific .taskboard file was clicked from File Navigator
-		const clickedFilePath = (this.leaf as any).taskboardFilePath as string | undefined;
+		const clickedFilePath = this.leaf.taskboardFilePath as string | undefined;
 		if (clickedFilePath && typeof clickedFilePath === 'string' && clickedFilePath.endsWith('.taskboard')) {
 			// Load and render the clicked file
 			const clickedFileData = await this.plugin.taskBoardFileManager.loadBoardUsingPath(clickedFilePath);
 			if (clickedFileData) {
 				this.currentFilePath = clickedFilePath;
 				state = {
-					...state,
+					...(state as Record<string, unknown>),
 					filePath: this.currentFilePath
 				};
 				this.renderBoard(clickedFileData);
@@ -157,7 +157,7 @@ export class TaskBoardView extends ItemView {
 				if (boardData) {
 					this.currentFilePath = filePath;
 					state = {
-						...state,
+						...(state as Record<string, unknown>),
 						filePath: this.currentFilePath
 					};
 					this.renderBoard(boardData);
@@ -184,7 +184,7 @@ export class TaskBoardView extends ItemView {
 						if (firstItemFromRegistry.filePath) {
 							this.currentFilePath = firstItemFromRegistry.filePath;
 							state = {
-								...state,
+								...(state as Record<string, unknown>),
 								filePath: this.currentFilePath,
 							};
 						}
@@ -209,8 +209,9 @@ export class TaskBoardView extends ItemView {
 	async onOpen() {
 		if (Platform.isMobile) {
 			this.addAction(RefreshIcon, t("refresh-board-button"), async () => {
-				const fileStackString = localStorage.getItem(PENDING_SCAN_FILE_STACK);
-				const fileStack = fileStackString ? JSON.parse(fileStackString) : null;
+				const fileStackString = this.app.loadLocalStorage(PENDING_SCAN_FILE_STACK);
+				const parsedData: unknown = JSON.parse(fileStackString as string);
+				const fileStack = fileStackString ? parsedData as string[] : null;
 
 				if (fileStack && fileStack.length > 0) {
 					await this.plugin.realTimeScanner.processAllUpdatedFiles();
@@ -219,7 +220,7 @@ export class TaskBoardView extends ItemView {
 			}).addClass("taskboardRefreshBtn");
 		}
 
-		const mandatoryScanSignal = localStorage.getItem(MANDATORY_SCAN_KEY) === "true";
+		const mandatoryScanSignal = this.app.loadLocalStorage(MANDATORY_SCAN_KEY) === "true";
 
 		if (!Platform.isMobile || mandatoryScanSignal) {
 			this.addAction(ScanVaultIcon, t("scan-vault-modal"), () => {
@@ -227,7 +228,7 @@ export class TaskBoardView extends ItemView {
 			}).addClass("taskboardScanVaultBtn");
 		}
 
-		if (mandatoryScanSignal) this.highlighgtScanvaultIcon();
+		if (mandatoryScanSignal) void this.highlighgtScanvaultIcon();
 	}
 
 	async highlighgtScanvaultIcon() {
@@ -236,7 +237,7 @@ export class TaskBoardView extends ItemView {
 		) as HTMLElement;
 		if (scanVaultIcon) {
 			scanVaultIcon.classList.add("highlight");
-			setInterval(() => {
+			window.setInterval(() => {
 				scanVaultIcon.classList.toggle("highlight");
 			}, 800); // Toggle highlight class every 500ms for blinking effect
 		}
@@ -264,6 +265,7 @@ export class TaskBoardView extends ItemView {
 					plugin={this.plugin}
 					currentBoardData={currentBoardData}
 					currentLeaf={this.leaf}
+					viewId=""
 				/>
 			</StrictMode>
 		);
@@ -306,26 +308,29 @@ export class TaskBoardView extends ItemView {
 		// Create path elements
 		let currentPath = '';
 
-		// Add folder parts
-		folderParts.forEach((part, index) => {
-			if (part) {
-				currentPath += part;
-				const folderPath = currentPath;
-				const folderSpan = titleContainer.createSpan({ text: part, cls: 'taskboard-path-folder' });
-				folderSpan.addEventListener('click', () => {
-					const folder = this.app.vault.getAbstractFileByPath(folderPath);
-					if (folder instanceof TFolder) {
-						revealFileFolderInExplorer(this.plugin, folder);
-					}
-				});
+		// Add folder parts - Only show if the screen width is sufficiently large
+		// Else will only show the fileName
+		if (this.leaf.width > 500) {
+			folderParts.forEach((part, index) => {
+				if (part) {
+					currentPath += part;
+					const folderPath = currentPath;
+					const folderSpan = titleContainer.createSpan({ text: part, cls: 'taskboard-path-folder' });
+					folderSpan.addEventListener('click', () => {
+						const folder = this.app.vault.getAbstractFileByPath(folderPath);
+						if (folder instanceof TFolder) {
+							revealFileFolderInExplorer(this.plugin, folder);
+						}
+					});
 
-				// Add separator
-				if (index < folderParts.length - 1 || fileName) {
-					titleContainer.createSpan({ text: '/', cls: 'taskboard-path-separator' });
+					// Add separator
+					if (index < folderParts.length - 1 || fileName) {
+						titleContainer.createSpan({ text: '/', cls: 'taskboard-path-separator' });
+					}
+					currentPath += '/';
 				}
-				currentPath += '/';
-			}
-		});
+			});
+		}
 
 		// Add file name
 		if (fileName) {
@@ -381,7 +386,7 @@ export class TaskBoardView extends ItemView {
 			},
 		});
 		createBtn.addEventListener("click", () => {
-			this.handleCreateTemplateBoard();
+			void this.handleCreateTemplateBoard();
 		});
 
 		// Scan vault button
@@ -409,7 +414,7 @@ export class TaskBoardView extends ItemView {
 			const filePath = `TaskBoard-Template-${timestamp}.taskboard`;
 
 			// Create a deep copy of DEFAULT_BOARD and update its properties
-			const newBoard: Board = JSON.parse(JSON.stringify(DEFAULT_BOARD));
+			let newBoard: Board = DEFAULT_BOARD;
 			newBoard.id = boardId;
 
 			// Save the board to disk
@@ -445,6 +450,10 @@ export class TaskBoardView extends ItemView {
 				"TaskBoardView.tsx/handleCreateTemplateBoard",
 			);
 		}
+	}
+
+	onResize(): void {
+		this.renderCustomViewHeader();
 	}
 
 	async onClose() {
