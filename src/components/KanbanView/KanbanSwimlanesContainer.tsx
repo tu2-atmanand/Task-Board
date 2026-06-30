@@ -212,12 +212,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				swimlaneName = statusName ? statusName : 'All rest';
 			} else if (property === 'tags' && swimlaneItemValue.trim() === "") {
 				swimlaneName = "No tags";
-			} else if (property === 'filePath') {
-				swimlaneName = swimlaneItemValue.split("/").pop() ?? swimlaneItemValue;
-			} else if (property === 'folderPath') {
-				const parts = swimlaneItemValue.split("/");
-				swimlaneName = parts.at(-2) ?? swimlaneItemValue;
-				swimlaneName = swimlaneName + "/";
+			} else if (property === 'filePath' || property === 'folderPath') {
+				// #839: show the full vault-relative path so identically-named files/folders stay distinct
+				swimlaneName = swimlaneItemValue;
 			}
 			const isSwimlaneMinimized = minimized?.includes(swimlaneName) ?? false;
 
