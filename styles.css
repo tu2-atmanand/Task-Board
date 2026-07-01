@@ -7076,7 +7076,8 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	border-right: 1px solid var(--divider-color);
 	left: 0;
 	z-index: 5;
-	width: calc(var(--taskboard-leaf-width, 100%) - 25px);
+	width: 100%;
+	contain: inline-size;
 	flex-direction: row;
 	height: 2rem;
 }
@@ -7096,7 +7097,9 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	/* overflow: hidden; */
 	/* text-overflow: ellipsis; */
 	min-height: 100%;
-	min-width: 100%;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
 	flex-direction: row;
 }
 
@@ -7104,7 +7107,8 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
-	max-width: 95%;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .swimlaneHeaderName {
@@ -7113,7 +7117,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	justify-content: flex-start;
 	flex-direction: row;
 	gap: 0.5rem;
-	max-width: 95%;
+	min-width: 0;
 }
 
 .swimlaneHeaderNameLable {
@@ -7132,9 +7136,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 	/* 🔑 MAGIC FIX: Flex items won't shrink without this */
 	min-width: 0;
-
-	/* Take up all remaining space after siblings */
-	flex: 1;
 }
 
 .swimlaneHeaderSwimlaneCount {
@@ -7147,6 +7148,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	padding-inline: 3px;
 	margin-left: 1rem;
 	min-width: 1.5rem;
+	flex-shrink: 0;
 }
 
 /* Wrapper for all columns in a swimlane */
@@ -7206,6 +7208,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	align-items: center;
 	padding: 0 6px;
 	color: var(--text-muted);
+	flex-shrink: 0;
 }
 
 .swimlaneHeaderContainerMinimizICon svg {
