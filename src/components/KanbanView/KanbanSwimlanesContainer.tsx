@@ -1,6 +1,6 @@
 // src/components/KanbanView/KanbanSwimlanesContainer.tsx
 
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useRef, useState, useEffect } from 'react';
 import { Board, ColumnData } from 'src/interfaces/BoardConfigs';
 import { taskItem } from 'src/interfaces/TaskItem';
 import LazyColumn from './LazyColumn';
@@ -83,6 +83,10 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 	// Use only swimlane-enabled columns for swimlanes
 	const activeColumns = columnsInSwimlanes.filter((col) => col.active);
+
+	// vertical header spans the row's real height (runtime, capped by maxSwimlaneHeight), so measure it
+	const columnsWrapperRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+	const [swimlaneRowHeights, setSwimlaneRowHeights] = useState<Record<number, number>>({});
 
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
 		if (!swimlaneColumnTasks) {
@@ -237,6 +241,31 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		return swimlaneRows;
 	}, [board, tasksPerColumn, plugin]);
 
+	// keep above the early return - a hook after it changes hook count between renders
+	useEffect(() => {
+		const el = columnsHeaderRef.current;
+		if (!el) return;
+		if (headerUIType !== HeaderUITypeOptions.vertical) return;
+		const win = el.ownerDocument.defaultView ?? window;
+		const observer = new win.ResizeObserver((entries) => {
+			setSwimlaneRowHeights((prev) => {
+				const next = { ...prev };
+				let changed = false;
+				for (const entry of entries) {
+					const rowIndex = Number((entry.target as HTMLElement).dataset.rowIndex);
+					const height = entry.contentRect.height;
+					if (next[rowIndex] !== height) {
+						next[rowIndex] = height;
+						changed = true;
+					}
+				}
+				return changed ? next : prev;
+			});
+		});
+		columnsWrapperRefs.current.forEach((el) => observer.observe(el));
+		return () => observer.disconnect();
+	}, [headerUIType, swimlanes, maxSwimlaneHeight]);
+
 	const hasExcludedColumns = columnsOutsideSwimlanes.length > 0;
 	const hasSwimlaneColumns = columnsInSwimlanes.length > 0;
 
@@ -385,7 +414,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 											<div className='swimlaneHeaderSwimlaneCount-vertical'>
 												{swimlane.tasks.flat().length ?? 0}
 											</div>
-											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName}>
+											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName} style={!swimlane.minimized && swimlaneRowHeights[rowIndex] ? { width: `${Math.max(0, swimlaneRowHeights[rowIndex] - 80)}px` } : undefined}>
 												<div className='swimlaneHeaderNameLable-vertical'>{property}:</div>
 												{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue-vertical')}
 											</div>
@@ -396,7 +425,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 
 									{/* Columns for this Swimlane */}
-									<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+									<div className="swimlaneColumnsWrapper" data-row-index={rowIndex} ref={(el) => { if (el) columnsWrapperRefs.current.set(rowIndex, el); else columnsWrapperRefs.current.delete(rowIndex); }} style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
 										{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
 											const swimlaneData = {
 												property: board.swimlanes.property,
@@ -440,7 +469,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 
 									{/* Columns for this Swimlane */}
-									<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+									<div className="swimlaneColumnsWrapper" data-row-index={rowIndex} ref={(el) => { if (el) columnsWrapperRefs.current.set(rowIndex, el); else columnsWrapperRefs.current.delete(rowIndex); }} style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
 										{swimlane.minimized ? null : activeColumns.map((column, colIndex) => {
 											const swimlaneData = {
 												property: board.swimlanes.property,
