@@ -14,7 +14,7 @@ import TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal";
 import { MultiSuggest, getFileSuggestions, getFolderSuggestions, getTagSuggestions } from "src/services/MultiSuggest";
-import { colTypeNames, HeaderUITypeOptions, UniversalDateOptions } from "src/interfaces/Enums";
+import { colTypeNames, HeaderUITypeOptions, HeaderTruncationOptions, UniversalDateOptions } from "src/interfaces/Enums";
 import { Board, ColumnData, swimlaneConfigs } from "src/interfaces/BoardConfigs";
 import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "src/interfaces/Mapping";
 import { AddColumnModal } from "./AddColumnModal";
@@ -215,7 +215,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				sortCriteria: 'asc',
 				minimized: [],
 				maxHeight: '300px',
-				headerUIType: HeaderUITypeOptions.horizontal
+				headerUIType: HeaderUITypeOptions.horizontal,
+				headerTruncation: HeaderTruncationOptions.middle
 			},
 		};
 		setLocalBoards([...oldBoards, newBoard]);

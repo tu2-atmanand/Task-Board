@@ -9,7 +9,7 @@ import { t } from 'src/utils/lang/helper';
 import { ChevronDown, ChevronRight, TableCellsSplit } from 'lucide-react';
 import { eventEmitter } from 'src/services/EventEmitter';
 import { bugReporterManagerInsatance } from 'src/managers/BugReporter';
-import { HeaderUITypeOptions } from 'src/interfaces/Enums';
+import { HeaderUITypeOptions, HeaderTruncationOptions } from 'src/interfaces/Enums';
 import { getAllTaskTags } from 'src/utils/TaskItemUtils';
 import { getStatusNameFromStatusSymbol } from 'src/utils/taskNote/TaskNoteUtils';
 
@@ -77,6 +77,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		groupAllRest,
 		maxHeight: maxSwimlaneHeight,
 		headerUIType,
+		headerTruncation = HeaderTruncationOptions.middle,
 		minimized
 	} = board.swimlanes;
 
@@ -316,6 +317,29 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		}
 	}
 
+	const renderHeaderNameValue = (value: string, className: string) => {
+		if (headerTruncation === HeaderTruncationOptions.middle) {
+			const trailingSlash = value.endsWith('/') ? '/' : '';
+			const segments = value.split('/').filter(Boolean);
+			const tailSegments = 3;
+			if (segments.length > tailSegments) {
+				const head = segments.slice(0, -tailSegments).join('/');
+				const tail = '/' + segments.slice(-tailSegments).join('/') + trailingSlash; // lead the tail with '/' so names don't merge after the head ellipsis
+				return (
+					<div className={className} data-truncate={headerTruncation}>
+						<span className="swimlaneHeaderNameHead">{head}</span>
+						<span className="swimlaneHeaderNameTail">{tail}</span>
+					</div>
+				);
+			}
+		}
+		// middle with too few segments (short path, tag or status) - falls back to the end ellipsis
+		const mode = headerTruncation === HeaderTruncationOptions.middle ? HeaderTruncationOptions.end : headerTruncation;
+		return (
+			<div className={className} data-truncate={mode}><bdi>{value}</bdi></div>
+		);
+	};
+
 	// Render a sticky header row of column headers across swimlanes
 	return (
 		<div className="kanbanSwimlanesGrid">
@@ -363,7 +387,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 											</div>
 											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName}>
 												<div className='swimlaneHeaderNameLable-vertical'>{property}:</div>
-												<div className='swimlaneHeaderNameValue-vertical'>{swimlane.swimlaneName}</div>
+												{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue-vertical')}
 											</div>
 											<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
 												<ChevronRight />
@@ -406,7 +430,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												</div>
 												<div className="swimlaneHeaderName" title={swimlane.swimlaneName}>
 													<div className='swimlaneHeaderNameLable'>{property}:</div>
-													<div className='swimlaneHeaderNameValue'>{swimlane.swimlaneName}</div>
+													{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue')}
 												</div>
 											</div>
 											<div className='swimlaneHeaderSwimlaneCount'>

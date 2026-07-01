@@ -122,6 +122,7 @@ export type swimlaneConfigs = {
 	}[]; // This is only if user selects "custom" as the sort criteria.
 	groupAllRest?: boolean; // This will be only visible for customSortOrder. It will help user to decide if they want to group all the rest of the task below the custom sort order.
 	headerUIType: string;
+	headerTruncation: string; // e.g., 'start', 'middle', 'end'
 	minimized: string[]; // This will store the names of the minimized swimlanes.
 };
 

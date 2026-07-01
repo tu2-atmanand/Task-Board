@@ -7138,6 +7138,31 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	min-width: 0;
 }
 
+/* Header path truncation styles ("end" is the base rule above; start/middle keep the file name) */
+.swimlaneHeaderNameValue[data-truncate="start"],
+.swimlaneHeaderNameValue-vertical[data-truncate="start"] {
+	direction: rtl;
+}
+
+.swimlaneHeaderNameValue[data-truncate="middle"],
+.swimlaneHeaderNameValue-vertical[data-truncate="middle"] {
+	display: flex;
+	flex-direction: row;
+}
+
+.swimlaneHeaderNameHead {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.swimlaneHeaderNameTail {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}
+
 .swimlaneHeaderSwimlaneCount {
 	color: var(--text-muted);
 	font-size: smaller;
