@@ -6909,8 +6909,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 .swimlaneRow.verticalUI.minimized {
 	min-height: 2rem;
 	min-width: 100%;
-	position: sticky;
-	left: 0;
 }
 
 .swimlaneHeaderContainer-vertical {
@@ -6953,8 +6951,14 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 .swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
 	display: flex;
 	flex-direction: row-reverse;
-	gap: 1rem;
 	padding-inline: 0.2rem;
+	/* size to the label (mirror of the horizontal .swimlaneHeader fix): shrink to the bar and
+	   truncate only at its edge, not at a fixed fraction, so the label uses all the space; sticky
+	   pins it left, justify-content clusters the group flush instead of space-between spreading it */
+	position: sticky;
+	left: 0;
+	flex: 0 1 auto;
+	justify-content: flex-end;
 }
 
 .swimlaneHeaderSwimlaneCount-vertical {
@@ -6999,7 +7003,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 1rem;
+	gap: 0.5rem;
 	width: 100%;
 
 	transform: rotate(0deg);
@@ -7033,7 +7037,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	margin-inline: 4px;
+	margin-left: 1rem;
 	min-width: 20px;
 	justify-content: center;
 
@@ -7076,7 +7080,8 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	border-right: 1px solid var(--divider-color);
 	left: 0;
 	z-index: 5;
-	width: calc(var(--taskboard-leaf-width, 100%) - 25px);
+	width: 100%;
+	contain: inline-size;
 	flex-direction: row;
 	height: 2rem;
 }
@@ -7096,7 +7101,12 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	/* overflow: hidden; */
 	/* text-overflow: ellipsis; */
 	min-height: 100%;
-	min-width: 100%;
+	/* size to the label (not flex:1) so position:sticky has room to travel and the label/count pin
+	   left while the full-width bar scrolls; shrink to the bar and truncate only at its edge - not
+	   at a fixed fraction, so the label uses all the space the bar offers */
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
 	flex-direction: row;
 }
 
@@ -7104,7 +7114,8 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
-	max-width: 95%;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .swimlaneHeaderName {
@@ -7113,7 +7124,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	justify-content: flex-start;
 	flex-direction: row;
 	gap: 0.5rem;
-	max-width: 95%;
+	min-width: 0;
 }
 
 .swimlaneHeaderNameLable {
@@ -7132,9 +7143,31 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 
 	/* 🔑 MAGIC FIX: Flex items won't shrink without this */
 	min-width: 0;
+}
 
-	/* Take up all remaining space after siblings */
-	flex: 1;
+/* Header path truncation styles ("end" is the base rule above; start/middle keep the file name) */
+.swimlaneHeaderNameValue[data-truncate="start"],
+.swimlaneHeaderNameValue-vertical[data-truncate="start"] {
+	direction: rtl;
+}
+
+.swimlaneHeaderNameValue[data-truncate="middle"],
+.swimlaneHeaderNameValue-vertical[data-truncate="middle"] {
+	display: flex;
+	flex-direction: row;
+}
+
+.swimlaneHeaderNameHead {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.swimlaneHeaderNameTail {
+	flex: 0 0 auto;
+	white-space: nowrap;
 }
 
 .swimlaneHeaderSwimlaneCount {
@@ -7147,6 +7180,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	padding-inline: 3px;
 	margin-left: 1rem;
 	min-width: 1.5rem;
+	flex-shrink: 0;
 }
 
 /* Wrapper for all columns in a swimlane */
@@ -7206,6 +7240,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	align-items: center;
 	padding: 0 6px;
 	color: var(--text-muted);
+	flex-shrink: 0;
 }
 
 .swimlaneHeaderContainerMinimizICon svg {
