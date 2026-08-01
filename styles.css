@@ -4192,7 +4192,7 @@ ReactFlow necessary CSS from its bundle
 }
 
 .react-flow__edge-path {
-	stroke: rgb(var(--canvas-color));
+	stroke: var(--text-muted);
 	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
 	stroke-width: calc(1.5px * var(--task-board-map-zoom));
 	fill: none;
@@ -4200,7 +4200,7 @@ ReactFlow necessary CSS from its bundle
 }
 
 .react-flow__connection-path {
-	stroke: rgb(var(--canvas-color));
+	stroke: var(--text-muted);
 	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
 	stroke-width: calc(1.5px * var(--task-board-map-zoom));
 	fill: none;
