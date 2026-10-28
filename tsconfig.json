@@ -30,7 +30,7 @@
 			"obsidian-typings",
 			"node"
 		],
-		// "verbatimModuleSyntax": true
+		// "verbatimModuleSyntax": true,
 		// TODO : Below are new settings enabled in the "obsidian-sample-plugin"
 		// "strictBindCallApply": true,
 		// "allowSyntheticDefaultImports": true,

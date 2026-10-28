@@ -58,7 +58,7 @@
       "dependsOn"
     ],
     "taskCardStyle": "bases",
-    "showVerticalScroll": false,
+    "showVerticalScroll": true,
     "dragAutoScrollEdgePercent": 15,
     "tagColors": [
       {
@@ -248,13 +248,13 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2295,
-    "experimentalFeatures": true,
+    "uniqueIdCounter": 2296,
+    "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
       "boardIndex": 1,
-      "settingTab": 0,
+      "settingTab": 1,
       "taskId": "",
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
     },

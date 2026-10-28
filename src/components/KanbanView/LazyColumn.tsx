@@ -424,7 +424,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 * Opens the column menu, which allows the user to sort and filter the tasks in the column,
 	 * configure the column's sorting and filtering, and hide the column.
 	 *
-	 * @param {MouseEvent | React.MouseEvent} event - The event that triggered the menu
+	 * @param event - The event that triggered the menu
 	 */
 	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
 		const columnMenu = new Menu();
