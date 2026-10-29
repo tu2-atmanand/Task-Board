@@ -52,6 +52,7 @@ import { eventEmitter } from "src/services/EventEmitter";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { parse } from "date-fns";
+import { getHideClassForProperty } from "src/utils/UIHelpers";
 
 export default class TaskBoard extends Plugin {
 	app: App;
@@ -173,6 +174,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	onunload() {
+		this.clearTaskPropertyVisibilityStyles();
 		// console.log("Task Board : Uninstalling...");
 		// deleteAllLocalStorageKeys(); // TODO : Enable this while production build. This is disabled for testing purpose because the data from localStorage is required for testing.
 		// onUnloadSave(this.plugin);
@@ -349,6 +351,7 @@ export default class TaskBoard extends Plugin {
 	registerReadingModePostProcessor() {
 		const hiddenProperties =
 			this.settings.data.globalSettings?.hiddenTaskProperties || [];
+		this.clearTaskPropertyVisibilityStyles();
 		if (hiddenProperties.length === 0) {
 			return;
 		}
@@ -374,188 +377,28 @@ export default class TaskBoard extends Plugin {
 				});
 			});
 		} else {
-			// Instead of dynamically injecting CSS, apply CSS classes to the container
-			// to control visibility of task properties via static styles in styles.css.
-			// Link to refer for Tasks plugin CSS classes: https://publish.obsidian.md/tasks/Advanced/Styling#Sample+HTML+Full+mode.
-
-			// ---------------------------------------------------------
-			// METHOD 1
-			// ---------------------------------------------------------
-			// Find the view container or root element to apply CSS classes
-			// const viewContainer = document.querySelector(
-			// 	`.workspace-leaf-content[data-type="task-board-view"]`,
-			// );
-
-			// if (viewContainer) {
-			// 	// Remove all existing hide classes
-			// 	viewContainer.classList.remove("task-board-view-container");
-			// 	hiddenProperties.forEach((property) => {
-			// 		const hideClass = getHideClassForProperty(property);
-			// 		viewContainer.classList.remove(hideClass);
-			// 	});
-
-			// 	// Add base class and new hide classes
-			// 	viewContainer.classList.add("task-board-view-container");
-			// 	hiddenProperties.forEach((property) => {
-			// 		const hideClass = getHideClassForProperty(property);
-			// 		viewContainer.classList.add(hideClass);
-			// 	});
-			// }
-
-			// ---------------------------------------------------------
-			// METHOD 2
-			// ---------------------------------------------------------
-			const styleId = "task-board-hide-task-properties-style";
-			let styleEl = document.getElementById(
-				styleId,
-			) as HTMLStyleElement | null;
-			if (!styleEl) {
-				styleEl = document.createElement("style");
-				styleEl.id = styleId;
-				document.head.appendChild(styleEl);
-			}
-			let css = "";
-			const fadeInCSS =
-				"@keyframes task-board-fade-in { from { display: none !important; opacity: 0; transform: scaleX(0); } to { display: inline !important; opacity: 1; transform: scaleX(1); } }";
-			// const fadeOutCSS =
-			// 	"@keyframes task-board-fade-out { from { display: inline !important; opacity: 1; transform: scaleX(1); } to { display: none !important; opacity: 0; transform: scaleX(0); } }";
+			// The plugin stylesheet contains the hide/reveal rules; apply the configured classes.
+			document.body.classList.add("task-board-view-container");
 			hiddenProperties.forEach((property) => {
-				switch (property) {
-					case taskPropertiesNames.ID:
-						css +=
-							".task-id{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-id { 	opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-id { animation: task-board-fade-out 0.5s ease-in-out 0.5s; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.Tags:
-						css +=
-							".task-description>span>a.tag { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-description>span>a.tag { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-					// css +=
-					// 	"li:out-of-range .task-description>span>a.tag { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-					// css += fadeOutCSS;
-					case taskPropertiesNames.CreatedDate:
-						css +=
-							".task-created { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-created { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:out-of-range .task-created { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.StartDate:
-						css +=
-							".task-start { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-start { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-start { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.ScheduledDate:
-						css +=
-							".task-scheduled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-scheduled { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-scheduled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.DueDate:
-						css +=
-							".task-due { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-due { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-due { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.CompletionDate:
-						css +=
-							".task-completion { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-completion { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-completion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.CancelledDate:
-						css +=
-							".task-cancelled { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-cancelled { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-cancelled { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.Priority:
-						css +=
-							".task-priority { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-priority { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-priority { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.Time:
-						css +=
-							".task-time { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-time { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-time { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.Dependencies:
-						css +=
-							".task-dependsOn { opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-dependsOn { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-dependsOn { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.OnCompletion:
-						css +=
-							".task-onCompletion{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-onCompletion { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-onCompletion { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-					case taskPropertiesNames.Recurring:
-						css +=
-							".task-recurring{ opacity: 0; transform: scaleX(0); transition: opacity 0.2s ease-in, transform 0.2s ease-in; }";
-						css +=
-							"span:hover .task-recurring { opacity: 1; transform: scaleX(1); transition-delay: 0.3s; }";
-						css += fadeInCSS;
-						// css +=
-						// 	"li:not(:hover) .task-recurring { display: none !important; animation: task-board-fade-out 0.5s ease-in-out; }";
-						// css += fadeOutCSS;
-						break;
-
-					// TODO : Reminder is pending.
+				const hideClass = getHideClassForProperty(property);
+				if (hideClass) {
+					document.body.classList.add(hideClass);
 				}
 			});
-			styleEl.textContent = css;
 		}
+	}
+
+	private clearTaskPropertyVisibilityStyles() {
+		document
+			.getElementById("task-board-hide-task-properties-style")
+			?.remove();
+		const hideClasses = Object.values(taskPropertiesNames)
+			.map(getHideClassForProperty)
+			.filter(Boolean);
+		document.body.classList.remove(
+			"task-board-view-container",
+			...hideClasses,
+		);
 	}
 
 	private hidePropertiesInElement(
@@ -576,35 +419,76 @@ export default class TaskBoard extends Plugin {
 		}
 
 		textNodes.forEach((textNode) => {
-			let content = textNode.textContent || "";
-			let modified = false;
+			const content = textNode.textContent || "";
+			let parts = [{ text: content, hidden: false }];
 
 			hiddenProperties.forEach((property) => {
-				const pattern = getTaskPropertyRegexPatterns(
+				const sourcePattern = getTaskPropertyRegexPatterns(
 					property,
 					this.settings.data.globalSettings?.taskPropertyFormat,
 				);
-				if (pattern.test(content)) {
-					content = content.replace(pattern, (match) => {
-						modified = true;
-						return `<span class="taskboard-hidden-property">${match}</span>`;
+				const pattern = new RegExp(
+					sourcePattern.source,
+					sourcePattern.flags.includes("g")
+						? sourcePattern.flags
+						: `${sourcePattern.flags}g`,
+				);
+				parts = parts.flatMap((part) => {
+					if (part.hidden) {
+						return [part];
+					}
+
+					const matches = [...part.text.matchAll(pattern)];
+					if (matches.length === 0) {
+						return [part];
+					}
+
+					const matchedParts: typeof parts = [];
+					let lastIndex = 0;
+					matches.forEach((match) => {
+						const start = match.index ?? 0;
+						const matchedText = match[0];
+						if (
+							matchedText.length === 0 ||
+							start < lastIndex
+						) {
+							return;
+						}
+						if (start > lastIndex) {
+							matchedParts.push({
+								text: part.text.slice(lastIndex, start),
+								hidden: false,
+							});
+						}
+						matchedParts.push({
+							text: matchedText,
+							hidden: true,
+						});
+						lastIndex = start + matchedText.length;
 					});
-				}
+					if (lastIndex < part.text.length) {
+						matchedParts.push({
+							text: part.text.slice(lastIndex),
+							hidden: false,
+						});
+					}
+					return matchedParts.length > 0 ? matchedParts : [part];
+				});
 			});
 
-			if (modified && textNode.parentElement) {
-				// Create a temporary element to hold the HTML content safely
-				const tempDiv = document.createElement("div");
-				// Use insertAdjacentHTML with proper sanitization (content already escaped via regex)
-				tempDiv.insertAdjacentHTML("beforeend", content);
-
-				// Replace the text node with the new content
-				while (tempDiv.firstChild) {
-					textNode.parentNode?.insertBefore(
-						tempDiv.firstChild,
-						textNode,
-					);
-				}
+			if (parts.some((part) => part.hidden) && textNode.parentNode) {
+				const fragment = document.createDocumentFragment();
+				parts.forEach((part) => {
+					if (part.hidden) {
+						const span = document.createElement("span");
+						span.className = "taskboard-hidden-property";
+						span.textContent = part.text;
+						fragment.append(span);
+					} else {
+						fragment.append(document.createTextNode(part.text));
+					}
+				});
+				textNode.parentNode.insertBefore(fragment, textNode);
 				textNode.remove();
 			}
 		});
