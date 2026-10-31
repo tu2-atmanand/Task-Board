@@ -1,7 +1,7 @@
 // /src/components/BoardFilters/ViewTaskFilterPopover.ts
 
 import { App } from "obsidian";
-import { CloseableComponent, Component } from "obsidian";
+import { Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import type TaskBoard from "main";
 import { t } from "src/utils/lang/helper";
@@ -11,7 +11,6 @@ import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 
 export class ViewTaskFilterPopover
 	extends Component
-	implements CloseableComponent
 {
 	private plugin: TaskBoard;
 	private app: App;
