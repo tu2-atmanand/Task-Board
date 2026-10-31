@@ -290,7 +290,9 @@ const TaskBoardViewContent: React.FC<{ app: App; plugin: TaskBoard; boardConfigs
 	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
 		try {
 			const currentBoardConfig = boards[activeBoardIndex];
-			if (Platform.isMobile || Platform.isMacOS || event.currentTarget.win !== plugin.app.workspace.containerEl.win) {
+			const boardWin = (event.currentTarget as HTMLElement | null)?.win ?? window;
+
+			if (Platform.isMobile || Platform.isMacOS || boardWin !== plugin.app.workspace.containerEl.win) {
 				// On mobile/macOS, or when the board is in a popout window, open a modal instead of the popover
 				// (the popover and its path autocomplete render in the main window, not the popout).
 				const filterModal = new ViewTaskFilterModal(
