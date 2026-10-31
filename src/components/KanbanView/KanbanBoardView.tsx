@@ -76,7 +76,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, board, filteredAndSea
 		}
 
 		return null;
-	}, [loading]);
+	}, [loading, board]);
 
 	const renderFreshInstallMessage = useMemo(() => {
 		if (freshInstall) {
