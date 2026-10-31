@@ -89,7 +89,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	const [swimlaneRowHeights, setSwimlaneRowHeights] = useState<Record<number, number>>({});
 
 	// collapsed rows render no columns, so they can't size to them - mirror the always-rendered column-header width instead
-	const columnsHeaderRef = useRef<HTMLDivElement>(null);
+	const swimlanesContainerRef = useRef<HTMLDivElement>(null);
 	const [columnsWidth, setColumnsWidth] = useState<number | undefined>(undefined);
 
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
@@ -247,9 +247,11 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 	// keep above the early return - a hook after it changes hook count between renders
 	useEffect(() => {
-		const el = columnsHeaderRef.current;
+		const el = swimlanesContainerRef.current;
 		if (!el) return;
+
 		if (headerUIType !== HeaderUITypeOptions.vertical) return;
+
 		const win = el.ownerDocument.defaultView ?? window;
 		const observer = new win.ResizeObserver((entries) => {
 			setSwimlaneRowHeights((prev) => {
@@ -272,14 +274,22 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 	// measure the column-header width so collapsed rows (which render no columns) can match it
 	useLayoutEffect(() => {
-		const el = columnsHeaderRef.current;
-		if (!el) return;
-		const measure = () => setColumnsWidth((prev) => (prev !== el.offsetWidth ? el.offsetWidth : prev));
+		const container = swimlanesContainerRef.current;
+		if (!container) return;
+
+		const measure = () => {
+			const width = container.offsetWidth;
+			setColumnsWidth((prev) => (prev !== width ? width : prev));
+		};
 		measure();
-		// create the observer in the element's own window, otherwise it never fires when the board is in a popout
-		const win = el.ownerDocument.defaultView ?? window;
+
+		// Observe the available width as well as the intrinsic header width. The header alone may not
+		// resize when the containing leaf changes size because it is sized to fit its columns.
+		const win = container.ownerDocument.defaultView;
+		if (!win) return;
+
 		const observer = new win.ResizeObserver(measure);
-		observer.observe(el);
+		observer.observe(container);
 		return () => observer.disconnect();
 	}, [headerUIType, swimlanes]);
 
@@ -398,9 +408,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 			{/* Swimlane Rows */}
 			{hasSwimlaneColumns && swimlaneBoard && (
-				<div className="swimlanesContainer">
+				<div ref={swimlanesContainerRef} className="swimlanesContainer">
 					{/* Top header showing column headers and counts */}
-					<div ref={columnsHeaderRef} className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
+					<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
 						{/* A small Icon at the top right corner inside the swimlanes container */}
 						{headerUIType === HeaderUITypeOptions.vertical && (
 							<TableCellsSplit strokeWidth={1.5} size={32} className='swimlanesContainerIcon' />
@@ -466,7 +476,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 								</div>
 							) : (
-								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`} style={swimlane.minimized && columnsWidth ? { width: `${columnsWidth}px` } : undefined}>
+								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`} style={columnsWidth ? { width: `${columnsWidth}px` } : undefined}>
 									{/* Swimlane Label */}
 									<div className='swimlaneHeaderContainer'>
 										<div className='swimlaneHeader'>
