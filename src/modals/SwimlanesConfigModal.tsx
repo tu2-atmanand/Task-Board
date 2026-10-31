@@ -4,7 +4,7 @@ import { Modal, App, Setting, setIcon, normalizePath } from 'obsidian';
 import { t } from 'src/utils/lang/helper';
 import Sortable from 'sortablejs';
 import { swimlaneConfigs } from 'src/interfaces/BoardConfigs';
-import { HeaderUITypeOptions } from 'src/interfaces/Enums';
+import { HeaderUITypeOptions, HeaderTruncationOptions } from 'src/interfaces/Enums';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, StatusDropdownOption } from 'src/interfaces/Mapping';
 import TaskBoard from 'main';
 import { getFileSuggestions, getFolderSuggestions, getTagSuggestions, MultiSuggest } from 'src/services/MultiSuggest';
@@ -32,6 +32,7 @@ export class SwimlanesConfigModal extends Modal {
 	private maxHeight: string;
 	private groupAllRest: boolean;
 	private headerUIType: string;
+	private headerTruncation: string;
 
 	private sortableInstance: Sortable | null = null;
 	private sortableListEl: HTMLElement | null = null;
@@ -60,6 +61,7 @@ export class SwimlanesConfigModal extends Modal {
 		this.maxHeight = swimlaneConfig.maxHeight || '300px';
 		this.groupAllRest = swimlaneConfig.groupAllRest ?? true;
 		this.headerUIType = swimlaneConfig.headerUIType || HeaderUITypeOptions.horizontal;
+		this.headerTruncation = swimlaneConfig.headerTruncation || HeaderTruncationOptions.middle;
 
 		this.modalEl.classList.add('swimlanes-config-modal');
 	}
@@ -88,6 +90,7 @@ export class SwimlanesConfigModal extends Modal {
 			this.renderMaxHeight(modalContent);
 			this.renderSortCriteria(modalContent);
 			this.renderHeaderUIType(modalContent);
+			this.renderHeaderTruncation(modalContent);
 		}
 
 		// this.renderButtons(modalContent);
@@ -503,6 +506,29 @@ export class SwimlanesConfigModal extends Modal {
 					}),)
 	}
 
+	private renderHeaderTruncation(container: HTMLElement) {
+		const truncationOptions = [
+			{ value: HeaderTruncationOptions.start, label: t('truncate-start') },
+			{ value: HeaderTruncationOptions.middle, label: t('truncate-middle') },
+			{ value: HeaderTruncationOptions.end, label: t('truncate-end') },
+		];
+
+		new Setting(container)
+			.setName(t('header-truncation'))
+			.setDesc(t('header-truncation-info'))
+			.addDropdown((dropdown) => {
+				truncationOptions.forEach((option) => {
+					dropdown.addOption(option.value, option.label);
+				});
+				dropdown
+					.setValue(this.headerTruncation)
+					.onChange(async (value) => {
+						this.headerTruncation = value;
+						this.edited = true;
+					})
+			});
+	}
+
 	private renderHeaderUIType(container: HTMLElement) {
 		const uiTypeOptions = [
 			{ value: HeaderUITypeOptions.horizontal, label: t('horizontal') },
@@ -555,6 +581,7 @@ export class SwimlanesConfigModal extends Modal {
 				customSortOrder: this.customSortOrder,
 				groupAllRest: this.groupAllRest,
 				headerUIType: this.headerUIType,
+				headerTruncation: this.headerTruncation,
 				minimized: this.swimlaneConfig.minimized,
 			};
 			this.onSave(updatedConfig);
@@ -588,6 +615,7 @@ export class SwimlanesConfigModal extends Modal {
 				customSortOrder: this.customSortOrder,
 				groupAllRest: this.groupAllRest,
 				headerUIType: this.headerUIType,
+				headerTruncation: this.headerTruncation,
 				minimized: this.swimlaneConfig.minimized,
 			};
 			this.onSave(updatedConfig);

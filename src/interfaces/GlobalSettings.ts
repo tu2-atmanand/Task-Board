@@ -17,6 +17,7 @@ import {
 	taskCardStyleNames,
 	scanModeOptions,
 	HeaderUITypeOptions,
+	HeaderTruncationOptions,
 } from "./Enums";
 import { taskItemKeyToNameMapping } from "./Mapping";
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants";
@@ -257,6 +258,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					minimized: [],
 					maxHeight: "300px",
 					headerUIType: HeaderUITypeOptions.horizontal,
+					headerTruncation: HeaderTruncationOptions.middle,
 				},
 			},
 			{
@@ -331,6 +333,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					minimized: [],
 					maxHeight: "300px",
 					headerUIType: HeaderUITypeOptions.horizontal,
+					headerTruncation: HeaderTruncationOptions.middle,
 				},
 			},
 			{
@@ -407,6 +410,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 					minimized: [],
 					maxHeight: "300px",
 					headerUIType: HeaderUITypeOptions.horizontal,
+					headerTruncation: HeaderTruncationOptions.middle,
 				},
 			},
 		],
