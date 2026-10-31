@@ -434,7 +434,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 					{swimlanes.map((swimlane, rowIndex) => (
 						<React.Fragment key={swimlane.swimlaneValue}>
 							{headerUIType === HeaderUITypeOptions.vertical ? (
-								<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`} style={swimlane.minimized && columnsWidth ? { width: `${columnsWidth}px`, minWidth: `${columnsWidth}px` } : undefined}>
+								<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`} style={swimlane.minimized && columnsWidth ? { width: `${columnsWidth - 20}px`, minWidth: `${columnsWidth - 20}px` } : undefined}>
 									{/* Swimlane Label */}
 									<div className='swimlaneHeaderContainer-vertical'>
 										<div className='swimlaneHeader-vertical'>
@@ -476,7 +476,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 								</div>
 							) : (
-								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`} style={columnsWidth ? { width: `${columnsWidth}px` } : undefined}>
+								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`} style={columnsWidth ? { width: `${columnsWidth - 20}px` } : undefined}>
 									{/* Swimlane Label */}
 									<div className='swimlaneHeaderContainer'>
 										<div className='swimlaneHeader'>
