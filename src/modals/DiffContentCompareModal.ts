@@ -53,13 +53,10 @@ export class DiffContentCompareModal extends Modal {
 		const newContentDiv = rightDiv.createDiv({
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
-		newContentDiv.insertAdjacentHTML(
-			"beforeend",
-			this.getHighlightedDiff(
-				this.cachedTaskContent,
-				this.taskContentFromFile,
-				"left",
-			),
+		newContentDiv.textContent = this.getHighlightedDiff(
+			this.cachedTaskContent,
+			this.taskContentFromFile,
+			"left",
 		);
 		new ButtonComponent(rightDiv)
 			.setButtonText("Keep this as it is")
@@ -76,13 +73,10 @@ export class DiffContentCompareModal extends Modal {
 		const oldContentDiv = leftDiv.createDiv({
 			cls: "taskboard-diff-content-compare-modal-content",
 		});
-		oldContentDiv.insertAdjacentHTML(
-			"beforeend",
-			this.getHighlightedDiff(
-				this.cachedTaskContent,
-				this.EditedTaskContent,
-				"right",
-			),
+		oldContentDiv.textContent = this.getHighlightedDiff(
+			this.cachedTaskContent,
+			this.EditedTaskContent,
+			"right",
 		);
 		new ButtonComponent(leftDiv)
 			.setButtonText("Use this")
@@ -95,7 +89,7 @@ export class DiffContentCompareModal extends Modal {
 		const noteOnSetting = contentEl.createEl("p", {
 			text: "NOTE : If you think this safe guard modal shown is irrelevant and its also popping-up too many times, you can by-pass it and disable this from the settings under the 'general' tab.",
 		});
-		noteOnSetting.style.color = "red";
+		noteOnSetting.addClass("tb_color_red");
 
 		const infoDiv = contentEl.createDiv({
 			cls: "taskboard-diff-content-compare-modal-info",
@@ -127,7 +121,7 @@ export class DiffContentCompareModal extends Modal {
 
 		contentEl.createEl("hr");
 
-		contentEl.createEl("h2", { text: "Debug Info" });
+		contentEl.createEl("h2", { text: "Debug info" });
 		contentEl.createEl("p", {
 			text: "Here is why this modal was shown in the first place. If you think this modal shown was unnecessary and if possible kindly share this information with the developer to improve the plugin.",
 		});
@@ -146,14 +140,12 @@ export class DiffContentCompareModal extends Modal {
 			debuInfoComparisonContainerLefttDiv.createDiv({
 				cls: "taskboard-diff-content-compare-modal-content",
 			});
-		debuInfoComparisonContainerLefttDivContent.insertAdjacentHTML(
-			"beforeend",
+		debuInfoComparisonContainerLefttDivContent.textContent =
 			this.getHighlightedDiff(
 				this.cachedTaskContent,
 				this.taskContentFromFile,
 				"left",
-			),
-		);
+			);
 
 		const debuInfoComparisonContainerRightDiv =
 			debuInfoComparisonContainer.createDiv({
@@ -166,14 +158,12 @@ export class DiffContentCompareModal extends Modal {
 			debuInfoComparisonContainerRightDiv.createDiv({
 				cls: "taskboard-diff-content-compare-modal-content",
 			});
-		debuInfoComparisonContainerRightDivContent.insertAdjacentHTML(
-			"beforeend",
+		debuInfoComparisonContainerRightDivContent.textContent =
 			this.getHighlightedDiff(
 				this.taskContentFromFile,
 				this.cachedTaskContent,
 				"right",
-			),
-		);
+			);
 
 		contentEl.createEl("p", {
 			text: "This 'Debug info' section is just provided to find out whether the Safe Guard genuinely captured the difference correctly or whether this was a false alarm. Will remove this section in the future, if this safe guard feature is working as expected.",
@@ -264,7 +254,7 @@ export class DiffContentCompareModal extends Modal {
 			.replace(/&/g, "&amp;")
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;")
-			.replace(/\"/g, "&quot;")
+			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&#039;");
 	}
 }
@@ -326,3 +316,4 @@ export function isTheContentDiffAreOnlySpaces_V2(
 
 	return true;
 }
+

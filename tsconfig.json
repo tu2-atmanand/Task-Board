@@ -31,6 +31,14 @@
 		],
 	},
 	"include": [
-		"src"
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"main.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"build",
+		"main.js"
 	]
 }

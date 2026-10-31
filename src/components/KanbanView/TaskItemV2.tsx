@@ -143,7 +143,6 @@ const TaskItemV2: React.FC<TaskProps> = ({ dataAttributeIndex, plugin, task, act
 		if (!el || !componentRef.current) return;
 
 		try {
-			el.insertAdjacentHTML("beforeend", "");
 			if (task.title === "") return;
 
 			const cleanedTitle = isTaskNote ? task.title : cleanTaskTitleLegacy(task);

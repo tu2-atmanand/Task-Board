@@ -11,7 +11,7 @@
  */
 
 import type TaskBoard from "main";
-import { App, Component, Notice, TFile } from "obsidian";
+import { App, Component, Notice, setIcon, TFile } from "obsidian";
 import { extractFrontmatterFromContent } from "src/utils/taskNote/FrontmatterOperations";
 
 /**
@@ -148,8 +148,8 @@ export class FrontmatterRenderer {
 		const collapseIcon = header.createSpan({
 			cls: "taskboard-frontmatter-collapse-icon",
 		});
-		const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-		collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+
+		setIcon(collapseIcon, "chevron-down"); // or 'chevron-up' for expanded state
 
 		// Add "Properties" text
 		header.createSpan({
@@ -171,9 +171,9 @@ export class FrontmatterRenderer {
 			cls: ["metadata-properties", "taskboard-frontmatter-properties"],
 		});
 		if (this.isFrontmatterContainerCollapsed) {
-			propertiesContainer.hide()
-			const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
-			collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+			propertiesContainer.hide();
+			collapseIcon.replaceChildren();
+			setIcon(collapseIcon, "chevron-right");
 		}
 
 		// Render each property using PropertyWidget
@@ -185,13 +185,19 @@ export class FrontmatterRenderer {
 				!this.isFrontmatterContainerCollapsed;
 
 			if (this.isFrontmatterContainerCollapsed) {
-				propertiesContainer.hide()
-				const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
-				collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				propertiesContainer.hide();
+				// collapseIcon.replaceChildren();
+				// const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"></polyline></svg>`;
+				// // collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				// collapseIcon.textContent = collapseIconSVG;
+				setIcon(collapseIcon, "chevron-down");
 			} else {
-				propertiesContainer.addClass("taskboard_display_flex");
-				const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-				collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				propertiesContainer.show();
+				// collapseIcon.replaceChildren();
+				// const collapseIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+				// // collapseIcon.insertAdjacentHTML("beforeend", collapseIconSVG);
+				// collapseIcon.textContent = collapseIconSVG;
+				setIcon(collapseIcon, "chevron-down");
 			}
 
 			frontmatterSection.toggleClass(
@@ -214,7 +220,7 @@ export class FrontmatterRenderer {
 	 */
 	private renderProperties(
 		containerEl: HTMLElement,
-		frontmatter: Record<string, any>,
+		frontmatter: Record<string, unknown>,
 		file?: TFile,
 	): void {
 		this.renderPropertiesSimple(containerEl, frontmatter);
@@ -332,7 +338,7 @@ export class FrontmatterRenderer {
 	 */
 	private renderPropertiesSimple(
 		containerEl: HTMLElement,
-		frontmatter: Record<string, any>,
+		frontmatter: Record<string, unknown>,
 	): void {
 		const propertiesToRender = Object.entries(frontmatter).filter(
 			([key]) => key !== "position",
@@ -369,7 +375,7 @@ export class FrontmatterRenderer {
 	 */
 	private renderPropertyValueSimple(
 		containerEl: HTMLElement,
-		value: any,
+		value: unknown,
 	): void {
 		if (Array.isArray(value)) {
 			const list = containerEl.createEl("ul", {

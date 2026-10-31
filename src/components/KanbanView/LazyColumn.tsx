@@ -256,6 +256,8 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	 * @param {MouseEvent | React.MouseEvent} event - The event that triggered the menu
 	 */
 	function openColumnMenu(event: MouseEvent | React.MouseEvent) {
+		// captured now: event.currentTarget is null inside the async menu-item handler below
+		const boardWin = (event.currentTarget as HTMLElement | null)?.win ?? window;
 		const columnMenu = new Menu();
 
 		columnMenu.addItem((item) => {
@@ -317,8 +319,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 					// );
 					const columnIndex = columnData.index - 1;
 
-					if (Platform.isMobile || Platform.isMacOS) {
-						// If its a mobile platform, then we will open a modal instead of popover.
+					if (Platform.isMobile || Platform.isMacOS || boardWin !== plugin.app.workspace.containerEl.win) {
+						// On mobile/macOS, or when the board is in a popout window, open a modal instead of the popover
+						// (the popover and its path autocomplete render in the main window, not the popout).
 						const filterModal = new ViewTaskFilterModal(
 							plugin, true, undefined, boardIndex, columnData.name, columnData.filters
 						);

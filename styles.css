@@ -4192,7 +4192,7 @@ ReactFlow necessary CSS from its bundle
 }
 
 .react-flow__edge-path {
-	stroke: rgb(var(--canvas-color));
+	stroke: var(--text-muted);
 	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
 	stroke-width: calc(1.5px * var(--task-board-map-zoom));
 	fill: none;
@@ -4200,7 +4200,7 @@ ReactFlow necessary CSS from its bundle
 }
 
 .react-flow__connection-path {
-	stroke: rgb(var(--canvas-color));
+	stroke: var(--text-muted);
 	/* stroke-width: calc(var(--xy-connectionline-stroke-width, var(--xy-connectionline-stroke-width-default)) / var(--task-board-map-zoom, 1)); */
 	stroke-width: calc(1.5px * var(--task-board-map-zoom));
 	fill: none;
@@ -8067,4 +8067,30 @@ li[data-task=b]>p>input:checked {
 	transform: scale(1.2) !important;
 	color: var(--color-orange);
 	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath d='M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z' /%3E%3C/svg%3E")
+}
+
+
+/* ---------------------------------------------------- */
+/*                 SOME COMMON STYLES                   */
+/* ---------------------------------------------------- */
+
+.tb_opacity_1 {
+	opacity: 1;
+}
+
+.tb_opacity_0 {
+	opacity: 0;
+}
+
+.tb_padding_left_0 {
+	padding-left: 0;
+	padding-inline-start: 0;
+}
+
+.tb_color_white {
+	color: white;
+}
+
+.tb_color_red {
+	color: red;
 }
