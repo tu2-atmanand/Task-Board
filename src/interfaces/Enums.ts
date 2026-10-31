@@ -222,3 +222,9 @@ export enum HeaderUITypeOptions {
 	horizontal = "hor",
 	vertical = "vert",
 }
+
+export enum HeaderTruncationOptions {
+	start = "start",
+	middle = "middle",
+	end = "end",
+}
