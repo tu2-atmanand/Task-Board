@@ -1,7 +1,5 @@
 // /src/services/ObsidianDebugInfo.ts
 
-// Originally from the PDF++ plugin (https://github.com/RyotaUshio/obsidian-pdf-plus)
-
 /**
  * A util function to extract various system and application related information for building debug logs.
  *
@@ -61,10 +59,9 @@ export async function getWebViewVersion(): Promise<string | null> {
 		return null;
 	}
 
-	const plugins = (window.Capacitor as Record<string, unknown>)
-		.Plugins as Record<string, unknown>;
+	const plugins = window.Capacitor.Plugins;
 	const deviceInfo = await (
-		plugins.Device as { getInfo: () => Promise<CapacitorDeviceInfo> }
+		plugins?.Device as { getInfo: () => Promise<CapacitorDeviceInfo> }
 	).getInfo();
 	return deviceInfo.webViewVersion ?? null;
 }
@@ -89,8 +86,7 @@ export async function getSystemInfo(): Promise<Record<string, unknown>> {
 		};
 	}
 
-	const apps = (window.Capacitor as Record<string, unknown>)
-		.Plugins as Record<string, unknown>;
+	const apps = window.Capacitor.Plugins;
 	const appInfo = await (
 		apps.App as { getInfo: () => Promise<CapacitorAppInfo> }
 	).getInfo();

@@ -63,7 +63,7 @@ export function validateFrontmatterValue(
 	customKey: string,
 	valueType: "string" | "number" | "array",
 ): string | number | string[] | undefined {
-	const value = frontmatter[customKey] as unknown ?? "";
+	const value = (frontmatter[customKey] as unknown) ?? "";
 
 	if (value && typeof value === valueType) {
 		return value as string | number | string[];
@@ -418,7 +418,7 @@ export function formatTaskNoteContent(
  * @param task - Task item with updated properties
  * @param forceId (Optional) - Whether to forcefully add ID property in frontmatter
  * @returns Promise<void>
- * 
+ *
  * @error_code 158
  */
 export async function updateFrontmatterInMarkdownFile(

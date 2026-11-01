@@ -19,7 +19,7 @@ import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 // Class component extending Modal for Obsidian
 export class TaskEditorModal extends Modal {
 	plugin: TaskBoard;
-	task: taskItem = taskItemEmpty;
+	task: taskItem = { ...taskItemEmpty };
 	filePath: string;
 	taskExists: boolean;
 	isEdited: boolean;
@@ -37,9 +37,7 @@ export class TaskEditorModal extends Modal {
 		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;
 		this.saveTask = saveTask;
-		if (taskExists && task) {
-			this.task = task;
-		}
+		this.task = task ? { ...task } : { ...taskItemEmpty };
 		this.isEdited = false;
 		this.isTaskNote = isTaskNote;
 		this.activeNote = activeNote;

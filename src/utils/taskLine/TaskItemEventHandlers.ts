@@ -180,9 +180,6 @@ export const handleSubTasksChange = (
 	oldTask: taskItem,
 	updatedTask: taskItem,
 ) => {
-	// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
-	// updateTaskInJson(plugin, updatedTask);
-
 	void updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
 		plugin.realTimeScanner
 			.processAllUpdatedFiles(updatedTask.filePath, oldTask.id)
