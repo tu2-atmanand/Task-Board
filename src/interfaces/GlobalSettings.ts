@@ -11,7 +11,6 @@ import {
 	scanModeOptions,
 	taskCardStyleNames,
 	UniversalDateOptions,
-	defaultTaskStatuses,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	NotificationService,
 	mapViewBackgrounVariantTypes,
@@ -19,7 +18,7 @@ import {
 	RibbonIconActions,
 	statusTypeNames,
 } from "./Enums.js";
-import { taskItemKeyToNameMapping } from "./Mapping.js";
+import { defaultTaskStatuses, taskItemKeyToNameMapping } from "./Mapping.js";
 
 export type ScanFilters = {
 	files: {

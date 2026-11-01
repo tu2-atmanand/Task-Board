@@ -2,7 +2,6 @@
 
 import { Notice, normalizePath } from "obsidian";
 import TaskBoard from "../../../main.js";
-import { defaultTaskStatuses } from "../../interfaces/Enums.js";
 import {
 	PluginDataJson,
 	CustomStatus,
@@ -16,6 +15,7 @@ import {
 	createYamlFromObject,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations.js";
+import { defaultTaskStatuses } from "../../interfaces/Mapping.js";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter

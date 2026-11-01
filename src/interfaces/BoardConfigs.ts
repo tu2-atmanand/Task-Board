@@ -3,10 +3,10 @@ import {
 	viewTypeNames,
 	colTypeNames,
 	HeaderUITypeOptions,
-	defaultTaskStatuses,
 	viewsPanelPropertiesToShow,
 	UniversalDateOptions,
 } from "./Enums.js";
+import { defaultTaskStatuses } from "./Mapping.js";
 
 export interface columnSortingCriteria {
 	criteria:
