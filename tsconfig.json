@@ -5,8 +5,8 @@
 		// "jsxFragmentFactory": "React.Fragment",
 		"inlineSourceMap": true,
 		"inlineSources": true,
-		"module": "node16",
-		"moduleResolution": "node16",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
 		"target": "ES2024",
 		"allowJs": true,
 		"noImplicitAny": true,
@@ -28,7 +28,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"types": [
 			"obsidian-typings",
-			"node"
 		],
 		// "verbatimModuleSyntax": true,
 		// TODO : Below are new settings enabled in the "obsidian-sample-plugin"
@@ -45,5 +44,11 @@
 	"include": [
 		"src",
 		"main.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"build",
+		"main.js"
 	]
 }
