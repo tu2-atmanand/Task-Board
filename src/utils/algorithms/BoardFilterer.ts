@@ -11,7 +11,6 @@ import { getAllTaskTags } from "../TaskItemUtils";
 import { compareAsc } from "date-fns";
 import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
 import { robustDateParser } from "../DateTimeCalculations";
-import { normalizePath } from "obsidian";
 
 /**
  * Filters tasks based on the board's filter configuration

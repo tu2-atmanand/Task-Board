@@ -21,7 +21,7 @@ import {
 } from "src/regularExpressions/TasksPluginRegularExpr";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "src/regularExpressions/DataviewPluginRegularExpr";
 import { taskPropertiesNames } from "src/interfaces/Enums";
-import { Component, editorLivePreviewField } from "obsidian";
+import { Component, editorLivePreviewField, getFrontMatterInfo } from "obsidian";
 
 /**
  * Widget for showing placeholder text when properties are hidden
@@ -244,6 +244,7 @@ function createPropertyDecorations(
 
 	const cursorPos = view.state.selection.main.head;
 	const doc = view.state.doc;
+	const frontmatterInfo = getFrontMatterInfo(doc.toString());
 
 	// Process each line
 	for (let lineNum = 1; lineNum <= doc.lines; lineNum++) {
@@ -254,18 +255,21 @@ function createPropertyDecorations(
 		// Skip non-task lines
 		if (!isTaskLine(lineText)) continue;
 
-		// Check if line is in codeblock or frontmatter
-		const syntaxNode = syntaxTree(view.state).resolveInner(line.from + 1);
-		const nodeProps = syntaxNode.type.prop(tokenClassNodeProp);
+		if (
+			frontmatterInfo.exists &&
+			line.from < frontmatterInfo.contentStart
+		) {
+			continue;
+		}
 
+		// Obsidian's token property and this package use separate Lezer typings.
+		const syntaxNode = syntaxTree(view.state).resolveInner(line.from + 1);
+		const nodeProps = syntaxNode.type.prop(
+			tokenClassNodeProp as Parameters<typeof syntaxNode.type.prop>[0],
+		) as string | undefined;
 		if (nodeProps) {
 			const props = nodeProps.split(" ");
-			if (
-				props.includes("hmd-codeblock") ||
-				props.includes("hmd-frontmatter")
-			) {
-				continue;
-			}
+			if (props.includes("hmd-codeblock")) continue;
 		}
 
 		// Check if cursor is on this line

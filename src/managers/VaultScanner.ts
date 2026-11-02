@@ -81,11 +81,11 @@ export default class VaultScanner {
 		this.indentationString = getObsidianIndentationSetting(plugin);
 		this.testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
 		this.supportedChecklistSymbols = [];
-		this.plugin.settings.data.globalSettings.customStatuses.forEach(
-			(status) => {
-				this.supportedChecklistSymbols.push(status.symbol);
-			},
-		);
+		const customStatuses =
+			this.plugin.settings.data.globalSettings?.customStatuses ?? [];
+		customStatuses.forEach((status) => {
+			this.supportedChecklistSymbols.push(status.symbol);
+		});
 	}
 
 	async initializeTasksCache() {
