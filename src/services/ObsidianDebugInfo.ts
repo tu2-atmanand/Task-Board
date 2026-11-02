@@ -78,10 +78,14 @@ export async function getSystemInfo(): Promise<Record<string, unknown>> {
 		const ipcRenderer = electron.ipcRenderer as {
 			sendSync: (channel: string) => string;
 		};
-		const remote = electron?.remote as { app: { getVersion: () => string } } ?? {};
+		const remote = (
+			electron as typeof electron & {
+				remote?: { app?: { getVersion?: () => string } };
+			}
+		).remote;
 		return {
 			"Obsidian version": ipcRenderer.sendSync("version"),
-			"Installer version": remote?.app.getVersion() ?? "unknown",
+			"Installer version": remote?.app?.getVersion?.() ?? "unknown",
 			"Operating system": os.version() + " " + os.release(),
 		};
 	}
