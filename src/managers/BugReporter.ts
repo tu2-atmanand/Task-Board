@@ -380,35 +380,35 @@ ${entry.bugContent}
 			// const fileContent = JSON.stringify(data, null, 2);
 
 			// Desktop folder picker
-			if (
-				window?.electron &&
-				window.electron?.remote &&
-				window.electron.dialog
-			) {
+			// if (
+			// 	window?.electron &&
+			// 	// window.electron?.remote &&
+			// 	window.electron.dialog
+			// ) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-				let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
-					await window.electron.dialog.showOpenDialog({
-						title: "Pick folder to export log file",
-						properties: ["openDirectory", "dontAddToRecent"],
-					});
-				if (
-					pickFolderDialogReturn.canceled ||
-					!pickFolderDialogReturn?.filePaths ||
-					pickFolderDialogReturn.filePaths.length === 0
-				) {
-					new Notice("Export cancelled or folder not selected.");
-					return;
-				}
-				const folderPath = pickFolderDialogReturn.filePaths[0];
-				const exportPath =
-					folderPath.endsWith("/") || folderPath.endsWith("\\")
-						? folderPath + exportFileName
-						: folderPath +
-							(folderPath.includes("/") ? "/" : "\\") +
-							exportFileName;
-				await fsPromises.writeFile(exportPath, data, "utf8");
-				new Notice(`Log file exported to ${exportPath}`);
-			} else {
+				// let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
+				// 	await window.electron.dialog.showOpenDialog({
+				// 		title: "Pick folder to export log file",
+				// 		properties: ["openDirectory", "dontAddToRecent"],
+				// 	});
+				// if (
+				// 	pickFolderDialogReturn.canceled ||
+				// 	!pickFolderDialogReturn?.filePaths ||
+				// 	pickFolderDialogReturn.filePaths.length === 0
+				// ) {
+				// 	new Notice("Export cancelled or folder not selected.");
+				// 	return;
+				// }
+				// const folderPath = pickFolderDialogReturn.filePaths[0];
+				// const exportPath =
+				// 	folderPath.endsWith("/") || folderPath.endsWith("\\")
+				// 		? folderPath + exportFileName
+				// 		: folderPath +
+				// 			(folderPath.includes("/") ? "/" : "\\") +
+				// 			exportFileName;
+				// await fsPromises.writeFile(exportPath, data, "utf8");
+				// new Notice(`Log file exported to ${exportPath}`);
+			// } else {
 				// Web: use file save dialog
 				let a = activeDocument.createElement("a");
 				a.href = URL.createObjectURL(
@@ -424,7 +424,7 @@ ${entry.bugContent}
 				new Notice(
 					"Log file exported. Check the folder where you saved the file.",
 				);
-			}
+			// }
 		} catch (err) {
 			bugReporterManagerInsatance.addToLogs(
 				198,
