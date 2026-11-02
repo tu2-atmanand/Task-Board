@@ -1,7 +1,7 @@
 // /src/components/BoardFilters/AdvancedFilterPopover.ts
 
 import { App, setIcon, setTooltip } from "obsidian";
-import { CloseableComponent, Component } from "obsidian";
+import { Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
@@ -11,7 +11,7 @@ import { AdvancedFilterComponent } from "./Component.js";
 
 export class AdvancedFilterPopover
 	extends Component
-	implements CloseableComponent
+	// implements CloseableComponent
 {
 	private plugin: TaskBoard;
 	private app: App;
