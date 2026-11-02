@@ -16,7 +16,7 @@ interface AddColumnModalProps {
 export class AddColumnModal extends Modal {
 	private onSubmit: (columnData: ColumnData) => void;
 	private onCancel: () => void;
-	private colType: string;
+	private colType: colTypeNames;
 	private name: string;
 
 	constructor(app: App, { onCancel, onSubmit }: AddColumnModalProps) {
@@ -99,7 +99,7 @@ export class AddColumnModal extends Modal {
 
 		colTypeSelect.addEventListener("change", (event: Event) => {
 			const target = event.target as HTMLSelectElement;
-			this.colType = target.value;
+			this.colType = target.value as colTypeNames;
 		});
 
 		// Name Field
@@ -171,7 +171,7 @@ export class AddColumnModal extends Modal {
 					name: this.name,
 					taskPriority: 1,
 				});
-			} else if (this.colType === "completed") {
+			} else if (this.colType === colTypeNames.completed) {
 				this.onSubmit({
 					id: generateRandomNumber(),
 					index: 9999,

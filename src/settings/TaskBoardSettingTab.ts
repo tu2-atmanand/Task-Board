@@ -20,12 +20,12 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	}
 
 	// Display the settings in the settings tab
-	async display(): Promise<void> {
+	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 		containerEl.addClass("TaskBoardSettingTab");
 
-		this.settingsManager.constructUI(containerEl, t("task-board"));
+		void this.settingsManager.constructUI(containerEl, t("task-board"));
 	}
 
 	hide(): void {

@@ -115,7 +115,7 @@ export class ScanFilterModal extends Modal {
 		}
 
 		this.selectedValues.forEach((value) => {
-			const itemEl = listEl!.createDiv("scan-filter-item");
+			const itemEl = listEl.createDiv("scan-filter-item");
 			itemEl.setText(value);
 			const removeBtn = itemEl.createEl("button", {
 				text: "Remove",

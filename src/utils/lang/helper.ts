@@ -1,9 +1,14 @@
 // /src/utils/lang/helper.ts
 
-import { Notice, normalizePath, requestUrl, getLanguage } from "obsidian";
+import { Notice, normalizePath, requestUrl, getLanguage, App } from "obsidian";
 import i18next from "i18next";
 import TaskBoard from "../../../main.js";
-import { NODE_POSITIONS_STORAGE_KEY, NODE_SIZE_STORAGE_KEY, VIEWPORT_STORAGE_KEY, PENDING_SCAN_FILE_STACK } from "../../interfaces/Constants.js";
+import {
+	NODE_POSITIONS_STORAGE_KEY,
+	NODE_SIZE_STORAGE_KEY,
+	VIEWPORT_STORAGE_KEY,
+	PENDING_SCAN_FILE_STACK,
+} from "../../interfaces/Constants.js";
 import { langCodes } from "../../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import en from "./locale/en.js";
@@ -38,7 +43,7 @@ export const loadTranslationsOnStartup = async (plugin: TaskBoard) => {
 				`${pluginFolder}/locales/${lang}.json`,
 			);
 			const file = await plugin.app.vault.adapter.read(filePath);
-			const parsed = JSON.parse(file);
+			const parsed = JSON.parse(file) as unknown;
 
 			// Add the loaded translations to i18next
 			i18next.addResourceBundle(lang, "translation", parsed, true, true);
@@ -142,10 +147,17 @@ export async function downloadAndApplyLanguageFile(
 	}
 }
 
-export const deleteAllLocalStorageKeys = () => {
+/**
+ * This function removes all the keys and data from the localStorage.
+ *
+ * @note Dont use this anymore, since any localStorage created using the `plugin.app.saveLocalStorage` will be automatically removed, when plugin will be unloaded.
+ *
+ * @param app - The app instance
+ */
+export const deleteAllLocalStorageKeys = (app: App) => {
 	// No longer need to remove LOCAL_STORAGE_TRANSLATIONS as we're using i18next
-	localStorage.removeItem(NODE_POSITIONS_STORAGE_KEY);
-	localStorage.removeItem(NODE_SIZE_STORAGE_KEY);
-	localStorage.removeItem(VIEWPORT_STORAGE_KEY);
-	localStorage.removeItem(PENDING_SCAN_FILE_STACK);
+	// localStorage.removeItem(NODE_POSITIONS_STORAGE_KEY);
+	// localStorage.removeItem(NODE_SIZE_STORAGE_KEY);
+	// localStorage.removeItem(VIEWPORT_STORAGE_KEY);
+	// localStorage.removeItem(PENDING_SCAN_FILE_STACK);
 };

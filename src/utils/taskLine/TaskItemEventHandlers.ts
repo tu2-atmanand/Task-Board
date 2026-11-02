@@ -53,15 +53,22 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			status: newStatus.newSymbol,
 		};
 
-		updateTaskInFile(plugin, taskWithUpdatedStatus, task).then((newId) => {
-			plugin.realTimeScanner.processAllUpdatedFiles(
-				task.filePath,
-				task.legacyId,
-			);
+		void updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
+			(newId) => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(task.filePath, task.legacyId)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"TaskItemEventHandlers.ts/handleCheckboxChange/updateTaskInFile",
+						);
+					});
 
-			// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
-			// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
-		});
+				// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
+				// moveFromCompletedToPending(plugin, taskWithUpdatedStatus);
+			},
+		);
 
 		// if (isTaskCompleted(`- [${task.status}]`, false, plugin.settings)) {
 		// 	const newStatusType =
@@ -130,10 +137,15 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 				.then(() => {
-					plugin.realTimeScanner.processAllUpdatedFiles(
-						task.filePath,
-						task.legacyId,
-					);
+					plugin.realTimeScanner
+						.processAllUpdatedFiles(task.filePath, task.legacyId)
+						.catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"TaskItemEventHandlers.ts/handleCheckboxChange/useTasksPluginToUpdateInFile",
+							);
+						});
 
 					// NOTE : This is not necessary any more as I am scanning the file after it has been updated.
 					// 	// Move from Pending to Completed
@@ -171,11 +183,16 @@ export const handleSubTasksChange = (
 	// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
 	// updateTaskInJson(plugin, updatedTask);
 
-	updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
-		plugin.realTimeScanner.processAllUpdatedFiles(
-			updatedTask.filePath,
-			oldTask.id,
-		);
+	void updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
+		plugin.realTimeScanner
+			.processAllUpdatedFiles(updatedTask.filePath, oldTask.id)
+			.catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					217,
+					String(error),
+					"TaskItemEventHandlers.ts/handleCheckboxChange/updateTaskInFile",
+				);
+			});
 	});
 };
 
@@ -197,12 +214,18 @@ export const handleDeleteTask = (
 		mssg,
 		onConfirm: () => {
 			if (isTaskNote) {
-				deleteTaskNote(plugin, task.filePath);
+				void deleteTaskNote(plugin, task.filePath);
 			} else {
-				deleteTaskFromFile(plugin, task).then(() => {
-					plugin.realTimeScanner.processAllUpdatedFiles(
-						task.filePath,
-					);
+				void deleteTaskFromFile(plugin, task).then(() => {
+					plugin.realTimeScanner
+						.processAllUpdatedFiles(task.filePath)
+						.catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"TaskItemEventHandlers.ts/handleDeleteTask/deleteTaskFromFile",
+							);
+						});
 				});
 
 				// DEPRECATED : See notes from //src/utils/TaskItemCacheOperations.ts file
@@ -216,11 +239,11 @@ export const handleDeleteTask = (
 		},
 		onArchive: () => {
 			if (isTaskNote) {
-				archiveTaskNote(plugin, task.filePath).then(() => {
+				void archiveTaskNote(plugin, task.filePath).then(() => {
 					eventEmitter.emit("SOFT_REFRESH");
 				});
 			} else {
-				archiveTask(plugin, task);
+				void archiveTask(plugin, task);
 			}
 		},
 	});
@@ -241,7 +264,7 @@ export const createNewInlineTask = async (
 		);
 		completeTask = formattedTaskContent;
 
-		(communityPlugins.quickAddPlugin as any)?.api.executeChoice(
+		communityPlugins.quickAddPlugin?.api.executeChoice(
 			plugin.settings.data.quickAddPluginDefaultChoice,
 			{
 				value: completeTask + "\n",
@@ -249,7 +272,7 @@ export const createNewInlineTask = async (
 		);
 	} else {
 		await addTaskInNote(plugin, task, false).then((newId) => {
-			plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+			void plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
 		});
 	}
 };

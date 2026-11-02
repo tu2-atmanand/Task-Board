@@ -8,7 +8,7 @@ export function hookMarkdownLinkMouseEventHandlers(
 	plugin: TaskBoard,
 	containerEl: HTMLElement,
 	sourcePath: string,
-	filePath: string
+	filePath: string,
 ) {
 	containerEl
 		.querySelectorAll<HTMLElement>("a.internal-link")
@@ -18,10 +18,10 @@ export function hookMarkdownLinkMouseEventHandlers(
 				evt.preventDefault();
 				const linktext = el.getAttribute("href");
 				if (linktext) {
-					app.workspace.openLinkText(
+					void app.workspace.openLinkText(
 						linktext,
 						sourcePath,
-						Keymap.isModEvent(evt)
+						Keymap.isModEvent(evt),
 					);
 				}
 			});
@@ -47,7 +47,7 @@ export function hookMarkdownLinkMouseEventHandlers(
 export function markdownButtonHoverPreviewEvent(
 	app: App,
 	event: React.MouseEvent,
-	filePath: string
+	filePath: string,
 ) {
 	app.workspace.trigger("hover-link", {
 		event,

@@ -4,17 +4,36 @@ import { WorkspaceLeaf, TFile, Notice } from "obsidian";
 
 import { t } from "i18next";
 import TaskBoard from "../../main.js";
-import { EditButtonMode, statusTypeNames, UniversalDateOptions } from "../interfaces/Enums.js";
+import {
+	EditButtonMode,
+	statusTypeNames,
+	UniversalDateOptions,
+} from "../interfaces/Enums.js";
 import { globalSettingsData } from "../interfaces/GlobalSettings.js";
 import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
-import { openEditTaskNoteModal, openEditTaskModal, openEditTaskView } from "../services/OpenModals.js";
+import {
+	openEditTaskNoteModal,
+	openEditTaskModal,
+	openEditTaskView,
+} from "../services/OpenModals.js";
 import { openTasksPluginEditModal } from "../services/tasks-plugin/helpers.js";
 import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer.js";
-import { sanitizeStatus, sanitizePriority, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizeTags } from "./taskLine/TaskContentFormatter.js";
+import {
+	sanitizeStatus,
+	sanitizePriority,
+	sanitizeStartDate,
+	sanitizeScheduledDate,
+	sanitizeDueDate,
+	sanitizeReminder,
+	sanitizeTags,
+} from "./taskLine/TaskContentFormatter.js";
 import { updateTaskInFile } from "./taskLine/TaskLineUtils.js";
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "./taskNote/TaskNoteUtils.js";
+import {
+	isTaskNotePresentInTags,
+	updateFrontmatterInMarkdownFile,
+} from "./taskNote/TaskNoteUtils.js";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -25,7 +44,7 @@ import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "./task
 export const handleEditTask = (
 	plugin: TaskBoard,
 	task: taskItem,
-	settingOption: string,
+	settingOption: EditButtonMode,
 ) => {
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isThisATaskNote = isTaskNotePresentInTags(
@@ -41,7 +60,7 @@ export const handleEditTask = (
 			}
 			break;
 		case EditButtonMode.ViewInSplitTab:
-			openEditTaskView(
+			void openEditTaskView(
 				plugin,
 				isThisATaskNote,
 				false,
@@ -52,7 +71,7 @@ export const handleEditTask = (
 			);
 			break;
 		case EditButtonMode.ViewInWindow:
-			openEditTaskView(
+			void openEditTaskView(
 				plugin,
 				isThisATaskNote,
 				false,
@@ -66,19 +85,19 @@ export const handleEditTask = (
 			if (isThisATaskNote) {
 				openEditTaskNoteModal(plugin, task);
 			} else {
-				openTasksPluginEditModal(plugin, task);
+				void openTasksPluginEditModal(plugin, task);
 			}
 			break;
 		case EditButtonMode.NoteInTab: {
-			openFileAndHighlightTask(plugin, task, settingOption);
+			void openFileAndHighlightTask(plugin, task, settingOption);
 			break;
 		}
 		case EditButtonMode.NoteInSplit: {
-			openFileAndHighlightTask(plugin, task, settingOption);
+			void openFileAndHighlightTask(plugin, task, settingOption);
 			break;
 		}
 		case EditButtonMode.NoteInWindow: {
-			openFileAndHighlightTask(plugin, task, settingOption);
+			void openFileAndHighlightTask(plugin, task, settingOption);
 			break;
 		}
 		default:
@@ -105,7 +124,7 @@ export const handleEditTask = (
 export const openFileAndHighlightTask = async (
 	plugin: TaskBoard,
 	task: taskItem,
-	mode: string,
+	mode: EditButtonMode,
 ) => {
 	const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
 	let leaf: WorkspaceLeaf | null = null;
@@ -229,16 +248,23 @@ export const updateTaskItemStatus = async (
 		taskOld.tags,
 	);
 	if (isThisTaskNote) {
-		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
-			sleep(1000).then(() => {
-				// TODO : Is 1 sec really required ?
-				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					taskOld.filePath,
-					taskOld.id,
-				);
-			});
-		});
+		updateFrontmatterInMarkdownFile(plugin, newTask)
+			.then(() => {
+				window.setTimeout(() => {
+					// TODO : Is 1 sec really required ?
+					// This is required to rescan the updated file and refresh the board.
+					plugin.realTimeScanner
+						.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+						.catch((error) => {
+							bugReporterManagerInsatance.addToLogs(
+								217,
+								String(error),
+								"UserTaskEvents.ts/udateTaskItemStatus",
+							);
+						});
+				}, 1000);
+			})
+			.catch((error) => {});
 	} else {
 		newTask.title = sanitizeStatus(
 			plugin.settings.data,
@@ -246,11 +272,16 @@ export const updateTaskItemStatus = async (
 			newStatus,
 			statusType,
 		);
-		updateTaskInFile(plugin, newTask, taskOld).then((newId) => {
-			plugin.realTimeScanner.processAllUpdatedFiles(
-				taskOld.filePath,
-				taskOld.id,
-			);
+		void updateTaskInFile(plugin, newTask, taskOld).then((newId) => {
+			plugin.realTimeScanner
+				.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						217,
+						String(error),
+						"UserTaskEvents.ts/udateTaskItemStatus",
+					);
+				});
 		});
 	}
 };
@@ -272,7 +303,7 @@ export const updateTaskItemPriority = (
 	taskUpdated: taskItem,
 	newPriority: number,
 ) => {
-	let newTask = { ...taskUpdated } as taskItem;
+	let newTask = { ...taskUpdated };
 	newTask.priority = newPriority;
 
 	let eventData = {
@@ -287,13 +318,18 @@ export const updateTaskItemPriority = (
 	);
 
 	if (isThisTaskNote) {
-		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
-			sleep(1000).then(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					taskOld.filePath,
-					taskOld.id,
-				);
-			});
+		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+			window.setTimeout(() => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"UserTaskEvents.ts/updateTaskItemTags",
+						);
+					});
+			}, 1000);
 		});
 	} else {
 		newTask.title = sanitizePriority(
@@ -301,11 +337,16 @@ export const updateTaskItemPriority = (
 			newTask.title,
 			newPriority,
 		);
-		updateTaskInFile(plugin, newTask, taskOld).then(() => {
-			plugin.realTimeScanner.processAllUpdatedFiles(
-				taskOld.filePath,
-				taskOld.id,
-			);
+		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
+			plugin.realTimeScanner
+				.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						217,
+						String(error),
+						"UserTaskEvents.ts/updateTaskItemTags",
+					);
+				});
 		});
 	}
 };
@@ -326,10 +367,10 @@ export const updateTaskItemDate = (
 	plugin: TaskBoard,
 	taskOld: taskItem,
 	taskUpdated: taskItem,
-	dateType: string,
+	dateType: UniversalDateOptions,
 	newDate: string,
 ): void => {
-	let newTask = { ...taskUpdated } as taskItem;
+	let newTask = { ...taskUpdated };
 	switch (dateType) {
 		case UniversalDateOptions.startDate:
 			newTask.startDate = newDate;
@@ -344,7 +385,7 @@ export const updateTaskItemDate = (
 			bugReporterManagerInsatance.addToLogs(
 				166,
 				"error while updating the date value. Date type unknown.",
-				`dateType = ${dateType}`,
+				`dateType = ${String(dateType)}`,
 			);
 	}
 
@@ -356,13 +397,18 @@ export const updateTaskItemDate = (
 	);
 
 	if (isThisTaskNote) {
-		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
-			sleep(1000).then(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					taskOld.filePath,
-					taskOld.id,
-				);
-			});
+		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+			window.setTimeout(() => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"UserTaskEvents.ts/updateTaskItemTags",
+						);
+					});
+			}, 1000);
 		});
 	} else {
 		switch (dateType) {
@@ -391,15 +437,20 @@ export const updateTaskItemDate = (
 				bugReporterManagerInsatance.addToLogs(
 					167,
 					"error while updating the date value. Date type unknown.",
-					`dateType = ${dateType}`,
+					`dateType = ${String(dateType)}`,
 				);
 		}
 
-		updateTaskInFile(plugin, newTask, taskOld).then(() => {
-			plugin.realTimeScanner.processAllUpdatedFiles(
-				taskOld.filePath,
-				taskOld.id,
-			);
+		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
+			plugin.realTimeScanner
+				.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						217,
+						String(error),
+						"UserTaskEvents.ts/updateTaskItemTags",
+					);
+				});
 		});
 	}
 };
@@ -421,7 +472,7 @@ export const updateTaskItemReminder = (
 	taskUpdated: taskItem,
 	newReminder: string,
 ) => {
-	const newTask = { ...taskUpdated } as taskItem;
+	const newTask = { ...taskUpdated };
 	newTask.reminder = newReminder;
 
 	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld.id, state: true });
@@ -432,13 +483,18 @@ export const updateTaskItemReminder = (
 	);
 
 	if (isThisTaskNote) {
-		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
-			sleep(1000).then(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					taskOld.filePath,
-					taskOld.id,
-				);
-			});
+		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+			window.setTimeout(() => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"UserTaskEvents.ts/updateTaskItemTags",
+						);
+					});
+			}, 1000);
 		});
 	} else {
 		newTask.title = sanitizeReminder(
@@ -446,11 +502,16 @@ export const updateTaskItemReminder = (
 			taskOld.title,
 			newReminder,
 		);
-		updateTaskInFile(plugin, newTask, taskOld).then(() => {
-			plugin.realTimeScanner.processAllUpdatedFiles(
-				taskOld.filePath,
-				taskOld.id,
-			);
+		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
+			plugin.realTimeScanner
+				.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						217,
+						String(error),
+						"UserTaskEvents.ts/updateTaskItemTags",
+					);
+				});
 		});
 	}
 };
@@ -482,21 +543,31 @@ export const updateTaskItemTags = (
 	);
 
 	if (isThisTaskNote) {
-		updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
-			sleep(1000).then(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					taskOld.filePath,
-					taskOld.id,
-				);
-			});
+		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
+			window.setTimeout(() => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"UserTaskEvents.ts/updateTaskItemTags",
+						);
+					});
+			}, 1000);
 		});
 	} else {
 		newTask.title = sanitizeTags(newTask.title, newTags);
-		updateTaskInFile(plugin, newTask, taskOld).then(() => {
-			plugin.realTimeScanner.processAllUpdatedFiles(
-				taskOld.filePath,
-				taskOld.id,
-			);
+		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
+			plugin.realTimeScanner
+				.processAllUpdatedFiles(taskOld.filePath, taskOld.id)
+				.catch((error) => {
+					bugReporterManagerInsatance.addToLogs(
+						217,
+						String(error),
+						"UserTaskEvents.ts/updateTaskItemTags",
+					);
+				});
 		});
 	}
 };

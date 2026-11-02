@@ -1,15 +1,15 @@
-import { memo } from 'react';
+import { memo, ReactElement } from 'react';
 import { Handle, Position, NodeResizeControl, NodeProps } from '@xyflow/react';
 import TaskBoard from '../../../main.js';
 
-interface dataProps extends React.ReactElement<unknown, string> {
+interface dataProps extends ReactElement<unknown, string> {
 	props: { plugin: TaskBoard };
 }
 
 interface CustomNodeProps {
 	data: {
 		label: dataProps;
-		[key: string]: any;
+		[key: string]: unknown;
 	};
 	// selected: boolean;
 	// width: number | undefined;

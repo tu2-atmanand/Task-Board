@@ -109,6 +109,7 @@ export class ModifiedFilesModal extends Modal {
 			cls: "deletedFilesSectionHeader",
 		});
 		sectionContainer.createEl("p", {
+			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			text: "NOTE : Renamed files are little difficult to find. So if you see a lot of files here, it will be good idea to run the vault scan to re-build the cache.",
 		});
 

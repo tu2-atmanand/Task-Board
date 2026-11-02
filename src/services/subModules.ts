@@ -14,4 +14,6 @@ export class TaskBoardSubmodule {
 	get settings(): PluginDataJson {
 		return this.plugin.settings;
 	}
+
+	api: unknown;
 }

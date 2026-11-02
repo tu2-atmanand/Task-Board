@@ -9,7 +9,7 @@ import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon } from "lu
 import { ViewUpdate } from "@codemirror/view";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import TaskBoard from "../../main.js";
-import { statusTypeNames, UniversalDateOptions, viewTypeNames, EditButtonMode, NotificationService } from "../interfaces/Enums.js";
+import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService } from "../interfaces/Enums.js";
 import { taskItemEmpty, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
 import { taskItem, cursorLocationInterface } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
@@ -24,7 +24,7 @@ import { getTagSuggestions, MultiSuggest, getQuickAddPluginChoices, getFileSugge
 import { openEditTaskView } from "../services/OpenModals.js";
 import { compareTwoTags, verifySubtasksAndChildtasksAreComplete } from "../utils/algorithms/ScanningFilterer.js";
 import { getObsidianIndentationSetting, isTaskLine } from "../utils/CheckBoxUtils.js";
-import { applyIdToTaskItem, getTaskFromId } from "../utils/TaskItemUtils.js";
+import { applyIdToTaskItem } from "../utils/TaskItemUtils.js";
 import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn } from "../utils/taskLine/TaskContentFormatter.js";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "../utils/taskNote/TaskNoteUtils.js";
 import { updateRGBAOpacity } from "../utils/UIHelpers.js";
@@ -47,7 +47,7 @@ export const TaskEditorRC: React.FC<{
 	noteContent: string;
 	task?: taskItem,
 	taskExists?: boolean,
-	onSave: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => void;
+	onSave: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
 }> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
@@ -80,7 +80,7 @@ export const TaskEditorRC: React.FC<{
 	const [quickAddPluginChoice, setQuickAddPluginChoice] = useState<string>(globalSettings.quickAddPluginDefaultChoice || '');
 
 	const [markdownEditor, setMarkdownEditor] = useState<EmbeddableMarkdownEditor | null>(null);
-	const [isEditorContentChanged, setIsEditorContentChanged] = useState<Boolean>(true);
+	const [isEditorContentChanged, setIsEditorContentChanged] = useState<boolean>(true);
 	const cursorLocationRef = useRef<cursorLocationInterface | null>(null);
 
 	const indentationString = getObsidianIndentationSetting(plugin);
@@ -97,11 +97,11 @@ export const TaskEditorRC: React.FC<{
 
 	useEffect(() => {
 		if (isRightSecVisible) {
-			document.addEventListener("mousedown", handleClickOutside);
+			activeDocument.addEventListener("mousedown", handleClickOutside);
 		} else {
-			document.removeEventListener("mousedown", handleClickOutside);
+			activeDocument.removeEventListener("mousedown", handleClickOutside);
 		}
-		return () => document.removeEventListener("mousedown", handleClickOutside);
+		return () => activeDocument.removeEventListener("mousedown", handleClickOutside);
 	}, [isRightSecVisible]);
 
 	// Load statuses dynamically
@@ -132,7 +132,7 @@ export const TaskEditorRC: React.FC<{
 			// Clear previous content before rendering new markdown
 			titleComponentRef.current.empty();
 
-			MarkdownUIRenderer.renderTaskDisc(
+			void MarkdownUIRenderer.strictRender(
 				plugin.app,
 				cleanedTaskTitle,
 				titleComponentRef.current,
@@ -439,7 +439,7 @@ export const TaskEditorRC: React.FC<{
 			setIsEditorContentChanged(true);
 
 			// Clear the input field after MultiSuggest has finished processing
-			setTimeout(() => {
+			window.setTimeout(() => {
 				if (tagsInputFieldRef.current) {
 					tagsInputFieldRef.current.value = '';
 				}
@@ -519,14 +519,14 @@ export const TaskEditorRC: React.FC<{
 			tags,
 			time: newTime,
 			priority,
-			filePath: newFilePath,
+			filePath: editedFilePath,
 			taskLocation: task.taskLocation,
 			cancelledDate: task.cancelledDate || '',
 			status,
 			reminder,
 		};
 
-		onSave(updatedTask, quickAddPluginChoice);
+		void onSave(updatedTask, quickAddPluginChoice);
 		// onClose();
 	}
 
@@ -578,7 +578,7 @@ export const TaskEditorRC: React.FC<{
 		const newFormattedNoteContent = formatTaskNoteContent(plugin, taskNoteItem, formattedTaskContent);
 
 		// Call onSave with the task note item
-		onSave(taskNoteItem, quickAddPluginChoice, newFormattedNoteContent.newContent ? newFormattedNoteContent.newContent : undefined);
+		void onSave(taskNoteItem, quickAddPluginChoice, newFormattedNoteContent.newContent ? newFormattedNoteContent.newContent : undefined);
 	};
 
 	let modifiedTask: taskItem = {
@@ -636,22 +636,28 @@ export const TaskEditorRC: React.FC<{
 		}
 	}, [plugin.app]);
 
-	const handleOpenTaskInMapView = () => {
+	const handleOpenTaskInMapView = async () => {
 		// if (!globalSettings.experimentalFeatures) {
 		// 	new Notice(t("enable-experimental-features-message"));
 		// 	return;
 		// }
 
-		applyIdToTaskItem(plugin, task).then((newId) => {
+		await applyIdToTaskItem(plugin, task).then((newId) => {
 			plugin.settings.data.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
 
 			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
 
 			plugin.realTimeScanner.processAllUpdatedFiles(filePath).then(() => {
 				onClose();
-				sleep(1000).then(() => {
+				window.setTimeout(() => {
 					eventEmitter.emit("SWITCH_VIEW", 'first-map');
-				});
+				}, 1000)
+			}).catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					217,
+					String(error),
+					"TaskEditorRC.tss/handleOpenTaskInMapView",
+				);
 			});
 		});
 
@@ -726,7 +732,7 @@ export const TaskEditorRC: React.FC<{
 	const componentRef = useRef<Component | null>(null); // Reference to the HTML element where markdown will be rendered
 	useEffect(() => {
 		// Initialize Obsidian Component on mount
-		componentRef.current = plugin.view;
+		componentRef.current = null; // @todo - Assign the current Modal parent as component to maintain its lifecycle.
 	}, []);
 
 	// TODO : This function should be optimized to avoid excessive parsing on every keystroke.
@@ -943,7 +949,7 @@ export const TaskEditorRC: React.FC<{
 	useEffect(() => {
 		if (isEditorContentChanged) {
 			if (isTaskNote) {
-				const { newContent, newFrontmatter, contentWithoutFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
+				const { newContent, newFrontmatter } = formatTaskNoteContent(plugin, modifiedTask, formattedTaskContent);
 				const newFormattedTaskNoteContent = newContent;
 				// console.log("Updating embedded markdown editor for task note with content:\n", newFormattedTaskNoteContent,
 				// 	"\nFrontmatter:\n", newFrontmatter, "\nContent without frontmatter:\n", contentWithoutFrontmatter
@@ -978,9 +984,8 @@ export const TaskEditorRC: React.FC<{
 
 	const handleOpenChildTaskSelector = async (): Promise<void> => {
 		try {
-			let pendingTaskItems = getPendingTasksSuggestions(plugin).filter(t => t.id !== task.id);
-			pendingTaskItems = pendingTaskItems.filter((t) => !dependsOn.includes(t.legacyId));
-			openTaskSelector(plugin, pendingTaskItems, async (selected) => {
+
+			const handleOnChooseTask = async (selected: taskItem | null) => {
 				if (!selected) return;
 
 				const newId = await applyIdToTaskItem(plugin, selected);
@@ -1026,6 +1031,12 @@ export const TaskEditorRC: React.FC<{
 				// .catch(err => {
 				// 	bugReporterManagerInsatance.showNotice(25, "Error updating task in file", `An error occurred while updating the task in file: ${err.message}`, "AddOrEditTaskModal.tsx/handleOpenChildTaskSelector");
 				// });
+			}
+
+			let pendingTaskItems = getPendingTasksSuggestions(plugin).filter(t => t.id !== task.id);
+			pendingTaskItems = pendingTaskItems.filter((t) => !dependsOn.includes(t.legacyId));
+			openTaskSelector(plugin, pendingTaskItems, (selected) => {
+				void handleOnChooseTask(selected);
 			}, {
 				placeholder: t("search-child-task"),
 				title: t("select-child-task")
@@ -1061,7 +1072,7 @@ export const TaskEditorRC: React.FC<{
 			if (!element) return;
 
 			const childTaskTitle = childTask.title;
-			MarkdownUIRenderer.renderSubtaskText(
+			void MarkdownUIRenderer.safeRender(
 				plugin.app,
 				childTaskTitle,
 				element,
@@ -1101,9 +1112,11 @@ export const TaskEditorRC: React.FC<{
 			case EditButtonMode.ViewInWindow:
 			case EditButtonMode.TasksPluginModal:
 			default:
-				const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);
-				openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
-				break;
+				{
+					const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);
+					void openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
+					break;
+				}
 		}
 
 		// if (settingOption !== EditButtonMode.NoteInHover && settingOption !== EditButtonMode.Modal) {
@@ -1249,14 +1262,14 @@ export const TaskEditorRC: React.FC<{
 								{taskExists && (
 									<div className="EditTaskModalHomePreviewHeaderBtnSec">
 										<button className="EditTaskModalTabHeaderOpenMapBtn"
-											onClick={handleOpenTaskInMapView}
+											onClick={() => { void handleOpenTaskInMapView(); }}
 											aria-label={t("open-in-map-view")}>
 											<Network height={17} />
 										</button>
 										<button className="EditTaskModalHomeOpenFileBtn"
 											id="EditTaskModalHomeOpenFileBtn"
 											aria-label={t("hold-ctrl-button-to-open-in-new-window")}
-											onClick={(event) => isCtrlPressed ? onOpenFilBtnClicked(event.nativeEvent, true) : onOpenFilBtnClicked(event.nativeEvent, false)}
+											onClick={(event) => isCtrlPressed ? void onOpenFilBtnClicked(event.nativeEvent, true) : void onOpenFilBtnClicked(event.nativeEvent, false)}
 										>
 											<FileInput height={16} />
 										</button>
@@ -1302,7 +1315,7 @@ export const TaskEditorRC: React.FC<{
 								<label className="EditTaskModalHomeFieldTitle">{t("child-tasks")}</label>
 								<div
 									className="EditTaskModalChildTaskAddBtn"
-									onClick={() => handleOpenChildTaskSelector()}
+									onClick={() => { void handleOpenChildTaskSelector(); }}
 									aria-label={t("child-tasks-section-description")}
 								>
 									{t("add-child-task")}
@@ -1321,7 +1334,7 @@ export const TaskEditorRC: React.FC<{
 												</div>
 												<div className="EditTaskModalChildTasksListItemFooterBtns">
 													{!Platform.isMobileApp && (
-														<button className="EditTaskModalChildTasksListItemEditBtn" onClick={(e) => handleOpenChildTaskModal(e, taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
+														<button className="EditTaskModalChildTasksListItemEditBtn" onClick={(e) => void handleOpenChildTaskModal(e, taskId)} aria-label="Edit Child Task"><EditIcon size={17} /></button>
 													)}
 													<button className="EditTaskModalChildTasksListItemDeleteBtn" onClick={() => handleRemoveChildTask(taskId)}><DeleteIcon size={20} /></button>
 												</div>
@@ -1356,7 +1369,7 @@ export const TaskEditorRC: React.FC<{
 						{/* Task Status */}
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("task-status")}</label>
-							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => handleStatusChange(e.target.value)}>
+							<select className="EditTaskModalHome-taskStatusValue" value={status} onChange={(e) => void handleStatusChange(e.target.value)}>
 								{filteredStatusesDropdown.map((option) => (
 									<option key={`${option.value}-${Math.floor(1000 + Math.random() * 9000)}`} value={option.value}>{option.text}</option>
 								))}
@@ -1447,14 +1460,14 @@ export const TaskEditorRC: React.FC<{
 							/>
 							{/* Render tags with cross icon */}
 							<div className="EditTaskModalHome-taskItemTags">
-								{tags.map((tag: string) => {
+								{tags.map((tag: string, index: number) => {
 									const customTagData = globalSettings.tagColors.find(t => compareTwoTags(t.name, tag));
 									const tagColor = customTagData?.color;
 									const backgroundColor = tagColor ? updateRGBAOpacity(tagColor, 0.1) : `var(--tag-background)`;
 									const borderColor = tagColor ? updateRGBAOpacity(tagColor, 0.5) : `var(--tag-color-hover)`;
 									return (
 										<div
-											key={tag}
+											key={`${tag}_${index}`}
 											className="EditTaskModalHome-taskItemTagsPreview"
 											style={{
 												color: tagColor,

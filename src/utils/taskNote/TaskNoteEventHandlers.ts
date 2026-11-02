@@ -61,14 +61,18 @@ export const handleTaskNoteStatusChange = async (
 
 		// Update frontmatter with new status
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
-			// This is required to rescan the updated file and refresh the board.
-			sleep(1000).then(() => {
-				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					updatedTask.filePath,
-					task.legacyId,
-				);
-			});
+			// This delay is required to rescan the updated file and refresh the board.
+			window.setTimeout(() => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(updatedTask.filePath, task.legacyId)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"TaskNoteEventHandlers.ts/handleTaskNoteStatusChange/updateFrontmatterInMarkdownFile",
+						);
+					});
+			}, 1000);
 		});
 
 		new Notice(`Task note status updated to ${newStatusName}`);
@@ -96,13 +100,18 @@ export const handleTaskNotePropertyUpdate = async (
 	try {
 		// Update frontmatter with all updated properties
 		await updateFrontmatterInMarkdownFile(plugin, updatedTask).then(() => {
-			// This is required to rescan the updated file and refresh the board.
-			sleep(1000).then(() => {
-				// This is required to rescan the updated file and refresh the board.
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					updatedTask.filePath,
-				);
-			});
+			// This delay is required to rescan the updated file and refresh the board.
+			window.setTimeout(() => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(updatedTask.filePath)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"TaskNoteEventHandlers.ts/handleTaskNoteStatusChange/handleTaskNotePropertyUpdate",
+						);
+					});
+			}, 1000);
 		});
 
 		new Notice("Task note properties updated");
@@ -136,13 +145,12 @@ export const handleTaskNote2NormalNote = async (
 			plugin.app.metadataCache.getFileCache(file)?.frontmatter;
 		if (frontmatter && frontmatter.tags) {
 			// Remove taskNote tag from frontmatter
-			let tags = Array.isArray(frontmatter.tags)
-				? [...frontmatter.tags]
-				: [frontmatter.tags];
-			tags = tags.filter(
-				(tag: string) =>
-					tag.includes(plugin.settings.data.taskNoteIdentifierTag) ===
-					false,
+			const rawTags = frontmatter.tags as unknown;
+			let tagsArray = Array.isArray(rawTags)
+				? [...(rawTags as string[])]
+				: [rawTags as string];
+			tagsArray = tagsArray.filter((tag: string) =>
+				tag.includes(plugin.settings.data.taskNoteIdentifierTag),
 			);
 
 			// If no other tags remain, we could remove the tags property entirely
@@ -209,11 +217,23 @@ export const handleTaskNoteBodyChange = async (
 
 				return updatedLines.join("\n");
 			})
-			.finally(() => {
-				plugin.realTimeScanner.processAllUpdatedFiles(
-					updatedTask.filePath,
-					oldTask.id,
+			.catch((error) => {
+				bugReporterManagerInsatance.addToLogs(
+					219,
+					String(error),
+					"TaskNoteEventHandlers.ts/handleTaskNoteBodyChange/process",
 				);
+			})
+			.finally(() => {
+				plugin.realTimeScanner
+					.processAllUpdatedFiles(updatedTask.filePath, oldTask.id)
+					.catch((error) => {
+						bugReporterManagerInsatance.addToLogs(
+							217,
+							String(error),
+							"TaskNoteEventHandlers.ts/handleTaskNoteBodyChange/process",
+						);
+					});
 			});
 
 		// const fileContent = await readDataOfVaultFile(

@@ -1,13 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
-import {
-	App,
-	Notice,
-	TAbstractFile,
-	TFile,
-	TFolder,
-	moment as _moment,
-} from "obsidian";
+import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
 import { isValid, parse } from "date-fns";
 import { t } from "i18next";
 import type TaskBoard from "../../main.js";
@@ -604,7 +597,9 @@ export default class VaultScanner {
 				if (this.tasksDetectedOrUpdated) {
 					let result = await this.saveTasksToJsonCache();
 					if (!result) {
-						throw "There was an error while saving the tasks cache.";
+						throw new Error(
+							"There was an error while saving the tasks cache.",
+						);
 					}
 				}
 
@@ -674,7 +669,7 @@ export default class VaultScanner {
 			this.tasksCache,
 		);
 
-		setTimeout(() => {
+		window.setTimeout(() => {
 			eventEmitter.emit("SOFT_REFRESH");
 			// 	if (this.plugin.settings.data.searchQuery) {
 			// 		console.log(
@@ -876,7 +871,7 @@ export function extractTaskId(text: string): RegExpMatchArray | null {
 		return idMatch;
 	}
 
-	idMatch = text.match(/\@id\(\s*(.*?)\)/);
+	idMatch = text.match(/@id\(\s*(.*?)\)/);
 	if (idMatch && idMatch[1]) {
 		return idMatch;
 	}
@@ -914,7 +909,7 @@ export function extractBody(
 			let tempLine = prevLine;
 			while (tempLine && tempLine.startsWith(indentationString)) {
 				n++;
-				tempLine = tempLine!.slice(indentationString.length);
+				tempLine = tempLine.slice(indentationString.length);
 			}
 			const requiredIndent = indentationString.repeat(n + 1);
 			if (!sanitizedLine.startsWith(requiredIndent)) {
@@ -1006,7 +1001,7 @@ export function extractCreatedDate(text: string): RegExpMatchArray | null {
 		return match;
 	}
 
-	match = text.match(/\@created\(\s*([^ ]+)\)/);
+	match = text.match(/@created\(\s*([^ ]+)\)/);
 	if (match && match[1]) {
 		return match;
 	}
@@ -1031,7 +1026,7 @@ export function extractStartDate(text: string): RegExpMatchArray | null {
 		return match;
 	}
 
-	match = text.match(/\@start\(\s*([^ ]+)\)/);
+	match = text.match(/@start\(\s*([^ ]+)\)/);
 	if (match && match[1]) {
 		return match;
 	}
@@ -1057,7 +1052,7 @@ export function extractScheduledDate(text: string): RegExpMatchArray | null {
 		return match;
 	}
 
-	match = text.match(/\@scheduled\(\s*([^ ]+)\)/);
+	match = text.match(/@scheduled\(\s*([^ ]+)\)/);
 	if (match && match[1]) {
 		return match;
 	}
@@ -1081,7 +1076,7 @@ export function extractDueDate(text: string): RegExpMatchArray | null {
 		return match;
 	}
 
-	match = text.match(/\@due\(\s*([^ ]+)\)/);
+	match = text.match(/@due\(\s*([^ ]+)\)/);
 	if (match && match[1]) {
 		return match;
 	}
@@ -1165,7 +1160,7 @@ export function extractReminder(
 	// }
 
 	// New patterns
-	// match = text.match(/\(\@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/);
+	// match = text.match(/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/);
 	// if (match) {
 	// 	const dateStr = match[1];
 	// 	if (dateStr.includes(" ")) {
@@ -1176,7 +1171,7 @@ export function extractReminder(
 	// 	}
 	// }
 
-	match = text.match(/\(\@(\d{2}:\d{2})\)/);
+	match = text.match(/\(@(\d{2}:\d{2})\)/);
 	if (match) {
 		const baseDate = startDate || scheduledDate || dueDate;
 		if (baseDate) {
@@ -1210,7 +1205,7 @@ export function extractDependsOn(text: string): RegExpMatchArray | null {
 		return match;
 	}
 
-	match = text.match(/\@dependsOn\(\s*(.*?)\s*\)/);
+	match = text.match(/@dependsOn\(\s*(.*?)\s*\)/);
 	if (match && match[1]) {
 		return match;
 	}
@@ -1234,7 +1229,7 @@ export function extractCompletionDate(text: string): RegExpMatchArray | null {
 		return match;
 	}
 
-	match = text.match(/\@completion\(\s*([^ ]+)\)/);
+	match = text.match(/@completion\(\s*([^ ]+)\)/);
 	if (match && match[1]) {
 		return match;
 	}
@@ -1259,7 +1254,7 @@ export function extractCancelledDate(text: string): RegExpMatchArray | null {
 		return match;
 	}
 
-	match = text.match(/\@cancelled\(\s*([^ ]+)\)/);
+	match = text.match(/@cancelled\(\s*([^ ]+)\)/);
 	if (match && match[1]) {
 		return match;
 	}

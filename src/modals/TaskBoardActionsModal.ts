@@ -18,7 +18,7 @@ export class TaskBoardActionsModal extends Modal {
 		super(plugin.app);
 		this.plugin = plugin;
 		this.columns = columns;
-		this.setTitle("Task Board Actions");
+		this.setTitle("Task board actions");
 	}
 
 	onOpen() {
@@ -30,7 +30,7 @@ export class TaskBoardActionsModal extends Modal {
 
 		// Header
 		const header = contentEl.createDiv({ cls: "taskboard-actions-header" });
-		header.createEl("h2", { text: "Active Actions" });
+		header.createEl("h2", { text: "Active actions" });
 
 		const addBtn = header.createEl("button", {
 			text: "Add action",
@@ -44,7 +44,7 @@ export class TaskBoardActionsModal extends Modal {
 				targetColumn: this.columns[0].name || "",
 			};
 			this.plugin.settings.data.actions.push(newAction);
-			this.plugin.saveSettings();
+			void this.plugin.saveSettings();
 			this.refresh();
 		};
 
@@ -54,7 +54,7 @@ export class TaskBoardActionsModal extends Modal {
 		});
 		const inactiveSection = contentEl.createDiv();
 		inactiveSection.createEl("h2", {
-			text: "Inactive Actions",
+			text: "Inactive actions",
 			cls: "taskboard-inactive-actions-section",
 		});
 
@@ -62,8 +62,7 @@ export class TaskBoardActionsModal extends Modal {
 			cls: "taskboard-actions-modal-list",
 		});
 
-		const actions: TaskBoardAction[] =
-			this.plugin.settings.data.actions;
+		const actions: TaskBoardAction[] = this.plugin.settings.data.actions;
 
 		for (let i = 0; i < actions.length; i++) {
 			const action = actions[i];
@@ -79,7 +78,7 @@ export class TaskBoardActionsModal extends Modal {
 			toggle.setValue(action.enabled);
 			toggle.onChange((val) => {
 				action.enabled = val;
-				this.plugin.saveSettings();
+				void this.plugin.saveSettings();
 				this.refresh();
 			});
 
@@ -90,7 +89,7 @@ export class TaskBoardActionsModal extends Modal {
 				.setValue(action.trigger)
 				.onChange((val) => {
 					action.trigger = val as "Complete" | "Incomplete";
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 
 			new DropdownComponent(container)
@@ -98,7 +97,7 @@ export class TaskBoardActionsModal extends Modal {
 				.setValue(action.type)
 				.onChange((val) => {
 					action.type = val as "move" | "copy";
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 
 			container.createSpan({ text: "the card to" });
@@ -106,24 +105,21 @@ export class TaskBoardActionsModal extends Modal {
 			new DropdownComponent(container)
 				.addOptions(
 					Object.fromEntries(
-						this.columns.map((c) => [c.index, c.name || ""])
-					)
+						this.columns.map((c) => [c.index, c.name || ""]),
+					),
 				)
 				.setValue(action.targetColumn)
 				.onChange((val) => {
 					action.targetColumn = val;
-					this.plugin.saveSettings();
+					void this.plugin.saveSettings();
 				});
 
 			new ButtonComponent(container)
 				.setIcon("trash")
-				.setTooltip("Delete Action")
+				.setTooltip("Delete action")
 				.onClick(() => {
-					this.plugin.settings.data.actions.splice(
-						i,
-						1
-					);
-					this.plugin.saveSettings();
+					this.plugin.settings.data.actions.splice(i, 1);
+					void this.plugin.saveSettings();
 					this.refresh();
 				});
 		}

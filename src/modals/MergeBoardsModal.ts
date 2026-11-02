@@ -1,6 +1,6 @@
 import { App, Modal, Setting, Notice, TFile, setIcon } from "obsidian";
 import TaskBoard from "../../main.js";
-import { Board } from "../interfaces/BoardConfigs.js";
+import { AdvancedFilter, Board } from "../interfaces/BoardConfigs.js";
 import TaskBoardFileManager from "../managers/TaskBoardFileManager.js";
 import { MultiSuggest } from "../services/MultiSuggest.js";
 import { generateRandomStringId } from "../utils/TaskItemUtils.js";
@@ -141,9 +141,11 @@ export class MergeBoardsModal extends Modal {
 		const actions = modalContent.createDiv({
 			cls: "mergeBoardsModalActions",
 		});
-		this.mergeButton = actions.createEl("button", { text: "Merge Boards" });
+		this.mergeButton = actions.createEl("button", {
+			text: t("merge-boards"),
+		});
 		this.mergeButton.addEventListener("click", () => {
-			this.handleMerge();
+			void this.handleMerge();
 		});
 
 		// Cancel Button
@@ -227,7 +229,7 @@ export class MergeBoardsModal extends Modal {
 			// Re-enable button
 			if (this.mergeButton) {
 				this.mergeButton.disabled = false;
-				this.mergeButton.textContent = "Merge Boards";
+				this.mergeButton.textContent = t("merge-boards");
 			}
 		}
 	}
@@ -235,18 +237,6 @@ export class MergeBoardsModal extends Modal {
 	private mergeBoards(board1: Board, board2: Board): Board {
 		// Generate new ID
 		const newId = generateRandomStringId("board");
-
-		// Combine filterConfig
-		const combinedFilterConfig = {
-			enableSavedFilters:
-				board1.filterConfig?.enableSavedFilters ||
-				board2.filterConfig?.enableSavedFilters ||
-				false,
-			savedConfigs: [
-				...(board1.filterConfig?.savedConfigs || []),
-				...(board2.filterConfig?.savedConfigs || []),
-			],
-		};
 
 		// Combine views
 		const combinedViews = [...board1.views, ...board2.views];
@@ -257,7 +247,6 @@ export class MergeBoardsModal extends Modal {
 			revision: board1?.revision ?? CURRENT_REVISION,
 			name: this.newBoardName,
 			description: board1.description,
-			filterConfig: combinedFilterConfig,
 			views: combinedViews,
 			// lastViewId: board1.lastViewId, // Use from first board
 			lastViewIndex: 0,

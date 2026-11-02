@@ -7,7 +7,10 @@ import {
 } from "date-fns";
 import { moment as _moment } from "obsidian";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "../interfaces/Constants.js";
+import {
+	DEFAULT_DATE_FORMAT,
+	DEFAULT_DATE_TIME_FORMAT,
+} from "../interfaces/Constants.js";
 import { UniversalDateOptions } from "../interfaces/Enums.js";
 import { taskItem } from "../interfaces/TaskItem.js";
 
@@ -306,7 +309,7 @@ export function getAllDatesInRelativeRange(
  * @returns The universal date of the task as a string, or an empty string if not set. */
 export const getUniversalDateFromTask = (
 	task: taskItem,
-	universalDateType: string,
+	universalDateType: UniversalDateOptions,
 ): string => {
 	// Method 1 - Comparing
 	if (universalDateType === UniversalDateOptions.dueDate) {
@@ -338,7 +341,9 @@ export const getUniversalDateFromTask = (
  * @param plugin - The TaskBoard plugin object.
  * @returns An emoji representing the universal date type, or an empty string if not set.
  */
-export const getUniversalDateEmoji = (universalDateSetting: string): string => {
+export const getUniversalDateEmoji = (
+	universalDateSetting: UniversalDateOptions,
+): string => {
 	if (universalDateSetting === UniversalDateOptions.dueDate) {
 		return "📅";
 	} else if (universalDateSetting === UniversalDateOptions.scheduledDate) {

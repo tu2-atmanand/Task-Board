@@ -46,7 +46,7 @@ export function getViewById(
  */
 export function getViewByType(
 	board: Board,
-	viewType: string,
+	viewType: viewTypeNames,
 ): TaskBoardViewType | undefined {
 	return board.views.find((v) => v.viewType === viewType);
 }
@@ -59,7 +59,7 @@ export function getViewByType(
  */
 export function getViewsByType(
 	board: Board,
-	viewType: string,
+	viewType: viewTypeNames,
 ): TaskBoardViewType[] {
 	return board.views.filter((v) => v.viewType === viewType);
 }
@@ -73,7 +73,7 @@ export function getViewsByType(
  */
 export function addViewToBoard(
 	board: Board,
-	viewType: string,
+	viewType: viewTypeNames,
 	viewName: string,
 ): Board {
 	const newViewId = generateRandomStringId("view");
@@ -156,7 +156,8 @@ export function duplicateViewInBoard(board: Board, viewIndex: number): boolean {
 	}
 
 	const originalView = board.views[viewIndex];
-	const newView: TaskBoardViewType = JSON.parse(JSON.stringify(originalView));
+	const parsedData: unknown = JSON.parse(JSON.stringify(originalView));
+	const newView= parsedData as TaskBoardViewType;
 
 	// Generate new view ID
 	newView.viewId = generateRandomStringId("view");
@@ -260,6 +261,9 @@ export function getTotalViewCount(board: Board): number {
  * @param viewType The view type to check for
  * @returns true if board has at least one view of the specified type
  */
-export function boardHasViewType(board: Board, viewType: string): boolean {
+export function boardHasViewType(
+	board: Board,
+	viewType: viewTypeNames,
+): boolean {
 	return board.views.some((v) => v.viewType === viewType);
 }

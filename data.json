@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-beta-4",
+  "version": "2.0.0-beta-5",
   "data": {
     "lang": "en",
     "openOnStartup": false,
@@ -145,7 +145,7 @@
     "compatiblePlugins": {
       "dailyNotesPlugin": false,
       "dayPlannerPlugin": false,
-      "tasksPlugin": false,
+      "tasksPlugin": true,
       "reminderPlugin": false,
       "quickAddPlugin": false
     },
@@ -248,8 +248,8 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2291,
-    "experimentalFeatures": false,
+    "uniqueIdCounter": 2295,
+    "experimentalFeatures": true,
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
@@ -278,18 +278,6 @@
         "boardName": "My Project",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       },
-      "board_1039059216": {
-        "boardId": "board_1039059216",
-        "filePath": "TaskBoard/A Test Board (copy).taskboard",
-        "boardName": "A Test Board (copy)",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_3907751366": {
-        "boardId": "board_3907751366",
-        "filePath": "TaskBoard/A Test Board.taskboard",
-        "boardName": "A Test Board",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
       "board_2553700948": {
         "boardId": "board_2553700948",
         "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1774097758616.taskboard",
@@ -300,6 +288,18 @@
         "boardId": "board_762849833",
         "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1778856605183.taskboard",
         "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
+      "board_1039059216": {
+        "boardId": "board_1039059216",
+        "filePath": "TaskBoard/A Test Board (copy).taskboard",
+        "boardName": "A Test Board (copy)",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
+      "board_3907751366": {
+        "boardId": "board_3907751366",
+        "filePath": "TaskBoard/A Test Board.taskboard",
+        "boardName": "A Test Board",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
     },

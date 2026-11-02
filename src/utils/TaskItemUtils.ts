@@ -113,7 +113,7 @@ export function generateTaskId(plugin: TaskBoard): string {
 		plugin.settings.data.uniqueIdCounter + 1 || 0;
 
 	// Save the updated uniqueIdCounter back to settings
-	plugin.saveSettings();
+	void plugin.saveSettings();
 	// Return the current counter value and then increment it for the next ID
 	return String(plugin.settings.data.uniqueIdCounter);
 }
@@ -145,7 +145,7 @@ export const applyIdToTaskItem = async (
 			newId = generateTaskId(plugin);
 			task.legacyId = newId;
 		}
-		updateFrontmatterInMarkdownFile(plugin, task, true);
+		void updateFrontmatterInMarkdownFile(plugin, task, true);
 
 		return newId;
 	}

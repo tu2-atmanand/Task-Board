@@ -15,7 +15,7 @@ interface AddViewModalProps {
 export class AddViewModal extends Modal {
 	private onSubmit: (updatedBoardData: Board) => void;
 	private onCancel: () => void;
-	private viewType: string;
+	private viewType: viewTypeNames;
 	private viewName: string;
 	private boardData: Board;
 
@@ -55,7 +55,7 @@ export class AddViewModal extends Modal {
 					})
 					.setValue(this.viewType)
 					.onChange(async (value) => {
-						this.viewType = value;
+						this.viewType = value as viewTypeNames;
 					}),
 			);
 

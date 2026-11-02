@@ -67,7 +67,7 @@ export const columnSegregator = (
 				}
 			});
 			break;
-		case colTypeNames.dated:
+		case colTypeNames.dated: {
 			const { dateType, from, to } = columnData.datedBasedColumn || {
 				dateType: "due",
 				from: 0,
@@ -187,6 +187,7 @@ export const columnSegregator = (
 				return diffDays >= from && diffDays <= to;
 			});
 			break;
+		}
 		case colTypeNames.untagged:
 			tasksToDisplay = pendingTasks.filter(
 				(task) => getAllTaskTags(task).length === 0,
@@ -238,7 +239,7 @@ export const columnSegregator = (
 				tasksToDisplay = [];
 			}
 			break;
-		case colTypeNames.otherTags:
+		case colTypeNames.otherTags: {
 			const TaggedColumns = activeViewData.kanbanView.columns.filter(
 				(col: ColumnData) =>
 					col.colType === colTypeNames.namedTag && col.coltag,
@@ -261,6 +262,7 @@ export const columnSegregator = (
 				});
 			});
 			break;
+		}
 		case colTypeNames.completed:
 			// NOTE : to apply the sorting algorithm properly, we have to take all the completed tasks.
 			// Here we are taking around 1000 which should be enough.
@@ -274,12 +276,13 @@ export const columnSegregator = (
 				(task) => task.priority === columnData.taskPriority,
 			);
 			break;
-		case colTypeNames.taskStatus:
+		case colTypeNames.taskStatus: {
 			const allTasks = [...pendingTasks, ...completedTasks];
 			tasksToDisplay = allTasks.filter(
 				(task) => task.status === columnData.taskStatus,
 			);
 			break;
+		}
 		case colTypeNames.allPending:
 			tasksToDisplay = pendingTasks;
 			break;
@@ -331,7 +334,7 @@ export const columnSegregator = (
 				// Prepend missing ids so newest appear on top
 				columnData.tasksIdManualOrder = [
 					...missingIds,
-					...columnData.tasksIdManualOrder!,
+					...columnData.tasksIdManualOrder,
 				];
 			}
 

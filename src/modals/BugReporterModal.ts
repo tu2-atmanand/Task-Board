@@ -120,9 +120,9 @@ export class BugReporterModal extends Modal {
 	}
 
 	async sanitizeBugReportContent(
-		message: String,
-		bugContent: String,
-		context: String,
+		message: string,
+		bugContent: string,
+		context: string,
 	) {
 		// Sanitize the bug report content to prevent XSS attacks
 		let sanitizedErrorContent = bugContent;
@@ -189,7 +189,7 @@ export class BugReporterModal extends Modal {
 
 	handleCopyBtnEvent(bugReportContent: string) {
 		// Copy the bug report content to clipboard
-		navigator.clipboard.writeText(bugReportContent).then(() => {
+		void navigator.clipboard.writeText(bugReportContent).then(() => {
 			new Notice(t("copied-to-clipboard"));
 		});
 	}

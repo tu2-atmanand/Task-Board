@@ -21,7 +21,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	// Check Pending tasks
 	Object.values(plugin.vaultScanner.tasksCache.Pending).forEach((tasks) => {
 		tasks.forEach((task) => {
-			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
+			const taskIdNum = task.legacyId ? parseInt(task.legacyId, 10) : 0;
 			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
 				maxId = taskIdNum;
 			}
@@ -31,7 +31,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	// Check Completed tasks
 	Object.values(plugin.vaultScanner.tasksCache.Completed).forEach((tasks) => {
 		tasks.forEach((task) => {
-			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
+			const taskIdNum = task.legacyId ? parseInt(task.legacyId, 10) : 0;
 			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
 				maxId = taskIdNum;
 			}
@@ -40,7 +40,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 
 	// Update the uniqueIdCounter in settings to be one more than the max found ID
 	plugin.settings.data.uniqueIdCounter = maxId + 1;
-	plugin.saveSettings();
+	void plugin.saveSettings();
 }
 
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanner: VaultScanner }> = ({ app, plugin, vaultScanner }) => {
@@ -97,8 +97,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 		findMaxIdCounterAndUpdateSettings(plugin);
 
 		// If mandatory scan, close all existing Task Board views to force re-opening with the newly scanned data. Else, just emit REFRESH_BOARD event to update the existing board(s) with the newly scanned data.
-		if (localStorage.getItem(MANDATORY_SCAN_KEY) === "true") {
-			localStorage.setItem(MANDATORY_SCAN_KEY, "false");
+		if (plugin.app.loadLocalStorage(MANDATORY_SCAN_KEY) === "true") {
+			plugin.app.saveLocalStorage(MANDATORY_SCAN_KEY, "false");
 			plugin.app.workspace.getLeavesOfType(VIEW_TYPE_TASKBOARD).forEach((leaf) => {
 				leaf.detach();
 			});
@@ -115,7 +115,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const componentRef = useRef<Component | null>(null);
 	useEffect(() => {
 		// Initialize Obsidian Component on mount
-		componentRef.current = plugin.view;
+		// componentRef.current = plugin.view;
+		componentRef.current = new Component();
 	}, []);
 
 	const taskRendererRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -135,7 +136,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 						priority: task.priority,
 					};
 
-					getFormattedTaskContent(newTaskContent).then((formatedContent) => {
+					void getFormattedTaskContent(newTaskContent).then((formatedContent) => {
 
 						const uniqueKey = `${filePath}-task-${taskIndex}`;
 						const descElement = taskRendererRef.current[uniqueKey];
@@ -143,7 +144,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 						if (descElement && formatedContent !== "") {
 							descElement.empty();
 							// Render task description using MarkdownUIRenderer
-							MarkdownUIRenderer.renderTaskDisc(
+							void MarkdownUIRenderer.strictRender(
 								app,
 								formatedContent,
 								descElement,
@@ -160,7 +161,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	return (
 		<div className="scanVaultModalHome">
 			<h2>{t("vault-scanner")}</h2>
-			{localStorage.getItem(MANDATORY_SCAN_KEY) === "true" ?
+			{plugin.app.loadLocalStorage(MANDATORY_SCAN_KEY) === "true" ?
 				(<>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-1")} {CURRENT_PLUGIN_VERSION}</div>
 					<div className="scanVaultModalHomeMandatoryScan">{t("scan-vault-from-the-vault-upgrade-message-2")}</div>
@@ -178,7 +179,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 				<div className="scanVaultModalHomeSecondSectionProgressBarContainer">
 					<progress max="100" value={progress} style={{ width: "100%", height: '35px' }}></progress>
 				</div>
-				<button className="scanVaultModalHomeSecondSectionButton" onClick={runScan} disabled={isRunning}>
+				<button className="scanVaultModalHomeSecondSectionButton" onClick={() => { void runScan(); }} disabled={isRunning}>
 					{isRunning ? progress.toFixed(0) : t("run")}
 				</button>
 			</div>
@@ -200,7 +201,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 						<div key={index}>
 							<h3>{filePath}</h3>
 							<div>
-								{collectedTasks.Pending[filePath].map((task: any, taskIndex: number) => {
+								{collectedTasks.Pending[filePath].map((task: unknown, taskIndex: number) => {
 									const uniqueKey = `${filePath}-task-${taskIndex}`;
 									return (
 										<div key={taskIndex}>

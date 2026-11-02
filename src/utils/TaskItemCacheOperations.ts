@@ -43,7 +43,7 @@ export const moveFromPendingToCompleted = async (
 			if (!allTasks.Completed[task.filePath]) {
 				allTasks.Completed[task.filePath] = [];
 			}
-			allTasks.Completed[task.filePath]!.push(task);
+			allTasks.Completed[task.filePath].push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -82,7 +82,7 @@ export const moveFromCompletedToPending = async (
 			if (!allTasks.Pending[task.filePath]) {
 				allTasks.Pending[task.filePath] = [];
 			}
-			allTasks.Pending[task.filePath]!.push(task);
+			allTasks.Pending[task.filePath].push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -201,12 +201,12 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 		if (allTasks.Pending[task.filePath]) {
 			allTasks.Pending[task.filePath] = allTasks.Pending[
 				task.filePath
-			].filter((t: any) => t.id !== task.id);
+			].filter((t: taskItem) => t.id !== task.id);
 		}
 		if (allTasks.Completed[task.filePath]) {
 			allTasks.Completed[task.filePath] = allTasks.Completed[
 				task.filePath
-			].filter((t: any) => t.id !== task.id);
+			].filter((t: taskItem) => t.id !== task.id);
 		}
 
 		await writeJsonCacheDataToDisk(plugin, allTasks);

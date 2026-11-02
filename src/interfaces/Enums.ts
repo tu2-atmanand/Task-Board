@@ -104,20 +104,27 @@ export enum viewTypeNames {
 
 export enum defaultTaskStatuses {
 	unchecked = " ",
+	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
 	incomplete = " ",
+	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
 	pending = " ",
+	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
 	todo = " ",
 	regular = "x",
 	checked = "X",
+	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
 	done = "x",
 	dropped = "-",
 	forward = ">",
 	migrated = "<",
+	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
 	rescheduled = ">",
+	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
 	scheduled = "<",
 	date = "D",
 	question = "?",
 	halfDone = "/",
+	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
 	inprogress = "/",
 	add = "+",
 	research = "R",
@@ -150,6 +157,9 @@ export enum defaultTaskStatuses {
 	secret = "s",
 }
 
+/**
+ * Collection of status types supported by the plugin.
+ */
 export enum statusTypeNames {
 	TODO = "TODO",
 	DONE = "DONE",
