@@ -1,6 +1,6 @@
 // src/components/TaskBoardViewContainer.tsx
 
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon, CalendarDays, Inbox as InboxIcon, Table2 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { debounce, Platform, Menu, WorkspaceLeaf, Notice, Component } from "obsidian";
 import { t } from 'i18next';
@@ -19,6 +19,7 @@ import { AdvancedFilterModal } from './AdvancedFilterer/index.js';
 import { AdvancedFilterPopover } from './AdvancedFilterer/Popover.js';
 import MapView from './MapView/MapView.js';
 import TableView from './TableView/TableView.js';
+import InboxView from './InboxView/InboxView.js';
 import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined, viewId: string }> = ({ plugin, currentBoardData, currentLeaf, viewId }) => {
@@ -1064,9 +1065,11 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		switch (viewType) {
 			case viewTypeNames.kanban:
 				return <SquareKanban size={size} strokeWidth={1.5} />;
+			case viewTypeNames.table:
+				return <Table2 size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.inbox:
+				return <InboxIcon size={size - 2} strokeWidth={1.5} />;
 			case viewTypeNames.map:
-				case viewTypeNames.table:
-					return <Table2 size={size - 2} strokeWidth={1.5} />;
 				return <Network size={size - 2} strokeWidth={1.5} />;
 			default:
 				return <BrickWall size={size - 2} strokeWidth={1.5} />;
@@ -1457,6 +1460,15 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 									currentViewIndex={currentViewIndex}
 									filteredAndSearchedTasks={filteredAndSearchedTasks}
 								/>
+							) : currentView.viewType === viewTypeNames.inbox ? (
+								<InboxView
+									plugin={plugin}
+									parentComponent={currentLeaf ? currentLeaf.view : new Component()}
+									currentBoardData={boardData}
+									currentView={currentView}
+									currentViewIndex={currentViewIndex}
+									filteredTasks={filteredAndSearchedTasks}
+								/>
 							) : currentView.viewType === viewTypeNames.map ? (
 								loading ? (
 									<div className="loadingContainer" >
@@ -1491,9 +1503,6 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 							) : (
 								<div className="emptyBoardMessage">
 									{/* Placeholder for other view types */}
-									{currentView.viewType === viewTypeNames.list && "List view coming soon."}
-									{currentView.viewType === viewTypeNames.table && "Table view coming soon."}
-									{currentView.viewType === viewTypeNames.inbox && "Inbox view coming soon."}
 									{currentView.viewType === viewTypeNames.gantt && "Gantt chart view coming soon."}
 								</div>
 							)

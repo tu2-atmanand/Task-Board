@@ -38,6 +38,9 @@ export interface LazyColumnProps {
 	swimlaneData?: swimlaneDataProp;
 	hideColumnHeader?: boolean;
 	headerOnly?: boolean;
+	activeViewType?: viewTypeNames;
+	selectedTaskId?: string;
+	onTaskSelect?: (task: taskItem) => void;
 }
 
 const LazyColumn: React.FC<LazyColumnProps> = ({
@@ -51,6 +54,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	swimlaneData,
 	hideColumnHeader = false,
 	headerOnly = false,
+	activeViewType = viewTypeNames.kanban,
+	selectedTaskId,
+	onTaskSelect,
 }) => {
 	// console.log("Column Data :", columnData);
 
@@ -731,9 +737,9 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 						<div
 							className={`tasksContainer${plugin.settings.data.showVerticalScroll ? '' : ' SH'}`}
 							ref={tasksContainerRef}
-							onDragOver={(e) => { handleDragOver(e); }}
-							onDragLeave={handleDragLeave}
-							onDrop={handleDrop}
+							onDragOver={activeViewType === viewTypeNames.kanban ? (e) => { handleDragOver(e); } : undefined}
+							onDragLeave={activeViewType === viewTypeNames.kanban ? handleDragLeave : undefined}
+							onDrop={activeViewType === viewTypeNames.kanban ? handleDrop : undefined}
 							onDragEnd={(e) => {
 								// setIsDragOver(false);
 								setInsertIndex(null);
@@ -754,15 +760,25 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 														);
 													}
 													const task = visibleTasks[i];
+													const isSelected = selectedTaskId === task.id;
 													elements.push(
 														<div
 															key={task.id}
-															className="taskItemFadeIn"
+															className={`taskItemFadeIn${isSelected ? ' inboxTaskSelected' : ''}`}
 															data-taskitem-index={i}
 															data-taskitem-id={task.id}
-															onDragOver={(e) => { handleTaskItemDragOver(e); }
-															}
-															onDrop={e => handleDrop(e)}
+															onClick={onTaskSelect ? () => onTaskSelect(task) : undefined}
+															aria-selected={onTaskSelect ? isSelected : undefined}
+															role={onTaskSelect ? "option" : undefined}
+															tabIndex={onTaskSelect ? 0 : undefined}
+															onKeyDown={onTaskSelect ? (event) => {
+																if (event.key === "Enter" || event.key === " ") {
+																	event.preventDefault();
+																	onTaskSelect(task);
+																}
+															} : undefined}
+															onDragOver={activeViewType === viewTypeNames.kanban ? (e) => { handleTaskItemDragOver(e); } : undefined}
+															onDrop={activeViewType === viewTypeNames.kanban ? (e) => handleDrop(e) : undefined}
 														>
 															{React.createElement(taskItemComponent, {
 																key: task.id,
@@ -772,7 +788,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																parentComponent: parentComponent,
 																activeBoardID: activeBoardData.id,
 																activeViewIndex: currentViewIndex,
-																activeViewType: viewTypeNames.kanban, // Since LazyColumn will be always rendered inside a Kanban view.
+																activeViewType: activeViewType,
 																kanbanViewData: kanbanViewData,
 																columnIndex: columnData.index,
 																swimlaneData: swimlaneData

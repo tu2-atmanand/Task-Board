@@ -52,6 +52,7 @@ export class AddViewModal extends Modal {
 					.addOptions({
 						[viewTypeNames.kanban]: t(viewTypeNames.kanban),
 						[viewTypeNames.table]: t(viewTypeNames.table),
+						[viewTypeNames.inbox]: t(viewTypeNames.inbox),
 						[viewTypeNames.map]: t(viewTypeNames.map),
 					})
 					.setValue(this.viewType)

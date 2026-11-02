@@ -185,6 +185,11 @@ export interface KanbanView {
 	swimlanes: swimlaneConfigs;
 }
 
+export interface InboxView {
+	column: ColumnData;
+	listWidth: number;
+}
+
 /**
  * Interface for the Task Board view. It will store the data specific to a particular view created by user inside the board.
  */
@@ -213,6 +218,11 @@ export interface TaskBoardViewType {
 	 * All configurations specific to the map view
 	 */
 	mapView?: MapView;
+
+	/**
+	 * All configurations specific to the inbox view
+	 */
+	inboxView?: InboxView;
 
 	// More views will be added in the future
 
