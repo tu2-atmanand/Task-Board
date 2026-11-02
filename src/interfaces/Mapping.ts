@@ -1,6 +1,6 @@
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { t } from "../utils/lang/helper.js";
-import { defaultTaskStatuses, statusTypeNames } from "./Enums.js";
+import { statusTypeNames } from "./Enums.js";
 import { CustomStatus } from "./GlobalSettings.js";
 import { taskItem } from "./TaskItem.js";
 
@@ -219,6 +219,54 @@ export const getCustomStatusOptionsForDropdown = (
 	groups.sort((a, b) => a.label.localeCompare(b.label));
 
 	return { type: "grouped", groups };
+};
+
+export const defaultTaskStatuses = {
+	unchecked: " ",
+	incomplete: " ",
+	pending: " ",
+	todo: " ",
+	regular: "x",
+	checked: "X",
+	done: "x",
+	dropped: "-",
+	forward: ">",
+	migrated: "<",
+	rescheduled: ">",
+	scheduled: "<",
+	date: "D",
+	question: "?",
+	halfDone: "/",
+	inprogress: "/",
+	add: "+",
+	research: "R",
+	important: "!",
+	idea: "i",
+	brainstorm: "B",
+	pro: "P",
+	con: "C",
+	quote: "Q",
+	note: "N",
+	bookmark: "b",
+	information: "I",
+	paraphrase: "p",
+	location: "L",
+	example: "E",
+	answer: "A",
+	reward: "r",
+	choice: "c",
+	doing: "d",
+	time: "T",
+	character: "@",
+	talk: "t",
+	outline: "O",
+	conflict: "~",
+	world: "W",
+	find: "f",
+	foreshadow: "F",
+	favorite: "H",
+	symbolism: "&",
+	secret: "s",
 };
 
 /**

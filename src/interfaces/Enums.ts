@@ -94,67 +94,13 @@ export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 export enum viewTypeNames {
 	kanban = "kanban",
 	map = "map",
-
-	// Upcoming views...
+	calendar = "calendar",
 	list = "list",
 	table = "table",
 	inbox = "inbox",
-	gantt = "gantt",
-}
 
-export enum defaultTaskStatuses {
-	unchecked = " ",
-	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-	incomplete = " ",
-	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-	pending = " ",
-	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-	todo = " ",
-	regular = "x",
-	checked = "X",
-	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-	done = "x",
-	dropped = "-",
-	forward = ">",
-	migrated = "<",
-	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-	rescheduled = ">",
-	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-	scheduled = "<",
-	date = "D",
-	question = "?",
-	halfDone = "/",
-	// eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-	inprogress = "/",
-	add = "+",
-	research = "R",
-	important = "!",
-	idea = "i",
-	brainstorm = "B",
-	pro = "P",
-	con = "C",
-	quote = "Q",
-	note = "N",
-	bookmark = "b",
-	information = "I",
-	paraphrase = "p",
-	location = "L",
-	example = "E",
-	answer = "A",
-	reward = "r",
-	choice = "c",
-	doing = "d",
-	time = "T",
-	character = "@",
-	talk = "t",
-	outline = "O",
-	conflict = "~",
-	world = "W",
-	find = "f",
-	foreshadow = "F",
-	favorite = "H",
-	symbolism = "&",
-	secret = "s",
+	// Upcoming views...
+	gantt = "gantt",
 }
 
 /**

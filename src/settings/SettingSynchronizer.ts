@@ -105,35 +105,35 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 		const fileContent = JSON.stringify(data, null, 2);
 
 		// Desktop folder picker
-		if (
-			window?.electron &&
-			window.electron?.remote &&
-			window.electron.dialog
-		) {
+		// if (
+		// 	window?.electron &&
+		// 	// window.electron?.remote &&
+		// 	window.electron.dialog
+		// ) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-			let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
-				await window.electron.dialog.showOpenDialog({
-					title: "Pick folder to export settings",
-					properties: ["openDirectory", "dontAddToRecent"],
-				});
-			if (
-				pickFolderDialogReturn.canceled ||
-				!pickFolderDialogReturn?.filePaths ||
-				pickFolderDialogReturn.filePaths.length === 0
-			) {
-				new Notice("Export cancelled or folder not selected.");
-				return;
-			}
-			const folderPath = pickFolderDialogReturn.filePaths[0];
-			const exportPath =
-				folderPath.endsWith("/") || folderPath.endsWith("\\")
-					? folderPath + exportFileName
-					: folderPath +
-						(folderPath.includes("/") ? "/" : "\\") +
-						exportFileName;
-			await fsPromises.writeFile(exportPath, fileContent, "utf8");
-			new Notice(`Settings exported to ${exportPath}`);
-		} else {
+			// let pickFolderDialogReturn: ElectronOpenDialogReturnValue =
+			// 	await window.electron.dialog.showOpenDialog({
+			// 		title: "Pick folder to export settings",
+			// 		properties: ["openDirectory", "dontAddToRecent"],
+			// 	});
+			// if (
+			// 	pickFolderDialogReturn.canceled ||
+			// 	!pickFolderDialogReturn?.filePaths ||
+			// 	pickFolderDialogReturn.filePaths.length === 0
+			// ) {
+			// 	new Notice("Export cancelled or folder not selected.");
+			// 	return;
+			// }
+			// const folderPath = pickFolderDialogReturn.filePaths[0];
+			// const exportPath =
+			// 	folderPath.endsWith("/") || folderPath.endsWith("\\")
+			// 		? folderPath + exportFileName
+			// 		: folderPath +
+			// 			(folderPath.includes("/") ? "/" : "\\") +
+			// 			exportFileName;
+			// await fsPromises.writeFile(exportPath, fileContent, "utf8");
+			// new Notice(`Settings exported to ${exportPath}`);
+		// } else {
 			// Web: use file save dialog
 			let a = activeDocument.createElement("a");
 			a.href = URL.createObjectURL(
@@ -147,7 +147,7 @@ export async function exportConfigurations(plugin: TaskBoard): Promise<void> {
 				URL.revokeObjectURL(a.href);
 			}, 1000);
 			new Notice(`Settings exported to ${exportFileName}. Check the folder where you saved the file.`);
-		}
+		// }
 	} catch (err) {
 		new Notice("Failed to export settings.");
 		bugReporterManagerInsatance.addToLogs(
@@ -171,30 +171,30 @@ export async function importConfigurations(
 		let name = "JSON Files";
 
 		// Desktop folder picker
-		if (
-			window?.electron &&
-			window.electron?.remote &&
-			window.electron.dialog
-		) {
+		// if (
+		// 	window?.electron &&
+		// 	// window.electron?.remote &&
+		// 	window.electron.dialog
+		// ) {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-			let pickFileDialogReturn: ElectronOpenDialogReturnValue =
-				await window.electron.dialog.showOpenDialog({
-					title: "Pick settings file to import",
-					properties: ["openDirectory", "dontAddToRecent"],
-				});
-			if (
-				pickFileDialogReturn.canceled ||
-				!pickFileDialogReturn?.filePaths ||
-				pickFileDialogReturn.filePaths.length === 0
-			) {
-				new Notice("Import cancelled or file not selected.");
-				return false;
-			}
-			const pickedFile = new NodePickedFile(
-				pickFileDialogReturn.filePaths[0],
-			);
-			importedContent = await pickedFile.readText();
-		} else {
+			// let pickFileDialogReturn: ElectronOpenDialogReturnValue =
+			// 	await window.electron.dialog.showOpenDialog({
+			// 		title: "Pick settings file to import",
+			// 		properties: ["openDirectory", "dontAddToRecent"],
+			// 	});
+			// if (
+			// 	pickFileDialogReturn.canceled ||
+			// 	!pickFileDialogReturn?.filePaths ||
+			// 	pickFileDialogReturn.filePaths.length === 0
+			// ) {
+			// 	new Notice("Import cancelled or file not selected.");
+			// 	return false;
+			// }
+			// const pickedFile = new NodePickedFile(
+			// 	pickFileDialogReturn.filePaths[0],
+			// );
+			// importedContent = await pickedFile.readText();
+		// } else {
 			// Web file picker
 			await new Promise<void>((resolve) => {
 				let inputEl = activeDocument.createElement("input");
@@ -218,7 +218,7 @@ export async function importConfigurations(
 				new Notice("Import cancelled or file not selected.");
 				return false;
 			}
-		}
+		// }
 
 		const parsedData: unknown = JSON.parse(importedContent);
 		const importedData = parsedData as PluginDataJson;

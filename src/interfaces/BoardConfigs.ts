@@ -3,10 +3,10 @@ import {
 	viewTypeNames,
 	colTypeNames,
 	HeaderUITypeOptions,
-	defaultTaskStatuses,
 	viewsPanelPropertiesToShow,
 	UniversalDateOptions,
 } from "./Enums.js";
+import { defaultTaskStatuses } from "./Mapping.js";
 
 export interface columnSortingCriteria {
 	criteria:
@@ -170,11 +170,24 @@ export interface MapView {
 	nodesData: nodeDataType;
 }
 
+export interface TableView {
+	columnWidths?: Record<string, number>;
+	columnOrder?: string[];
+	sortColumn?: string;
+	sortDirection?: "asc" | "desc";
+	wrapText?: boolean;
+}
+
 export interface KanbanView {
 	columns: ColumnData[];
 	showColumnTags: boolean;
 	hideEmptyColumns: boolean;
 	swimlanes: swimlaneConfigs;
+}
+
+export interface InboxView {
+	column: ColumnData;
+	listWidth: number;
 }
 
 /**
@@ -197,9 +210,19 @@ export interface TaskBoardViewType {
 	kanbanView?: KanbanView;
 
 	/**
+	 * All configurations specific to the table view
+	 */
+	tableView?: TableView;
+
+	/**
 	 * All configurations specific to the map view
 	 */
 	mapView?: MapView;
+
+	/**
+	 * All configurations specific to the inbox view
+	 */
+	inboxView?: InboxView;
 
 	// More views will be added in the future
 
@@ -612,7 +635,7 @@ export interface Filter_Deprecated {
 /**
  * This stores multiple criterion.
  * This has been deprecated, use {@link FilterCriterionGroup} instead.
- * 
+ *
  * @deprecated To implement the new Advanced Filter architecture, this interface has been replaced with {@link FilterCriterionGroup}.
  */
 export interface FilterGroup {

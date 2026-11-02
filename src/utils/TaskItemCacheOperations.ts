@@ -22,6 +22,8 @@ import {
 } from "./taskNote/FrontmatterOperations.js";
 
 /**
+ * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
+ * 
  * Move a task from Pending to Completed in the tasks.json file (cache file).
  * @param plugin - The Taskboard plugin instance.
  * @param task - The task to move from Pending to Completed.
@@ -61,6 +63,8 @@ export const moveFromPendingToCompleted = async (
 };
 
 /**
+ * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
+ * 
  * Move a task from Completed to Pending in the tasks.json file (cache file).
  * @param plugin - The Taskboard plugin instance.
  * @param task - The task to move from Completed to Pending.
@@ -100,6 +104,8 @@ export const moveFromCompletedToPending = async (
 };
 
 /**
+ * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
+ * 
  * Adds a new task to the task list in the tasks.json file (cache file).
  * @param {plugin} plugin - plugin instance
  * @param {newTask} newTask - taskItem object that needs to be added to the file
@@ -132,6 +138,8 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 };
 
 /**
+ * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
+ * 
  * Function to update tasks in both Pending and Completed categories in the tasks.json file (cache file)
  * @param updatedPendingTasks - Updated Pending tasks
  * @param updatedCompletedTasks - Updated Completed tasks
@@ -188,6 +196,8 @@ export const updateTaskInJson = async (
 };
 
 /**
+ * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
+ * 
  * Deletes a task from the tasks.json file (cache file)
  * @param plugin - The Taskboard plugin instance
  * @param task - The task item object that needs to be deleted from the file

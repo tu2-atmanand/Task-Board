@@ -518,8 +518,6 @@ declare module "obsidian" {
 	}
 
 	export interface Vault extends obsidianVault {
-		config: unknown;
-
 		getMarkdownFiles: () => TFile[];
 
 		getConfig(key: string): unknown;

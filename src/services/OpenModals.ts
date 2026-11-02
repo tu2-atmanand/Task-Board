@@ -113,7 +113,11 @@ export const openAddNewTaskInCurrentFileModal = (
 	return true;
 };
 
-export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
+export const openAddNewTaskModal = (
+	plugin: TaskBoard,
+	activeFile?: TFile,
+	initialTask?: taskItem,
+) => {
 	const preDefinedNoteFile = plugin.app.vault.getAbstractFileByPath(
 		plugin.settings.data.preDefinedNote,
 	);
@@ -166,7 +170,7 @@ export const openAddNewTaskModal = (plugin: TaskBoard, activeFile?: TFile) => {
 		false,
 		false,
 		false,
-		undefined,
+		initialTask,
 		activeTFile
 			? activeTFile.path
 			: normalizePath(plugin.settings.data.preDefinedNote),

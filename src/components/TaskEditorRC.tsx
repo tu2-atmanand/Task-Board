@@ -47,10 +47,11 @@ export const TaskEditorRC: React.FC<{
 	noteContent: string;
 	task?: taskItem,
 	taskExists?: boolean,
+	inboxView?: boolean,
 	onSave: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
-}> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, activeNote, filePath, onSave, onClose, setIsEdited }) => {
+}> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, inboxView = false, activeNote, filePath, onSave, onClose, setIsEdited: reportEdited }) => {
 	const globalSettings = plugin.settings.data;
 
 	// All useState
@@ -73,6 +74,12 @@ export const TaskEditorRC: React.FC<{
 	const [reminder, setReminder] = useState(task?.reminder || "");
 	const [dependsOn, setDependsOn] = useState<string[]>(task?.dependsOn || []);
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
+	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+	const setIsEdited = (value: boolean) => {
+		setHasUnsavedChanges(value);
+		reportEdited(value);
+	};
 
 	const [formattedTaskContent, setFormattedTaskContent] = useState<string>(isTaskNote ? noteContent : getFormattedTaskContentSync(task));
 	const frontmatterContentRef = useRef<string>('');
@@ -469,15 +476,19 @@ export const TaskEditorRC: React.FC<{
 	// ------------ Handle save task ------------
 
 	// Function to handle saving the updated task
-	const handleSave = () => {
-		if (isTaskNote) {
-			handleSaveAsTaskNote();
-		} else {
-			handleSaveAsTaskLine();
+	const handleSave = async () => {
+		try {
+			if (isTaskNote) {
+				await handleSaveAsTaskNote();
+			} else {
+				await handleSaveAsTaskLine();
+			}
+		} catch (error) {
+			new Notice(`Unable to save task: ${String(error)}`);
 		}
 	};
 
-	const handleSaveAsTaskLine = () => {
+	const handleSaveAsTaskLine = async () => {
 		let newDueDate = due;
 		let newStartDate = startDate;
 		let newScheduledDate = scheduledDate;
@@ -526,12 +537,13 @@ export const TaskEditorRC: React.FC<{
 			reminder,
 		};
 
-		void onSave(updatedTask, quickAddPluginChoice);
+		await onSave(updatedTask, quickAddPluginChoice);
+		setIsEdited(false);
 		// onClose();
 	}
 
 	// Function to handle saving as task note
-	const handleSaveAsTaskNote = () => {
+	const handleSaveAsTaskNote = async () => {
 		let newDue = due;
 		let newStartDate = startDate;
 		let newScheduledDate = scheduledDate;
@@ -578,7 +590,8 @@ export const TaskEditorRC: React.FC<{
 		const newFormattedNoteContent = formatTaskNoteContent(plugin, taskNoteItem, formattedTaskContent);
 
 		// Call onSave with the task note item
-		void onSave(taskNoteItem, quickAddPluginChoice, newFormattedNoteContent.newContent ? newFormattedNoteContent.newContent : undefined);
+		await onSave(taskNoteItem, quickAddPluginChoice, newFormattedNoteContent.newContent ? newFormattedNoteContent.newContent : undefined);
+		setIsEdited(false);
 	};
 
 	let modifiedTask: taskItem = {
@@ -1209,6 +1222,17 @@ export const TaskEditorRC: React.FC<{
 			<div className="EditTaskModalHome">
 				<div className="EditTaskModalHomeBody">
 					<div className="EditTaskModalHomeLeftSec">
+						{inboxView && hasUnsavedChanges && (
+							<button
+								type="button"
+								className="EditTaskModalInboxSaveBtn"
+								onClick={() => void handleSave()}
+								aria-label={t("save")}
+								title={t("save")}
+							>
+								{t("save")}
+							</button>
+						)}
 						<div className="EditTaskModalHomeLeftSecScrollable">
 							{!isTaskNote ? (
 								<div className="EditTaskModalHomeModalTitle" ref={titleComponentRef}></div>
@@ -1354,7 +1378,9 @@ export const TaskEditorRC: React.FC<{
 						</div>
 
 						<div className="EditTaskModalHomeFooterBtnSec">
-							<button className="EditTaskModalHomeSaveBtn" onClick={handleSave}>{t("save")}</button>
+							{!inboxView && (
+								<button className="EditTaskModalHomeSaveBtn" onClick={() => void handleSave()}>{t("save")}</button>
+							)}
 							<button className="EditTaskModalHomeToggleBtn" onClick={toggleRightSec} aria-label="Toggle Details">
 								<PanelRightOpenIcon size={25} alignmentBaseline="middle" />
 							</button>

@@ -115,6 +115,8 @@ export function addViewToBoard(
 				headerUIType: HeaderUITypeOptions.horizontal,
 			},
 		};
+	} else if (viewType === viewTypeNames.table) {
+		newView.tableView = {};
 	} else if (viewType === viewTypeNames.map) {
 		newView.mapView = {
 			viewPortData: {
@@ -123,6 +125,19 @@ export function addViewToBoard(
 				zoom: 0.5,
 			},
 			nodesData: {},
+		};
+	} else if (viewType === viewTypeNames.inbox) {
+		newView.inboxView = {
+			column: {
+				id: generateRandomNumber(),
+				index: 1,
+				colType: colTypeNames.undated,
+				active: true,
+				name: "Inbox",
+				sortCriteria: [],
+				tasksIdManualOrder: [],
+			},
+			listWidth: 360,
 		};
 	}
 
@@ -157,7 +172,7 @@ export function duplicateViewInBoard(board: Board, viewIndex: number): boolean {
 
 	const originalView = board.views[viewIndex];
 	const parsedData: unknown = JSON.parse(JSON.stringify(originalView));
-	const newView= parsedData as TaskBoardViewType;
+	const newView = parsedData as TaskBoardViewType;
 
 	// Generate new view ID
 	newView.viewId = generateRandomStringId("view");
