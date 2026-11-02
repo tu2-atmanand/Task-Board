@@ -5,12 +5,46 @@
 
 import { EditorView, gutter, GutterMarker } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
-import { App, ExtraButtonComponent } from "obsidian";
+import type { Text } from "@codemirror/state";
+import {
+	App,
+	ExtraButtonComponent,
+	getFrontMatterInfo,
+	type FrontMatterInfo,
+} from "obsidian";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "../../../main.js";
 import { TaskEditorModal } from "../../modals/TaskEditorModal.js";
 import { isTaskLine } from "../../utils/CheckBoxUtils.js";
 import { t } from "i18next";
+
+const frontmatterInfoByDoc = new WeakMap<Text, FrontMatterInfo>();
+
+function isLineInCodeBlockOrFrontmatter(
+	view: EditorView,
+	lineFrom: number,
+): boolean {
+	const doc = view.state.doc;
+	let frontmatterInfo = frontmatterInfoByDoc.get(doc);
+	if (!frontmatterInfo) {
+		frontmatterInfo = getFrontMatterInfo(doc.toString());
+		frontmatterInfoByDoc.set(doc, frontmatterInfo);
+	}
+
+	if (
+		frontmatterInfo.exists &&
+		lineFrom < frontmatterInfo.contentStart
+	) {
+		return true;
+	}
+
+	const syntaxNode = syntaxTree(view.state).resolveInner(lineFrom + 1);
+	const nodeProps = syntaxNode.type.prop(
+		tokenClassNodeProp as Parameters<typeof syntaxNode.type.prop>[0],
+	) as string | undefined;
+
+	return nodeProps?.split(" ").includes("hmd-codeblock") ?? false;
+}
 
 // Task icon marker
 class TaskGutterMarker extends GutterMarker {
@@ -50,21 +84,11 @@ class TaskGutterMarker extends GutterMarker {
 
 				if (!file || !isTaskLine(lineText)) return false;
 
-				// Check if the line is in a codeblock or frontmatter
 				const line = this.view.state.doc.line(this.lineNum);
-				const syntaxNode = syntaxTree(this.view.state).resolveInner(
-					line.from + 1,
-				);
-				const nodeProps = syntaxNode.type.prop(tokenClassNodeProp);
-
-				if (nodeProps) {
-					const props = nodeProps.split(" ");
-					if (
-						props.includes("hmd-codeblock") ||
-						props.includes("hmd-frontmatter")
-					) {
-						return false;
-					}
+				if (
+					isLineInCodeBlockOrFrontmatter(this.view, line.from)
+				) {
+					return false;
 				}
 
 				// Create a save callback for the modal
@@ -113,20 +137,8 @@ export function taskGutterExtension(app: App, plugin: TaskBoard): Extension {
 				// Skip if not a task
 				if (!isTaskLine(lineText)) return null;
 
-				// Check if the line is in a codeblock or frontmatter
-				const syntaxNode = syntaxTree(view.state).resolveInner(
-					line.from + 1,
-				);
-				const nodeProps = syntaxNode.type.prop(tokenClassNodeProp);
-
-				if (nodeProps) {
-					const props = nodeProps.split(" ");
-					if (
-						props.includes("hmd-codeblock") ||
-						props.includes("hmd-frontmatter")
-					) {
-						return null;
-					}
+				if (isLineInCodeBlockOrFrontmatter(view, line.from)) {
+					return null;
 				}
 
 				return new TaskGutterMarker(lineText, lineNumber, view, plugin);
