@@ -182,105 +182,64 @@ export const handleTaskNoteBodyChange = async (
 ) => {
 	try {
 		const file = plugin.app.vault.getFileByPath(updatedTask.filePath);
-		if (!file) return;
+		if (!file)
+			throw new Error(`Task note not found: ${updatedTask.filePath}`);
 
-		plugin.app.vault
-			.process(file, (fileContent) => {
-				const oldBodyLines = Array.isArray(oldTask.body)
-					? oldTask.body
-					: [];
-				const newBodyLines = Array.isArray(updatedTask.body)
-					? updatedTask.body
-					: [];
+		await plugin.app.vault.process(file, (fileContent) => {
+			const oldBodyLines = Array.isArray(oldTask.body)
+				? oldTask.body
+				: [];
+			const newBodyLines = Array.isArray(updatedTask.body)
+				? updatedTask.body
+				: [];
+			const lineEnding = fileContent.includes("\r\n") ? "\r\n" : "\n";
+			const frontmatter =
+				fileContent.match(
+					/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/,
+				)?.[0] ?? "";
+			const contentLines = fileContent
+				.slice(frontmatter.length)
+				.split(/\r?\n/);
+			const oldLineIndices = new Map<string, number[]>();
 
-				// Find differing lines (simple diff)
-				const oldLinesWhichAreModified: string[] = [];
-				const maxLen = Math.max(
-					oldBodyLines.length,
-					newBodyLines.length,
-				);
-				for (let i = 0; i < maxLen; i++) {
-					if (oldBodyLines[i] !== newBodyLines[i]) {
-						oldLinesWhichAreModified.push(oldBodyLines[i]);
-					}
+			oldBodyLines.forEach((line, index) => {
+				const key = line.trim();
+				const indices = oldLineIndices.get(key) ?? [];
+				indices.push(index);
+				oldLineIndices.set(key, indices);
+			});
+
+			const matchedIndices = new Set<number>();
+			const updatedLines: string[] = [];
+			for (const line of contentLines) {
+				const indices = oldLineIndices.get(line.trim());
+				const oldIndex = indices?.shift();
+				if (oldIndex === undefined) {
+					updatedLines.push(line);
+					continue;
 				}
 
-				// Split content into lines and replace the old line with the new line
-				const lines = fileContent.split("\n");
-				const updatedLines = lines.map((line: string) => {
-					for (const oldLine of oldLinesWhichAreModified) {
-						const index = oldBodyLines.indexOf(oldLine);
-						const newLine = index !== -1 ? newBodyLines[index] : "";
-						return line.trim() === oldLine.trim() ? newLine : line;
-					}
-				});
+				matchedIndices.add(oldIndex);
+				if (oldIndex < newBodyLines.length)
+					updatedLines.push(newBodyLines[oldIndex]);
+			}
 
-				return updatedLines.join("\n");
-			})
+			newBodyLines.forEach((line, index) => {
+				if (!matchedIndices.has(index)) updatedLines.push(line);
+			});
+
+			return `${frontmatter}${updatedLines.join(lineEnding)}`;
+		});
+
+		await plugin.realTimeScanner
+			.processAllUpdatedFiles(updatedTask.filePath, oldTask.id)
 			.catch((error) => {
 				bugReporterManagerInsatance.addToLogs(
-					219,
+					217,
 					String(error),
 					"TaskNoteEventHandlers.ts/handleTaskNoteBodyChange/process",
 				);
-			})
-			.finally(() => {
-				plugin.realTimeScanner
-					.processAllUpdatedFiles(updatedTask.filePath, oldTask.id)
-					.catch((error) => {
-						bugReporterManagerInsatance.addToLogs(
-							217,
-							String(error),
-							"TaskNoteEventHandlers.ts/handleTaskNoteBodyChange/process",
-						);
-					});
 			});
-
-		// const fileContent = await readDataOfVaultFile(
-		// 	plugin,
-		// 	updatedTask.filePath,
-		// 	true,
-		// );
-		// if (fileContent == null) return;
-
-		// const oldBodyLines = Array.isArray(oldTask.body) ? oldTask.body : [];
-		// const newBodyLines = Array.isArray(updatedTask.body)
-		// 	? updatedTask.body
-		// 	: [];
-
-		// // Find differing lines (simple diff)
-		// const oldLinesWhichAreModified: string[] = [];
-		// const maxLen = Math.max(oldBodyLines.length, newBodyLines.length);
-		// for (let i = 0; i < maxLen; i++) {
-		// 	if (oldBodyLines[i] !== newBodyLines[i]) {
-		// 		oldLinesWhichAreModified.push(oldBodyLines[i]);
-		// 	}
-		// }
-
-		// // Split content into lines and replace the old line with the new line
-		// const lines = fileContent.split("\n");
-		// const updatedLines = lines.map((line: string) => {
-		// 	for (const oldLine of oldLinesWhichAreModified) {
-		// 		const index = oldBodyLines.indexOf(oldLine);
-		// 		const newLine = index !== -1 ? newBodyLines[index] : "";
-		// 		return line.trim() === oldLine.trim() ? newLine : line;
-		// 	}
-		// });
-
-		// await writeDataToVaultFile(
-		// 	plugin,
-		// 	updatedTask.filePath,
-		// 	updatedLines.join("\n"),
-		// ).then(() => {
-		// 	// This is required to rescan the updated file and refresh the board.
-		// 	sleep(1000).then(() => {
-		// 		// This is required to rescan the updated file and refresh the board.
-		// 		plugin.realTimeScanner.processAllUpdatedFiles(
-		// 			updatedTask.filePath,
-		// 			oldTask.id,
-		// 		);
-		// 	});
-		// });
 	} catch (error) {
 		bugReporterManagerInsatance.showNotice(
 			156,
