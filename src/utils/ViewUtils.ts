@@ -115,6 +115,8 @@ export function addViewToBoard(
 				headerUIType: HeaderUITypeOptions.horizontal,
 			},
 		};
+	} else if (viewType === viewTypeNames.table) {
+		newView.tableView = {};
 	} else if (viewType === viewTypeNames.map) {
 		newView.mapView = {
 			viewPortData: {

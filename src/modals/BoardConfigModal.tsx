@@ -2,7 +2,7 @@
 
 import { Modal, normalizePath, Notice } from "obsidian";
 import Sortable from "sortablejs";
-import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban, GripHorizontalIcon, Copy } from "lucide-react";
+import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban, Table2, GripHorizontalIcon, Copy } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { FaAlignJustify, FaTrash } from 'react-icons/fa';
 import ReactDOM from "react-dom/client";
@@ -338,9 +338,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	// TaskBoardView Management - Function to handle opening the add view modal when the "Add View" button is clicked in the sidebar of the board configuration modal
 	const handleAddNewView = () => {
 		const app = plugin.app;
+		const boardWithCurrentEdits = {
+			...activeBoardData,
+			views: allViewsData,
+		};
 		const modal = new AddViewModal(
 			app,
-			currentBoardData,
+			boardWithCurrentEdits,
 			{
 				onCancel: () => {
 					// Do nothing on cancel
@@ -488,6 +492,20 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		setAllViewsData(updatedViewsData);
 		setIsEdited(true);
 	};
+	const handleToggleTableViewWrapping = (viewIndex: number, value: boolean) => {
+		const updatedViewsData = [...allViewsData];
+		if (updatedViewsData[viewIndex]) {
+			updatedViewsData[viewIndex] = {
+				...updatedViewsData[viewIndex],
+				tableView: {
+					...updatedViewsData[viewIndex].tableView,
+					wrapText: value,
+				},
+			};
+		}
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
 
 	// Board Management - Function to handle saving the complete board configuration by saving the updated board data to the file system and updating the current view with the new board data after saving.
 	const handleSave = async () => {
@@ -529,6 +547,8 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 				return <SquareKanban className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size} strokeWidth={1.5} />;
 			case viewTypeNames.map:
 				return <Network className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.table:
+				return <Table2 className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
 			default:
 				return <BrickWall className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
 		}
@@ -741,6 +761,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							/>
 						</div>
 
+						{/* Configuration specific to Kanban view */}
 						{view.viewType === viewTypeNames.kanban && (
 							<>
 								<div className="boardConfigModalMainContent-Active-Body-InputItems">
@@ -1301,6 +1322,21 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 								</div>
 								<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t("add-column")}</button>
 							</>
+						)}
+
+						{/* Configuration specific to Table view */}
+						{view.viewType === viewTypeNames.table && (
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+									<div className="boardConfigModalSettingName">{t("wrap-table-cell-text")}</div>
+									<div className="boardConfigModalSettingDescription">{t("wrap-table-cell-text-info")}</div>
+								</div>
+								<input
+									type="checkbox"
+									checked={view.tableView?.wrapText ?? true}
+									onChange={(e) => handleToggleTableViewWrapping(viewIndex, e.target.checked)}
+								/>
+							</div>
 						)}
 					</div>
 				</div>

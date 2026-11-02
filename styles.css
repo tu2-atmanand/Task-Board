@@ -9729,3 +9729,120 @@ li[data-task=b]>p>input:checked {
 .tb_color_white {
 	color: red;
 }
+
+/* -------------------------------------- */
+/*          TABLE VIEW                    */
+/* -------------------------------------- */
+
+.taskBoardTableView {
+	display: flex;
+	flex: 1;
+	height: 100%;
+	min-height: 0;
+	width: 100%;
+}
+
+.taskBoardTableResizing {
+	cursor: col-resize;
+	user-select: none;
+}
+
+.taskBoardTableViewScrollContainer {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+}
+
+.taskBoardTable {
+	border-collapse: separate;
+	border-spacing: 0;
+	min-width: 100%;
+	table-layout: fixed;
+	width: max-content;
+}
+
+.taskBoardTable th,
+.taskBoardTable td {
+	border-bottom: 1px solid var(--background-modifier-border);
+	border-right: 1px solid var(--background-modifier-border);
+	max-width: 0;
+	overflow-wrap: anywhere;
+	padding: 8px 10px;
+	text-align: left;
+	vertical-align: top;
+	white-space: pre-wrap;
+}
+
+.taskBoardTable th {
+	background: var(--background-secondary);
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.taskBoardTableDragHandle {
+	color: var(--text-muted);
+	cursor: grab;
+	flex: 0 0 auto;
+	margin-right: 4px;
+	vertical-align: middle;
+}
+
+.taskBoardTableDragHandle:active {
+	cursor: grabbing;
+}
+
+.taskBoardTableSortButton {
+	background: transparent;
+	border: 0;
+	color: var(--text-normal);
+	cursor: pointer;
+	font-weight: 600;
+	padding: 0 16px 0 0;
+	text-align: left;
+	width: auto;
+}
+
+.taskBoardTableView--noWrap .taskBoardTable td {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.taskBoardEditableCellInput,
+.taskBoardEditableCellSelect {
+	box-sizing: border-box;
+	min-width: 0;
+	width: 100%;
+}
+
+.taskBoardEditableCellInput {
+	white-space: pre-wrap;
+}
+
+.taskBoardTableEditableCell {
+	cursor: text;
+}
+
+.taskBoardTableResizeHandle {
+	bottom: 0;
+	cursor: col-resize;
+	position: absolute;
+	right: -3px;
+	top: 0;
+	touch-action: none;
+	width: 8px;
+	z-index: 2;
+}
+
+.taskBoardTableResizeHandle:hover {
+	background: var(--interactive-accent);
+	opacity: 0.35;
+}
+
+.taskBoardTableLoadingMore,
+.taskBoardTableEmpty {
+	color: var(--text-muted);
+	padding: 12px;
+	text-align: center;
+}

@@ -170,6 +170,14 @@ export interface MapView {
 	nodesData: nodeDataType;
 }
 
+export interface TableView {
+	columnWidths?: Record<string, number>;
+	columnOrder?: string[];
+	sortColumn?: string;
+	sortDirection?: "asc" | "desc";
+	wrapText?: boolean;
+}
+
 export interface KanbanView {
 	columns: ColumnData[];
 	showColumnTags: boolean;
@@ -195,6 +203,11 @@ export interface TaskBoardViewType {
 
 	// All configurations specific to the kanban view
 	kanbanView?: KanbanView;
+
+	/**
+	 * All configurations specific to the table view
+	 */
+	tableView?: TableView;
 
 	/**
 	 * All configurations specific to the map view
@@ -612,7 +625,7 @@ export interface Filter_Deprecated {
 /**
  * This stores multiple criterion.
  * This has been deprecated, use {@link FilterCriterionGroup} instead.
- * 
+ *
  * @deprecated To implement the new Advanced Filter architecture, this interface has been replaced with {@link FilterCriterionGroup}.
  */
 export interface FilterGroup {

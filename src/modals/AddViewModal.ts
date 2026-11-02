@@ -51,6 +51,7 @@ export class AddViewModal extends Modal {
 				dropdown
 					.addOptions({
 						[viewTypeNames.kanban]: t(viewTypeNames.kanban),
+						[viewTypeNames.table]: t(viewTypeNames.table),
 						[viewTypeNames.map]: t(viewTypeNames.map),
 					})
 					.setValue(this.viewType)
