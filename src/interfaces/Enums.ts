@@ -94,11 +94,12 @@ export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 export enum viewTypeNames {
 	kanban = "kanban",
 	map = "map",
-
-	// Upcoming views...
+	calendar = "calendar",
 	list = "list",
 	table = "table",
 	inbox = "inbox",
+
+	// Upcoming views...
 	gantt = "gantt",
 }
 

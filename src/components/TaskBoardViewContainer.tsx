@@ -20,6 +20,7 @@ import { AdvancedFilterPopover } from './AdvancedFilterer/Popover.js';
 import MapView from './MapView/MapView.js';
 import TableView from './TableView/TableView.js';
 import InboxView from './InboxView/InboxView.js';
+import CalendarView from './CalendarView/CalendarView.js';
 import KanbanBoardView from './KanbanView/KanbanBoardView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined, viewId: string }> = ({ plugin, currentBoardData, currentLeaf, viewId }) => {
@@ -1071,6 +1072,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				return <InboxIcon size={size - 2} strokeWidth={1.5} />;
 			case viewTypeNames.map:
 				return <Network size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.calendar:
+				return <CalendarDays size={size - 2} strokeWidth={1.5} />;
 			default:
 				return <BrickWall size={size - 2} strokeWidth={1.5} />;
 		}
@@ -1468,6 +1471,12 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 									currentView={currentView}
 									currentViewIndex={currentViewIndex}
 									filteredTasks={filteredAndSearchedTasks}
+								/>
+							) : currentView.viewType === viewTypeNames.calendar ? (
+								<CalendarView
+									plugin={plugin}
+									tasks={filteredAndSearchedTasks}
+									dateFormat={plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT}
 								/>
 							) : currentView.viewType === viewTypeNames.map ? (
 								loading ? (
