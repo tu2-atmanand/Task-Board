@@ -1,6 +1,6 @@
 // src/components/TaskBoardViewContainer.tsx
 
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon, CalendarDays, Inbox as InboxIcon, Table2 } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon, CalendarDays, Inbox as InboxIcon, Table2, ListIcon } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { debounce, Platform, Menu, WorkspaceLeaf, Notice, Component } from "obsidian";
 import { t } from 'i18next';
@@ -22,6 +22,7 @@ import TableView from './TableView/TableView.js';
 import InboxView from './InboxView/InboxView.js';
 import CalendarView from './CalendarView/CalendarView.js';
 import KanbanBoardView from './KanbanView/KanbanBoardView.js';
+import ListView from './ListView/ListView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined, viewId: string }> = ({ plugin, currentBoardData, currentLeaf, viewId }) => {
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
@@ -1074,6 +1075,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 				return <Network size={size - 2} strokeWidth={1.5} />;
 			case viewTypeNames.calendar:
 				return <CalendarDays size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.list:
+				return <ListIcon size={size - 2} strokeWidth={1.5} />;
 			default:
 				return <BrickWall size={size - 2} strokeWidth={1.5} />;
 		}
@@ -1509,6 +1512,15 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 										focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
 									/>
 								)
+							) : currentView.viewType === viewTypeNames.list ? (
+								<ListView
+									plugin={plugin}
+									parentComponent={currentLeaf ? currentLeaf.view : new Component()}
+									currentBoardData={boardData}
+									currentView={currentView}
+									currentViewIndex={currentViewIndex}
+									tasks={filteredAndSearchedTasks}
+								/>
 							) : (
 								<div className="emptyBoardMessage">
 									{/* Placeholder for other view types */}

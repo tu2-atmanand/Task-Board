@@ -55,6 +55,7 @@ export class AddViewModal extends Modal {
 						[viewTypeNames.inbox]: t(viewTypeNames.inbox),
 						[viewTypeNames.calendar]: t(viewTypeNames.calendar),
 						[viewTypeNames.map]: t(viewTypeNames.map),
+						[viewTypeNames.list]: t(viewTypeNames.list),
 					})
 					.setValue(this.viewType)
 					.onChange(async (value) => {
