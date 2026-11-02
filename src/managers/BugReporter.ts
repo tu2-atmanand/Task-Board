@@ -388,31 +388,31 @@ ${entry.bugContent}
 			// const fileContent = JSON.stringify(data, null, 2);
 
 			// Desktop folder picker
-			if (
-				(window as any).electron &&
-				(window as any).electron.remote &&
-				(window as any).electron.remote.dialog
-			) {
-				let folderPaths: string[] = (
-					window as any
-				).electron.remote.dialog.showOpenDialogSync({
-					title: "Pick folder to export settings",
-					properties: ["openDirectory", "dontAddToRecent"],
-				});
-				if (!folderPaths || folderPaths.length === 0) {
-					new Notice("Export cancelled or folder not selected.");
-					return;
-				}
-				const folderPath = folderPaths[0];
-				const exportPath =
-					folderPath.endsWith("/") || folderPath.endsWith("\\")
-						? folderPath + exportFileName
-						: folderPath +
-							(folderPath.includes("/") ? "/" : "\\") +
-							exportFileName;
-				await fsPromises.writeFile(exportPath, data, "utf8");
-				new Notice(`Log file exported to ${exportPath}`);
-			} else {
+			// if (
+			// 	(window as any).electron &&
+			// 	(window as any).electron.remote &&
+			// 	(window as any).electron.remote.dialog
+			// ) {
+			// 	let folderPaths: string[] = (
+			// 		window as any
+			// 	).electron.remote.dialog.showOpenDialogSync({
+			// 		title: "Pick folder to export settings",
+			// 		properties: ["openDirectory", "dontAddToRecent"],
+			// 	});
+			// 	if (!folderPaths || folderPaths.length === 0) {
+			// 		new Notice("Export cancelled or folder not selected.");
+			// 		return;
+			// 	}
+			// 	const folderPath = folderPaths[0];
+			// 	const exportPath =
+			// 		folderPath.endsWith("/") || folderPath.endsWith("\\")
+			// 			? folderPath + exportFileName
+			// 			: folderPath +
+			// 				(folderPath.includes("/") ? "/" : "\\") +
+			// 				exportFileName;
+			// 	await fsPromises.writeFile(exportPath, data, "utf8");
+			// 	new Notice(`Log file exported to ${exportPath}`);
+			// } else {
 				// Web: use file save dialog
 				let a = document.createElement("a");
 				a.href = URL.createObjectURL(
@@ -428,7 +428,7 @@ ${entry.bugContent}
 				new Notice(
 					"Log file exported. Check the folder where you downloaded the file.",
 				);
-			}
+			// }
 		} catch (err) {
 			new Notice("Failed to export logs.");
 			console.error(err);
