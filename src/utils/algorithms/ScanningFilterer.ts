@@ -6,6 +6,15 @@ import { isTaskCompleted, isTaskLine } from "../CheckBoxUtils";
 import { extractFrontmatterFromFile } from "../taskNote/FrontmatterOperations";
 import { getTaskFromId } from "../TaskItemUtils";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
+import { matchesFolderFilter } from "./ScanFilterMatching";
+
+/** Reports malformed `/pattern/flags` entries once per scan check. */
+const logInvalidFolderFilterPattern = (error: unknown) =>
+	bugReporterManagerInsatance.addToLogs(
+		190,
+		JSON.stringify(error),
+		"ScanningFileterer.ts/checkFolderFilters",
+	);
 
 /**
  * Checks whether the file is mentioned in the "Files" filter or not and based on the logic returns a truth array to specify if the file is explicitely mentioned inside the filter and whether its allowed for scanning or not.
@@ -112,35 +121,17 @@ export function checkFolderFilters(
 	parentFolder: string,
 	scanFilters: scanFilters,
 ): boolean[] | undefined {
-	let folderInFilters = scanFilters.folders.values.includes(parentFolder);
-
-	if (!folderInFilters && parentFolder !== "") {
-		folderInFilters = scanFilters.folders.values.some((filter: string) => {
-			// Check if filter is in regex format: /pattern/flags
-			// Parse /pattern/flags using regex (handles escaped slashes in pattern)
-			const match = filter.trim().match(/^\/(.*?)\/([gimsuy]*)$/);
-			if (match && match[1]) {
-				try {
-					const [, pattern, flags] = match;
-					const regex = new RegExp(pattern, flags);
-					return regex.test(parentFolder);
-				} catch (error) {
-					bugReporterManagerInsatance.addToLogs(
-						190,
-						JSON.stringify(error),
-						"ScanningFileterer.ts/checkFileFilters",
-					);
-					return false; // Skip invalid patterns
-				}
-			} else {
-				// Check if parentFolder is exactly the filter OR is a subfolder of the filter
-				return (
-					parentFolder === filter ||
-					parentFolder.startsWith(filter + "/")
-				);
-			}
-		});
-	}
+	const folderInFilters = scanFilters.folders.values.some((filter: string) =>
+		// Matches when the parent folder is the filter itself or a subfolder of it.
+		// Compared segment by segment, so trailing slashes and slash padding in the
+		// filter (the folder suggestions add a "/") are irrelevant, and "A/BC" can
+		// never be confused with the folder "ABC".
+		matchesFolderFilter(
+			parentFolder,
+			filter,
+			logInvalidFolderFilterPattern,
+		),
+	);
 
 	if (folderInFilters && scanFilters.folders.polarity === 1) {
 		return [true, true];
