@@ -11,6 +11,7 @@ import { getAllTaskTags } from "../TaskItemUtils";
 import { compareAsc } from "date-fns";
 import { DEFAULT_DATE_FORMAT } from "src/interfaces/Constants";
 import { robustDateParser } from "../DateTimeCalculations";
+import { matchTagsWithWildcards } from "./ScanningFilterer";
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -219,20 +220,12 @@ function evaluateFilter(
 			return compareDates(taskValue, value, dateFormat) >= 0;
 		case "hasTag":
 			if (Array.isArray(taskValue)) {
-				return taskValue.some(
-					(tag) =>
-						String(tag).toLowerCase() ===
-						String(value).toLowerCase(),
-				);
+				return matchTagsWithWildcards(String(value), taskValue) !== null;
 			}
 			return false;
 		case "doesNotHaveTag":
 			if (Array.isArray(taskValue)) {
-				return !taskValue.some(
-					(tag) =>
-						String(tag).toLowerCase() ===
-						String(value).toLowerCase(),
-				);
+				return matchTagsWithWildcards(String(value), taskValue) === null;
 			}
 			return true;
 		default:
