@@ -19,6 +19,8 @@ import {
 import { updateTaskInFile } from "./taskLine/TaskLineUtils";
 import { eventEmitter } from "src/services/EventEmitter";
 import {
+	normalizeTagWithHash,
+	removeTagsFromBody,
 	sanitizeDueDate,
 	sanitizePriority,
 	sanitizeReminder,
@@ -31,6 +33,31 @@ import { globalSettingsData } from "src/interfaces/GlobalSettings";
 import { bugReporterManagerInsatance } from "src/managers/BugReporter";
 import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer";
 import { t } from "./lang/helper";
+
+/**
+ * Returns the tags that exist in the old list but are absent from the new list.
+ * Used to remove only explicitly deleted tags from the task body.
+ */
+const getRemovedTags = (oldTags: string[], newTags: string[]): string[] => {
+	const newTagSet = new Set(newTags.map((tag) => normalizeTagWithHash(tag)));
+	return (oldTags ?? []).filter(
+		(tag) => !newTagSet.has(normalizeTagWithHash(tag)),
+	);
+};
+
+/**
+ * Applies a tag-list change to an inline task's content: removes explicitly
+ * deleted tags from the body and keeps the title in sync with the new tags.
+ */
+const applyTagChangesToTaskContent = (
+	task: taskItem,
+	oldTags: string[],
+	newTags: string[],
+): void => {
+	const removedTags = getRemovedTags(oldTags, newTags);
+	task.body = removeTagsFromBody(task.body, removedTags);
+	task.title = sanitizeTags(task.title, newTags, undefined, task.body);
+};
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
@@ -509,7 +536,7 @@ export const updateTaskItemTags = (
 			});
 		});
 	} else {
-		newTask.title = sanitizeTags(newTask.title, newTags);
+		applyTagChangesToTaskContent(newTask, taskOld.tags, newTags);
 		updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner.processAllUpdatedFiles(
 				taskOld.filePath,
@@ -546,8 +573,9 @@ export const updateTaskItemProperty = async (
 		case "tags":
 			updatedTask.tags = newValue as string[];
 			if (!isThisTaskNote) {
-				updatedTask.title = sanitizeTags(
-					task.title,
+				applyTagChangesToTaskContent(
+					updatedTask,
+					task.tags,
 					newValue as string[],
 				);
 			}
