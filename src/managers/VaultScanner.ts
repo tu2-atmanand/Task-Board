@@ -895,7 +895,9 @@ export function extractTaskId(text: string): RegExpMatchArray | null {
 
 /**
  * Extracts the body of a task from an array of lines. The body is considered as the lines
- * that have indentation (either with '>' or '\t'), and the extraction stops when an empty line is encountered.
+ * that have indentation (either with '>' or '\t'). Blank lines are kept when more indented
+ * content follows them, so multi-paragraph task descriptions stay together; the extraction
+ * stops at the first line that does not belong to the task.
  * @param {string[]} lines - The array of lines to extract the body from.
  * @param {number} startLineIndex - The index of the line where the body starts.
  * @param {string} indentationString - The string used to indent the lines.
@@ -906,58 +908,64 @@ export function extractBody(
 	startLineIndex: number,
 	indentationString: string,
 ): string[] {
-	const bodyLines = [];
-	let bodyStartIndex = startLineIndex;
-	const prevLine = lines[bodyStartIndex - 1];
-	for (bodyStartIndex; bodyStartIndex < lines.length; bodyStartIndex++) {
-		const line = lines[bodyStartIndex];
-		// Using regex for faster matching/removal of leading '>' or '> '
-		const sanitizedLine = line.replace(/^>\s?/, "");
+	const bodyLines: string[] = [];
+	const prevLine = lines[startLineIndex - 1];
 
-		if (sanitizedLine.trim() === "") {
+	let requiredIndent = indentationString;
+	if (prevLine?.startsWith(indentationString)) {
+		let n = 0;
+		let tempLine = prevLine;
+		while (tempLine.startsWith(indentationString)) {
+			n++;
+			tempLine = tempLine.slice(indentationString.length);
+		}
+		requiredIndent = indentationString.repeat(n + 1);
+	}
+
+	// A line belongs to the task body when it is indented one level deeper than
+	// the task line itself. Blockquote markers ('> ') are ignored while checking.
+	const isBodyLine = (line: string): boolean => {
+		const sanitizedLine = line.replace(/^>\s?/, "");
+		return (
+			sanitizedLine.startsWith(requiredIndent) ||
+			sanitizedLine.startsWith("\t")
+		);
+	};
+
+	for (let index = startLineIndex; index < lines.length; index++) {
+		const line = lines[index];
+
+		// Blank lines inside a list item are part of the body as long as more
+		// indented content follows them (multi-paragraph task descriptions).
+		if (line.trim() === "") {
+			let nextNonBlankIndex = index + 1;
+			while (
+				nextNonBlankIndex < lines.length &&
+				lines[nextNonBlankIndex].trim() === ""
+			) {
+				nextNonBlankIndex++;
+			}
+
+			if (
+				nextNonBlankIndex < lines.length &&
+				isBodyLine(lines[nextNonBlankIndex])
+			) {
+				bodyLines.push(line);
+				continue;
+			}
 			break;
 		}
 
-		let n = 0;
-		if (prevLine.startsWith(indentationString)) {
-			let tempLine = prevLine;
-			while (tempLine.startsWith(indentationString)) {
-				n++;
-				tempLine = tempLine.slice(indentationString.length);
-			}
-			const requiredIndent = indentationString.repeat(n + 1);
-			if (!sanitizedLine.startsWith(requiredIndent)) {
-				return [];
-			}
-		}
-
-		// console.log(
-		// 	"Line:",
-		// 	line,
-		// 	"\nSanitized line:",
-		// 	sanitizedLine,
-		// 	"\nIndentation String:'",
-		// 	indentationString,
-		// 	"'",
-		// 	"\nLenth of indentationString:",
-		// 	indentationString.length,
-		// 	"\nsanitizedLine starts with indentationString:",
-		// 	sanitizedLine.startsWith(indentationString),
-		// 	"\nSanitized line starts with tab:",
-		// 	sanitizedLine.startsWith("\t")
-		// );
-		// If the line has one level of indentation, consider it part of the body
-		if (
-			sanitizedLine.startsWith(indentationString) ||
-			sanitizedLine.startsWith("\t")
-		) {
+		if (isBodyLine(line)) {
 			bodyLines.push(line);
 		} else {
 			break;
 		}
 	}
 
-	return bodyLines.at(0)?.trim() === "" ? [] : bodyLines;
+	// Ignore an all-blank body, but keep leading blank lines so that the number
+	// of body lines stays in sync with the physical lines of the file.
+	return bodyLines.some((line) => line.trim() !== "") ? bodyLines : [];
 }
 
 /**
