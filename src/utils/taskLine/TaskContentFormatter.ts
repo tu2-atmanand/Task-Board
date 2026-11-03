@@ -33,6 +33,41 @@ import {
 	formatDateTimeAsPerSettings,
 	getCurrentLocalDateTimeString,
 } from "../DateTimeCalculations";
+import { isTaskLine } from "../CheckBoxUtils";
+
+/**
+ * Removes the common leading indentation shared by all non-blank lines of a task body.
+ * Task bodies are stored exactly as they appear in the note, i.e. indented one level
+ * deeper than the task line. Rendering them as standalone markdown without dedenting
+ * turns tab/4-space indented paragraphs into code blocks.
+ * @param bodyLines - The raw body lines of a task.
+ * @returns The body lines with the shared indentation prefix removed.
+ */
+export const dedentTaskBodyLines = (bodyLines: string[]): string[] => {
+	const nonBlankLines = bodyLines.filter((line) => line.trim() !== "");
+	if (nonBlankLines.length === 0) return bodyLines;
+
+	let commonIndent = nonBlankLines[0].match(/^[\t ]*/)?.[0] ?? "";
+	for (const line of nonBlankLines.slice(1)) {
+		const lineIndent = line.match(/^[\t ]*/)?.[0] ?? "";
+		let commonLength = 0;
+		while (
+			commonLength < commonIndent.length &&
+			commonLength < lineIndent.length &&
+			commonIndent[commonLength] === lineIndent[commonLength]
+		) {
+			commonLength++;
+		}
+		commonIndent = commonIndent.slice(0, commonLength);
+		if (commonIndent === "") break;
+	}
+
+	if (commonIndent === "") return bodyLines;
+
+	return bodyLines.map((line) =>
+		line.startsWith(commonIndent) ? line.slice(commonIndent.length) : line,
+	);
+};
 
 /**
  * Function to get the formatted task content. The content will look similar to how it goes into your notes.
@@ -1619,4 +1654,34 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();
+};
+
+// Matches titles that contain nothing but a time (optionally a time range),
+// e.g. "09:54" or "09:54 - 10:30". Such titles are common in journal/daily notes
+// where the actual task text lives in the indented body lines.
+const timeOnlyTitleRegex =
+	/^\d{1,2}:\d{2}(\s*[-–~]\s*\d{1,2}:\d{2})?$/;
+
+/**
+ * Checks whether the task title carries no text besides a time.
+ * @param task - The task item to check.
+ * @returns True when the cleaned title is empty or only a time.
+ */
+export const isTaskTitleWithoutText = (task: taskItem): boolean => {
+	const title = cleanTaskTitleLegacy(task).trim();
+	return title === "" || timeOnlyTitleRegex.test(title);
+};
+
+/**
+ * Whether the description section of a task should start expanded on the board.
+ * A task whose title is empty or only a time is meaningless without its body,
+ * hence such descriptions are expanded by default to avoid showing only the time.
+ * @param task - The task item to check.
+ * @returns True when the task has description lines and no meaningful title.
+ */
+export const shouldExpandTaskDescription = (task: taskItem): boolean => {
+	const hasDescriptionLines = task.body?.some(
+		(line) => line.trim() !== "" && !isTaskLine(line),
+	);
+	return !!hasDescriptionLines && isTaskTitleWithoutText(task);
 };
