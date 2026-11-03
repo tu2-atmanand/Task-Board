@@ -10,7 +10,7 @@ import { cursorLocation, taskItem } from "src/interfaces/TaskItem";
 import TaskBoard from "main";
 import { updateRGBAOpacity } from "src/utils/UIHelpers";
 import { t } from "src/utils/lang/helper";
-import { cleanTaskTitleLegacy, getFormattedTaskContentSync, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeStatus, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
+import { cleanTaskTitleLegacy, getFormattedTaskContentSync, removeTagsFromBody, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeStatus, sanitizeTags, sanitizeTime } from "src/utils/taskLine/TaskContentFormatter";
 import { buildTaskFromRawContent } from "src/managers/VaultScanner";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon } from "lucide-react";
 import { MultiSuggest, getFileSuggestions, getPendingTasksSuggestions, getQuickAddPluginChoices, getTagSuggestions } from "src/services/MultiSuggest";
@@ -398,7 +398,7 @@ export const AddOrEditTaskRC: React.FC<{
 			const newTagsList = tags.concat(input);
 
 			if (!isTaskNote) {
-				const newTitle = sanitizeTags(title, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(title, newTagsList, cursorLocationRef.current ?? undefined, bodyContent.split('\n'));
 				setTitle(newTitle);
 			}
 
@@ -414,12 +414,14 @@ export const AddOrEditTaskRC: React.FC<{
 	// NEW refs to always track the latest value of title and tags
 	const titleRef = useRef(title);
 	const tagsRef = useRef(tags);
+	const bodyContentRef = useRef(bodyContent);
 
 	// Keep refs updated on each render
 	useEffect(() => {
 		titleRef.current = title;
 		tagsRef.current = tags;
-	}, [title, tags]);
+		bodyContentRef.current = bodyContent;
+	}, [title, tags, bodyContent]);
 	useEffect(() => {
 		if (!tagsInputFieldRef.current) return;
 
@@ -430,7 +432,7 @@ export const AddOrEditTaskRC: React.FC<{
 
 			if (!isTaskNote) {
 				const newTagsList = currentTags.concat(choice);
-				const newTitle = sanitizeTags(currentTitle, newTagsList, cursorLocationRef.current ?? undefined);
+				const newTitle = sanitizeTags(currentTitle, newTagsList, cursorLocationRef.current ?? undefined, bodyContentRef.current.split('\n'));
 				setTitle(newTitle);
 			}
 
@@ -454,8 +456,10 @@ export const AddOrEditTaskRC: React.FC<{
 		const newTags = tags.filter(tag => tag !== tagToRemove);
 
 		if (!isTaskNote) {
-			const newTitle = sanitizeTags(title, newTags, cursorLocationRef.current ?? undefined);
+			const newBodyLines = removeTagsFromBody(bodyContent.split('\n'), [tagToRemove]);
+			const newTitle = sanitizeTags(title, newTags, cursorLocationRef.current ?? undefined, newBodyLines);
 			setTitle(newTitle);
+			setBodyContent(newBodyLines.join('\n'));
 		}
 		setTags(newTags);
 
