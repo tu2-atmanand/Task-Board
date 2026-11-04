@@ -41,7 +41,7 @@ import {
 	extractTaskNoteProperties,
 } from "../utils/taskNote/TaskNoteUtils.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
-import type { ScanFilters } from "../interfaces/GlobalSettings.js";
+import type { VaultScannnerFilters } from "../interfaces/GlobalSettings.js";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -100,7 +100,7 @@ export default class VaultScanner {
 	// Extract tasks from a specific file
 	async extractTasksFromFile(
 		file: TFile,
-		scanFilters: ScanFilters,
+		scanFilters: VaultScannnerFilters,
 	): Promise<string> {
 		try {
 			const fileNameWithPath = file.path;

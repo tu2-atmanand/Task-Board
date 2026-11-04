@@ -5,7 +5,7 @@ import { App, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import TaskBoard from "../../main.js";
 import { Board } from "../interfaces/BoardConfigs.js";
 import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "../interfaces/Constants.js";
-import { ScanFilters } from "../interfaces/GlobalSettings.js";
+import { VaultScannnerFilters } from "../interfaces/GlobalSettings.js";
 import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { TaskEditorModal } from "../modals/TaskEditorModal.js";
@@ -617,7 +617,7 @@ export const openDiffContentCompareModal = (
 
 export const openScanFiltersModal = (
 	plugin: TaskBoard,
-	filterType: keyof ScanFilters,
+	filterType: keyof VaultScannnerFilters,
 	onSave: (scanFilters: string[]) => void,
 ) => {
 	new ScanFilterModal(plugin, filterType, (newValues) => {

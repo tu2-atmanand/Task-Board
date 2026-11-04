@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-deprecated */
 import {
 	ColumnData,
 	Filter,
@@ -23,7 +22,7 @@ import {
 	UniversalDateOptions,
 } from "../../interfaces/Enums.js";
 import {
-	ScanFilters,
+	VaultScannnerFilters,
 	TagColor,
 	CustomStatus,
 	FrontmatterFormattingInterface,
@@ -56,7 +55,7 @@ export type BoardConfigsLegacy = BoardLegacy[];
 export interface globalSettingsDataLegacy {
 	openOnStartup: boolean;
 	lang: string;
-	scanFilters: ScanFilters;
+	scanFilters: VaultScannnerFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskPropertyFormat: taskPropertyFormatOptions;

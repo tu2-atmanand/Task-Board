@@ -20,7 +20,7 @@ import {
 } from "./Enums.js";
 import { defaultTaskStatuses, taskItemKeyToNameMapping } from "./Mapping.js";
 
-export type ScanFilters = {
+export type VaultScannnerFilters = {
 	files: {
 		polarity: number;
 		values: string[];
@@ -79,7 +79,7 @@ export interface taskBoardFilesRegistryType {
 export interface globalSettingsData {
 	openOnStartup: boolean;
 	lang: string;
-	scanFilters: ScanFilters;
+	scanFilters: VaultScannnerFilters;
 	firstDayOfWeek?: string;
 	ignoreFileNameDates: boolean;
 	taskPropertyFormat: taskPropertyFormatOptions;

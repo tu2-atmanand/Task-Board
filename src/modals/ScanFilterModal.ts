@@ -1,7 +1,7 @@
 import { t } from "i18next";
 import { Modal, Setting, setIcon } from "obsidian";
 import TaskBoard from "../../main.js";
-import { ScanFilters } from "../interfaces/GlobalSettings.js";
+import { VaultScannnerFilters } from "../interfaces/GlobalSettings.js";
 import { trashIcon } from "../interfaces/Icons.js";
 import {
 	getFileSuggestions,
@@ -19,7 +19,7 @@ export class ScanFilterModal extends Modal {
 
 	constructor(
 		private plugin: TaskBoard,
-		private filterType: keyof ScanFilters,
+		private filterType: keyof VaultScannnerFilters,
 		private onSave: (values: string[]) => void,
 	) {
 		super(plugin.app);
