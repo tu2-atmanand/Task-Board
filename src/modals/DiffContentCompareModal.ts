@@ -107,7 +107,7 @@ export class DiffContentCompareModal extends Modal {
 			// eslint-disable-next-line obsidianmd/ui/sentence-case
 			text: "NOTE : If you think this safe guard modal shown is irrelevant and its also popping-up too many times, you can by-pass it and disable this from the settings under the 'general' tab.",
 		});
-		noteOnSetting.addClass("tb_color_white");
+		noteOnSetting.addClass("tb_color_red");
 
 		const infoDiv = contentEl.createDiv({
 			cls: "taskboard-diff-content-compare-modal-info",
