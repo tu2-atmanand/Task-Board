@@ -198,3 +198,9 @@ export enum RibbonIconActions {
 	allBoardsMenu = "menu",
 	boardsExplorer = "explorer",
 }
+
+export enum HeaderTruncationOptions {
+	start = "start",
+	middle = "middle",
+	end = "end",
+}

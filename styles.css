@@ -563,7 +563,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	max-height: calc(var(--task-board-embed-wdith) - 60px);
 }
 
-.task-board-embed .taskBoardView .taskBoardMainContent .taskBoardViewSectionWrapper .taskBoardViewSection .taskBoardMapViewWrapper .taskBoardMapView{
+.task-board-embed .taskBoardView .taskBoardMainContent .taskBoardViewSectionWrapper .taskBoardViewSection .taskBoardMapViewWrapper .taskBoardMapView {
 	max-height: inherit;
 }
 
@@ -7303,8 +7303,6 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 .swimlaneRow.verticalUI.minimized {
 	min-height: 2rem;
 	min-width: 100%;
-	position: sticky;
-	left: 0;
 }
 
 .swimlaneHeaderContainer-vertical {
@@ -7346,8 +7344,14 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 .swimlaneRow.verticalUI.minimized .swimlaneHeaderContainer-vertical .swimlaneHeader-vertical {
 	display: flex;
 	flex-direction: row-reverse;
-	gap: 1rem;
 	padding-inline: 0.2rem;
+	/* size to the label (mirror of the horizontal .swimlaneHeader fix): shrink to the bar and
+			   truncate only at its edge, not at a fixed fraction, so the label uses all the space; sticky
+			   pins it left, justify-content clusters the group flush instead of space-between spreading it */
+	position: sticky;
+	left: 0;
+	flex: 0 1 auto;
+	justify-content: flex-end;
 }
 
 .swimlaneHeaderSwimlaneCount-vertical {
@@ -7389,7 +7393,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 1rem;
+	gap: 0.5rem;
 	width: 100%;
 	transform: rotate(0deg);
 }
@@ -7433,7 +7437,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	margin-inline: 4px;
+	margin-left: 1rem;
 	min-width: 20px;
 	justify-content: center;
 	transform: rotate(0deg);
@@ -7475,7 +7479,8 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	border-right: 1px solid var(--divider-color);
 	left: 0;
 	z-index: 5;
-	width: calc(var(--taskboard-leaf-width, 100%) - 25px);
+	width: 100%;
+	contain: inline-size;
 	flex-direction: row;
 	height: 2rem;
 }
@@ -7495,18 +7500,21 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	/* overflow: hidden; */
 	/* text-overflow: ellipsis; */
 	min-height: 100%;
-	min-width: 100%;
+	/* size to the label (not flex:1) so position:sticky has room to travel and the label/count pin
+	   left while the full-width bar scrolls; shrink to the bar and truncate only at its edge - not
+	   at a fixed fraction, so the label uses all the space the bar offers */
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
 	flex-direction: row;
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-start;
-	max-width: 95%;
 }
 
 .swimlaneHeaderLeftSec {
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .swimlaneHeaderName {
@@ -7515,7 +7523,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	justify-content: flex-start;
 	flex-direction: row;
 	gap: 0.5rem;
-	max-width: 95%;
+	min-width: 0;
 }
 
 .swimlaneHeaderNameLable {
@@ -7535,6 +7543,31 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	min-width: 0;
 	/* Take up all remaining space after siblings */
 	flex: 1;
+}
+
+/* Header path truncation styles ("end" is the base rule above; start/middle keep the file name) */
+.swimlaneHeaderNameValue[data-truncate="start"],
+.swimlaneHeaderNameValue-vertical[data-truncate="start"] {
+	direction: rtl;
+}
+
+.swimlaneHeaderNameValue[data-truncate="middle"],
+.swimlaneHeaderNameValue-vertical[data-truncate="middle"] {
+	display: flex;
+	flex-direction: row;
+}
+
+.swimlaneHeaderNameHead {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.swimlaneHeaderNameTail {
+	flex: 0 0 auto;
+	white-space: nowrap;
 }
 
 .swimlaneLabel {
@@ -7559,6 +7592,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	padding-inline: 3px;
 	margin-left: 1rem;
 	min-width: 1.5rem;
+	flex-shrink: 0;
 }
 
 /* Wrapper for all columns in a swimlane */
@@ -7619,6 +7653,7 @@ input[type="checkbox"].swimlanesConfigCheckbox {
 	align-items: center;
 	padding: 0 6px;
 	color: var(--text-muted);
+	flex-shrink: 0;
 }
 
 .swimlaneHeaderContainerMinimizICon svg {
@@ -9845,4 +9880,700 @@ li[data-task=b]>p>input:checked {
 	color: var(--text-muted);
 	padding: 12px;
 	text-align: center;
+}
+
+/* -------------------------------------- */
+/*          LIST VIEW                    */
+/* -------------------------------------- */
+
+.taskBoardListView {
+	background: var(--background-primary);
+	color: var(--text-normal);
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.taskBoardListHeader {
+	align-items: center;
+	background: var(--background-primary);
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	justify-content: space-between;
+	padding: 12px 16px;
+}
+
+.taskBoardListHeading,
+.taskBoardListControls,
+.taskBoardListFilters,
+.taskBoardListSort {
+	align-items: center;
+	display: flex;
+}
+
+.taskBoardListHeading {
+	gap: 10px;
+	min-width: 0;
+}
+
+.taskBoardListHeading>svg {
+	color: var(--interactive-accent);
+	flex: 0 0 auto;
+}
+
+.taskBoardListHeading h2 {
+	font-size: 1rem;
+	line-height: 1.3;
+	margin: 0;
+}
+
+.taskBoardListHeading span {
+	color: var(--text-muted);
+	font-size: 0.8rem;
+}
+
+.taskBoardListControls {
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.taskBoardListFilters {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	gap: 2px;
+	padding: 3px;
+}
+
+.taskBoardListFilters button {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	border-radius: 5px;
+	color: var(--text-muted);
+	cursor: pointer;
+	display: inline-flex;
+	font-size: 0.82rem;
+	gap: 6px;
+	padding: 5px 8px;
+	white-space: nowrap;
+}
+
+.taskBoardListFilters button:hover {
+	color: var(--text-normal);
+}
+
+.taskBoardListFilters button.is-active {
+	background: var(--background-primary);
+	box-shadow: 0 1px 3px var(--background-modifier-box-shadow);
+	color: var(--text-normal);
+}
+
+.taskBoardListFilters button span {
+	color: var(--text-faint);
+	font-size: 0.75rem;
+}
+
+.taskBoardListSort {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	color: var(--text-muted);
+	gap: 6px;
+	padding: 0 8px;
+}
+
+.taskBoardListSort select {
+	appearance: none;
+	background: transparent;
+	border: 0;
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: 0.82rem;
+	max-width: 130px;
+	padding: 7px 0;
+}
+
+.taskBoardListContent {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 14px clamp(12px, 3vw, 28px) 24px;
+}
+
+.taskBoardListTasks {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0 auto;
+	max-width: 1100px;
+}
+
+.taskBoardListTasks>.taskItemContainer {
+	margin: 0;
+	min-width: 0;
+	width: 100%;
+}
+
+.taskBoardListTasks .taskItem {
+	margin: 0;
+	width: 100%;
+}
+
+.taskBoardListEmpty {
+	align-items: center;
+	color: var(--text-muted);
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	justify-content: center;
+	min-height: 220px;
+	text-align: center;
+}
+
+.taskBoardListEmpty>svg {
+	color: var(--text-faint);
+}
+
+.taskBoardListEmpty strong {
+	color: var(--text-normal);
+	font-size: 1rem;
+}
+
+.taskBoardListLoadMore {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	color: var(--text-normal);
+	cursor: pointer;
+	display: block;
+	margin: 16px auto 0;
+	padding: 8px 14px;
+}
+
+.taskBoardListLoadMore:hover {
+	background: var(--background-modifier-hover);
+}
+
+/* ----------------------------------------- */
+/*          CALENDAR VIEW                    */
+/* ----------------------------------------- */
+
+.taskBoardCalendar {
+	background: var(--background-primary);
+	color: var(--text-normal);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.taskBoardCalendarHeader {
+	align-items: center;
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	justify-content: space-between;
+	padding: 12px 16px;
+}
+
+.taskBoardCalendarHeading,
+.taskBoardCalendarControls {
+	align-items: center;
+	display: flex;
+	gap: 8px;
+}
+
+.taskBoardCalendarHeading {
+	color: var(--text-accent);
+}
+
+.taskBoardCalendarHeading h2 {
+	color: var(--text-normal);
+	font-size: 1.05rem;
+	line-height: 1.3;
+	margin: 0;
+}
+
+.taskBoardCalendarHeading span {
+	color: var(--text-muted);
+	font-size: 0.8rem;
+}
+
+.taskBoardCalendarControls button {
+	align-items: center;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	color: var(--text-normal);
+	cursor: pointer;
+	display: inline-flex;
+	justify-content: center;
+	min-height: 30px;
+	padding: 4px 8px;
+}
+
+.taskBoardCalendarControls button:hover {
+	background: var(--background-modifier-hover);
+}
+
+.taskBoardCalendarControls .taskBoardCalendarIconButton {
+	padding: 4px;
+	width: 30px;
+}
+
+.taskBoardCalendarModeSwitch {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 7px;
+	display: flex;
+	margin-left: 4px;
+	overflow: hidden;
+}
+
+.taskBoardCalendarControls .taskBoardCalendarModeSwitch button {
+	border: 0;
+	border-radius: 0;
+	min-width: 48px;
+}
+
+.taskBoardCalendarControls .taskBoardCalendarModeSwitch button+button {
+	border-left: 1px solid var(--background-modifier-border);
+}
+
+.taskBoardCalendarControls .taskBoardCalendarModeSwitch button.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.taskBoardCalendarTimeScroll,
+.taskBoardCalendarMonth {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+}
+
+.taskBoardCalendarTimeView {
+	min-height: 100%;
+}
+
+.taskBoardCalendarDayHeaders,
+.taskBoardCalendarAllDayRow,
+.taskBoardCalendarDayColumns {
+	display: grid;
+	grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+}
+
+.taskBoardCalendarDayHeaders {
+	background: var(--background-primary);
+	position: sticky;
+	top: 0;
+	z-index: 4;
+}
+
+.taskBoardCalendarDayHeader {
+	align-items: center;
+	border-bottom: 1px solid var(--background-modifier-border);
+	border-left: 1px solid var(--background-modifier-border);
+	display: flex;
+	gap: 7px;
+	justify-content: center;
+	padding: 8px 4px;
+}
+
+.taskBoardCalendarDayHeader span {
+	color: var(--text-muted);
+	font-size: 0.8rem;
+}
+
+.taskBoardCalendarDayHeader strong {
+	align-items: center;
+	border-radius: 50%;
+	display: flex;
+	font-weight: 500;
+	height: 28px;
+	justify-content: center;
+	width: 28px;
+}
+
+.taskBoardCalendarDayHeader.is-today strong {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.taskBoardCalendarAllDayRow {
+	border-bottom: 1px solid var(--background-modifier-border);
+	min-height: 34px;
+}
+
+.taskBoardCalendarAllDayLabel {
+	color: var(--text-muted);
+	font-size: 0.75rem;
+	padding: 8px 4px;
+	text-align: right;
+}
+
+.taskBoardCalendarAllDayCell {
+	border-left: 1px solid var(--background-modifier-border);
+	padding: 3px;
+}
+
+.taskBoardCalendarAllDayTask,
+.taskBoardCalendarMonthTask {
+	background: var(--background-secondary);
+	border-left: 3px solid var(--interactive-accent);
+	border-radius: 3px;
+	font-size: 0.75rem;
+	margin: 2px 0;
+	overflow: hidden;
+	padding: 3px 5px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.taskBoardCalendarTimeGrid {
+	display: grid;
+	grid-template-columns: 56px minmax(0, 1fr);
+}
+
+.taskBoardCalendarTimeLabels {
+	background: var(--background-primary);
+}
+
+.taskBoardCalendarTimeLabel {
+	box-sizing: border-box;
+	color: var(--text-muted);
+	font-size: 0.7rem;
+	padding: 0 5px;
+	position: relative;
+	text-align: right;
+	transform: translateY(-0.5em);
+}
+
+.taskBoardCalendarDayColumns {
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.taskBoardCalendarDayColumn {
+	border-left: 1px solid var(--background-modifier-border);
+	min-height: 100%;
+	position: relative;
+}
+
+.taskBoardCalendarHourLines {
+	background-image: repeating-linear-gradient(to bottom,
+			var(--background-modifier-border) 0,
+			var(--background-modifier-border) 1px,
+			transparent 1px,
+			transparent 100%);
+}
+
+.taskBoardCalendarTimedTask {
+	background: color-mix(in srgb, var(--interactive-accent) 18%, var(--background-primary));
+	border: 1px solid color-mix(in srgb, var(--interactive-accent) 55%, transparent);
+	border-left: 3px solid var(--interactive-accent);
+	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+	font-size: 0.75rem;
+	left: 3px;
+	overflow: hidden;
+	padding: 4px 6px;
+	position: absolute;
+	right: 3px;
+	z-index: 1;
+}
+
+.taskBoardCalendarTimedTask strong {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.taskBoardCalendarTimedTask span {
+	color: var(--text-muted);
+	font-size: 0.7rem;
+}
+
+.taskBoardCalendarAllDayTask {
+	cursor: grab;
+	touch-action: none;
+}
+
+.taskBoardCalendarAllDayTask:active {
+	cursor: grabbing;
+}
+
+.taskBoardCalendarTimedTask {
+	touch-action: none;
+}
+
+.taskBoardCalendarResizeHandle {
+	bottom: 0;
+	cursor: ns-resize;
+	height: 8px;
+	left: 0;
+	position: absolute;
+	right: 0;
+	touch-action: none;
+	z-index: 2;
+}
+
+.taskBoardCalendarResizeHandle:hover {
+	background: color-mix(in srgb, var(--interactive-accent) 45%, transparent);
+}
+
+.taskBoardCalendarInteractionPreview {
+	background: color-mix(in srgb, var(--interactive-accent) 20%, transparent);
+	border: 2px solid var(--interactive-accent);
+	border-radius: 4px;
+	left: 3px;
+	pointer-events: none;
+	position: absolute;
+	right: 3px;
+	z-index: 3;
+}
+
+.taskBoardCalendarMonth {
+	display: flex;
+	flex-direction: column;
+}
+
+.taskBoardCalendarWeekdays,
+.taskBoardCalendarMonthGrid {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(110px, 1fr));
+}
+
+.taskBoardCalendarWeekdays {
+	background: var(--background-primary);
+	position: sticky;
+	top: 0;
+	z-index: 2;
+}
+
+.taskBoardCalendarWeekdays>div {
+	border-bottom: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	font-size: 0.8rem;
+	padding: 9px;
+	text-align: center;
+}
+
+.taskBoardCalendarMonthGrid {
+	flex: 1;
+	grid-auto-rows: minmax(100px, 1fr);
+	min-height: 500px;
+}
+
+.taskBoardCalendarMonthDay {
+	border-bottom: 1px solid var(--background-modifier-border);
+	border-right: 1px solid var(--background-modifier-border);
+	min-width: 0;
+	padding: 5px;
+}
+
+.taskBoardCalendarMonthDay.is-outside-month {
+	background: var(--background-secondary);
+	color: var(--text-faint);
+}
+
+.taskBoardCalendarMonthDayNumber {
+	border-radius: 50%;
+	font-size: 0.8rem;
+	height: 24px;
+	line-height: 24px;
+	text-align: center;
+	width: 24px;
+}
+
+.taskBoardCalendarMonthDay.is-today .taskBoardCalendarMonthDayNumber {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.taskBoardCalendarMonthTasks {
+	overflow: hidden;
+}
+
+.taskBoardCalendarMoreTasks {
+	color: var(--text-muted);
+	font-size: 0.72rem;
+	padding: 2px 5px;
+}
+
+@media (max-width: 700px) {
+	.taskBoardCalendarHeader {
+		align-items: flex-start;
+		padding: 10px;
+	}
+
+	.taskBoardCalendarControls {
+		flex-wrap: wrap;
+	}
+
+	.taskBoardCalendarDayHeaders,
+	.taskBoardCalendarAllDayRow {
+		grid-template-columns: 44px repeat(7, minmax(120px, 1fr));
+	}
+
+	.taskBoardCalendarTimeGrid {
+		grid-template-columns: 44px minmax(0, 1fr);
+	}
+}
+
+/* -------------------------------------- */
+/*          INBOX VIEW                    */
+/* -------------------------------------- */
+
+.taskBoardInboxView {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.taskBoardInboxList {
+	display: flex;
+	flex: 0 0 auto;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.taskBoardInboxListHeader {
+	align-items: center;
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	gap: 8px;
+	min-height: 42px;
+	padding: 0 12px;
+}
+
+.taskBoardInboxListTitle {
+	flex: 1;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.taskBoardInboxSortButton {
+	align-items: center;
+	background: transparent;
+	border: 0;
+	color: var(--text-muted);
+	cursor: pointer;
+	display: inline-flex;
+	justify-content: center;
+	padding: 4px;
+}
+
+.taskBoardInboxSortButton:hover {
+	color: var(--text-normal);
+}
+
+.taskBoardInboxTaskCount {
+	color: var(--text-muted);
+	font-size: 0.85em;
+}
+
+.taskBoardInboxListContent {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+}
+
+.taskBoardInboxListContent .TaskBoardColumnsSection {
+	height: 100%;
+	max-width: 100%;
+	min-height: 100%;
+	min-width: 0;
+	width: 100%;
+}
+
+.taskBoardInboxListContent .tasksContainer {
+	height: 100%;
+	max-height: 100%;
+	overflow: auto;
+}
+
+.taskBoardInboxListContent .inboxTaskSelected>.taskItemContainer {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 1px;
+}
+
+.taskBoardInboxResizer {
+	background: var(--background-modifier-border);
+	cursor: col-resize;
+	flex: 0 0 4px;
+	touch-action: none;
+}
+
+.taskBoardInboxResizer:hover {
+	background: var(--interactive-accent);
+}
+
+.taskBoardInboxEditor {
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+	overflow: auto;
+	padding: 12px;
+	position: relative;
+}
+
+.taskBoardInboxEditor .EditTaskModalHome {
+	height: 100%;
+}
+
+.taskBoardInboxEditorEmpty {
+	align-items: center;
+	color: var(--text-muted);
+	display: flex;
+	height: 100%;
+	justify-content: center;
+	text-align: center;
+}
+
+.taskBoardInboxView .EditTaskModalHomePreviewBody {
+	min-height: 160px;
+}
+
+.taskBoardInboxView .EditTaskModalHomeLeftSec {
+	position: relative;
+}
+
+.EditTaskModalInboxSaveBtn {
+	align-items: center;
+	background: var(--interactive-accent);
+	border: 0;
+	border-radius: 4px;
+	color: var(--text-on-accent);
+	cursor: pointer;
+	display: inline-flex;
+	justify-content: center;
+	padding: 6px;
+	position: absolute;
+	right: 8px;
+	top: 8px;
+	z-index: 2;
+}
+
+.EditTaskModalInboxSaveBtn:hover {
+	background: var(--interactive-accent-hover);
+}
+
+@media (max-width: 700px) {
+	.taskBoardInboxEditor {
+		padding: 8px;
+	}
 }

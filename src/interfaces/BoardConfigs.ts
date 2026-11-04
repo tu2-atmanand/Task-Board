@@ -5,6 +5,7 @@ import {
 	HeaderUITypeOptions,
 	viewsPanelPropertiesToShow,
 	UniversalDateOptions,
+	HeaderTruncationOptions,
 } from "./Enums.js";
 import { defaultTaskStatuses } from "./Mapping.js";
 
@@ -146,6 +147,7 @@ export type swimlaneConfigs = {
 	}[]; // This is only if user selects "custom" as the sort criteria.
 	groupAllRest?: boolean; // This will be only visible for customSortOrder. It will help user to decide if they want to group all the rest of the task below the custom sort order.
 	headerUIType: HeaderUITypeOptions;
+	headerTruncation: string; // e.g., 'start', 'middle', 'end'
 	minimized: string[]; // This will store the names of the minimized swimlanes.
 };
 
@@ -405,6 +407,7 @@ export const DEFAULT_BOARD: Board = {
 					minimized: [],
 					maxHeight: "300px",
 					headerUIType: HeaderUITypeOptions.horizontal,
+					headerTruncation: HeaderTruncationOptions.middle,
 				},
 			},
 			viewFilters: {
@@ -483,6 +486,7 @@ export const DEFAULT_BOARD: Board = {
 					minimized: [],
 					maxHeight: "300px",
 					headerUIType: HeaderUITypeOptions.horizontal,
+					headerTruncation: HeaderTruncationOptions.middle,
 				},
 			},
 			viewFilters: {
@@ -571,6 +575,7 @@ export const DEFAULT_BOARD: Board = {
 					minimized: [],
 					maxHeight: "300px",
 					headerUIType: HeaderUITypeOptions.horizontal,
+					headerTruncation: HeaderTruncationOptions.middle,
 				},
 			},
 			viewFilters: {

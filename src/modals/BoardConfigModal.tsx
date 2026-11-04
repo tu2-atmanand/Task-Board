@@ -10,7 +10,7 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 import { t } from "i18next";
 import TaskBoard from "../../main.js";
 import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../interfaces/BoardConfigs.js";
-import { viewTypeNames, colTypeNames, UniversalDateOptions } from "../interfaces/Enums.js";
+import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions } from "../interfaces/Enums.js";
 import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../services/MultiSuggest.js";
@@ -263,6 +263,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			customSortOrder: [],
 			minimized: false,
 			maxHeight: '300px',
+			headerTruncation: HeaderTruncationOptions.middle
 		};
 
 		const swimlaneModal = new SwimlanesConfigModal(

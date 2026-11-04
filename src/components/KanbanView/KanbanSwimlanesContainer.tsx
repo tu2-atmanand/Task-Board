@@ -2,10 +2,10 @@
 
 import { t } from 'i18next';
 import { TableCellsSplit, ChevronRight, ChevronDown } from 'lucide-react';
-import React, { useMemo, memo } from 'react';
+import React, { useMemo, memo, useRef, useState, useLayoutEffect, useEffect } from 'react';
 import TaskBoard from '../../../main.js';
 import { Board, KanbanView, ColumnData } from '../../interfaces/BoardConfigs.js';
-import { HeaderUITypeOptions } from '../../interfaces/Enums.js';
+import { HeaderTruncationOptions, HeaderUITypeOptions } from '../../interfaces/Enums.js';
 import { taskItem } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
@@ -84,8 +84,17 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		groupAllRest,
 		maxHeight: maxSwimlaneHeight,
 		headerUIType,
+		headerTruncation = HeaderTruncationOptions.middle,
 		minimized
 	} = kanbanViewData.swimlanes;
+
+	// vertical header spans the row's real height (runtime, capped by maxSwimlaneHeight), so measure it
+	const columnsWrapperRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+	const [swimlaneRowHeights, setSwimlaneRowHeights] = useState<Record<number, number>>({});
+
+	// collapsed rows render no columns, so they can't size to them - mirror the always-rendered column-header width instead
+	const swimlanesContainerRef = useRef<HTMLDivElement>(null);
+	const [columnsWidth, setColumnsWidth] = useState<number | undefined>(undefined);
 
 	const swimlanes: SwimlaneRow[] = useMemo(() => {
 		if (!swimlaneColumnTasks || swimlaneColumnTasks.flat().length < 1) {
@@ -216,12 +225,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 				swimlaneName = statusName ? statusName : 'All rest';
 			} else if (property === 'tags' && swimlaneItemValue.trim() === "") {
 				swimlaneName = "No tags";
-			} else if (property === 'filePath') {
-				swimlaneName = swimlaneItemValue.split("/").pop() ?? swimlaneItemValue;
-			} else if (property === 'folderPath') {
-				const parts = swimlaneItemValue.split("/");
-				swimlaneName = parts.at(-2) ?? swimlaneItemValue;
-				swimlaneName = swimlaneName + "/";
+			} else if (property === 'filePath' || property === 'folderPath') {
+				// #839: show the full vault-relative path so identically-named files/folders stay distinct
+				swimlaneName = swimlaneItemValue;
 			}
 			const isSwimlaneMinimized = minimized?.includes(swimlaneName) ?? false;
 
@@ -242,6 +248,55 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 		return swimlaneRows;
 	}, [currentBoardData, tasksPerColumn, plugin]);
+
+	// keep above the early return - a hook after it changes hook count between renders
+	useEffect(() => {
+		const el = swimlanesContainerRef.current;
+		if (!el) return;
+
+		if (headerUIType !== HeaderUITypeOptions.vertical) return;
+
+		const win = el.ownerDocument.defaultView ?? window;
+		const observer = new win.ResizeObserver((entries) => {
+			setSwimlaneRowHeights((prev) => {
+				const next = { ...prev };
+				let changed = false;
+				for (const entry of entries) {
+					const rowIndex = Number((entry.target as HTMLElement).dataset.rowIndex);
+					const height = entry.contentRect.height;
+					if (next[rowIndex] !== height) {
+						next[rowIndex] = height;
+						changed = true;
+					}
+				}
+				return changed ? next : prev;
+			});
+		});
+		columnsWrapperRefs.current.forEach((el) => observer.observe(el));
+		return () => observer.disconnect();
+	}, [headerUIType, swimlanes, maxSwimlaneHeight]);
+
+	// measure the column-header width so collapsed rows (which render no columns) can match it
+	useLayoutEffect(() => {
+		const container = swimlanesContainerRef.current;
+		if (!container) return;
+
+		const measure = () => {
+			const width = container.offsetWidth;
+			setColumnsWidth((prev) => (prev !== width ? width : prev));
+		};
+		measure();
+
+		// Observe the available width as well as the intrinsic header width. The header alone may not
+		// resize when the containing leaf changes size because it is sized to fit its columns.
+		const win = container.ownerDocument.defaultView;
+		if (!win) return;
+
+		const observer = new win.ResizeObserver(measure);
+		observer.observe(container);
+		return () => observer.disconnect();
+	}, [headerUIType, swimlanes]);
+
 
 	const hasExcludedColumns = columnsOutsideSwimlanes.length > 0;
 	const hasSwimlaneColumns = columnsInSwimlanes.length > 0;
@@ -302,7 +357,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 	// 	);
 	// }
 
-	function handleSwimlaneMinimize(rowIndex: number) {
+	async function handleSwimlaneMinimize(rowIndex: number) {
 		try {
 			const swimlaneName = swimlanes[rowIndex]?.swimlaneName;
 			if (!swimlaneName) return;
@@ -339,6 +394,29 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 		}
 	}
 
+	const renderHeaderNameValue = (value: string, className: string) => {
+		if (headerTruncation === HeaderTruncationOptions.middle) {
+			const trailingSlash = value.endsWith('/') ? '/' : '';
+			const segments = value.split('/').filter(Boolean);
+			const tailSegments = 3;
+			if (segments.length > tailSegments) {
+				const head = segments.slice(0, -tailSegments).join('/');
+				const tail = '/' + segments.slice(-tailSegments).join('/') + trailingSlash; // lead the tail with '/' so names don't merge after the head ellipsis
+				return (
+					<div className={className} data-truncate={headerTruncation}>
+						<span className="swimlaneHeaderNameHead">{head}</span>
+						<span className="swimlaneHeaderNameTail">{tail}</span>
+					</div>
+				);
+			}
+		}
+		// middle with too few segments (short path, tag or status) - falls back to the end ellipsis
+		const mode = headerTruncation === HeaderTruncationOptions.middle ? HeaderTruncationOptions.end : headerTruncation;
+		return (
+			<div className={className} data-truncate={mode}><bdi>{value}</bdi></div>
+		);
+	};
+
 	// Render a sticky header row of column headers across swimlanes
 	return (
 		<div className="kanbanSwimlanesGrid">
@@ -351,7 +429,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 
 			{/* Swimlane Rows */}
 			{hasSwimlaneColumns && swimlaneBoard && (
-				<div className="swimlanesContainer">
+				<div ref={swimlanesContainerRef} className="swimlanesContainer">
 					{/* Top header showing column headers and counts */}
 					<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
 						{/* A small Icon at the top right corner inside the swimlanes container */}
@@ -378,16 +456,16 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 					{swimlanes.map((swimlane, rowIndex) => (
 						<React.Fragment key={swimlane.swimlaneValue}>
 							{headerUIType === HeaderUITypeOptions.vertical ? (
-								<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`}>
+								<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`} style={swimlane.minimized && columnsWidth ? { width: `${columnsWidth - 20}px`, minWidth: `${columnsWidth - 20}px` } : undefined}>
 									{/* Swimlane Label */}
 									<div className='swimlaneHeaderContainer-vertical'>
 										<div className='swimlaneHeader-vertical'>
 											<div className='swimlaneHeaderSwimlaneCount-vertical'>
 												{swimlane.tasks.flat().length ?? 0}
 											</div>
-											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName}>
+											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName} style={!swimlane.minimized && swimlaneRowHeights[rowIndex] ? { width: `${Math.max(0, swimlaneRowHeights[rowIndex] - 80)}px` } : undefined}>
 												<div className='swimlaneHeaderNameLable-vertical'>{property}:</div>
-												<div className='swimlaneHeaderNameValue-vertical'>{swimlane.swimlaneName}</div>
+												{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue-vertical')}
 											</div>
 											<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
 												<ChevronRight />
@@ -396,7 +474,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 
 									{/* Columns for this Swimlane */}
-									<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+									<div className="swimlaneColumnsWrapper" data-row-index={rowIndex} ref={(el) => { if (el) columnsWrapperRefs.current.set(rowIndex, el); else columnsWrapperRefs.current.delete(rowIndex); }} style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
 										{swimlane.minimized ? null : columnsInSwimlanes.map((column: ColumnData, colIndex: number) => {
 											const swimlaneData = {
 												property: kanbanViewData.swimlanes.property,
@@ -421,7 +499,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 								</div>
 							) : (
-								<div className={`swimlaneRow${swimlane.minimized ? ' minimized' : ''}`}>
+								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`} style={columnsWidth ? { width: `${columnsWidth - 20}px` } : undefined}>
 									{/* Swimlane Label */}
 									<div className='swimlaneHeaderContainer'>
 										<div className='swimlaneHeader'>
@@ -431,7 +509,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												</div>
 												<div className="swimlaneHeaderName" title={swimlane.swimlaneName}>
 													<div className='swimlaneHeaderNameLable'>{property}:</div>
-													<div className='swimlaneHeaderNameValue'>{swimlane.swimlaneName}</div>
+													{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue')}
 												</div>
 											</div>
 											<div className='swimlaneHeaderSwimlaneCount'>
@@ -441,7 +519,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 
 									{/* Columns for this Swimlane */}
-									<div className="swimlaneColumnsWrapper" style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+									<div className="swimlaneColumnsWrapper" data-row-index={rowIndex} ref={(el) => { if (el) columnsWrapperRefs.current.set(rowIndex, el); else columnsWrapperRefs.current.delete(rowIndex); }} style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
 										{swimlane.minimized ? null : columnsInSwimlanes.map((column: ColumnData, colIndex: number) => {
 											const swimlaneData = {
 												property: kanbanViewData.swimlanes.property || 'tags',

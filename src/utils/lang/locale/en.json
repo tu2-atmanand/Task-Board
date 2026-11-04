@@ -578,5 +578,10 @@
 	"configure-status-entry": "Configure status entry",
 	"edit": "Edit",
 	"no-custom-statuses-configured": "No custom statuses configured",
-	"task-note-title-placeholder": "Enter a simple title for the task..."
+	"task-note-title-placeholder": "Enter a simple title for the task...",
+	"header-truncation": "Header path truncation",
+	"header-truncation-info": "How the file/folder path in the swimlane header is shortened when it does not fit. Middle keeps the file name, Start keeps the tail, End is the classic trailing ellipsis.",
+	"truncate-start": "Start (keep tail)",
+	"truncate-middle": "Middle (keep file name)",
+	"truncate-end": "End (classic)"
 }

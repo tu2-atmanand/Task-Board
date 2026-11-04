@@ -4,7 +4,7 @@ import { Modal, Setting, getAllTags, normalizePath, setIcon } from 'obsidian';
 import Sortable from 'sortablejs';
 
 import { swimlaneConfigs } from '../interfaces/BoardConfigs.js';
-import { HeaderUITypeOptions } from '../interfaces/Enums.js';
+import { HeaderTruncationOptions, HeaderUITypeOptions } from '../interfaces/Enums.js';
 import { t } from '../utils/lang/helper.js';
 import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, StatusDropdownOption } from '../interfaces/Mapping.js';
 import TaskBoard from '../../main.js';
@@ -33,6 +33,7 @@ export class SwimlanesConfigModal extends Modal {
 	private maxHeight: string;
 	private groupAllRest: boolean;
 	private headerUIType: HeaderUITypeOptions;
+	private headerTruncation: string;
 
 	private sortableInstance: Sortable | null = null;
 	private sortableListEl: HTMLElement | null = null;
@@ -61,6 +62,7 @@ export class SwimlanesConfigModal extends Modal {
 		this.maxHeight = swimlaneConfig.maxHeight || '300px';
 		this.groupAllRest = swimlaneConfig.groupAllRest ?? true;
 		this.headerUIType = swimlaneConfig.headerUIType || HeaderUITypeOptions.horizontal;
+		this.headerTruncation = swimlaneConfig.headerTruncation || HeaderTruncationOptions.middle;
 
 		this.modalEl.classList.add('swimlanes-config-modal');
 	}
@@ -89,6 +91,7 @@ export class SwimlanesConfigModal extends Modal {
 			this.renderMaxHeight(modalContent);
 			this.renderSortCriteria(modalContent);
 			this.renderHeaderUIType(modalContent);
+			this.renderHeaderTruncation(modalContent);
 		}
 
 		// this.renderButtons(modalContent);
@@ -527,6 +530,29 @@ export class SwimlanesConfigModal extends Modal {
 			});
 	}
 
+	private renderHeaderTruncation(container: HTMLElement) {
+		const truncationOptions = [
+			{ value: HeaderTruncationOptions.start, label: t('truncate-start') },
+			{ value: HeaderTruncationOptions.middle, label: t('truncate-middle') },
+			{ value: HeaderTruncationOptions.end, label: t('truncate-end') },
+		];
+
+		new Setting(container)
+			.setName(t('header-truncation'))
+			.setDesc(t('header-truncation-info'))
+			.addDropdown((dropdown) => {
+				truncationOptions.forEach((option) => {
+					dropdown.addOption(option.value, option.label);
+				});
+				dropdown
+					.setValue(this.headerTruncation)
+					.onChange(async (value) => {
+						this.headerTruncation = value;
+						this.edited = true;
+					})
+			});
+	}
+
 	private renderButtons(container: HTMLElement) {
 		const buttonsContainer = container.createDiv({
 			cls: 'swimlanesConfigButtonsContainer',
@@ -557,6 +583,7 @@ export class SwimlanesConfigModal extends Modal {
 				groupAllRest: this.groupAllRest,
 				headerUIType: this.headerUIType,
 				minimized: this.swimlaneConfig.minimized,
+				headerTruncation: this.headerTruncation,
 			};
 			this.edited = false;
 			this.onSave(updatedConfig);
@@ -590,6 +617,7 @@ export class SwimlanesConfigModal extends Modal {
 				groupAllRest: this.groupAllRest,
 				headerUIType: this.headerUIType,
 				minimized: this.swimlaneConfig.minimized,
+				headerTruncation: this.headerTruncation,
 			};
 			this.onSave(updatedConfig);
 			this.onClose();
