@@ -499,9 +499,9 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 									</div>
 								</div>
 							) : (
-								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`} style={columnsWidth ? { width: `${columnsWidth - 20}px` } : undefined}>
+								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`}>
 									{/* Swimlane Label */}
-									<div className='swimlaneHeaderContainer'>
+									<div className='swimlaneHeaderContainer' style={columnsWidth ? { width: `${columnsWidth - 20}px` } : undefined}>
 										<div className='swimlaneHeader'>
 											<div className='swimlaneHeaderLeftSec'>
 												<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
