@@ -3,7 +3,6 @@ import { Notice } from "obsidian";
 import type TaskBoard from "../../main.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import { BugReporterModal } from "../modals/BugReporterModal.js";
-import { fsPromises } from "../services/FileSystem.js";
 import { getObsidianDebugInfo } from "../services/ObsidianDebugInfo.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
 import { type ElectronOpenDialogReturnValue } from "obsidian-typings";
