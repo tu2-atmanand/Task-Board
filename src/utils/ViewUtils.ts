@@ -9,6 +9,7 @@ import {
 	viewTypeNames,
 	HeaderUITypeOptions,
 	colTypeNames,
+	HeaderTruncationOptions,
 } from "../interfaces/Enums.js";
 import {
 	generateRandomNumber,
@@ -113,6 +114,7 @@ export function addViewToBoard(
 				minimized: [],
 				maxHeight: "300px",
 				headerUIType: HeaderUITypeOptions.horizontal,
+				headerTruncation: HeaderTruncationOptions.middle,
 			},
 		};
 	} else if (viewType === viewTypeNames.table) {

@@ -4,7 +4,7 @@ import { ArrowUpDown } from "lucide-react";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import type { Board, ColumnData, InboxView as InboxViewConfig, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
-import { colTypeNames, HeaderUITypeOptions, viewTypeNames } from "../../interfaces/Enums.js";
+import { colTypeNames, HeaderTruncationOptions, HeaderUITypeOptions, viewTypeNames } from "../../interfaces/Enums.js";
 import { taskItem, taskJsonMerged } from "../../interfaces/TaskItem.js";
 import { ConfigureColumnSortingModal } from "../../modals/ConfigureColumnSortingModal.js";
 import { ClosePopupConfrimationModal } from "../../modals/ClosePopupConfrimationModal.js";
@@ -281,6 +281,8 @@ const InboxView: React.FC<InboxViewProps> = ({
 								minimized: [],
 								maxHeight: "300px",
 								headerUIType: HeaderUITypeOptions.horizontal,
+								headerTruncation: HeaderTruncationOptions.middle,
+
 							},
 						}}
 						columnData={columnData}
