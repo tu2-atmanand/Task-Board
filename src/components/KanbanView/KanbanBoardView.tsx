@@ -92,7 +92,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, parentComponent, curr
 		}
 
 		return null;
-	}, [loading]);
+	}, [loading, currentBoardData]);
 
 	const renderFreshInstallMessage = useMemo(() => {
 		if (freshInstall) {
