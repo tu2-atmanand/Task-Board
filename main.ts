@@ -1183,6 +1183,7 @@ export default class TaskBoard extends Plugin {
 									this.vaultScanner.refreshTasksFromFiles(
 										[file],
 										true,
+										true,
 									);
 								}
 							});
@@ -1331,7 +1332,13 @@ export default class TaskBoard extends Plugin {
 			// 	this.fileUpdatedUsingModal = "";
 			// }
 
-			await this.realTimeScanner.processAllUpdatedFiles();
+			// The editor has lost focus here, so the latest content is already
+			// on disk and writing IDs back is safe.
+			await this.realTimeScanner.processAllUpdatedFiles(
+				undefined,
+				undefined,
+				true,
+			);
 		}
 	}
 
