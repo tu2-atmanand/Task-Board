@@ -148,7 +148,6 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 
 	// Scroll event handler
 	const handleScroll = useCallback(() => {
-		debugger;
 		const container = tasksContainerRef.current;
 		if (!container) return;
 
@@ -170,10 +169,11 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		if (!container) return;
 
 		// Throttle scroll events for performance
-		let throttleTimeout: number | null;
+		let throttleTimeout: number | null = null;
 		const throttledScroll = () => {
-			if (throttleTimeout) return;
+			if (throttleTimeout !== null) return;
 			throttleTimeout = window.setTimeout(() => {
+				throttleTimeout = null;
 				handleScroll();
 
 				if (Platform.isMobile)
@@ -657,7 +657,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	// -------------------------------------------------
 
 	// -------------------------------------------------
-	// Render
+	// ALL RENDERING CODE
 	// -------------------------------------------------
 
 	// If this column is requested to render header-only (used by swimlane top header), return just the header UI
