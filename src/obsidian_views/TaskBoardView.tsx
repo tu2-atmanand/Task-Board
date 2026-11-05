@@ -41,72 +41,74 @@ export class TaskBoardView extends ItemView {
 	}
 
 	onPaneMenu(menu: Menu, source: "more-options" | "tab-header"): void {
-		if (source === "more-options") {
-			menu.addItem((item) => {
-				item.setTitle(t("quick-actions"));
-				item.setIsLabel(true);
-			});
-			menu.addItem((item) => {
-				item.setTitle(t("refresh-the-board"));
-				item.setIcon("rotate-cw");
-				item.onClick(async () => {
-					// refreshBoardButton();
-				});
-			});
-			menu.addItem((item) => {
-				item.setTitle(t("show-hide-properties"));
-				item.setIcon("list");
-				item.onClick(async () => {
-					// handlePropertiesBtnClick(event);
-				});
-			});
-			menu.addItem((item) => {
-				item.setTitle(t("open-board-filters-modal"));
-				item.setIcon(funnelIcon);
-				item.onClick(async () => {
-					// handleFilterButtonClick(event);
-				});
-			});
-			menu.addItem((item) => {
-				item.setTitle(t("open-board-configuration-modal"));
-				item.setIcon("settings");
-				item.onClick(async () => {
-					// openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
-					// 	// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-					// 	// setCurrentBoardData(updatedBoard);
-					// 	this.plugin.taskBoardFileManager.saveBoard(updatedBoard);
-					// })
-				});
-			});
-			menu.addItem((item) => {
-				item.setTitle(t("scan-vault-modal"));
-				item.setIcon(ScanVaultIcon);
-				item.onClick(async () => {
-					openScanVaultModal(this.plugin);
-				});
-			});
+
+		// This are not required at present, especially we do not want additional menu button. Only refresh button will be present.
+		// if (source === "more-options") {
+		// 	menu.addItem((item) => {
+		// 		item.setTitle(t("quick-actions"));
+		// 		item.setIsLabel(true);
+		// 	});
+		// 	menu.addItem((item) => {
+		// 		item.setTitle(t("refresh-the-board"));
+		// 		item.setIcon("rotate-cw");
+		// 		item.onClick(async () => {
+		// 			// refreshBoardButton();
+		// 		});
+		// 	});
+		// 	menu.addItem((item) => {
+		// 		item.setTitle(t("show-hide-properties"));
+		// 		item.setIcon("list");
+		// 		item.onClick(async () => {
+		// 			// handlePropertiesBtnClick(event);
+		// 		});
+		// 	});
+		// 	menu.addItem((item) => {
+		// 		item.setTitle(t("open-board-filters-modal"));
+		// 		item.setIcon(funnelIcon);
+		// 		item.onClick(async () => {
+		// 			// handleFilterButtonClick(event);
+		// 		});
+		// 	});
+		// 	menu.addItem((item) => {
+		// 		item.setTitle(t("open-board-configuration-modal"));
+		// 		item.setIcon("settings");
+		// 		item.onClick(async () => {
+		// 			// openBoardConfigModal(plugin, currentBoardData, (updatedBoard: Board) => {
+		// 			// 	// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+		// 			// 	// setCurrentBoardData(updatedBoard);
+		// 			// 	this.plugin.taskBoardFileManager.saveBoard(updatedBoard);
+		// 			// })
+		// 		});
+		// 	});
+		// 	menu.addItem((item) => {
+		// 		item.setTitle(t("scan-vault-modal"));
+		// 		item.setIcon(ScanVaultIcon);
+		// 		item.onClick(async () => {
+		// 			openScanVaultModal(this.plugin);
+		// 		});
+		// 	});
 
 
-			// DEPRECATED : As we are moving the view switching options to the ribbon menu, we will remove these options from the pane menu to avoid confusion for users.
-			// menu.addItem((item) => {
-			// 	item.setTitle(t("view-type"));
-			// 	item.setIsLabel(true);
-			// });
-			// menu.addItem((item) => {
-			// 	item.setTitle(t("kanban-view"));
-			// 	item.setIcon("square-kanban");
-			// 	item.onClick(async () => {
-			// 		eventEmitter.emit("SWITCH_VIEW", 'kanban');
-			// 	});
-			// });
-			// menu.addItem((item) => {
-			// 	item.setTitle(t("map-view"));
-			// 	item.setIcon("network");
-			// 	item.onClick(async () => {
-			// 		eventEmitter.emit("SWITCH_VIEW", 'map');
-			// 	});
-			// });
-		}
+		// 	// DEPRECATED : As we are moving the view switching options to the ribbon menu, we will remove these options from the pane menu to avoid confusion for users.
+		// 	// menu.addItem((item) => {
+		// 	// 	item.setTitle(t("view-type"));
+		// 	// 	item.setIsLabel(true);
+		// 	// });
+		// 	// menu.addItem((item) => {
+		// 	// 	item.setTitle(t("kanban-view"));
+		// 	// 	item.setIcon("square-kanban");
+		// 	// 	item.onClick(async () => {
+		// 	// 		eventEmitter.emit("SWITCH_VIEW", 'kanban');
+		// 	// 	});
+		// 	// });
+		// 	// menu.addItem((item) => {
+		// 	// 	item.setTitle(t("map-view"));
+		// 	// 	item.setIcon("network");
+		// 	// 	item.onClick(async () => {
+		// 	// 		eventEmitter.emit("SWITCH_VIEW", 'map');
+		// 	// 	});
+		// 	// });
+		// }
 	}
 
 	/**

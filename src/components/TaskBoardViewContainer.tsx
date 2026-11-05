@@ -1,6 +1,6 @@
 // src/components/TaskBoardViewContainer.tsx
 
-import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon, CalendarDays, Inbox as InboxIcon, Table2, ListIcon } from 'lucide-react';
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon, CalendarDays, Inbox as InboxIcon, Table2, ListIcon, PanelLeftClose } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { debounce, Platform, Menu, WorkspaceLeaf, Notice, Component } from "obsidian";
 import { t } from 'i18next';
@@ -62,7 +62,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	const [freshInstall, setFreshInstall] = useState(false);
 	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
 	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
-	const [isMobileView, setIsMobileView] = useState(false); // show elements for screens smaller than 800px
+	const [isSmallWidthScreen, setIsSmallWidthScreen] = useState(false); // show elements for screens smaller than 800px
 	const [boardDrawerVisible, setboardDrawerVisible] = useState(boardData.viewsPanel.isOpen);
 	const [editorModified, setEditorModified] = useState(plugin.editorModified);
 
@@ -105,8 +105,8 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 	}, []);
 
 	useEffect(() => {
-		setShowAllElements(viewWidth >= 1000);
-		setIsMobileView(viewWidth <= 800); // For even little bigger screen smartphones, let go with 800
+		setShowAllElements(viewWidth >= 800);
+		setIsSmallWidthScreen(viewWidth <= 400); // To design specifically for Mobile phones. This will allow to show desktop like UI for tablet screens.
 	}, [viewWidth]);
 
 	useEffect(() => {
@@ -1268,62 +1268,78 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 									className="taskBoarHeaderLeftSecDrawerBtn"
 									onClick={toggleBoardSidebar}
 									aria-label={boardDrawerVisible ? t("close-board-drawer") : t("open-board-drawer")}
-								>
+								>{boardDrawerVisible ? (
+									<PanelLeftClose
+										className="taskBoarHeaderLeftSecDrawerIcon"
+										size={22}
+										strokeWidth={1.5}
+									/>
+								) : (
 									<PanelLeft
 										className="taskBoarHeaderLeftSecDrawerIcon"
 										size={22}
 										strokeWidth={1.5}
 									/>
-								</button>
-								{!boardDrawerVisible && boardData.viewsPanel.buttonsBelt ? (
-									<div className="viewSwitcherBar" ref={leftHeaderSecRef}>
-										{boardData.views.map((view, index) => (
-											<button
-												key={index}
-												className={`viewTitleButton${index === currentViewIndex ? " Active" : ""}`}
-												onClick={() => handleViewSelect(index)}
-											>
-												{getViewTypeIconComponent(view.viewType, 20)}
-												{view.viewName}
-											</button>
-										))}
-									</div>
-								) : (
-									<div className="mobileBoardHeader">
-										<div
-											ref={viewDropdownRef}
-											className={`taskBoardViewDropdown`}
-											onClick={() => {
-												setShowViewDropdown(!showViewDropdown);
-											}}
-										>
-											<div className="taskBoardViewDropdownBtn">
-												<span className="taskBoardViewDropdownName">
-													{currentView.viewName}
-												</span>
-												<ChevronDownIcon
-													size={22}
-													className='taskBoardHeaderLeftSecViewsDropdownIcon'
-													aria-label={t("all-views-dropdown")}
-												/>
-											</div>
+								)}</button>
 
-											{/* Custom Dropdown Menu */}
-											<div className={`taskBoardViewDropdownMenu ${showViewDropdown ? 'taskBoardViewDropdownMenu--open' : ''}`}>
-												{boardData.views.map((view, index) => (
+								{boardDrawerVisible ?
+									(
+										<span className="taskBoardViewDropdownName">
+											{currentView.viewName}
+										</span>
+									) : (
+										<>
+											{boardData.viewsPanel.buttonsBelt ? (
+												<div className="viewSwitcherBar" ref={leftHeaderSecRef}>
+													{boardData.views.map((view, index) => (
+														<button
+															key={index}
+															className={`viewTitleButton${index === currentViewIndex ? " Active" : ""}`}
+															onClick={() => handleViewSelect(index)}
+														>
+															{getViewTypeIconComponent(view.viewType, 20)}
+															{view.viewName}
+														</button>
+													))}
+												</div>
+											) : (
+												<div className="mobileBoardHeader">
 													<div
-														key={`${view.viewId}-${index}`}
-														className={`taskBoardViewDropdownItem ${currentViewIndex === index ? 'taskBoardViewDropdownItem--active' : ''}`}
-														onClick={() => handleViewSelect(index)}
+														ref={viewDropdownRef}
+														className={`taskBoardViewDropdown`}
+														onClick={() => {
+															setShowViewDropdown(!showViewDropdown);
+														}}
 													>
-														{getViewTypeIconComponent(view.viewType, 20)}
-														{view.viewName}
+														<div className="taskBoardViewDropdownBtn">
+															<span className="taskBoardViewDropdownName">
+																{currentView.viewName}
+															</span>
+															<ChevronDownIcon
+																size={22}
+																className='taskBoardHeaderLeftSecViewsDropdownIcon'
+																aria-label={t("all-views-dropdown")}
+															/>
+														</div>
+
+														{/* Custom Dropdown Menu */}
+														<div className={`taskBoardViewDropdownMenu ${showViewDropdown ? 'taskBoardViewDropdownMenu--open' : ''}`}>
+															{boardData.views.map((view, index) => (
+																<div
+																	key={`${view.viewId}-${index}`}
+																	className={`taskBoardViewDropdownItem ${currentViewIndex === index ? 'taskBoardViewDropdownItem--active' : ''}`}
+																	onClick={() => handleViewSelect(index)}
+																>
+																	{getViewTypeIconComponent(view.viewType, 20)}
+																	{view.viewName}
+																</div>
+															))}
+														</div>
 													</div>
-												))}
-											</div>
-										</div>
-									</div>
-								)}
+												</div>
+											)}
+										</>
+									)}
 							</>
 						) : (
 							<div className="mobileBoardHeader">
@@ -1335,115 +1351,143 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					</div>
 
 					<div className="taskBoardHeaderRightSec">
-						<div className="taskCountContainer">
-							<div className={`taskCountContainerProgressBar${isMobileView ? "-hidden" : ""}`}>
-								<div
-									className="taskCountContainerProgressBarProgress"
-									style={{
-										width: `${((filteredTasks ? filteredTasks?.Completed.length : 0) / (filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 1)) * 100}%`,
-									}}
-								/>
-							</div>
-							<span className="taskCountContainerTaskCount">
-								{(filteredTasks ? filteredTasks?.Completed.length : 0)} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
-							</span>
-						</div>
-						{showSearchInput && (
-							<input
-								type="text"
-								className="taskBoardSearchInput"
-								placeholder="Search tasks..."
-								aria-label={t("enter-task-content-to-search")}
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
-										handleSearchSubmit();
-									}
-								}}
-								// ref={input => {
-								// 	if (input && showSearchInput) {
-								// 		input.focus();
-								// 	}
-								// }}
-								ref={searchInputElement}
-							/>
-						)}
-						<button
-							className="searchTaskBtn"
-							onClick={() => handleSearchButtonClick()}
-						>
-							{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
-						</button>
-
-						<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={() => {
-							openAddNewTaskModal(plugin);
-						}}>
-							<CirclePlus size={18} />
-						</button>
-
-						<button
-							className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-							aria-label={t("show-hide-properties")}
-							onClick={handlePropertiesBtnClick}
-						>
-							<List size={18} />
-						</button>
-
-						<button
-							className={`filterTaskBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-							aria-label={t("apply-advanced-board-filters")}
-							onClick={handleFilterButtonClick}
-						>
-							<Filter size={18} />
-						</button>
-
-						<button
-							className={`ConfigureBtn ${(isMobileView || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
-							aria-label={t("board-configure-button")}
-							onClick={() =>
-								openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
-									// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
-									setCurrentBoardData(updatedBoard);
-
-									window.setTimeout(() => {
-										eventEmitter.emit("REFRESH_BOARD");
-									}, 100);
-								}
+						{boardDrawerVisible && isSmallWidthScreen ? (
+							<></>
+						) : (
+							<>
+								<div className="taskCountContainer">
+									<div className={`taskCountContainerProgressBar${isSmallWidthScreen ? "-hidden" : ""}`}>
+										<div
+											className="taskCountContainerProgressBarProgress"
+											style={{
+												width: `${((filteredTasks ? filteredTasks?.Completed.length : 0) / (filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 1)) * 100}%`,
+											}}
+										/>
+									</div>
+									<span className="taskCountContainerTaskCount">
+										{(filteredTasks ? filteredTasks?.Completed.length : 0)} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
+									</span>
+								</div>
+								{showSearchInput && showAllElements && (
+									<input
+										type="text"
+										className="taskBoardSearchInput"
+										placeholder="Search tasks..."
+										aria-label={t("enter-task-content-to-search")}
+										value={searchQuery}
+										onChange={(e) => setSearchQuery(e.target.value)}
+										onKeyDown={(e) => {
+											if (e.key === "Enter") {
+												handleSearchSubmit();
+											}
+										}}
+										// ref={input => {
+										// 	if (input && showSearchInput) {
+										// 		input.focus();
+										// 	}
+										// }}
+										ref={searchInputElement}
+									/>
 								)}
-						>
-							<Settings size={18} />
-						</button>
+								<button
+									className="searchTaskBtn"
+									onClick={() => handleSearchButtonClick()}
+								>
+									{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
+								</button>
 
-						{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}>
-						<Bot size={20} />
-					</button> */}
+								<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={() => {
+									openAddNewTaskModal(plugin);
+								}}>
+									<CirclePlus size={18} />
+								</button>
 
-						{currentView && currentView.viewType === viewTypeNames.map && (
-							<button
-								className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
-								onClick={(e) => {
-									if (mapViewDataUpdated) {
-										eventEmitter.emit("SAVE_MAP");
-										setMapViewDataUpdated(false);
-									}
-								}}
-							>
-								<Save size={18} />
-							</button>
-						)}
+								<button
+									className={`filterTaskBtn ${(isSmallWidthScreen || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+									aria-label={t("show-hide-properties")}
+									onClick={handlePropertiesBtnClick}
+								>
+									<List size={18} />
+								</button>
 
-						<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={() => { void refreshBoardButton(); }}>
-							<RefreshCcw size={18} />
-						</button>
+								<button
+									className={`filterTaskBtn ${(isSmallWidthScreen || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+									aria-label={t("apply-advanced-board-filters")}
+									onClick={handleFilterButtonClick}
+								>
+									<Filter size={18} />
+								</button>
 
-						{(isMobileView || Platform.isMobile) && (
-							<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
-								<EllipsisVertical size={20} />
-							</button>
+								<button
+									className={`ConfigureBtn ${(isSmallWidthScreen || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+									aria-label={t("board-configure-button")}
+									onClick={() =>
+										openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
+											// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+											setCurrentBoardData(updatedBoard);
+
+											window.setTimeout(() => {
+												eventEmitter.emit("REFRESH_BOARD");
+											}, 100);
+										}
+										)}
+								>
+									<Settings size={18} />
+								</button>
+
+								{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}><Bot size={20} /></button> */}
+
+								{currentView && currentView.viewType === viewTypeNames.map && (
+									<button
+										className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
+										onClick={(e) => {
+											if (mapViewDataUpdated) {
+												eventEmitter.emit("SAVE_MAP");
+												setMapViewDataUpdated(false);
+											}
+										}}
+									>
+										<Save size={18} />
+									</button>
+								)}
+
+								<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={() => { void refreshBoardButton(); }}>
+									<RefreshCcw size={18} />
+								</button>
+
+								{(isSmallWidthScreen || Platform.isMobile) && (
+									<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
+										<EllipsisVertical size={20} />
+									</button>
+								)}
+							</>
 						)}
 					</div>
-				</div>
+				</div >
+
+				{!showAllElements && showSearchInput ? (
+					<div className='taskBoardSearchSection'>
+						<input
+							type="text"
+							className="taskBoardSearchInput"
+							placeholder="Search tasks..."
+							aria-label={t("enter-task-content-to-search")}
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									handleSearchSubmit();
+								}
+							}}
+							// ref={input => {
+							// 	if (input && showSearchInput) {
+							// 		input.focus();
+							// 	}
+							// }}
+							ref={searchInputElement}
+						/>
+					</div>
+				) : (<></>)}
 
 				<div className={`taskBoardViewSectionWrapper ${boardDrawerVisible && boardData.views && boardData.views.length > 0 && !showAllElements ? 'taskBoardViewSectionWrapper--shifted' : ''}`}>
 					<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
@@ -1534,7 +1578,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 						)}
 					</div>
 				</div>
-			</div>
+			</div >
 		</div >
 	);
 };

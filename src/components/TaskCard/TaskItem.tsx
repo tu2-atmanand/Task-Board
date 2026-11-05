@@ -781,22 +781,25 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 				handleEditTask(plugin, task, EditButtonMode.Modal);
 			});
 		});
-		taskItemMenu.addItem((item) => {
-			item.setIcon("square-pen");
-			item.setTitle(t("open-task-editor-in"));
-			const taskEditorMenu = item.setSubmenu();
-			taskEditorMenu.addItem((subItem) => {
-				subItem.setIcon("columns-2");
-				subItem.setTitle(t("right-split"));
-				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
-			});
 
-			taskEditorMenu.addItem((subItem) => {
-				subItem.setIcon("picture-in-picture-2");
-				subItem.setTitle(t("new-window"));
-				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+		if (!Platform.isMobile) {
+			taskItemMenu.addItem((item) => {
+				item.setIcon("square-pen");
+				item.setTitle(t("open-task-editor-in"));
+				const taskEditorMenu = item.setSubmenu();
+				taskEditorMenu.addItem((subItem) => {
+					subItem.setIcon("columns-2");
+					subItem.setTitle(t("right-split"));
+					subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
+				});
+
+				taskEditorMenu.addItem((subItem) => {
+					subItem.setIcon("picture-in-picture-2");
+					subItem.setTitle(t("new-window"));
+					subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+				});
 			});
-		});
+		}
 
 		taskItemMenu.addSeparator();
 
@@ -812,13 +815,16 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 				handleEditTask(plugin, task, EditButtonMode.NoteInTab)
 			});
 		});
-		taskItemMenu.addItem((item) => {
-			item.setIcon("columns-2");
-			item.setTitle(t("open-note-to-right"));
-			item.onClick(() => {
-				handleEditTask(plugin, task, EditButtonMode.NoteInSplit)
+
+		if (!Platform.isMobile) { 
+			taskItemMenu.addItem((item) => {
+				item.setIcon("columns-2");
+				item.setTitle(t("open-note-to-right"));
+				item.onClick(() => {
+					handleEditTask(plugin, task, EditButtonMode.NoteInSplit)
+				});
 			});
-		});
+		}
 
 		// Note actions submenu
 		taskItemMenu.addItem((item) => {
