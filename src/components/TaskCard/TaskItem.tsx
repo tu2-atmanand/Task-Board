@@ -22,7 +22,7 @@ import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreC
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../utils/CheckBoxUtils.js';
 import { getUniversalDateFromTask, robustDateParser } from '../../utils/DateTimeCalculations.js';
 import { getAllTaskTags, getTaskFromId } from '../../utils/TaskItemUtils.js';
-import { cleanTaskTitleLegacy } from '../../utils/taskLine/TaskContentFormatter.js';
+import { cleanTaskTitleLegacy, dedentTaskBodyLines, shouldExpandTaskDescription } from '../../utils/taskLine/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../utils/taskLine/TaskItemEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../utils/taskNote/TaskNoteEventHandlers.js';
 import { isTaskNotePresentInTags, getStatusNameFromStatusSymbol } from '../../utils/taskNote/TaskNoteUtils.js';
@@ -46,7 +46,6 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
-	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
 	useEffect(() => {
 		if (plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks)) {
@@ -55,6 +54,17 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 			setShowSubtasks(false);
 		}
 	}, [plugin.settings.data.visiblePropertiesList]);
+
+	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(
+		() => !showDescriptionSection && shouldExpandTaskDescription(task),
+	);
+	useEffect(() => {
+		if (showDescriptionSection) {
+			setIsDescriptionExpanded(false);
+			return;
+		}
+		if (shouldExpandTaskDescription(task)) setIsDescriptionExpanded(true);
+	}, [task.id, task.title, task.body?.join("\n"), showDescriptionSection]);
 
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
@@ -239,10 +249,9 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 
 		if (!container) return;
 
-		let descriptionContent = task.body
-			?.filter((line) => !isTaskLine(line))
-			.join("\n")
-			.trim();
+		let descriptionContent = dedentTaskBodyLines(
+			task.body?.filter((line) => !isTaskLine(line)) ?? [],
+		).join("\n").trim();
 
 		if (!descriptionContent) {
 			container.empty();
@@ -278,9 +287,11 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 	const renderDescriptionSection = () => {
 		// const uniqueKey = `${taskIdKey}-desc`;
 		// const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
-		const descriptionContent = task.body
-			? task.body.filter((line) => !isTaskLine(line)).join("\n").trim()
-			: "";
+		const descriptionContent = dedentTaskBodyLines(
+			task.body ? task.body.filter((line) => !isTaskLine(line)) : [],
+		)
+			.join("\n")
+			.trim();
 
 		if (!descriptionContent) return null;
 
@@ -816,7 +827,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 			});
 		});
 
-		if (!Platform.isMobile) { 
+		if (!Platform.isMobile) {
 			taskItemMenu.addItem((item) => {
 				item.setIcon("columns-2");
 				item.setTitle(t("open-note-to-right"));
@@ -1414,7 +1425,7 @@ const TaskItem: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, p
 						)}
 						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized) && (
 							<div className="taskItemMainBodyDescription">
-								{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
+								{task.body.some((line) => line.trim() !== "" && !isTaskLine(line)) && (
 									<div
 										className='taskItemMainBodyDescriptionSectionToggler'
 										onClick={toggleDescription}

@@ -25,7 +25,7 @@ import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreC
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../utils/CheckBoxUtils.js';
 import { getUniversalDateFromTask, robustDateParser } from '../../utils/DateTimeCalculations.js';
 import { getAllTaskTags, getTaskFromId } from '../../utils/TaskItemUtils.js';
-import { cleanTaskTitleLegacy } from '../../utils/taskLine/TaskContentFormatter.js';
+import { cleanTaskTitleLegacy, dedentTaskBodyLines, shouldExpandTaskDescription } from '../../utils/taskLine/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../utils/taskLine/TaskItemEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../utils/taskNote/TaskNoteEventHandlers.js';
 import { isTaskNotePresentInTags, getStatusNameFromStatusSymbol } from '../../utils/taskNote/TaskNoteUtils.js';
@@ -61,7 +61,16 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
-	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(
+		() => !showDescriptionSection && shouldExpandTaskDescription(task),
+	);
+	useEffect(() => {
+		if (showDescriptionSection) {
+			setIsDescriptionExpanded(false);
+			return;
+		}
+		if (shouldExpandTaskDescription(task)) setIsDescriptionExpanded(true);
+	}, [task.id, task.title, task.body?.join("\n"), showDescriptionSection]);
 	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
 	useEffect(() => {
 		if (plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks)) {
@@ -255,8 +264,9 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 
 		if (!container) return;
 
-		let descriptionContent = task.body
-			?.filter((line) => !isTaskLine(line))
+		let descriptionContent = dedentTaskBodyLines(
+			task.body?.filter((line) => !isTaskLine(line)) ?? [],
+		)
 			.join("\n")
 			.trim();
 
@@ -1418,7 +1428,7 @@ const TaskItemV2: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 						)}
 						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized) && (
 							<div className="taskItemMainBodyDescription">
-								{task.body.at(0) !== "" && task.body.filter(line => !isTaskLine(line)).length > 0 && (
+								{task.body.some((line) => line.trim() !== "" && !isTaskLine(line)) && (
 									<div
 										className='taskItemMainBodyDescriptionSectionToggler'
 										onClick={toggleDescription}
