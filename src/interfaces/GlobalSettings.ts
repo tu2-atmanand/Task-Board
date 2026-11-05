@@ -122,6 +122,7 @@ export interface globalSettingsData {
 	searchQuery?: string;
 	hiddenTaskProperties: taskPropertiesNames[];
 	autoAddUniqueID: boolean;
+	addIdDuringScan: boolean; // When enabled (and autoAddUniqueID is enabled), missing IDs are written while scanning.
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;
 	safeGuardFeature: boolean;
@@ -683,6 +684,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			],
 			hiddenTaskProperties: [],
 			autoAddUniqueID: false,
+			addIdDuringScan: false,
 			uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 			experimentalFeatures: false,
 			safeGuardFeature: true,

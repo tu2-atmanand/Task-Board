@@ -18,9 +18,10 @@ import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
 } from "../utils/JsonFileOperations";
-import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
+import { jsonCacheData, taskItem, IdInjectionResult } from "src/interfaces/TaskItem";
 import {
 	extractTaskNoteProperties,
+	getCustomFrontmatterKey,
 	isTaskNotePresentInFrontmatter,
 } from "../utils/taskNote/TaskNoteUtils";
 
@@ -46,6 +47,7 @@ import {
 	scanFilterForTags,
 } from "src/utils/algorithms/ScanningFilterer";
 import { generateRandomTempTaskId } from "src/utils/TaskItemUtils";
+import { appendTaskIdToContent } from "src/utils/taskLine/TaskIdFormatter";
 import { bugReporterManagerInsatance } from "./BugReporter";
 import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { parse } from "date-fns/parse";
@@ -574,6 +576,7 @@ export default class VaultScanner {
 	async refreshTasksFromFiles(
 		files: (TFile | null)[],
 		showNotice: boolean,
+		addMissingIds: boolean = false,
 	): Promise<boolean> {
 		if (!files || files.length === 0) {
 			return false;
@@ -583,6 +586,7 @@ export default class VaultScanner {
 			const scanFilters =
 				this.plugin.settings.data.globalSettings.scanFilters;
 			let isFileScanned: string = "";
+			const scannedFilePaths: string[] = [];
 			for (const file of files) {
 				if (
 					file !== null &&
@@ -597,10 +601,31 @@ export default class VaultScanner {
 						file,
 						scanFilters,
 					);
+					scannedFilePaths.push(file.path);
 				} else {
 					if (showNotice) {
 						new Notice(t("not-valid-file-type-for-scanning"), 5000);
 					}
+				}
+			}
+
+			if (addMissingIds && scannedFilePaths.length > 0) {
+				const idResult = await this.addMissingIdsToTasks(
+					this.getTasksForFilePaths(scannedFilePaths),
+				);
+				if (
+					idResult.tasksUpdated > 0 ||
+					idResult.filesFailed.length > 0
+				) {
+					if (idResult.tasksUpdated > 0) {
+						// The re-scan below compares against the already updated
+						// objects, so force the cache to be persisted.
+						this.tasksDetectedOrUpdated = true;
+					}
+					new Notice(
+						`${t("scan-tasks-ids-added")} : ${idResult.tasksUpdated}\n${t("scan-files-updated")} : ${idResult.filesUpdated.length}\n${t("scan-files-failed")} : ${idResult.filesFailed.length}`,
+						8000,
+					);
 				}
 			}
 
@@ -633,6 +658,351 @@ export default class VaultScanner {
 			);
 			return false;
 		}
+	}
+
+	/**
+	 * Collects the cached tasks that belong to the given file paths.
+	 */
+	getTasksForFilePaths(filePaths: string[]): taskItem[] {
+		const tasks: taskItem[] = [];
+		filePaths.forEach((filePath) => {
+			if (this.tasksCache.Pending[filePath]) {
+				tasks.push(...this.tasksCache.Pending[filePath]);
+			}
+			if (this.tasksCache.Completed[filePath]) {
+				tasks.push(...this.tasksCache.Completed[filePath]);
+			}
+		});
+		return tasks;
+	}
+
+	/**
+	 * Recalculates the unique ID counter from the currently cached tasks.
+	 * The counter is never lowered, so IDs which were already issued (even to
+	 * files that are excluded by the scan filters) are never reused.
+	 */
+	async calibrateUniqueIdCounter(): Promise<void> {
+		let maxId = 0;
+		[this.tasksCache.Pending, this.tasksCache.Completed].forEach((cache) => {
+			Object.values(cache).forEach((tasks) => {
+				tasks.forEach((task) => {
+					const parsedId = task.legacyId
+						? parseInt(String(task.legacyId), 10)
+						: NaN;
+					if (!isNaN(parsedId) && parsedId > maxId) {
+						maxId = parsedId;
+					}
+				});
+			});
+		});
+
+		const globalSettings = this.plugin.settings.data.globalSettings;
+		const currentCounter = Number(globalSettings.uniqueIdCounter) || 0;
+		const nextCounter = Math.max(currentCounter, maxId + 1);
+		if (nextCounter !== currentCounter) {
+			globalSettings.uniqueIdCounter = nextCounter;
+			await this.plugin.saveSettings();
+		}
+	}
+
+	/**
+	 * Reserves the next `count` IDs and persists the counter once. Mirrors the
+	 * semantics of `generateTaskId` (increment first, then return), without
+	 * persisting the settings on every single ID.
+	 */
+	private async allocateTaskIds(count: number): Promise<string[]> {
+		const globalSettings = this.plugin.settings.data.globalSettings;
+		const start = Number(globalSettings.uniqueIdCounter) || 0;
+		const allocatedIds: string[] = [];
+		for (let offset = 1; offset <= count; offset++) {
+			allocatedIds.push(String(start + offset));
+		}
+		globalSettings.uniqueIdCounter = start + count;
+		// Persist right away so an interrupted run never reuses the reserved range.
+		await this.plugin.saveSettings();
+		return allocatedIds;
+	}
+
+	/**
+	 * Writes a unique ID to every given task which does not have one yet.
+	 * Inline tasks are rewritten file by file (single read/single write), while
+	 * task notes only get the ID key in their frontmatter.
+	 * Callers stay responsible for persisting the task cache.
+	 */
+	async addMissingIdsToTasks(tasks: taskItem[]): Promise<IdInjectionResult> {
+		const result: IdInjectionResult = {
+			tasksUpdated: 0,
+			filesUpdated: [],
+			filesFailed: [],
+		};
+
+		const globalSettings = this.plugin.settings.data.globalSettings;
+		if (
+			globalSettings.autoAddUniqueID !== true ||
+			globalSettings.addIdDuringScan !== true
+		) {
+			return result;
+		}
+		if (!tasks || tasks.length === 0 || this.plugin.isAddingTaskIds) {
+			return result;
+		}
+
+		// De-duplicate and keep only tasks which do not have an ID yet.
+		const uniqueTasks = new Map<string, taskItem>();
+		tasks.forEach((task) => {
+			if (!task?.filePath) return;
+			if (task.legacyId && String(task.legacyId).trim() !== "") return;
+			const key = `${task.filePath}:${task.taskLocation?.startLine ?? -1}`;
+			if (!uniqueTasks.has(key)) {
+				uniqueTasks.set(key, task);
+			}
+		});
+		if (uniqueTasks.size === 0) {
+			return result;
+		}
+
+		this.plugin.isAddingTaskIds = true;
+		const taskNoteFiles = new Set<string>();
+		try {
+			await this.calibrateUniqueIdCounter();
+
+			const tasksByFile = new Map<string, taskItem[]>();
+			uniqueTasks.forEach((task) => {
+				const fileTasks = tasksByFile.get(task.filePath) ?? [];
+				fileTasks.push(task);
+				tasksByFile.set(task.filePath, fileTasks);
+			});
+
+			const allocatedIds = await this.allocateTaskIds(
+				uniqueTasks.size,
+			);
+			let idCursor = 0;
+
+			for (const [filePath, fileTasks] of tasksByFile) {
+				const fileIds = allocatedIds.slice(
+					idCursor,
+					idCursor + fileTasks.length,
+				);
+				idCursor += fileTasks.length;
+
+				const file = this.plugin.app.vault.getFileByPath(filePath);
+				if (!file) {
+					bugReporterManagerInsatance.addToLogs(
+						166,
+						`File not found while adding missing task IDs: ${filePath}`,
+						"VaultScanner.ts/addMissingIdsToTasks",
+					);
+					result.filesFailed.push(filePath);
+					continue;
+				}
+
+				let updated = 0;
+				let failed = 0;
+				try {
+					const frontmatter =
+						this.plugin.app.metadataCache.getFileCache(file)
+							?.frontmatter;
+					if (
+						isTaskNotePresentInFrontmatter(
+							globalSettings.taskNoteIdentifierTag,
+							frontmatter,
+						)
+					) {
+						taskNoteFiles.add(filePath);
+						const applied = await this.addIdToTaskNoteFile(
+							file,
+							fileTasks[0],
+							fileIds[0],
+						);
+						updated = applied ? 1 : 0;
+						failed = applied ? 0 : 1;
+					} else {
+						const attempt = await this.addIdsToInlineTasks(
+							file,
+							fileTasks,
+							fileIds,
+						);
+						updated = attempt.updated;
+						failed = attempt.failed;
+					}
+				} catch (error) {
+					bugReporterManagerInsatance.addToLogs(
+						166,
+						`Failed to add missing task IDs in ${filePath}. ERROR : ${String(error)}`,
+						"VaultScanner.ts/addMissingIdsToTasks",
+					);
+					failed = fileTasks.length;
+				}
+
+				if (updated > 0) {
+					result.tasksUpdated += updated;
+					result.filesUpdated.push(filePath);
+				}
+				if (failed > 0) {
+					result.filesFailed.push(filePath);
+				}
+			}
+		} finally {
+			this.plugin.isAddingTaskIds = false;
+		}
+
+		// Rebuild the cache entries of the rewritten files so the cache and the
+		// files never disagree about the IDs. Task notes are skipped on purpose:
+		// their cache objects were already updated above and the metadata cache
+		// may not reflect the freshly written frontmatter yet.
+		const scanFilters = globalSettings.scanFilters;
+		for (const filePath of result.filesUpdated) {
+			if (taskNoteFiles.has(filePath)) continue;
+			const file = this.plugin.app.vault.getFileByPath(filePath);
+			if (file) {
+				await this.extractTasksFromFile(file, scanFilters);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Adds the ID key to the frontmatter of a task note, leaving every other
+	 * frontmatter property untouched.
+	 */
+	private async addIdToTaskNoteFile(
+		file: TFile,
+		task: taskItem,
+		id: string,
+	): Promise<boolean> {
+		const frontmatterFormatting =
+			this.plugin.settings.data.globalSettings.frontmatterFormatting;
+		const idKey = getCustomFrontmatterKey("id", frontmatterFormatting);
+		const existingFrontmatter =
+			this.plugin.app.metadataCache.getFileCache(file)?.frontmatter;
+		if (this.hasFrontmatterId(existingFrontmatter, idKey)) {
+			return false;
+		}
+
+		let applied = false;
+		await this.plugin.app.fileManager.processFrontMatter(
+			file,
+			(frontmatter) => {
+				if (this.hasFrontmatterId(frontmatter, idKey)) {
+					return;
+				}
+				frontmatter[idKey] = id;
+				applied = true;
+			},
+		);
+
+		if (applied) {
+			task.id = id;
+			task.legacyId = id;
+		}
+		return applied;
+	}
+
+	private hasFrontmatterId(
+		frontmatter: Record<string, unknown> | undefined,
+		idKey: string,
+	): boolean {
+		const value = frontmatter?.[idKey];
+		return (
+			value !== undefined &&
+			value !== null &&
+			String(value).trim() !== ""
+		);
+	}
+
+	/**
+	 * Returns the lines that can receive an ID, validating the task location
+	 * against the latest file content (the scan may be a few moments old).
+	 */
+	private getInlineIdUpdateCandidates(
+		lines: string[],
+		tasks: taskItem[],
+		ids: string[],
+		format: string,
+	): { lineIndex: number; taskIndex: number; newLine: string }[] {
+		const candidates: {
+			lineIndex: number;
+			taskIndex: number;
+			newLine: string;
+		}[] = [];
+
+		tasks.forEach((task, taskIndex) => {
+			const lineIndex = (task.taskLocation?.startLine ?? 0) - 1;
+			const line = lines[lineIndex];
+			if (line === undefined) return;
+			if (!isTaskLine(line) || extractTaskId(line)) return;
+
+			// Guard against a stale task location: the first characters of the
+			// title are stored inside the raw task line during scanning.
+			const titlePrefix = task.title.trim().substring(0, 5);
+			if (titlePrefix && !line.trim().startsWith(titlePrefix)) return;
+
+			candidates.push({
+				lineIndex,
+				taskIndex,
+				newLine: appendTaskIdToContent(line, ids[taskIndex], format),
+			});
+		});
+
+		return candidates;
+	}
+
+	/**
+	 * Writes IDs into inline tasks of a single file with one read and one write.
+	 * The line count never changes, so the task locations remain valid.
+	 */
+	private async addIdsToInlineTasks(
+		file: TFile,
+		tasks: taskItem[],
+		ids: string[],
+	): Promise<{ updated: number; failed: number }> {
+		const format =
+			this.plugin.settings.data.globalSettings.taskPropertyFormat;
+
+		// Cheap pre-check so a file whose tasks have gone stale is not rewritten.
+		// The scan just read this file, so the cached content is warm; the
+		// `process` callback below re-validates against the latest content.
+		const currentContent = await this.plugin.app.vault.cachedRead(file);
+		const previewCandidates = this.getInlineIdUpdateCandidates(
+			currentContent.split("\n"),
+			tasks,
+			ids,
+			format,
+		);
+		if (previewCandidates.length === 0) {
+			return { updated: 0, failed: tasks.length };
+		}
+
+		const appliedTaskIndexes: number[] = [];
+		await this.plugin.app.vault.process(file, (data) => {
+			appliedTaskIndexes.length = 0;
+			const lines = data.split("\n");
+			const candidates = this.getInlineIdUpdateCandidates(
+				lines,
+				tasks,
+				ids,
+				format,
+			);
+
+			candidates.forEach(({ lineIndex, taskIndex, newLine }) => {
+				lines[lineIndex] = newLine;
+				appliedTaskIndexes.push(taskIndex);
+			});
+
+			return appliedTaskIndexes.length > 0 ? lines.join("\n") : data;
+		});
+
+		// Only touch the cache once the file has actually been written.
+		appliedTaskIndexes.forEach((taskIndex) => {
+			tasks[taskIndex].id = ids[taskIndex];
+			tasks[taskIndex].legacyId = ids[taskIndex];
+		});
+
+		return {
+			updated: appliedTaskIndexes.length,
+			failed: tasks.length - appliedTaskIndexes.length,
+		};
 	}
 
 	async deleteCacheForFiles(filepaths: string[]) {

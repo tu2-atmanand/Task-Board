@@ -67,6 +67,7 @@ export default class TaskBoard extends Plugin {
 	// fileUpdatedUsingModal: string;
 	IstasksJsonDataChanged: boolean;
 	isI18nInitialized: boolean;
+	isAddingTaskIds: boolean; // True while missing task IDs are being written after a scan.
 	private _leafIsActive: boolean; // Private property to track leaf state
 	private ribbonIconEl: HTMLElement | null; // Store ribbonIconEl globally for reference
 
@@ -107,6 +108,7 @@ export default class TaskBoard extends Plugin {
 		this._leafIsActive = false;
 		this.ribbonIconEl = null;
 		this.isI18nInitialized = false;
+		this.isAddingTaskIds = false;
 	}
 
 	get api(): ReturnType<typeof TaskBoardApi.GetApi> {
@@ -268,6 +270,8 @@ export default class TaskBoard extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData(),
 		);
+		// Old configurations do not contain this field yet.
+		this.settings.data.globalSettings.addIdDuringScan ??= false;
 		// this.migrateSettings(DEFAULT_SETTINGS, this.settings);
 		this.saveSettings();
 	}
@@ -308,7 +312,11 @@ export default class TaskBoard extends Plugin {
 	createLocalStorageAndScanModifiedFiles() {
 		// Following line will create a localStorage. And then it will scan the previous files which didnt got scanned, becaues the Obsidian was closed before that or crashed.
 		this.realTimeScanner.initializeStack();
-		this.realTimeScanner.processAllUpdatedFiles();
+		this.realTimeScanner.processAllUpdatedFiles(
+			undefined,
+			undefined,
+			true,
+		);
 	}
 
 	registerTaskBoardView() {
@@ -928,7 +936,7 @@ export default class TaskBoard extends Plugin {
 			if (totalFilesLength > 0) {
 				const scanAllModifiedFiles = () => {
 					this.plugin.vaultScanner
-						.refreshTasksFromFiles(changed_files, false)
+						.refreshTasksFromFiles(changed_files, false, true)
 						.then(async () => {
 							if (deletedFilesList.length > 0) {
 								await this.plugin.vaultScanner.deleteCacheForFiles(
@@ -1048,6 +1056,11 @@ export default class TaskBoard extends Plugin {
 	registerEvents() {
 		this.registerEvent(
 			this.app.vault.on("modify", async (file: TAbstractFile) => {
+				// Writes performed by the bulk ID injection must not trigger
+				// another scan of the same files.
+				if (this.plugin.isAddingTaskIds) {
+					return;
+				}
 				if (
 					fileTypeAllowedForScanning(
 						this.plugin.settings.data.globalSettings,
