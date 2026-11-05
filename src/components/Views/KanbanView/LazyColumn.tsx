@@ -5,21 +5,20 @@ import { type CSSProperties } from 'react';
 import { Component, Menu, Notice, Platform, View } from 'obsidian';
 import { t } from 'i18next';
 import { AlertOctagon, EllipsisVertical } from 'lucide-react';
-import TaskBoard from '../../../main.js';
-import type { Board, KanbanView, ColumnData, AdvancedFilter } from '../../interfaces/BoardConfigs.js';
-import { taskCardStyleNames, viewTypeNames } from '../../interfaces/Enums.js';
-import type { taskItem } from '../../interfaces/TaskItem.js';
-import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
-import { dragDropTasksManagerInsatance } from '../../managers/DragDropTasksManager.js';
-import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSortingModal.js';
-import { eventEmitter } from '../../services/EventEmitter.js';
-import { isAdvancedFilterEmpty } from '../../utils/algorithms/AdvancedFilterer.js';
-import { matchTagsWithWildcards } from '../../utils/algorithms/ScanningFilterer.js';
-import { AdvancedFilterModal } from '../AdvancedFilterer/index.js';
-import { AdvancedFilterPopover } from '../AdvancedFilterer/Popover.js';
-import TaskItem, { type swimlaneDataProp } from '../TaskCard/TaskItem.js';
-import TaskItemV2 from '../TaskCard/TaskItemV2.js';
-import { DEFAULT_SETTINGS } from '../../interfaces/GlobalSettings.js';
+import TaskBoard from '../../../../main.js';
+import type { Board, KanbanView, ColumnData, AdvancedFilter } from '../../../interfaces/BoardConfigs.js';
+import { taskCardStyleNames, viewTypeNames } from '../../../interfaces/Enums.js';
+import type { taskItem } from '../../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../../managers/BugReporter.js';
+import { dragDropTasksManagerInsatance } from '../../../managers/DragDropTasksManager.js';
+import { ConfigureColumnSortingModal } from '../../../modals/ConfigureColumnSortingModal.js';
+import { eventEmitter } from '../../../services/EventEmitter.js';
+import { isAdvancedFilterEmpty } from '../../../utils/algorithms/AdvancedFilterer.js';
+import { matchTagsWithWildcards } from '../../../utils/algorithms/ScanningFilterer.js';
+import { AdvancedFilterModal } from '../../AdvancedFilterer/index.js';
+import { AdvancedFilterPopover } from '../../AdvancedFilterer/Popover.js';
+import { DEFAULT_SETTINGS } from '../../../interfaces/GlobalSettings.js';
+import { BasesStyle, EmojiStyle, swimlaneDataProp } from '../../TaskCard/index.js';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -687,7 +686,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 	}
 
-	const taskItemComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI ? TaskItem : TaskItemV2;
+	const taskItemComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI ? EmojiStyle : BasesStyle;
 
 	try {
 		return (

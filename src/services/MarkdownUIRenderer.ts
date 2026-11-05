@@ -33,7 +33,7 @@ export function createAndAppendElement<K extends keyof HTMLElementTagNameMap>(
 	//  so had to convert all of these to the equivalent but more elaborate document.createElement() and
 	//  appendChild() calls.
 
-	const el: HTMLElementTagNameMap[K] = activeDocument.createElement(tagName);
+	const el: HTMLElementTagNameMap[K] = activeWindow.createEl(tagName);
 	parentElement.appendChild(el);
 	return el;
 }

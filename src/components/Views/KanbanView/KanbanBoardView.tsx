@@ -2,17 +2,17 @@
 
 import { t } from "i18next";
 import React, { memo, useMemo, useState, useEffect } from "react";
-import TaskBoard from "../../../main.js";
-import type { Board, ColumnData, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
-import type { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
-import { columnSegregator } from "../../utils/algorithms/ColumnSegregator.js";
+import TaskBoard from "../../../../main.js";
+import type { Board, ColumnData, TaskBoardViewType } from "../../../interfaces/BoardConfigs.js";
+import type { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
+import { columnSegregator } from "../../../utils/algorithms/ColumnSegregator.js";
 import KanbanSwimlanesContainer from "./KanbanSwimlanesContainer.js";
 import LazyColumn from "./LazyColumn.js";
 import { Component, View } from "obsidian";
 
 interface KanbanBoardProps {
 	plugin: TaskBoard;
-	parentComponent: Component | View;
+	parentComponent: Component;
 	currentBoardData: Board;
 	currentView: TaskBoardViewType;
 	currentViewIndex: number;

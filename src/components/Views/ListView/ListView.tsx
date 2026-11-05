@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { ArrowDownUp, ListTodo } from "lucide-react";
 import { Component, View } from "obsidian";
-import TaskBoard from "../../../main.js";
-import type { Board, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
-import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
-import { taskCardStyleNames, viewTypeNames } from "../../interfaces/Enums.js";
-import type { taskItem, taskJsonMerged } from "../../interfaces/TaskItem.js";
-import TaskItem from "../TaskCard/TaskItem.js";
-import TaskItemV2 from "../TaskCard/TaskItemV2.js";
-import { robustDateParser } from "../../utils/DateTimeCalculations.js";
+import TaskBoard from "../../../../main.js";
+import type { Board, TaskBoardViewType } from "../../../interfaces/BoardConfigs.js";
+import { DEFAULT_DATE_FORMAT } from "../../../interfaces/Constants.js";
+import { taskCardStyleNames, viewTypeNames } from "../../../interfaces/Enums.js";
+import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
+import TaskItem from "../../TaskCard/EmojiStyle.js";
+import BasesStyle from "../../TaskCard/BasesStyle.js";
+import { robustDateParser } from "../../../utils/DateTimeCalculations.js";
 
 interface ListViewProps {
 	plugin: TaskBoard;
@@ -38,7 +38,7 @@ const ListView: React.FC<ListViewProps> = ({
 	const [visibleTaskCount, setVisibleTaskCount] = useState(INITIAL_TASK_COUNT);
 	const taskCardComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI
 		? TaskItem
-		: TaskItemV2;
+		: BasesStyle;
 	const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 	const sortedTasks = useMemo(() => {

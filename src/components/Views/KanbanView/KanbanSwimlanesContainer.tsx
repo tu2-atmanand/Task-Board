@@ -3,15 +3,15 @@
 import { t } from 'i18next';
 import { TableCellsSplit, ChevronRight, ChevronDown } from 'lucide-react';
 import React, { useMemo, memo, useRef, useState, useLayoutEffect, useEffect } from 'react';
-import TaskBoard from '../../../main.js';
-import { Board, KanbanView, ColumnData } from '../../interfaces/BoardConfigs.js';
-import { HeaderTruncationOptions, HeaderUITypeOptions } from '../../interfaces/Enums.js';
-import { taskItem } from '../../interfaces/TaskItem.js';
-import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
-import { eventEmitter } from '../../services/EventEmitter.js';
-import { getAllTaskTags } from '../../utils/TaskItemUtils.js';
+import TaskBoard from '../../../../main.js';
+import { Board, KanbanView, ColumnData } from '../../../interfaces/BoardConfigs.js';
+import { HeaderTruncationOptions, HeaderUITypeOptions } from '../../../interfaces/Enums.js';
+import { taskItem } from '../../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../../managers/BugReporter.js';
+import { eventEmitter } from '../../../services/EventEmitter.js';
+import { getAllTaskTags } from '../../../utils/TaskItemUtils.js';
 import LazyColumn from './LazyColumn.js';
-import { getStatusNameFromStatusSymbol } from '../../utils/taskNote/TaskNoteUtils.js';
+import { getStatusNameFromStatusSymbol } from '../../../utils/taskNote/TaskNoteUtils.js';
 import { Component, View } from 'obsidian';
 
 interface KanbanSwimlanesContainerProps {

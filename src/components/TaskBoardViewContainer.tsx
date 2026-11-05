@@ -17,12 +17,12 @@ import { advancedFilterer } from '../utils/algorithms/AdvancedFilterer.js';
 import { loadTasksAndMerge } from '../utils/JsonFileOperations.js';
 import { AdvancedFilterModal } from './AdvancedFilterer/index.js';
 import { AdvancedFilterPopover } from './AdvancedFilterer/Popover.js';
-import MapView from './MapView/MapView.js';
-import TableView from './TableView/TableView.js';
-import InboxView from './InboxView/InboxView.js';
-import CalendarView from './CalendarView/CalendarView.js';
-import KanbanBoardView from './KanbanView/KanbanBoardView.js';
-import ListView from './ListView/ListView.js';
+import TableView from './Views/TableView/TableView.js';
+import InboxView from './Views/InboxView/InboxView.js';
+import CalendarView from './Views/CalendarView/CalendarView.js';
+import KanbanBoardView from './Views/KanbanView/KanbanBoardView.js';
+import ListView from './Views/ListView/ListView.js';
+import MapView from './Views/MapView/MapView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined, viewId: string }> = ({ plugin, currentBoardData, currentLeaf, viewId }) => {
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);

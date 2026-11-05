@@ -1,6 +1,5 @@
 import { Notice, Platform } from "obsidian";
 import TaskBoard from "../../main.js";
-import { swimlaneDataProp } from "../components/TaskCard/TaskItemV2.js";
 import { ColumnData } from "../interfaces/BoardConfigs.js";
 import { statusTypeNames, colTypeNames } from "../interfaces/Enums.js";
 import { globalSettingsData } from "../interfaces/GlobalSettings.js";
@@ -23,6 +22,7 @@ import {
 } from "../utils/UserTaskEvents.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import { compareTwoTags } from "../utils/algorithms/ScanningFilterer.js";
+import { swimlaneDataProp } from "../components/TaskCard/index.js";
 
 type RectLike = Pick<DOMRect, "left" | "top" | "width" | "height">;
 type DragImageOffset = { x: number; y: number };

@@ -11,19 +11,19 @@ import {
 } from "date-fns";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Notice } from "obsidian";
-import TaskBoard from "../../../main.js";
-import { taskItemEmpty } from "../../interfaces/Mapping.js";
-import type { taskItem, taskJsonMerged } from "../../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { eventEmitter } from "../../services/EventEmitter.js";
-import { openAddNewTaskModal } from "../../services/OpenModals.js";
+import TaskBoard from "../../../../main.js";
+import { taskItemEmpty } from "../../../interfaces/Mapping.js";
+import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../../managers/BugReporter.js";
+import { eventEmitter } from "../../../services/EventEmitter.js";
+import { openAddNewTaskModal } from "../../../services/OpenModals.js";
 import {
 	formatDateStringAsPerSettings,
 	robustDateParser,
-} from "../../utils/DateTimeCalculations.js";
-import { sanitizeStartDate, sanitizeTime } from "../../utils/taskLine/TaskContentFormatter.js";
-import { updateTaskInFile } from "../../utils/taskLine/TaskLineUtils.js";
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../utils/taskNote/TaskNoteUtils.js";
+} from "../../../utils/DateTimeCalculations.js";
+import { sanitizeStartDate, sanitizeTime } from "../../../utils/taskLine/TaskContentFormatter.js";
+import { updateTaskInFile } from "../../../utils/taskLine/TaskLineUtils.js";
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/taskNote/TaskNoteUtils.js";
 
 type CalendarMode = "day" | "week" | "month";
 

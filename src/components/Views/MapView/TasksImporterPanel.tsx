@@ -9,7 +9,7 @@ import { taskItem } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
 import { applyIdToTaskItem } from '../../utils/TaskItemUtils.js';
-import TaskItem from '../TaskCard/TaskItem.js';
+import TaskItem from '../TaskCard/EmojiStyle.js';
 import { t } from '../../utils/lang/helper.js';
 import { Component } from 'obsidian';
 

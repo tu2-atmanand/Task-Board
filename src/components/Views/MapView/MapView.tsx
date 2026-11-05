@@ -29,7 +29,7 @@ import { isTaskCompleted } from '../../utils/CheckBoxUtils.js';
 import { sanitizeDependsOn } from '../../utils/taskLine/TaskContentFormatter.js';
 import { updateTaskInFile } from '../../utils/taskLine/TaskLineUtils.js';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../utils/taskNote/TaskNoteUtils.js';
-import TaskItem from '../TaskCard/TaskItem.js';
+import TaskItem from '../TaskCard/EmojiStyle.js';
 import { MapViewMinimap } from './MapViewMinimap.js';
 import ResizableNodeSelected from './ResizableNodeSelected.js';
 import { TasksImporterPanel } from './TasksImporterPanel.js';

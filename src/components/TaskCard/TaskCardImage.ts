@@ -13,6 +13,8 @@ import { updateRGBAOpacity } from "../../utils/UIHelpers.js";
  * Creates an HTML DOM element to be rendered as a task card for the given taskitem data.
  * This DOM element has no interaction capabilities and should be only used for rendering purposes.
  * In functionalities where we simply want to show the tasks as card to select them as option.
+ * This will allow an efficient rendering of huge number of tasks as cards without consuming much 
+ * rendering resources and creating unnecessary hooks and event listeners.
  *
  * @param plugin - The plugin instance.
  * @param task - The task to be rendered as card.
