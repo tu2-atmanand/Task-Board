@@ -91,13 +91,14 @@ export function extractTaskNoteProperties(
 
 	let value: string | string[] | number | undefined = "";
 	// Extract id
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("id", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData["id"] = value;
+	const idKey = getCustomFrontmatterKey("id", frontmatterFormatting);
+	const rawId = frontmatter[idKey];
+	if (typeof rawId === "string" && rawId.trim() !== "") {
+		taskItemData["id"] = rawId;
+	} else if (typeof rawId === "number") {
+		// YAML parses an unquoted numeric id (id: 123) as a number. Accept it
+		// as well, otherwise an existing ID would be reported as missing.
+		taskItemData["id"] = String(rawId);
 	}
 
 	// Extract title

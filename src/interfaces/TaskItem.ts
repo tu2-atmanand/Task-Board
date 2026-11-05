@@ -85,3 +85,9 @@ export interface UpdateTaskEventData {
 	taskID: string;
 	state: boolean;
 }
+
+export interface IdInjectionResult {
+	tasksUpdated: number;
+	filesUpdated: string[];
+	filesFailed: string[];
+}

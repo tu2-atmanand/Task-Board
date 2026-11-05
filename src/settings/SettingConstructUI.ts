@@ -5,6 +5,7 @@ import {
 	Notice,
 	Platform,
 	Setting,
+	ToggleComponent,
 	normalizePath,
 	setIcon,
 } from "obsidian";
@@ -311,6 +312,7 @@ export class SettingsManager {
 			tasksCacheFilePath,
 			showModifiedFilesNotice,
 			autoAddUniqueID,
+			addIdDuringScan,
 			experimentalFeatures,
 			safeGuardFeature,
 		} = this.globalSettings!;
@@ -468,6 +470,7 @@ export class SettingsManager {
 			);
 
 		// Setting to scan the modified file in realtime
+		let addIdDuringScanToggle: ToggleComponent | null = null;
 		new Setting(contentEl)
 			.setName(t("auto-add-unique-id"))
 			.setDesc(
@@ -490,11 +493,30 @@ export class SettingsManager {
 			.addToggle((toggle) =>
 				toggle.setValue(autoAddUniqueID).onChange(async (value) => {
 					this.globalSettings.autoAddUniqueID = value;
+					addIdDuringScanToggle?.setDisabled(!value);
 					await this.saveSettings();
 
 					this.openReloadNoticeIfNeeded();
 				}),
 			);
+
+		new Setting(contentEl)
+			.setName(t("add-missing-ids-during-scan"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("add-missing-ids-during-scan-description"),
+				),
+			)
+			.addToggle((toggle) => {
+				addIdDuringScanToggle = toggle;
+				toggle
+					.setValue(addIdDuringScan ?? false)
+					.setDisabled(!autoAddUniqueID)
+					.onChange(async (value) => {
+						this.globalSettings.addIdDuringScan = value;
+						await this.saveSettings();
+					});
+			});
 
 		const tasksCachePathSettingsContainer = contentEl.createDiv({
 			cls: "task-board-single-setting-container",

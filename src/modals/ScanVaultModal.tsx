@@ -2,7 +2,11 @@
 
 import { App, Component, Modal, Notice } from "obsidian";
 import React, { useEffect, useRef, useState } from "react";
-import { jsonCacheData, taskItem } from "src/interfaces/TaskItem";
+import {
+	IdInjectionResult,
+	jsonCacheData,
+	taskItem,
+} from "src/interfaces/TaskItem";
 
 import { MarkdownUIRenderer } from "src/services/MarkdownUIRenderer";
 import ReactDOM from "react-dom/client";
@@ -15,34 +19,6 @@ import { getCurrentLocalDateTimeString } from "src/utils/DateTimeCalculations";
 import { scanFilterForFilesNFoldersNFrontmatter } from "src/utils/algorithms/ScanningFilterer";
 import { eventEmitter } from "src/services/EventEmitter";
 
-export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
-	let maxId = 0;
-
-	// Check Pending tasks
-	Object.values(plugin.vaultScanner.tasksCache.Pending).forEach((tasks) => {
-		tasks.forEach((task) => {
-			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
-			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
-				maxId = taskIdNum;
-			}
-		});
-	});
-
-	// Check Completed tasks
-	Object.values(plugin.vaultScanner.tasksCache.Completed).forEach((tasks) => {
-		tasks.forEach((task) => {
-			const taskIdNum = task.legacyId ? parseInt(task.legacyId as unknown as string, 10) : 0;
-			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
-				maxId = taskIdNum;
-			}
-		});
-	});
-
-	// Update the uniqueIdCounter in settings to be one more than the max found ID
-	plugin.settings.data.globalSettings.uniqueIdCounter = maxId + 1;
-	plugin.saveSettings();
-}
-
 const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanner: VaultScanner }> = ({ app, plugin, vaultScanner }) => {
 
 	const [isRunning, setIsRunning] = useState(false);
@@ -50,6 +26,8 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 	const [progress, setProgress] = useState(0);
 	const [scannedFilesCount, setScannedFilesCount] = useState<number>();
 	const [showCollectedTasks, setShowCollectedTasks] = useState(false);
+	const [idInjectionResult, setIdInjectionResult] =
+		useState<IdInjectionResult | null>(null);
 	const [collectedTasks, setCollectedTasks] = useState<jsonCacheData>({
 		VaultName: app.vault.getName(),
 		Modified_at: getCurrentLocalDateTimeString(),
@@ -86,6 +64,49 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 			setProgress(((i + 1) / files.length) * 100); // Update progress
 		}
 
+		// Calibrate the counter before any new IDs are allocated.
+		await vaultScanner.calibrateUniqueIdCounter();
+
+		let idResult: IdInjectionResult | null = null;
+		if (
+			globalSettings.autoAddUniqueID === true &&
+			globalSettings.addIdDuringScan === true
+		) {
+			const allCachedTasks = [
+				...Object.values(vaultScanner.tasksCache.Pending).flat(),
+				...Object.values(vaultScanner.tasksCache.Completed).flat(),
+			];
+			idResult = await vaultScanner.addMissingIdsToTasks(
+				allCachedTasks,
+			);
+
+			if (
+				idResult.filesUpdated.length > 0 ||
+				idResult.filesFailed.length > 0
+			) {
+				setTerminalOutput((prev) => [
+					...prev,
+					...idResult!.filesUpdated.map(
+						(filePath) => `Added missing IDs: ${filePath}`,
+					),
+					...idResult!.filesFailed.map(
+						(filePath) => `Failed to add missing IDs: ${filePath}`,
+					),
+				]);
+			}
+
+			if (
+				idResult.tasksUpdated > 0 ||
+				idResult.filesFailed.length > 0
+			) {
+				new Notice(
+					`${t("scan-tasks-ids-added")} : ${idResult.tasksUpdated}\n${t("scan-files-updated")} : ${idResult.filesUpdated.length}\n${t("scan-files-failed")} : ${idResult.filesFailed.length}`,
+					8000,
+				);
+			}
+		}
+		setIdInjectionResult(idResult);
+
 		// setIsRunning(false);
 		setCollectedTasks(vaultScanner.tasksCache);
 		setScannedFilesCount(totalScannedFilesCount);
@@ -93,8 +114,6 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 
 		plugin.vaultScanner.tasksCache = vaultScanner.tasksCache;
 		await vaultScanner.saveTasksToJsonCache();
-
-		findMaxIdCounterAndUpdateSettings(plugin);
 
 		if (localStorage.getItem("manadatoryScan") === "true") {
 			localStorage.setItem("manadatoryScan", "false");
@@ -188,6 +207,12 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 			{progress === 100 && (
 				<div className="scanVaultModalHomeScannedFilesCountSection">
 					Total files scanned : {scannedFilesCount}
+				</div>
+			)}
+
+			{progress === 100 && idInjectionResult && (
+				<div className="scanVaultModalHomeScannedFilesCountSection">
+					{t("scan-tasks-ids-added")} : {idInjectionResult.tasksUpdated} | {t("scan-files-updated")} : {idInjectionResult.filesUpdated.length} | {t("scan-files-failed")} : {idInjectionResult.filesFailed.length}
 				</div>
 			)}
 

@@ -61,6 +61,7 @@ export class RealTimeScanner {
 	async processAllUpdatedFiles(
 		currentFile?: TFile | string | undefined,
 		updatedTaskId?: string | undefined,
+		addMissingIds: boolean = false,
 	) {
 		// If a current file is provided, ensure it's included in the processing
 		let newFile: TFile | null | undefined = null;
@@ -90,6 +91,7 @@ export class RealTimeScanner {
 			result = await this.vaultScanner.refreshTasksFromFiles(
 				files,
 				false,
+				addMissingIds,
 			);
 		}
 
