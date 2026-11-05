@@ -2,8 +2,8 @@ import { memo, FC, ReactElement } from 'react';
 import { Handle, Position, NodeResizer, NodeProps } from '@xyflow/react';
 import { t } from 'i18next';
 import { CircleArrowRightIcon, CircleArrowDownIcon } from 'lucide-react';
-import TaskBoard from '../../../main.js';
-import { mapViewNodeMapOrientation } from '../../interfaces/Enums.js';
+import TaskBoard from '../../../../main.js';
+import { mapViewNodeMapOrientation } from '../../../interfaces/Enums.js';
 // import { nodeSize } from './MapView';
 
 interface dataProps extends ReactElement<unknown, string> {

@@ -2,16 +2,16 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "
 import { TFile, Notice } from "obsidian";
 import Sortable from "sortablejs";
 import { GripVertical } from "lucide-react";
-import TaskBoard from "../../../main.js";
-import type { Board, TableView as TableViewConfig, TaskBoardViewType } from "../../interfaces/BoardConfigs.js";
-import { statusTypeNames, taskPropertiesNames } from "../../interfaces/Enums.js";
-import { getPriorityOptionsForDropdown, taskItemKeyToNameMapping } from "../../interfaces/Mapping.js";
-import type { taskItem, taskJsonMerged } from "../../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
-import { updateTaskInFile } from "../../utils/taskLine/TaskLineUtils.js";
-import { sanitizeCancelledDate, sanitizeCompletionDate, sanitizeCreatedDate, sanitizeDependsOn, sanitizeDueDate, sanitizePriority, sanitizeReminder, sanitizeScheduledDate, sanitizeStartDate, sanitizeStatus, sanitizeTags, sanitizeTime } from "../../utils/taskLine/TaskContentFormatter.js";
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../utils/taskNote/TaskNoteUtils.js";
-import { handleTaskNoteBodyChange } from "../../utils/taskNote/TaskNoteEventHandlers.js";
+import TaskBoard from "../../../../main.js";
+import { Board, TaskBoardViewType, TableView as TableViewConfig } from "../../../interfaces/BoardConfigs.js";
+import { taskPropertiesNames, statusTypeNames } from "../../../interfaces/Enums.js";
+import { taskItemKeyToNameMapping, getPriorityOptionsForDropdown } from "../../../interfaces/Mapping.js";
+import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../../managers/BugReporter.js";
+import { sanitizeTags, sanitizeStatus, sanitizePriority, sanitizeTime, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizeCompletionDate, sanitizeCancelledDate, sanitizeDependsOn } from "../../../utils/taskLine/TaskContentFormatter.js";
+import { updateTaskInFile } from "../../../utils/taskLine/TaskLineUtils.js";
+import { handleTaskNoteBodyChange } from "../../../utils/taskNote/TaskNoteEventHandlers.js";
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/taskNote/TaskNoteUtils.js";
 
 interface TableViewProps {
 	plugin: TaskBoard;

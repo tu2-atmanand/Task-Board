@@ -19,20 +19,20 @@ import {
 import { Component, debounce, Menu, Notice, Platform, View, WorkspaceLeaf } from 'obsidian';
 import { PanelLeftOpenIcon } from 'lucide-react';
 import { t } from 'i18next';
-import TaskBoard from '../../../main.js';
-import { Board, TaskBoardViewType, viewPortType, nodeDataType, nodePositionData } from '../../interfaces/BoardConfigs.js';
-import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewScrollAction, mapViewArrowDirection } from '../../interfaces/Enums.js';
-import { taskJsonMerged, taskItem, UpdateTaskEventData } from '../../interfaces/TaskItem.js';
-import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
-import { eventEmitter } from '../../services/EventEmitter.js';
-import { isTaskCompleted } from '../../utils/CheckBoxUtils.js';
-import { sanitizeDependsOn } from '../../utils/taskLine/TaskContentFormatter.js';
-import { updateTaskInFile } from '../../utils/taskLine/TaskLineUtils.js';
-import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../utils/taskNote/TaskNoteUtils.js';
-import TaskItem from '../TaskCard/EmojiStyle.js';
 import { MapViewMinimap } from './MapViewMinimap.js';
 import ResizableNodeSelected from './ResizableNodeSelected.js';
 import { TasksImporterPanel } from './TasksImporterPanel.js';
+import TaskBoard from '../../../../main.js';
+import { Board, TaskBoardViewType, nodeDataType, viewPortType, nodePositionData } from '../../../interfaces/BoardConfigs.js';
+import { mapViewBackgrounVariantTypes, viewTypeNames, mapViewArrowDirection, mapViewScrollAction } from '../../../interfaces/Enums.js';
+import { taskJsonMerged, taskItem, UpdateTaskEventData } from '../../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../../managers/BugReporter.js';
+import { eventEmitter } from '../../../services/EventEmitter.js';
+import { isTaskCompleted } from '../../../utils/CheckBoxUtils.js';
+import { sanitizeDependsOn } from '../../../utils/taskLine/TaskContentFormatter.js';
+import { updateTaskInFile } from '../../../utils/taskLine/TaskLineUtils.js';
+import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../../utils/taskNote/TaskNoteUtils.js';
+import BasesStyle from '../../TaskCard/BasesStyle.js';
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -377,7 +377,7 @@ const MapView: React.FC<MapViewProps> = ({
 					id,
 					type: 'ResizableNodeSelected',
 					data: {
-						label: <TaskItem
+						label: <BasesStyle
 							dataAttributeIndex={0}
 							plugin={plugin}
 							task={task}

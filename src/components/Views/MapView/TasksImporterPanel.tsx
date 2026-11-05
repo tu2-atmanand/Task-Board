@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { X, ChevronDown } from 'lucide-react';
-import TaskBoard from '../../../main.js';
-import { Board, TaskBoardViewType } from '../../interfaces/BoardConfigs.js';
-import { viewTypeNames } from '../../interfaces/Enums.js';
-import { taskItem } from '../../interfaces/TaskItem.js';
-import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
-import { eventEmitter } from '../../services/EventEmitter.js';
-import { applyIdToTaskItem } from '../../utils/TaskItemUtils.js';
-import TaskItem from '../TaskCard/EmojiStyle.js';
-import { t } from '../../utils/lang/helper.js';
 import { Component } from 'obsidian';
+import { t } from 'i18next';
+import TaskBoard from '../../../../main.js';
+import { Board, TaskBoardViewType } from '../../../interfaces/BoardConfigs.js';
+import { viewTypeNames } from '../../../interfaces/Enums.js';
+import { taskItem } from '../../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../../managers/BugReporter.js';
+import { eventEmitter } from '../../../services/EventEmitter.js';
+import { applyIdToTaskItem } from '../../../utils/TaskItemUtils.js';
+import BasesStyle from '../../TaskCard/BasesStyle.js';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
@@ -227,7 +227,8 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 										className="tasksImporterPanelTaskItemWrapper"
 										onClick={() => { void handleImportTask(task); }}
 									>
-										<TaskItem
+										{/* TODO : Replace this with the cardImage */}
+										<BasesStyle
 											key={task.id}
 											dataAttributeIndex={0} // TODO : No need of this data in this case.
 											plugin={plugin}
