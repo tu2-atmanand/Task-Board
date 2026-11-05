@@ -393,10 +393,13 @@ export async function verifySubtasksAndChildtasksAreComplete(
 /**
  * Matches user input tags against settings tags that may include wildcards (*).
  * Wildcard (*) can be used at the start or end of a tag to match any sequence of characters.
+ * A tag without wildcards also matches its nested tags, the same way Obsidian does:
+ * `#DEV` matches both `#DEV` and `#DEV/Tom`.
  * Examples:
  *   - "#tag*" matches "#tag1", "#tag-abc", etc.
  *   - "*tag" matches "#mytag", "#yourtag", etc.
  *   - "*tag*" matches "#mytag123", "#123tag456", etc.
+ *   - "#tag" matches "#tag" and "#tag/child", but not "#tag2"
  * @param settingsTags - Tags from settings which may include wildcards
  * @param userInputTags - Tags from user input to match against settings tags
  * @returns An array of matching tags or null if no match is found
@@ -422,9 +425,16 @@ export function matchTagsWithWildcards(
 		// Escape regex special chars except *
 		let pattern = tag.toLowerCase().replace("#", ""); // Remove leading #
 
+		const hasWildcard = pattern.includes("*");
+
 		pattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
-		// Replace * with .+ (at least one character)
-		pattern = pattern.replace(/\\\*/g, ".*").replace(/\*/g, ".+");
+		if (hasWildcard) {
+			// Replace * with .+ (at least one character)
+			pattern = pattern.replace(/\\\*/g, ".*").replace(/\*/g, ".+");
+		} else {
+			// A parent tag also covers its sub-tags.
+			pattern = pattern + "(?:/.*)?";
+		}
 
 		// // If wildcard is at the start, allow anything before
 		// if (pattern.startsWith(".+")) pattern = "^" + pattern;

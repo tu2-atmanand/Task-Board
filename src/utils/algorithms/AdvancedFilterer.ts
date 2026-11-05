@@ -258,19 +258,15 @@ function evaluateFilterCriterion(
 			return compareDates(taskValue, value, dateFormat) >= 0;
 		case "hasTag":
 			if (Array.isArray(taskValue)) {
-				return taskValue.some(
-					(tag) =>
-						String(tag).toLowerCase() ===
-						String(value).toLowerCase(),
+				return (
+					matchTagsWithWildcards(String(value), taskValue) !== null
 				);
 			}
 			return false;
 		case "doesNotHaveTag":
 			if (Array.isArray(taskValue)) {
-				return !taskValue.some(
-					(tag) =>
-						String(tag).toLowerCase() ===
-						String(value).toLowerCase(),
+				return (
+					matchTagsWithWildcards(String(value), taskValue) === null
 				);
 			}
 			return true;
