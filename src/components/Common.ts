@@ -1,4 +1,3 @@
-// import { isSettingsScope, setSettingsScope } from "../settings/settings-scope";
 import { App } from "obsidian";
 import {
 	getOwnerWindow,
@@ -10,6 +9,7 @@ import {
 	getOwnerDocument,
 } from "../utils/dom-compat.js";
 import { getWindowApp } from "../services/ObsidianApp.js";
+import { isSettingsScope, setSettingsScope } from "../settings/ScopeSettings.js";
 
 /**
  * Track native board transforms without reading or writing their data models.
@@ -944,7 +944,7 @@ export function createFloatingPanel(
 		"div",
 	);
 	panel.className = className;
-	// setSettingsScope(panel, isSettingsScope(anchorEl ?? rectAnchorOwnerEl));
+	setSettingsScope(panel, isSettingsScope(anchorEl ?? rectAnchorOwnerEl));
 	if (mobileSurfaceContext) {
 		panel.classList.add(
 			"task-board-mobile-picker-surface",
@@ -1120,7 +1120,7 @@ export function createFloatingPanel(
 			: getFloatingRectAnchorOwner(anchor);
 		record.anchorEl = anchorEl;
 		bindMigration();
-		// setSettingsScope(panel, isSettingsScope(nextOwner));
+		setSettingsScope(panel, isSettingsScope(nextOwner));
 		if (followsTaskCard && rectAnchorOwnerEl)
 			stopCardAnchor = observeTaskCardAnchor(
 				rectAnchorOwnerEl,

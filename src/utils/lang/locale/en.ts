@@ -584,6 +584,7 @@ const en: Lang = {
 	"task-status-symbol-info": "This is the character between the square braces in case of inline-tasks. Also, this is used to store in the case.",
 	"task-status-name": "Task status name",
 	"task-status-name-info": "Map a unique name to the above status symbol. This name will be used in the task-note frontmatter.",
+	"select-status-icon": "Select status icon",
 	"task-status-type": "Task status type",
 	"task-status-type-info": "Select what kind of status is this. If this status if of type DONE or CANCELLED, then the task will appear inside the 'completed' type column.",
 	"cycle-to-following-status": "Cycle to the following status",

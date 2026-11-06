@@ -3338,6 +3338,21 @@ li:hover .taskboard-hidden-property {
 	justify-content: flex-end;
 }
 
+.custom-status-icon-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4px;
+	background: transparent;
+	border: 0;
+	color: var(--text-muted);
+	cursor: var(--cursor);
+}
+
+.custom-status-icon-button:hover {
+	color: var(--text-normal);
+}
+
 .custom-status-buttons .edit-btn svg.svg-icon:hover {
 	opacity: 0.8;
 	color: var(--blockquote-border-color)
@@ -3536,6 +3551,10 @@ li:hover .taskboard-hidden-property {
 	flex-direction: column !important;
 }
 
+.settingTabFooterSection {
+	padding-inline: 20px;
+}
+
 @media (max-width: 768px) {
 	.settingTabFooterDonationsSec {
 		display: flex;
@@ -3543,7 +3562,7 @@ li:hover .taskboard-hidden-property {
 		gap: 1em;
 		margin-top: 1em;
 		align-items: center;
-		justify-content: center;
+		justify-content: space-between;
 		/* max-height: 150px; */
 		flex-wrap: wrap;
 	}

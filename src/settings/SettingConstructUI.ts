@@ -5,6 +5,7 @@ import {
 	Notice,
 	Platform,
 	Setting,
+	getIcon,
 	normalizePath,
 	setIcon,
 } from "obsidian";
@@ -49,6 +50,11 @@ import {
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "../interfaces/Icons.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { CustomStatusModal } from "../modals/CustomStatusConfigurator.js";
+import {
+	normalizeTaskIconValue,
+	openIconPickerModal,
+	showIconPicker,
+} from "../modals/icon_picker/index.js";
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/TasksPluginRegularExpr.js";
 import { CommunityPlugins } from "../services/CommunityPlugins.js";
 import {
@@ -68,6 +74,21 @@ import {
 	exportConfigurations,
 } from "./SettingSynchronizer.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
+
+export type SettingsTabPagesKey =
+	| "general"
+	| "all-ui"
+	| "default-properties"
+	| "custom-properties"
+	| "custom-statuses"
+	| "custom-priorities"
+	| "inline-tasks"
+	| "task-notes"
+	| "map-view"
+	| "automation"
+	| "formats"
+	| "support-development"
+	| "experimental-features";
 
 export class SettingsManager {
 	win: Window;
@@ -197,35 +218,35 @@ export class SettingsManager {
 		[
 			{
 				key: t("general"),
-				handler: () => this.renderGeneralTabSettings(tabContent),
+				handler: () => this.renderGeneralSettingsTab(tabContent),
 			},
 			{
 				key: t("all-ui"),
-				handler: () => this.renderAllUITabSettings(tabContent),
+				handler: () => this.renderAllUISettingsTab(tabContent),
 			},
 			{
 				key: t("properties"),
-				handler: () => this.renderPropertiesTabSettings(tabContent),
+				handler: () => this.renderCustomStatusesTab(tabContent),
 			},
 			{
 				key: t("inline-tasks"),
-				handler: () => this.renderInlineTasksTabSettings(tabContent),
+				handler: () => this.renderInlineTasksSettingsTab(tabContent),
 			},
 			{
 				key: t("task-notes"),
-				handler: () => this.renderTBNoteTabSettings(tabContent),
+				handler: () => this.renderTBNoteSettingsTab(tabContent),
 			},
 			{
 				key: t("map-view"),
-				handler: () => this.renderMapViewTabSettings(tabContent),
+				handler: () => this.renderMapViewSettingsTab(tabContent),
 			},
 			{
 				key: t("automation"),
-				handler: () => this.renderAutomationTabSettings(tabContent),
+				handler: () => this.renderAutomationSettingsTab(tabContent),
 			},
 			{
 				key: t("formats"),
-				handler: () => this.renderFormatsTabSettings(tabContent),
+				handler: () => this.renderFormatsSettingsTab(tabContent),
 			},
 		].forEach(({ key, handler }) => {
 			sections[key] = handler;
@@ -286,6 +307,44 @@ export class SettingsManager {
 			});
 	}
 
+	public renderDeclarativeSettingsSection(
+		section: SettingsTabPagesKey,
+		contentEl: HTMLElement,
+	): void {
+		switch (section) {
+			case "general":
+				this.renderGeneralSettingsTab(contentEl);
+				break;
+			case "all-ui":
+				this.renderAllUISettingsTab(contentEl);
+				break;
+			case "custom-statuses":
+				this.renderCustomStatusesTab(contentEl);
+				break;
+			case "inline-tasks":
+				this.renderInlineTasksSettingsTab(contentEl);
+				break;
+			case "task-notes":
+				this.renderTBNoteSettingsTab(contentEl);
+				break;
+			case "map-view":
+				this.renderMapViewSettingsTab(contentEl);
+				break;
+			case "automation":
+				this.renderAutomationSettingsTab(contentEl);
+				break;
+			case "formats":
+				this.renderFormatsSettingsTab(contentEl);
+				break;
+			case "experimental-features":
+				this.renderExperimentalSettingsTab(contentEl);
+				break;
+			case "support-development":
+				this.renderSupportDevelopmentSection(contentEl);
+				break;
+		}
+	}
+
 	cleanUp() {
 		// Clear the content of contentEl (if set)
 		// if (this.contentEl) {
@@ -307,7 +366,7 @@ export class SettingsManager {
 	}
 
 	// Function to render the "Filters for scanning" tab content
-	private renderGeneralTabSettings(contentEl: HTMLElement) {
+	private renderGeneralSettingsTab(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("general-settings-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -734,37 +793,6 @@ export class SettingsManager {
 				}),
 			);
 
-		new Setting(contentEl)
-			.setName(t("enable-experimental-features"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("enable-experimental-features-info-1") +
-						"<br/>" +
-						"<br/>" +
-						"<br/>" +
-						t("enable-experimental-features-info-2") +
-						"<br/>" +
-						"<br/>" +
-						"<ul>" +
-						"<li>" +
-						"<b>" +
-						t("embed-task-boards") +
-						" : " +
-						"</b>" +
-						t("embed-task-boards-info") +
-						"</li>" +
-						"</ul>",
-				),
-			)
-			.addToggle((toggle) =>
-				toggle.setValue(experimentalFeatures).onChange((value) => {
-					this.globalSettings.experimentalFeatures = value;
-					void this.saveSettings();
-
-					this.openReloadNoticeIfNeeded();
-				}),
-			);
-
 		// // Helper to add filter rows
 		// const addFilterRow = (
 		// 	label: string,
@@ -843,53 +871,11 @@ export class SettingsManager {
 		// 	"#Bug, #docs/🔥bug, #feature"
 		// );
 
-		contentEl.createEl("hr");
-
-		const footerSection = contentEl.createEl("div", {
-			cls: "settingTabFooterSection",
-		});
-
-		footerSection
-			.createEl("p", {
-				text: t("this-plugin-is-created-by"),
-			})
-			.createEl("a", {
-				text: t("author-name"),
-				href: "https://www.github.com/tu2-atmanand",
-			});
-
-		const footerText = createEl("p");
-		footerText.appendText(t("donation-message"));
-
-		footerSection.appendChild(footerText);
-
-		const parser = new DOMParser();
-
-		const donationSection = createEl("div", {
-			cls: "settingTabFooterDonationsSec",
-		});
-		donationSection.appendChild(
-			paypalButton("https://paypal.me/tu2atmanand"),
-		);
-		donationSection.appendChild(
-			buyMeACoffeeButton(
-				"https://www.buymeacoffee.com/tu2_atmanand",
-				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
-					.documentElement,
-			),
-		);
-		donationSection.appendChild(
-			kofiButton(
-				"https://ko-fi.com/atmanandgauns",
-				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement,
-			),
-		);
-
-		footerSection.appendChild(donationSection);
+		// contentEl.createEl("hr");
 	}
 
 	// Function to render "Board UI settings" tab content
-	private renderAllUITabSettings(contentEl: HTMLElement) {
+	private renderAllUISettingsTab(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("board-ui-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -1384,7 +1370,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "All properties" tab content
-	private renderPropertiesTabSettings(contentEl: HTMLElement) {
+	private renderCustomStatusesTab(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("board-ui-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -1447,7 +1433,7 @@ export class SettingsManager {
 				});
 				statusInfoName.createDiv({
 					cls: "custom-status-field-label",
-					text: `${t("status-name")}:`,
+					text: `${t("name")}:`,
 				});
 				statusInfoName.createDiv({
 					cls: "custom-status-field-value",
@@ -1460,7 +1446,7 @@ export class SettingsManager {
 				});
 				statusInfoSymbol.createDiv({
 					cls: "custom-status-field-label",
-					text: `${t("status-symbol")}:`,
+					text: `${t("symbol")}:`,
 				});
 				statusInfoSymbol.createDiv({
 					cls: "custom-status-field-value",
@@ -1473,12 +1459,58 @@ export class SettingsManager {
 				});
 				statusInfoAction.createDiv({
 					cls: "custom-status-field-label",
-					text: `${t("status-action")}:`,
+					text: `${t("click-action")}:`,
 				});
 				statusInfoAction.createDiv({
 					cls: "custom-status-field",
 					text: `When you will click on the checkbox [${status.symbol}] it will change to [${status.nextStatusSymbol}]`,
 				});
+
+				// Lucide icon for status
+				const statusLucideIcon = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element",
+				});
+				statusLucideIcon.createDiv({
+					cls: "custom-status-field-label",
+					text: `${t("lucide-icon")}:`,
+				});
+				const iconButton = statusLucideIcon.createEl("button", {
+					cls: "custom-status-icon-button",
+					attr: {
+						type: "button",
+						title: t("select-status-icon"),
+						"aria-label": t("select-status-icon"),
+					},
+				});
+				const iconId = normalizeTaskIconValue(status.lucideIcon);
+				setIcon(
+					iconButton,
+					iconId && getIcon(iconId) ? iconId : "image-plus",
+				);
+				iconButton.onclick = () => {
+					const updateStatusIcon = (value: string) => {
+						const currentStatus =
+							this.plugin.settings.data.customStatuses[index];
+						if (!currentStatus) return;
+						currentStatus.lucideIcon =
+							normalizeTaskIconValue(value);
+						void this.saveSettings();
+						renderCustomStatuses();
+						this.openReloadNoticeIfNeeded();
+					};
+					const pickerOptions = {
+						value: iconId,
+						title: t("select-status-icon"),
+						onSelect: updateStatusIcon,
+						onClear: () => updateStatusIcon(""),
+					};
+
+					if (Platform.isMobile) {
+						openIconPickerModal(this.app, pickerOptions);
+					} else {
+						showIconPicker(iconButton, pickerOptions);
+					}
+				};
 
 				const rightSideContainer = row.createDiv({
 					cls: "custom-status-right-side",
@@ -1531,6 +1563,7 @@ export class SettingsManager {
 								availableAsCommand:
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,
+								lucideIcon: status.lucideIcon ?? "",
 							};
 							this.plugin.settings.data.customStatuses[index] =
 								customStatus;
@@ -1592,6 +1625,7 @@ export class SettingsManager {
 							nextStatusSymbol: "",
 							availableAsCommand: false,
 							type: statusTypeNames.TODO,
+							lucideIcon: "",
 						};
 						const modal = new CustomStatusModal(
 							this.plugin,
@@ -1610,6 +1644,7 @@ export class SettingsManager {
 									availableAsCommand:
 										statusConfig.availableAsCommand,
 									type: statusConfig.type,
+									lucideIcon: "",
 								};
 								if (!this.globalSettings.customStatuses) {
 									this.globalSettings.customStatuses = [];
@@ -1629,7 +1664,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "Task formats" tab content
-	private renderInlineTasksTabSettings(contentEl: HTMLElement) {
+	private renderInlineTasksSettingsTab(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("format-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -1935,7 +1970,7 @@ export class SettingsManager {
 		});
 	}
 
-	private renderTBNoteTabSettings(contentEl: HTMLElement) {
+	private renderTBNoteSettingsTab(contentEl: HTMLElement) {
 		const {
 			taskNoteIdentifierTag,
 			taskNoteDefaultLocation,
@@ -2191,7 +2226,7 @@ export class SettingsManager {
 		// });
 	}
 
-	private renderMapViewTabSettings(contentEl: HTMLElement) {
+	private renderMapViewSettingsTab(contentEl: HTMLElement) {
 		const {
 			background,
 			mapOrientation,
@@ -2360,7 +2395,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "Automation" tab content
-	private renderAutomationTabSettings(contentEl: HTMLElement) {
+	private renderAutomationSettingsTab(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("automation-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -2561,7 +2596,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "Task formats" tab content
-	private renderFormatsTabSettings(contentEl: HTMLElement) {
+	private renderFormatsSettingsTab(contentEl: HTMLElement) {
 		// contentEl.createEl("p", {
 		// 	text: t("format-section-description"),
 		// 	cls: "taskBoard-tab-section-desc",
@@ -2869,6 +2904,85 @@ export class SettingsManager {
 		// 				void this.saveSettings();
 		// 			}),
 		// 	);
+	}
+
+	private renderExperimentalSettingsTab(contentEl: HTMLElement) {
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						"<br/>" +
+						"<br/>" +
+						t("enable-experimental-features-info-2") +
+						"<br/>" +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("embed-task-boards") +
+						" : " +
+						"</b>" +
+						t("embed-task-boards-info") +
+						"</li>" +
+						"</ul>",
+				),
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.globalSettings.experimentalFeatures)
+					.onChange((value) => {
+						this.globalSettings.experimentalFeatures = value;
+						void this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
+					}),
+			);
+	}
+
+	private renderSupportDevelopmentSection(contentEl: HTMLElement) {
+		const footerSection = contentEl.createEl("div", {
+			cls: "settingTabFooterSection setting-item-name",
+		});
+
+		// footerSection
+		// 	.createEl("p", {
+		// 		text: t("this-plugin-is-created-by"),
+		// 	})
+		// 	.createEl("a", {
+		// 		text: t("author-name"),
+		// 		href: "https://www.github.com/tu2-atmanand",
+		// 	});
+
+		const footerText = createEl("p");
+		footerText.appendText(t("donation-message"));
+
+		footerSection.appendChild(footerText);
+
+		const parser = new DOMParser();
+
+		const donationSection = createEl("div", {
+			cls: "settingTabFooterDonationsSec",
+		});
+		donationSection.appendChild(
+			paypalButton("https://paypal.me/tu2atmanand"),
+		);
+		donationSection.appendChild(
+			buyMeACoffeeButton(
+				"https://www.buymeacoffee.com/tu2_atmanand",
+				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
+					.documentElement,
+			),
+		);
+		donationSection.appendChild(
+			kofiButton(
+				"https://ko-fi.com/atmanandgauns",
+				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement,
+			),
+		);
+
+		footerSection.appendChild(donationSection);
 	}
 }
 

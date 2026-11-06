@@ -69,6 +69,9 @@ export async function fetchTasksPluginCustomStatuses(
 				statusMap.set(status.symbol, status),
 			);
 			const statuses: CustomStatus[] = Array.from(statusMap.values());
+			statuses.forEach((status) => {
+				status.lucideIcon ??= "";
+			});
 
 			// console.log(
 			// 	"Fetched custom statuses from tasks plugin:",

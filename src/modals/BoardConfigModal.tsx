@@ -14,7 +14,6 @@ import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOpti
 import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../services/MultiSuggest.js";
-import { SettingsManager } from "../settings/SettingConstructUI.js";
 import { generateRandomNumber, generateRandomStringId } from "../utils/TaskItemUtils.js";
 import { AddColumnModal } from "./AddColumnModal.js";
 import { AddViewModal } from "./AddViewModal.js";
@@ -26,7 +25,6 @@ import { AdvancedFilterModal } from "../components/AdvancedFilterer/index.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
-	settingManager: SettingsManager;
 	currentBoardData: Board;
 	currentViewIndex: number;
 	onSave: (updatedBoard: Board) => void;
@@ -36,7 +34,6 @@ interface ConfigModalProps {
 
 const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	plugin,
-	settingManager,
 	currentBoardData,
 	currentViewIndex,
 	onSave,
@@ -60,7 +57,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	const getInputValue = (key: string, fallback: number | "" = "") => inputValues[key] ?? fallback;
 	const isDatedInputUndefined = (key: string, fallback: number) => inputValues[key] === "" && fallback === 0;
 
-	const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+	// const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
 	const columnListRef = useRef<HTMLDivElement | null>(null);
 	const boardListRef = useRef<HTMLDivElement | null>(null);
 
@@ -591,28 +588,28 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 	};
 
 	// UseEffect and function to render the global settings UI in the board configuration modal when the global settings tab is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts.
-	useEffect(() => {
-		if (selectedViewIndex !== -2) return;
+	// useEffect(() => {
+	// 	if (selectedViewIndex !== -2) return;
 
-		if (globalSettingsHTMLSection.current) {
-			settingManager.cleanUp();
-			globalSettingsHTMLSection.current.empty();
-			// Render global settings
-			void settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
-		}
-	}, [selectedViewIndex]);
-	const renderGlobalSettingsTab = (viewIndex: number) => {
-		return (
-			<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
-		);
-	}
+	// 	if (globalSettingsHTMLSection.current) {
+	// 		settingManager.cleanUp();
+	// 		globalSettingsHTMLSection.current.empty();
+	// 		// Render global settings
+	// 		void settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
+	// 	}
+	// }, [selectedViewIndex]);
+	// const renderGlobalSettingsTab = (viewIndex: number) => {
+	// 	return (
+	// 		<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
+	// 	);
+	// }
 
 	// Function to render the board settings UI in the board configuration modal when a specific view is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts.
 	const renderBoardConfigTab = () => {
-		if (globalSettingsHTMLSection.current) {
-			settingManager.cleanUp();
-			globalSettingsHTMLSection.current.empty();
-		}
+		// if (globalSettingsHTMLSection.current) {
+		// 	settingManager.cleanUp();
+		// 	globalSettingsHTMLSection.current.empty();
+		// }
 
 		return (
 			<div className="boardConfigTab">
@@ -682,10 +679,10 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 
 	// Function to render the view specific settings UI in the board configuration modal when a specific view is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts. This function also handles rendering the UI for configuring the settings of a Kanban specific view and for configuring the columns in a Kanban specific view.
 	const renderViewSettings = (viewIndex: number) => {
-		if (globalSettingsHTMLSection.current) {
-			settingManager.cleanUp();
-			globalSettingsHTMLSection.current.empty();
-		}
+		// if (globalSettingsHTMLSection.current) {
+		// 	settingManager.cleanUp();
+		// 	globalSettingsHTMLSection.current.empty();
+		// }
 
 		let view: TaskBoardViewType | undefined;
 		if (allViewsData && allViewsData.length > 0)
@@ -1368,13 +1365,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 						<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
 							<div className="boardConfigModalSidebarBtnArea" >
 								<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => {
-									setSelectedViewIndex(-2);
-									toggleSidebar();
-								}}>
-									{t("global-settings")}
-								</div>
-
-								<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => {
 									setSelectedViewIndex(-1);
 									toggleSidebar();
 								}}>
@@ -1424,13 +1414,13 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							</div>
 						</div>
 
-						<div className="boardConfigModalMainContent">
+						{/* <div className="boardConfigModalMainContent">
 							{selectedViewIndex === -2
 								? renderGlobalSettingsTab(selectedViewIndex)
 								: selectedViewIndex === -1
 									? renderBoardConfigTab()
 									: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
-						</div>
+						</div> */}
 					</>
 				)}
 			</div>
@@ -1452,7 +1442,6 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
  */
 export class BoardConfigureModal extends Modal {
 	root: ReactDOM.Root;
-	settingsManager: SettingsManager;
 	currentBoardData: Board;
 	currentViewIndex: number;
 	isEdited: boolean;
@@ -1479,7 +1468,6 @@ export class BoardConfigureModal extends Modal {
 		this.onSave = onSave;
 
 		this.isEdited = false;
-		this.settingsManager = new SettingsManager(plugin);
 		const { contentEl } = this;
 		this.root = ReactDOM.createRoot(contentEl);
 
@@ -1490,7 +1478,6 @@ export class BoardConfigureModal extends Modal {
 		this.root.render(
 			<ConfigModalContent
 				plugin={this.plugin}
-				settingManager={this.settingsManager}
 				currentBoardData={this.currentBoardData}
 				currentViewIndex={this.currentViewIndex}
 				onSave={(updatedBoard: Board) => {
@@ -1532,11 +1519,6 @@ export class BoardConfigureModal extends Modal {
 		// Clean up React rendering
 		if (this.root) {
 			this.root.unmount();
-		}
-
-		// Clean up settings manager if needed
-		if (this.settingsManager) {
-			this.settingsManager.cleanUp();
 		}
 
 		// Clear the content element

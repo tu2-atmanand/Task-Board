@@ -51,6 +51,7 @@ export interface CustomStatus {
 	nextStatusSymbol: string; // The symbol representing the next status in the workflow (e.g., "x")
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
 	type: statusTypeNames; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
+	lucideIcon: string; // Lucide icon id
 }
 
 export interface TaskBoardAction {
@@ -263,6 +264,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: false,
 				type: statusTypeNames.TODO,
+				lucideIcon: "",
 			},
 			{
 				symbol: defaultTaskStatuses.scheduled,
@@ -270,6 +272,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: false,
 				type: statusTypeNames.TODO,
+				lucideIcon: "",
 			},
 			{
 				symbol: defaultTaskStatuses.question,
@@ -277,6 +280,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: false,
 				type: statusTypeNames.TODO,
+				lucideIcon: "",
 			},
 			{
 				symbol: defaultTaskStatuses.inprogress,
@@ -284,6 +288,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: true,
 				type: statusTypeNames.IN_PROGRESS,
+				lucideIcon: "",
 			},
 			{
 				symbol: defaultTaskStatuses.done,
@@ -291,6 +296,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				nextStatusSymbol: defaultTaskStatuses.todo,
 				availableAsCommand: true,
 				type: statusTypeNames.DONE,
+				lucideIcon: "",
 			},
 			{
 				symbol: defaultTaskStatuses.checked,
@@ -298,6 +304,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				nextStatusSymbol: defaultTaskStatuses.todo,
 				availableAsCommand: true,
 				type: statusTypeNames.DONE,
+				lucideIcon: "",
 			},
 			{
 				symbol: defaultTaskStatuses.dropped,
@@ -305,6 +312,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				nextStatusSymbol: defaultTaskStatuses.done,
 				availableAsCommand: true,
 				type: statusTypeNames.CANCELLED,
+				lucideIcon: "",
 			},
 		],
 		compatiblePlugins: {
