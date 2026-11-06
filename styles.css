@@ -10577,3 +10577,380 @@ li[data-task=b]>p>input:checked {
 		padding: 8px;
 	}
 }
+
+
+/* ==================================== */
+/*         Floating Window              */
+/* ==================================== */
+
+.task-board-floating-panel {
+	z-index: 1000;
+	min-width: 180px;
+	max-width: 360px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+	padding: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-quick-offset {
+	--button-bg: var(--background-primary);
+	--button-hover-bg: var(--background-primary);
+	--button-active-bg: var(--background-primary);
+	--button-shadow: none;
+	appearance: none;
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+	min-height: 36px;
+	padding: 5px 6px;
+	border: 1px solid var(--task-board-reminder-rules-picker-border);
+	border-radius: 6px;
+	background: var(--background-primary);
+	background-color: var(--background-primary);
+	background-image: none;
+	box-shadow: none;
+	filter: none;
+	color: var(--text-muted);
+	font-size: 11px;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.2;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-quick-offset:hover:not(.is-selected) {
+	border-color: var(--task-board-reminder-rules-picker-border);
+	background: var(--background-primary);
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+}
+
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-quick-offset.is-selected {
+	--button-bg: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	--button-hover-bg: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	--button-active-bg: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	border-color: var(--task-board-reminder-rules-picker-hover-border);
+	background: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	background-color: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	color: var(--text-normal);
+	box-shadow: 0 0 0 2px var(--task-board-reminder-rules-picker-focus-ring);
+}
+
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-quick-offset:focus-visible {
+	border-color: var(--task-board-reminder-rules-picker-hover-border);
+	outline: none;
+	box-shadow: 0 0 0 2px var(--task-board-reminder-rules-picker-focus-ring);
+}
+
+@media (hover: none),
+(pointer: coarse) {
+	body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-quick-offset {
+		min-height: 44px;
+		padding-block: 8px;
+	}
+}
+
+/* Keep picker result rows neutral even when the active Obsidian theme styles buttons. */
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-item {
+	--button-bg: var(--background-primary);
+	--button-hover-bg: var(--background-primary);
+	--button-active-bg: var(--background-primary);
+	--button-shadow: none;
+	appearance: none;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 12px;
+	min-height: 44px;
+	padding: 7px 9px;
+	border: 1px solid var(--task-board-reminder-rules-picker-border);
+	border-radius: 8px;
+	background: var(--background-primary);
+	background-color: var(--background-primary);
+	background-image: none;
+	box-shadow: none;
+	filter: none;
+	color: var(--text-normal);
+	text-align: left;
+}
+
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-item.is-active:not(:disabled) {
+	--button-bg: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	--button-hover-bg: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	--button-active-bg: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	border-color: var(--task-board-reminder-rules-picker-hover-border);
+	background: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	background-color: color-mix(in srgb, var(--task-board-reminder-rules-picker-accent) 8%, var(--background-primary));
+	outline: none;
+	box-shadow: 0 0 0 2px var(--task-board-reminder-rules-picker-focus-ring);
+}
+
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-item:hover:not(.is-active):not(:disabled) {
+	border-color: var(--task-board-reminder-rules-picker-border);
+	background: var(--background-primary);
+	background-color: var(--background-primary);
+}
+
+body .task-board-floating-panel.task-board-reminder-rules-picker-panel button.task-board-reminder-rules-picker-item:focus-visible:not(:disabled) {
+	border-color: var(--task-board-reminder-rules-picker-hover-border);
+	background: var(--background-primary);
+	background-color: var(--background-primary);
+	outline: none;
+	box-shadow: 0 0 0 2px var(--task-board-reminder-rules-picker-focus-ring);
+}
+
+.task-board-settings-floating-host>.task-board-floating-panel {
+	z-index: 10060;
+}
+
+.task-board-floating-input {
+	width: 100%;
+	padding: 6px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+
+.task-board-icon-picker-panel .task-board-floating-input,
+.task-board-settings-icon-picker-modal .task-board-floating-input {
+	border: 1px solid var(--task-board-icon-picker-border);
+	border-radius: 8px;
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+	color: var(--text-normal);
+	filter: none;
+	--input-shadow: none;
+	--input-shadow-hover: none;
+	transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+}
+
+.task-board-floating-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 6px;
+}
+
+/* ==================================== */
+/*            Icon Picker               */
+/* ==================================== */
+
+.task-board-icon-picker-panel {
+	z-index: 10060;
+	min-width: min(400px, calc(100vw - 24px));
+	max-width: min(400px, calc(100vw - 24px));
+}
+
+.task-board-icon-picker-panel,
+.task-board-settings-icon-picker-modal {
+	--task-board-icon-picker-accent: var(--task-board-task-creator-accent, var(--task-board-task-editor-accent, var(--interactive-accent)));
+	--task-board-icon-picker-border: color-mix(in srgb, var(--text-muted) 28%, var(--background-modifier-border));
+	--task-board-icon-picker-hover-border: color-mix(in srgb, var(--task-board-icon-picker-accent) 38%, var(--background-modifier-border));
+	--task-board-icon-picker-focus-ring: color-mix(in srgb, var(--task-board-icon-picker-accent) 12%, transparent);
+	--task-board-icon-picker-selected-border: color-mix(in srgb, var(--task-board-icon-picker-accent) 46%, var(--background-modifier-border));
+	--task-board-icon-picker-active-color: color-mix(in srgb, var(--task-board-icon-picker-accent) 82%, var(--text-normal));
+}
+
+.task-board-icon-picker-panel .task-board-floating-input,
+.task-board-settings-icon-picker-modal .task-board-floating-input {
+	border: 1px solid var(--task-board-icon-picker-border);
+	border-radius: 8px;
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+	color: var(--text-normal);
+	filter: none;
+	--input-shadow: none;
+	--input-shadow-hover: none;
+	transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+}
+
+.task-board-icon-picker-panel .task-board-floating-input:hover,
+.task-board-icon-picker-panel .task-board-floating-input:focus,
+.task-board-icon-picker-panel .task-board-floating-input:focus-visible,
+.task-board-settings-icon-picker-modal .task-board-floating-input:hover,
+.task-board-settings-icon-picker-modal .task-board-floating-input:focus,
+.task-board-settings-icon-picker-modal .task-board-floating-input:focus-visible {
+	border-color: var(--task-board-icon-picker-hover-border);
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	outline: none;
+	box-shadow: 0 0 0 2px var(--task-board-icon-picker-focus-ring);
+}
+
+.task-board-icon-picker-actions {
+	justify-content: space-between;
+}
+
+.task-board-icon-picker-count {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.task-board-icon-picker-grid {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	grid-auto-rows: minmax(42px, auto);
+	gap: 4px;
+	max-height: calc((42px * 5) + (4px * 4));
+	overflow-y: auto;
+	padding-right: 2px;
+	scroll-padding-block: 4px;
+}
+
+.task-board-icon-picker-grid.is-empty {
+	display: none;
+}
+
+body .task-board-icon-picker-panel button.task-board-icon-picker-cell,
+body .modal.task-board-settings-icon-picker-modal button.task-board-icon-picker-cell {
+	appearance: none;
+	-webkit-appearance: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 42px;
+	padding: 6px 4px;
+	border: 1px solid var(--task-board-icon-picker-border, var(--background-modifier-border));
+	border-radius: 8px;
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	color: var(--text-normal);
+	box-shadow: none;
+	cursor: pointer;
+	filter: none;
+	text-align: center;
+	--button-bg: transparent;
+	--button-hover-bg: transparent;
+	--button-active-bg: transparent;
+	--button-shadow: none;
+	transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+}
+
+body .task-board-icon-picker-panel button.task-board-icon-picker-cell:hover,
+body .task-board-icon-picker-panel button.task-board-icon-picker-cell:focus-visible,
+body .task-board-icon-picker-panel button.task-board-icon-picker-cell.is-active,
+body .modal.task-board-settings-icon-picker-modal button.task-board-icon-picker-cell:hover,
+body .modal.task-board-settings-icon-picker-modal button.task-board-icon-picker-cell:focus-visible,
+body .modal.task-board-settings-icon-picker-modal button.task-board-icon-picker-cell.is-active {
+	background: transparent;
+	background-color: transparent;
+	background-image: none;
+	border-color: var(--task-board-icon-picker-hover-border, var(--interactive-accent));
+	color: var(--task-board-icon-picker-active-color, var(--interactive-accent));
+	outline: none;
+	box-shadow: 0 0 0 2px var(--task-board-icon-picker-focus-ring, color-mix(in srgb, var(--interactive-accent) 12%, transparent));
+}
+
+.task-board-icon-picker-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	color: currentColor;
+}
+
+.task-board-icon-picker-icon svg {
+	width: 24px;
+	height: 24px;
+}
+
+.task-board-settings-icon-picker-modal .modal-content {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-width: min(420px, calc(100vw - 40px));
+}
+
+
+.task-board-mobile-picker-surface.task-board-icon-picker-panel {
+	min-width: 0;
+	max-width: none;
+}
+
+.task-board-mobile-picker-surface.task-board-icon-picker-panel .task-board-icon-picker-grid {
+	grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
+	grid-auto-rows: minmax(38px, auto);
+	width: 100%;
+	min-width: 0;
+}
+
+.task-board-mobile-picker-surface.task-board-icon-picker-panel .task-board-icon-picker-cell {
+	min-width: 0;
+}
+
+.task-board-mobile-picker-surface.task-board-icon-picker-panel .task-board-floating-actions {
+	flex-wrap: wrap;
+}
+
+.task-board-settings-icon-picker-trigger:where(.task-board-settings-scope, .task-board-settings-scope *):hover,
+.task-board-settings-icon-picker-trigger:where(.task-board-settings-scope, .task-board-settings-scope *):focus-visible {
+	border-color: var(--interactive-accent);
+	background: var(--background-modifier-hover);
+}
+
+.task-board-settings-icon-picker-trigger:where(.task-board-settings-scope, .task-board-settings-scope *):focus-visible {
+	outline: 2px solid var(--interactive-accent);
+	outline-offset: 2px;
+}
+
+.task-board-settings-icon-picker-preview:where(.task-board-settings-scope, .task-board-settings-scope *) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 20px;
+	width: 20px;
+	height: 20px;
+	border-radius: 4px;
+	color: var(--text-muted);
+}
+
+.task-board-settings-icon-picker-preview:where(.task-board-settings-scope, .task-board-settings-scope *).has-icon {
+	color: var(--text-normal);
+}
+
+.task-board-settings-icon-picker-preview:where(.task-board-settings-scope, .task-board-settings-scope *) svg {
+	width: 16px;
+	height: 16px;
+}
+
+.task-board-settings-icon-picker-value:where(.task-board-settings-scope, .task-board-settings-scope *) {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 13px;
+}
+
+.task-board-settings-icon-picker-value:where(.task-board-settings-scope, .task-board-settings-scope *).is-placeholder {
+	color: var(--text-muted);
+}
+
+body .task-board-state-icon-setting:where(.task-board-settings-scope, .task-board-settings-scope *) button.task-board-settings-icon-picker-trigger {
+	justify-content: flex-start;
+	text-align: start;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: none;
+}
+
+body .task-board-state-icon-setting:where(.task-board-settings-scope, .task-board-settings-scope *) button.task-board-settings-icon-picker-trigger:hover {
+	background: var(--background-modifier-hover);
+}
