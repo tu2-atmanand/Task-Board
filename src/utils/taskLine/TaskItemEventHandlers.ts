@@ -6,7 +6,7 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { DeleteConfirmationModal } from "../../modals/DeleteConfirmationModal.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
-import { TasksPluginApi } from "../../services/tasks-plugin/api.js";
+import { TasksPluginApi } from "../../services/tasks_plugin/api.js";
 import { checkboxStateSwitcher } from "../CheckBoxUtils.js";
 import { deleteTaskNote, archiveTaskNote } from "../taskNote/TaskNoteUtils.js";
 import {

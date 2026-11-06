@@ -18,7 +18,7 @@ import {
 	openEditTaskModal,
 	openEditTaskView,
 } from "../services/OpenModals.js";
-import { openTasksPluginEditModal } from "../services/tasks-plugin/helpers.js";
+import { openTasksPluginEditModal } from "../services/tasks_plugin/helpers.js";
 import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer.js";
 import {
 	sanitizeStatus,

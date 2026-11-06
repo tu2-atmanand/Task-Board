@@ -83,8 +83,8 @@ import {
 	openBoardsExplorerModal,
 	openScanVaultModal,
 } from "./src/services/OpenModals.js";
-import { TasksPluginApi } from "./src/services/tasks-plugin/api.js";
-import { isTasksPluginEnabled } from "./src/services/tasks-plugin/helpers.js";
+import { TasksPluginApi } from "./src/services/tasks_plugin/api.js";
+import { isTasksPluginEnabled } from "./src/services/tasks_plugin/helpers.js";
 import {
 	checkAndNotifyV2MigrationsRequired,
 	openMigrationModal,

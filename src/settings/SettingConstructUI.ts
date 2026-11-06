@@ -58,7 +58,7 @@ import {
 	getQuickAddPluginChoices,
 } from "../services/MultiSuggest.js";
 import { openScanFiltersModal } from "../services/OpenModals.js";
-import { fetchTasksPluginCustomStatuses } from "../services/tasks-plugin/helpers.js";
+import { fetchTasksPluginCustomStatuses } from "../services/tasks_plugin/helpers.js";
 import { moveTasksCacheFileToNewPath } from "../utils/JsonFileOperations.js";
 import { downloadAndApplyLanguageFile } from "../utils/lang/helper.js";
 import { createFragmentWithHTML } from "../utils/UIHelpers.js";

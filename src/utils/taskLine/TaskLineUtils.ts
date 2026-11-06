@@ -7,7 +7,7 @@ import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import { isTheContentDiffAreOnlySpaces_V2 } from "../../modals/DiffContentCompareModal.js";
 import { allowedFileExtensionsRegEx } from "../../regularExpressions/MiscelleneousRegExpr.js";
 import { openDiffContentCompareModal } from "../../services/OpenModals.js";
-import { TasksPluginApi } from "../../services/tasks-plugin/api.js";
+import { TasksPluginApi } from "../../services/tasks_plugin/api.js";
 import {
 	readDataOfVaultFile,
 	writeDataToVaultFile,
