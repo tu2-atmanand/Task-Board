@@ -34,9 +34,9 @@
     "showTaskWithoutMetadata": true,
     "ignoreFileNameDates": false,
     "taskPropertyFormat": "2",
+    "dailyNotesPluginComp": false,
     "dateFormat": "yyyy-MM-dd",
     "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",
-    "dailyNotesPluginComp": false,
     "defaultStartTime": "",
     "taskCompletionInLocalTime": true,
     "taskCompletionShowUtcOffset": false,
@@ -47,17 +47,25 @@
     "showModifiedFilesNotice": true,
     "scanMode": "automatic",
     "columnWidth": "340px",
-    "visiblePropertiesList": [
+    "propertiesVisibleInUI": [
       "checkbox",
       "id",
       "title",
+      "subTasksMinimized",
+      "descriptionMinimized",
       "status",
-      "priority",
-      "filePath",
       "tags",
+      "time",
+      "reminder",
+      "priority",
+      "createdDate",
+      "startDate",
+      "scheduledDate",
+      "dueDate",
+      "completionDate",
+      "cancelledDate",
       "dependsOn",
-      "subTasks",
-      "description"
+      "filePath"
     ],
     "taskCardStyle": "bases",
     "showVerticalScroll": true,
@@ -90,7 +98,7 @@
       }
     ],
     "editButtonAction": "popUp",
-    "doubleClickCardToEdit": "noteInTab",
+    "cardDoubleClickAction": "none",
     "universalDate": "due",
     "tagColorsType": "tagBg",
     "customStatuses": [
@@ -100,7 +108,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": ""
+        "lucideIcon": "circle"
       },
       {
         "symbol": "<",
@@ -108,7 +116,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": ""
+        "lucideIcon": "alarm-check"
       },
       {
         "symbol": "?",
@@ -116,7 +124,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": ""
+        "lucideIcon": "scan-search"
       },
       {
         "symbol": "/",
@@ -124,7 +132,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": true,
         "type": "IN_PROGRESS",
-        "lucideIcon": ""
+        "lucideIcon": "hammer"
       },
       {
         "symbol": "x",
@@ -132,7 +140,7 @@
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
         "type": "DONE",
-        "lucideIcon": ""
+        "lucideIcon": "circle-check-big"
       },
       {
         "symbol": "X",
@@ -164,86 +172,6 @@
     "taskNoteDefaultLocation": "Meta/Task_Board/Task_Notes",
     "archivedTBNotesFolderPath": "Meta/Task_Board/Archived_Task_Notes",
     "quickAddPluginDefaultChoice": "",
-    "frontmatterFormatting": [
-      {
-        "index": 1,
-        "property": "ID",
-        "key": "id",
-        "taskItemKey": "id"
-      },
-      {
-        "index": 2,
-        "property": "Title",
-        "key": "title",
-        "taskItemKey": "title"
-      },
-      {
-        "index": 3,
-        "property": "Status",
-        "key": "status",
-        "taskItemKey": "status"
-      },
-      {
-        "index": 4,
-        "property": "Priority",
-        "key": "priority",
-        "taskItemKey": "priority"
-      },
-      {
-        "index": 5,
-        "property": "Tags",
-        "key": "tags",
-        "taskItemKey": "tags"
-      },
-      {
-        "index": 6,
-        "property": "Time",
-        "key": "time",
-        "taskItemKey": "time"
-      },
-      {
-        "index": 7,
-        "property": "Reminder",
-        "key": "reminder",
-        "taskItemKey": "reminder"
-      },
-      {
-        "index": 8,
-        "property": "Created date",
-        "key": "created-date",
-        "taskItemKey": "createdDate"
-      },
-      {
-        "index": 9,
-        "property": "Start date",
-        "key": "start-date",
-        "taskItemKey": "startDate"
-      },
-      {
-        "index": 10,
-        "property": "Scheduled date",
-        "key": "scheduled-date",
-        "taskItemKey": "scheduledDate"
-      },
-      {
-        "index": 11,
-        "property": "Due date",
-        "key": "due-date",
-        "taskItemKey": "due"
-      },
-      {
-        "index": 12,
-        "property": "Depends on",
-        "key": "depends-on",
-        "taskItemKey": "dependsOn"
-      },
-      {
-        "index": 13,
-        "property": "Completed date",
-        "key": "cancelled-date",
-        "taskItemKey": "cancelledDate"
-      }
-    ],
     "showFrontmatterTagsOnCards": false,
     "tasksCacheFilePath": "",
     "notificationService": "none",
@@ -255,7 +183,6 @@
         "targetColumn": "Completed"
       }
     ],
-    "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
     "uniqueIdCounter": 2304,
     "experimentalFeatures": false,
@@ -279,7 +206,6 @@
       "renderVisibleNodes": false,
       "edgeType": "default"
     },
-    "searchQuery": "",
     "taskBoardFilesRegistry": {
       "board_329394": {
         "boardId": "board_329394",
@@ -312,6 +238,7 @@
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
     },
+    "enableDragnDropTouch": false,
     "filtersWarehouse": [
       {
         "id": "filter_1780231276075_3763997378",
@@ -445,43 +372,205 @@
         "description": "These are the tasks I created when I found a new topic which I want to learn."
       }
     ],
-    "enableDragnDropTouch": false,
     "ribbonIconAction": "menu",
-    "propertiesVisibleInUI": [
-      "checkbox",
-      "id",
-      "title",
-      "subTasksMinimized",
-      "descriptionMinimized",
-      "status",
-      "tags",
-      "time",
-      "reminder",
-      "priority",
-      "createdDate",
-      "startDate",
-      "scheduledDate",
-      "dueDate",
-      "completionDate",
-      "cancelledDate",
-      "dependsOn",
-      "filePath"
-    ],
-    "cardDoubleClickAction": "none",
-    "propertiesHiddenInNotes": [],
     "defaultProperties": [
       {
+        "key": "id",
         "id": "id",
         "name": "ID",
-        "desc": "Property to apply a uniqu ID to the task to explicitely identify and find it from whole vault. Will be also used for other features.",
+        "desc": "Property to uniquely identify a task across the vault.",
         "type": "text",
         "emoji": "🆔",
+        "icon": "fingerprint-pattern",
         "hidePropertyInNotesForInlineTasks": false,
-        "icon": "id",
+        "defaultValue": "",
+        "rank": 1
+      },
+      {
+        "key": "title",
+        "id": "title",
+        "name": "Title",
+        "desc": "",
+        "type": "text",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 2
+      },
+      {
+        "key": "status",
+        "id": "status",
+        "name": "Status",
+        "desc": "",
+        "type": "text",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 3
+      },
+      {
+        "key": "priority",
+        "id": "priority",
+        "name": "Priority",
+        "desc": "",
+        "type": "numeric",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 4
+      },
+      {
+        "key": "tags",
+        "id": "tags",
+        "name": "Tags",
+        "desc": "",
+        "type": "list",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 5
+      },
+      {
+        "key": "time",
+        "id": "time",
+        "name": "Time",
+        "desc": "",
+        "type": "time",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 6
+      },
+      {
+        "key": "reminder",
+        "id": "reminder",
+        "name": "Reminder",
+        "desc": "",
+        "type": "text",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 7
+      },
+      {
+        "key": "createdDate",
+        "id": "created-date",
+        "name": "Created date",
+        "desc": "",
+        "type": "date",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 8
+      },
+      {
+        "key": "startDate",
+        "id": "start-date",
+        "name": "Start date",
+        "desc": "",
+        "type": "date",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 9
+      },
+      {
+        "key": "scheduledDate",
+        "id": "scheduled-date",
+        "name": "Scheduled date",
+        "desc": "",
+        "type": "date",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 10
+      },
+      {
+        "key": "due",
+        "id": "due-date",
+        "name": "Due date",
+        "desc": "",
+        "type": "date",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 11
+      },
+      {
+        "key": "dependsOn",
+        "id": "depends-on",
+        "name": "Depends on",
+        "desc": "",
+        "type": "list",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 12
+      },
+      {
+        "key": "cancelledDate",
+        "id": "cancelled-date",
+        "name": "Completed date",
+        "desc": "",
+        "type": "date",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 13
+      },
+      {
+        "key": "completionDate",
+        "id": "completed-date",
+        "name": "Completed date",
+        "desc": "",
+        "type": "date",
+        "emoji": "",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 14
+      }
+    ],
+    "customProperties": [
+      {
+        "key": "assignee",
+        "id": "assignee",
+        "name": "Assignee",
+        "desc": "To whome the task is assigned to.",
+        "type": "text",
+        "emoji": "🧑",
+        "icon": "",
+        "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
         "rank": 1
       }
     ],
-    "customProperties": []
+    "visiblePropertiesList": [
+      "checkbox",
+      "id",
+      "title",
+      "status",
+      "priority",
+      "filePath",
+      "tags",
+      "dependsOn",
+      "subTasks",
+      "description"
+    ],
+    "doubleClickCardToEdit": "noteInTab",
+    "hiddenTaskProperties": [],
+    "searchQuery": ""
   }
 }
