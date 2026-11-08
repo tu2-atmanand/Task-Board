@@ -1,6 +1,6 @@
 import { sanitizeHTMLToDom } from "obsidian";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { taskPropertiesNames } from "../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
 
 /**
  * Convert a hex color string to an rgba() CSS string.
@@ -96,33 +96,33 @@ export const createFragmentWithHTML = (html: string) => sanitizeHTMLToDom(html);
  * @param property - The task property name
  * @returns The corresponding CSS hide class name
  */
-export function getHideClassForProperty(property: taskPropertiesNames): string {
+export function getHideClassForProperty(property: DEFAULT_TASK_CACHE_KEYS): string {
 	switch (property) {
-		case taskPropertiesNames.ID:
+		case DEFAULT_TASK_CACHE_KEYS.ID:
 			return "hide-task-id";
-		case taskPropertiesNames.Tags:
+		case DEFAULT_TASK_CACHE_KEYS.Tags:
 			return "hide-task-tags";
-		case taskPropertiesNames.CreatedDate:
+		case DEFAULT_TASK_CACHE_KEYS.CreatedDate:
 			return "hide-task-created";
-		case taskPropertiesNames.StartDate:
+		case DEFAULT_TASK_CACHE_KEYS.StartDate:
 			return "hide-task-start";
-		case taskPropertiesNames.ScheduledDate:
+		case DEFAULT_TASK_CACHE_KEYS.ScheduledDate:
 			return "hide-task-scheduled";
-		case taskPropertiesNames.DueDate:
+		case DEFAULT_TASK_CACHE_KEYS.DueDate:
 			return "hide-task-due";
-		case taskPropertiesNames.CompletionDate:
+		case DEFAULT_TASK_CACHE_KEYS.CompletionDate:
 			return "hide-task-completion";
-		case taskPropertiesNames.CancelledDate:
+		case DEFAULT_TASK_CACHE_KEYS.CancelledDate:
 			return "hide-task-cancelled";
-		case taskPropertiesNames.Priority:
+		case DEFAULT_TASK_CACHE_KEYS.Priority:
 			return "hide-task-priority";
-		case taskPropertiesNames.Time:
+		case DEFAULT_TASK_CACHE_KEYS.Time:
 			return "hide-task-time";
-		case taskPropertiesNames.Dependencies:
+		case DEFAULT_TASK_CACHE_KEYS.Dependencies:
 			return "hide-task-dependsOn";
-		case taskPropertiesNames.OnCompletion:
+		case DEFAULT_TASK_CACHE_KEYS.OnCompletion:
 			return "hide-task-onCompletion";
-		case taskPropertiesNames.Recurring:
+		case DEFAULT_TASK_CACHE_KEYS.Recurring:
 			return "hide-task-recurring";
 		default:
 			return "";

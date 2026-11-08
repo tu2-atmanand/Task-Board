@@ -7,7 +7,7 @@ import { t } from 'i18next';
 import TaskBoard from '../../main.js';
 import { AdvancedFilter, Board, TaskBoardViewType } from '../interfaces/BoardConfigs.js';
 import { DEFAULT_DATE_FORMAT } from '../interfaces/Constants.js';
-import { taskPropertiesNames, viewTypeNames, viewsPanelPropertiesToShow } from '../interfaces/Enums.js';
+import { DEFAULT_TASK_CACHE_KEYS, viewTypeNames, viewsPanelPropertiesToShow } from '../interfaces/Enums.js';
 import { funnelIcon, ScanVaultIcon } from '../interfaces/Icons.js';
 import { taskJsonMerged } from '../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../managers/BugReporter.js';
@@ -515,40 +515,40 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		}
 	}
 
-	function togglePropertyNameInSettings(propertyName: taskPropertiesNames) {
-		let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
+	function togglePropertyNameInSettings(propertyName: DEFAULT_TASK_CACHE_KEYS) {
+		let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
 
 		if (visibleProperties.includes(propertyName)) {
 			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
-			plugin.settings.data.visiblePropertiesList = visibleProperties;
+			plugin.settings.data.propertiesVisibleInUI = visibleProperties;
 
 		} else {
 			let index = -1;
 			switch (propertyName) {
-				case taskPropertiesNames.SubTasks:
-					index = visibleProperties.indexOf(taskPropertiesNames.SubTasksMinimized);
+				case DEFAULT_TASK_CACHE_KEYS.SubTasks:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
 					if (index > -1)
 						visibleProperties.splice(index, 1);
 					break;
-				case taskPropertiesNames.SubTasksMinimized:
-					index = visibleProperties.indexOf(taskPropertiesNames.SubTasks);
+				case DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasks);
 					if (index > -1)
 						visibleProperties.splice(index, 1);
 					break;
-				case taskPropertiesNames.Description:
-					index = visibleProperties.indexOf(taskPropertiesNames.DescriptionMinimized);
+				case DEFAULT_TASK_CACHE_KEYS.Description:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized);
 					if (index > -1)
 						visibleProperties.splice(index, 1);
 					break;
-				case taskPropertiesNames.DescriptionMinimized:
-					index = visibleProperties.indexOf(taskPropertiesNames.Description);
+				case DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Description);
 					if (index > -1)
 						visibleProperties.splice(index, 1);
 					break;
 			}
 			visibleProperties.push(propertyName);
 
-			plugin.settings.data.visiblePropertiesList = visibleProperties;
+			plugin.settings.data.propertiesVisibleInUI = visibleProperties;
 		}
 
 		void plugin.saveSettings();
@@ -569,148 +569,148 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("id"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.ID);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ID);
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ID))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ID))
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("checkbox"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.Checkbox);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Checkbox);
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox))
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("status"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.Status);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Status);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Status))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Status))
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("priority"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.Priority);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Priority);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Priority))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Priority))
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("tags"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.Tags);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Tags);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Tags))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Tags))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("time"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.Time);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Time);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Time))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Time))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("reminder"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.Reminder);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Reminder);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Reminder))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Reminder))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("created-date"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.CreatedDate);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CreatedDate);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CreatedDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("start-date"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.StartDate);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.StartDate);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.StartDate))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.StartDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("scheduled-date"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.ScheduledDate);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ScheduledDate);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ScheduledDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("due-date"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.DueDate);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.DueDate);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DueDate))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DueDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("completed-date"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.CompletionDate);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CompletionDate);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CompletionDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("cancelled-date"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.CancelledDate);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CancelledDate);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CancelledDate))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("dependencies"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.Dependencies);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Dependencies);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("file-name"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.FilePath);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FilePath);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePath))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePath))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("file-name-in-header"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.FilePathInHeader);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("parent-folder"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.ParentFolder);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ParentFolder);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ParentFolder))
 		});
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("full-path"));
 			item.onClick(() => {
-				togglePropertyNameInSettings(taskPropertiesNames.FullPath);
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FullPath);
 
 			})
-			item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.FullPath))
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FullPath))
 		});
 
 		propertyMenu.addSeparator();
@@ -722,39 +722,39 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			subTasksMenu.addItem((item) => {
 				item.setTitle(t("visible"))
 				item.onClick(() => {
-					togglePropertyNameInSettings(taskPropertiesNames.SubTasks);
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.SubTasks);
 
 				})
-				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
 			});
 
 			subTasksMenu.addItem((item) => {
 				item.setTitle(t("minimized"))
 				item.onClick(() => {
-					togglePropertyNameInSettings(taskPropertiesNames.SubTasksMinimized);
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
 
 				})
-				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
 			});
 
 			subTasksMenu.addItem((item) => {
 				item.setTitle(t("hidden"))
 				item.onClick(() => {
-					let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
+					let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
 
-					if (visibleProperties.includes(taskPropertiesNames.SubTasks)) {
-						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasks), 1);
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasks), 1);
 					}
 
-					if (visibleProperties.includes(taskPropertiesNames.SubTasksMinimized)) {
-						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.SubTasksMinimized), 1);
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized), 1);
 					}
 
-					plugin.settings.data.visiblePropertiesList = visibleProperties;
+					plugin.settings.data.propertiesVisibleInUI = visibleProperties;
 					void plugin.saveSettings();
 					eventEmitter.emit("REFRESH_BOARD");
 				})
-				item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized));
+				item.setChecked(!plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) && !plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
 			});
 		});
 
@@ -765,41 +765,41 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			descriptionMenu.addItem((item) => {
 				item.setTitle(t("visible"))
 				item.onClick(() => {
-					togglePropertyNameInSettings(taskPropertiesNames.Description);
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Description);
 					void plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description));
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description));
 			});
 
 			descriptionMenu.addItem((item) => {
 				item.setTitle(t("minimized"))
 				item.onClick(() => {
-					togglePropertyNameInSettings(taskPropertiesNames.DescriptionMinimized);
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized);
 					void plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
 			});
 
 			descriptionMenu.addItem((item) => {
 				item.setTitle(t("hidden"))
 				item.onClick(() => {
-					let visibleProperties = plugin.settings.data.visiblePropertiesList || [];
+					let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
 
-					if (visibleProperties.includes(taskPropertiesNames.Description)) {
-						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.Description), 1);
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.Description)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Description), 1);
 					}
 
-					if (visibleProperties.includes(taskPropertiesNames.DescriptionMinimized)) {
-						visibleProperties.splice(visibleProperties.indexOf(taskPropertiesNames.DescriptionMinimized), 1);
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized), 1);
 					}
 
-					plugin.settings.data.visiblePropertiesList = visibleProperties;
+					plugin.settings.data.propertiesVisibleInUI = visibleProperties;
 					void plugin.saveSettings();
 					eventEmitter.emit("REFRESH_BOARD");
 				})
-				item.setChecked(!plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.Description) && !plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized));
+				item.setChecked(!plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description) && !plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
 			});
 		});
 

@@ -4,7 +4,7 @@ import Sortable from "sortablejs";
 import { GripVertical } from "lucide-react";
 import TaskBoard from "../../../../main.js";
 import { Board, TaskBoardViewType, TableView as TableViewConfig } from "../../../interfaces/BoardConfigs.js";
-import { taskPropertiesNames, statusTypeNames } from "../../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, statusTypeNames } from "../../../interfaces/Enums.js";
 import { taskItemKeyToNameMapping, getPriorityOptionsForDropdown } from "../../../interfaces/Mapping.js";
 import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../../managers/BugReporter.js";
@@ -30,24 +30,24 @@ const MIN_COLUMN_WIDTH = 80;
 
 const tableColumns = Object.keys(taskItemKeyToNameMapping) as TableColumnKey[];
 
-const columnVisibilityProperty: Partial<Record<TableColumnKey, taskPropertiesNames[]>> = {
-	id: [taskPropertiesNames.ID],
-	title: [taskPropertiesNames.Title],
-	body: [taskPropertiesNames.SubTasks, taskPropertiesNames.SubTasksMinimized],
-	status: [taskPropertiesNames.Status],
-	priority: [taskPropertiesNames.Priority],
-	tags: [taskPropertiesNames.Tags],
-	frontmatterTags: [taskPropertiesNames.Tags],
-	time: [taskPropertiesNames.Time],
-	reminder: [taskPropertiesNames.Reminder],
-	createdDate: [taskPropertiesNames.CreatedDate],
-	startDate: [taskPropertiesNames.StartDate],
-	scheduledDate: [taskPropertiesNames.ScheduledDate],
-	due: [taskPropertiesNames.DueDate],
-	dependsOn: [taskPropertiesNames.Dependencies],
-	completion: [taskPropertiesNames.CompletionDate],
-	cancelledDate: [taskPropertiesNames.CancelledDate],
-	filePath: [taskPropertiesNames.FilePath],
+const columnVisibilityProperty: Partial<Record<TableColumnKey, DEFAULT_TASK_CACHE_KEYS[]>> = {
+	id: [DEFAULT_TASK_CACHE_KEYS.ID],
+	title: [DEFAULT_TASK_CACHE_KEYS.Title],
+	body: [DEFAULT_TASK_CACHE_KEYS.SubTasks, DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized],
+	status: [DEFAULT_TASK_CACHE_KEYS.Status],
+	priority: [DEFAULT_TASK_CACHE_KEYS.Priority],
+	tags: [DEFAULT_TASK_CACHE_KEYS.Tags],
+	frontmatterTags: [DEFAULT_TASK_CACHE_KEYS.Tags],
+	time: [DEFAULT_TASK_CACHE_KEYS.Time],
+	reminder: [DEFAULT_TASK_CACHE_KEYS.Reminder],
+	createdDate: [DEFAULT_TASK_CACHE_KEYS.CreatedDate],
+	startDate: [DEFAULT_TASK_CACHE_KEYS.StartDate],
+	scheduledDate: [DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
+	due: [DEFAULT_TASK_CACHE_KEYS.DueDate],
+	dependsOn: [DEFAULT_TASK_CACHE_KEYS.Dependencies],
+	completion: [DEFAULT_TASK_CACHE_KEYS.CompletionDate],
+	cancelledDate: [DEFAULT_TASK_CACHE_KEYS.CancelledDate],
+	filePath: [DEFAULT_TASK_CACHE_KEYS.FilePath],
 };
 
 const editableColumns = new Set<TableColumnKey>([
@@ -79,7 +79,7 @@ const TableView: React.FC<TableViewProps> = ({
 	const isLoadingMoreRef = useRef(false);
 	const resizeCleanupRef = useRef<(() => void) | null>(null);
 
-	const visiblePropertyKeys = (plugin.settings.data.visiblePropertiesList ?? []).join("\u0000");
+	const visiblePropertyKeys = (plugin.settings.data.propertiesVisibleInUI ?? []).join("\u0000");
 	const visibleColumns = useMemo(() => {
 		const visibleProperties = new Set(visiblePropertyKeys.split("\u0000"));
 		const orderedColumns = tableColumns.filter((column) => (tableViewData.columnOrder ?? []).includes(column));

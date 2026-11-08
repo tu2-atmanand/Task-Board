@@ -14,7 +14,7 @@ import {
 import { Extension, Range, StateField, EditorState } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "../../../main.js";
-import { taskPropertiesNames } from "../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../regularExpressions/DataviewPluginRegularExpr.js";
 import {
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
@@ -44,63 +44,63 @@ class HiddenPropertyWidget extends WidgetType {
  * Get regex patterns for different property types for different formats as per the user setting.
  */
 export function getTaskPropertyRegexPatterns(
-	property: taskPropertiesNames,
+	property: DEFAULT_TASK_CACHE_KEYS,
 	tasksPropertyFormat: string,
 ): RegExp {
 	if (tasksPropertyFormat === "1" || tasksPropertyFormat === "2") {
 		switch (property) {
-			case taskPropertiesNames.ID:
+			case DEFAULT_TASK_CACHE_KEYS.ID:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.idRegex;
 
-			case taskPropertiesNames.Tags:
+			case DEFAULT_TASK_CACHE_KEYS.Tags:
 				// return [/#[\w\-_\/]+/g];
 				return TaskRegularExpressions.hashTagsRegex;
 
-			case taskPropertiesNames.CreatedDate:
+			case DEFAULT_TASK_CACHE_KEYS.CreatedDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.createdDateRegex;
 
-			case taskPropertiesNames.StartDate:
+			case DEFAULT_TASK_CACHE_KEYS.StartDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.startDateRegex;
 
-			case taskPropertiesNames.ScheduledDate:
+			case DEFAULT_TASK_CACHE_KEYS.ScheduledDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.scheduledDateRegex;
 
-			case taskPropertiesNames.DueDate:
+			case DEFAULT_TASK_CACHE_KEYS.DueDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.dueDateRegex;
 
-			case taskPropertiesNames.CompletionDate:
+			case DEFAULT_TASK_CACHE_KEYS.CompletionDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.doneDateRegex;
 
-			case taskPropertiesNames.CancelledDate:
+			case DEFAULT_TASK_CACHE_KEYS.CancelledDate:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.cancelledDateRegex;
 
-			case taskPropertiesNames.Priority:
+			case DEFAULT_TASK_CACHE_KEYS.Priority:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.priorityRegex;
 
-			case taskPropertiesNames.Time:
+			case DEFAULT_TASK_CACHE_KEYS.Time:
 				return /⏰\s*\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/g;
 
-			case taskPropertiesNames.Recurring:
+			case DEFAULT_TASK_CACHE_KEYS.Recurring:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.recurrenceRegex;
 
-			case taskPropertiesNames.OnCompletion:
+			case DEFAULT_TASK_CACHE_KEYS.OnCompletion:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.onCompletionRegex;
 
-			case taskPropertiesNames.Dependencies:
+			case DEFAULT_TASK_CACHE_KEYS.Dependencies:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.dependsOnRegex;
 
-			case taskPropertiesNames.Reminder:
+			case DEFAULT_TASK_CACHE_KEYS.Reminder:
 				return /\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?)\)/g;
 
 			default:
@@ -108,59 +108,59 @@ export function getTaskPropertyRegexPatterns(
 		}
 	} else if (tasksPropertyFormat === "3") {
 		switch (property) {
-			case taskPropertiesNames.ID:
+			case DEFAULT_TASK_CACHE_KEYS.ID:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.idRegex;
 
-			case taskPropertiesNames.Tags:
+			case DEFAULT_TASK_CACHE_KEYS.Tags:
 				// return [/#[\w\-_\/]+/g];
 				return TaskRegularExpressions.hashTagsRegex;
 
-			case taskPropertiesNames.CreatedDate:
+			case DEFAULT_TASK_CACHE_KEYS.CreatedDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.createdDateRegex;
 
-			case taskPropertiesNames.StartDate:
+			case DEFAULT_TASK_CACHE_KEYS.StartDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.startDateRegex;
 
-			case taskPropertiesNames.ScheduledDate:
+			case DEFAULT_TASK_CACHE_KEYS.ScheduledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.scheduledDateRegex;
 
-			case taskPropertiesNames.DueDate:
+			case DEFAULT_TASK_CACHE_KEYS.DueDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dueDateRegex;
 
-			case taskPropertiesNames.CompletionDate:
+			case DEFAULT_TASK_CACHE_KEYS.CompletionDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.doneDateRegex;
 
-			case taskPropertiesNames.CancelledDate:
+			case DEFAULT_TASK_CACHE_KEYS.CancelledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.cancelledDateRegex;
 
-			case taskPropertiesNames.Priority:
+			case DEFAULT_TASK_CACHE_KEYS.Priority:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.priorityRegex;
 
-			case taskPropertiesNames.Time:
+			case DEFAULT_TASK_CACHE_KEYS.Time:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.timeRegex;
 
-			case taskPropertiesNames.Recurring:
+			case DEFAULT_TASK_CACHE_KEYS.Recurring:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.recurrenceRegex;
 
-			case taskPropertiesNames.OnCompletion:
+			case DEFAULT_TASK_CACHE_KEYS.OnCompletion:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.onCompletionRegex;
 
-			case taskPropertiesNames.Dependencies:
+			case DEFAULT_TASK_CACHE_KEYS.Dependencies:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dependsOnRegex;
 
-			case taskPropertiesNames.Reminder:
+			case DEFAULT_TASK_CACHE_KEYS.Reminder:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.reminderRegex;
 
@@ -169,59 +169,59 @@ export function getTaskPropertyRegexPatterns(
 		}
 	} else {
 		switch (property) {
-			case taskPropertiesNames.ID:
+			case DEFAULT_TASK_CACHE_KEYS.ID:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.idRegex;
 
-			case taskPropertiesNames.Tags:
+			case DEFAULT_TASK_CACHE_KEYS.Tags:
 				// return [/#[\w\-_\/]+/g];
 				return TaskRegularExpressions.hashTagsRegex;
 
-			case taskPropertiesNames.CreatedDate:
+			case DEFAULT_TASK_CACHE_KEYS.CreatedDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.createdDateRegex;
 
-			case taskPropertiesNames.StartDate:
+			case DEFAULT_TASK_CACHE_KEYS.StartDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.startDateRegex;
 
-			case taskPropertiesNames.ScheduledDate:
+			case DEFAULT_TASK_CACHE_KEYS.ScheduledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.scheduledDateRegex;
 
-			case taskPropertiesNames.DueDate:
+			case DEFAULT_TASK_CACHE_KEYS.DueDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dueDateRegex;
 
-			case taskPropertiesNames.CompletionDate:
+			case DEFAULT_TASK_CACHE_KEYS.CompletionDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.doneDateRegex;
 
-			case taskPropertiesNames.CancelledDate:
+			case DEFAULT_TASK_CACHE_KEYS.CancelledDate:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.cancelledDateRegex;
 
-			case taskPropertiesNames.Priority:
+			case DEFAULT_TASK_CACHE_KEYS.Priority:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.priorityRegex;
 
-			case taskPropertiesNames.Time:
+			case DEFAULT_TASK_CACHE_KEYS.Time:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.timeRegex;
 
-			case taskPropertiesNames.Recurring:
+			case DEFAULT_TASK_CACHE_KEYS.Recurring:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.recurrenceRegex;
 
-			case taskPropertiesNames.OnCompletion:
+			case DEFAULT_TASK_CACHE_KEYS.OnCompletion:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.onCompletionRegex;
 
-			case taskPropertiesNames.Dependencies:
+			case DEFAULT_TASK_CACHE_KEYS.Dependencies:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.dependsOnRegex;
 
-			case taskPropertiesNames.Reminder:
+			case DEFAULT_TASK_CACHE_KEYS.Reminder:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.reminderRegex;
 
@@ -239,7 +239,7 @@ function createPropertyDecorations(
 	plugin: TaskBoard,
 ): DecorationSet {
 	const decorations: Range<Decoration>[] = [];
-	const hiddenProperties = plugin.settings.data.hiddenTaskProperties || [];
+	const hiddenProperties = plugin.settings.data.propertiesHiddenInNotes || [];
 
 	const cursorPos = view.state.selection.main.head;
 	const doc = view.state.doc;

@@ -4,25 +4,127 @@ import { t } from "i18next";
 import {
 	App,
 	PluginSettingTab,
+	setIcon,
+	Setting,
 	SettingDefinition,
+	SettingDefinitionGroup,
 	SettingDefinitionItem,
+	SettingDefinitionList,
+	SettingDefinitionPage,
 } from "obsidian";
 import TaskBoard from "../../main.js";
-import { globalSettingsData } from "../interfaces/GlobalSettings.js";
+import {
+	globalSettingsData,
+	SupportedPropertiesConfig,
+} from "../interfaces/GlobalSettings.js";
 import { TaskBoardIcon } from "../interfaces/Icons.js";
 import { SettingsManager, SettingsTabPagesKey } from "./SettingConstructUI.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
-import { scopeSettingsModal } from "./ScopeSettings.js";
+import { scopeSettingsModal, setSettingsScope } from "./ScopeSettings.js";
+import { createFragmentWithHTML } from "../utils/UIHelpers.js";
+
+/** Decorate the containing declarative page without replacing its searchable items. */
+export function attachDeclarativeSettingsPageTitleAction(
+	settingEl: HTMLElement,
+	pageTitle: string,
+	action: NativeSettingsDocsActionOptions | NativeSettingsDocsActionOptions[],
+): (() => void) | undefined {
+	// Declarative page definitions do not expose title actions. Fail closed if the
+	// native page structure or title differs (for example, a search preview).
+	const pageEl = settingEl.closest(".setting-page");
+	const titlebarEl = pageEl?.querySelector<HTMLElement>(
+		".setting-page-titlebar",
+	);
+	const titleEl = titlebarEl?.querySelector<HTMLElement>(
+		".setting-page-title",
+	);
+	if (
+		!titlebarEl ||
+		titlebarEl.parentElement !== pageEl ||
+		titleEl?.parentElement !== titlebarEl ||
+		titleEl.textContent !== pageTitle ||
+		titlebarEl.querySelector(
+			".operon-native-settings-page-title-docs-action",
+		)
+	)
+		return;
+
+	const hadScope = titlebarEl.classList.contains("operon-settings-scope");
+	setSettingsScope(titlebarEl, true);
+	const anchors = (Array.isArray(action) ? action : [action]).map((item) => {
+		const button = renderNativeSettingsPageTitleAction(
+			titlebarEl,
+			item,
+			true,
+		);
+		return button.closest(".operon-settings-docs-tooltip-anchor") ?? button;
+	});
+	return () => {
+		for (const anchor of anchors) anchor.remove();
+		if (
+			!titlebarEl.querySelector(
+				".operon-native-settings-page-title-docs-action",
+			)
+		) {
+			titlebarEl.removeClass(
+				"operon-native-settings-page-titlebar-with-docs",
+			);
+			if (!hadScope) setSettingsScope(titlebarEl, false);
+		}
+	};
+}
+
+export interface NativeSettingsDocsActionOptions {
+	label: string;
+	docsTarget: string;
+	onClick: () => void;
+}
+
+export interface NativeSettingsSectionOptions {
+	action?: NativeSettingsDocsActionOptions;
+}
+
+export function renderNativeSettingsPageTitleAction(
+	titlebarEl: HTMLElement,
+	action: NativeSettingsDocsActionOptions,
+	append = false,
+): HTMLButtonElement {
+	titlebarEl.addClass("operon-native-settings-page-titlebar-with-docs");
+	const existingButton = append
+		? null
+		: titlebarEl.querySelector<HTMLButtonElement>(
+				".operon-native-settings-page-title-docs-action",
+			);
+	const existingTooltipAnchor = existingButton?.closest(
+		".operon-settings-docs-tooltip-anchor",
+	);
+	if (existingTooltipAnchor) existingTooltipAnchor.remove();
+	else existingButton?.remove();
+
+	const actionButton = titlebarEl.createEl("button", {
+		cls: "clickable-icon operon-native-settings-page-title-docs-action",
+		attr: {
+			type: "button",
+			"aria-label": action.label,
+		},
+	});
+	setIcon(actionButton, "circle-question-mark");
+	actionButton.addEventListener("click", () => {
+		action.onClick();
+	});
+	return actionButton;
+}
 
 export class TaskBoardSettingTab extends PluginSettingTab {
 	plugin: TaskBoard;
 	settingsManager: SettingsManager;
-	globalSettings: globalSettingsData | null = null;
+	globalSettings: globalSettingsData;
 	icon: string = TaskBoardIcon;
 
 	constructor(app: App, plugin: TaskBoard) {
 		super(app, plugin);
 		this.plugin = plugin;
+		this.globalSettings = this.plugin.settings.data;
 		this.settingsManager = new SettingsManager(plugin);
 	}
 
@@ -33,6 +135,10 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		containerEl.addClass("TaskBoardSettingTab");
 
 		void this.settingsManager.constructUI(containerEl, t("task-board"));
+	}
+
+	private updateNativeSettingsDefinitions(): void {
+		this.update();
 	}
 
 	getSettingDefinitions(): SettingDefinitionItem[] {
@@ -135,6 +241,27 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				"export-logs",
 				"Safeguard feature",
 			]),
+			// {
+			// 	type: "page",
+			// 	name: t("general"),
+			// 	items: [
+			// 		{
+			// 			type: "list",
+			// 			name: t("filters-for-scanning"),
+			// 			desc: createFragmentWithHTML(
+			// 				t("name-of-the-file-folder-tag-for-filter-info") +
+			// 					"<br/>" +
+			// 					"<b>" +
+			// 					t("note") +
+			// 					" :</b> " +
+			// 					t(
+			// 						"name-of-the-file-folder-tag-for-filter-info-2",
+			// 					),
+			// 			),
+			// 			items: [this.renderCustomPropertiesSection],
+			// 		},
+			// 	],
+			// },
 			this.createLegacySettingsPage("all-ui", [
 				"task-card-style",
 				"show-task-without-metadata",
@@ -158,20 +285,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						type: "page",
 						name: t("default-properties"),
 						desc: t("default-properties-info"),
-						items: [
-							{
-								type: "list",
-								items: [
-									this.createLegacySettingsEntry(
-										"default-properties",
-										[
-											"supported-properties",
-											...customStatusAliases,
-										],
-									),
-								],
-							},
-						],
+						items: this.renderCustomPropertiesSection(
+							this.containerEl,
+						),
 					},
 					{
 						type: "page",
@@ -376,6 +492,115 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				);
 			},
 		};
+	}
+
+	// ---------------------------------------------
+	//      Custom Settings Sections Rendering
+	// ---------------------------------------------
+
+	private renderSupportedPropertyConfigurationPage(
+		current: SupportedPropertiesConfig,
+	): SettingDefinitionGroup {
+		return {
+			type: "list",
+			items: [
+				// For defaultProperties - Render each of the settings here for user to input the values for SupportedPropertiesConfig, except name, because name is something by default supported by Task Board. - This will going to replace the this.globalSettings.frontmatterFormatting setting. It will going to be deprecated.
+
+				// For customProperties - Render each of the settings here for user to input the values for SupportedPropertiesConfig.
+			],
+		};
+	}
+
+	private renderKeyMappingRow(
+		host: HTMLElement,
+		current: SupportedPropertiesConfig,
+	): SettingDefinitionItem {
+		return {
+			type: "page",
+			name: "",
+			render: (setting) => {
+				// Row 1 = [current.lucideIcon] [current.name] + [current.type]
+				// The lucide icon should be rendered and then will be the name, aligned to left. The type should be aligned to the right and should be shown as a pill and different type will be of different pill colors. For example, text = blue, numeric = greeen, etc..
+				// Row 2 = A columnn of key value pair of other fields such as desc, emoji, hidden in notes, default value.
+				// Row 3 = There will be two icon side by side, with icons of up-arrow and down-arrow. This buttons will be used to change the rank of the property item. And accordingly it should refresh and move it up and down.
+			},
+		};
+	}
+
+	private renderCustomPropertiesSection(
+		contentEl: HTMLElement,
+	): SettingDefinitionItem[] {
+		const prepareHost = (setting: Setting): HTMLElement => {
+			const host = setting.settingEl;
+			host.empty();
+			host.removeClass("setting-item");
+			host.addClass(
+				"operon-settings-tab-root",
+				"operon-settings-native-page-root",
+				"operon-key-mapping-search-item",
+			);
+			return host;
+		};
+
+		return [
+			{
+				name: "",
+				searchable: false,
+				render: (setting) => {
+					const host = prepareHost(setting);
+					const explanation = host.createDiv(
+						"setting-item-description operon-key-mappings-help",
+					);
+					explanation.createEl("p", {
+						text: t("custom-properties-mapping"),
+					});
+					const title = t("custom-properties-mapping");
+					// return attachDeclarativeSettingsPageTitleAction(
+					// 	host,
+					// 	title,
+					// 	[
+					// 		"DOCS-039 Key mappings",
+					// 		"DOCS-018 Task properties",
+					// 	].map(
+					// 		(target) =>
+					// 			this.buildNativeSettingsDocsAction(
+					// 				title,
+					// 				target,
+					// 			).action,
+					// 	),
+					// );
+				},
+			},
+			...this.globalSettings.customProperties.map(
+				(mapping): SettingDefinition => ({
+					name:
+						mapping.name === mapping.id
+							? mapping.id
+							: `${mapping.name} — ${mapping.id}`,
+					desc: mapping.desc,
+					aliases: [
+						mapping.name,
+						mapping.id,
+						mapping.type,
+						"keymapping",
+						"key mappings",
+						"frontmatter key",
+					],
+					render: (setting) => {
+						const host = prepareHost(setting);
+						const current =
+							this.globalSettings.customProperties.find(
+								(candidate) => candidate.id === mapping.id,
+							);
+						if (current) this.renderKeyMappingRow(host, current);
+						// return () => {
+						// 	closeFloatingPanelsForRoot(host);
+						// 	cleanupOperonHoverTooltips(host);
+						// };
+					},
+				}),
+			),
+		];
 	}
 
 	hide(): void {

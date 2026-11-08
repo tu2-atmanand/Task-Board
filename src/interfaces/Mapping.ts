@@ -344,10 +344,14 @@ export const taskItemEmpty: taskItem = {
 	status: defaultTaskStatuses.unchecked,
 };
 
+/**
+ * The keys from this constant should be same as the values in {@link DEFAULT_TASK_CACHE_KEYS} enum.
+ */
 export const taskItemKeyToNameMapping: { [key: string]: string } = {
 	id: "ID",
 	title: "Title",
 	body: "Body",
+	subTasks: "Sub tasks",
 	status: "Status",
 	priority: "Priority",
 	tags: "Tags",
@@ -356,14 +360,18 @@ export const taskItemKeyToNameMapping: { [key: string]: string } = {
 	createdDate: "Created date",
 	startDate: "Start date",
 	scheduledDate: "Scheduled date",
-	due: "Due date",
-	dependsOn: "Depends on",
-	frontmatterTags: "Frontmatter tags",
-	completion: "Completed date",
+	dueDate: "Due date",
+	completionDate: "Completed date",
 	cancelledDate: "Cancelled date",
+	dependsOn: "Depends on",
 	filePath: "Source file",
+	frontmatterTags: "Frontmatter tags",
 	taskLocation: "Task location",
+
+	// Below properties are not supported yet but will be implemented soon.
 	dateModified: "Last modified",
+	onCompletion: "On completion",
+	recurring: "Recurring",
 };
 
 export const columnTypeAndNameMapping: { [key: string]: string } = {

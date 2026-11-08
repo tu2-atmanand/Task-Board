@@ -5,6 +5,8 @@ import {
 	Notice,
 	Platform,
 	Setting,
+	SettingDefinition,
+	SettingDefinitionItem,
 	getIcon,
 	normalizePath,
 	setIcon,
@@ -26,7 +28,7 @@ import { isValid, parse, format, differenceInHours } from "date-fns";
 import { t } from "i18next";
 import TaskBoard from "../../main.js";
 import {
-	taskPropertiesNames,
+	DEFAULT_TASK_CACHE_KEYS,
 	scanModeOptions,
 	taskCardStyleNames,
 	TagColorType,
@@ -74,6 +76,7 @@ import {
 	exportConfigurations,
 } from "./SettingSynchronizer.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
+import { setSettingsScope } from "./ScopeSettings.js";
 
 export type SettingsTabPagesKey =
 	| "general"
@@ -106,44 +109,45 @@ export class SettingsManager {
 	}
 
 	private getPropertyDisplayName(
-		property: taskPropertiesNames,
+		property: DEFAULT_TASK_CACHE_KEYS,
 	): string | null {
 		type PartialDisplayNames = Pick<
-			Record<taskPropertiesNames, string>,
-			| taskPropertiesNames.ID
-			| taskPropertiesNames.Tags
-			| taskPropertiesNames.Priority
-			| taskPropertiesNames.Time
-			| taskPropertiesNames.Reminder
-			| taskPropertiesNames.CreatedDate
-			| taskPropertiesNames.StartDate
-			| taskPropertiesNames.ScheduledDate
-			| taskPropertiesNames.DueDate
-			| taskPropertiesNames.CompletionDate
-			| taskPropertiesNames.CancelledDate
-			| taskPropertiesNames.Dependencies
-			| taskPropertiesNames.OnCompletion
-			| taskPropertiesNames.Recurring
+			Record<DEFAULT_TASK_CACHE_KEYS, string>,
+			| DEFAULT_TASK_CACHE_KEYS.ID
+			| DEFAULT_TASK_CACHE_KEYS.Tags
+			| DEFAULT_TASK_CACHE_KEYS.Priority
+			| DEFAULT_TASK_CACHE_KEYS.Time
+			| DEFAULT_TASK_CACHE_KEYS.Reminder
+			| DEFAULT_TASK_CACHE_KEYS.CreatedDate
+			| DEFAULT_TASK_CACHE_KEYS.StartDate
+			| DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+			| DEFAULT_TASK_CACHE_KEYS.DueDate
+			| DEFAULT_TASK_CACHE_KEYS.CompletionDate
+			| DEFAULT_TASK_CACHE_KEYS.CancelledDate
+			| DEFAULT_TASK_CACHE_KEYS.Dependencies
+			| DEFAULT_TASK_CACHE_KEYS.OnCompletion
+			| DEFAULT_TASK_CACHE_KEYS.Recurring
 		>;
 
 		const displayNames: PartialDisplayNames = {
-			[taskPropertiesNames.ID]: "ID (🆔 fpyvkz)",
-			[taskPropertiesNames.Tags]: "Tags (#tag)",
-			[taskPropertiesNames.Priority]: "Priority (🔺)",
-			[taskPropertiesNames.CreatedDate]: "Created Date (➕ 2024-01-01)",
-			[taskPropertiesNames.StartDate]: "Start Date (🛫 2024-01-01)",
-			[taskPropertiesNames.ScheduledDate]:
+			[DEFAULT_TASK_CACHE_KEYS.ID]: "ID (🆔 fpyvkz)",
+			[DEFAULT_TASK_CACHE_KEYS.Tags]: "Tags (#tag)",
+			[DEFAULT_TASK_CACHE_KEYS.Priority]: "Priority (🔺)",
+			[DEFAULT_TASK_CACHE_KEYS.CreatedDate]:
+				"Created Date (➕ 2024-01-01)",
+			[DEFAULT_TASK_CACHE_KEYS.StartDate]: "Start Date (🛫 2024-01-01)",
+			[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]:
 				"Scheduled Date (⏳ 2024-01-01)",
-			[taskPropertiesNames.DueDate]: "Due Date (📅 2024-01-01)",
-			[taskPropertiesNames.CompletionDate]:
+			[DEFAULT_TASK_CACHE_KEYS.DueDate]: "Due Date (📅 2024-01-01)",
+			[DEFAULT_TASK_CACHE_KEYS.CompletionDate]:
 				"Completion Date (✅ 2024-01-01)",
-			[taskPropertiesNames.CancelledDate]:
+			[DEFAULT_TASK_CACHE_KEYS.CancelledDate]:
 				"Cancelled Date (❌ 2024-01-01)",
-			[taskPropertiesNames.Time]: "Time (⏰ 09:00-10:00)",
-			[taskPropertiesNames.Reminder]: "Reminder (@(12:30))",
-			[taskPropertiesNames.Recurring]: "Recurring (🔁 every 2 weeks)",
-			[taskPropertiesNames.OnCompletion]: "On-completion (🏁 delete)",
-			[taskPropertiesNames.Dependencies]: "Dependens-on (⛔ fa4sm9)",
+			[DEFAULT_TASK_CACHE_KEYS.Time]: "Time (⏰ 09:00-10:00)",
+			[DEFAULT_TASK_CACHE_KEYS.Reminder]: "Reminder (@(12:30))",
+			[DEFAULT_TASK_CACHE_KEYS.Recurring]: "Recurring (🔁 every 2 weeks)",
+			[DEFAULT_TASK_CACHE_KEYS.OnCompletion]: "On-completion (🏁 delete)",
+			[DEFAULT_TASK_CACHE_KEYS.Dependencies]: "Dependens-on (⛔ fa4sm9)",
 		};
 		return displayNames[property as keyof typeof displayNames] || null;
 	}
@@ -1048,9 +1052,9 @@ export class SettingsManager {
 							"open-note-in-hover-preview",
 						),
 					})
-					.setValue(this.globalSettings.doubleClickCardToEdit)
+					.setValue(this.globalSettings.cardDoubleClickAction)
 					.onChange((value) => {
-						this.globalSettings.doubleClickCardToEdit =
+						this.globalSettings.cardDoubleClickAction =
 							value as EditButtonMode;
 						void this.saveSettings();
 					}),
@@ -1675,7 +1679,7 @@ export class SettingsManager {
 			preDefinedNote,
 			archivedTasksFilePath,
 			showFrontmatterTagsOnCards,
-			hiddenTaskProperties,
+			propertiesHiddenInNotes,
 		} = this.globalSettings;
 
 		// Create the live preview element
@@ -1929,7 +1933,7 @@ export class SettingsManager {
 		);
 
 		// Create checkboxes for each hideable property
-		Object.values(taskPropertiesNames).forEach((property) => {
+		Object.values(DEFAULT_TASK_CACHE_KEYS).forEach((property) => {
 			const displayName = this.getPropertyDisplayName(property);
 
 			if (displayName) {
@@ -1938,23 +1942,23 @@ export class SettingsManager {
 					.setClass("taskboard-property-checkbox-setting")
 					.addToggle((toggle) => {
 						const isSelected =
-							hiddenTaskProperties.includes(property);
+							propertiesHiddenInNotes.includes(property);
 						toggle.setValue(isSelected).onChange((value) => {
 							if (value) {
 								// Add property if not already included
 								if (
-									!this.globalSettings.hiddenTaskProperties.includes(
+									!this.globalSettings.propertiesHiddenInNotes.includes(
 										property,
 									)
 								) {
-									this.globalSettings.hiddenTaskProperties.push(
+									this.globalSettings.propertiesHiddenInNotes.push(
 										property,
 									);
 								}
 							} else {
 								// Remove property
-								this.globalSettings.hiddenTaskProperties =
-									this.globalSettings.hiddenTaskProperties.filter(
+								this.globalSettings.propertiesHiddenInNotes =
+									this.globalSettings.propertiesHiddenInNotes.filter(
 										(p) => p !== property,
 									);
 							}

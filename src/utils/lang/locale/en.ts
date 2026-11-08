@@ -66,7 +66,7 @@ const en: Lang = {
 	"hide-collected-tasks": "Hide collected tasks",
 	"show-collected-tasks": "Show collected tasks",
 	"falied-to-load-settings": "Failed to load settings.",
-	"please-read-the-documentation-to-make-an-efficient-use-of-this-plugin": "Please read the documentation to make an efficient use of this plugin : ",
+	"task-board-docs-setting-info": "Please read the documentation to make an efficient use of this plugin!",
 	"task-board-docs": "Task board docs",
 	"filters-for-scanning": "Filters for scanning",
 	"only-scan-this": "Only scan this",

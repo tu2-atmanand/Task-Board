@@ -1,5 +1,5 @@
 import TaskBoard from "../../../main.js";
-import { taskPropertiesNames, TagColorType } from "../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, TagColorType } from "../../interfaces/Enums.js";
 import { priorityEmojis } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { isTaskCompleted } from "../../utils/CheckBoxUtils.js";
@@ -50,8 +50,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	header.className = "taskItemHeader";
 
 	if (
-		globalSettings.visiblePropertiesList?.includes(
-			taskPropertiesNames.FilePathInHeader,
+		globalSettings.propertiesVisibleInUI?.includes(
+			DEFAULT_TASK_CACHE_KEYS.FilePathInHeader,
 		) &&
 		task.filePath
 	) {
@@ -72,8 +72,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	headerLeft.className = "taskItemHeaderLeft";
 
 	if (
-		globalSettings.visiblePropertiesList?.includes(
-			taskPropertiesNames.Priority,
+		globalSettings.propertiesVisibleInUI?.includes(
+			DEFAULT_TASK_CACHE_KEYS.Priority,
 		) &&
 		task.priority > 0
 	) {
@@ -84,8 +84,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	}
 
 	if (
-		globalSettings.visiblePropertiesList?.includes(
-			taskPropertiesNames.Tags,
+		globalSettings.propertiesVisibleInUI?.includes(
+			DEFAULT_TASK_CACHE_KEYS.Tags,
 		) &&
 		(task.tags.length > 0 || task.frontmatterTags.length > 0)
 	) {
@@ -134,8 +134,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	const headerRight = activeDocument.createDiv("div");
 	headerRight.className = "taskItemHeaderRight";
 	if (
-		globalSettings.visiblePropertiesList?.includes(
-			taskPropertiesNames.ID,
+		globalSettings.propertiesVisibleInUI?.includes(
+			DEFAULT_TASK_CACHE_KEYS.ID,
 		) &&
 		task.legacyId
 	) {
@@ -163,8 +163,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	titleWrap.className = "taskItemMainBodyTitleNsubTasks";
 
 	if (
-		globalSettings.visiblePropertiesList?.includes(
-			taskPropertiesNames.Checkbox,
+		globalSettings.propertiesVisibleInUI?.includes(
+			DEFAULT_TASK_CACHE_KEYS.Checkbox,
 		)
 	) {
 		const cb = activeDocument.createElement("input");
@@ -189,8 +189,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	const footer = activeDocument.createDiv("div");
 	footer.className = "taskItemFooter";
 	if (
-		globalSettings.visiblePropertiesList?.includes(
-			taskPropertiesNames.Status,
+		globalSettings.propertiesVisibleInUI?.includes(
+			DEFAULT_TASK_CACHE_KEYS.Status,
 		) &&
 		task.status
 	) {
@@ -206,8 +206,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		footer.appendChild(stat);
 	}
 	if (
-		globalSettings.visiblePropertiesList?.includes(
-			taskPropertiesNames.FilePath,
+		globalSettings.propertiesVisibleInUI?.includes(
+			DEFAULT_TASK_CACHE_KEYS.FilePath,
 		) &&
 		task.filePath
 	) {

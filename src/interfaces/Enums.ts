@@ -36,8 +36,10 @@ export enum NotificationService {
 	ObsidApp = "obsiApp",
 }
 
-export enum taskPropertiesNames {
-	// These are the main properties stored inside the cache with the exact key name.
+/**
+ * These are the main properties stored inside the cache with the exact key name.
+ */
+export enum DEFAULT_TASK_CACHE_KEYS {
 	ID = "id",
 	Title = "title",
 	Body = "body",
@@ -56,12 +58,14 @@ export enum taskPropertiesNames {
 	CancelledDate = "cancelledDate",
 	Dependencies = "dependsOn",
 	FilePath = "filePath",
+	FrontMatterTags = "frontmatterTags",
 
-	// These two properties are not stored inside the cache yet.
+	// These two properties are not supported yet but will be implemented soon.
+	DateModified = "dateModified",
 	OnCompletion = "onCompletion",
 	Recurring = "recurring",
 
-	// These are specially added for the UI hide/show properties setting.
+	// Below properties are not stored in cache, but this same enum is used at other places hence placing them here.
 	Checkbox = "checkbox",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",
@@ -203,4 +207,18 @@ export enum HeaderTruncationOptions {
 	start = "start",
 	middle = "middle",
 	end = "end",
+}
+
+export enum PropertyTypeConfig {
+	text = "text",
+	boolean = "boolean",
+	numeric = "numeric",
+	time = "time",
+	date = "date",
+	dateTime = "date-time",
+	list = "list",
+}
+
+export enum DefaultLucideIconsForProperties {
+	id = "id",
 }

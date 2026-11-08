@@ -8,7 +8,7 @@ import {
 import {
 	EditButtonMode,
 	TagColorType,
-	taskPropertiesNames,
+	DEFAULT_TASK_CACHE_KEYS,
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
@@ -73,13 +73,13 @@ export interface globalSettingsDataLegacy {
 	showModifiedFilesNotice: boolean;
 	scanMode: scanModeOptions;
 	columnWidth: string;
-	visiblePropertiesList: string[];
+	propertiesVisibleInUI: string[];
 	taskCardStyle: taskCardStyleNames;
 	showVerticalScroll: boolean;
 	dragAutoScrollEdgePercent: number;
 	tagColors: TagColor[];
 	editButtonAction: EditButtonMode;
-	doubleClickCardToEdit: EditButtonMode;
+	cardDoubleClickAction: EditButtonMode;
 	universalDate: UniversalDateOptions;
 	customStatuses: CustomStatus[];
 	showTaskWithoutMetadata: boolean;
@@ -103,7 +103,7 @@ export interface globalSettingsDataLegacy {
 	notificationService: NotificationService;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
-	hiddenTaskProperties: taskPropertiesNames[];
+	propertiesHiddenInNotes: DEFAULT_TASK_CACHE_KEYS[];
 	autoAddUniqueID: boolean;
 	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	experimentalFeatures: boolean;

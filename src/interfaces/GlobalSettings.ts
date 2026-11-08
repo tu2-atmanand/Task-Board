@@ -1,9 +1,10 @@
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/TasksPluginRegularExpr.js";
 import { Filter } from "./BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants.js";
 import {
 	EditButtonMode,
 	TagColorType,
-	taskPropertiesNames,
+	DEFAULT_TASK_CACHE_KEYS,
 	mapViewArrowDirection,
 	mapViewScrollAction,
 	mapViewEdgeType,
@@ -17,6 +18,8 @@ import {
 	mapViewNodeMapOrientation,
 	RibbonIconActions,
 	statusTypeNames,
+	PropertyTypeConfig,
+	DefaultLucideIconsForProperties,
 } from "./Enums.js";
 import { defaultTaskStatuses, taskItemKeyToNameMapping } from "./Mapping.js";
 
@@ -45,6 +48,23 @@ export interface TagColor {
 	priority: number;
 }
 
+/**
+ * Interface for storing configuration of each task property which is supported by Task Board.
+ * This can be default ones or custom properties added by user.
+ */
+export interface SupportedPropertiesConfig {
+	key: string; // This is the value used to store this property in task cache. For customProperties, this will be same as id below.
+	id: string; // for frontmatter, dataview format inline-tasks and other use-cases
+	name: string; // which will be visible in UI
+	desc: string; // If user wants to explain something about the property.
+	type: PropertyTypeConfig; // Will be used to give proper format values and provide correct vaule selectors
+	emoji: string; // Specifically if user is using Tasks plugin format for their inline-tasks.
+	icon: string; // Lucide icon id for the specific property
+	hidePropertyInNotesForInlineTasks: boolean; // Specifically used for inline-tasks to hide properties inside notes. This setting will going to replace this.plugin.settings.data.propertiesHiddenInNotes.
+	defaultValue: string | number | string[]; // This can be an exact value or a template text which will be resolved during execution.
+	rank: number; // This will mostly be used for task-notes to format the frontmatter, so the properties stays in a defined order.
+}
+
 export interface CustomStatus {
 	symbol: string; // The symbol representing the status (e.g., "/", "-")
 	name: string; // The human-readable name of the status (e.g., "In Progress")
@@ -54,13 +74,26 @@ export interface CustomStatus {
 	lucideIcon: string; // Lucide icon id
 }
 
+export interface RecurrenceConfigs {
+	frequency: string; // Daily, Weekly, Monthly, Yearly
+}
+
 export interface TaskBoardAction {
 	enabled: boolean;
 	trigger: "Complete" | "Incomplete";
 	type: "move" | "copy";
 	targetColumn: string;
 }
-
+/**
+ * Interface for storing the mapping of default supported task properties and their key.
+ * The key will be used in the frontmatter for creating task-notes. And the index will
+ * be used to keep a fixed order when a specific task properties are added to the task-
+ * note.
+ * 
+ * @deprecated - This complete setting has been deprecated in 2.0.0. 
+ * Use {@link SupportedPropertiesConfig} for both the 
+ * {@link globalSettingsData.defaultProperties} and {@link globalSettingsData.customProperties}.
+ */
 export interface FrontmatterFormattingInterface {
 	index: number;
 	property: string;
@@ -78,39 +111,66 @@ export interface taskBoardFilesRegistryType {
 }
 
 export interface globalSettingsData {
-	openOnStartup: boolean;
-	lang: string;
+	// General Tab
 	scanFilters: VaultScannnerFilters;
-	firstDayOfWeek?: string;
-	ignoreFileNameDates: boolean;
+	scanMode: scanModeOptions;
+	autoAddUniqueID: boolean;
+	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
+	openOnStartup: boolean;
+	showModifiedFilesNotice: boolean;
+	ribbonIconAction: RibbonIconActions;
+	lang: string;
+	tasksCacheFilePath: string;
+	safeGuardFeature: boolean;
+
+	// All UI Tab
+	taskCardStyle: taskCardStyleNames;
+	showTaskWithoutMetadata: boolean;
+	columnWidth: string;
+	showVerticalScroll: boolean;
+	editButtonAction: EditButtonMode;
+	cardDoubleClickAction: EditButtonMode;
+	tagColorsType: TagColorType;
+	tagColors: TagColor[];
+
+	// Properties Tab
+	defaultProperties: SupportedPropertiesConfig[];
+	customProperties: SupportedPropertiesConfig[];
+	customStatuses: CustomStatus[];
+
+	// Views
+	//     Map View
+	mapView: {
+		renderVisibleNodes: boolean;
+		scrollAction: mapViewScrollAction;
+		background: mapViewBackgrounVariantTypes;
+		mapOrientation: mapViewNodeMapOrientation;
+		arrowDirection: mapViewArrowDirection;
+		edgeType: mapViewEdgeType;
+		animatedEdges: boolean;
+		showMinimap: boolean;
+	};
+
+	// Inline Tasks Tab
 	taskPropertyFormat: taskPropertyFormatOptions;
-	dailyNotesPluginComp: boolean;
-	dateFormat: string;
-	dateTimeFormat: string;
-	defaultStartTime: string;
-	taskCompletionInLocalTime: boolean;
-	taskCompletionShowUtcOffset: boolean;
+	preDefinedNote: string;
+	archivedTasksFilePath: string;
+	showFrontmatterTagsOnCards: boolean;
+	propertiesHiddenInNotes: DEFAULT_TASK_CACHE_KEYS[];
+
+	// Task Notes Tab
+	taskNoteIdentifierTag: string;
+	taskNoteDefaultLocation: string;
+	archivedTBNotesFolderPath: string;
+	frontmatterFormatting: FrontmatterFormattingInterface[];
+
+	// Automations
+	boundTaskCompletionToChildTasks: boolean;
 	autoAddUniversalDate: boolean;
 	autoAddCreatedDate: boolean;
 	autoAddCompletedDate: boolean;
 	autoAddCancelledDate: boolean;
-	// scanVaultAtStartup: boolean; - @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
-	showModifiedFilesNotice: boolean;
-	scanMode: scanModeOptions;
-	columnWidth: string;
-	visiblePropertiesList: string[];
-	taskCardStyle: taskCardStyleNames;
-	showVerticalScroll: boolean;
-	dragAutoScrollEdgePercent: number;
-	tagColors: TagColor[];
-	editButtonAction: EditButtonMode;
-	doubleClickCardToEdit: EditButtonMode;
-	universalDate: UniversalDateOptions;
-	customStatuses: CustomStatus[];
-	showTaskWithoutMetadata: boolean;
-	tagColorsType: TagColorType;
-	taskNoteIdentifierTag: string;
-	quickAddPluginDefaultChoice: string;
+	// Plugins Compatibility
 	compatiblePlugins: {
 		dailyNotesPlugin: boolean;
 		dayPlannerPlugin: boolean;
@@ -118,43 +178,39 @@ export interface globalSettingsData {
 		reminderPlugin: boolean;
 		quickAddPlugin: boolean;
 	};
-	preDefinedNote: string;
-	archivedTasksFilePath: string;
-	taskNoteDefaultLocation: string;
-	archivedTBNotesFolderPath: string;
-	frontmatterFormatting: FrontmatterFormattingInterface[];
-	showFrontmatterTagsOnCards: boolean;
-	tasksCacheFilePath: string;
+	dailyNotesPluginComp: boolean; // TODO : Remove this duplicate
+	quickAddPluginDefaultChoice: string;
+
+	// Formats
+	universalDate: UniversalDateOptions;
+	dateFormat: string;
+	dateTimeFormat: string;
+	defaultStartTime: string;
+	firstDayOfWeek?: string;
+	// TODO : Below 3 settings not implemented yet
+	ignoreFileNameDates: boolean;
+	taskCompletionInLocalTime: boolean;
+	taskCompletionShowUtcOffset: boolean;
+
+	// Experimental Tab
+	experimentalFeatures: boolean;
+
+	// Other Caching Settings
+	propertiesVisibleInUI: DEFAULT_TASK_CACHE_KEYS[]; // TODO : Need to move this setting to view specific.
+	dragAutoScrollEdgePercent: number;
 	notificationService: NotificationService;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
-	hiddenTaskProperties: taskPropertiesNames[];
-	autoAddUniqueID: boolean;
-	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
-	experimentalFeatures: boolean;
-	safeGuardFeature: boolean;
 	lastViewHistory: {
 		boardFilePath: string;
 		settingTab: number;
 		taskId?: string;
 	};
-	boundTaskCompletionToChildTasks: boolean;
-	mapView: {
-		background: mapViewBackgrounVariantTypes;
-		mapOrientation: mapViewNodeMapOrientation;
-		optimizedRender: boolean;
-		arrowDirection: mapViewArrowDirection;
-		animatedEdges: boolean;
-		scrollAction: mapViewScrollAction;
-		showMinimap: boolean;
-		renderVisibleNodes: boolean;
-		edgeType: mapViewEdgeType;
-	};
 	// New settings introduced in 2.x.x series
 	taskBoardFilesRegistry: taskBoardFilesRegistryType;
 	enableDragnDropTouch: boolean;
 	filtersWarehouse: Filter[];
-	ribbonIconAction: RibbonIconActions;
+	// scanVaultAtStartup: boolean; - @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
 }
 
 // Define the interface for GlobalSettings based on your JSON structure
@@ -208,25 +264,25 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		showModifiedFilesNotice: false,
 		scanMode: scanModeOptions.AUTOMATIC,
 		columnWidth: "300px",
-		visiblePropertiesList: [
-			taskPropertiesNames.Checkbox,
-			taskPropertiesNames.ID,
-			taskPropertiesNames.Title,
-			taskPropertiesNames.SubTasksMinimized,
-			taskPropertiesNames.DescriptionMinimized,
-			taskPropertiesNames.Status,
-			taskPropertiesNames.Tags,
-			taskPropertiesNames.Time,
-			taskPropertiesNames.Reminder,
-			taskPropertiesNames.Priority,
-			taskPropertiesNames.CreatedDate,
-			taskPropertiesNames.StartDate,
-			taskPropertiesNames.ScheduledDate,
-			taskPropertiesNames.DueDate,
-			taskPropertiesNames.CompletionDate,
-			taskPropertiesNames.CancelledDate,
-			taskPropertiesNames.Dependencies,
-			taskPropertiesNames.FilePath,
+		propertiesVisibleInUI: [
+			DEFAULT_TASK_CACHE_KEYS.Checkbox,
+			DEFAULT_TASK_CACHE_KEYS.ID,
+			DEFAULT_TASK_CACHE_KEYS.Title,
+			DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized,
+			DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized,
+			DEFAULT_TASK_CACHE_KEYS.Status,
+			DEFAULT_TASK_CACHE_KEYS.Tags,
+			DEFAULT_TASK_CACHE_KEYS.Time,
+			DEFAULT_TASK_CACHE_KEYS.Reminder,
+			DEFAULT_TASK_CACHE_KEYS.Priority,
+			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+			DEFAULT_TASK_CACHE_KEYS.StartDate,
+			DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+			DEFAULT_TASK_CACHE_KEYS.DueDate,
+			DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+			DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+			DEFAULT_TASK_CACHE_KEYS.Dependencies,
+			DEFAULT_TASK_CACHE_KEYS.FilePath,
 		],
 		taskCardStyle: taskCardStyleNames.EMOJI,
 		showVerticalScroll: true,
@@ -254,7 +310,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			},
 		],
 		editButtonAction: EditButtonMode.Modal,
-		doubleClickCardToEdit: EditButtonMode.None,
+		cardDoubleClickAction: EditButtonMode.None,
 		universalDate: UniversalDateOptions.dueDate,
 		tagColorsType: TagColorType.TagText,
 		customStatuses: [
@@ -444,7 +500,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				targetColumn: "Completed",
 			},
 		],
-		hiddenTaskProperties: [],
+		propertiesHiddenInNotes: [],
 		autoAddUniqueID: false,
 		uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 		experimentalFeatures: false,
@@ -458,7 +514,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		mapView: {
 			background: mapViewBackgrounVariantTypes.none,
 			mapOrientation: mapViewNodeMapOrientation.horizontal,
-			optimizedRender: false,
 			arrowDirection: mapViewArrowDirection.childToParent,
 			animatedEdges: true,
 			scrollAction: mapViewScrollAction.zoom,
@@ -478,6 +533,21 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		enableDragnDropTouch: false,
 		filtersWarehouse: [],
 		ribbonIconAction: RibbonIconActions.allBoardsMenu,
+		defaultProperties: [
+			{
+				key: DEFAULT_TASK_CACHE_KEYS.ID,
+				id: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
+				name: taskItemKeyToNameMapping["id"],
+				desc: "Property to apply a uniqu ID to the task to explicitely identify and find it from whole vault. Will be also used for other features.",
+				type: PropertyTypeConfig.text,
+				emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.idSymbol,
+				hidePropertyInNotesForInlineTasks: false,
+				icon: DefaultLucideIconsForProperties.id,
+				defaultValue: "",
+				rank: 1,
+			},
+		],
+		customProperties: [],
 	},
 };
 

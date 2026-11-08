@@ -51,7 +51,7 @@ import {
 	MANDATORY_SCAN_KEY,
 } from "./src/interfaces/Constants.js";
 import {
-	taskPropertiesNames,
+	DEFAULT_TASK_CACHE_KEYS,
 	scanModeOptions,
 	RibbonIconActions,
 } from "./src/interfaces/Enums.js";
@@ -599,14 +599,14 @@ export default class TaskBoard extends Plugin {
 		// this.registerEditorExtension(taskGutterExtension(this.app, this));
 
 		// Register task property hiding extension
-		const hiddenProperties = this.settings.data?.hiddenTaskProperties || [];
+		const hiddenProperties = this.settings.data?.propertiesHiddenInNotes || [];
 		if (hiddenProperties.length > 0) {
 			this.registerEditorExtension(taskPropertyHidingExtension(this));
 		}
 	}
 
 	registerReadingModePostProcessor() {
-		const hiddenProperties = this.settings.data?.hiddenTaskProperties || [];
+		const hiddenProperties = this.settings.data?.propertiesHiddenInNotes || [];
 		this.clearTaskPropertyVisibilityStyles();
 		if (hiddenProperties.length === 0) {
 			return;
@@ -649,7 +649,7 @@ export default class TaskBoard extends Plugin {
 		document
 			.getElementById("task-board-hide-task-properties-style")
 			?.remove();
-		const hideClasses = Object.values(taskPropertiesNames)
+		const hideClasses = Object.values(DEFAULT_TASK_CACHE_KEYS)
 			.map(getHideClassForProperty)
 			.filter(Boolean);
 		document.body.classList.remove(
@@ -660,7 +660,7 @@ export default class TaskBoard extends Plugin {
 
 	private hidePropertiesInElement(
 		element: HTMLElement,
-		hiddenProperties: taskPropertiesNames[],
+		hiddenProperties: DEFAULT_TASK_CACHE_KEYS[],
 	) {
 		// Process text nodes to find and hide specific patterns
 		const walker = activeDocument.createTreeWalker(

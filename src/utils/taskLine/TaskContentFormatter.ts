@@ -5,7 +5,7 @@ import {
 	taskPropertyFormatOptions,
 	statusTypeNames,
 	NotificationService,
-	taskPropertiesNames,
+	DEFAULT_TASK_CACHE_KEYS,
 } from "../../interfaces/Enums.js";
 import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
 import { priorityEmojis } from "../../interfaces/Mapping.js";
@@ -1409,14 +1409,14 @@ export const sanitizeDependsOn = (
 
 /**
  * Function to remove only the properties which user has configured
- * to be hidden using the hiddenTaskProperties setting.
+ * to be hidden using the propertiesHiddenInNotes setting.
  * @param plugin - The TaskBoard plugin instance.
  * @param task - The task item to clean.
  * @returns The cleaned task title without metadata.
  */
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Get the list of properties to hide
-	const hiddenProperties = plugin.settings.data.hiddenTaskProperties || [];
+	const hiddenProperties = plugin.settings.data.propertiesHiddenInNotes || [];
 
 	// If no properties are configured to hide and the legacy setting is false, return original title
 	if (
@@ -1444,7 +1444,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Hide only selected properties
 	hiddenProperties.forEach((property) => {
 		switch (property) {
-			case taskPropertiesNames.Tags:
+			case DEFAULT_TASK_CACHE_KEYS.Tags:
 				// Remove tags
 				task.tags.forEach((tag) => {
 					const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
@@ -1455,7 +1455,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				});
 				break;
 
-			case taskPropertiesNames.Time:
+			case DEFAULT_TASK_CACHE_KEYS.Time:
 				// Remove time (handles both formats)
 				if (task.time) {
 					const timeRegex =
@@ -1467,7 +1467,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case taskPropertiesNames.DueDate:
+			case DEFAULT_TASK_CACHE_KEYS.DueDate:
 				// Remove due date in various formats
 				if (task.due) {
 					const dueDateRegex =
@@ -1476,7 +1476,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case taskPropertiesNames.CreatedDate:
+			case DEFAULT_TASK_CACHE_KEYS.CreatedDate:
 				// Remove Created date in various formats
 				if (task.createdDate) {
 					const createdDateRegex =
@@ -1485,7 +1485,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case taskPropertiesNames.StartDate:
+			case DEFAULT_TASK_CACHE_KEYS.StartDate:
 				// Remove start date in various formats
 				if (task.startDate) {
 					const startDateRegex =
@@ -1494,7 +1494,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case taskPropertiesNames.ScheduledDate:
+			case DEFAULT_TASK_CACHE_KEYS.ScheduledDate:
 				// Remove scheduled date in various formats
 				if (task.scheduledDate) {
 					const scheduledDateRegex =
@@ -1503,7 +1503,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case taskPropertiesNames.CompletionDate:
+			case DEFAULT_TASK_CACHE_KEYS.CompletionDate:
 				// Remove completion date in various formats
 				if (task.completion) {
 					const completionRegex =
@@ -1512,7 +1512,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 				}
 				break;
 
-			case taskPropertiesNames.Priority:
+			case DEFAULT_TASK_CACHE_KEYS.Priority:
 				// Remove priority in various formats
 				if (task.priority > 0) {
 					let match = cleanedTitle.match(
@@ -1555,7 +1555,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 	// Remove reminder if it's in the hidden properties list
 	if (
-		hiddenProperties.includes(taskPropertiesNames.Dependencies) ||
+		hiddenProperties.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies) ||
 		plugin.settings.data.showTaskWithoutMetadata
 	) {
 		const reminderRegex =

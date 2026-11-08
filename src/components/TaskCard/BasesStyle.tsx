@@ -9,7 +9,7 @@ import { t } from 'i18next';
 import TaskBoard from '../../../main.js';
 import { KanbanView } from '../../interfaces/BoardConfigs.js';
 import { DEFAULT_DATE_FORMAT } from '../../interfaces/Constants.js';
-import { taskPropertiesNames, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames } from '../../interfaces/Enums.js';
+import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames } from '../../interfaces/Enums.js';
 import { getCustomStatusOptionsForDropdown, getPriorityEmoji, getPriorityOptionsForDropdown, priorityNames } from '../../interfaces/Mapping.js';
 import { taskItem, UpdateTaskEventData } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../managers/BugReporter.js';
@@ -39,7 +39,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
 	const columnData = columnIndex !== undefined && kanbanViewData ? kanbanViewData.columns[columnIndex - 1] : undefined;
-	const showDescriptionSection = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Description) ?? true;
+	const showDescriptionSection = globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description) ?? true;
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
@@ -53,14 +53,14 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		}
 		if (shouldExpandTaskDescription(task)) setIsDescriptionExpanded(true);
 	}, [task.id, task.title, task.body?.join("\n"), showDescriptionSection]);
-	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks));
+	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
 	useEffect(() => {
-		if (plugin.settings.data.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks)) {
+		if (plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
 			setShowSubtasks(true);
 		} else {
 			setShowSubtasks(false);
 		}
-	}, [plugin.settings.data.visiblePropertiesList]);
+	}, [plugin.settings.data.propertiesVisibleInUI]);
 
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
@@ -606,7 +606,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	}
 
 	const handleDoubleClickOnCard = (event: React.MouseEvent) => {
-		const settingOption = plugin.settings.data.doubleClickCardToEdit;
+		const settingOption = plugin.settings.data.cardDoubleClickAction;
 		if (settingOption === EditButtonMode.None) return;
 
 		if (settingOption !== EditButtonMode.NoteInHover) {
@@ -975,7 +975,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 		try {
 			return (
 				<div className="taskItemHeader">
-					{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePathInHeader) && task.filePath && (
+					{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader) && task.filePath && (
 						<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>
 							<div className='taskitemHeaderTopFilenameValue'>{task.filePath.split('/').pop()}</div>
 						</div>
@@ -984,7 +984,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 					<div className='taskItemHeaderBottom'>
 						<div className="taskItemHeaderLeft">
 							{/* Render tags individually */}
-							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Tags) && (task.tags.length > 0 || task.frontmatterTags.length > 0) && (
+							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Tags) && (task.tags.length > 0 || task.frontmatterTags.length > 0) && (
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
 									{task.tags.map((tag: string, index: number) => {
@@ -1045,7 +1045,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 							)}
 						</div>
 						<div className='taskItemHeaderRight'>
-							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ID) && task.legacyId && (
+							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ID) && task.legacyId && (
 								<div className='taskItemPropertyID'>
 									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
 								</div>
@@ -1073,7 +1073,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			const total = allSubTasks.length;
 			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
 
-			const showSubTaskSummaryBar = globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized);
+			const showSubTaskSummaryBar = globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
 
 			return (
 				<>
@@ -1171,79 +1171,79 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 						<>
 							<div className="taskItemFooterPropertiesContainer">
 								{/* Conditionally render each property of the task */}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Priority) && task.priority > 0 && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Priority) && task.priority > 0 && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("priority")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{priorityNames[task.priority]}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Status) && task?.status && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Status) && task?.status && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("status")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{getStatusNameFromStatusSymbol(task.status, globalSettings.customStatuses ?? [])}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Time) && task?.time && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Time) && task?.time && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("time")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.time}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Reminder) && task?.reminder && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Reminder) && task?.reminder && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("reminder")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.reminder}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CreatedDate) && task?.createdDate && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CreatedDate) && task?.createdDate && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("created")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.createdDate}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.StartDate) && task?.startDate && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.StartDate) && task?.startDate && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("start")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.startDate}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ScheduledDate) && task?.scheduledDate && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ScheduledDate) && task?.scheduledDate && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("scheduled")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.scheduledDate}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DueDate) && task?.due && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DueDate) && task?.due && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("due")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.due}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CompletionDate) && task?.completion && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CompletionDate) && task?.completion && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("completed")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.completion}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.CancelledDate) && task?.cancelledDate && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CancelledDate) && task?.cancelledDate && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("cancelled")}</div>
 										<div className='taskItemFooterPropertyContainerValue'>{task.cancelledDate}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FilePath) && task.filePath && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePath) && task.filePath && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
 										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.ParentFolder) && task.filePath && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ParentFolder) && task.filePath && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("folder")}</div>
 										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/')[task.filePath.split('/').length - 2] ? task.filePath.split('/')[task.filePath.split('/').length - 2] : "Vault root"}</div>
 									</div>
 								)}
-								{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.FullPath) && task.filePath && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FullPath) && task.filePath && (
 									<div className="taskItemFooterPropertyContainer">
 										<div className='taskItemFooterPropertyContainerLabel'>{t("path")}</div>
 										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').slice(0, -1).join("/") ? task.filePath.split('/').slice(0, -1).join("/") : "Vault root"}</div>
@@ -1323,8 +1323,8 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.visiblePropertiesList, task.priority, task.tags, columnData]);
-	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.visiblePropertiesList, task.body, showSubtasks]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.propertiesVisibleInUI, task.priority, task.tags, columnData]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.propertiesVisibleInUI, task.body, showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
 
@@ -1365,7 +1365,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 					{/* Task Content */}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
-							{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Checkbox) && (
+							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox) && (
 								<input
 									id={`${task.id}-checkbox`}
 									type="checkbox"
@@ -1392,7 +1392,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 								<div className="taskItemTitle" ref={taskTitleRendererRef} />
 
 								{/* Sub-tasks section */}
-								{(globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasks) || globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.SubTasksMinimized)) && (
+								{(globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) || globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) && (
 									<div className="taskItemSubTasksSection">
 										{memoizedRenderSubTasks}
 									</div>
@@ -1406,7 +1406,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 								{renderDescriptionSection()}
 							</div>
 						)}
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.DescriptionMinimized) && (
+						{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized) && (
 							<div className="taskItemMainBodyDescription">
 								{task.body.some((line) => line.trim() !== "" && !isTaskLine(line)) && (
 									<div
@@ -1436,7 +1436,7 @@ const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 							</div>
 						)}
 
-						{globalSettings.visiblePropertiesList?.includes(taskPropertiesNames.Dependencies) && (
+						{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies) && (
 							<>
 								{memoizedRenderChildTasks}
 							</>
