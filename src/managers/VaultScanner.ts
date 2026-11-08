@@ -4,10 +4,10 @@ import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
 import { isValid, parse } from "date-fns";
 import { t } from "i18next";
 import type TaskBoard from "../../main.js";
-import { UniversalDateOptions } from "../interfaces/Enums.js";
-import { globalSettingsData } from "../interfaces/GlobalSettings.js";
+import { taskPropertyFormatOptions, UniversalDateOptions } from "../interfaces/Enums.js";
+import { globalSettingsData, SupportedPropertiesConfig } from "../interfaces/GlobalSettings.js";
 import { priorityEmojis } from "../interfaces/Mapping.js";
-import { jsonCacheData, taskItem } from "../interfaces/TaskItem.js";
+import { coerceCustomTaskPropertyValue, jsonCacheData, taskItem } from "../interfaces/TaskItem.js";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/DataviewPluginRegularExpr.js";
 import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
 import {
@@ -206,6 +206,7 @@ export default class VaultScanner {
 
 					// Create task item for the task note
 					const taskNoteItem: taskItem = {
+						...taskNoteProperties,
 						id: taskNoteProperties?.id
 							? taskNoteProperties.id
 							: generateRandomStringId(),
@@ -405,6 +406,7 @@ export default class VaultScanner {
 							}
 
 							const task: taskItem = {
+								...extractCustomTaskProperties(line, this.plugin.settings.data),
 								id: legacyId
 									? (legacyId[1] ?? "")
 									: generateRandomStringId(),
@@ -766,6 +768,50 @@ export function fileTypeAllowedForScanning(
 }
 
 /**
+ * Read custom inline fields in the active task-property syntax. Custom emoji values
+ * are token-based (quoted values may contain spaces); Dataview/native forms are delimited.
+ */
+export function extractCustomTaskProperties(
+	line: string,
+	settings: globalSettingsData,
+): Record<string, unknown> {
+	const result: Record<string, unknown> = {};
+	const builtInKeys = new Set([
+		"id", "legacyId", "title", "body", "status", "priority", "tags",
+		"frontmatterTags", "time", "createdDate", "startDate", "scheduledDate",
+		"due", "filePath", "taskLocation", "dependsOn", "reminder", "completion", "cancelledDate",
+	]);
+	const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	for (const property of settings.customProperties ?? []) {
+		if (!property.id || builtInKeys.has(property.id)) continue;
+		let expression: RegExp | undefined;
+		switch (settings.taskPropertyFormat) {
+			case taskPropertyFormatOptions.dataviewPlugin:
+				expression = new RegExp(`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`);
+				break;
+			case taskPropertyFormatOptions.obsidianNative:
+				expression = new RegExp(`@${escapeRegExp(property.id)}\\(([^)]*)\\)`);
+				break;
+			default:
+				if (property.emoji) {
+					expression = new RegExp(`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`);
+				}
+		}
+		const match = expression?.exec(line);
+		if (!match) continue;
+		let raw: unknown = match[1].trim();
+		if (typeof raw === "string" && raw.startsWith('"') && raw.endsWith('"')) {
+			try { raw = JSON.parse(raw) as string; } catch { raw = match[1].trim().slice(1, -1); }
+		} else if (typeof raw === "string" && raw.startsWith("'") && raw.endsWith("'")) {
+			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
+		}
+		const value = coerceCustomTaskPropertyValue(raw, property.type);
+		if (value !== undefined) result[property.id] = value;
+	}
+	return result;
+}
+
+/**
  * Function to build a task from raw content
  * @param rawTaskContent - The raw content of the task ONLY.
  * @param filePath - Optional file path where the task is located
@@ -775,6 +821,7 @@ export function buildTaskFromRawContent(
 	rawTaskContent: string,
 	indentationString: string,
 	filePath?: string,
+	settings?: globalSettingsData,
 ): Partial<taskItem> {
 	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
@@ -792,6 +839,7 @@ export function buildTaskFromRawContent(
 	const body = extractBody(lines, 1, indentationString);
 
 	return {
+		...(settings ? extractCustomTaskProperties(firstLine, settings) : {}),
 		title: title,
 		status: taskStatus ?? " ",
 		body: body,

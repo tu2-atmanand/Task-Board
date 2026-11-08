@@ -8,6 +8,7 @@ import {
 	AdvancedFilter,
 } from "../../interfaces/BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
+import { PropertyTypeConfig } from "../../interfaces/Enums.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { robustDateParser } from "../DateTimeCalculations.js";
 import { getAllTaskTags } from "../TaskItemUtils.js";
@@ -149,10 +150,21 @@ function evaluateFilterCriterion(
 	filter: FilterCriterion,
 	dateFormat: string,
 ): boolean {
-	const { property, condition, value } = filter;
+	const { property, condition, value, propertyType } = filter;
 
-	// Get the property value from the task
-	const taskValue = getTaskPropertyValue(task, property);
+	// Configured property ids are the keys stored on task cache objects.
+	let taskValue = getTaskPropertyValue(task, property, propertyType);
+	if (propertyType === PropertyTypeConfig.numeric && taskValue !== "" && taskValue != null) {
+		const numericValue = Number(taskValue);
+		taskValue = Number.isNaN(numericValue) ? undefined : numericValue;
+	} else if (propertyType === PropertyTypeConfig.boolean) {
+		if (typeof taskValue === "string" && taskValue !== "") {
+			taskValue = taskValue.toLowerCase() === "true";
+		}
+	}
+	const comparisonValue = propertyType === PropertyTypeConfig.boolean
+		? String(value).toLowerCase() === "true"
+		: value;
 
 	// console.log(
 	// 	"task :",
@@ -166,6 +178,7 @@ function evaluateFilterCriterion(
 	// Evaluate based on condition
 	switch (condition) {
 		case "isNotEmpty":
+			if (typeof taskValue === "boolean" || typeof taskValue === "number") return true;
 			if (Array.isArray(taskValue) && taskValue.length > 0) return true;
 			else if (taskValue && taskValue !== "") return true;
 			else if (taskValue) return true;
@@ -178,6 +191,7 @@ function evaluateFilterCriterion(
 		// 	taskValue?.length > 0
 		// );
 		case "isEmpty":
+			if (typeof taskValue === "boolean" || typeof taskValue === "number") return false;
 			return (
 				taskValue === "" ||
 				taskValue === null ||
@@ -186,10 +200,10 @@ function evaluateFilterCriterion(
 			);
 		case "equals":
 		case "is":
-			return taskValue == value;
+			return taskValue == comparisonValue;
 		case "notEquals":
 		case "isNot":
-			return taskValue != value;
+			return taskValue != comparisonValue;
 		case "contains":
 			if (typeof taskValue === "string") {
 				return taskValue
@@ -243,19 +257,27 @@ function evaluateFilterCriterion(
 		case "before":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return compareDates(taskValue, value, dateFormat) < 0;
+			return (propertyType === PropertyTypeConfig.time
+				? compareTimeValues(taskValue, value)
+				: compareDates(taskValue, value, dateFormat)) < 0;
 		case "after":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return compareDates(taskValue, value, dateFormat) > 0;
+			return (propertyType === PropertyTypeConfig.time
+				? compareTimeValues(taskValue, value)
+				: compareDates(taskValue, value, dateFormat)) > 0;
 		case "onOrBefore":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return compareDates(taskValue, value, dateFormat) <= 0;
+			return (propertyType === PropertyTypeConfig.time
+				? compareTimeValues(taskValue, value)
+				: compareDates(taskValue, value, dateFormat)) <= 0;
 		case "onOrAfter":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return compareDates(taskValue, value, dateFormat) >= 0;
+			return (propertyType === PropertyTypeConfig.time
+				? compareTimeValues(taskValue, value)
+				: compareDates(taskValue, value, dateFormat)) >= 0;
 		case "hasTag":
 			if (Array.isArray(taskValue)) {
 				return (
@@ -281,7 +303,11 @@ function evaluateFilterCriterion(
 function getTaskPropertyValue(
 	task: taskItem,
 	property: string,
-): string | string[] | number | boolean | undefined {
+	propertyType?: PropertyTypeConfig,
+): unknown {
+	if (propertyType) {
+		return (task as unknown as Record<string, unknown>)[property];
+	}
 	switch (property) {
 		case "content":
 			return getFormattedTaskContentSync(task);
@@ -342,6 +368,20 @@ function getTaskPropertyValue(
 			}
 			return undefined;
 	}
+}
+
+/** Compare configured time values as clock times (HH:mm), not dates. */
+function compareTimeValues(value1: string, value2: string): number {
+	const toMinutes = (value: string): number => {
+		const [hours, minutes] = value.split(":").map(Number);
+		return Number.isFinite(hours) && Number.isFinite(minutes)
+			? hours * 60 + minutes
+			: Number.NaN;
+	};
+	const time1 = toMinutes(value1);
+	const time2 = toMinutes(value2);
+	if (Number.isNaN(time1) || Number.isNaN(time2)) return 0;
+	return time1 - time2;
 }
 
 /**

@@ -208,7 +208,7 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 
 		try {
 			// Build task creation data
-			let taskData = buildTaskFromRawContent(`- [ ] ${query}`, "");
+			let taskData = buildTaskFromRawContent(`- [ ] ${query}`, "", undefined, this.plugin.settings.data);
 			taskData["id"] = generateRandomStringId();
 			let completeTask: taskItem = taskData as taskItem;
 			// Create the task

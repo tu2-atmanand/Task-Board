@@ -107,6 +107,36 @@
 	font-size: var(--font-smaller);
 }
 
+.task-board-property-icon-control {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+.task-board-property-icon-control .custom-status-icon-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.3em;
+	border: 0;
+	background: transparent;
+	color: var(--text-muted);
+	cursor: var(--cursor);
+}
+
+.task-board-property-icon-control .custom-status-icon-button.faint {
+	color: var(--text-faint);
+}
+
+.task-board-property-icon-control .custom-status-icon-button:hover {
+	color: var(--text-normal);
+}
+
+.task-board-property-icon-name {
+	color: var(--text-muted);
+	font-size: var(--font-smaller);
+}
+
 .task-board-property-values,
 .task-board-property-actions {
 	gap: 0.5em;

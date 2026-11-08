@@ -534,6 +534,21 @@ export function updateFrontmatterProperties(
 		delete oldFrontmatter?.[dependsOnKey];
 	}
 
+	// Persist configured custom values under each configured frontmatter ID.
+	const builtInIds = new Set(plugin.settings.data.defaultProperties.map((property) => property.id));
+	for (const property of plugin.settings.data.customProperties ?? []) {
+		if (!property.id || builtInIds.has(property.id)) continue;
+		if (Object.prototype.hasOwnProperty.call(task, property.id)) {
+			const value = (task as unknown as Record<string, unknown>)[property.id];
+			if (value === undefined || value === null || value === "") {
+				delete tempUpdates[property.id];
+				delete oldFrontmatter?.[property.id];
+			} else {
+				tempUpdates[property.id] = value;
+			}
+		}
+	}
+
 	// Step 2: Order the frontmatter properties and add additional properties from existing frontmatter
 	const orderedFrontmatter = orderFrontmatterProperties(
 		tempUpdates,

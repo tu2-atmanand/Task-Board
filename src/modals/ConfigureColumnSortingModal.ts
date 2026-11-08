@@ -52,6 +52,9 @@ export class ConfigureColumnSortingModal extends Modal {
 					(criteria: columnSortingCriteria) => ({
 						...criteria,
 						uid: criteria.uid || generateRandomStringId("sort"),
+						propertyType: this.plugin.settings.data.customProperties?.find(
+							(property) => property.id === criteria.criteria,
+						)?.type,
 					}),
 				);
 		}
@@ -164,7 +167,11 @@ export class ConfigureColumnSortingModal extends Modal {
 								.addOption("scheduledDate", t("scheduled-date"))
 								.addOption("dueDate", t("due-date"))
 								.addOption("completedDate", t("completed-date"))
-								.addOption("filePath", t("file-path"))
+								.addOption("filePath", t("file-path"));
+								this.plugin.settings.data.customProperties?.forEach((property) => {
+									dropdown.addOption(property.id, property.name);
+								});
+								dropdown
 								// .addOption("lineNumber", t("line Number"))
 								.setValue(sortCriteria.criteria)
 								.onChange((value: string) => {
@@ -196,8 +203,13 @@ export class ConfigureColumnSortingModal extends Modal {
 													.sortCriteria[index];
 
 											if (foundCriteria) {
-												foundCriteria.criteria =
-													value as columnSortingCriteria["criteria"];
+												foundCriteria.criteria = value;
+												const configuredProperty = this.plugin.settings.data.customProperties?.find((property) => property.id === value);
+												if (configuredProperty) {
+													foundCriteria.propertyType = configuredProperty.type;
+												} else {
+													delete foundCriteria.propertyType;
+												}
 											} else {
 												bugReporterManagerInsatance.showNotice(
 													179,

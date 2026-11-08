@@ -8,7 +8,7 @@ import {
 	FrontmatterFormattingInterface,
 	getDefaultPropertyFrontmatterFormatting,
 } from "../../interfaces/GlobalSettings.js";
-import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
+import { coerceCustomTaskPropertyValue, customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
 import {
 	extractFrontmatterFromContent,
@@ -232,6 +232,14 @@ export function extractTaskNoteProperties(
 	);
 	if (typeof value === "string") {
 		taskItemData["reminder"] = value;
+	}
+
+	// Custom properties use their configured frontmatter ID as the cache key.
+	const builtInKeys = new Set(settings.data.defaultProperties.map((property) => property.id));
+	for (const property of settings.data.customProperties ?? []) {
+		if (!property.id || builtInKeys.has(property.id)) continue;
+		const customValue = coerceCustomTaskPropertyValue(frontmatter[property.id], property.type);
+		if (customValue !== undefined) (taskItemData as Record<string, unknown>)[property.id] = customValue;
 	}
 
 	return taskItemData;

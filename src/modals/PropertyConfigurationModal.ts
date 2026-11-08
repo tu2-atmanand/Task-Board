@@ -1,7 +1,23 @@
 import { t } from "i18next";
-import { App, Modal, Notice, Setting } from "obsidian";
-import { PropertyTypeConfig } from "../interfaces/Enums.js";
+import {
+	App,
+	getIcon,
+	Modal,
+	Notice,
+	Platform,
+	setIcon,
+	Setting,
+} from "obsidian";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
+} from "../interfaces/Enums.js";
 import { SupportedPropertiesConfig } from "../interfaces/GlobalSettings.js";
+import {
+	normalizeTaskIconValue,
+	openIconPickerModal,
+	showIconPicker,
+} from "./icon_picker/index.js";
 
 export class PropertyConfigurationModal extends Modal {
 	private draft: SupportedPropertiesConfig;
@@ -33,6 +49,9 @@ export class PropertyConfigurationModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass("task-board-property-editor");
+		const isTitleProperty =
+			this.propertyGroup === "default" &&
+			this.draft.key === DEFAULT_TASK_CACHE_KEYS.Title;
 
 		const addTextField = (
 			name: string,
@@ -46,7 +65,7 @@ export class PropertyConfigurationModal extends Modal {
 			});
 		};
 
-		addTextField("Frontmatter key", this.draft.id, (value) => {
+		addTextField("Property ID", this.draft.id, (value) => {
 			this.draft.id = value.trim();
 			if (this.propertyGroup === "custom")
 				this.draft.key = this.draft.id;
@@ -59,10 +78,11 @@ export class PropertyConfigurationModal extends Modal {
 				(value) => (this.draft.name = value),
 				"e.g. Project",
 			);
-		} else {
-			addTextField("Task Board property key", this.draft.key, (value) => {
-				this.draft.key = value.trim();
-			});
+		}
+
+		if (isTitleProperty) {
+			this.renderFooter(contentEl);
+			return;
 		}
 
 		addTextField("Description", this.draft.desc, (value) => {
@@ -83,8 +103,44 @@ export class PropertyConfigurationModal extends Modal {
 		addTextField("Emoji", this.draft.emoji, (value) => {
 			this.draft.emoji = value;
 		});
-		addTextField("Lucide icon", this.draft.icon, (value) => {
-			this.draft.icon = value;
+		const iconSetting = new Setting(contentEl).setName("Lucide icon");
+		const iconControl = iconSetting.controlEl.createDiv(
+			"task-board-property-icon-control",
+		);
+		const iconButton = iconControl.createEl("button", {
+			cls: `custom-status-icon-button${this.draft.icon ? "" : " faint"}`,
+			attr: {
+				type: "button",
+				title: "Select icon",
+				"aria-label": "Select icon",
+			},
+		});
+		let iconValue = normalizeTaskIconValue(this.draft.icon);
+		setIcon(iconButton, iconValue && getIcon(iconValue) ? iconValue : "plus");
+		const iconName = iconControl.createSpan({
+			cls: "task-board-property-icon-name",
+			text: iconValue || "Select icon",
+		});
+		iconButton.addEventListener("click", () => {
+			const updateIcon = (value: string) => {
+				iconValue = normalizeTaskIconValue(value);
+				this.draft.icon = iconValue;
+				const hasIcon = Boolean(
+					iconValue && getIcon(iconValue),
+				);
+				iconButton.toggleClass("faint", !hasIcon);
+				setIcon(iconButton, hasIcon ? iconValue : "plus");
+				iconName.setText(hasIcon ? iconValue : "Select icon");
+			};
+			const pickerOptions = {
+				value: iconValue,
+				title: "Select property icon",
+				onSelect: updateIcon,
+				onClear: () => updateIcon(""),
+			};
+			if (Platform.isMobile)
+				openIconPickerModal(this.app, pickerOptions);
+			else showIconPicker(iconButton, pickerOptions);
 		});
 
 		new Setting(contentEl)
@@ -119,6 +175,10 @@ export class PropertyConfigurationModal extends Modal {
 			},
 		);
 
+		this.renderFooter(contentEl);
+	}
+
+	private renderFooter(contentEl: HTMLElement): void {
 		const footer = new Setting(contentEl);
 		footer.addButton((button) =>
 			button

@@ -2,6 +2,7 @@
 
 import { columnSortingCriteria } from "../../interfaces/BoardConfigs.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
+import { PropertyTypeConfig } from "../../interfaces/Enums.js";
 
 /**
  * Gets the property value from a task based on the criteria name
@@ -10,7 +11,11 @@ function getTaskPropertyValue(
 	task: taskItem,
 	criteria: string,
 	startTimeConfig: string,
-): string | string[] | number | undefined {
+	propertyType?: PropertyTypeConfig,
+): unknown {
+	if (propertyType) {
+		return (task as unknown as Record<string, unknown>)[criteria];
+	}
 	switch (criteria) {
 		case "content":
 			return task.title;
@@ -150,12 +155,33 @@ function compareTimes(
  * Compares two values based on their type
  */
 function compareValues(
-	value1: string | string[] | number,
-	value2: string | string[] | number,
+	value1: unknown,
+	value2: unknown,
 	criteria: string,
 	order: "asc" | "desc",
+	propertyType?: PropertyTypeConfig,
 ): number {
-	// Handle date/date-time type properties
+	// Apply configured custom-property semantics from shared property metadata.
+	if (propertyType === PropertyTypeConfig.date || propertyType === PropertyTypeConfig.dateTime) {
+		return compareDates(String(value1 ?? ""), String(value2 ?? ""), order);
+	}
+	if (propertyType === PropertyTypeConfig.time) {
+		return compareTimes(String(value1 ?? ""), String(value2 ?? ""), order);
+	}
+	if (propertyType === PropertyTypeConfig.numeric) {
+		const number1 = Number(value1);
+		const number2 = Number(value2);
+		if (!Number.isFinite(number1) && !Number.isFinite(number2)) return 0;
+		if (!Number.isFinite(number1)) return 1;
+		if (!Number.isFinite(number2)) return -1;
+		return number1 - number2;
+	}
+	if (propertyType === PropertyTypeConfig.boolean) {
+		const bool1 = value1 === true || String(value1).toLowerCase() === "true";
+		const bool2 = value2 === true || String(value2).toLowerCase() === "true";
+		return Number(bool1) - Number(bool2);
+	}
+	// Built-in date/date-time type properties
 	if (
 		[
 			"dueDate",
@@ -306,14 +332,20 @@ export function columnSortingAlgorithm(
 				taskA,
 				criterion.criteria,
 				startTimeConfig,
+				criterion.propertyType,
 			);
 			const valueB = getTaskPropertyValue(
 				taskB,
 				criterion.criteria,
 				startTimeConfig,
+				criterion.propertyType,
 			);
 
-			if (!valueA || !valueB) return 0;
+			if (valueA == null || valueA === "" || valueB == null || valueB === "") {
+				if ((valueA == null || valueA === "") && (valueB == null || valueB === "")) return 0;
+				const emptyFirst = criterion.order === "desc";
+				return valueA == null || valueA === "" ? (emptyFirst ? -1 : 1) : (emptyFirst ? 1 : -1);
+			}
 
 			// if (criterion.criteria === "time") {
 			// 	console.log("valueA :", valueA, "\nvalueB :", valueB);
@@ -324,6 +356,7 @@ export function columnSortingAlgorithm(
 				valueB,
 				criterion.criteria,
 				criterion.order,
+				criterion.propertyType,
 			);
 
 			// For priority and other criteria that already handle order internally,
