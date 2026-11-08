@@ -12,13 +12,13 @@ import {
 	scanModeOptions,
 	taskCardStyleNames,
 	UniversalDateOptions,
-	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	NotificationService,
 	mapViewBackgrounVariantTypes,
 	mapViewNodeMapOrientation,
 	RibbonIconActions,
 	statusTypeNames,
 	PropertyTypeConfig,
+	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 	DefaultLucideIconsForProperties,
 } from "./Enums.js";
 import { defaultTaskStatuses, taskItemKeyToNameMapping } from "./Mapping.js";
@@ -156,13 +156,15 @@ export interface globalSettingsData {
 	preDefinedNote: string;
 	archivedTasksFilePath: string;
 	showFrontmatterTagsOnCards: boolean;
-	propertiesHiddenInNotes: DEFAULT_TASK_CACHE_KEYS[];
+	/** @deprecated Migrate to SupportedPropertiesConfig.hidePropertyInNotesForInlineTasks. */
+	propertiesHiddenInNotes?: DEFAULT_TASK_CACHE_KEYS[];
 
 	// Task Notes Tab
 	taskNoteIdentifierTag: string;
 	taskNoteDefaultLocation: string;
 	archivedTBNotesFolderPath: string;
-	frontmatterFormatting: FrontmatterFormattingInterface[];
+	/** @deprecated Migrate to defaultProperties. */
+	frontmatterFormatting?: FrontmatterFormattingInterface[];
 
 	// Automations
 	boundTaskCompletionToChildTasks: boolean;
@@ -217,6 +219,232 @@ export interface globalSettingsData {
 export interface PluginDataJson {
 	version: string;
 	data: globalSettingsData;
+}
+
+const DEFAULT_FRONTMATTER_FORMATTING: FrontmatterFormattingInterface[] = [
+	{
+		index: 0,
+		property: taskItemKeyToNameMapping.id,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
+		taskItemKey: "id",
+	},
+	{
+		index: 1,
+		property: taskItemKeyToNameMapping.title,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.title,
+		taskItemKey: "title",
+	},
+	{
+		index: 2,
+		property: taskItemKeyToNameMapping.status,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.status,
+		taskItemKey: "status",
+	},
+	{
+		index: 3,
+		property: taskItemKeyToNameMapping.priority,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.priority,
+		taskItemKey: "priority",
+	},
+	{
+		index: 4,
+		property: taskItemKeyToNameMapping.tags,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.tags,
+		taskItemKey: "tags",
+	},
+	{
+		index: 5,
+		property: taskItemKeyToNameMapping.time,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.time,
+		taskItemKey: "time",
+	},
+	{
+		index: 6,
+		property: taskItemKeyToNameMapping.reminder,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.reminder,
+		taskItemKey: "reminder",
+	},
+	{
+		index: 7,
+		property: taskItemKeyToNameMapping.createdDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.createdDate,
+		taskItemKey: "createdDate",
+	},
+	{
+		index: 8,
+		property: taskItemKeyToNameMapping.startDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.startDate,
+		taskItemKey: "startDate",
+	},
+	{
+		index: 9,
+		property: taskItemKeyToNameMapping.scheduledDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.scheduledDate,
+		taskItemKey: "scheduledDate",
+	},
+	{
+		index: 10,
+		property: taskItemKeyToNameMapping.dueDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.due,
+		taskItemKey: "due",
+	},
+	{
+		index: 11,
+		property: taskItemKeyToNameMapping.dependsOn,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dependsOn,
+		taskItemKey: "dependsOn",
+	},
+	{
+		index: 12,
+		property: taskItemKeyToNameMapping.cancelledDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
+		taskItemKey: "cancelledDate",
+	},
+	{
+		index: 13,
+		property: taskItemKeyToNameMapping.completionDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.completionDate,
+		taskItemKey: "completionDate",
+	},
+];
+
+const DEFAULT_PROPERTY_TYPES: Partial<Record<string, PropertyTypeConfig>> = {
+	priority: PropertyTypeConfig.numeric,
+	tags: PropertyTypeConfig.list,
+	dependsOn: PropertyTypeConfig.list,
+	time: PropertyTypeConfig.time,
+	createdDate: PropertyTypeConfig.date,
+	startDate: PropertyTypeConfig.date,
+	scheduledDate: PropertyTypeConfig.date,
+	due: PropertyTypeConfig.date,
+	cancelledDate: PropertyTypeConfig.date,
+	completionDate: PropertyTypeConfig.date,
+};
+
+const DEFAULT_PROPERTY_PRESENTATION: Partial<
+	Record<string, Pick<SupportedPropertiesConfig, "desc" | "emoji" | "icon">>
+> = {
+	id: {
+		desc: "Property to uniquely identify a task across the vault.",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.idSymbol,
+		icon: DefaultLucideIconsForProperties.id,
+	},
+};
+
+function createDefaultSupportedProperties(): SupportedPropertiesConfig[] {
+	return DEFAULT_FRONTMATTER_FORMATTING.map((formatting, index) => ({
+		key: formatting.taskItemKey,
+		id: formatting.key,
+		name: formatting.property,
+		desc:
+			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.desc ?? "",
+		type:
+			DEFAULT_PROPERTY_TYPES[formatting.taskItemKey] ??
+			PropertyTypeConfig.text,
+		emoji:
+			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.emoji ?? "",
+		icon:
+			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.icon ?? "",
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: index + 1,
+	}));
+}
+
+/**
+ * Converts settings from before the supported-properties configuration was
+ * introduced, preserving customized frontmatter keys, order, and hidden fields.
+ */
+export function migrateLegacyPropertySettings(
+	settings: globalSettingsData,
+	previousData: Partial<globalSettingsData> | undefined,
+): void {
+	const oldFormatting = previousData?.frontmatterFormatting ?? [];
+	const configuredProperties = previousData?.defaultProperties ?? [];
+	const propertyKeys = new Set<string>();
+
+	settings.defaultProperties = createDefaultSupportedProperties().map(
+		(defaultProperty) => {
+			propertyKeys.add(defaultProperty.key);
+			const legacy = oldFormatting.find(
+				(item) => item.taskItemKey === defaultProperty.key,
+			);
+			const configured = configuredProperties.find(
+				(item) => item.key === defaultProperty.key,
+			);
+			return {
+				...defaultProperty,
+				...(legacy && {
+					id: legacy.key,
+					rank: legacy.index + 1,
+					name: legacy.property || defaultProperty.name,
+				}),
+				...configured,
+			};
+		},
+	);
+	settings.defaultProperties.push(
+		...configuredProperties.filter(
+			(property) => !propertyKeys.has(property.key),
+		),
+	);
+
+	for (const property of [
+		...settings.defaultProperties,
+		...settings.customProperties,
+	]) {
+		if (
+			previousData?.propertiesHiddenInNotes?.includes(
+				property.key as DEFAULT_TASK_CACHE_KEYS,
+			)
+		) {
+			property.hidePropertyInNotesForInlineTasks = true;
+		}
+	}
+
+	delete settings.frontmatterFormatting;
+	delete settings.propertiesHiddenInNotes;
+}
+
+export function getPropertiesHiddenInNotes(
+	defaultProperties: SupportedPropertiesConfig[],
+	customProperties: SupportedPropertiesConfig[],
+): DEFAULT_TASK_CACHE_KEYS[] {
+	const knownKeys = new Set<string>(Object.values(DEFAULT_TASK_CACHE_KEYS));
+	return Array.from(
+		new Set(
+			[...defaultProperties, ...customProperties]
+				.filter(
+					(property) =>
+						property.hidePropertyInNotesForInlineTasks &&
+						knownKeys.has(property.key),
+				)
+				.map(
+					(property) =>
+						property.key as DEFAULT_TASK_CACHE_KEYS,
+				),
+		),
+	);
+}
+
+export function getHiddenPropertyConfigs(
+	defaultProperties: SupportedPropertiesConfig[],
+	customProperties: SupportedPropertiesConfig[],
+): SupportedPropertiesConfig[] {
+	return [...defaultProperties, ...customProperties].filter(
+		(property) => property.hidePropertyInNotesForInlineTasks,
+	);
+}
+
+export function getDefaultPropertyFrontmatterFormatting(
+	defaultProperties: SupportedPropertiesConfig[],
+): FrontmatterFormattingInterface[] {
+	return defaultProperties.map((property) => ({
+		index: property.rank,
+		property: property.name,
+		key: property.id,
+		taskItemKey: property.key,
+	}));
 }
 
 /**
@@ -384,111 +612,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
 		archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",
 		quickAddPluginDefaultChoice: "",
-		frontmatterFormatting: [
-			{
-				index: 0,
-				property: taskItemKeyToNameMapping["id"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
-				taskItemKey: "id",
-			},
-			{
-				index: 1,
-				property: taskItemKeyToNameMapping["title"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.title,
-				taskItemKey: "title",
-			},
-			{
-				index: 2,
-				property: taskItemKeyToNameMapping["status"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.status,
-				taskItemKey: "status",
-			},
-			{
-				index: 3,
-				property: taskItemKeyToNameMapping["priority"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.priority,
-				taskItemKey: "priority",
-			},
-			{
-				index: 4,
-				property: taskItemKeyToNameMapping["tags"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.tags,
-				taskItemKey: "tags",
-			},
-			{
-				index: 5,
-				property: taskItemKeyToNameMapping["time"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.time,
-				taskItemKey: "time",
-			},
-			{
-				index: 6,
-				property: taskItemKeyToNameMapping["reminder"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.reminder,
-				taskItemKey: "reminder",
-			},
-			{
-				index: 7,
-				property: taskItemKeyToNameMapping["createdDate"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.createdDate,
-				taskItemKey: "createdDate",
-			},
-			{
-				index: 8,
-				property: taskItemKeyToNameMapping["startDate"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.startDate,
-				taskItemKey: "startDate",
-			},
-			{
-				index: 9,
-				property: taskItemKeyToNameMapping["scheduledDate"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.scheduledDate,
-				taskItemKey: "scheduledDate",
-			},
-			{
-				index: 10,
-				property: taskItemKeyToNameMapping["due"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.due,
-				taskItemKey: "due",
-			},
-			{
-				index: 11,
-				property: taskItemKeyToNameMapping["dependsOn"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dependsOn,
-				taskItemKey: "dependsOn",
-			},
-			{
-				index: 12,
-				property: taskItemKeyToNameMapping["completion"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
-				taskItemKey: "cancelledDate",
-			},
-			{
-				index: 13,
-				property: taskItemKeyToNameMapping["completionDate"],
-				key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.completionDate,
-				taskItemKey: "completionDate",
-			},
-			// TODO : The below properties will be available once the TBNote feature has been implemented. The filePath will be actually the path of the task-note or the tb-note. A new property will be required to be added inside the taskItem interface to store the sourcePath.
-			// {
-			// 	index: 14,
-			// 	property: taskItemKeyToNameMapping["filePath"],
-			// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.filePath,
-			// 	taskItemKey: "filePath",
-			// },
-			// {
-			// 	index: 15,
-			// 	property: taskItemKeyToNameMapping["taskLocation"],
-			// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.taskLocation,
-			// 	taskItemKey: "taskLocation",
-			// },
-			// {
-			// 	index: 14,
-			// 	property: taskItemKeyToNameMapping["dateModified"],
-			// 	key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dateModified,
-			// 	taskItemKey: "",
-			// },
-		],
 		showFrontmatterTagsOnCards: false,
 		tasksCacheFilePath: "",
 		notificationService: NotificationService.None,
@@ -500,7 +623,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				targetColumn: "Completed",
 			},
 		],
-		propertiesHiddenInNotes: [],
 		autoAddUniqueID: false,
 		uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
 		experimentalFeatures: false,
@@ -533,20 +655,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		enableDragnDropTouch: false,
 		filtersWarehouse: [],
 		ribbonIconAction: RibbonIconActions.allBoardsMenu,
-		defaultProperties: [
-			{
-				key: DEFAULT_TASK_CACHE_KEYS.ID,
-				id: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
-				name: taskItemKeyToNameMapping["id"],
-				desc: "Property to apply a uniqu ID to the task to explicitely identify and find it from whole vault. Will be also used for other features.",
-				type: PropertyTypeConfig.text,
-				emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.idSymbol,
-				hidePropertyInNotesForInlineTasks: false,
-				icon: DefaultLucideIconsForProperties.id,
-				defaultValue: "",
-				rank: 1,
-			},
-		],
+		defaultProperties: createDefaultSupportedProperties(),
 		customProperties: [],
 	},
 };

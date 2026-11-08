@@ -13,7 +13,10 @@ import {
 	getStatusNameFromStatusSymbol,
 	getPriorityNameForTaskNote,
 } from "./TaskNoteUtils.js";
-import { FrontmatterFormattingInterface } from "../../interfaces/GlobalSettings.js";
+import {
+	FrontmatterFormattingInterface,
+	getDefaultPropertyFrontmatterFormatting,
+} from "../../interfaces/GlobalSettings.js";
 import { compareTwoTags } from "../algorithms/ScanningFilterer.js";
 
 /**
@@ -304,8 +307,10 @@ export function updateFrontmatterProperties(
 	task: taskItem,
 	forceId?: boolean,
 ): Partial<customFrontmatterCache> {
-	const frontmatterFormatting: FrontmatterFormattingInterface[] =
-		plugin.settings.data.frontmatterFormatting;
+	const frontmatterFormatting =
+		getDefaultPropertyFrontmatterFormatting(
+			plugin.settings.data.defaultProperties,
+		);
 	const oldFrontmatter = existingFrontmatter;
 
 	// Step 1: Build a temporary object with all the updated values

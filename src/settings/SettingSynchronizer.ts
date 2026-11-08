@@ -4,7 +4,9 @@ import TaskBoard from "../../main.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import {
 	type PluginDataJson,
+	type globalSettingsData,
 	DEFAULT_SETTINGS,
+	migrateLegacyPropertySettings,
 } from "../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
@@ -24,6 +26,19 @@ export function migrateSettings(
 	try {
 		if (settings == undefined) return defaults as PluginDataJson;
 
+		const previousPropertySettings = settings.data
+			? {
+					defaultProperties: settings.data.defaultProperties
+						? [...settings.data.defaultProperties]
+						: undefined,
+					frontmatterFormatting:
+						settings.data.frontmatterFormatting?.map(
+							(formatting) => ({ ...formatting }),
+						),
+					propertiesHiddenInNotes:
+						settings.data.propertiesHiddenInNotes?.slice(),
+				}
+			: undefined;
 		const s = settings as Record<string, unknown>;
 		const d = defaults as Record<string, unknown>;
 
@@ -81,6 +96,13 @@ export function migrateSettings(
 			) {
 				migrateSettings(d[key], s[key] as Partial<PluginDataJson>);
 			}
+		}
+
+		if ("data" in settings && s["data"]) {
+			migrateLegacyPropertySettings(
+				s["data"] as globalSettingsData,
+				previousPropertySettings,
+			);
 		}
 		return s as unknown as PluginDataJson;
 	} catch (error) {

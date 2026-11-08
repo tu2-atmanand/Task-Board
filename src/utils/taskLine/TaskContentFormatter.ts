@@ -7,7 +7,10 @@ import {
 	NotificationService,
 	DEFAULT_TASK_CACHE_KEYS,
 } from "../../interfaces/Enums.js";
-import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
+import {
+	getPropertiesHiddenInNotes,
+	globalSettingsData,
+} from "../../interfaces/GlobalSettings.js";
 import { priorityEmojis } from "../../interfaces/Mapping.js";
 import {
 	cursorLocationInterface,
@@ -1416,7 +1419,10 @@ export const sanitizeDependsOn = (
  */
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Get the list of properties to hide
-	const hiddenProperties = plugin.settings.data.propertiesHiddenInNotes || [];
+	const hiddenProperties = getPropertiesHiddenInNotes(
+		plugin.settings.data.defaultProperties,
+		plugin.settings.data.customProperties,
+	);
 
 	// If no properties are configured to hide and the legacy setting is false, return original title
 	if (

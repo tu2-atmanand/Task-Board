@@ -73,7 +73,7 @@ export interface globalSettingsDataLegacy {
 	showModifiedFilesNotice: boolean;
 	scanMode: scanModeOptions;
 	columnWidth: string;
-	propertiesVisibleInUI: string[];
+	propertiesVisibleInUI: DEFAULT_TASK_CACHE_KEYS[];
 	taskCardStyle: taskCardStyleNames;
 	showVerticalScroll: boolean;
 	dragAutoScrollEdgePercent: number;

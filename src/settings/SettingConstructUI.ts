@@ -28,7 +28,6 @@ import { isValid, parse, format, differenceInHours } from "date-fns";
 import { t } from "i18next";
 import TaskBoard from "../../main.js";
 import {
-	DEFAULT_TASK_CACHE_KEYS,
 	scanModeOptions,
 	taskCardStyleNames,
 	TagColorType,
@@ -47,7 +46,6 @@ import {
 import {
 	globalSettingsData,
 	CustomStatus,
-	FrontmatterFormattingInterface,
 } from "../interfaces/GlobalSettings.js";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "../interfaces/Icons.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
@@ -106,50 +104,6 @@ export class SettingsManager {
 		this.plugin = plugin;
 		this.win = window;
 		this.globalSettings = this.plugin.settings.data;
-	}
-
-	private getPropertyDisplayName(
-		property: DEFAULT_TASK_CACHE_KEYS,
-	): string | null {
-		type PartialDisplayNames = Pick<
-			Record<DEFAULT_TASK_CACHE_KEYS, string>,
-			| DEFAULT_TASK_CACHE_KEYS.ID
-			| DEFAULT_TASK_CACHE_KEYS.Tags
-			| DEFAULT_TASK_CACHE_KEYS.Priority
-			| DEFAULT_TASK_CACHE_KEYS.Time
-			| DEFAULT_TASK_CACHE_KEYS.Reminder
-			| DEFAULT_TASK_CACHE_KEYS.CreatedDate
-			| DEFAULT_TASK_CACHE_KEYS.StartDate
-			| DEFAULT_TASK_CACHE_KEYS.ScheduledDate
-			| DEFAULT_TASK_CACHE_KEYS.DueDate
-			| DEFAULT_TASK_CACHE_KEYS.CompletionDate
-			| DEFAULT_TASK_CACHE_KEYS.CancelledDate
-			| DEFAULT_TASK_CACHE_KEYS.Dependencies
-			| DEFAULT_TASK_CACHE_KEYS.OnCompletion
-			| DEFAULT_TASK_CACHE_KEYS.Recurring
-		>;
-
-		const displayNames: PartialDisplayNames = {
-			[DEFAULT_TASK_CACHE_KEYS.ID]: "ID (🆔 fpyvkz)",
-			[DEFAULT_TASK_CACHE_KEYS.Tags]: "Tags (#tag)",
-			[DEFAULT_TASK_CACHE_KEYS.Priority]: "Priority (🔺)",
-			[DEFAULT_TASK_CACHE_KEYS.CreatedDate]:
-				"Created Date (➕ 2024-01-01)",
-			[DEFAULT_TASK_CACHE_KEYS.StartDate]: "Start Date (🛫 2024-01-01)",
-			[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]:
-				"Scheduled Date (⏳ 2024-01-01)",
-			[DEFAULT_TASK_CACHE_KEYS.DueDate]: "Due Date (📅 2024-01-01)",
-			[DEFAULT_TASK_CACHE_KEYS.CompletionDate]:
-				"Completion Date (✅ 2024-01-01)",
-			[DEFAULT_TASK_CACHE_KEYS.CancelledDate]:
-				"Cancelled Date (❌ 2024-01-01)",
-			[DEFAULT_TASK_CACHE_KEYS.Time]: "Time (⏰ 09:00-10:00)",
-			[DEFAULT_TASK_CACHE_KEYS.Reminder]: "Reminder (@(12:30))",
-			[DEFAULT_TASK_CACHE_KEYS.Recurring]: "Recurring (🔁 every 2 weeks)",
-			[DEFAULT_TASK_CACHE_KEYS.OnCompletion]: "On-completion (🏁 delete)",
-			[DEFAULT_TASK_CACHE_KEYS.Dependencies]: "Dependens-on (⛔ fa4sm9)",
-		};
-		return displayNames[property as keyof typeof displayNames] || null;
 	}
 
 	/**
@@ -1401,7 +1355,7 @@ export class SettingsManager {
 		// 	});
 
 		new Setting(contentEl)
-			.setName(t("custom-statuses"))
+			// .setName(t("custom-statuses"))
 			.setDesc(t("custom-statuses-info"));
 
 		// Container for custom statuses list
@@ -1431,66 +1385,25 @@ export class SettingsManager {
 					cls: "custom-status-info-container",
 				});
 
-				// Status Name
-				const statusInfoName = statusInfoContainer.createDiv({
-					cls: "custom-status-field-element",
+				// Heading Row
+				const statusItemHeading = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element-heading setting-item-name",
 				});
-				statusInfoName.createDiv({
-					cls: "custom-status-field-label",
-					text: `${t("name")}:`,
+				// Status Icon - Lucide icon picker
+				const statusLucideIcon = statusItemHeading.createDiv({
+					cls: "custom-status-field-element-heading-icon",
 				});
-				statusInfoName.createDiv({
-					cls: "custom-status-field-value",
-					text: status.name,
-				});
-
-				// Status Symbol
-				const statusInfoSymbol = statusInfoContainer.createDiv({
-					cls: "custom-status-field-element",
-				});
-				statusInfoSymbol.createDiv({
-					cls: "custom-status-field-label",
-					text: `${t("symbol")}:`,
-				});
-				statusInfoSymbol.createDiv({
-					cls: "custom-status-field-value",
-					text: `[${status.symbol}]`,
-				});
-
-				// Next Status Symbol
-				const statusInfoAction = statusInfoContainer.createDiv({
-					cls: "custom-status-field-element",
-				});
-				statusInfoAction.createDiv({
-					cls: "custom-status-field-label",
-					text: `${t("click-action")}:`,
-				});
-				statusInfoAction.createDiv({
-					cls: "custom-status-field",
-					text: `When you will click on the checkbox [${status.symbol}] it will change to [${status.nextStatusSymbol}]`,
-				});
-
-				// Lucide icon for status
-				const statusLucideIcon = statusInfoContainer.createDiv({
-					cls: "custom-status-field-element",
-				});
-				statusLucideIcon.createDiv({
-					cls: "custom-status-field-label",
-					text: `${t("lucide-icon")}:`,
-				});
-				const iconButton = statusLucideIcon.createEl("button", {
-					cls: "custom-status-icon-button",
+				const iconId = normalizeTaskIconValue(status.lucideIcon);
+				const isIconAvailable = iconId && getIcon(iconId);
+				const iconButton = statusLucideIcon.createEl("span", {
+					cls: `custom-status-icon-button${isIconAvailable ? '' : ' faint'}`,
 					attr: {
 						type: "button",
 						title: t("select-status-icon"),
 						"aria-label": t("select-status-icon"),
 					},
 				});
-				const iconId = normalizeTaskIconValue(status.lucideIcon);
-				setIcon(
-					iconButton,
-					iconId && getIcon(iconId) ? iconId : "image-plus",
-				);
+				setIcon(iconButton, isIconAvailable ? iconId : "plus");
 				iconButton.onclick = () => {
 					const updateStatusIcon = (value: string) => {
 						const currentStatus =
@@ -1515,16 +1428,49 @@ export class SettingsManager {
 						showIconPicker(iconButton, pickerOptions);
 					}
 				};
+				// Status Name
+				const statusInfoName = statusItemHeading.createDiv({
+					cls: "custom-status-field-element-heading-name",
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-value",
+					text: status.name,
+				});
+
+				// Status Symbol
+				const statusInfoSymbol = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element setting-item-description",
+				});
+				// statusInfoSymbol.createDiv({
+				// 	cls: "custom-status-field-label",
+				// 	text: `${t("symbol")}:`,
+				// });
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-value",
+					text: `This status [${status.symbol}] will change to [${status.nextStatusSymbol}].`,
+				});
+
+				// Next Status Symbol
+				// const statusInfoAction = statusInfoContainer.createDiv({
+				// 	cls: "custom-status-field-element setting-item-description",
+				// });
+				// statusInfoAction.createDiv({
+				// 	cls: "custom-status-field-label",
+				// 	text: `${t("next-status-symbol")}:`,
+				// });
+				// statusInfoAction.createDiv({
+				// 	cls: "custom-status-field-value",
+				// 	text: `[${status.nextStatusSymbol}]`,
+				// });
 
 				const rightSideContainer = row.createDiv({
 					cls: "custom-status-right-side",
 				});
-
 				// Status Type
 				rightSideContainer.createDiv({
 					cls: `custom-status-field-status-pill${
-						status.type === statusTypeNames.DONE ? " done" : ""
-					}${
+						status.type === statusTypeNames.TODO ? " todo" : ""
+					}${status.type === statusTypeNames.DONE ? " done" : ""}${
 						status.type === statusTypeNames.CANCELLED
 							? " cancelled"
 							: ""
@@ -1679,7 +1625,6 @@ export class SettingsManager {
 			preDefinedNote,
 			archivedTasksFilePath,
 			showFrontmatterTagsOnCards,
-			propertiesHiddenInNotes,
 		} = this.globalSettings;
 
 		// Create the live preview element
@@ -1920,58 +1865,6 @@ export class SettingsManager {
 						void this.saveSettings();
 					}),
 			);
-
-		// Setting for hiding specific task properties in Live Editor and Reading mode
-		new Setting(contentEl)
-			.setName(t("hide-specific-properties-in-notes"))
-			.setDesc(t("hide-specific-properties-in-notes-description"))
-			.setClass("taskboard-hidden-properties-setting");
-
-		// Create a container for checkboxes
-		const checkboxContainer = contentEl.createDiv(
-			"taskboard-hidden-properties-container",
-		);
-
-		// Create checkboxes for each hideable property
-		Object.values(DEFAULT_TASK_CACHE_KEYS).forEach((property) => {
-			const displayName = this.getPropertyDisplayName(property);
-
-			if (displayName) {
-				const checkboxSetting = new Setting(checkboxContainer)
-					.setName(displayName)
-					.setClass("taskboard-property-checkbox-setting")
-					.addToggle((toggle) => {
-						const isSelected =
-							propertiesHiddenInNotes.includes(property);
-						toggle.setValue(isSelected).onChange((value) => {
-							if (value) {
-								// Add property if not already included
-								if (
-									!this.globalSettings.propertiesHiddenInNotes.includes(
-										property,
-									)
-								) {
-									this.globalSettings.propertiesHiddenInNotes.push(
-										property,
-									);
-								}
-							} else {
-								// Remove property
-								this.globalSettings.propertiesHiddenInNotes =
-									this.globalSettings.propertiesHiddenInNotes.filter(
-										(p) => p !== property,
-									);
-							}
-							void this.saveSettings();
-
-							this.openReloadNoticeIfNeeded();
-						});
-					});
-
-				// Style the checkbox setting to be more compact
-				checkboxSetting.settingEl.addClass("taskboard-compact-setting");
-			}
-		});
 	}
 
 	private renderTBNoteSettingsTab(contentEl: HTMLElement) {
@@ -1979,7 +1872,6 @@ export class SettingsManager {
 			taskNoteIdentifierTag,
 			taskNoteDefaultLocation,
 			archivedTBNotesFolderPath,
-			frontmatterFormatting,
 		} = this.globalSettings;
 
 		new Setting(contentEl)
@@ -2086,148 +1978,6 @@ export class SettingsManager {
 					this.app,
 				);
 			});
-
-		new Setting(contentEl)
-			.setName(t("frontmatter-formatting"))
-			.setDesc(t("frontmatter-formatting-description"));
-
-		const frontmatterFormattingContainer = contentEl.createDiv({
-			cls: "taskBoardSettingsFrontmatterFormattingContainer",
-		});
-
-		// Initialize Sortable.js
-		Sortable.create(frontmatterFormattingContainer, {
-			animation: 150,
-			handle: ".taskBoardSettingsFrontmatterFormattingContainerItemDragHandle",
-			ghostClass: "task-board-sortable-ghost",
-			chosenClass: "task-board-sortable-chosen",
-			dragClass: "task-board-sortable-drag",
-			dragoverBubble: true,
-			forceFallback: true,
-			fallbackClass: "task-board-sortable-fallback",
-			easing: "cubic-bezier(1, 0, 0, 1)",
-			onSort: () => {
-				const newOrder = Array.from(
-					frontmatterFormattingContainer.children,
-				)
-					.map((child, index) => {
-						const propertyName = child.getAttribute(
-							"data-frontmatterItem-name",
-						);
-						const frontmatterItem = frontmatterFormatting?.find(
-							(c) => c.property === propertyName,
-						);
-						if (frontmatterItem) {
-							frontmatterItem.index = index + 1;
-							return frontmatterItem;
-						}
-						return null;
-					})
-					.filter(
-						(
-							frontmatterItem,
-						): frontmatterItem is FrontmatterFormattingInterface =>
-							frontmatterItem !== null,
-					);
-
-				this.plugin.settings.data.frontmatterFormatting = newOrder;
-			},
-		});
-
-		const renderFrontmatterFormattingItems = () => {
-			if (!frontmatterFormatting) return;
-
-			frontmatterFormattingContainer.empty(); // Clear existing rendered rows
-
-			frontmatterFormatting
-				.sort((a, b) => a.index - b.index)
-				.forEach((sortfrontmatterItem, index) => {
-					const row = frontmatterFormattingContainer.createDiv({
-						cls: "taskBoardSettingsFrontmatterFormattingContainerItemRow",
-						attr: {
-							"data-frontmatterItem-name":
-								sortfrontmatterItem.property,
-						},
-					});
-
-					new Setting(row)
-						.setClass(
-							"taskBoardSettingsFrontmatterFormattingContainerItem",
-						)
-						.addButton((drag) =>
-							drag
-								.setTooltip("Hold and drag")
-								.setIcon("grip-horizontal")
-								.setClass(
-									"taskBoardSettingsFrontmatterFormattingContainerItemDragHandle",
-								),
-						)
-						.addButton((button) => {
-							button.setButtonText(sortfrontmatterItem.property);
-						})
-						.addText((text) => {
-							text.setValue(sortfrontmatterItem.key)
-								.setPlaceholder(t("Enter property key"))
-								.onChange((value) => {
-									this.plugin.settings.data.frontmatterFormatting[
-										index
-									].key = value.trim();
-								});
-						});
-					// .addButton((del) =>
-					// 	del
-					// 		.setButtonText("delete")
-					// 		.setIcon("trash")
-					// 		.setClass(
-					// 			"taskBoardSettingsFrontmatterFormattingContainerItemDeleteCriterion"
-					// 		)
-					// 		.setTooltip(t("remove-sort-criterion"))
-					// 		.onClick(async () => {
-					// 			if (
-					// 				this.plugin.settings.data
-					// 					.frontmatterFormatting
-					// 			) {
-					// 				this.plugin.settings.data.frontmatterFormatting.splice(
-					// 					index,
-					// 					1
-					// 				);
-					// 				void this.saveSettings();
-					// 				renderFrontmatterFormattingItems(); // Re-render after delete
-					// 			}
-					// 		})
-					// );
-				});
-		};
-
-		// Initial render
-		renderFrontmatterFormattingItems();
-
-		// const addNewSortingButton = frontmatterFormattingContainer.createEl(
-		// 	"button",
-		// 	{
-		// 		text: t("add-new-sorting-criterion"),
-		// 		cls: "configureColumnSortingModalHomeAddSortingBtn",
-		// 	}
-		// );
-		// addNewSortingButton.addEventListener("click", async () => {
-		// 	const newfrontmatterItem: frontmatterFormatting = {
-		// 		index:
-		// 			(this.plugin.settings.data
-		// 				.frontmatterFormatting?.length || 0) + 1,
-		// 		property: "",
-		// 		key: "",
-		// 	};
-		// 	if (
-		// 		!this.plugin.settings.data.frontmatterFormatting
-		// 	) {
-		// 		this.plugin.settings.data.frontmatterFormatting =
-		// 			[];
-		// 	}
-		// 	this.plugin.settings.data.frontmatterFormatting.push(
-		// 		newfrontmatterItem
-		// 	);
-		// 	renderFrontmatterFormattingItems();
-		// });
 	}
 
 	private renderMapViewSettingsTab(contentEl: HTMLElement) {
@@ -3100,3 +2850,4 @@ const kofiButton = (link: string, img: HTMLElement): HTMLElement => {
 	a.appendChild(img);
 	return a;
 };
+

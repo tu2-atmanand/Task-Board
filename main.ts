@@ -57,8 +57,12 @@ import {
 } from "./src/interfaces/Enums.js";
 import {
 	type PluginDataJson,
+	type SupportedPropertiesConfig,
 	DEFAULT_SETTINGS,
 	type taskBoardFilesRegistryType,
+	getHiddenPropertyConfigs,
+	getPropertiesHiddenInNotes,
+	migrateLegacyPropertySettings,
 } from "./src/interfaces/GlobalSettings.js";
 import { TaskBoardIcon } from "./src/interfaces/Icons.js";
 import { bugReporterManagerInsatance } from "./src/managers/BugReporter.js";
@@ -430,11 +434,19 @@ export default class TaskBoard extends Plugin {
 	}
 
 	async loadSettings() {
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData(),
+		const storedSettings =
+			(await this.loadData()) as Partial<PluginDataJson> | null;
+		this.settings = {
+			...DEFAULT_SETTINGS,
+			...storedSettings,
+			data: {
+				...DEFAULT_SETTINGS.data,
+				...storedSettings?.data,
+			},
+		};
+		migrateLegacyPropertySettings(
+			this.settings.data,
+			storedSettings?.data,
 		);
 		// this.migrateSettings(DEFAULT_SETTINGS, this.settings);
 		void this.saveSettings();
@@ -599,16 +611,26 @@ export default class TaskBoard extends Plugin {
 		// this.registerEditorExtension(taskGutterExtension(this.app, this));
 
 		// Register task property hiding extension
-		const hiddenProperties = this.settings.data?.propertiesHiddenInNotes || [];
+		const hiddenProperties = getHiddenPropertyConfigs(
+			this.settings.data.defaultProperties,
+			this.settings.data.customProperties,
+		);
 		if (hiddenProperties.length > 0) {
 			this.registerEditorExtension(taskPropertyHidingExtension(this));
 		}
 	}
 
 	registerReadingModePostProcessor() {
-		const hiddenProperties = this.settings.data?.propertiesHiddenInNotes || [];
+		const hiddenPropertyConfigs = getHiddenPropertyConfigs(
+			this.settings.data.defaultProperties,
+			this.settings.data.customProperties,
+		);
+		const hiddenProperties = getPropertiesHiddenInNotes(
+			this.settings.data.defaultProperties,
+			this.settings.data.customProperties,
+		);
 		this.clearTaskPropertyVisibilityStyles();
-		if (hiddenProperties.length === 0) {
+		if (hiddenPropertyConfigs.length === 0) {
 			return;
 		}
 		const tasksPlugin = new TasksPluginApi(this);
@@ -627,7 +649,7 @@ export default class TaskBoard extends Plugin {
 					) {
 						this.hidePropertiesInElement(
 							listItem,
-							hiddenProperties,
+							hiddenPropertyConfigs,
 						);
 					}
 				});
@@ -642,6 +664,28 @@ export default class TaskBoard extends Plugin {
 					document.body.classList.add(hideClass);
 				}
 			});
+			const customProperties =
+				hiddenPropertyConfigs.filter(
+					(property) =>
+						!Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
+							property.key as DEFAULT_TASK_CACHE_KEYS,
+						),
+				);
+			if (customProperties.length > 0) {
+				this.registerMarkdownPostProcessor((element) => {
+					element.querySelectorAll("li").forEach((listItem) => {
+						if (
+							listItem.querySelector(".task-list-item") ||
+							listItem.hasAttribute("data-task")
+						) {
+							this.hidePropertiesInElement(
+								listItem,
+								customProperties,
+							);
+						}
+					});
+				});
+			}
 		}
 	}
 
@@ -660,7 +704,7 @@ export default class TaskBoard extends Plugin {
 
 	private hidePropertiesInElement(
 		element: HTMLElement,
-		hiddenProperties: DEFAULT_TASK_CACHE_KEYS[],
+		hiddenProperties: SupportedPropertiesConfig[],
 	) {
 		// Process text nodes to find and hide specific patterns
 		const walker = activeDocument.createTreeWalker(

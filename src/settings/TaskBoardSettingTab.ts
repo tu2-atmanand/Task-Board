@@ -3,13 +3,13 @@
 import { t } from "i18next";
 import {
 	App,
+	Notice,
 	PluginSettingTab,
 	setIcon,
 	Setting,
 	SettingDefinition,
 	SettingDefinitionGroup,
 	SettingDefinitionItem,
-	SettingDefinitionList,
 	SettingDefinitionPage,
 } from "obsidian";
 import TaskBoard from "../../main.js";
@@ -17,11 +17,35 @@ import {
 	globalSettingsData,
 	SupportedPropertiesConfig,
 } from "../interfaces/GlobalSettings.js";
+import { PropertyTypeConfig } from "../interfaces/Enums.js";
 import { TaskBoardIcon } from "../interfaces/Icons.js";
 import { SettingsManager, SettingsTabPagesKey } from "./SettingConstructUI.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
-import { scopeSettingsModal, setSettingsScope } from "./ScopeSettings.js";
-import { createFragmentWithHTML } from "../utils/UIHelpers.js";
+import { setSettingsScope } from "./ScopeSettings.js";
+import { showReloadObsidianNotice } from "./SettingSynchronizer.js";
+
+/**
+ * Filters tab — list of user-defined filter sets.
+ */
+export function buildNativeSettingsDocsAction(title: string, target: string) {
+	return {
+		action: {
+			label: t("settings", "openDocumentationFor", { name: title }),
+			docsTarget: target,
+			onClick: () => {
+				// Implementation pending
+				// This will open a specific docs link in browser.
+				// Need to keep a mapping of docs id and link to docs.
+				// runSettingsAsync("settings docs link open failed", () =>
+				// 	openTaskBoardDocsLink(
+				// 		this.app,
+				// 		target,
+				// 	),
+				// );
+			},
+		},
+	};
+}
 
 /** Decorate the containing declarative page without replacing its searchable items. */
 export function attachDeclarativeSettingsPageTitleAction(
@@ -44,12 +68,12 @@ export function attachDeclarativeSettingsPageTitleAction(
 		titleEl?.parentElement !== titlebarEl ||
 		titleEl.textContent !== pageTitle ||
 		titlebarEl.querySelector(
-			".operon-native-settings-page-title-docs-action",
+			".task-board-native-settings-page-title-docs-action",
 		)
 	)
 		return;
 
-	const hadScope = titlebarEl.classList.contains("operon-settings-scope");
+	const hadScope = titlebarEl.classList.contains("task-board-settings-scope");
 	setSettingsScope(titlebarEl, true);
 	const anchors = (Array.isArray(action) ? action : [action]).map((item) => {
 		const button = renderNativeSettingsPageTitleAction(
@@ -57,17 +81,17 @@ export function attachDeclarativeSettingsPageTitleAction(
 			item,
 			true,
 		);
-		return button.closest(".operon-settings-docs-tooltip-anchor") ?? button;
+		return button.closest(".task-board-settings-docs-tooltip-anchor") ?? button;
 	});
 	return () => {
 		for (const anchor of anchors) anchor.remove();
 		if (
 			!titlebarEl.querySelector(
-				".operon-native-settings-page-title-docs-action",
+				".task-board-native-settings-page-title-docs-action",
 			)
 		) {
 			titlebarEl.removeClass(
-				"operon-native-settings-page-titlebar-with-docs",
+				"task-board-native-settings-page-titlebar-with-docs",
 			);
 			if (!hadScope) setSettingsScope(titlebarEl, false);
 		}
@@ -89,20 +113,20 @@ export function renderNativeSettingsPageTitleAction(
 	action: NativeSettingsDocsActionOptions,
 	append = false,
 ): HTMLButtonElement {
-	titlebarEl.addClass("operon-native-settings-page-titlebar-with-docs");
+	titlebarEl.addClass("task-board-native-settings-page-titlebar-with-docs");
 	const existingButton = append
 		? null
 		: titlebarEl.querySelector<HTMLButtonElement>(
-				".operon-native-settings-page-title-docs-action",
+				".task-board-native-settings-page-title-docs-action",
 			);
 	const existingTooltipAnchor = existingButton?.closest(
-		".operon-settings-docs-tooltip-anchor",
+		".task-board-settings-docs-tooltip-anchor",
 	);
 	if (existingTooltipAnchor) existingTooltipAnchor.remove();
 	else existingButton?.remove();
 
 	const actionButton = titlebarEl.createEl("button", {
-		cls: "clickable-icon operon-native-settings-page-title-docs-action",
+		cls: "clickable-icon task-board-native-settings-page-title-docs-action",
 		attr: {
 			type: "button",
 			"aria-label": action.label,
@@ -120,6 +144,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	settingsManager: SettingsManager;
 	globalSettings: globalSettingsData;
 	icon: string = TaskBoardIcon;
+	private reloadNoticeAlreadyShown = false;
 
 	constructor(app: App, plugin: TaskBoard) {
 		super(app, plugin);
@@ -141,6 +166,12 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		this.update();
 	}
 
+	private showReloadNoticeIfNeeded(): void {
+		if (this.reloadNoticeAlreadyShown) return;
+		this.reloadNoticeAlreadyShown = true;
+		void showReloadObsidianNotice(this.plugin);
+	}
+
 	getSettingDefinitions(): SettingDefinitionItem[] {
 		this.containerEl.addClass("TaskBoardSettingTab");
 		const customStatusAliases =
@@ -156,7 +187,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		return [
 			{
 				type: "group",
-				searchable: false,
 				items: [
 					{
 						name: "task-board" + " " + CURRENT_PLUGIN_VERSION,
@@ -185,7 +215,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 											// 		{
 											// 			docsFolder:
 											// 				this.settings
-											// 					.operonDocsFolder,
+											// 					.task-boardDocsFolder,
 											// 		},
 											// 	),
 											// 	true,
@@ -217,7 +247,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 											// 		{
 											// 			docsFolder:
 											// 				this.settings
-											// 					.operonDocsFolder,
+											// 					.task-boardDocsFolder,
 											// 		},
 											// 	),
 											// 	true,
@@ -258,7 +288,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			// 						"name-of-the-file-folder-tag-for-filter-info-2",
 			// 					),
 			// 			),
-			// 			items: [this.renderCustomPropertiesSection],
+			// 			items: ,
 			// 		},
 			// 	],
 			// },
@@ -282,82 +312,86 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				name: t("properties"),
 				items: [
 					{
-						type: "page",
-						name: t("default-properties"),
-						desc: t("default-properties-info"),
-						items: this.renderCustomPropertiesSection(
-							this.containerEl,
-						),
-					},
-					{
-						type: "page",
-						name: t("custom-properties"),
-						desc: t("custom-properties-info"),
+						type: "group",
 						items: [
 							{
-								type: "list",
-								items: [
-									this.createLegacySettingsEntry(
-										"custom-properties",
-										["extra-properties"],
-									),
-								],
+								type: "page",
+								name: t("default-properties"),
+								desc: t("default-properties-info"),
+								items: this.renderPropertiesConfigurationSection(
+									this.containerEl,
+									"default",
+								),
+							},
+							{
+								type: "page",
+								name: t("custom-properties"),
+								desc: t("custom-properties-info"),
+								items: this.renderPropertiesConfigurationSection(
+									this.containerEl,
+									"custom",
+								),
 							},
 						],
 					},
 					{
-						type: "page",
-						name: t("custom-statuses"),
-						desc: t("custom-statuses-info"),
+						type: "group",
 						items: [
 							{
-								type: "list",
+								type: "page",
+								name: t("custom-statuses"),
+								desc: t("custom-statuses-info"),
 								items: [
-									this.createLegacySettingsEntry(
-										"custom-statuses",
-										[
-											"custom-statuses",
-											"status-name",
-											"status-symbol",
-											"status-action",
-											"name",
-											"symbol",
-											"click-action",
-											"lucide-icon",
-											"add-new-status",
-											"import-from-tasks-plugin",
-											...customStatusAliases,
+									{
+										type: "list",
+										items: [
+											this.createLegacySettingsEntry(
+												"custom-statuses",
+												[
+													"custom-statuses",
+													"status-name",
+													"status-symbol",
+													"status-action",
+													"name",
+													"symbol",
+													"click-action",
+													"lucide-icon",
+													"add-new-status",
+													"import-from-tasks-plugin",
+													...customStatusAliases,
+												],
+											),
 										],
-									),
+									},
 								],
 							},
-						],
-					},
-					{
-						type: "page",
-						name: t("custom-priorities"),
-						desc: t("custom-priorities-info"),
-						items: [
 							{
-								type: "list",
-								heading: t("custom-statuses"),
+								type: "page",
+								name: t("custom-priorities"),
+								desc: t("custom-priorities-info"),
 								items: [
-									this.createLegacySettingsEntry(
-										"custom-priorities",
-										[
-											"custom-statuses",
-											"status-name",
-											"status-symbol",
-											"status-action",
-											"name",
-											"symbol",
-											"click-action",
-											"lucide-icon",
-											"add-new-status",
-											"import-from-tasks-plugin",
-											...customStatusAliases,
+									{
+										type: "list",
+										heading: t("custom-statuses"),
+										items: [
+											this.createLegacySettingsEntry(
+												"custom-priorities",
+												[
+													"custom-statuses",
+													"status-name",
+													"status-symbol",
+													"status-action",
+													"name",
+													"symbol",
+													"click-action",
+													"lucide-icon",
+													"add-new-status",
+													"import-from-tasks-plugin",
+													...customStatusAliases,
+												],
+											),
 										],
-									),
+									},
 								],
 							},
 						],
@@ -394,7 +428,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				"default-note-for-adding-new-tasks",
 				"file-for-archived-tasks",
 				"show-note-frontmatter-tags-in-the-card-header",
-				"hide-specific-properties-in-notes",
 				"ID",
 				"Tags",
 				"Priority",
@@ -415,7 +448,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				"task-note-identifier-tag",
 				"default-location-for-new-task-notes",
 				"folder-for-archived-task-notes",
-				"frontmatter-formatting",
 			]),
 			this.createLegacySettingsPage("automation", [
 				"restrict-task-completion-to-child-tasks-and-sub-tasks",
@@ -442,7 +474,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			]),
 			{
 				type: "group",
-				name: t("support"),
+				heading: t("support"),
 				items: [
 					this.createLegacySettingsEntry("support-development", [
 						"support-development",
@@ -464,7 +496,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			items: [
 				{
 					type: "group",
-					desc: "Hello",
 					items: [
 						this.createLegacySettingsEntry(section, searchAliases),
 					],
@@ -500,107 +531,474 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 	private renderSupportedPropertyConfigurationPage(
 		current: SupportedPropertiesConfig,
+		propertyGroup: "default" | "custom",
+		isNew = false,
 	): SettingDefinitionGroup {
 		return {
-			type: "list",
+			type: "group",
 			items: [
-				// For defaultProperties - Render each of the settings here for user to input the values for SupportedPropertiesConfig, except name, because name is something by default supported by Task Board. - This will going to replace the this.globalSettings.frontmatterFormatting setting. It will going to be deprecated.
+				{
+					name: "",
+					searchable: false,
+					render: (setting) => {
+						const host = setting.settingEl;
+						host.empty();
+						host.removeClass("setting-item");
+						host.addClass("task-board-property-editor");
 
-				// For customProperties - Render each of the settings here for user to input the values for SupportedPropertiesConfig.
+						const properties =
+							propertyGroup === "default"
+								? this.globalSettings.defaultProperties
+								: this.globalSettings.customProperties;
+						if (isNew && !properties.includes(current)) {
+							properties.push(current);
+							void this.settingsManager.saveSettings();
+						}
+
+						const save = () => {
+							void this.settingsManager.saveSettings();
+						};
+						const addTextField = (
+							name: string,
+							value: string,
+							onChange: (value: string) => void,
+							placeholder?: string,
+						) => {
+							new Setting(host).setName(name).addText((text) => {
+								text.setValue(value).onChange(onChange);
+								if (placeholder)
+									text.setPlaceholder(placeholder);
+							});
+						};
+
+						addTextField("Frontmatter key", current.id, (value) => {
+							const id = value.trim();
+							const duplicate = [
+								...this.globalSettings.defaultProperties,
+								...this.globalSettings.customProperties,
+							].find(
+								(property) =>
+									property !== current && property.id === id,
+							);
+							if (id && duplicate) {
+								new Notice(
+									`The property key "${id}" is already in use.`,
+								);
+								return;
+							}
+							current.id = id;
+							if (propertyGroup === "custom")
+								current.key = current.id;
+							save();
+						});
+
+						if (propertyGroup === "custom") {
+							addTextField(
+								"Property name",
+								current.name,
+								(value) => {
+									current.name = value;
+									save();
+								},
+								"e.g. Project",
+							);
+						} else {
+							addTextField(
+								"Task Board property key",
+								current.key,
+								(value) => {
+									current.key = value.trim();
+									save();
+								},
+							);
+						}
+
+						addTextField("Description", current.desc, (value) => {
+							current.desc = value;
+							save();
+						});
+
+						new Setting(host)
+							.setName("Type")
+							.addDropdown((dropdown) => {
+								Object.values(PropertyTypeConfig).forEach(
+									(type) => {
+										dropdown.addOption(type, type);
+									},
+								);
+								dropdown
+									.setValue(current.type)
+									.onChange((value) => {
+										current.type =
+											value as PropertyTypeConfig;
+										save();
+									});
+							});
+
+						addTextField("Emoji", current.emoji, (value) => {
+							current.emoji = value;
+							save();
+						});
+						addTextField("Lucide icon", current.icon, (value) => {
+							current.icon = value;
+							save();
+						});
+
+						new Setting(host)
+							.setName("Hide property in inline task notes")
+							.addToggle((toggle) =>
+								toggle
+									.setValue(
+										current.hidePropertyInNotesForInlineTasks,
+									)
+									.onChange((value) => {
+										current.hidePropertyInNotesForInlineTasks =
+											value;
+										save();
+										this.showReloadNoticeIfNeeded();
+									}),
+							);
+
+						addTextField(
+							"Default value",
+							Array.isArray(current.defaultValue)
+								? current.defaultValue.join(", ")
+								: String(current.defaultValue),
+							(value) => {
+								if (current.type === PropertyTypeConfig.list) {
+									current.defaultValue = value
+										.split(",")
+										.map((item) => item.trim())
+										.filter(Boolean);
+								} else if (
+									current.type ===
+										PropertyTypeConfig.numeric &&
+									value.trim() !== ""
+								) {
+									const numberValue = Number(value);
+									if (Number.isFinite(numberValue))
+										current.defaultValue = numberValue;
+								} else {
+									current.defaultValue = value;
+								}
+								save();
+							},
+						);
+
+						if (propertyGroup === "custom") {
+							new Setting(host).addButton((button) =>
+								button
+									.setButtonText("Delete property")
+									.setWarning()
+									.onClick(() => {
+										const propertyIndex =
+											properties.indexOf(current);
+										if (propertyIndex >= 0)
+											properties.splice(propertyIndex, 1);
+										this.normalizePropertyRanks(properties);
+										void this.settingsManager.saveSettings();
+										this.updateNativeSettingsDefinitions();
+									}),
+							);
+						}
+					},
+				},
 			],
 		};
 	}
 
 	private renderKeyMappingRow(
-		host: HTMLElement,
 		current: SupportedPropertiesConfig,
-	): SettingDefinitionItem {
+		propertyGroup: "default" | "custom",
+		isNew = false,
+	): SettingDefinitionPage {
 		return {
 			type: "page",
-			name: "",
-			render: (setting) => {
-				// Row 1 = [current.lucideIcon] [current.name] + [current.type]
-				// The lucide icon should be rendered and then will be the name, aligned to left. The type should be aligned to the right and should be shown as a pill and different type will be of different pill colors. For example, text = blue, numeric = greeen, etc..
-				// Row 2 = A columnn of key value pair of other fields such as desc, emoji, hidden in notes, default value.
-				// Row 3 = There will be two icon side by side, with icons of up-arrow and down-arrow. This buttons will be used to change the rank of the property item. And accordingly it should refresh and move it up and down.
-			},
+			name: current.name,
+			// desc: this.createPropertySummaryDescription(current),
+			items: [
+				this.renderSupportedPropertyConfigurationPage(
+					current,
+					propertyGroup,
+					isNew,
+				),
+			],
 		};
 	}
 
-	private renderCustomPropertiesSection(
+	private createPropertySummaryDescription(
+		property: SupportedPropertiesConfig,
+	): DocumentFragment {
+		return createFragment((summary) => {
+			const root = summary.createDiv("task-board-property-summary");
+
+			// Row-1 = Icon + Title (on Left) | Type (on Right)
+			const heading = root.createDiv(
+				"task-board-property-summary-heading",
+			);
+			const headingLeft = heading.createDiv(
+				"task-board-property-summary-heading-left",
+			);
+			const icon = headingLeft.createSpan({
+				cls: "task-board-property-summary-heading-icon",
+			});
+
+			if (property.icon) setIcon(icon, property.icon);
+			else icon.setText(property.emoji || "");
+
+			headingLeft.createSpan({
+				cls: "task-board-property-summary-heading-name",
+				text: property.name,
+			});
+			const headingRight = heading.createDiv(
+				"task-board-property-summary-heading-right",
+			);
+			headingRight.createSpan({
+				cls: `task-board-property-summary-type task-board-property-type-${property.type}`,
+				text: property.type,
+			});
+
+			// Row-2 = Description (Will only show description for now)
+			const details = root.createDiv(
+				"task-board-property-summary-details",
+			);
+			const detailValues = [
+				// ["Key", property.key],
+				// ["Frontmatter", property.id],
+				["Description", property.desc],
+				// ["Emoji", property.emoji],
+				// [
+				// 	"Hidden in notes",
+				// 	property.hidePropertyInNotesForInlineTasks ? "Yes" : "No",
+				// ],
+				// [
+				// 	"Default",
+				// 	Array.isArray(property.defaultValue)
+				// 		? property.defaultValue.join(", ")
+				// 		: String(property.defaultValue),
+				// ],
+			];
+			for (const [label, value] of detailValues) {
+				const detail = details.createDiv(
+					"task-board-property-summary-detail",
+				);
+				// detail.createSpan({
+				// 	cls: "task-board-property-summary-label",
+				// 	text: `${label}:`,
+				// });
+				detail.createSpan({ text: value });
+			}
+
+			const properties = this.globalSettings.defaultProperties.includes(
+				property,
+			)
+				? this.globalSettings.defaultProperties
+				: this.globalSettings.customProperties;
+			const orderedProperties = properties
+				.slice()
+				.sort((a, b) => a.rank - b.rank);
+			const index = orderedProperties.indexOf(property);
+
+			// Row-3 = Up and Down arrow icons to move the item up and down
+			const controls = root.createDiv(
+				"task-board-property-summary-order-controls",
+			);
+			for (const [direction, iconName, label] of [
+				[-1, "arrow-up", "Move property up"],
+				[1, "arrow-down", "Move property down"],
+			] as const) {
+				const button = controls.createEl("button", {
+					cls: "clickable-icon",
+					attr: {
+						type: "button",
+						"aria-label": label,
+						title: label,
+					},
+				});
+				setIcon(button, iconName);
+				button.disabled =
+					direction < 0
+						? index <= 0
+						: index < 0 || index >= orderedProperties.length - 1;
+				button.addEventListener("click", (event) => {
+					event.preventDefault();
+					event.stopPropagation();
+					this.moveProperty(properties, property, direction);
+				});
+			}
+		});
+	}
+
+	private renderPropertiesConfigurationSection(
 		contentEl: HTMLElement,
+		type: string,
 	): SettingDefinitionItem[] {
 		const prepareHost = (setting: Setting): HTMLElement => {
 			const host = setting.settingEl;
 			host.empty();
 			host.removeClass("setting-item");
 			host.addClass(
-				"operon-settings-tab-root",
-				"operon-settings-native-page-root",
-				"operon-key-mapping-search-item",
+				"task-board-settings-tab-root",
+				"task-board-settings-native-page-root",
+				"task-board-key-mapping-search-item",
 			);
 			return host;
 		};
 
-		return [
-			{
-				name: "",
-				searchable: false,
-				render: (setting) => {
-					const host = prepareHost(setting);
-					const explanation = host.createDiv(
-						"setting-item-description operon-key-mappings-help",
-					);
-					explanation.createEl("p", {
-						text: t("custom-properties-mapping"),
-					});
-					const title = t("custom-properties-mapping");
-					// return attachDeclarativeSettingsPageTitleAction(
-					// 	host,
-					// 	title,
-					// 	[
-					// 		"DOCS-039 Key mappings",
-					// 		"DOCS-018 Task properties",
-					// 	].map(
-					// 		(target) =>
-					// 			this.buildNativeSettingsDocsAction(
-					// 				title,
-					// 				target,
-					// 			).action,
-					// 	),
-					// );
-				},
-			},
-			...this.globalSettings.customProperties.map(
-				(mapping): SettingDefinition => ({
-					name:
-						mapping.name === mapping.id
-							? mapping.id
-							: `${mapping.name} — ${mapping.id}`,
-					desc: mapping.desc,
-					aliases: [
-						mapping.name,
-						mapping.id,
-						mapping.type,
-						"keymapping",
-						"key mappings",
-						"frontmatter key",
-					],
+		if (type === "default") {
+			return [
+				{
+					name: "",
+					searchable: false,
 					render: (setting) => {
 						const host = prepareHost(setting);
-						const current =
-							this.globalSettings.customProperties.find(
-								(candidate) => candidate.id === mapping.id,
-							);
-						if (current) this.renderKeyMappingRow(host, current);
-						// return () => {
-						// 	closeFloatingPanelsForRoot(host);
-						// 	cleanupOperonHoverTooltips(host);
-						// };
+						const explanation = host.createDiv(
+							"setting-item-description task-board-key-mappings-help",
+						);
+						explanation.createEl("p", {
+							text: t("default-properties-mapping-info"),
+						});
+						const title = t("default-properties-mapping");
+						return attachDeclarativeSettingsPageTitleAction(
+							host,
+							title,
+							[
+								"DOCS-039 Key mappings",
+								"DOCS-018 Task properties",
+							].map(
+								(target) =>
+									buildNativeSettingsDocsAction(title, target)
+										.action,
+							),
+						);
 					},
-				}),
-			),
+				},
+				...this.globalSettings.defaultProperties
+					.slice()
+					.sort((a, b) => a.rank - b.rank)
+					.map((mapping) => ({
+						...this.renderKeyMappingRow(mapping, "default"),
+						aliases: [
+							mapping.name,
+							mapping.id,
+							mapping.type,
+							"keymapping",
+							"key mappings",
+							"frontmatter key",
+						],
+						class: "task-board-property-listitem",
+					})),
+			];
+		} else {
+			return [
+				{
+					name: "",
+					searchable: false,
+					render: (setting) => {
+						const host = prepareHost(setting);
+						const explanation = host.createDiv(
+							"setting-item-description task-board-key-mappings-help",
+						);
+						explanation.createEl("p", {
+							text: t("custom-properties-mapping-info"),
+						});
+						const title = t("custom-properties-mapping");
+						return attachDeclarativeSettingsPageTitleAction(
+							host,
+							title,
+							[
+								"DOCS-039 Key mappings",
+								"DOCS-018 Task properties",
+							].map(
+								(target) =>
+									buildNativeSettingsDocsAction(title, target)
+										.action,
+							),
+						);
+					},
+				},
+				...this.globalSettings.customProperties
+					.slice()
+					.sort((a, b) => a.rank - b.rank)
+					.map((mapping) => ({
+						...this.renderKeyMappingRow(mapping, "custom"),
+						aliases: [
+							mapping.name,
+							mapping.id,
+							mapping.type,
+							"keymapping",
+							"key mappings",
+							"frontmatter key",
+						],
+					})),
+				this.renderKeyMappingRow(
+					this.createNewCustomProperty(),
+					"custom",
+					true,
+				),
+			];
+		}
+	}
+
+	private createNewCustomProperty(): SupportedPropertiesConfig {
+		const existingIds = new Set(
+			this.globalSettings.customProperties.map((property) => property.id),
+		);
+		let suffix = this.globalSettings.customProperties.length + 1;
+		let id = `custom-property-${suffix}`;
+		while (existingIds.has(id)) {
+			suffix += 1;
+			id = `custom-property-${suffix}`;
+		}
+		return {
+			key: id,
+			id,
+			name: `Custom property ${suffix}`,
+			desc: "",
+			type: PropertyTypeConfig.text,
+			emoji: "",
+			icon: "",
+			hidePropertyInNotesForInlineTasks: false,
+			defaultValue: "",
+			rank: this.globalSettings.customProperties.length + 1,
+		};
+	}
+
+	private normalizePropertyRanks(properties: SupportedPropertiesConfig[]) {
+		properties
+			.slice()
+			.sort((a, b) => a.rank - b.rank)
+			.forEach((property, index) => {
+				property.rank = index + 1;
+			});
+	}
+
+	private async moveProperty(
+		properties: SupportedPropertiesConfig[],
+		current: SupportedPropertiesConfig,
+		direction: -1 | 1,
+	) {
+		const orderedProperties = properties
+			.slice()
+			.sort((a, b) => a.rank - b.rank);
+		const index = orderedProperties.indexOf(current);
+		const targetIndex = index + direction;
+		if (
+			index < 0 ||
+			targetIndex < 0 ||
+			targetIndex >= orderedProperties.length
+		)
+			return;
+
+		[orderedProperties[index], orderedProperties[targetIndex]] = [
+			orderedProperties[targetIndex],
+			orderedProperties[index],
 		];
+		orderedProperties.forEach((property, rank) => {
+			property.rank = rank + 1;
+		});
+		await this.settingsManager.saveSettings();
+		this.updateNativeSettingsDefinitions();
 	}
 
 	hide(): void {

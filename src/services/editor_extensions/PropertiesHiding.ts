@@ -15,6 +15,10 @@ import { Extension, Range, StateField, EditorState } from "@codemirror/state";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "../../../main.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import {
+	getHiddenPropertyConfigs,
+	SupportedPropertiesConfig,
+} from "../../interfaces/GlobalSettings.js";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../regularExpressions/DataviewPluginRegularExpr.js";
 import {
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
@@ -44,9 +48,44 @@ class HiddenPropertyWidget extends WidgetType {
  * Get regex patterns for different property types for different formats as per the user setting.
  */
 export function getTaskPropertyRegexPatterns(
-	property: DEFAULT_TASK_CACHE_KEYS,
+	property: DEFAULT_TASK_CACHE_KEYS | SupportedPropertiesConfig,
 	tasksPropertyFormat: string,
 ): RegExp {
+	if (typeof property !== "string") {
+		if (
+			Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
+				property.key as DEFAULT_TASK_CACHE_KEYS,
+			)
+		) {
+			return getTaskPropertyRegexPatterns(
+				property.key as DEFAULT_TASK_CACHE_KEYS,
+				tasksPropertyFormat,
+			);
+		}
+
+		const escapedId = property.id.replace(
+			/[.*+?^${}()|[\]\\]/g,
+			"\\$&",
+		);
+		if (tasksPropertyFormat === "3" && escapedId) {
+			return new RegExp(`\\[${escapedId}\\s*::[^\\]]*\\]`, "g");
+		}
+		if (tasksPropertyFormat === "4" && escapedId) {
+			return new RegExp(`@${escapedId}\\([^)]*\\)`, "g");
+		}
+		if (
+			(tasksPropertyFormat === "1" || tasksPropertyFormat === "2") &&
+			property.emoji
+		) {
+			const escapedEmoji = property.emoji.replace(
+				/[.*+?^${}()|[\]\\]/g,
+				"\\$&",
+			);
+			return new RegExp(`${escapedEmoji}\\s*[^\\s]+`, "g");
+		}
+		return /(?!)/g;
+	}
+
 	if (tasksPropertyFormat === "1" || tasksPropertyFormat === "2") {
 		switch (property) {
 			case DEFAULT_TASK_CACHE_KEYS.ID:
@@ -239,7 +278,10 @@ function createPropertyDecorations(
 	plugin: TaskBoard,
 ): DecorationSet {
 	const decorations: Range<Decoration>[] = [];
-	const hiddenProperties = plugin.settings.data.propertiesHiddenInNotes || [];
+	const hiddenProperties = getHiddenPropertyConfigs(
+		plugin.settings.data.defaultProperties,
+		plugin.settings.data.customProperties,
+	);
 
 	const cursorPos = view.state.selection.main.head;
 	const doc = view.state.doc;

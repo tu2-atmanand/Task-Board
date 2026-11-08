@@ -776,7 +776,11 @@ export async function migrateVersion1_to_Version2(
 		onStepStart?.(4, 4, "Finalizing migration...");
 		const modifiedOldPluginSettings: PluginDataJson = {
 			version: oldPluginSettings.version,
-			data: oldPluginSettings.data.globalSettings,
+			data: {
+				...oldPluginSettings.data.globalSettings,
+				defaultProperties: [],
+				customProperties: [],
+			},
 		};
 		const registryResult = await updateRegistryAndSettings(
 			plugin,

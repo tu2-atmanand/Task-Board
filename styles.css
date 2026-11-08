@@ -1,5 +1,91 @@
 /* Obsidian Components */
 
+.task-board-property-summary {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35em;
+}
+
+.task-board-property-summary-heading,
+.task-board-property-summary-detail {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+.task-board-property-summary-heading {
+	font-weight: var(--font-medium);
+}
+
+.task-board-property-summary-heading-left {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.task-board-property-summary-heading-icon {
+	display: inline-flex;
+	align-items: center;
+}
+
+.task-board-property-summary-heading-icon svg.svg-icon {
+	height: 20px;
+	width: 20px;
+}
+
+.task-board-property-summary-type {
+	border-radius: var(--radius-s);
+	padding: 0.1em 0.5em;
+	font-size: var(--font-smaller);
+	font-weight: var(--font-medium);
+	background-color: var(--background-modifier-hover);
+}
+
+.task-board-property-type-text {
+	color: var(--text-accent);
+}
+
+.task-board-property-type-boolean {
+	color: var(--color-purple);
+}
+
+.task-board-property-type-numeric {
+	color: var(--color-green);
+}
+
+.task-board-property-type-time,
+.task-board-property-type-date,
+.task-board-property-type-date-time {
+	color: var(--color-orange);
+}
+
+.task-board-property-type-list {
+	color: var(--color-cyan);
+}
+
+.task-board-property-summary-details {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25em 0.8em;
+	font-size: var(--font-smaller);
+	flex-direction: column;
+}
+
+.task-board-property-summary-order-controls {
+	display: flex;
+	justify-content: flex-start;
+	gap: 0.25em;
+}
+
+.task-board-property-summary-order-controls button:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.task-board-property-summary-label {
+	color: var(--text-muted);
+}
+
 /* .workspace-tabs .workspace-leaf .view-content {
 	height: 100%;
 	padding: 0 !important;
@@ -3247,6 +3333,8 @@ li:hover .taskboard-hidden-property {
 	align-items: center;
 	justify-content: space-between;
 	padding: 4px 12px;
+	padding-bottom: 6px;
+	margin-inline: 1rem;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 8px;
 	background-color: var(--background-primary);
@@ -3260,9 +3348,7 @@ li:hover .taskboard-hidden-property {
 .custom-status-info-container {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
 	flex-grow: 1;
-	padding-block: 8px;
 }
 
 .custom-status-field-element {
@@ -3270,18 +3356,18 @@ li:hover .taskboard-hidden-property {
 	flex-direction: row;
 }
 
+.custom-status-field-element-heading {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+	align-items: center;
+}
+
 .custom-status-field-label {
-	min-width: 5.7rem;
+	min-width: 110px;
 	word-break: break-word;
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
-}
-
-.custom-status-field-value {
-	font-size: 1.1em;
-	color: var(--text-normal);
-	word-break: break-word;
-	font-weight: 500;
 }
 
 .custom-status-right-side {
@@ -3304,27 +3390,33 @@ li:hover .taskboard-hidden-property {
 	align-self: end;
 }
 
+.custom-status-field-status-pill.todo {
+	background-color: #898e20 !important;
+	border-color: #898e20 !important;
+	color: white !important;
+}
+
 .custom-status-field-status-pill.done {
-	background-color: var(--color-green) !important;
-	border-color: var(--color-green) !important;
+	background-color: #258012 !important;
+	border-color: #258012 !important;
 	color: white !important;
 }
 
 .custom-status-field-status-pill.cancelled {
-	background-color: var(--color-red) !important;
-	border-color: var(--color-red) !important;
+	background-color: #881212 !important;
+	border-color: #881212 !important;
 	color: white !important;
 }
 
 .custom-status-field-status-pill.wip {
-	background-color: var(--color-blue) !important;
-	border-color: var(--color-blue) !important;
+	background-color: #0b4987 !important;
+	border-color: #0b4987 !important;
 	color: white !important;
 }
 
 .custom-status-field-status-pill.hold {
-	background-color: var(--color-yellow) !important;
-	border-color: var(--color-yellow) !important;
+	background-color: #5f472e !important;
+	border-color: #5f472e !important;
 	color: white !important;
 }
 
@@ -3336,6 +3428,7 @@ li:hover .taskboard-hidden-property {
 	min-height: -webkit-fill-available;
 	align-items: flex-end;
 	justify-content: flex-end;
+	color: var(--text-faint);
 }
 
 .custom-status-icon-button {
@@ -3349,8 +3442,17 @@ li:hover .taskboard-hidden-property {
 	cursor: var(--cursor);
 }
 
+.custom-status-icon-button.faint {
+	color: var(--text-faint);
+}
+
 .custom-status-icon-button:hover {
 	color: var(--text-normal);
+}
+
+.custom-status-icon-button svg.svg-icon {
+	width: 20;
+	height: 20;
 }
 
 .custom-status-buttons .edit-btn svg.svg-icon:hover {

@@ -6,6 +6,7 @@ import {
 	PluginDataJson,
 	CustomStatus,
 	FrontmatterFormattingInterface,
+	getDefaultPropertyFrontmatterFormatting,
 } from "../../interfaces/GlobalSettings.js";
 import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
@@ -85,8 +86,10 @@ export function extractTaskNoteProperties(
 		return {};
 	}
 
-	const frontmatterFormatting: FrontmatterFormattingInterface[] =
-		settings.data.frontmatterFormatting;
+	const frontmatterFormatting =
+		getDefaultPropertyFrontmatterFormatting(
+			settings.data.defaultProperties,
+		);
 	let taskItemData: Partial<taskItem> = {};
 
 	// console.log(

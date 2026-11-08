@@ -700,7 +700,9 @@ const en: Lang = {
 	"view-id": "View id",
 	"view-id-info": "Click on the copy icon to copy the ID of this view. The ID can be used while while embedding boards inside notes and set a default view which should be rendered by default inside the embed. As this id is unique, you will be free to change the name or position of this view inside the board and the embed link will not break.",
 	"copy-view-id-successful": "Succesfully copied the view id to clipboard.",
-	"copy-view-id-unsuccessful": "There was an issue while copying the view id. Check the logs for more details."
+	"copy-view-id-unsuccessful": "There was an issue while copying the view id. Check the logs for more details.",
+	"symbol": "Symbol",
+	"next-status-symbol": "Next status symbol"
 };
 
 export default en;
