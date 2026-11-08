@@ -1329,31 +1329,6 @@ export class SettingsManager {
 
 	// Function to render "All properties" tab content
 	private renderCustomStatusesTab(contentEl: HTMLElement) {
-		// contentEl.createEl("p", {
-		// 	text: t("board-ui-section-description"),
-		// 	cls: "taskBoard-tab-section-desc",
-		// });
-
-		// // Setting for Plugin Language
-		// new Setting(contentEl)
-		// 	.setName(t("plugin-language"))
-		// 	.setDesc(t("plugin-language-info"))
-		// 	.addDropdown((dropdown) => {
-		// 		// Dynamically add options from langCodes
-		// 		Object.keys(langCodes).forEach((key) => {
-		// 			dropdown.addOption(key, langCodes[key]); // key as value, langCodes[key] as label
-		// 		});
-
-		// 		// Set the initial value (assuming lang is the current selected language)
-		// 		dropdown.setValue(lang as string);
-
-		// 		// On dropdown value change, update the global settings
-		// 		dropdown.onChange((value) => {
-		// 			this.globalSettings!.lang = value;
-		// 			void this.saveSettings();
-		// 		});
-		// 	});
-
 		new Setting(contentEl)
 			// .setName(t("custom-statuses"))
 			.setDesc(t("custom-statuses-info"));
@@ -1396,7 +1371,7 @@ export class SettingsManager {
 				const iconId = normalizeTaskIconValue(status.lucideIcon);
 				const isIconAvailable = iconId && getIcon(iconId);
 				const iconButton = statusLucideIcon.createEl("span", {
-					cls: `custom-status-icon-button${isIconAvailable ? '' : ' faint'}`,
+					cls: `custom-status-icon-button${isIconAvailable ? "" : " faint"}`,
 					attr: {
 						type: "button",
 						title: t("select-status-icon"),
@@ -1441,27 +1416,10 @@ export class SettingsManager {
 				const statusInfoSymbol = statusInfoContainer.createDiv({
 					cls: "custom-status-field-element setting-item-description",
 				});
-				// statusInfoSymbol.createDiv({
-				// 	cls: "custom-status-field-label",
-				// 	text: `${t("symbol")}:`,
-				// });
 				statusInfoSymbol.createDiv({
 					cls: "custom-status-field-value",
 					text: `This status [${status.symbol}] will change to [${status.nextStatusSymbol}].`,
 				});
-
-				// Next Status Symbol
-				// const statusInfoAction = statusInfoContainer.createDiv({
-				// 	cls: "custom-status-field-element setting-item-description",
-				// });
-				// statusInfoAction.createDiv({
-				// 	cls: "custom-status-field-label",
-				// 	text: `${t("next-status-symbol")}:`,
-				// });
-				// statusInfoAction.createDiv({
-				// 	cls: "custom-status-field-value",
-				// 	text: `[${status.nextStatusSymbol}]`,
-				// });
 
 				const rightSideContainer = row.createDiv({
 					cls: "custom-status-right-side",
@@ -2850,4 +2808,3 @@ const kofiButton = (link: string, img: HTMLElement): HTMLElement => {
 	a.appendChild(img);
 	return a;
 };
-

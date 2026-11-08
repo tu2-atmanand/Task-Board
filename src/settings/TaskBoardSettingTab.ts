@@ -10,9 +10,9 @@ import {
 	SettingDefinition,
 	SettingDefinitionGroup,
 	SettingDefinitionItem,
-	SettingDefinitionPage,
 } from "obsidian";
 import TaskBoard from "../../main.js";
+import { PropertyConfigurationModal } from "../modals/PropertyConfigurationModal.js";
 import {
 	globalSettingsData,
 	SupportedPropertiesConfig,
@@ -708,241 +708,116 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	}
 
 	private renderKeyMappingRow(
+		container: HTMLElement,
 		current: SupportedPropertiesConfig,
 		propertyGroup: "default" | "custom",
-		isNew = false,
-	): SettingDefinitionPage {
-		return {
-			type: "page",
-			name: current.name,
-			// desc: this.createPropertySummaryDescription(current),
-			items: [
-				this.renderSupportedPropertyConfigurationPage(
-					current,
-					propertyGroup,
-					isNew,
-				),
-			],
-		};
+		onEdit: () => void,
+		onMove: (direction: -1 | 1) => void,
+		canMoveUp: boolean,
+		canMoveDown: boolean,
+		onDelete?: () => void,
+	): HTMLElement {
+		const row = container.createDiv("task-board-property-row");
+		row.dataset.propertyId = current.id;
+		const info = row.createDiv("task-board-property-info");
+		const heading = info.createDiv("task-board-property-heading");
+		const left = heading.createDiv("task-board-property-heading-left");
+		const icon = left.createSpan("task-board-property-icon");
+		if (current.icon) setIcon(icon, current.icon);
+		else icon.setText(current.emoji || "");
+		left.createSpan({
+			cls: "task-board-property-name",
+			text: current.name,
+		});
+		heading.createSpan({
+			cls: `task-board-property-type task-board-property-type-${current.type}`,
+			text: current.type,
+		});
+
+		info.createDiv({
+			cls: "task-board-property-description",
+			text: current.desc || "",
+		});
+
+		const footer = info.createDiv("task-board-property-footer");
+		const values = footer.createDiv("task-board-property-values");
+		this.createPropertyValuePill(values, "Key", current.key);
+		this.createPropertyValuePill(values, "ID", current.id);
+
+		const actions = footer.createDiv("task-board-property-actions");
+		this.createPropertyActionButton(
+			actions,
+			"arrow-up",
+			"Move property up",
+			() => onMove(-1),
+			"move-up-btn",
+		).disabled = !canMoveUp;
+		this.createPropertyActionButton(
+			actions,
+			"arrow-down",
+			"Move property down",
+			() => onMove(1),
+			"move-down-btn",
+		).disabled = !canMoveDown;
+		this.createPropertyActionButton(actions, "pencil", t("edit"), onEdit);
+		if (propertyGroup === "custom" && onDelete) {
+			this.createPropertyActionButton(
+				actions,
+				"trash",
+				t("delete"),
+				onDelete,
+				"delete-btn",
+			);
+		}
+		return row;
 	}
 
-	private createPropertySummaryDescription(
-		property: SupportedPropertiesConfig,
-	): DocumentFragment {
-		return createFragment((summary) => {
-			const root = summary.createDiv("task-board-property-summary");
-
-			// Row-1 = Icon + Title (on Left) | Type (on Right)
-			const heading = root.createDiv(
-				"task-board-property-summary-heading",
-			);
-			const headingLeft = heading.createDiv(
-				"task-board-property-summary-heading-left",
-			);
-			const icon = headingLeft.createSpan({
-				cls: "task-board-property-summary-heading-icon",
-			});
-
-			if (property.icon) setIcon(icon, property.icon);
-			else icon.setText(property.emoji || "");
-
-			headingLeft.createSpan({
-				cls: "task-board-property-summary-heading-name",
-				text: property.name,
-			});
-			const headingRight = heading.createDiv(
-				"task-board-property-summary-heading-right",
-			);
-			headingRight.createSpan({
-				cls: `task-board-property-summary-type task-board-property-type-${property.type}`,
-				text: property.type,
-			});
-
-			// Row-2 = Description (Will only show description for now)
-			const details = root.createDiv(
-				"task-board-property-summary-details",
-			);
-			const detailValues = [
-				// ["Key", property.key],
-				// ["Frontmatter", property.id],
-				["Description", property.desc],
-				// ["Emoji", property.emoji],
-				// [
-				// 	"Hidden in notes",
-				// 	property.hidePropertyInNotesForInlineTasks ? "Yes" : "No",
-				// ],
-				// [
-				// 	"Default",
-				// 	Array.isArray(property.defaultValue)
-				// 		? property.defaultValue.join(", ")
-				// 		: String(property.defaultValue),
-				// ],
-			];
-			for (const [label, value] of detailValues) {
-				const detail = details.createDiv(
-					"task-board-property-summary-detail",
-				);
-				// detail.createSpan({
-				// 	cls: "task-board-property-summary-label",
-				// 	text: `${label}:`,
-				// });
-				detail.createSpan({ text: value });
-			}
-
-			const properties = this.globalSettings.defaultProperties.includes(
-				property,
-			)
-				? this.globalSettings.defaultProperties
-				: this.globalSettings.customProperties;
-			const orderedProperties = properties
-				.slice()
-				.sort((a, b) => a.rank - b.rank);
-			const index = orderedProperties.indexOf(property);
-
-			// Row-3 = Up and Down arrow icons to move the item up and down
-			const controls = root.createDiv(
-				"task-board-property-summary-order-controls",
-			);
-			for (const [direction, iconName, label] of [
-				[-1, "arrow-up", "Move property up"],
-				[1, "arrow-down", "Move property down"],
-			] as const) {
-				const button = controls.createEl("button", {
-					cls: "clickable-icon",
-					attr: {
-						type: "button",
-						"aria-label": label,
-						title: label,
-					},
-				});
-				setIcon(button, iconName);
-				button.disabled =
-					direction < 0
-						? index <= 0
-						: index < 0 || index >= orderedProperties.length - 1;
-				button.addEventListener("click", (event) => {
-					event.preventDefault();
-					event.stopPropagation();
-					this.moveProperty(properties, property, direction);
-				});
-			}
+	private createPropertyValuePill(
+		container: HTMLElement,
+		label: string,
+		value: string,
+	): void {
+		const pill = container.createDiv("task-board-property-value-pill");
+		pill.createSpan({
+			cls: "task-board-property-value-label",
+			text: label,
+		});
+		pill.createSpan({
+			cls: "task-board-property-value",
+			text: value || "—",
 		});
 	}
 
-	private renderPropertiesConfigurationSection(
-		contentEl: HTMLElement,
-		type: string,
-	): SettingDefinitionItem[] {
-		const prepareHost = (setting: Setting): HTMLElement => {
-			const host = setting.settingEl;
-			host.empty();
-			host.removeClass("setting-item");
-			host.addClass(
-				"task-board-settings-tab-root",
-				"task-board-settings-native-page-root",
-				"task-board-key-mapping-search-item",
-			);
-			return host;
-		};
-
-		if (type === "default") {
-			return [
-				{
-					name: "",
-					searchable: false,
-					render: (setting) => {
-						const host = prepareHost(setting);
-						const explanation = host.createDiv(
-							"setting-item-description task-board-key-mappings-help",
-						);
-						explanation.createEl("p", {
-							text: t("default-properties-mapping-info"),
-						});
-						const title = t("default-properties-mapping");
-						return attachDeclarativeSettingsPageTitleAction(
-							host,
-							title,
-							[
-								"DOCS-039 Key mappings",
-								"DOCS-018 Task properties",
-							].map(
-								(target) =>
-									buildNativeSettingsDocsAction(title, target)
-										.action,
-							),
-						);
-					},
-				},
-				...this.globalSettings.defaultProperties
-					.slice()
-					.sort((a, b) => a.rank - b.rank)
-					.map((mapping) => ({
-						...this.renderKeyMappingRow(mapping, "default"),
-						aliases: [
-							mapping.name,
-							mapping.id,
-							mapping.type,
-							"keymapping",
-							"key mappings",
-							"frontmatter key",
-						],
-						class: "task-board-property-listitem",
-					})),
-			];
-		} else {
-			return [
-				{
-					name: "",
-					searchable: false,
-					render: (setting) => {
-						const host = prepareHost(setting);
-						const explanation = host.createDiv(
-							"setting-item-description task-board-key-mappings-help",
-						);
-						explanation.createEl("p", {
-							text: t("custom-properties-mapping-info"),
-						});
-						const title = t("custom-properties-mapping");
-						return attachDeclarativeSettingsPageTitleAction(
-							host,
-							title,
-							[
-								"DOCS-039 Key mappings",
-								"DOCS-018 Task properties",
-							].map(
-								(target) =>
-									buildNativeSettingsDocsAction(title, target)
-										.action,
-							),
-						);
-					},
-				},
-				...this.globalSettings.customProperties
-					.slice()
-					.sort((a, b) => a.rank - b.rank)
-					.map((mapping) => ({
-						...this.renderKeyMappingRow(mapping, "custom"),
-						aliases: [
-							mapping.name,
-							mapping.id,
-							mapping.type,
-							"keymapping",
-							"key mappings",
-							"frontmatter key",
-						],
-					})),
-				this.renderKeyMappingRow(
-					this.createNewCustomProperty(),
-					"custom",
-					true,
-				),
-			];
-		}
+	private createPropertyActionButton(
+		container: HTMLElement,
+		icon: string,
+		label: string,
+		onClick: () => void,
+		className = "edit-btn",
+	): HTMLButtonElement {
+		const button = container.createEl("button", {
+			cls: `task-board-property-action ${className}`,
+			attr: {
+				type: "button",
+				title: label,
+				"aria-label": label,
+			},
+		});
+		setIcon(button, icon);
+		button.addEventListener("click", (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			onClick();
+		});
+		return button;
 	}
 
 	private createNewCustomProperty(): SupportedPropertiesConfig {
 		const existingIds = new Set(
-			this.globalSettings.customProperties.map((property) => property.id),
+			[
+				...this.globalSettings.defaultProperties,
+				...this.globalSettings.customProperties,
+			].map((property) => property.id),
 		);
 		let suffix = this.globalSettings.customProperties.length + 1;
 		let id = `custom-property-${suffix}`;
@@ -975,30 +850,279 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 	private async moveProperty(
 		properties: SupportedPropertiesConfig[],
-		current: SupportedPropertiesConfig,
+		property: SupportedPropertiesConfig,
 		direction: -1 | 1,
-	) {
+		renderRows: () => void,
+	): Promise<void> {
 		const orderedProperties = properties
 			.slice()
 			.sort((a, b) => a.rank - b.rank);
-		const index = orderedProperties.indexOf(current);
-		const targetIndex = index + direction;
+		const currentIndex = orderedProperties.indexOf(property);
+		const targetIndex = currentIndex + direction;
 		if (
-			index < 0 ||
+			currentIndex < 0 ||
 			targetIndex < 0 ||
 			targetIndex >= orderedProperties.length
 		)
 			return;
 
-		[orderedProperties[index], orderedProperties[targetIndex]] = [
-			orderedProperties[targetIndex],
-			orderedProperties[index],
-		];
-		orderedProperties.forEach((property, rank) => {
-			property.rank = rank + 1;
+		const previousRanks = properties.map((item) => ({
+			item,
+			rank: item.rank,
+		}));
+		orderedProperties.splice(currentIndex, 1);
+		orderedProperties.splice(targetIndex, 0, property);
+		orderedProperties.forEach((item, index) => {
+			item.rank = index + 1;
 		});
-		await this.settingsManager.saveSettings();
-		this.updateNativeSettingsDefinitions();
+		try {
+			await this.settingsManager.saveSettings();
+			renderRows();
+		} catch (error) {
+			previousRanks.forEach(({ item, rank }) => {
+				item.rank = rank;
+			});
+			console.error("Failed to save property order", error);
+			new Notice("Failed to save property order.");
+			renderRows();
+		}
+	}
+
+	private renderPropertiesConfigurationSection(
+		_contentEl: HTMLElement,
+		type: "default" | "custom",
+	): SettingDefinitionItem[] {
+		const propertyGroup = type;
+		const properties =
+			propertyGroup === "default"
+				? this.globalSettings.defaultProperties
+				: this.globalSettings.customProperties;
+		const pageTitle = t(`${propertyGroup}-properties-mapping`);
+		const helpText = t(`${propertyGroup}-properties-mapping-info`);
+
+		return [
+			{
+				name: "",
+				searchable: false,
+				aliases: properties.flatMap((property) => [
+					property.name,
+					property.id,
+					property.key,
+					property.type,
+				]),
+				render: (setting) => {
+					const host = setting.settingEl;
+					host.empty();
+					host.removeClass("setting-item");
+					host.addClass(
+						"task-board-property-list",
+						"task-board-settings-tab-root",
+					);
+
+					const help = host.createDiv(
+						"setting-item-description task-board-key-mappings-help",
+					);
+					help.createEl("p", { text: helpText });
+
+					const list = host.createDiv(
+						"task-board-property-list-items",
+					);
+					const renderRows = () => {
+						list.empty();
+						const orderedProperties = properties
+							.slice()
+							.sort((a, b) => a.rank - b.rank);
+						if (orderedProperties.length === 0) {
+							list.createDiv({
+								cls: "task-board-property-empty-message",
+								text: "No properties configured.",
+							});
+						}
+
+						orderedProperties.forEach((property, index) => {
+							this.renderKeyMappingRow(
+								list,
+								property,
+								propertyGroup,
+								() => {
+									new PropertyConfigurationModal(
+										this.app,
+										property,
+										propertyGroup,
+										async (updatedProperty) => {
+											const duplicate = [
+												...this.globalSettings.defaultProperties,
+												...this.globalSettings.customProperties,
+											].find(
+												(candidate) =>
+													candidate !== property &&
+													candidate.id ===
+														updatedProperty.id,
+											);
+											if (duplicate) {
+												throw new Error(
+													`The property key "${updatedProperty.id}" is already in use.`,
+												);
+											}
+											const shouldShowReloadNotice =
+												property.hidePropertyInNotesForInlineTasks !==
+												updatedProperty.hidePropertyInNotesForInlineTasks;
+											const previousProperty = {
+												...property,
+											};
+											Object.assign(
+												property,
+												updatedProperty,
+											);
+											try {
+												await this.settingsManager.saveSettings();
+											} catch (error) {
+												Object.assign(
+													property,
+													previousProperty,
+												);
+												throw error;
+											}
+											renderRows();
+											if (shouldShowReloadNotice)
+												this.showReloadNoticeIfNeeded();
+										},
+									).open();
+								},
+								(direction) => {
+									void this.moveProperty(
+										properties,
+										property,
+										direction,
+										renderRows,
+									);
+								},
+								index > 0,
+								index < orderedProperties.length - 1,
+								propertyGroup === "custom"
+									? () => {
+											const index =
+												properties.indexOf(property);
+											if (index < 0) return;
+											const previousRanks =
+												properties.map((item) => ({
+													item,
+													rank: item.rank,
+												}));
+											properties.splice(index, 1);
+											this.normalizePropertyRanks(
+												properties,
+											);
+											void (async () => {
+												try {
+													await this.settingsManager.saveSettings();
+													renderRows();
+												} catch (error) {
+													properties.splice(
+														index,
+														0,
+														property,
+													);
+													previousRanks.forEach(
+														({ item, rank }) => {
+															item.rank = rank;
+														},
+													);
+													console.error(
+														"Failed to delete property",
+														error,
+													);
+													new Notice(
+														"Failed to delete property.",
+													);
+													renderRows();
+												}
+											})();
+										}
+									: undefined,
+							);
+						});
+					};
+
+					renderRows();
+
+					if (propertyGroup === "custom") {
+						new Setting(host).addButton((button) =>
+							button
+								.setButtonText("Add custom property")
+								.setCta()
+								.onClick(() => {
+									const newProperty =
+										this.createNewCustomProperty();
+									new PropertyConfigurationModal(
+										this.app,
+										newProperty,
+										"custom",
+										async (updatedProperty) => {
+											const duplicate = [
+												...this.globalSettings.defaultProperties,
+												...this.globalSettings.customProperties,
+											].some(
+												(property) =>
+													property.id ===
+													updatedProperty.id,
+											);
+											if (duplicate) {
+												throw new Error(
+													`The property key "${updatedProperty.id}" is already in use.`,
+												);
+											}
+											const previousRanks = properties.map(
+												(property) => ({
+													property,
+													rank: property.rank,
+												}),
+											);
+											properties.push(updatedProperty);
+											this.normalizePropertyRanks(
+												properties,
+											);
+											try {
+												await this.settingsManager.saveSettings();
+											} catch (error) {
+												properties.pop();
+												previousRanks.forEach(
+													({ property, rank }) => {
+														property.rank = rank;
+													},
+												);
+												throw error;
+											}
+											renderRows();
+										},
+										true,
+									).open();
+								}),
+						);
+					}
+
+					const cleanupTitleAction =
+						attachDeclarativeSettingsPageTitleAction(
+							host,
+							pageTitle,
+							[
+								"DOCS-039 Key mappings",
+								"DOCS-018 Task properties",
+							].map(
+								(target) =>
+									buildNativeSettingsDocsAction(
+										pageTitle,
+										target,
+									).action,
+							),
+						);
+
+					return () => {
+						cleanupTitleAction?.();
+					};
+				},
+			},
+		];
 	}
 
 	hide(): void {

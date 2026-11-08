@@ -53,7 +53,7 @@ export interface TagColor {
  * This can be default ones or custom properties added by user.
  */
 export interface SupportedPropertiesConfig {
-	key: string; // This is the value used to store this property in task cache. For customProperties, this will be same as id below.
+	key: string; // This is the value used to store this property in task cache. For customProperties, this will be same as id below. User cannot change this.
 	id: string; // for frontmatter, dataview format inline-tasks and other use-cases
 	name: string; // which will be visible in UI
 	desc: string; // If user wants to explain something about the property.
