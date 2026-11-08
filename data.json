@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0-beta-5",
+  "version": "2.0.0-beta-6",
   "data": {
     "lang": "en",
     "openOnStartup": false,
@@ -14,7 +14,7 @@
       "folders": {
         "polarity": 3,
         "values": [
-          "Daily_Notes"
+          "Daily_Notes/"
         ]
       },
       "frontmatter": {
@@ -55,7 +55,9 @@
       "priority",
       "filePath",
       "tags",
-      "dependsOn"
+      "dependsOn",
+      "subTasks",
+      "description"
     ],
     "taskCardStyle": "bases",
     "showVerticalScroll": true,
@@ -97,49 +99,56 @@
         "name": "Todo",
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
-        "type": "TODO"
+        "type": "TODO",
+        "lucideIcon": ""
       },
       {
         "symbol": "<",
         "name": "Ready to start",
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
-        "type": "TODO"
+        "type": "TODO",
+        "lucideIcon": ""
       },
       {
         "symbol": "?",
         "name": "In Review",
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
-        "type": "TODO"
+        "type": "TODO",
+        "lucideIcon": ""
       },
       {
         "symbol": "/",
         "name": "In Progress",
         "nextStatusSymbol": "x",
         "availableAsCommand": true,
-        "type": "IN_PROGRESS"
+        "type": "IN_PROGRESS",
+        "lucideIcon": ""
       },
       {
         "symbol": "x",
         "name": "Done",
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
-        "type": "DONE"
+        "type": "DONE",
+        "lucideIcon": ""
       },
       {
         "symbol": "X",
         "name": "Completed",
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
-        "type": "DONE"
+        "type": "DONE",
+        "lucideIcon": ""
       },
       {
         "symbol": "-",
         "name": "Cancelled",
         "nextStatusSymbol": "x",
         "availableAsCommand": true,
-        "type": "CANCELLED"
+        "type": "CANCELLED",
+        "lucideIcon": ""
       }
     ],
     "compatiblePlugins": {
@@ -248,13 +257,13 @@
     ],
     "hiddenTaskProperties": [],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2296,
+    "uniqueIdCounter": 2304,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
       "viewedType": "kanban",
       "boardIndex": 1,
-      "settingTab": 1,
+      "settingTab": 2,
       "taskId": "",
       "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
     },
@@ -437,6 +446,42 @@
       }
     ],
     "enableDragnDropTouch": false,
-    "ribbonIconAction": "lastBoard"
+    "ribbonIconAction": "menu",
+    "propertiesVisibleInUI": [
+      "checkbox",
+      "id",
+      "title",
+      "subTasksMinimized",
+      "descriptionMinimized",
+      "status",
+      "tags",
+      "time",
+      "reminder",
+      "priority",
+      "createdDate",
+      "startDate",
+      "scheduledDate",
+      "dueDate",
+      "completionDate",
+      "cancelledDate",
+      "dependsOn",
+      "filePath"
+    ],
+    "cardDoubleClickAction": "none",
+    "propertiesHiddenInNotes": [],
+    "defaultProperties": [
+      {
+        "id": "id",
+        "name": "ID",
+        "desc": "Property to apply a uniqu ID to the task to explicitely identify and find it from whole vault. Will be also used for other features.",
+        "type": "text",
+        "emoji": "🆔",
+        "hidePropertyInNotesForInlineTasks": false,
+        "icon": "id",
+        "defaultValue": "",
+        "rank": 1
+      }
+    ],
+    "customProperties": []
   }
 }
