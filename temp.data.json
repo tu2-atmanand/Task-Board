@@ -1046,7 +1046,7 @@
         }
       ],
       "cardSectionsVisibility": "hideBoth",
-      "hiddenTaskProperties": [],
+      "propertiesHiddenInNotes": [],
       "taskPropertyFormat": "3",
       "taskNoteDefaultLocation": "",
       "autoAddUniqueID": true,
@@ -1060,7 +1060,7 @@
         "settingTab": 1
       },
       "taskNoteIdentifierTag": "task",
-      "doubleClickCardToEdit": "noteInTab",
+      "cardDoubleClickAction": "noteInTab",
       "boundTaskCompletionToChildTasks": true,
       "defaultStartTime": "23:59",
       "archivedTBNotesFolderPath": "",
@@ -1167,7 +1167,7 @@
         "scrollThresholdPercent": 80
       },
       "safeGuardFeature": true,
-      "visiblePropertiesList": [
+      "propertiesVisibleInUI": [
         "id",
         "priority",
         "tags",

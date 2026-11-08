@@ -2,194 +2,206 @@
 
 ## System Information
 
-- **Obsidian version**: 1.12.7
-- **Installer version**: 1.12.7
+- **Obsidian version**: 1.14.5
+- **Installer version**: 1.14.5
 - **Operating system**: Windows 10 Home Single Language 10.0.19045
 - **Use [[Wikilinks]]**: true
 - **Base color scheme**: dark
 - **Community theme**: none
 - **Snippets enabled**: 0
-- **Plugins installed**: 56
+- **Plugins installed**: 57
 - **Plugins enabled**: 
-  - Task Board v2.0.0-beta-5
   - Advanced Debug Mode v1.9.1
   - Plugin Reloader v0.0.3
   - Tasks v7.22.0
+  - Task Board v2.0.0-beta-5
 
 ## Recent Bug Reports
 
-Timestamp : 2026-06-14T11:30:27
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
-
-Timestamp : 2026-06-14T11:34:48
-ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-ERROR: Same id is present on two tasks
-```
-
--------------
-
-Timestamp : 2026-06-14T11:43:03
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
-
-Timestamp : 2026-06-14T22:37:24
-ID : 141
-Message : 
-Context : DragDropTasksManager.ts/handleColumnDragOverEvent
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-No source column data available for dragover.
-SourceColumn=null
-```
-
--------------
-
-Timestamp : 2026-06-14T22:37:25
-ID : 142
-Message : 
-Context : DragDropTasksManager.ts/handleDropEvent
-Version : 2.0.0-beta-4
-
-#### Bug Content
-```log
-No current drag data available for drop operation.
-currentDragData=null
-```
-
--------------
-
-Timestamp : 2026-06-15T00:03:36
+Timestamp : undefined
 ID : 196
-Message : 
-Context : TaskBoardEmbedComponent.tsx/loadFile
-Version : 2.0.0-beta-5
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-06-15T00:04:23
-ID : 196
-Message : 
-Context : TaskBoardEmbedComponent.tsx/loadFile
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
-```
-
--------------
-
-Timestamp : 2026-06-15T00:06:35
-ID : 196
-Message : 
-Context : TaskBoardEmbedComponent.tsx/loadFile
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
-```
-
--------------
-
-Timestamp : 2026-06-15T00:08:04
-ID : 196
-Message : 
-Context : TaskBoardEmbedComponent.tsx/loadFile
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-Error loading task board for embed: TypeError: Cannot read properties of undefined (reading 'contains')
-```
-
--------------
-
-Timestamp : 2026-06-15T00:34:29
+Timestamp : undefined
 ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
-Version : 2.0.0-beta-5
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-ERROR: Same id is present on two tasks
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-06-15T09:45:16
+Timestamp : undefined
 ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
-Version : 2.0.0-beta-5
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-ERROR: Same id is present on two tasks
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-06-15T10:12:58
+Timestamp : undefined
 ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
-Version : 2.0.0-beta-5
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-ERROR: Same id is present on two tasks
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-06-15T10:19:59
+Timestamp : undefined
 ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
-Version : 2.0.0-beta-5
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
 
 #### Bug Content
 ```log
-ERROR: Same id is present on two tasks
+undefined
 ```
 
 -------------
 
-Timestamp : 2026-06-15T10:48:42
+Timestamp : undefined
+ID : 197
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 197
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 17
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 197
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 197
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 17
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : undefined
+ID : 197
+Message : undefined
+Context : undefined
+Version : Older than 1.9.3
+
+#### Bug Content
+```log
+undefined
+```
+
+-------------
+
+Timestamp : 2026-11-03T22:38:27
+ID : 131
+Message : 
+Context : TaskBoardViewContent.tsx/loading boards and tasks useEffect
+Version : 1.10.12
+
+#### Bug Content
+```log
+No need to worry about this bug, if its appearing on the fresh install.
+TypeError: Cannot read properties of undefined (reading 'tasksCacheFilePath')
+```
+
+-------------
+
+Timestamp : 2026-11-04T21:35:28
+ID : 185
+Message : 
+Context : TaskBoardView.tsx/onOpen
+Version : 2.0.0-beta-5
+
+#### Bug Content
+```log
+There was an issue with opening the last viewed board. lastViewedBoardData is undefined
+```
+
+-------------
+
+Timestamp : 2026-11-04T21:38:35
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -202,7 +214,7 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-06-15T11:07:44
+Timestamp : 2026-11-04T22:00:20
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -215,20 +227,7 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-06-15T11:13:28
-ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-ERROR: Same id is present on two tasks
-```
-
--------------
-
-Timestamp : 2026-06-15T11:45:49
+Timestamp : 2026-11-04T23:21:36
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -241,7 +240,7 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-10-01T09:35:26
+Timestamp : 2026-11-04T23:30:10
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -254,20 +253,20 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-10-01T09:35:46
-ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
+Timestamp : 2026-11-06T09:43:03
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
 Version : 2.0.0-beta-5
 
 #### Bug Content
 ```log
-ERROR: Same id is present on two tasks
+No valid statuses after filtering
 ```
 
 -------------
 
-Timestamp : 2026-10-18T23:00:33
+Timestamp : 2026-11-06T10:41:50
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown

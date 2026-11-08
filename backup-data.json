@@ -38,7 +38,7 @@
     "showModifiedFilesNotice": true,
     "scanMode": "automatic",
     "columnWidth": "300px",
-    "visiblePropertiesList": [
+    "propertiesVisibleInUI": [
       "title",
       "tags",
       "time",
@@ -78,7 +78,7 @@
       }
     ],
     "editButtonAction": "popUp",
-    "doubleClickCardToEdit": "none",
+    "cardDoubleClickAction": "none",
     "universalDate": "due",
     "tagColorsType": "tagBg",
     "customStatuses": [
@@ -248,7 +248,7 @@
         "targetColumn": "Completed"
       }
     ],
-    "hiddenTaskProperties": [],
+    "propertiesHiddenInNotes": [],
     "autoAddUniqueID": false,
     "uniqueIdCounter": 670,
     "experimentalFeatures": false,
