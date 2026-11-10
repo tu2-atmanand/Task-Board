@@ -12,7 +12,7 @@ import {
 	SettingDefinitionItem,
 } from "obsidian";
 import TaskBoard from "../../main.js";
-import { PropertyConfigurationModal } from "../modals/PropertyConfigurationModal.js";
+import { PropertyConfigurationModal } from "../ui/modals/PropertyConfigurationModal.js";
 import {
 	globalSettingsData,
 	SupportedPropertiesConfig,

@@ -48,14 +48,14 @@ import {
 	CustomStatus,
 } from "../interfaces/GlobalSettings.js";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "../interfaces/Icons.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { CustomStatusModal } from "../modals/CustomStatusConfigurator.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
+import { CustomStatusModal } from "../ui/modals/CustomStatusConfigurator.js";
 import {
 	normalizeTaskIconValue,
 	openIconPickerModal,
 	showIconPicker,
-} from "../modals/icon_picker/index.js";
-import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/TasksPluginRegularExpr.js";
+} from "../ui/modals/icon_picker/index.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { CommunityPlugins } from "../services/CommunityPlugins.js";
 import {
 	getFileSuggestions,
@@ -63,7 +63,7 @@ import {
 	getFolderSuggestions,
 	getQuickAddPluginChoices,
 } from "../services/MultiSuggest.js";
-import { openScanFiltersModal } from "../services/OpenModals.js";
+import { openScanFiltersModal } from "../ui/modals/OpenModals.js";
 import { fetchTasksPluginCustomStatuses } from "../services/tasks_plugin/helpers.js";
 import { moveTasksCacheFileToNewPath } from "../utils/JsonFileOperations.js";
 import { downloadAndApplyLanguageFile } from "../utils/lang/helper.js";

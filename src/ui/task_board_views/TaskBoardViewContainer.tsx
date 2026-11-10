@@ -1,0 +1,1586 @@
+// src/components/TaskBoardViewContainer.tsx
+
+import { CirclePlus, RefreshCcw, Search, SearchX, Filter, Settings, EllipsisVertical, List, Network, BrickWall, SquareKanban, Save, PanelLeft, ChevronDownIcon, CalendarDays, Inbox as InboxIcon, Table2, ListIcon, PanelLeftClose } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { debounce, Platform, Menu, WorkspaceLeaf, Notice, Component } from "obsidian";
+import { t } from 'i18next';
+import TaskBoard from '../../../main.js';
+import { AdvancedFilter, Board, TaskBoardViewType } from '../../interfaces/BoardConfigs.js';
+import { DEFAULT_DATE_FORMAT } from '../../interfaces/Constants.js';
+import { DEFAULT_TASK_CACHE_KEYS, viewTypeNames, viewsPanelPropertiesToShow } from '../../interfaces/Enums.js';
+import { funnelIcon, ScanVaultIcon } from '../../interfaces/Icons.js';
+import { taskJsonMerged } from '../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../core/managers/BugReporter.js';
+import { eventEmitter } from '../../services/EventEmitter.js';
+import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '../modals/OpenModals.js';
+import { advancedFilterer } from '../../core/algorithms/AdvancedFilterer.js';
+import { loadTasksAndMerge } from '../../utils/JsonFileOperations.js';
+import { AdvancedFilterModal } from '../components/advanced_filterer/index.js';
+import { AdvancedFilterPopover } from '../components/advanced_filterer/Popover.js';
+import TableView from './TableView/TableView.js';
+import InboxView from './InboxView/InboxView.js';
+import CalendarView from './CalendarView/CalendarView.js';
+import KanbanBoardView from './KanbanView/KanbanBoardView.js';
+import ListView from './ListView/ListView.js';
+import MapView from './MapView/MapView.js';
+
+const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined, viewId: string }> = ({ plugin, currentBoardData, currentLeaf, viewId }) => {
+	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);
+	const [currentViewIndex, setCurrentViewIndex] = useState<number>(() => {
+		// Clamp lastViewIndex to valid range [0, views.length - 1] or default to 0
+		if (!currentBoardData?.views?.length) return 0;
+
+		if (viewId) {
+			const foundView = currentBoardData.views.find((view) => view.viewId === viewId)
+			if (foundView) return foundView.viewIndex;
+		}
+
+		return Math.max(0, Math.min(currentBoardData.lastViewIndex, currentBoardData.views.length - 1));
+	});
+	const [currentView, setCurrentView] = useState<TaskBoardViewType | undefined>(() => {
+		// const initialBoard = currentBoardData;
+		if (!currentBoardData?.views?.length) return undefined;
+
+		// Clamp lastViewIndex to valid range
+		const validIndex = Math.max(0, Math.min(currentBoardData.lastViewIndex, currentBoardData.views.length - 1));
+		return currentBoardData.views[validIndex];
+	});
+
+	// All UI Refs
+	const [isResizing, setIsResizing] = useState(false);
+	const drawerRef = useRef<HTMLDivElement>(null);
+	const filterPopoverRef = useRef<AdvancedFilterPopover | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [showSearchInput, setShowSearchInput] = useState(plugin.settings.data.searchQuery ? true : false);
+	const [viewWidth, setviewWidth] = useState<number>(currentLeaf ? currentLeaf.width : 800);
+	const [sidebarAnimating, setSidebarAnimating] = useState(false);
+
+	const [allTasks, setAllTasks] = useState<taskJsonMerged>();
+	const [filteredTasks, setFilteredTasks] = useState<taskJsonMerged | null>(null);
+	const [hardRefreshCount, setHardRefreshCount] = useState(0);
+	const [softRefreshCount, setSoftRefreshCount] = useState(0);
+	const [freshInstall, setFreshInstall] = useState(false);
+	const [searchQuery, setSearchQuery] = useState(plugin.settings.data.searchQuery ?? "");
+	const [showAllElements, setShowAllElements] = useState(true); // show elements for screens larger than 1000px
+	const [isSmallWidthScreen, setIsSmallWidthScreen] = useState(false); // show elements for screens smaller than 800px
+	const [boardDrawerVisible, setboardDrawerVisible] = useState(boardData.viewsPanel.isOpen);
+	const [editorModified, setEditorModified] = useState(plugin.editorModified);
+
+	/**
+	 * These below two states are a temporary solution using eventEmitters for now which is working fine. 
+	 * In reality, the map view should update the boardData inside the {@link taskBoardFileManager} 
+	 * cache, just like how Obsidian does an atomic transaction operations. In this scenario, if
+	 * in the future, this plugin has to do atomic changes to the same board file instantly, 
+	 * the data can be simply updated in the cache and then after sometime it will be 
+	 * written to the disk.
+	 */
+	const [mapViewDataUpdated, setMapViewDataUpdated] = useState<boolean>(false);
+	const viewPortDataOfMapViewUpdated = useRef<boolean>(false);
+
+	// // Derive current view from board data and currentViewId
+	// const currentView: View | undefined = useMemo(() => {
+	// 	if (boardData) {
+	// 		return getViewById(boardData, currentViewId);
+	// 	}
+	// 	return undefined;
+	// }, [boardData, currentViewId]);
+
+	useEffect(() => {
+		const handleResize = () => {
+			const taskBoardLeaf = currentLeaf;
+			if (taskBoardLeaf && taskBoardLeaf.width) {
+				setviewWidth(taskBoardLeaf.width);
+				activeDocument.documentElement.style.setProperty('--taskboard-leaf-width', `${taskBoardLeaf.width}px`);
+			}
+		};
+
+		handleResize();
+
+		if (currentLeaf) {
+			plugin.registerEvent(plugin.app.workspace.on("resize", handleResize));
+		}
+		return () => {
+			// cleanup if needed
+		};
+	}, []);
+
+	useEffect(() => {
+		setShowAllElements(viewWidth >= 800);
+		setIsSmallWidthScreen(viewWidth <= 400); // To design specifically for Mobile phones. This will allow to show desktop like UI for tablet screens.
+	}, [viewWidth]);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			// console.log("TASK BOARD : Does this run while switching boards...");
+			try {
+				// if (currentBoardData) {
+				// setCurrentBoardData(boardData);
+				// const lastView = currentBoardData.views.find((view) => view.viewId === currentBoardData.lastViewId);
+				// if (lastView)
+				// 	setCurrentViewIndex(currentBoardData.views.indexOf(lastView));
+				// setCurrentViewIndex(currentViewIndex);
+				// setCurrentView(currentBoardData.views[currentViewIndex]);
+
+				// // Get index of the new board from the registry based on the board id.
+				// const indexOfNewBoard = plugin.taskBoardFileManager.getBoardIndexFromRegistry(currentBoardData.id);;
+				// const registryLength = Object.keys(plugin.settings.data.taskBoardFilesRegistry || {}).length; setActiveBoardIndex(indexOfNewBoard ?? registryLength);
+
+				// // When board changes, automatically select the first view if available
+				// if (currentBoardData?.views?.length > 0) {
+				// 	const firstViewId = currentBoardData.views[0].viewId;
+				// 	setCurrentViewId(firstViewId);
+				// 	plugin.settings.data.lastViewHistory.currentViewId = firstViewId;
+				// }
+				// } else {
+				// 	const data = await plugin.taskBoardFileManager.loadBoardUsingIndex(activeBoardIndex);
+				// 	if (!data) throw "Board data not found.";
+
+				// 	setCurrentBoardData(data);
+				// }
+
+				// @todo - Hard refresh here means, the in-memory cahce (plugin.vaultScanner.tasksCache) will be replaced with the disk cache (tasks.json). This might cause loss of data, since in-memory cache is always to the latest state. If any issue is reported in the future, try changing this to soft-refresh.
+				const refreshedTasks = await loadTasksAndMerge(plugin, true);
+				if (refreshedTasks) {
+					setAllTasks(refreshedTasks);
+					setFreshInstall(false);
+				}
+			} catch (error) {
+				bugReporterManagerInsatance.addToLogs(
+					131,
+					`No need to worry about this bug, if its appearing on the fresh install.\n${String(error)}`,
+					"TaskBoardViewContainer.tsx/loading boards and tasks useEffect",
+				);
+				setFreshInstall(true);
+			}
+		};
+
+		void fetchData();
+	}, [hardRefreshCount]);
+
+	// Update currentView when currentViewIndex or boardData changes
+	useEffect(() => {
+		if (!boardData?.views?.length) {
+			setCurrentView(undefined);
+			return;
+		}
+
+		// Clamp currentViewIndex to valid range [0, views.length - 1]
+		const validIndex = Math.max(0, Math.min(currentViewIndex, boardData.views.length - 1));
+		setCurrentView(boardData.views[validIndex]);
+	}, [currentViewIndex, boardData?.views]);
+
+	// First memo: Filter tasks by board filter and search query (but don't segregate by column yet)
+	const filteredAndSearchedTasks = useMemo(() => {
+		if (allTasks && boardData?.views && currentViewIndex >= 0 && currentViewIndex < boardData.views.length) {
+			const boardFilters = boardData.boardFilters;
+			const viewFilter = boardData.views[currentViewIndex].viewFilters; // NOTE : We will have to do this because, the currentView state variable takes a long time to refresh when user switch the view -> which updates the currentViewIndex -> which updates the currentView
+			const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+
+			// Apply board filters to tasks
+			const boardFilteredTasks = {
+				...allTasks,
+				Pending: advancedFilterer(allTasks.Pending, boardFilters, dateFormat),
+				Completed: advancedFilterer(allTasks.Completed, boardFilters, dateFormat),
+			};
+
+			const viewLevelFilterTasks = {
+				...allTasks,
+				Pending: advancedFilterer(boardFilteredTasks.Pending, viewFilter, dateFormat),
+				Completed: advancedFilterer(boardFilteredTasks.Completed, viewFilter, dateFormat),
+			};
+
+			// Create a new board data object immutably
+			let newBoardData = { ...boardData, views: [...boardData.views] };
+			// Update task count in settings only if currentViewIndex is within bounds
+			if (currentViewIndex >= 0 && currentViewIndex < newBoardData.views.length) {
+				newBoardData.views[currentViewIndex] = {
+					...newBoardData.views[currentViewIndex],
+					taskCount: {
+						pending: viewLevelFilterTasks.Pending.length,
+						completed: viewLevelFilterTasks.Completed.length,
+					},
+				};
+			}
+			setCurrentBoardData(newBoardData);
+			setFilteredTasks(viewLevelFilterTasks);
+
+			// Apply search filter if search query exists
+			if (searchQuery.trim() !== "") {
+				const searchFiltered = handleSearchSubmit(viewLevelFilterTasks);
+				// setLoading(false);
+				return searchFiltered || viewLevelFilterTasks;
+			}
+
+			// setLoading(false);
+			return viewLevelFilterTasks;
+		}
+		return { Pending: [], Completed: [] };
+	}, [allTasks, softRefreshCount]);
+
+	useEffect(() => {
+		if (filteredAndSearchedTasks.Pending.length > 0 || filteredAndSearchedTasks.Completed.length > 0) {
+			setLoading(false);
+		}
+	}, [filteredAndSearchedTasks]);
+
+	const debouncedRefreshColumn = useCallback(
+		debounce(async () => {
+			try {
+				const refreshedTasks = await loadTasksAndMerge(plugin, false);
+				setAllTasks(refreshedTasks);
+				// setSoftRefreshCount((prev) => prev + 1);
+			} catch (error) {
+				bugReporterManagerInsatance.showNotice(28, "Error loading tasks on column refresh", String(error), "TaskBoardViewContainer.tsx/debouncedRefreshColumn");
+			}
+		}, 500),
+		[plugin]
+	);
+
+	useEffect(() => {
+		eventEmitter.on("SOFT_REFRESH", debouncedRefreshColumn);
+		return () => eventEmitter.off("SOFT_REFRESH", debouncedRefreshColumn);
+	}, [debouncedRefreshColumn]);
+
+	// Register all the EMITE event listeners
+	useEffect(() => {
+		const refreshBoardListener = () => {
+			setHardRefreshCount((prev) => prev + 1);
+		}
+
+		const refreshView = (viewId: string) => {
+			if (viewId === 'first-map') {
+				// Find the id of the first map-view
+				const mapView = boardData.views.find((view: TaskBoardViewType) => view.viewType === viewTypeNames.map)
+
+				if (mapView) {
+					// const viewIndex = boardData.views.indexOf(mapView);
+					handleViewSelect(mapView.viewIndex);
+				}
+				else {
+					new Notice("No map view available in this board. Please create atleast one map view.", 5000);
+					return;
+				}
+			}
+
+
+			// let updatedBoardData = boardData;
+			// updatedBoardData.lastViewId = newViewId;
+			// plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+
+			// setCurrentView(getViewById(boardData, newViewId));
+			// setCurrentBoardData(updatedBoardData);
+			// sleep(100);
+			// eventEmitter.emit('REFRESH_BOARD');
+
+		};
+
+		const handleMapDataUpdated = (eventData: { onlyviewport: boolean }) => {
+			if (eventData.onlyviewport)
+				viewPortDataOfMapViewUpdated.current = true;
+			else
+				setMapViewDataUpdated(true);
+		};
+
+		const handleMapDataSaved = () => {
+			setMapViewDataUpdated(false);
+			viewPortDataOfMapViewUpdated.current = false;
+
+		}
+
+		// Listen to editor modified state changes
+		const handleEditorModifiedChange = (modified: boolean) => {
+			setEditorModified(modified);
+		};
+
+		eventEmitter.on("REFRESH_BOARD", refreshBoardListener);
+		eventEmitter.on("SWITCH_VIEW", refreshView);
+		eventEmitter.on("MAP_UNSAVED", handleMapDataUpdated);
+		eventEmitter.on("MAP_SAVED", handleMapDataSaved);
+		eventEmitter.on("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+
+		return () => {
+			eventEmitter.off("REFRESH_BOARD", refreshBoardListener);
+			eventEmitter.off("SWITCH_VIEW", refreshView);
+			eventEmitter.off("MAP_UNSAVED", handleMapDataUpdated);
+			eventEmitter.off("MAP_SAVED", handleMapDataSaved);
+			eventEmitter.off("EDITOR_MODIFIED_CHANGED", handleEditorModifiedChange);
+		};
+	}, []);
+
+	const saveMapViewIfNeeded = async () => {
+		if (mapViewDataUpdated || viewPortDataOfMapViewUpdated.current) {
+			eventEmitter.emit("SAVE_MAP");
+			// setMapViewDataUpdated(false);
+			// viewPortDataOfMapViewUpdated.current = false;
+			// sleep(100);
+		}
+	}
+
+	const refreshBoardButton = useCallback(async () => {
+		await plugin.realTimeScanner.processAllUpdatedFiles(); //.then(() => console.log("Finished processing all updated files."));
+		await plugin.processCreateQueue(); //.then(() => console.log("Finished processing create queue."));
+		await plugin.processDeleteQueue(); //.then(() => console.log("Finished processing delete queue."));
+		await plugin.processRenameQueue(); //.then(() => console.log("Finished processing rename queue."));
+
+		window.setTimeout(() => {
+			eventEmitter.emit("REFRESH_BOARD");
+		}, 100);
+	}, []);
+
+	// function handleOpenTaskBoardActionsModal() {
+	// 	if (boardData)
+	// 		openTaskBoardActionsModal(plugin, boardData);
+	// }
+
+	function handleSearchButtonClick() {
+		void saveMapViewIfNeeded();
+
+		if (showSearchInput) {
+			setSearchQuery("");
+			// el.currentTarget.focus();
+			plugin.settings.data.searchQuery = "";
+
+			eventEmitter.emit("SOFT_REFRESH");
+			void plugin.saveSettings();
+			setShowSearchInput(false);
+		} else {
+			setSearchQuery(plugin.settings.data.searchQuery || "");
+			handleSearchSubmit();
+			setShowSearchInput(true);
+
+			window.setTimeout(() => {
+				if (searchInputElement) searchInputElement.current?.focus();
+			}, 200);
+
+			window.setTimeout(() => {
+				if (!searchInputElement.current?.isActiveElement() && searchQuery === "") setShowSearchInput(false);
+			}, 10000);
+		}
+	}
+
+	// function highlightMatch(text: string, query: string): string {
+	// 	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+	// 	return text.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`);
+	// }
+
+	function handleSearchSubmit(fileteredAllTasks?: taskJsonMerged): taskJsonMerged | undefined {
+		const lowerQuery = searchQuery.toLowerCase();
+		window.setTimeout(() => {
+			plugin.settings.data.searchQuery = lowerQuery;
+			void plugin.saveSettings();
+		}, 100);
+
+		if (!lowerQuery.trim()) {
+			eventEmitter.emit("REFRESH_COLUMN");
+
+			window.setTimeout(() => {
+				if (!searchInputElement.current?.isActiveElement() && plugin.settings.data.searchQuery === "") setShowSearchInput(false);
+			}, 10000)
+
+			return undefined;
+		}
+
+		let searchFilteredTasks: taskJsonMerged | undefined = fileteredAllTasks || filteredAndSearchedTasks;
+
+		if (fileteredAllTasks) {
+			searchFilteredTasks = {
+				Pending: fileteredAllTasks.Pending.filter((task) => {
+					if (lowerQuery.startsWith("file:")) {
+						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+					} else {
+						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
+						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						return titleMatch || bodyMatch;
+					}
+				}),
+				Completed: fileteredAllTasks.Completed.filter((task) => {
+					if (lowerQuery.startsWith("file:")) {
+						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+					} else {
+						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
+						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						return titleMatch || bodyMatch;
+					}
+				})
+			};
+		}
+
+		if (fileteredAllTasks)
+			return searchFilteredTasks;
+		else {
+			setAllTasks(searchFilteredTasks);
+			return undefined;
+		}
+	}
+
+	function handleFilterButtonClick(event: React.MouseEvent<HTMLButtonElement>) {
+		try {
+			void saveMapViewIfNeeded();
+
+			const boardFiltersPresent = boardData.boardFilters.filters.some((filter) => filter.status);
+			if (Platform.isMobile || Platform.isMacOS) {
+				// If its a mobile platform, then we will open a modal instead of popover.
+				const filterModal = new AdvancedFilterModal(
+					plugin, "view", boardData.id, boardFiltersPresent, currentView?.viewName
+				);
+
+				// Set initial filter state
+				if (boardData.views[currentViewIndex].viewFilters) {
+					window.setTimeout(() => {
+						// Use type assertion to resolve non-null issues
+						// const filterState = filterModal.liveFilterState as Filter;
+						if (filterModal.advancedFilterComponent) {
+							filterModal.advancedFilterComponent.loadFilterState(boardData.views[currentViewIndex].viewFilters);
+						}
+					}, 100);
+				}
+
+				// Set the close callback - mainly used for handling cancel actions
+				filterModal.filterCloseCallback = (filtersState) => {
+					if (filtersState) {
+						// Save the filter state to the board
+						let updatedcurrentBoardData = boardData;
+						updatedcurrentBoardData.views[currentViewIndex].viewFilters = filtersState;
+						setCurrentBoardData(updatedcurrentBoardData);
+						void plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
+
+						// Refresh the board view
+						window.setTimeout(() => {
+							eventEmitter.emit('REFRESH_BOARD');
+						}, 200);
+					}
+				};
+
+				filterModal.open();
+
+			} else {
+				// If the platform is not mobile, then we will open a popover near the button.
+
+				// Close existing popover if open
+				if (filterPopoverRef.current) {
+					filterPopoverRef.current.close();
+					filterPopoverRef.current = null;
+					return;
+				}
+
+				// Get button position
+				const buttonRect = event.currentTarget?.getBoundingClientRect();
+				const position = {
+					x: buttonRect?.left ?? 100,
+					y: buttonRect?.bottom ?? 100
+				};
+
+				// Create and show popover
+				const popover = new AdvancedFilterPopover(
+					plugin,
+					"view",
+					boardData.id,
+					boardFiltersPresent,
+					currentView?.viewName || "View",
+				);
+
+				// Load existing filter state if available
+				if (boardData.views[currentViewIndex].viewFilters) {
+					// Wait for component to be created and loaded
+					window.setTimeout(() => {
+						if (popover.advancedFilterComponent) {
+							popover.advancedFilterComponent.loadFilterState(boardData.views[currentViewIndex].viewFilters);
+						}
+					}, 100);
+				}
+
+				// Set up close callback to save filter state
+				popover.onClose = (filtersState?: AdvancedFilter) => {
+					if (filtersState) {
+						// Save the filter state to the board
+						let updatedcurrentBoardData = boardData;
+						updatedcurrentBoardData.views[currentViewIndex].viewFilters = filtersState;
+						setCurrentBoardData(updatedcurrentBoardData);
+						void plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
+
+						// Refresh the board view
+						window.setTimeout(() => {
+							eventEmitter.emit('REFRESH_BOARD');
+						}, 200);
+					}
+					filterPopoverRef.current = null;
+				};
+
+				popover.showAtPosition(position);
+				filterPopoverRef.current = popover;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(29, "Error showing filter popover", String(error), "TaskBoardViewContainer.tsx/handleFilterButtonClick");
+		}
+	}
+
+	function togglePropertyNameInSettings(propertyName: DEFAULT_TASK_CACHE_KEYS) {
+		let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
+
+		if (visibleProperties.includes(propertyName)) {
+			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
+			plugin.settings.data.propertiesVisibleInUI = visibleProperties;
+
+		} else {
+			let index = -1;
+			switch (propertyName) {
+				case DEFAULT_TASK_CACHE_KEYS.SubTasks:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+				case DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasks);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+				case DEFAULT_TASK_CACHE_KEYS.Description:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+				case DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized:
+					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Description);
+					if (index > -1)
+						visibleProperties.splice(index, 1);
+					break;
+			}
+			visibleProperties.push(propertyName);
+
+			plugin.settings.data.propertiesVisibleInUI = visibleProperties;
+		}
+
+		void plugin.saveSettings();
+		eventEmitter.emit("REFRESH_BOARD");
+	}
+
+	function handlePropertiesBtnClick(event: React.MouseEvent<HTMLButtonElement>) {
+		void saveMapViewIfNeeded();
+
+		const propertyMenu = new Menu();
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("show-hide-properties"));
+			item.setIsLabel(true);
+		});
+		propertyMenu.addSeparator();
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("id"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ID);
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ID))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("checkbox"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Checkbox);
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("status"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Status);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Status))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("priority"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Priority);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Priority))
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("tags"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Tags);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Tags))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("time"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Time);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Time))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("reminder"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Reminder);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Reminder))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("created-date"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CreatedDate);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CreatedDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("start-date"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.StartDate);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.StartDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("scheduled-date"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ScheduledDate);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ScheduledDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("due-date"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.DueDate);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DueDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("completed-date"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CompletionDate);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CompletionDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("cancelled-date"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CancelledDate);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CancelledDate))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("dependencies"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Dependencies);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("file-name"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FilePath);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePath))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("file-name-in-header"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("parent-folder"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ParentFolder);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ParentFolder))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("full-path"));
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FullPath);
+
+			})
+			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FullPath))
+		});
+
+		propertyMenu.addSeparator();
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("sub-tasks"));
+			const subTasksMenu = item.setSubmenu()
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("visible"))
+				item.onClick(() => {
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.SubTasks);
+
+				})
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
+			});
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("minimized"))
+				item.onClick(() => {
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
+
+				})
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
+			});
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(() => {
+					let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
+
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasks), 1);
+					}
+
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized), 1);
+					}
+
+					plugin.settings.data.propertiesVisibleInUI = visibleProperties;
+					void plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) && !plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
+			});
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("description"));
+			const descriptionMenu = item.setSubmenu()
+
+			descriptionMenu.addItem((item) => {
+				item.setTitle(t("visible"))
+				item.onClick(() => {
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Description);
+					void plugin.saveSettings();
+
+				})
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description));
+			});
+
+			descriptionMenu.addItem((item) => {
+				item.setTitle(t("minimized"))
+				item.onClick(() => {
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized);
+					void plugin.saveSettings();
+
+				})
+				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
+			});
+
+			descriptionMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(() => {
+					let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
+
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.Description)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Description), 1);
+					}
+
+					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized)) {
+						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized), 1);
+					}
+
+					plugin.settings.data.propertiesVisibleInUI = visibleProperties;
+					void plugin.saveSettings();
+					eventEmitter.emit("REFRESH_BOARD");
+				})
+				item.setChecked(!plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description) && !plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
+			});
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		propertyMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
+	function handleViewSelect(index: number) {
+		void saveMapViewIfNeeded();
+
+		if (index !== currentViewIndex) {
+			// Update the board's lastViewId to persist view selection
+			if (boardData?.views && index >= 0 && index < boardData.views.length) {
+				let updatedBoard = { ...boardData };
+				// updatedBoard.lastViewId = boardData.views[index].viewId;
+				updatedBoard.lastViewIndex = index;
+				setCurrentViewIndex(index);
+				setSearchQuery("");
+				plugin.settings.data.searchQuery = "";
+				// eventEmitter.emit("SOFT_REFRESH");
+				setSoftRefreshCount((prev) => prev + 1);
+
+				window.setTimeout(() => {
+					// eventEmitter.emit("REFRESH_BOARD");
+					// void plugin.saveSettings();
+					void plugin.taskBoardFileManager.saveBoard(updatedBoard);
+				}, 500);
+			}
+
+		}
+		// closeBoardSidebar(); // Close sidebar after selection
+	}
+
+	function toggleBoardSidebar() {
+		if (boardDrawerVisible) {
+			closeBoardSidebar();
+		} else {
+			openBoardSidebar();
+		}
+
+		setboardDrawerVisible(!boardDrawerVisible);
+
+		// Update the board's lastViewId to persist view selection
+		if (boardData) {
+			let updatedBoardData = { ...boardData };
+			updatedBoardData.viewsPanel.isOpen = !boardDrawerVisible;
+			plugin.taskBoardFileManager.debouncedSaveBoard(updatedBoardData);
+		}
+	}
+
+	function openBoardSidebar() {
+		setboardDrawerVisible(true);
+		setSidebarAnimating(true);
+	}
+
+	function closeBoardSidebar() {
+		setSidebarAnimating(false);
+		// Wait for animation to complete before hiding
+		window.setTimeout(() => {
+			setboardDrawerVisible(false);
+		}, 300); // Match animation duration
+	}
+
+	function openHeaderMoreOptionsMenu(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+		const sortMenu = new Menu();
+
+		sortMenu.addItem((item) => {
+			item.setTitle(t("quick-actions"));
+			item.setIsLabel(true);
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("refresh-the-board"));
+			item.setIcon("rotate-cw");
+			item.onClick(() => {
+				void refreshBoardButton();
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("show-hide-properties"));
+			item.setIcon("list");
+			item.onClick(() => {
+				handlePropertiesBtnClick(event);
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("open-board-filters-modal"));
+			item.setIcon(funnelIcon);
+			item.onClick(() => {
+				handleFilterButtonClick(event);
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("open-board-configuration-modal"));
+			item.setIcon("settings");
+			item.onClick(() => {
+				openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
+					// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+					setCurrentBoardData(updatedBoard);
+
+					window.setTimeout(() => {
+						eventEmitter.emit("REFRESH_BOARD");
+					}, 100);
+				}
+				)
+			});
+		});
+		sortMenu.addItem((item) => {
+			item.setTitle(t("scan-vault-modal"));
+			item.setIcon(ScanVaultIcon);
+			item.onClick(() => {
+				openScanVaultModal(plugin);
+			});
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		sortMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
+	function openBoardSidebarOption(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+		const propertyMenu = new Menu();
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("show-details"));
+			item.setIsLabel(true);
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("description"));
+			item.setIcon("");
+			item.setChecked(boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description))
+			item.onClick(() => {
+				if (boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description)) {
+					boardData.viewsPanel.propertiesToShow = boardData.viewsPanel.propertiesToShow.filter(prop => prop !== viewsPanelPropertiesToShow.Description);
+				} else {
+					boardData.viewsPanel.propertiesToShow.push(viewsPanelPropertiesToShow.Description);
+				}
+				setCurrentBoardData({ ...boardData });
+				void plugin.taskBoardFileManager.saveBoard(boardData);
+				window.setTimeout(() => {
+					eventEmitter.emit("REFRESH_BOARD");
+				}, 100);
+			});
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("progress"));
+			item.setIcon("");
+			item.setChecked(boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.progress))
+			item.onClick(() => {
+				if (boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.progress)) {
+					boardData.viewsPanel.propertiesToShow = boardData.viewsPanel.propertiesToShow.filter(prop => prop !== viewsPanelPropertiesToShow.progress);
+				} else {
+					boardData.viewsPanel.propertiesToShow.push(viewsPanelPropertiesToShow.progress);
+				}
+				setCurrentBoardData({ ...boardData });
+				void plugin.taskBoardFileManager.saveBoard(boardData);
+				window.setTimeout(() => {
+					eventEmitter.emit("REFRESH_BOARD");
+				}, 100);
+			});
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("header-style"));
+			item.setIsLabel(true);
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("buttons-belt"));
+			item.setIcon("");
+			item.setChecked(boardData.viewsPanel.buttonsBelt)
+			item.onClick(() => {
+				boardData.viewsPanel.buttonsBelt = !boardData.viewsPanel.buttonsBelt;
+				setCurrentBoardData({ ...boardData });
+				void plugin.taskBoardFileManager.saveBoard(boardData);
+
+				window.setTimeout(() => {
+					eventEmitter.emit("REFRESH_BOARD");
+				}, 100);
+			});
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("dropdown"));
+			item.setIcon("");
+			item.setChecked(!boardData.viewsPanel.buttonsBelt)
+			item.onClick(() => {
+				boardData.viewsPanel.buttonsBelt = !boardData.viewsPanel.buttonsBelt;
+				setCurrentBoardData({ ...boardData });
+
+				void plugin.taskBoardFileManager.saveBoard(boardData);
+				window.setTimeout(() => {
+					eventEmitter.emit("REFRESH_BOARD");
+				}, 100);
+			});
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		propertyMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent));
+	}
+
+	// Close sidebar when clicking outside or pressing escape
+	useEffect(() => {
+		function handleKeyDown(event: KeyboardEvent) {
+			if (event.key === 'Escape' && boardDrawerVisible) {
+				closeBoardSidebar();
+			}
+		}
+
+		if (boardDrawerVisible) {
+			activeDocument.addEventListener('keydown', handleKeyDown);
+			return () => activeDocument.removeEventListener('keydown', handleKeyDown);
+		}
+	}, [boardDrawerVisible]);
+
+	// Handle drawer resize
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isResizing || !drawerRef.current) return;
+
+			// Get the parent container's position
+			const parentRect = drawerRef.current.parentElement?.getBoundingClientRect();
+			if (!parentRect) return;
+
+			// Calculate new width based on mouse position
+			const newWidth = e.clientX - parentRect.left;
+
+			// Set minimum and maximum width constraints (e.g., 150px to 500px)
+			const minWidth = 150;
+			const maxWidth = 500;
+
+			if (newWidth >= minWidth && newWidth <= maxWidth) {
+				// Update the board data with the new width
+				const updatedBoard = { ...boardData };
+				updatedBoard.viewsPanel.width = newWidth;
+				setCurrentBoardData(updatedBoard);
+			}
+		};
+
+		const handleMouseUp = () => {
+			if (isResizing) {
+				setIsResizing(false);
+				// Save the updated board configuration
+				if (boardData) {
+					plugin.taskBoardFileManager.debouncedSaveBoard(boardData);
+				}
+			}
+		};
+
+		if (isResizing) {
+			activeDocument.addEventListener('mousemove', handleMouseMove);
+			activeDocument.addEventListener('mouseup', handleMouseUp);
+			return () => {
+				activeDocument.removeEventListener('mousemove', handleMouseMove);
+				activeDocument.removeEventListener('mouseup', handleMouseUp);
+			};
+		}
+	}, [isResizing, boardData, plugin]);
+
+	const getViewTypeIconComponent = (viewTypeName: viewTypeNames | undefined, size: number) => {
+		let viewType = viewTypeName ?? boardData.views[currentViewIndex].viewType;
+		switch (viewType) {
+			case viewTypeNames.kanban:
+				return <SquareKanban size={size} strokeWidth={1.5} />;
+			case viewTypeNames.table:
+				return <Table2 size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.inbox:
+				return <InboxIcon size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.map:
+				return <Network size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.calendar:
+				return <CalendarDays size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.list:
+				return <ListIcon size={size - 2} strokeWidth={1.5} />;
+			default:
+				return <BrickWall size={size - 2} strokeWidth={1.5} />;
+		}
+	}
+
+	// Update fade indicators on scroll
+	function updateScrollIndicators(element: HTMLElement) {
+		const { scrollLeft, scrollWidth, clientWidth } = element;
+
+		element.classList.toggle('can-scroll-left', scrollLeft > 0);
+		element.classList.toggle('can-scroll-right', scrollLeft < scrollWidth - clientWidth - 1);
+	}
+
+	/**
+	 * Enable horizontal scrolling via vertical mouse wheel
+	 * @param element - The scrollable container element
+	 */
+	function enableHorizontalWheelScroll(element: HTMLElement | null): () => void {
+		if (!element) return () => { };
+
+		const handleWheel = (event: WheelEvent) => {
+			// Only intercept vertical wheel events
+			if (event.deltaY === 0) return;
+
+			// Prevent default vertical scroll
+			event.preventDefault();
+
+			// Convert vertical delta to horizontal scroll
+			// Multiply by 1.5 for slightly faster scrolling (adjust as needed)
+			element.scrollLeft += event.deltaY * 1.5;
+		};
+
+		// Use { passive: false } to allow preventDefault()
+		element.addEventListener('wheel', handleWheel, { passive: false });
+		// Call this in your wheel handler + on mount/resize
+		element.addEventListener('scroll', () => updateScrollIndicators(element));
+		updateScrollIndicators(element); // Initial check
+
+		// Return cleanup function
+		return () => {
+			element.removeEventListener('wheel', handleWheel);
+		};
+	}
+	const leftHeaderSecRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		const cleanup = enableHorizontalWheelScroll(leftHeaderSecRef.current);
+		return cleanup; // Cleanup on unmount
+	}, []);
+
+	const viewDropdownRef = useRef<HTMLDivElement>(null);
+	const [showViewDropdown, setShowViewDropdown] = useState(false);
+	const searchInputElement = useRef<HTMLInputElement>(null);
+	// Close dropdown when clicking outside
+	useEffect(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (viewDropdownRef.current && !viewDropdownRef.current.contains(event.target as Node)) {
+				setShowViewDropdown(false);
+			}
+		}
+
+		if (showViewDropdown) {
+			activeDocument.addEventListener('mousedown', handleClickOutside);
+			return () => activeDocument.removeEventListener('mousedown', handleClickOutside);
+		}
+	}, [showViewDropdown]);
+
+	// Display a message that no views are present inside this board. Stop here only instead of moving with the rest of the code which is dependent on the views.
+	if (!currentView) {
+		return (
+			<div className="taskBoardViewContainer noViews">
+				<div className="loadingContainer">
+					<p>{t("no-views-in-board")}</p>
+					<button onClick={() => openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
+						setCurrentBoardData(updatedBoard);
+
+						window.setTimeout(() => {
+							eventEmitter.emit("REFRESH_BOARD");
+						}, 100);
+					})}>
+						{t("open-board-configure-modal")}
+					</button>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="taskBoardView">
+			{/* BOARD DRAWER TO LIST VIEW AND OTHER STUFF */}
+			<div
+				ref={drawerRef}
+				className={`boardSidebarDrawer ${boardDrawerVisible ? 'boardSidebarDrawer--open' : 'boardSidebarDrawer--closed'}`}
+				onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside sidebar
+				style={{ width: `${boardDrawerVisible ? boardData.viewsPanel.width : 0}px` }}
+			>
+				<div className="boardSidebar" style={{ width: `${boardData.viewsPanel.width}px` }}>
+					<div className="boardSidebarBoardHeader">
+						<div className='boardSidebarHeaderBoardName'>
+							<BrickWall
+								className="taskBoardHeaderPluginIcon"
+								size={24}
+								strokeWidth={1.5}
+								onClick={toggleBoardSidebar}
+								aria-label={boardDrawerVisible ? t("close-board-drawer") : t("open-board-drawer")}
+							/>
+							<h3>{boardData.name}</h3>
+						</div>
+						<p>{boardData.description}</p>
+					</div>
+
+					<div className="boardSidebarViewHeader">
+						<p>{t("your-views")}</p>
+						<div className="boardSidebarViewHeaderButtons">
+							<button
+								className="boardSidebarViewHeaderViewsOptionsBtn"
+								onClick={
+									openBoardSidebarOption
+								}
+								aria-label={t("panel-options")}
+							>
+								<EllipsisVertical size={18} strokeWidth={1.5} />
+							</button>
+						</div>
+					</div>
+
+					<div className="boardSidebarContent">
+						{boardData.views.length === 0 ? (
+							<div className="noViewsMessage">
+								{t("no-views-created-yet")}
+							</div>
+						) : (
+							<div className="boardSidebarContentBtnContainer">
+								{boardData.views.map((view, index) => (
+									<div
+										key={index}
+										className={`boardSidebarCard ${index === currentViewIndex ? 'boardSidebarCard--active' : ''}`}
+										onClick={() => handleViewSelect(index)}
+									>
+										<div className="boardSidebarCardTitle" >
+											{getViewTypeIconComponent(view.viewType, 20)}
+											<div className="boardSidebarCardTitleText">{view.viewName}</div>
+										</div>
+										{boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.Description) && (
+											<div className="boardSidebarCardDescription" >
+												{view?.description}
+											</div>
+										)}
+										{boardData.viewsPanel.propertiesToShow.contains(viewsPanelPropertiesToShow.progress) && (
+											<div className="taskCountContainerProgress" >
+												<div className={"taskCountContainerProgressBar"}>
+													<div
+														className="taskCountContainerProgressBarIndicator"
+														style={{
+															width: `${((view.taskCount.completed) / (view.taskCount.pending + view.taskCount.completed)) * 100}%`,
+														}}
+													/>
+												</div>
+												<span className="taskCountContainerProgressCount">
+													{(view.taskCount.completed)} / {view.taskCount.pending + view.taskCount?.completed}
+												</span>
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+
+			{/* Resizable Separator */}
+			{
+				boardDrawerVisible && (
+					<div
+						className="boardSidebarResizer"
+						onMouseDown={() => setIsResizing(true)}
+						aria-label={t("resize-drawer")}
+					/>
+				)
+			}
+
+			{/* MAIN VIEW CONTENT */}
+			<div className="taskBoardMainContent">
+				<div className="taskBoardHeader">
+					<div className="taskBoardHeaderLeftSec">
+						{boardData.views && boardData.views.length > 0 ? (
+							<>
+								<button
+									className="taskBoarHeaderLeftSecDrawerBtn"
+									onClick={toggleBoardSidebar}
+									aria-label={boardDrawerVisible ? t("close-board-drawer") : t("open-board-drawer")}
+								>{boardDrawerVisible ? (
+									<PanelLeftClose
+										className="taskBoarHeaderLeftSecDrawerIcon"
+										size={22}
+										strokeWidth={1.5}
+									/>
+								) : (
+									<PanelLeft
+										className="taskBoarHeaderLeftSecDrawerIcon"
+										size={22}
+										strokeWidth={1.5}
+									/>
+								)}</button>
+
+								{boardDrawerVisible ?
+									(
+										<span className="taskBoardViewDropdownName">
+											{currentView.viewName}
+										</span>
+									) : (
+										<>
+											{boardData.viewsPanel.buttonsBelt ? (
+												<div className="viewSwitcherBar" ref={leftHeaderSecRef}>
+													{boardData.views.map((view, index) => (
+														<button
+															key={index}
+															className={`viewTitleButton${index === currentViewIndex ? " Active" : ""}`}
+															onClick={() => handleViewSelect(index)}
+														>
+															{getViewTypeIconComponent(view.viewType, 20)}
+															{view.viewName}
+														</button>
+													))}
+												</div>
+											) : (
+												<div className="mobileBoardHeader">
+													<div
+														ref={viewDropdownRef}
+														className={`taskBoardViewDropdown`}
+														onClick={() => {
+															setShowViewDropdown(!showViewDropdown);
+														}}
+													>
+														<div className="taskBoardViewDropdownBtn">
+															<span className="taskBoardViewDropdownName">
+																{currentView.viewName}
+															</span>
+															<ChevronDownIcon
+																size={22}
+																className='taskBoardHeaderLeftSecViewsDropdownIcon'
+																aria-label={t("all-views-dropdown")}
+															/>
+														</div>
+
+														{/* Custom Dropdown Menu */}
+														<div className={`taskBoardViewDropdownMenu ${showViewDropdown ? 'taskBoardViewDropdownMenu--open' : ''}`}>
+															{boardData.views.map((view, index) => (
+																<div
+																	key={`${view.viewId}-${index}`}
+																	className={`taskBoardViewDropdownItem ${currentViewIndex === index ? 'taskBoardViewDropdownItem--active' : ''}`}
+																	onClick={() => handleViewSelect(index)}
+																>
+																	{getViewTypeIconComponent(view.viewType, 20)}
+																	{view.viewName}
+																</div>
+															))}
+														</div>
+													</div>
+												</div>
+											)}
+										</>
+									)}
+							</>
+						) : (
+							<div className="mobileBoardHeader">
+								{!showSearchInput && (
+									<span className="currentViewName">{t("no-view-created")}</span>
+								)}
+							</div>
+						)}
+					</div>
+
+					<div className="taskBoardHeaderRightSec">
+						{boardDrawerVisible && isSmallWidthScreen ? (
+							<></>
+						) : (
+							<>
+								<div className="taskCountContainer">
+									<div className={`taskCountContainerProgressBar${isSmallWidthScreen ? "-hidden" : ""}`}>
+										<div
+											className="taskCountContainerProgressBarProgress"
+											style={{
+												width: `${((filteredTasks ? filteredTasks?.Completed.length : 0) / (filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 1)) * 100}%`,
+											}}
+										/>
+									</div>
+									<span className="taskCountContainerTaskCount">
+										{(filteredTasks ? filteredTasks?.Completed.length : 0)} / {filteredTasks ? filteredTasks?.Pending.length + filteredTasks?.Completed.length : 0}
+									</span>
+								</div>
+								{showSearchInput && showAllElements && (
+									<input
+										type="text"
+										className="taskBoardSearchInput"
+										placeholder="Search tasks..."
+										aria-label={t("enter-task-content-to-search")}
+										value={searchQuery}
+										onChange={(e) => setSearchQuery(e.target.value)}
+										onKeyDown={(e) => {
+											if (e.key === "Enter") {
+												handleSearchSubmit();
+											}
+										}}
+										// ref={input => {
+										// 	if (input && showSearchInput) {
+										// 		input.focus();
+										// 	}
+										// }}
+										ref={searchInputElement}
+									/>
+								)}
+								<button
+									className="searchTaskBtn"
+									onClick={() => handleSearchButtonClick()}
+								>
+									{showSearchInput ? <SearchX size={20} aria-label={t("clear-search-query")} /> : <Search size={20} aria-label={t("search-tasks")} />}
+								</button>
+
+								<button className="AddNewTaskBtn" aria-label={t("add-new-task")} onClick={() => {
+									openAddNewTaskModal(plugin);
+								}}>
+									<CirclePlus size={18} />
+								</button>
+
+								<button
+									className={`filterTaskBtn ${(isSmallWidthScreen || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+									aria-label={t("show-hide-properties")}
+									onClick={handlePropertiesBtnClick}
+								>
+									<List size={18} />
+								</button>
+
+								<button
+									className={`filterTaskBtn ${(isSmallWidthScreen || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+									aria-label={t("apply-advanced-board-filters")}
+									onClick={handleFilterButtonClick}
+								>
+									<Filter size={18} />
+								</button>
+
+								<button
+									className={`ConfigureBtn ${(isSmallWidthScreen || Platform.isMobile) ? "taskBoardViewHeaderHideElements" : ""}`}
+									aria-label={t("board-configure-button")}
+									onClick={() =>
+										openBoardConfigModal(plugin, boardData, currentViewIndex, (updatedBoard: Board) => {
+											// handleUpdateBoards(plugin, updatedBoards, setCurrentBoardData)
+											setCurrentBoardData(updatedBoard);
+
+											window.setTimeout(() => {
+												eventEmitter.emit("REFRESH_BOARD");
+											}, 100);
+										}
+										)}
+								>
+									<Settings size={18} />
+								</button>
+
+								{/* <button className="taskboardActionshBtn" aria-label={t("task-board-actions-button")} onClick={handleOpenTaskBoardActionsModal}><Bot size={20} /></button> */}
+
+								{currentView && currentView.viewType === viewTypeNames.map && (
+									<button
+										className={`taskBoardMapViewSaveIcon${mapViewDataUpdated ? ' red' : ""}`}
+										onClick={(e) => {
+											if (mapViewDataUpdated) {
+												eventEmitter.emit("SAVE_MAP");
+												setMapViewDataUpdated(false);
+											}
+										}}
+									>
+										<Save size={18} />
+									</button>
+								)}
+
+								<button className={`RefreshBtn ${Platform.isMobile ? "taskBoardViewHeaderHideElements" : ""}${editorModified ? "needrefresh" : ""}`} aria-label={t("refresh-board-button")} onClick={() => { void refreshBoardButton(); }}>
+									<RefreshCcw size={18} />
+								</button>
+
+								{(isSmallWidthScreen || Platform.isMobile) && (
+									<button className="taskBoardViewHeaderOptionsBtn" onClick={openHeaderMoreOptionsMenu}>
+										<EllipsisVertical size={20} />
+									</button>
+								)}
+							</>
+						)}
+					</div>
+				</div >
+
+				{!showAllElements && showSearchInput ? (
+					<div className='taskBoardSearchSection'>
+						<input
+							type="text"
+							className="taskBoardSearchInput"
+							placeholder="Search tasks..."
+							aria-label={t("enter-task-content-to-search")}
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									handleSearchSubmit();
+								}
+							}}
+							// ref={input => {
+							// 	if (input && showSearchInput) {
+							// 		input.focus();
+							// 	}
+							// }}
+							ref={searchInputElement}
+						/>
+					</div>
+				) : (<></>)}
+
+				<div className={`taskBoardViewSectionWrapper ${boardDrawerVisible && boardData.views && boardData.views.length > 0 && !showAllElements ? 'taskBoardViewSectionWrapper--shifted' : ''}`}>
+					<div className={Platform.isMobile ? "taskBoardViewSection-mobile" : "taskBoardViewSection"}>
+						{boardData && currentView ? (
+							currentView.viewType === viewTypeNames.kanban ? (
+								<KanbanBoardView
+									plugin={plugin}
+									parentComponent={currentLeaf ? currentLeaf.view : new Component()}
+									currentBoardData={boardData}
+									currentView={currentView}
+									currentViewIndex={currentViewIndex}
+									filteredAndSearchedTasks={filteredAndSearchedTasks}
+									freshInstall={freshInstall}
+								/>
+							) : currentView.viewType === viewTypeNames.table ? (
+								<TableView
+									plugin={plugin}
+									currentBoardData={boardData}
+									currentView={currentView}
+									currentViewIndex={currentViewIndex}
+									filteredAndSearchedTasks={filteredAndSearchedTasks}
+								/>
+							) : currentView.viewType === viewTypeNames.inbox ? (
+								<InboxView
+									plugin={plugin}
+									parentComponent={currentLeaf ? currentLeaf.view : new Component()}
+									currentBoardData={boardData}
+									currentView={currentView}
+									currentViewIndex={currentViewIndex}
+									filteredTasks={filteredAndSearchedTasks}
+								/>
+							) : currentView.viewType === viewTypeNames.calendar ? (
+								<CalendarView
+									plugin={plugin}
+									tasks={filteredAndSearchedTasks}
+									dateFormat={plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT}
+								/>
+							) : currentView.viewType === viewTypeNames.map ? (
+								loading ? (
+									<div className="loadingContainer" >
+										{freshInstall ? (
+											<h2 className="initializationMessage" >
+												{t("fresh-install-1")}
+												<br />
+												<br />
+												{t("fresh-install-2")}
+												<br />
+												<br />
+												{t("fresh-install-3")}
+											</h2>
+										) : (
+											<>
+												<div className="spinner"></div>
+												<p>{t("loading-tasks")}</p>
+											</>
+										)}
+									</div>
+								) : (
+									<MapView
+										plugin={plugin}
+										parentComponent={currentLeaf ? currentLeaf.view : new Component()}
+										activeBoardData={boardData}
+										currentView={currentView}
+										currentViewIndex={currentViewIndex}
+										filteredTasks={filteredAndSearchedTasks}
+										focusOnTaskId={plugin.settings.data.lastViewHistory.taskId || ""}
+									/>
+								)
+							) : currentView.viewType === viewTypeNames.list ? (
+								<ListView
+									plugin={plugin}
+									parentComponent={currentLeaf ? currentLeaf.view : new Component()}
+									currentBoardData={boardData}
+									currentView={currentView}
+									currentViewIndex={currentViewIndex}
+									tasks={filteredAndSearchedTasks}
+								/>
+							) : (
+								<div className="emptyBoardMessage">
+									{/* Placeholder for other view types */}
+									{currentView.viewType === viewTypeNames.gantt && "Gantt chart view coming soon."}
+								</div>
+							)
+						) : (
+							<div className="emptyBoardMessage">
+								{boardData && boardData.views?.length === 0 ? "No views available in this board." : "Select or create a new view to get started."}
+							</div>
+						)}
+					</div>
+				</div>
+			</div >
+		</div >
+	);
+};
+
+export default TaskBoardViewContainer;

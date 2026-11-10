@@ -1,7 +1,7 @@
 // /src/services/MarkdownUIRenderer.ts
 
 import { App, Component, MarkdownRenderer } from "obsidian";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 
 export type TextRenderer = (
 	app: App,

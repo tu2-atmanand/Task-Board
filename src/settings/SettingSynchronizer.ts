@@ -8,7 +8,7 @@ import {
 	DEFAULT_SETTINGS,
 	migrateLegacyPropertySettings,
 } from "../interfaces/GlobalSettings.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
 import { type ElectronOpenDialogReturnValue } from "obsidian-typings";
 

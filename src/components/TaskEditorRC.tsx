@@ -9,28 +9,34 @@ import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon } from "lu
 import { ViewUpdate } from "@codemirror/view";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import TaskBoard from "../../main.js";
-import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService } from "../interfaces/Enums.js";
+import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService, PropertyTypeConfig, taskPropertyFormatOptions } from "../interfaces/Enums.js";
 import { taskItemEmpty, getPriorityOptionsForDropdown } from "../interfaces/Mapping.js";
-import { taskItem, cursorLocationInterface } from "../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { buildTaskFromRawContent } from "../managers/VaultScanner.js";
-import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
+import { coerceCustomTaskPropertyValue, taskItem, cursorLocationInterface } from "../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
+import { buildTaskFromRawContent } from "../core/managers/VaultScanner.js";
+import { allowedFileExtensionsRegEx } from "../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { CommunityPlugins } from "../services/CommunityPlugins.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "../services/MarkdownEditor.js";
 import { markdownButtonHoverPreviewEvent } from "../services/MarkdownHoverPreview.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
 import { getTagSuggestions, MultiSuggest, getQuickAddPluginChoices, getFileSuggestions, getPendingTasksSuggestions } from "../services/MultiSuggest.js";
-import { openEditTaskView } from "../services/OpenModals.js";
-import { compareTwoTags, verifySubtasksAndChildtasksAreComplete } from "../utils/algorithms/ScanningFilterer.js";
+import { openEditTaskView } from "../ui/modals/OpenModals.js";
+import { compareTwoTags, verifySubtasksAndChildtasksAreComplete } from "../core/algorithms/ScanningFilterer.js";
 import { getObsidianIndentationSetting, isTaskLine } from "../utils/CheckBoxUtils.js";
 import { applyIdToTaskItem } from "../utils/TaskItemUtils.js";
-import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn } from "../utils/taskLine/TaskContentFormatter.js";
-import { formatTaskNoteContent, isTaskNotePresentInTags } from "../utils/taskNote/TaskNoteUtils.js";
+import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn } from "../utils/task_line/TaskContentFormatter.js";
+import { formatTaskNoteContent, isTaskNotePresentInTags } from "../utils/task_note/TaskNoteUtils.js";
 import { updateRGBAOpacity } from "../utils/UIHelpers.js";
 import { handleEditTask } from "../utils/UserTaskEvents.js";
 import { t } from "../utils/lang/helper.js";
 import { openTaskSelector } from "../services/TaskSelectorWithCreateModal.js";
+
+const BUILT_IN_TASK_ITEM_KEYS = new Set([
+	"id", "legacyId", "title", "body", "status", "priority", "tags", "frontmatterTags",
+	"time", "createdDate", "startDate", "scheduledDate", "due", "filePath", "taskLocation",
+	"dependsOn", "reminder", "completion", "cancelledDate",
+]);
 
 export interface filterOptions {
 	value: string;
@@ -73,6 +79,13 @@ export const TaskEditorRC: React.FC<{
 	const [status, setStatus] = useState(task.status || ' ');
 	const [reminder, setReminder] = useState(task?.reminder || "");
 	const [dependsOn, setDependsOn] = useState<string[]>(task?.dependsOn || []);
+	const [customPropertyValues, setCustomPropertyValues] = useState<Record<string, unknown>>(() =>
+		Object.fromEntries((globalSettings.customProperties ?? []).filter(property => !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [
+			property.id,
+			(task as unknown as Record<string, unknown>)[property.id] !== undefined
+					? (task as unknown as Record<string, unknown>)[property.id]
+					: coerceCustomTaskPropertyValue(property.defaultValue, property.type),
+		])));
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -488,6 +501,42 @@ export const TaskEditorRC: React.FC<{
 		}
 	};
 
+	const handleCustomPropertyChange = (id: string, value: unknown, type: PropertyTypeConfig) => {
+		setCustomPropertyValues((previous) => ({
+			...previous,
+			[id]: value === "" ? "" : coerceCustomTaskPropertyValue(value, type),
+		}));
+		setIsEdited(true);
+		setIsEditorContentChanged(true);
+	};
+
+	const withCustomInlineProperties = (rawTitle: string): string => {
+		let result = rawTitle;
+		for (const property of globalSettings.customProperties ?? []) {
+			if (!property.id || BUILT_IN_TASK_ITEM_KEYS.has(property.id)) continue;
+			const escaped = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			let existing: RegExp | undefined;
+			let serialized = "";
+			const value = customPropertyValues[property.id];
+			if (globalSettings.taskPropertyFormat === taskPropertyFormatOptions.dataviewPlugin) {
+				existing = new RegExp(`\\[${escaped(property.id)}::\\s*([^\\]]*)\\]`);
+				if (value !== undefined && value !== null && value !== "") serialized = `[${property.id}:: ${Array.isArray(value) ? value.join(", ") : String(value)}]`;
+			} else if (globalSettings.taskPropertyFormat === taskPropertyFormatOptions.obsidianNative) {
+				existing = new RegExp(`@${escaped(property.id)}\\(([^)]*)\\)`);
+				if (value !== undefined && value !== null && value !== "") serialized = `@${property.id}(${Array.isArray(value) ? value.join(",") : String(value)})`;
+			} else if (property.emoji) {
+			existing = new RegExp(`(?:^|\\s)${escaped(property.emoji)}\\s+(?:"(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`);
+				if (value !== undefined && value !== null && value !== "") {
+					const text = Array.isArray(value) ? value.join(",") : String(value);
+					serialized = `${property.emoji} ${/\s/.test(text) ? JSON.stringify(text) : text}`;
+				}
+			}
+			if (existing) result = result.replace(existing, " ").replace(/\s{2,}/g, " ").trimEnd();
+			if (serialized) result = `${result} ${serialized}`;
+		}
+		return result;
+	};
+
 	const handleSaveAsTaskLine = async () => {
 		let newDueDate = due;
 		let newStartDate = startDate;
@@ -519,7 +568,8 @@ export const TaskEditorRC: React.FC<{
 
 		const updatedTask = {
 			...task,
-			title: newTitle,
+			...customPropertyValues,
+			title: withCustomInlineProperties(newTitle),
 			body: [
 				...bodyContent.split('\n'),
 			],
@@ -612,6 +662,7 @@ export const TaskEditorRC: React.FC<{
 		reminder: reminder,
 		taskLocation: task?.taskLocation || taskItemEmpty.taskLocation,
 		dependsOn: dependsOn,
+		...customPropertyValues,
 		completion: task.completion || '',
 		cancelledDate: task.cancelledDate || '',
 	};
@@ -752,7 +803,7 @@ export const TaskEditorRC: React.FC<{
 	const handleTaskEditedThroughEditors = debounce((value: string) => {
 		if (isTaskNote) return;
 
-		const updatedTask = buildTaskFromRawContent(value, indentationString);
+		const updatedTask = buildTaskFromRawContent(value, indentationString, undefined, globalSettings);
 
 		setTitle(updatedTask.title || '');
 		setBodyContent(updatedTask.body?.join('\n') || '');
@@ -767,6 +818,7 @@ export const TaskEditorRC: React.FC<{
 		setPriority(updatedTask.priority || 0);
 		setStatus(updatedTask.status || ' ');
 		setReminder(updatedTask.reminder || '');
+		setCustomPropertyValues(Object.fromEntries((globalSettings.customProperties ?? []).filter(property => !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [property.id, (updatedTask as unknown as Record<string, unknown>)[property.id]])));
 	}, 50);
 
 	// // This useEffect is used to get the formatted content of the updated task, which will be rendered in the editor(s).
@@ -1464,6 +1516,22 @@ export const TaskEditorRC: React.FC<{
 								/>
 							</div>
 						)}
+
+						{(globalSettings.customProperties ?? []).filter(property => !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => {
+							const value = customPropertyValues[property.id];
+							const displayValue = Array.isArray(value) ? value.join(", ") : value === undefined || value === null ? "" : String(value);
+							return <div className="EditTaskModalHomeField" key={property.id}>
+								<label className="EditTaskModalHomeFieldTitle">{property.name}</label>
+								{property.type === PropertyTypeConfig.boolean ? (
+									<select className="EditTaskModalHome-taskStatusValue" value={value === undefined ? "" : String(value)} onChange={(event) => handleCustomPropertyChange(property.id, event.target.value === "" ? "" : event.target.value === "true", property.type)}>
+										<option value="">—</option><option value="true">True</option><option value="false">False</option>
+									</select>
+								) : <input className="EditTaskModalHomeDueInput" type={property.type === PropertyTypeConfig.numeric ? "number" : property.type === PropertyTypeConfig.date ? "date" : property.type === PropertyTypeConfig.time ? "time" : property.type === PropertyTypeConfig.dateTime ? "datetime-local" : "text"} value={displayValue} onChange={(event) => {
+									const next = property.type === PropertyTypeConfig.list ? event.target.value.split(",").map(item => item.trim()).filter(Boolean) : event.target.value;
+									handleCustomPropertyChange(property.id, next, property.type);
+								}} />}
+							</div>;
+						})}
 
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>

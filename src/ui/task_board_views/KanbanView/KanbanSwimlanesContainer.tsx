@@ -1,0 +1,683 @@
+// src/components/KanbanView/KanbanSwimlanesContainer.tsx
+
+import { t } from 'i18next';
+import { TableCellsSplit, ChevronRight, ChevronDown } from 'lucide-react';
+import React, { useMemo, memo, useRef, useState, useLayoutEffect, useEffect } from 'react';
+import TaskBoard from '../../../../main.js';
+import { Board, KanbanView, ColumnData } from '../../../interfaces/BoardConfigs.js';
+import { HeaderTruncationOptions, HeaderUITypeOptions } from '../../../interfaces/Enums.js';
+import { taskItem } from '../../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
+import { eventEmitter } from '../../../services/EventEmitter.js';
+import { getAllTaskTags } from '../../../utils/TaskItemUtils.js';
+import LazyColumn from './LazyColumn.js';
+import { getStatusNameFromStatusSymbol } from '../../../utils/task_note/TaskNoteUtils.js';
+import { Component, View } from 'obsidian';
+
+interface KanbanSwimlanesContainerProps {
+	plugin: TaskBoard;
+	parentComponent: Component | View;
+	currentBoardData: Board;
+	currentViewIndex: number;
+	kanbanViewData: KanbanView;
+	tasksPerColumn: taskItem[][];
+}
+
+interface SwimlaneRow {
+	swimlaneName: string;
+	swimlaneValue: string;
+	tasks: taskItem[][];
+	minimized: boolean;
+}
+
+const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
+	plugin,
+	parentComponent,
+	currentBoardData,
+	currentViewIndex,
+	kanbanViewData,
+	tasksPerColumn,
+}) => {
+	// const ColumnComponent = LazyColumn; // lazyLoadingEnabled ? LazyColumn : Column;
+
+	// Separate columns into swimlane-enabled and excluded
+	const { columnsInSwimlanes, columnsOutsideSwimlanes, swimlaneColumnTasks, outsideSwimlaneColumnTasks } = useMemo(() => {
+		const activeColumns = kanbanViewData.columns.filter((col) => col.active);
+		const outsideSwimlanes: ColumnData[] = [];
+		const insideSwimlanes: ColumnData[] = [];
+		const outsideTasks: taskItem[][] = [];
+		const insideTasks: taskItem[][] = [];
+
+		activeColumns.forEach((column, index) => {
+			if (column.swimlaneEnabled === false) {
+				outsideSwimlanes.push(column);
+				outsideTasks.push(tasksPerColumn[index] || []);
+			} else {
+				insideSwimlanes.push(column);
+				insideTasks.push(tasksPerColumn[index] || []);
+			}
+		});
+
+		return {
+			columnsInSwimlanes: insideSwimlanes,
+			columnsOutsideSwimlanes: outsideSwimlanes,
+			swimlaneColumnTasks: insideTasks,
+			outsideSwimlaneColumnTasks: outsideTasks
+		};
+	}, [kanbanViewData.columns, tasksPerColumn]);
+
+	// Create a modified board for swimlanes with only swimlane-enabled columns
+	const swimlaneBoard = useMemo(() => {
+		if (columnsInSwimlanes.length === 0) return null;
+		return {
+			...kanbanViewData,
+			columns: columnsInSwimlanes
+		};
+	}, [kanbanViewData, columnsInSwimlanes]);
+
+	// Extract and organize swimlanes using tasksPerColumn (already segregated per active column)
+	const {
+		property,
+		sortCriteria,
+		customSortOrder,
+		customValue,
+		groupAllRest,
+		maxHeight: maxSwimlaneHeight,
+		headerUIType,
+		headerTruncation = HeaderTruncationOptions.middle,
+		minimized
+	} = kanbanViewData.swimlanes;
+
+	// vertical header spans the row's real height (runtime, capped by maxSwimlaneHeight), so measure it
+	const columnsWrapperRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+	const [swimlaneRowHeights, setSwimlaneRowHeights] = useState<Record<number, number>>({});
+
+	// collapsed rows render no columns, so they can't size to them - mirror the always-rendered column-header width instead
+	const swimlanesContainerRef = useRef<HTMLDivElement>(null);
+	const [columnsWidth, setColumnsWidth] = useState<number | undefined>(undefined);
+
+	const swimlanes: SwimlaneRow[] = useMemo(() => {
+		if (!swimlaneColumnTasks || swimlaneColumnTasks.flat().length < 1) {
+			return [];
+		}
+
+		// Get all active columns
+		if (columnsInSwimlanes.length === 0) return [];
+
+		// Extract unique values for the swimlane property from tasksPerColumn
+		let uniqueSwimlanValues = extractUniquePropertyValuesFromColumns(
+			swimlaneColumnTasks,
+			property,
+			customValue
+		);
+		if (property === 'tags')
+			uniqueSwimlanValues.push("");
+
+		// Sort the swimlane values
+		let sortedSwimlaneValues: { value: string; index: number }[] = [];
+
+		// When grouping remaining values into a single "All rest" swimlane,
+		// keep the remaining values so we can aggregate tasks later.
+		let customValues: Set<string> = new Set();
+		let remainingValuesForAllRest: string[] = [];
+
+		if (sortCriteria === 'custom' && customSortOrder && customSortOrder.length > 0) {
+			// Use custom sort order
+			sortedSwimlaneValues = customSortOrder.map((item) => ({
+				value: item.value.replace('#', ''),
+				index: item.index,
+			}));
+
+			// Add remaining values that are not in customSortOrder
+			customValues = new Set(customSortOrder.map((item) => item.value.replace('#', '').toLocaleLowerCase()));
+			const remainingValues = uniqueSwimlanValues.filter((val) => !customValues.has(val));
+			// console.log("KanbanSwimlanesContainer...\ncustomValues", customValues, "\nremainingValues", remainingValues);
+
+			if (!groupAllRest) {
+				if (remainingValues.length > 0) {
+					const maxIndex = Math.max(...customSortOrder.map((item) => item.index), 0);
+					sortedSwimlaneValues = [
+						...sortedSwimlaneValues,
+						...remainingValues.map((val, idx) => ({
+							value: val,
+							index: maxIndex + idx + 1,
+						})),
+					];
+				}
+			} else {
+				// If user has set to group all the remaining values into a single swimlane...
+				// Then will create only a single swimlane at the bottom of all the custom ones and name it as "All rest".
+				if (remainingValues.length > 0) {
+					const maxIndex = Math.max(...customSortOrder.map((item) => item.index), 0);
+					sortedSwimlaneValues = [
+						...sortedSwimlaneValues,
+						{
+							value: 'All rest',
+							index: maxIndex + 1,
+						},
+					];
+					// remember which values are part of the "rest" so we can aggregate tasks later
+					remainingValuesForAllRest = remainingValues;
+				}
+			}
+		} else if (sortCriteria === 'asc') {
+			// Sort ascending
+			sortedSwimlaneValues = uniqueSwimlanValues
+				.sort()
+				.map((val, idx) => ({
+					value: val,
+					index: idx + 1,
+				}));
+		} else if (sortCriteria === 'desc') {
+			// Sort descending
+			sortedSwimlaneValues = uniqueSwimlanValues
+				.sort((a, b) => b.localeCompare(a))
+				.map((val, idx) => ({
+					value: val,
+					index: idx + 1,
+				}));
+		}
+
+		// Create swimlane rows with tasks organized by column
+		const swimlaneRows: SwimlaneRow[] = sortedSwimlaneValues.map((swimlaneItem) => {
+			const swimlaneItemValue = swimlaneItem.value.trim();
+			const tasksByColumn = columnsInSwimlanes.map((column: ColumnData, colIdx: number) => {
+				// swimlaneColumnTasks is expected to align with active columns order
+				const columnTasks = swimlaneColumnTasks[colIdx] || [];
+
+				// If this swimlane is the aggregated "All rest", include any task whose
+				// property values are in the remainingValuesForAllRest list.
+				if (swimlaneItemValue === 'All rest') {
+					if (!remainingValuesForAllRest || remainingValuesForAllRest.length === 0) return [];
+					return columnTasks.filter((task: taskItem) => {
+						let values = getPropertyValues(task, property, customValue);
+						if (property === "tags") {
+							if (values.length === 0 && swimlaneItemValue.trim() === "") return true;
+
+							values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
+							const doesValuesHaveCustomValues = values.some((v: string) => customValues.has(v));
+							return values.some((v: string) => remainingValuesForAllRest.includes(v) && !doesValuesHaveCustomValues) || values.length === 0;
+						}
+
+						return values.some((v) => remainingValuesForAllRest.includes(v));
+					});
+				}
+
+				// Default behavior: filter tasks that include the exact swimlane value
+				return columnTasks.filter((task) => {
+					let values = getPropertyValues(task, property, customValue);
+					if (property === "tags") {
+						if (values.length === 0 && swimlaneItemValue.trim() === "") return true;
+
+						values = values.map((tag: string) => tag.replace('#', '').toLocaleLowerCase());
+						return values.includes(swimlaneItemValue.replace('#', '').toLocaleLowerCase());
+					} else if (property === "filePath" || property === "folderPath") {
+						return swimlaneItemValue.endsWith("/") ? values[0].includes(swimlaneItemValue) : values[0] === swimlaneItemValue;
+					}
+
+					return values.includes(swimlaneItemValue);
+				});
+			});
+
+			const statusName = getStatusNameFromStatusSymbol(swimlaneItemValue, plugin.settings.data.customStatuses ?? []);
+			let swimlaneName = swimlaneItemValue;
+			if (property === 'status') {
+				swimlaneName = statusName ? statusName : 'All rest';
+			} else if (property === 'tags' && swimlaneItemValue.trim() === "") {
+				swimlaneName = "No tags";
+			} else if (property === 'filePath' || property === 'folderPath') {
+				// #839: show the full vault-relative path so identically-named files/folders stay distinct
+				swimlaneName = swimlaneItemValue;
+			}
+			const isSwimlaneMinimized = minimized?.includes(swimlaneName) ?? false;
+
+			return {
+				swimlaneName: swimlaneName,
+				swimlaneValue: swimlaneItemValue,
+				tasks: tasksByColumn,
+				minimized: isSwimlaneMinimized,
+			};
+		});
+
+		// Filter out empty swimlanes if hideEmptySwimlanes is false
+		if (kanbanViewData.swimlanes?.hideEmptySwimlanes) {
+			return swimlaneRows.filter((row) =>
+				row.tasks.some((columnTasks) => columnTasks.length > 0)
+			);
+		}
+
+		return swimlaneRows;
+	}, [currentBoardData, tasksPerColumn, plugin]);
+
+	// keep above the early return - a hook after it changes hook count between renders
+	useEffect(() => {
+		const el = swimlanesContainerRef.current;
+		if (!el) return;
+
+		if (headerUIType !== HeaderUITypeOptions.vertical) return;
+
+		const win = el.ownerDocument.defaultView ?? window;
+		const observer = new win.ResizeObserver((entries) => {
+			setSwimlaneRowHeights((prev) => {
+				const next = { ...prev };
+				let changed = false;
+				for (const entry of entries) {
+					const rowIndex = Number((entry.target as HTMLElement).dataset.rowIndex);
+					const height = entry.contentRect.height;
+					if (next[rowIndex] !== height) {
+						next[rowIndex] = height;
+						changed = true;
+					}
+				}
+				return changed ? next : prev;
+			});
+		});
+		columnsWrapperRefs.current.forEach((el) => observer.observe(el));
+		return () => observer.disconnect();
+	}, [headerUIType, swimlanes, maxSwimlaneHeight]);
+
+	// measure the column-header width so collapsed rows (which render no columns) can match it
+	useLayoutEffect(() => {
+		const container = swimlanesContainerRef.current;
+		if (!container) return;
+
+		const measure = () => {
+			const width = container.offsetWidth;
+			setColumnsWidth((prev) => (prev !== width ? width : prev));
+		};
+		measure();
+
+		// Observe the available width as well as the intrinsic header width. The header alone may not
+		// resize when the containing leaf changes size because it is sized to fit its columns.
+		const win = container.ownerDocument.defaultView;
+		if (!win) return;
+
+		const observer = new win.ResizeObserver(measure);
+		observer.observe(container);
+		return () => observer.disconnect();
+	}, [headerUIType, swimlanes]);
+
+
+	const hasExcludedColumns = columnsOutsideSwimlanes.length > 0;
+	const hasSwimlaneColumns = columnsInSwimlanes.length > 0;
+
+	const renderExcludedColumns = () => {
+		return columnsOutsideSwimlanes.map((column, index) => (
+			<LazyColumn
+				key={`outside-${column.id}-${index}`}
+				plugin={plugin}
+				parentComponent={parentComponent}
+				activeBoardData={currentBoardData}
+				kanbanViewData={kanbanViewData}
+				currentViewIndex={currentViewIndex}
+				columnData={column}
+				tasksForThisColumn={outsideSwimlaneColumnTasks[index] || []}
+			/>
+		));
+	};
+
+	if (swimlanes.length === 0 && !hasExcludedColumns) {
+		return (
+			<div className="emptyBoardMessage">
+				{t('no-swimlanes-found-message')}
+			</div>
+		);
+	}
+
+	// function openSwimlaneMenu(event: MouseEvent | React.MouseEvent, rowIndex: number) {
+	// 	const swimlaneMenu = new Menu();
+
+	// 	swimlaneMenu.addItem((item) => {
+	// 		item.setTitle(t("quick-actions"));
+	// 		item.setIsLabel(true);
+	// 	});
+
+	// 	// Show minimize or maximize option based on current state
+	// 	if (swimlanes[rowIndex].minimized) {
+	// 		swimlaneMenu.addItem((item) => {
+	// 			item.setTitle(t("maximize-column"));
+	// 			item.setIcon("panel-left-open");
+	// 			item.onClick(async () => {
+	// 				// await handleMinimizeSwimlane(); // TODO : Implementation pending
+	// 			});
+	// 		});
+	// 	} else {
+	// 		swimlaneMenu.addItem((item) => {
+	// 			item.setTitle(t("minimize-column"));
+	// 			item.setIcon("panel-left-close");
+	// 			item.onClick(async () => {
+	// 				// await handleMinimizeSwimlane(); // TODO : Implementation pending
+	// 			});
+	// 		});
+	// 	}
+
+	// 	// Use native event if available (React event has nativeEvent property)
+	// 	swimlaneMenu.showAtMouseEvent(
+	// 		(event instanceof MouseEvent ? event : event.nativeEvent)
+	// 	);
+	// }
+
+	async function handleSwimlaneMinimize(rowIndex: number) {
+		try {
+			const swimlaneName = swimlanes[rowIndex]?.swimlaneName;
+			if (!swimlaneName) return;
+			// const boardIndex = currentBoardData.index; // plugin.settings.data.boardConfigs.findIndex((b) => b.index === currentBoardData.index);
+			// if (boardIndex === -1) return;
+			const swimCfg = kanbanViewData.swimlanes || { minimized: [] };
+			const arr = Array.isArray(swimCfg.minimized) ? [...swimCfg.minimized] : [];
+			const idx = arr.indexOf(swimlaneName);
+			if (idx === -1) arr.push(swimlaneName); else arr.splice(idx, 1);
+
+			// Create updated view data with new swimlanes configuration
+			const updatedKanbanViewData: KanbanView = {
+				...kanbanViewData,
+				swimlanes: {
+					...kanbanViewData.swimlanes,
+					minimized: arr,
+				},
+			};
+
+			const updatedBoardData = { ...currentBoardData };
+			if (updatedBoardData.views[currentViewIndex].kanbanView) {
+				updatedBoardData.views[currentViewIndex].kanbanView = updatedKanbanViewData;
+			}
+
+
+			void plugin.taskBoardFileManager.saveBoard(updatedBoardData);
+			eventEmitter.emit('REFRESH_BOARD');
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				121,
+				String(err),
+				"KanbanSwimlanesContainer.tsx/handleSwimlaneMinimize",
+			);
+		}
+	}
+
+	const renderHeaderNameValue = (value: string, className: string) => {
+		if (headerTruncation === HeaderTruncationOptions.middle) {
+			const trailingSlash = value.endsWith('/') ? '/' : '';
+			const segments = value.split('/').filter(Boolean);
+			const tailSegments = 3;
+			if (segments.length > tailSegments) {
+				const head = segments.slice(0, -tailSegments).join('/');
+				const tail = '/' + segments.slice(-tailSegments).join('/') + trailingSlash; // lead the tail with '/' so names don't merge after the head ellipsis
+				return (
+					<div className={className} data-truncate={headerTruncation}>
+						<span className="swimlaneHeaderNameHead">{head}</span>
+						<span className="swimlaneHeaderNameTail">{tail}</span>
+					</div>
+				);
+			}
+		}
+		// middle with too few segments (short path, tag or status) - falls back to the end ellipsis
+		const mode = headerTruncation === HeaderTruncationOptions.middle ? HeaderTruncationOptions.end : headerTruncation;
+		return (
+			<div className={className} data-truncate={mode}><bdi>{value}</bdi></div>
+		);
+	};
+
+	// Render a sticky header row of column headers across swimlanes
+	return (
+		<div className="kanbanSwimlanesGrid">
+			{/* Columns excluded from swimlanes (rendered on the left) */}
+			{hasExcludedColumns && (
+				<div className="columnsContainer">
+					{renderExcludedColumns()}
+				</div>
+			)}
+
+			{/* Swimlane Rows */}
+			{hasSwimlaneColumns && swimlaneBoard && (
+				<div ref={swimlanesContainerRef} className="swimlanesContainer">
+					{/* Top header showing column headers and counts */}
+					<div className={`swimlanesHeaderContainer${headerUIType === HeaderUITypeOptions.vertical ? ' verticalUI' : ''}`}>
+						{/* A small Icon at the top right corner inside the swimlanes container */}
+						{headerUIType === HeaderUITypeOptions.vertical && (
+							<TableCellsSplit strokeWidth={1.5} size={32} className='swimlanesContainerIcon' />
+						)}
+
+						<div className="swimlanesHeaderRow">
+							{columnsInSwimlanes.map((column: ColumnData, colIndex: number) => (
+								<LazyColumn
+									key={`header-${column.id}`}
+									plugin={plugin}
+									parentComponent={parentComponent}
+									activeBoardData={currentBoardData}
+									kanbanViewData={kanbanViewData}
+									currentViewIndex={currentViewIndex}
+									columnData={column}
+									tasksForThisColumn={tasksPerColumn?.[colIndex] || []}
+									headerOnly={true}
+								/>
+							))}
+						</div>
+					</div>
+					{swimlanes.map((swimlane, rowIndex) => (
+						<React.Fragment key={swimlane.swimlaneValue}>
+							{headerUIType === HeaderUITypeOptions.vertical ? (
+								<div className={`swimlaneRow verticalUI ${swimlane.minimized ? 'minimized' : ''}`} style={swimlane.minimized && columnsWidth ? { width: `${columnsWidth - 20}px`, minWidth: `${columnsWidth - 20}px` } : undefined}>
+									{/* Swimlane Label */}
+									<div className='swimlaneHeaderContainer-vertical'>
+										<div className='swimlaneHeader-vertical'>
+											<div className='swimlaneHeaderSwimlaneCount-vertical'>
+												{swimlane.tasks.flat().length ?? 0}
+											</div>
+											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName} style={!swimlane.minimized && swimlaneRowHeights[rowIndex] ? { width: `${Math.max(0, swimlaneRowHeights[rowIndex] - 80)}px` } : undefined}>
+												<div className='swimlaneHeaderNameLable-vertical'>{property}:</div>
+												{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue-vertical')}
+											</div>
+											<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
+												<ChevronRight />
+											</div>
+										</div>
+									</div>
+
+									{/* Columns for this Swimlane */}
+									<div className="swimlaneColumnsWrapper" data-row-index={rowIndex} ref={(el) => { if (el) columnsWrapperRefs.current.set(rowIndex, el); else columnsWrapperRefs.current.delete(rowIndex); }} style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+										{swimlane.minimized ? null : columnsInSwimlanes.map((column: ColumnData, colIndex: number) => {
+											const swimlaneData = {
+												property: kanbanViewData.swimlanes.property,
+												value: swimlane.swimlaneValue,
+											};
+
+											return (
+												<LazyColumn
+													key={`${swimlane.swimlaneValue}-${column.id}`}
+													plugin={plugin}
+													parentComponent={parentComponent}
+													activeBoardData={currentBoardData}
+													kanbanViewData={kanbanViewData}
+													currentViewIndex={currentViewIndex}
+													columnData={column}
+													tasksForThisColumn={swimlane.tasks[colIndex] || []}
+													hideColumnHeader={true}
+													swimlaneData={swimlaneData}
+												/>
+											);
+										})}
+									</div>
+								</div>
+							) : (
+								<div className={`swimlaneRow ${swimlane.minimized ? 'minimized' : ''}`}>
+									{/* Swimlane Label */}
+									<div className='swimlaneHeaderContainer' style={columnsWidth ? { width: `${columnsWidth - 20}px` } : undefined}>
+										<div className='swimlaneHeader'>
+											<div className='swimlaneHeaderLeftSec'>
+												<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
+													{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
+												</div>
+												<div className="swimlaneHeaderName" title={swimlane.swimlaneName}>
+													<div className='swimlaneHeaderNameLable'>{property}:</div>
+													{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue')}
+												</div>
+											</div>
+											<div className='swimlaneHeaderSwimlaneCount'>
+												{swimlane.tasks.flat().length ?? 0}
+											</div>
+										</div>
+									</div>
+
+									{/* Columns for this Swimlane */}
+									<div className="swimlaneColumnsWrapper" data-row-index={rowIndex} ref={(el) => { if (el) columnsWrapperRefs.current.set(rowIndex, el); else columnsWrapperRefs.current.delete(rowIndex); }} style={{ maxHeight: swimlane.minimized ? '0px' : maxSwimlaneHeight }}>
+										{swimlane.minimized ? null : columnsInSwimlanes.map((column: ColumnData, colIndex: number) => {
+											const swimlaneData = {
+												property: kanbanViewData.swimlanes.property || 'tags',
+												value: swimlane.swimlaneValue,
+											};
+
+											return (
+												<LazyColumn
+													key={`${swimlane.swimlaneValue}-${column.id}`}
+													plugin={plugin}
+													parentComponent={parentComponent}
+													activeBoardData={currentBoardData}
+													kanbanViewData={kanbanViewData}
+													currentViewIndex={currentViewIndex}
+													columnData={column}
+													tasksForThisColumn={swimlane.tasks[colIndex] || []}
+													hideColumnHeader={true}
+													swimlaneData={swimlaneData}
+												/>
+											);
+										})}
+									</div>
+								</div>
+							)}
+						</React.Fragment>
+					))}
+				</div>
+			)}
+		</div>
+	);
+};
+
+/**
+ * Extract unique values for a given property from tasks already grouped per column
+ */
+function extractUniquePropertyValuesFromColumns(
+	tasksPerColumn: taskItem[][],
+	property: string,
+	customValue?: string
+): string[] {
+	const uniqueValues = new Set<string>();
+
+	tasksPerColumn.forEach((columnTasks) => {
+		columnTasks.forEach((task) => {
+			const values = getPropertyValues(task, property, customValue);
+			values.forEach((v) => uniqueValues.add(v));
+		});
+	});
+
+	return Array.from(uniqueValues).sort();
+}
+
+/**
+ * Get property values from a single task
+ */
+function getPropertyValues(
+	task: taskItem,
+	property: string,
+	customValue?: string
+): string[] {
+	let values: string[] = [];
+
+	// console.log("getPropertyValues...", "\ntask:", task, "\nproperty", property, "\ncustomValue:", customValue);
+
+	switch (property) {
+		case 'tags':
+			{
+				const allTags = getAllTaskTags(task);
+				if (allTags && allTags.length > 0) {
+					values = allTags.map((tag: string) => {
+						if (typeof tag === 'string') return tag.replace('#', '');
+						return '';
+					}).filter((v: string) => v.trim());
+				}
+				break;
+			}
+
+		case 'priority':
+			if (typeof task.priority === 'number') {
+				values = [String(task.priority)];
+			}
+			break;
+
+		case 'status':
+			if (task.status) {
+				values = [task.status.trim()];
+			}
+			break;
+
+		case 'filePath':
+			if (task?.filePath)
+				values = [task.filePath];
+			break;
+		case 'folderPath':
+			if (task?.filePath) {
+				const parts = task.filePath.split("/");
+				const folderPath = parts.slice(0, -1).join("/");
+				values = [folderPath + "/" || ""];
+			}
+			break;
+
+		// case 'project':
+		// 	if (task.project) {
+		// 		values = [task.project];
+		// 	}
+		// 	break;
+
+		// case 'context':
+		// 	if (task.context) {
+		// 		values = [task.context];
+		// 	}
+		// 	break;
+
+		// case 'custom':
+		// 	if (customValue && task?.[customValue]) {
+		// 		const customProp = task?.[customValue];
+		// 		console.log("customValue", customValue, "\ntask[customValue]", task[customValue], "\ncustomProp", customProp);
+		// 		if (Array.isArray(customProp)) {
+		// 			values = customProp.map((v: any) => String(v)).filter((v) => v);
+		// 		} else {
+		// 			values = [String(customProp)];
+		// 		}
+		// 	}
+		// 	break;
+
+		default:
+			break;
+	}
+
+	return values;
+}
+
+/**
+ * Memoized swimlane column component
+ */
+// const MemoizedSwimlanColumn = memo<{
+// 	plugin: TaskBoard;
+// 	activeBoardData: Board;
+// 	kanbanViewData: KanbanView;
+// 	currentViewIndex: number;
+// 	columnData: ColumnData;
+// 	tasksForThisColumn: taskItem[];
+// 	Component: typeof LazyColumn;
+// 	swimlaneData?: { property: string, value: string };
+// 	hideColumnHeader?: boolean;
+// 	headerOnly?: boolean;
+// }>(({ Component, ...props }) => {
+// 	return <Component {...props} />;
+// }, (prevProps, nextProps) => {
+// 	return (
+// 		prevProps.activeBoardData === nextProps.activeBoardData &&
+// 		prevProps.kanbanViewData === nextProps.kanbanViewData &&
+// 		prevProps.currentViewIndex === nextProps.currentViewIndex &&
+// 		prevProps.columnData === nextProps.columnData &&
+// 		prevProps.tasksForThisColumn === nextProps.tasksForThisColumn &&
+// 		prevProps.Component === nextProps.Component &&
+// 		prevProps.hideColumnHeader === nextProps.hideColumnHeader
+// 	);
+// });
+
+export default memo(KanbanSwimlanesContainer);

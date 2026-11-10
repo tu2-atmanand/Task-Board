@@ -1,10 +1,10 @@
 import { t } from "i18next";
 import { SuggestModal, App, Notice } from "obsidian";
 import TaskBoard from "../../main.js";
-import createTaskCard from "../components/TaskCard/TaskCardImage.js";
+import createTaskCard from "../ui/components/task_card/TaskCardImage.js";
 import { taskItem } from "../interfaces/TaskItem.js";
-import { buildTaskFromRawContent } from "../managers/VaultScanner.js";
-import { createNewInlineTask } from "../utils/taskLine/TaskItemEventHandlers.js";
+import { buildTaskFromRawContent } from "../core/managers/VaultScanner.js";
+import { createNewInlineTask } from "../utils/task_line/TaskItemEventHandlers.js";
 import { generateRandomStringId } from "../utils/TaskItemUtils.js";
 
 export type TaskSelectorWithCreateResult =
@@ -208,7 +208,7 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 
 		try {
 			// Build task creation data
-			let taskData = buildTaskFromRawContent(`- [ ] ${query}`, "");
+			let taskData = buildTaskFromRawContent(`- [ ] ${query}`, "", undefined, this.plugin.settings.data);
 			taskData["id"] = generateRandomStringId();
 			let completeTask: taskItem = taskData as taskItem;
 			// Create the task

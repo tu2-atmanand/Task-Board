@@ -4,8 +4,8 @@ import { Notice } from "obsidian";
 import TaskBoard from "../../main.js";
 import { statusTypeNames } from "../interfaces/Enums.js";
 import { CustomStatus, PluginDataJson } from "../interfaces/GlobalSettings.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { TaskRegularExpressions } from "../regularExpressions/TasksPluginRegularExpr.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
+import { TaskRegularExpressions } from "./regular_expressions/TasksPluginRegularExpr.js";
 
 /**
  * Switches the checkbox state based on the current symbol.

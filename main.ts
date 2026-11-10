@@ -65,28 +65,21 @@ import {
 	migrateLegacyPropertySettings,
 } from "./src/interfaces/GlobalSettings.js";
 import { TaskBoardIcon } from "./src/interfaces/Icons.js";
-import { bugReporterManagerInsatance } from "./src/managers/BugReporter.js";
-import { dragDropTasksManagerInsatance } from "./src/managers/DragDropTasksManager.js";
-import { RealTimeScanner } from "./src/managers/RealTimeScanner.js";
-import TaskBoardFileManager from "./src/managers/TaskBoardFileManager.js";
+import { bugReporterManagerInsatance } from "./src/core/managers/BugReporter.js";
+import { dragDropTasksManagerInsatance } from "./src/core/managers/DragDropTasksManager.js";
+import { RealTimeScanner } from "./src/core/managers/RealTimeScanner.js";
+import TaskBoardFileManager from "./src/core/managers/TaskBoardFileManager.js";
 import VaultScanner, {
 	fileTypeAllowedForScanning,
-} from "./src/managers/VaultScanner.js";
-import { MergeBoardsModal } from "./src/modals/MergeBoardsModal.js";
-import { ModifiedFilesModal } from "./src/modals/ModifiedFilesModal.js";
-import { TaskBoardView } from "./src/obsidian_views/TaskBoardView.js";
+} from "./src/core/managers/VaultScanner.js";
+import { MergeBoardsModal } from "./src/ui/modals/MergeBoardsModal.js";
+import { ModifiedFilesModal } from "./src/ui/modals/ModifiedFilesModal.js";
+import { TaskBoardView } from "./src/ui/obsidian_views/TaskBoardView.js";
 import {
 	isReminderPluginInstalled,
 	revealFileFolderInExplorer,
 } from "./src/services/CommunityPlugins.js";
 import { eventEmitter } from "./src/services/EventEmitter.js";
-import {
-	openAddNewTaskModal,
-	openAddNewTaskNoteModal,
-	openAddNewTaskInCurrentFileModal,
-	openBoardsExplorerModal,
-	openScanVaultModal,
-} from "./src/services/OpenModals.js";
 import { TasksPluginApi } from "./src/services/tasks_plugin/api.js";
 import { isTasksPluginEnabled } from "./src/services/tasks_plugin/helpers.js";
 import {
@@ -95,13 +88,14 @@ import {
 } from "./src/settings/2_x_x_Migrations/MigrationUtils.js";
 import { migrateSettings } from "./src/settings/SettingSynchronizer.js";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
-import { TaskBoardApi } from "./src/taskboardAPIs.js";
+import { TaskBoardApi } from "./src/core/taskboardAPIs.js";
 import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.js";
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
 import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
-import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent.js";
+import { TaskBoardEmbedComponent } from "./src/ui/components/TaskBoardEmbedComponent.js";
 import { getHideClassForProperty } from "./src/utils/UIHelpers.js";
+import { openBoardsExplorerModal, openAddNewTaskModal, openAddNewTaskNoteModal, openAddNewTaskInCurrentFileModal, openScanVaultModal } from "./src/ui/modals/OpenModals.js";
 
 /**
  * The entry-point of this project.

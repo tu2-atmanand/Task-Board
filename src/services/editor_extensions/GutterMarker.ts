@@ -14,7 +14,7 @@ import {
 } from "obsidian";
 import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import TaskBoard from "../../../main.js";
-import { TaskEditorModal } from "../../modals/TaskEditorModal.js";
+import { TaskEditorModal } from "../../ui/modals/TaskEditorModal.js";
 import { isTaskLine } from "../../utils/CheckBoxUtils.js";
 import { t } from "i18next";
 

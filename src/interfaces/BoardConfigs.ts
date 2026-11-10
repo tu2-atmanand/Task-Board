@@ -6,29 +6,13 @@ import {
 	viewsPanelPropertiesToShow,
 	UniversalDateOptions,
 	HeaderTruncationOptions,
+	PropertyTypeConfig,
 } from "./Enums.js";
 import { defaultTaskStatuses } from "./Mapping.js";
 
 export interface columnSortingCriteria {
-	criteria:
-		| "status"
-		| "completed"
-		| "priority"
-		| "dueDate"
-		| "startDate"
-		| "scheduledDate"
-		| "createdDate"
-		| "completedDate"
-		| "content"
-		| "tags"
-		| "project"
-		| "context"
-		| "time"
-		| "recurrence"
-		| "filePath"
-		| "lineNumber"
-		| "manualOrder"
-		| "id"; // Fields to sort by
+	criteria: string; // Built-in criterion or configured property id
+	propertyType?: PropertyTypeConfig;
 	order: "asc" | "desc"; // Sort order
 	priority: number;
 	uid: string;
@@ -44,7 +28,8 @@ export interface columnSortingCriteria {
  */
 export interface FilterCriterion {
 	id: string;
-	property: string; // e.g., 'content', 'dueDate', 'priority'
+	property: string; // Built-in property or configured property id
+	propertyType?: PropertyTypeConfig;
 	condition: string; // e.g., 'isSet', 'equals', 'contains'
 	value?: string;
 }
