@@ -4,10 +4,20 @@ import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
 import { isValid, parse } from "date-fns";
 import { t } from "i18next";
 import type TaskBoard from "../../main.js";
-import { taskPropertyFormatOptions, UniversalDateOptions } from "../interfaces/Enums.js";
-import { globalSettingsData, SupportedPropertiesConfig } from "../interfaces/GlobalSettings.js";
+import {
+	taskPropertyFormatOptions,
+	UniversalDateOptions,
+} from "../interfaces/Enums.js";
+import {
+	globalSettingsData,
+	SupportedPropertiesConfig,
+} from "../interfaces/GlobalSettings.js";
 import { priorityEmojis } from "../interfaces/Mapping.js";
-import { coerceCustomTaskPropertyValue, jsonCacheData, taskItem } from "../interfaces/TaskItem.js";
+import {
+	coerceCustomTaskPropertyValue,
+	jsonCacheData,
+	taskItem,
+} from "../interfaces/TaskItem.js";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/DataviewPluginRegularExpr.js";
 import { allowedFileExtensionsRegEx } from "../regularExpressions/MiscelleneousRegExpr.js";
 import {
@@ -406,7 +416,10 @@ export default class VaultScanner {
 							}
 
 							const task: taskItem = {
-								...extractCustomTaskProperties(line, this.plugin.settings.data),
+								...extractCustomTaskProperties(
+									line,
+									this.plugin.settings.data,
+								),
 								id: legacyId
 									? (legacyId[1] ?? "")
 									: generateRandomStringId(),
@@ -768,8 +781,106 @@ export function fileTypeAllowedForScanning(
 }
 
 /**
+ * A single extraction function which can be used to extract default as well as custom 
+ * properties from an inline-task of a specific format.
+ * This is specially designed to reduce the parsing time for long notes and huge number
+ * of files. Makes use of the regular expressions to only scan the properties from the
+ * inline-tasks for the format set by user in the setting. Following formats are 
+ * supported so far : 
+ * - Tasks plugin Emoji
+ * - Dataview
+ * - Obsidian native
+ * 
+ * @param line - The inline-task line.
+ * @param settings - All settings of this plugin.
+ * @returns Extracted key value pair record.
+ */
+export function extractTaskPropertiesOfSingleFormat(
+	line: string,
+	settings: globalSettingsData,
+): Record<string, unknown> {
+	const result: Record<string, unknown> = {};
+	const builtInKeys = new Set([
+		"id",
+		"legacyId",
+		"title",
+		"body",
+		"status",
+		"priority",
+		"tags",
+		"frontmatterTags",
+		"time",
+		"createdDate",
+		"startDate",
+		"scheduledDate",
+		"due",
+		"filePath",
+		"taskLocation",
+		"dependsOn",
+		"reminder",
+		"completion",
+		"cancelledDate",
+	]);
+	const escapeRegExp = (value: string) =>
+		value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	for (const property of settings.customProperties ?? []) {
+		if (!property.id || builtInKeys.has(property.id)) continue;
+		let expression: RegExp | undefined;
+		switch (settings.taskPropertyFormat) {
+			case taskPropertyFormatOptions.dataviewPlugin:
+				expression = new RegExp(
+					`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`,
+				);
+				break;
+			case taskPropertyFormatOptions.obsidianNative:
+				expression = new RegExp(
+					`@${escapeRegExp(property.id)}\\(([^)]*)\\)`,
+				);
+				break;
+			default:
+				if (property.emoji) {
+					expression = new RegExp(
+						`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`,
+					);
+				}
+		}
+		const match = expression?.exec(line);
+		if (!match) continue;
+		let raw: unknown = match[1].trim();
+		if (
+			typeof raw === "string" &&
+			raw.startsWith('"') &&
+			raw.endsWith('"')
+		) {
+			try {
+				raw = JSON.parse(raw) as string;
+			} catch {
+				raw = match[1].trim().slice(1, -1);
+			}
+		} else if (
+			typeof raw === "string" &&
+			raw.startsWith("'") &&
+			raw.endsWith("'")
+		) {
+			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
+		}
+		const value = coerceCustomTaskPropertyValue(raw, property.type);
+		if (value !== undefined) result[property.id] = value;
+	}
+	return result;
+}
+
+/**
  * Read custom inline fields in the active task-property syntax. Custom emoji values
  * are token-based (quoted values may contain spaces); Dataview/native forms are delimited.
+ * 
+ * This is a little expensive function as it scans the properties in any of the 3 types of formats.
+ *
+ * TODO : Remove all the extract* functions below this one, as this single function can be used 
+ * as a generalized version of all of them. Rename this one as extractTaskPropertiesOfAllFormats
+ * 
+ * TODO : Create a setting, where user can decide whether they want to make use of this function while scanning their tasks either for the first time or for the automatic scanning.
+ * By default, {@link extractTaskPropertiesOfSingleFormat} will be the setting on plugin install.
  */
 export function extractCustomTaskProperties(
 	line: string,
@@ -777,32 +888,67 @@ export function extractCustomTaskProperties(
 ): Record<string, unknown> {
 	const result: Record<string, unknown> = {};
 	const builtInKeys = new Set([
-		"id", "legacyId", "title", "body", "status", "priority", "tags",
-		"frontmatterTags", "time", "createdDate", "startDate", "scheduledDate",
-		"due", "filePath", "taskLocation", "dependsOn", "reminder", "completion", "cancelledDate",
+		"id",
+		"legacyId",
+		"title",
+		"body",
+		"status",
+		"priority",
+		"tags",
+		"frontmatterTags",
+		"time",
+		"createdDate",
+		"startDate",
+		"scheduledDate",
+		"due",
+		"filePath",
+		"taskLocation",
+		"dependsOn",
+		"reminder",
+		"completion",
+		"cancelledDate",
 	]);
-	const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const escapeRegExp = (value: string) =>
+		value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	for (const property of settings.customProperties ?? []) {
 		if (!property.id || builtInKeys.has(property.id)) continue;
 		let expression: RegExp | undefined;
 		switch (settings.taskPropertyFormat) {
 			case taskPropertyFormatOptions.dataviewPlugin:
-				expression = new RegExp(`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`);
+				expression = new RegExp(
+					`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`,
+				);
 				break;
 			case taskPropertyFormatOptions.obsidianNative:
-				expression = new RegExp(`@${escapeRegExp(property.id)}\\(([^)]*)\\)`);
+				expression = new RegExp(
+					`@${escapeRegExp(property.id)}\\(([^)]*)\\)`,
+				);
 				break;
 			default:
 				if (property.emoji) {
-					expression = new RegExp(`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`);
+					expression = new RegExp(
+						`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`,
+					);
 				}
 		}
 		const match = expression?.exec(line);
 		if (!match) continue;
 		let raw: unknown = match[1].trim();
-		if (typeof raw === "string" && raw.startsWith('"') && raw.endsWith('"')) {
-			try { raw = JSON.parse(raw) as string; } catch { raw = match[1].trim().slice(1, -1); }
-		} else if (typeof raw === "string" && raw.startsWith("'") && raw.endsWith("'")) {
+		if (
+			typeof raw === "string" &&
+			raw.startsWith('"') &&
+			raw.endsWith('"')
+		) {
+			try {
+				raw = JSON.parse(raw) as string;
+			} catch {
+				raw = match[1].trim().slice(1, -1);
+			}
+		} else if (
+			typeof raw === "string" &&
+			raw.startsWith("'") &&
+			raw.endsWith("'")
+		) {
 			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
 		}
 		const value = coerceCustomTaskPropertyValue(raw, property.type);
