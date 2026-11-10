@@ -3,7 +3,7 @@ import { type Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import TaskBoard from "../../main.js";
 import TaskBoardViewContainer from "./TaskBoardViewContainer.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { type EmbedComponent, type EmbedContext } from "obsidian-typings";
 
 export const MAX_EMBED_Height = 400;

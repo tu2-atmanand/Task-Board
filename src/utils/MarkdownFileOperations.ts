@@ -2,7 +2,7 @@
 
 import { TFile } from "obsidian";
 import TaskBoard from "../../main.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 
 /**
  * Read data from a file in the vault

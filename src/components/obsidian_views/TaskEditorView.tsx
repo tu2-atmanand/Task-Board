@@ -1,0 +1,133 @@
+// src/views/TaskEditorView.tsx
+
+import { ItemView, WorkspaceLeaf, normalizePath } from "obsidian";
+import { Root, createRoot } from "react-dom/client";
+import { StrictMode } from "react";
+import { t } from "i18next";
+import TaskBoard from "../../../main.js";
+import { TaskEditorRC } from "../TaskEditorRC.js";
+import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
+import { taskItemEmpty } from "../../interfaces/Mapping.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { allowedFileExtensionsRegEx } from "../../regular_expressions/MiscelleneousRegExpr.js";
+import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
+import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
+import { generateTaskId } from "../../utils/TaskItemUtils.js";
+
+
+export class TaskEditorView extends ItemView {
+	plugin: TaskBoard;
+	root: Root | null = null;
+	viewTypeId: string = "";
+	task: taskItem = taskItemEmpty;
+	filePath: string;
+	taskExists: boolean;
+	isEdited: boolean;
+	isTaskNote: boolean;
+	activeNote: boolean;
+	saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>;
+
+	constructor(
+		plugin: TaskBoard,
+		leaf: WorkspaceLeaf,
+		viewTypeId: string,
+		saveTask: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>,
+		isTaskNote: boolean,
+		activeNote: boolean,
+		taskExists: boolean,
+		task?: taskItem,
+		filePath?: string
+	) {
+		super(leaf);
+		this.app = plugin.app;
+		this.plugin = plugin;
+		this.viewTypeId = viewTypeId;
+		this.filePath = filePath ? filePath : "";
+		this.taskExists = taskExists;
+		this.saveTask = saveTask;
+		if (taskExists && task) {
+			this.task = task;
+		}
+		this.isEdited = false;
+		this.isTaskNote = isTaskNote;
+		this.activeNote = activeNote;
+	}
+
+	getViewType() {
+		return this.viewTypeId;
+	}
+
+	getDisplayText() {
+		return this.taskExists ? t("edit-task") + " - " + this.task.id : t("add-new-task");
+	}
+
+	async onOpen() {
+		const container = this.containerEl.children[1];
+		// container.empty();
+		container.setAttribute('data-type', 'task-board-view');
+
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
+			this.task.id = generateTaskId(this.plugin);
+			this.task.legacyId = this.task.id;
+		}
+
+		// Some processing, if this is a Task-Note
+		let noteContent: string = "";
+		if (this.isTaskNote) {
+			if (this.taskExists) {
+				const data = await readDataOfVaultFile(this.plugin, this.filePath, true);
+
+				if (data == null) await this.onClose();
+				else noteContent = data;
+
+				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
+			} else {
+				noteContent = "---\ntitle: \n---\n";
+
+				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
+				this.task.title = "";
+
+				// Sanitize filename
+				const noteName = this.task.title || getCurrentLocalDateTimeString();
+				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
+				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
+			}
+		} else {
+			if (!this.taskExists)
+				this.task.title = "- [ ] ";
+		}
+
+		this.root = createRoot(container);
+		this.root.render(
+			<StrictMode>
+				<TaskEditorRC
+					plugin={this.plugin}
+					root={container as HTMLElement}
+					isTaskNote={this.isTaskNote}
+					noteContent={noteContent}
+					task={this.task}
+					taskExists={this.taskExists}
+					activeNote={this.activeNote}
+					filePath={this.filePath}
+					onSave={async (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => {
+						this.isEdited = false;
+						// const formattedContent = await getFormattedTaskContent(updatedTask);
+						await this.saveTask(updatedTask, quickAddPluginChoice, updatedNoteContent);
+						// Close the view leaf
+						this.app.workspace.detachLeavesOfType(this.viewTypeId);
+					}}
+					onClose={() => {
+						// Close the view leaf
+						// this.app.workspace.detachLeavesOfType(this.viewTypeId);
+					}}
+					setIsEdited={(value: boolean) => { this.isEdited = value; }}
+				/>
+			</StrictMode>
+		);
+	}
+
+	async onClose() {
+		// Clean up when view is closed
+		this.root?.unmount();
+	}
+}

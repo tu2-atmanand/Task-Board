@@ -12,7 +12,7 @@
 
 import { App, Component, Notice, setIcon, TFile } from "obsidian";
 import TaskBoard from "../../main.js";
-import { extractFrontmatterFromContent } from "../utils/taskNote/FrontmatterOperations.js";
+import { extractFrontmatterFromContent } from "../utils/task_note/FrontmatterOperations.js";
 
 /**
  * Renders frontmatter properties using Obsidian's PropertyWidget API

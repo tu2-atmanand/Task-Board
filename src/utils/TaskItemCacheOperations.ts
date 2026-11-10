@@ -8,7 +8,7 @@
 
 import TaskBoard from "../../main.js";
 import { taskItem, jsonCacheData } from "../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import { getCurrentLocalDateTimeString } from "./DateTimeCalculations.js";
 import {
@@ -19,7 +19,7 @@ import { generateTaskId } from "./TaskItemUtils.js";
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
-} from "./taskNote/FrontmatterOperations.js";
+} from "./task_note/FrontmatterOperations.js";
 
 /**
  * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.

@@ -9,7 +9,7 @@ import type * as NodeZlib from "node:zlib";
 import { App, Platform, TFile } from "obsidian";
 import { Buffer } from "node:buffer";
 
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 // import { configureWebWorker } from './z-worker-inline';
 
 // configureWebWorker(configure);

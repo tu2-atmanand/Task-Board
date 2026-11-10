@@ -6,7 +6,7 @@ import {
 	startOfToday,
 } from "date-fns";
 import { moment as _moment } from "obsidian";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import {
 	DEFAULT_DATE_FORMAT,
 	DEFAULT_DATE_TIME_FORMAT,

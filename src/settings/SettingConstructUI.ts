@@ -48,14 +48,14 @@ import {
 	CustomStatus,
 } from "../interfaces/GlobalSettings.js";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "../interfaces/Icons.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { CustomStatusModal } from "../modals/CustomStatusConfigurator.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
+import { CustomStatusModal } from "../components/modals/CustomStatusConfigurator.js";
 import {
 	normalizeTaskIconValue,
 	openIconPickerModal,
 	showIconPicker,
-} from "../modals/icon_picker/index.js";
-import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regularExpressions/TasksPluginRegularExpr.js";
+} from "../components/modals/icon_picker/index.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regular_expressions/TasksPluginRegularExpr.js";
 import { CommunityPlugins } from "../services/CommunityPlugins.js";
 import {
 	getFileSuggestions,

@@ -2,13 +2,13 @@
 
 import TaskBoard from "../../main.js";
 import { taskItem } from "../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { extractTaskId } from "../managers/VaultScanner.js";
-import { updateTaskInFile } from "./taskLine/TaskLineUtils.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
+import { extractTaskId } from "../core/managers/VaultScanner.js";
+import { updateTaskInFile } from "./task_line/TaskLineUtils.js";
 import {
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,
-} from "./taskNote/TaskNoteUtils.js";
+} from "./task_note/TaskNoteUtils.js";
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.

@@ -7,7 +7,7 @@ import {
 	taskJsonMerged,
 	taskItem,
 } from "../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { createFolderRecursively } from "../services/FileSystem.js";
 
 // --------------- Operations with data.json ---------------

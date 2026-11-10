@@ -10,7 +10,7 @@ import {
 	PENDING_SCAN_FILE_STACK,
 } from "../../interfaces/Constants.js";
 import { langCodes } from "../../interfaces/GlobalSettings.js";
-import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import en from "./locale/en.js";
 
 // --- Called Once On Plugin Load ---

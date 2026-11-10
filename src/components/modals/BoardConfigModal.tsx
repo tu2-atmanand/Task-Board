@@ -1,0 +1,1541 @@
+// /src/modal/BoardConfigModal.tsx
+
+import { Modal, normalizePath, Notice } from "obsidian";
+import Sortable from "sortablejs";
+import { BrickWall, EyeIcon, EyeOffIcon, Network, SquareKanban, Table2, GripHorizontalIcon, Copy } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { FaAlignJustify, FaTrash } from 'react-icons/fa';
+import ReactDOM from "react-dom/client";
+import { RxDragHandleDots2 } from "react-icons/rx";
+import { t } from "i18next";
+import TaskBoard from "../../../main.js";
+import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../../interfaces/BoardConfigs.js";
+import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions } from "../../interfaces/Enums.js";
+import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../interfaces/Mapping.js";
+import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
+import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../../services/MultiSuggest.js";
+import { generateRandomNumber, generateRandomStringId } from "../../utils/TaskItemUtils.js";
+import { AddColumnModal } from "./AddColumnModal.js";
+import { AddViewModal } from "./AddViewModal.js";
+import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
+import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
+import { eventEmitter } from "../../services/EventEmitter.js";
+import { AdvancedFilterModal } from "../advanced_filterer/index.js";
+
+interface ConfigModalProps {
+	plugin: TaskBoard;
+	currentBoardData: Board;
+	currentViewIndex: number;
+	onSave: (updatedBoard: Board) => void;
+	onClose: () => void;
+	setIsEdited: (value: boolean) => void;
+}
+
+const ConfigModalContent: React.FC<ConfigModalProps> = ({
+	plugin,
+	currentBoardData,
+	currentViewIndex,
+	onSave,
+	onClose,
+	setIsEdited,
+}) => {
+	const [allViewsData, setAllViewsData] = useState<TaskBoardViewType[]>(() => {
+		try {
+			const parsedData: unknown = JSON.parse(JSON.stringify(currentBoardData.views));
+			return currentBoardData.views ? parsedData as TaskBoardViewType[] : [];
+		} catch (e) {
+			bugReporterManagerInsatance.showNotice(34, "Error parsing boards data", e as string, "BoardConfigModal.tsx/allViewsData");
+			return [];
+		}
+	});
+	const [selectedViewIndex, setSelectedViewIndex] = useState<number>(currentViewIndex);
+	const [activeBoardData, setActiveBoardData] = useState<Board>(currentBoardData);
+	const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
+	const [inputValues, setInputValues] = useState<Record<string, string>>({});;
+	const getInputKey = (columnID: number, suffix: string) => `${columnID}-${suffix}`;
+	const getInputValue = (key: string, fallback: number | "" = "") => inputValues[key] ?? fallback;
+	const isDatedInputUndefined = (key: string, fallback: number) => inputValues[key] === "" && fallback === 0;
+
+	// const globalSettingsHTMLSection = useRef<HTMLDivElement>(null);
+	const columnListRef = useRef<HTMLDivElement | null>(null);
+	const boardListRef = useRef<HTMLDivElement | null>(null);
+
+	// --------------------------------------------------------------
+	// ALL EVENT HANDLING LOGIC BELOW
+	// --------------------------------------------------------------
+
+	// Kanban Column - Function to handle opening a modal for adding a new column
+	const handleOpenAddColumnModal = () => {
+		setIsAddColumnModalOpen(true);
+		// renderAddColumnModal();
+	};
+
+	// Kanban Column - Function to handle closing the add column modal
+	const handleCloseAddColumnModal = () => {
+		setIsAddColumnModalOpen(false);
+	};
+
+	// Kanban Column - Function to handle adding a new column to the selected Kanban specific view using the data submitted from the add column modal
+	const handleAddColumn = (viewIndex: number, columnData: ColumnData) => {
+		const updatedViewsData: TaskBoardViewType[] = [...allViewsData];
+		updatedViewsData[viewIndex].kanbanView!.columns.push({
+			id: columnData.id,
+			index: updatedViewsData[viewIndex].kanbanView!.columns.length + 1,
+			colType: columnData.colType,
+			active: true,
+			collapsed: false,
+			name: columnData.name,
+			coltag: columnData.coltag,
+			datedBasedColumn: {
+				dateType: plugin.settings.data.universalDate,
+				from: 0,
+				to: 0
+			},
+			taskStatus: columnData.taskStatus,
+			taskPriority: columnData.taskPriority,
+			limit: columnData.limit,
+			filePaths: columnData.filePaths,
+		});
+
+		// This is required to get the red border indicator to enter these values.
+		let fromKey = getInputKey(columnData.id, "from");
+		let toKey = getInputKey(columnData.id, "to");
+		setInputValues(prev => ({
+			...prev,
+			[fromKey]: "",
+			[toKey]: ""
+		}));
+
+		setAllViewsData(updatedViewsData);
+		handleCloseAddColumnModal();
+		setIsEdited(true);
+	};
+
+	// Kanban Column - UseEffect to initialize the MultiSuggest component for file path inputs in column configuration when the add/edit column modal is opened
+	const multiSuggestInputFieldRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+	useEffect(() => {
+		const view = allViewsData[selectedViewIndex];
+		if (!view || view.viewType !== viewTypeNames.kanban) return;
+
+		view.kanbanView?.columns.forEach((column, index) => {
+			const fileInputElement = multiSuggestInputFieldRefs.current[column.id];
+			if (!fileInputElement) return;
+
+			if (multiSuggestInputFieldRefs.current[column.id] !== null && column.colType === colTypeNames.pathFiltered) {
+				const suggestionContent = [
+					...getFolderSuggestions(plugin.app),
+					...getFileSuggestions(plugin.app),
+				];
+				const onSelectCallback = (selectedPath: string) => {
+					// setNewFilePath(selectedPath);
+					handleColumnChange(selectedViewIndex, index, "filePaths", selectedPath);
+				};
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			} else if (multiSuggestInputFieldRefs.current[column.id] !== null && column.colType === colTypeNames.namedTag) {
+				const suggestionContent = getTagSuggestions(plugin.app);
+				const onSelectCallback = (selectedTag: string) => {
+					handleColumnChange(selectedViewIndex, index, "coltag", selectedTag);
+				};
+				new MultiSuggest(fileInputElement, new Set(suggestionContent), onSelectCallback, plugin.app);
+			}
+		});
+	}, [plugin.app, selectedViewIndex, allViewsData]);
+
+	// Kanban Column - UseEffect to handle column reordering using SortableJS whenever the selected view or its columns change
+	useEffect(() => {
+		if (
+			selectedViewIndex === -1 ||
+			!columnListRef.current ||
+			!allViewsData[selectedViewIndex] ||
+			allViewsData[selectedViewIndex].viewType !== viewTypeNames.kanban
+		)
+			return;
+
+		const sortable = Sortable.create(columnListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalColumnRowDragButton",
+			ghostClass: "task-view-sortable-ghost",
+			chosenClass: "task-view-sortable-chosen",
+			dragClass: "task-view-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-view-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onEnd: (evt) => {
+				try {
+					if (evt.oldIndex === undefined || evt.newIndex === undefined) return;
+
+					const updatedViewsData = [...allViewsData];
+					const [movedItem] = updatedViewsData[selectedViewIndex].kanbanView!.columns.splice(evt.oldIndex, 1);
+					updatedViewsData[selectedViewIndex].kanbanView!.columns.splice(evt.newIndex, 0, movedItem);
+					updatedViewsData[selectedViewIndex].kanbanView!.columns.forEach((col, idx) => {
+						col.index = idx + 1;
+					});
+
+					setAllViewsData(updatedViewsData);
+					setIsEdited(true);
+
+					// I need to re-render the columnListRef section here
+					// if (columnListRef.current) {
+					// 	// Force re-render by updating the ref
+					// 	columnListRef.current.innerHTML = columnListRef.current.innerHTML;
+					// }
+				} catch (error) {
+					bugReporterManagerInsatance.showNotice(36, "Error in Sortable onEnd", error as string, "BoardConfigModal.tsx/onEnd");
+				}
+			},
+		});
+
+		return () => {
+			sortable.destroy();
+		};
+	}, [selectedViewIndex, allViewsData]);
+
+	// Kanban Column - Function to handle any property change for a specific column in the selected Kanban specific view. This is a generic function that can be used for changing any property of a column by passing the appropriate field and value.
+	const handleColumnChange = (
+		viewIndex: number,
+		columnIndex: number,
+		field: string,
+		value: unknown
+	) => {
+		// evt?.preventDefault();
+		// evt?.stopPropagation();
+		// console.log(`Updating column at viewIndex: ${viewIndex}, columnIndex: ${columnIndex}, field: ${field}, value:`, value);
+		const updatedViewsData = [...allViewsData];
+		(updatedViewsData[viewIndex].kanbanView!.columns[columnIndex] as Record<string, unknown>)[field] = value;
+
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	// Kanban Column - Function to handle toggling the visibility of a column in the selected Kanban specific view by toggling its "active" property
+	const toggleActiveState = (viewIndex: number, columnIndex: number) => {
+		const updatedViewsData = [...allViewsData];
+		const column = updatedViewsData[viewIndex].kanbanView!.columns[columnIndex];
+		column.active = !column.active; // Toggle the active state
+		setAllViewsData(updatedViewsData); // Update the state
+		setIsEdited(true);
+	};
+
+	// Kanban Column - Function to handle deleting a column from the selected Kanban specific view after confirming the action in a confirmation modal
+	const handleDeleteColumnFromBoard = (viewIndex: number, columnIndex: number) => {
+		const app = plugin.app;
+		const mssg = t("column-delete-confirmation-message") + allViewsData[viewIndex].kanbanView!.columns[columnIndex].name;
+
+		const deleteModal = new DeleteConfirmationModal(app, {
+			app,
+			mssg,
+			onConfirm: () => {
+				if (columnIndex !== -1) {
+					const updatedViewsData = [...allViewsData];
+					updatedViewsData[viewIndex].kanbanView!.columns.splice(columnIndex, 1);
+					setAllViewsData(updatedViewsData);
+					setIsEdited(true);
+				} else {
+					bugReporterManagerInsatance.showNotice(35, "There was an error while trying to delete the column. The column index was -1 for some reason.", `RROR : Column index is -1\nColumn name :${allViewsData[viewIndex].kanbanView!.columns[columnIndex].name}`, "BoardConfigModal.tsx/handleDeleteColumnFromBoard");
+				}
+			},
+			onCancel: () => {
+				// console.log("Board Deletion Operation Cancelled.");
+			},
+		});
+		deleteModal.open();
+	};
+
+	// Kanban Swimlanes - Function to handle opening the swimlane configuration modal for the selected Kanban specific view and passing the current swimlane configuration to the modal
+	const handleSwimlanesConfigureBtnClick = () => {
+		if (selectedViewIndex === -1) {
+			new Notice(t("no-view-selected"));
+			return;
+		}
+
+		const view = allViewsData[selectedViewIndex];
+		const currentSwimlaneConfig = view.kanbanView!.swimlanes || {
+			enabled: false,
+			hideEmptySwimlanes: false,
+			property: 'tags',
+			customValue: '',
+			sortCriteria: 'asc',
+			customSortOrder: [],
+			minimized: false,
+			maxHeight: '300px',
+			headerTruncation: HeaderTruncationOptions.middle
+		};
+
+		const swimlaneModal = new SwimlanesConfigModal(
+			plugin,
+			currentSwimlaneConfig,
+			(updatedConfig: swimlaneConfigs) => {
+				const updatedViewsData = [...allViewsData];
+				updatedViewsData[selectedViewIndex].kanbanView!.swimlanes = updatedConfig;
+				setAllViewsData(updatedViewsData);
+				setIsEdited(true);
+			},
+			() => { }
+		);
+
+		swimlaneModal.open();
+	};
+
+	// TaskBoardView Management - useEffect for view order sorting
+	useEffect(() => {
+		if (!boardListRef.current) return;
+
+		const sortableBoards = Sortable.create(boardListRef.current, {
+			animation: 150,
+			handle: ".boardConfigModalSidebarBtnArea-btn-drag-handle", // Define a drag handle class
+			onEnd: (evt) => {
+				if (evt.oldIndex === undefined || evt.newIndex === undefined || evt.oldIndex === evt.newIndex) {
+					return;
+				}
+
+				// Reorder the views inside the allViewsData state based on the new order after drag-and-drop
+				const updatedViewsData = [...allViewsData];
+				const [movedBoard] = updatedViewsData.splice(evt.oldIndex, 1);
+				updatedViewsData.splice(evt.newIndex, 0, movedBoard);
+
+				setAllViewsData(updatedViewsData);
+				setIsEdited(true);
+			},
+		});
+
+		return () => {
+			sortableBoards.destroy();
+		};
+	}, [allViewsData, selectedViewIndex]);
+
+	// TaskBoardView Management - Function to handle duplicating the currently selected view in the board configuration modal by creating a copy of the view data with a new name and adding it to the list of views in the state
+	const handleDuplicateCurrentView = async () => {
+		if (selectedViewIndex === -1) {
+			new Notice(t("no-view-selected-to-duplicate"));
+			return;
+		}
+		const viewToDuplicate = allViewsData[selectedViewIndex];
+		const parsedData: unknown = JSON.parse(JSON.stringify(viewToDuplicate)); // Deep copy
+		const duplicatedView: TaskBoardViewType = {
+			...parsedData as TaskBoardViewType,
+			viewId: generateRandomStringId('view'),
+			viewName: `${viewToDuplicate.viewName} ${t("copy-suffix")}`,
+		};
+
+		// Regenerate IDs for all columns to ensure uniqueness
+		if (duplicatedView?.kanbanView && duplicatedView.kanbanView.columns && duplicatedView.kanbanView.columns.length > 0) {
+			duplicatedView.kanbanView.columns = duplicatedView.kanbanView.columns.map((column: ColumnData) => ({
+				...column,
+				id: generateRandomNumber(), // Generate new numeric ID for each column
+			}));
+		}
+
+		const updatedViewsData = [...allViewsData, duplicatedView];
+		setAllViewsData(updatedViewsData);
+		setSelectedViewIndex(updatedViewsData.length - 1);
+		setIsEdited(true);
+	}
+
+	// TaskBoardView Management - Function to handle opening the add view modal when the "Add View" button is clicked in the sidebar of the board configuration modal
+	const handleAddNewView = () => {
+		const app = plugin.app;
+		const boardWithCurrentEdits = {
+			...activeBoardData,
+			views: allViewsData,
+		};
+		const modal = new AddViewModal(
+			app,
+			boardWithCurrentEdits,
+			{
+				onCancel: () => {
+					// Do nothing on cancel
+				},
+				onSubmit: (updatedBoardData: Board) => {
+					setActiveBoardData(updatedBoardData);
+					setAllViewsData(updatedBoardData.views || []);
+					setSelectedViewIndex(updatedBoardData.views ? updatedBoardData.views.length - 1 : -1);
+					setIsEdited(true);
+				},
+			}
+		);
+		modal.open();
+	};
+
+	// TaskBoardView Management - Function to handle deleting the currently selected view from the board configuration after confirming the action in a confirmation modal
+	const handleDeleteCurrentView = () => {
+		const app = plugin.app;
+		const mssg = t("view-delete-confirmation-message");
+		const deleteModal = new DeleteConfirmationModal(app, {
+			app,
+			mssg,
+			onConfirm: () => {
+				if (selectedViewIndex !== -1) {
+					const updatedViewsData = [...allViewsData];
+					updatedViewsData.splice(selectedViewIndex, 1);
+					setAllViewsData(updatedViewsData);
+					setIsEdited(true);
+					// if (updatedViewsData.length === 0) {
+					// 	handleAddNewBoard(updatedViewsData);
+					// 	setSelectedViewIndex(0);
+					// } else if (selectedViewIndex !== 0) {
+					// 	setSelectedViewIndex(selectedViewIndex - 1);
+					// }
+				} else {
+					new Notice(t("no-view-selected-to-delete"));
+				}
+			},
+			onCancel: () => {
+				// console.log("Board Deletion Operation Cancelled.");
+			},
+		});
+		deleteModal.open();
+	};
+
+	// TaskBoardView Management - Function to handle changing the name of the active view.
+	const handleViewNameChange = (index: number, newName: string) => {
+		const updatedViewsData = [...allViewsData];
+		updatedViewsData[index].viewName = newName;
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	// Board Management - Function to handle changing the description of the active view.
+	const handleBoardDescriptionChange = (index: number, description: string) => {
+		const updatedViewsData = [...allViewsData];
+		updatedViewsData[index].description = description;
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+	// Board Management - Function to handle configuring the board level filters
+	const handleConfigureBoardLevelFilters = () => {
+		const filterModal = new AdvancedFilterModal(
+			plugin, "board", currentBoardData.id, false, currentBoardData.name
+		);
+
+		// Set initial filter state
+		if (currentBoardData.boardFilters) {
+			window.setTimeout(() => {
+				// Use type assertion to resolve non-null issues
+				// const filterState = filterModal.liveFilterState as Filter;
+				if (filterModal.advancedFilterComponent) {
+					filterModal.advancedFilterComponent.loadFilterState(currentBoardData.boardFilters);
+				}
+			}, 100);
+		}
+
+		// Set the close callback - mainly used for handling cancel actions
+		filterModal.filterCloseCallback = (filtersState) => {
+			if (filtersState) {
+				// Save the filter state to the board
+				let updatedcurrentBoardData = currentBoardData;
+				updatedcurrentBoardData.boardFilters = filtersState;
+				void plugin.taskBoardFileManager.saveBoard(updatedcurrentBoardData);
+
+				// Refresh the board view
+				eventEmitter.emit('REFRESH_BOARD');
+			}
+		};
+
+		filterModal.open();
+	}
+
+	// Board Management - Function to handle duplicating the currently active board by creating a copy of the board data with a new name and adding it to the file system. After duplication, the new board is opened in a new view.
+	const handleDuplicateCurrentBoard = () => {
+		const parsedData: unknown = JSON.parse(JSON.stringify(activeBoardData)); // Deep copy
+		const duplicatedBoard: Board = {
+			...parsedData as Board,
+			id: generateRandomStringId('board'),
+			name: `${activeBoardData.name} ${t("copy-suffix")}`,
+			views: activeBoardData.views ? activeBoardData.views.map((view: TaskBoardViewType) => ({
+				...view,
+				viewId: generateRandomStringId('view'), // New unique ID for each view
+			})) : [],
+		};
+
+		let newFilePath = plugin.taskBoardFileManager.getBoardFilepathUsingBoardId(activeBoardData.id);
+		if (newFilePath) {
+			const parts = newFilePath.split("/");
+			const folderPath = parts.slice(0, -1).join("/");
+			newFilePath = normalizePath(folderPath + "/" + duplicatedBoard.name + ".taskboard");
+		} else {
+			newFilePath = normalizePath(duplicatedBoard.name + ".taskboard");
+		}
+
+		void plugin.taskBoardFileManager.saveBoardToDisk(newFilePath, duplicatedBoard);
+
+		window.setTimeout(() => {
+			eventEmitter.emit("OPEN_BOARD", {
+				layout: "tab",
+				filePath: newFilePath,
+				duplicate: false,
+			});
+		}, 400);
+
+		onClose();
+	};
+
+	// Toggle Settings - Function to handle toggling any boolean setting for the board or for a specific view by passing the appropriate field and value to the generic toggle functions defined below
+	type BooleanBoardProperties = 'showFilteredTags';
+	type BooleanKanbanProperties = 'hideEmptyColumns' | 'showColumnTags';
+	const handleToggleBoardSettings = (viewIndex: number, field: BooleanBoardProperties, value: boolean) => {
+		const updatedViewsData = [...allViewsData];
+		if (updatedViewsData[viewIndex]) {
+			updatedViewsData[viewIndex][field] = value;
+		}
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+	const handleToggleKanbanViewSettings = (viewIndex: number, field: BooleanKanbanProperties, value: boolean) => {
+		const updatedViewsData = [...allViewsData];
+		if (updatedViewsData[viewIndex] && updatedViewsData[viewIndex].kanbanView) {
+			updatedViewsData[viewIndex].kanbanView[field] = value;
+		}
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+	const handleToggleTableViewWrapping = (viewIndex: number, value: boolean) => {
+		const updatedViewsData = [...allViewsData];
+		if (updatedViewsData[viewIndex]) {
+			updatedViewsData[viewIndex] = {
+				...updatedViewsData[viewIndex],
+				tableView: {
+					...updatedViewsData[viewIndex].tableView,
+					wrapText: value,
+				},
+			};
+		}
+		setAllViewsData(updatedViewsData);
+		setIsEdited(true);
+	};
+
+	// Board Management - Function to handle saving the complete board configuration by saving the updated board data to the file system and updating the current view with the new board data after saving.
+	const handleSave = async () => {
+		let boardToSave = { ...activeBoardData };
+		boardToSave.views = allViewsData;
+		// Sanitize the viewIndex to ensure the index numbers inside each view is correct.
+		boardToSave.views = boardToSave.views.map((view, index) => ({
+			...view,
+			viewIndex: index
+		}));
+
+		// Clamp lastViewIndex to ensure it's within valid range [0, views.length - 1]
+		if (boardToSave.views.length > 0) {
+			boardToSave.lastViewIndex = Math.max(0, Math.min(boardToSave.lastViewIndex, boardToSave.views.length - 1));
+		} else {
+			boardToSave.lastViewIndex = 0;
+		}
+
+		if (boardToSave) {
+			await plugin.taskBoardFileManager.saveBoard(boardToSave);
+		}
+
+		// Find and return the updated current view data
+		// const updatedCurrentBoard = allViewsData.find(view => view.id === currentBoardData.id);
+		// if (updatedCurrentBoard) {
+
+		onSave(boardToSave);
+		// }
+	};
+
+	// --------------------------------------------------------------
+	// ALL RENDERING LOGIC BELOW
+	// --------------------------------------------------------------
+
+	const getViewTypeIconComponent = (viewTypeName: viewTypeNames | undefined, size: number) => {
+		let viewType = viewTypeName ?? currentBoardData.views[currentViewIndex].viewType;
+		switch (viewType) {
+			case viewTypeNames.kanban:
+				return <SquareKanban className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size} strokeWidth={1.5} />;
+			case viewTypeNames.map:
+				return <Network className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
+			case viewTypeNames.table:
+				return <Table2 className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
+			default:
+				return <BrickWall className="boardConfigModalSidebarBtnArea-btn-leftSecIcon" size={size - 2} strokeWidth={1.5} />;
+		}
+	}
+
+	// For Small Screens UI - Toggle Sidebar Visibility
+	const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+	const sidebarRef = useRef<HTMLDivElement>(null);
+	const toggleSidebar = () => setIsSidebarVisible(!isSidebarVisible);
+	const handleClickOutside = (event: MouseEvent) => {
+		if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+			setIsSidebarVisible(false);
+		}
+	};
+	useEffect(() => {
+		if (isSidebarVisible) {
+			activeDocument.addEventListener("mousedown", handleClickOutside);
+		} else {
+			activeDocument.removeEventListener("mousedown", handleClickOutside);
+		}
+		return () => {
+			if (isSidebarVisible) {
+				// Cleanup event listener when the component unmounts or sidebar visibility changes
+				activeDocument.removeEventListener("mousedown", handleClickOutside);
+			}
+		}
+	}, [isSidebarVisible]);
+
+	// Function to render the add column modal when the "Add Column" button is clicked in the configuration of a Kanban specific view.
+	const renderAddColumnModal = () => {
+		if (!isAddColumnModalOpen) return null;
+
+		const modal = new AddColumnModal(plugin.app, {
+			app: plugin.app,
+			onCancel: handleCloseAddColumnModal, // Previously onClose
+			onSubmit: (columnData: ColumnData) => handleAddColumn(selectedViewIndex, columnData),
+		});
+		modal.open();
+	};
+
+	// UseEffect and function to render the global settings UI in the board configuration modal when the global settings tab is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts.
+	// useEffect(() => {
+	// 	if (selectedViewIndex !== -2) return;
+
+	// 	if (globalSettingsHTMLSection.current) {
+	// 		settingManager.cleanUp();
+	// 		globalSettingsHTMLSection.current.empty();
+	// 		// Render global settings
+	// 		void settingManager.constructUI(globalSettingsHTMLSection.current, t("plugin-global-settings"));
+	// 	}
+	// }, [selectedViewIndex]);
+	// const renderGlobalSettingsTab = (viewIndex: number) => {
+	// 	return (
+	// 		<div className="pluginGlobalSettingsTab" ref={globalSettingsHTMLSection} />
+	// 	);
+	// }
+
+	// Function to render the board settings UI in the board configuration modal when a specific view is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts.
+	const renderBoardConfigTab = () => {
+		// if (globalSettingsHTMLSection.current) {
+		// 	settingManager.cleanUp();
+		// 	globalSettingsHTMLSection.current.empty();
+		// }
+
+		return (
+			<div className="boardConfigTab">
+				<div className="boardConfigModalMainContent-Active">
+					<div className="boardConfigModalMainContent-Active-TopSec">
+						<h2 className="boardConfigModalMainContent-Active-Heading">{activeBoardData.name} {t("configurations")}</h2>
+						<hr className="boardConfigModalHr-50" />
+						<div className="boardConfigModalMainContent-Active-Body">
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+									<div className="boardConfigModalSettingName">{t("view-name")}</div>
+									<div className="boardConfigModalSettingDescription">{t("view-name-info")}</div>
+								</div>
+								<input
+									type="text"
+									value={activeBoardData.name || ""}
+									onChange={(e) => {
+										setActiveBoardData({
+											...activeBoardData,
+											name: e.target.value,
+										});
+										setIsEdited(true);
+									}}
+								/>
+							</div>
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardDescriptionTag">
+									<div className="boardConfigModalSettingName">{t("view-description")}</div>
+									<div className="boardConfigModalSettingDescription">{t("view-description-info")}</div>
+								</div>
+								<textarea
+									className="boardConfigModalSettingDescriptionTextArea"
+									value={activeBoardData.description || ""}
+									onChange={(e) => {
+										setActiveBoardData({
+											...activeBoardData,
+											description: e.target.value,
+										});
+										setIsEdited(true);
+									}}
+								/>
+							</div>
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+									<div className="boardConfigModalSettingName">{t("board-level-filters")}</div>
+									<div className="boardConfigModalSettingDescription">{t("board-level-filters-info")}</div>
+								</div>
+								<button
+									className="boardConfigModalMainContentConfigureSwimlanesBtn"
+									onClick={handleConfigureBoardLevelFilters}
+								>{t("configure")}</button>
+							</div>
+						</div>
+					</div>
+
+					<div className="boardConfigModalMainContent-Active-BottomSec">
+						<hr className="boardConfigModalHr-100" />
+
+						<div className="boardConfigModalDoubleBtnContainer">
+							<button className="boardConfigModalDuplicateBoardBtn" onClick={() => handleDuplicateCurrentBoard}>{t("duplicate-this-board")}</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Function to render the view specific settings UI in the board configuration modal when a specific view is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts. This function also handles rendering the UI for configuring the settings of a Kanban specific view and for configuring the columns in a Kanban specific view.
+	const renderViewSettings = (viewIndex: number) => {
+		// if (globalSettingsHTMLSection.current) {
+		// 	settingManager.cleanUp();
+		// 	globalSettingsHTMLSection.current.empty();
+		// }
+
+		let view: TaskBoardViewType | undefined;
+		if (allViewsData && allViewsData.length > 0)
+			view = allViewsData[viewIndex];
+		if (!view) view = allViewsData[0];
+
+		if (!view) {
+			return (
+				<div className="boardConfigModalMainContent-Active">
+					<div className="boardConfigModalNoViewSelected">
+						{t("no-view-selected-1")}
+						{t("no-view-selected-2")}
+					</div>
+				</div>
+			);
+		}
+
+		const statusOptions = getCustomStatusOptionsForDropdown(
+			plugin.settings.data.customStatuses,
+			{
+				mode: 'grouped',
+				showTooltips: true,
+			}
+		);
+
+		return (
+			<div className="boardConfigModalMainContent-Active">
+				<div className="boardConfigModalMainContent-Active-TopSec">
+					<h2 className="boardConfigModalMainContent-Active-Heading">{view.viewName} {t("configurations")}</h2>
+					<hr className="boardConfigModalHr-50" />
+					<div className="boardConfigModalMainContent-Active-Body">
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+								<div className="boardConfigModalSettingName">{t("view-id")}</div>
+								<div className="boardConfigModalSettingDescription">{t("view-id-info")}</div>
+							</div>
+							<div className="boardConfigModalMainContent-Active-Body-ViewId">
+								<div className="boardConfigModalMainContent-Active-Body-ViewIdValue">{view.viewId}</div>
+								<Copy className="boardConfigModalMainContent-Active-Body-ViewIdCopyButton" onClick={() => {
+									try {
+										void navigator.clipboard.writeText(view.viewId);
+										new Notice(t("copy-view-id-successful"));
+									} catch (error) {
+										bugReporterManagerInsatance.addToLogs(
+											221,
+											String(error),
+											"BoardConfigModal.tsx/renderViewSettings/copy-view-id",
+										);
+										new Notice(t("copy-task-title-unsuccessful"));
+									}
+								}} />
+							</div>
+						</div>
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+								<div className="boardConfigModalSettingName">{t("view-name")}</div>
+								<div className="boardConfigModalSettingDescription">{t("view-name-info")}</div>
+							</div>
+							<input
+								type="text"
+								value={view.viewName}
+								onChange={(e) => handleViewNameChange(viewIndex, e.target.value)}
+							/>
+						</div>
+						<div className="boardConfigModalMainContent-Active-Body-InputItems">
+							<div className="boardConfigModalMainContent-Active-Body-boardDescriptionTag">
+								<div className="boardConfigModalSettingName">{t("view-description")}</div>
+								<div className="boardConfigModalSettingDescription">{t("view-description-info")}</div>
+							</div>
+							<textarea
+								className="boardConfigModalSettingDescriptionTextArea"
+								value={view?.description || ""}
+								onChange={(e) => handleBoardDescriptionChange(viewIndex, e.target.value)}
+							/>
+						</div>
+
+						{/* Configuration specific to Kanban view */}
+						{view.viewType === viewTypeNames.kanban && (
+							<>
+								<div className="boardConfigModalMainContent-Active-Body-InputItems">
+									<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+										<div className="boardConfigModalSettingName">{t("show-tags-in-the-columns-of-type-tagged")}</div>
+										<div className="boardConfigModalSettingDescription">{t("show-tags-in-the-columns-of-type-tagged-info")}</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={view.kanbanView!.showColumnTags}
+										onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "showColumnTags", e.target.checked)}
+									/>
+								</div>
+								<div className="boardConfigModalMainContent-Active-Body-InputItems">
+									<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+										<div className="boardConfigModalSettingName">{t("automatically-hide-empty-columns")}</div>
+										<div className="boardConfigModalSettingDescription">{t("automatically-hide-empty-columns-info")}</div>
+									</div>
+									<input
+										type="checkbox"
+										checked={view.kanbanView!.hideEmptyColumns}
+										onChange={(e) => handleToggleKanbanViewSettings(viewIndex, "hideEmptyColumns", e.target.checked)}
+									/>
+								</div>
+								<div className="boardConfigModalMainContent-Active-Body-InputItems">
+									<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+										<div className="boardConfigModalSettingName">{t("configure-kanban-swimlanes")}</div>
+										<div className="boardConfigModalSettingDescription">{t("configure-kanban-swimlanes-info")}</div>
+									</div>
+									<button
+										className="boardConfigModalMainContentConfigureSwimlanesBtn"
+										onClick={handleSwimlanesConfigureBtnClick}
+									>{t("configure")}</button>
+								</div>
+
+								<hr className="boardConfigModalHr-100" />
+
+								<div className="boardConfigModalMainContent-Active-BodyColumnSec">
+									<h3>{t("columns")}</h3>
+									<div
+										ref={columnListRef}
+										className="boardConfigModalMainContent-Active-BodyColumnsList"
+									>
+										{view.kanbanView!.columns.map((column: ColumnData, columnIndex: number) => (
+											<div key={column.id} className={`boardConfigModalColumnRow${column.active ? "" : " Hidden"}`}>
+												{/* Header for the column configuration */}
+												<div className="boardConfigModalColumnRowHeader">
+													<div className="boardConfigModalColumnRowHeaderLeftSec">
+														<GripHorizontalIcon className="boardConfigModalColumnRowDragButton" size={20} enableBackground={0} aria-label={t("column-config-drag-butn-info")} />
+														<div className="boardConfigModalColumnRowIndex">{column.index}</div>
+														<div className="boardConfigModalColumnRowContentColumnType" aria-label={t("column-type")}>{columnTypeAndNameMapping[column.colType]}</div>
+														{column.active ? (
+															<EyeIcon
+																size={20}
+																aria-label={t("hide-column")}
+																onClick={() => toggleActiveState(viewIndex, columnIndex)}
+																className="boardConfigModalColumnRowEyeButton"
+															/>
+														) : (
+															<EyeOffIcon
+																size={20}
+																aria-label={t("show-column")}
+																onClick={() => toggleActiveState(viewIndex, columnIndex)}
+																className="boardConfigModalColumnRowEyeButton"
+															/>
+														)}
+													</div>
+													<div className="boardConfigModalColumnRowHeaderRightSec">
+														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
+													</div>
+												</div>
+
+												{/* Show column specific properties input fields */}
+												<div className="boardConfigModalColumnRowContent">
+													<div className="boardConfigModalColumnRowContentProperty">
+														<div className="boardConfigModalColumnRowContentPropertyLabel">
+															{t("name")} :
+														</div>
+														<input
+															type="text"
+															placeholder={t("enter-column-name")}
+															aria-label={t("column-name")}
+															value={column.name || ""}
+															onChange={(e) =>
+																handleColumnChange(
+																	viewIndex,
+																	columnIndex,
+																	"name",
+																	e.target.value
+																)
+															}
+															className="boardConfigModalColumnRowContentColName"
+														/>
+													</div>
+
+													{/* Column specific properties input elements */}
+													{column.colType === colTypeNames.allPending && (
+														<div className="boardConfigModalColumnRowContentProperty">
+															<div className="boardConfigModalColumnRowContentPropertyLabel">
+																{t("work-limit")} :
+															</div>
+															<input
+																type="number"
+																placeholder={t("work-limit")}
+																aria-label={t("work-limit-info")}
+																value={getInputValue(getInputKey(column.id, "workLimit"), column.workLimit ?? 0)}
+																onChange={(e) => {
+																	setInputValues(prev => ({
+																		...prev,
+																		[getInputKey(column.id, "workLimit")]: e.target.value
+																	}));
+																}}
+																onBlur={(e) => {
+																	const value = e.target.value;
+																	const key = getInputKey(column.id, "workLimit");
+																	setInputValues(prev => ({
+																		...prev,
+																		[key]: value
+																	}));
+																	handleColumnChange(
+																		viewIndex,
+																		columnIndex,
+																		"workLimit",
+																		value === "" ? 0 : Number(value),
+																	);
+																}}
+																className="boardConfigModalColumnRowContentNumericInput"
+															/>
+														</div>
+													)}
+													{column.colType === colTypeNames.namedTag && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("tag")} :
+																</div>
+																<input
+																	type="text"
+																	ref={(el) => {
+																		multiSuggestInputFieldRefs.current[column.id] = el;
+																	}}
+																	placeholder={t("enter-tag")}
+																	value={column.coltag || ""}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"coltag",
+																			e.target.value
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																/>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "namedTag-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "namedTag-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "namedTag-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value)
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.taskStatus && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("status")} :
+																</div>
+																<select
+																	aria-label={t("task-status")}
+																	value={column.taskStatus || " "}
+																	onChange={(e) => {
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			colTypeNames.taskStatus,
+																			e.target.value
+																		)
+																	}
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																>
+																	{statusOptions.type === 'grouped' && statusOptions.groups.map((group) => (
+																		<optgroup key={group.type} label={group.label}>
+																			{group.options.map((opt) => (
+																				<option
+																					key={`${opt.value}-${group.type}`}
+																					value={opt.value}
+																					title={opt.tooltip}
+																				>
+																					{opt.label}
+																				</option>
+																			))}
+																		</optgroup>
+																	))}
+																</select>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "taskStatus-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "taskStatus-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value.trim();
+																		const key = getInputKey(column.id, "taskStatus-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.taskPriority && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("priority")} :
+																</div>
+																<select
+																	aria-label="Select priority"
+																	value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			colTypeNames.taskPriority,
+																			Number(e.target.value)
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentPriorityDropdown"
+																>
+																	{getPriorityOptionsForDropdown().map((option) => (
+																		<option key={option.value} value={option.value}>{option.text}</option>
+																	))}
+																</select>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "taskPriority-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "taskPriority-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "taskPriority-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.completed && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("max-items")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("max-items")}
+																	value={getInputValue(getInputKey(column.id, "limit"), column.limit || 20)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "limit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "limit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"limit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.pathFiltered && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("file-or-folder-path")} :
+																</div>
+																<input
+																	type="text"
+																	ref={(el) => {
+																		multiSuggestInputFieldRefs.current[column.id] = el;
+																	}}
+																	className="boardConfigModalColumnRowContentColName"
+																	value={column.filePaths || ""}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"filePaths",
+																			e.target.value
+																		)
+																	}
+																	placeholder={t("enter-path-pattern")}
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.dated && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("date-type")} :
+																</div>
+																<select
+																	aria-label="Select date type"
+																	value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"datedBasedColumn",
+																			{
+																				...column.datedBasedColumn,
+																				dateType: e.target.value,
+																			}
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																>
+																	<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+																	<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+																	<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
+																</select>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("from")} :
+																</div>
+																<input
+																	required={true}
+																	type="number"
+																	placeholder={t("from") + "  (eg. = -365)"}
+																	aria-label={t("from-tooltip")}
+																	value={getInputValue(getInputKey(column.id, "from"), column.datedBasedColumn?.from ?? 0) ?? ""}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "from")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "from");
+																		if (value === "") {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: ""
+																			}));
+																		} else {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: value
+																			}));
+																			handleColumnChange(
+																				viewIndex,
+																				columnIndex,
+																				"datedBasedColumn",
+																				{
+																					...column.datedBasedColumn,
+																					from: Number(value),
+																				}
+																			);
+																		}
+																	}}
+																	className={`boardConfigModalColumnRowContentNumericInput${isDatedInputUndefined(getInputKey(column.id, "from"), 0) ? " border-red" : ""}`}
+																/>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("to")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("to") + "  (eg. = 365)"}
+																	aria-label={t("to-tooltip")}
+																	value={getInputValue(getInputKey(column.id, "to"), column.datedBasedColumn?.to ?? 0) ?? ""}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "to")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "to");
+																		if (value === "") {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: ""
+																			}));
+																		} else {
+																			setInputValues(prev => ({
+																				...prev,
+																				[key]: value
+																			}));
+																			handleColumnChange(
+																				viewIndex,
+																				columnIndex,
+																				"datedBasedColumn",
+																				{
+																					...column.datedBasedColumn,
+																					to: Number(value),
+																				}
+																			);
+																		}
+																	}}
+																	className={`boardConfigModalColumnRowContentNumericInput${isDatedInputUndefined(getInputKey(column.id, "to"), 0) ? " border-red" : ""}`}
+																/>
+															</div>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("work-limit")} :
+																</div>
+																<input
+																	type="number"
+																	placeholder={t("work-limit")}
+																	aria-label={t("work-limit-info")}
+																	value={getInputValue(getInputKey(column.id, "dated-workLimit"), column.workLimit || 0)}
+																	onChange={(e) => {
+																		setInputValues(prev => ({
+																			...prev,
+																			[getInputKey(column.id, "dated-workLimit")]: e.target.value
+																		}));
+																	}}
+																	onBlur={(e) => {
+																		const value = e.target.value;
+																		const key = getInputKey(column.id, "dated-workLimit");
+																		setInputValues(prev => ({
+																			...prev,
+																			[key]: value
+																		}));
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"workLimit",
+																			value === "" ? 0 : Number(value),
+																		);
+																	}}
+																	className="boardConfigModalColumnRowContentNumericInput"
+																/>
+															</div>
+														</>
+													)}
+													{column.colType === colTypeNames.undated && (
+														<>
+															<div className="boardConfigModalColumnRowContentProperty">
+																<div className="boardConfigModalColumnRowContentPropertyLabel">
+																	{t("date-type")} :
+																</div>
+																<select
+																	aria-label="Select date type"
+																	value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
+																	onChange={(e) =>
+																		handleColumnChange(
+																			viewIndex,
+																			columnIndex,
+																			"datedBasedColumn",
+																			{
+																				from: 0,
+																				to: 0,
+																				dateType: e.target.value,
+																			}
+																		)
+																	}
+																	className="boardConfigModalColumnRowContentColName"
+																>
+																	<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
+																	<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
+																	<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
+																</select>
+															</div>
+														</>
+													)}
+												</div>
+
+											</div>
+										))}
+									</div>
+								</div>
+								<button className="boardConfigModalAddColumnButton" onClick={handleOpenAddColumnModal}>{t("add-column")}</button>
+							</>
+						)}
+
+						{/* Configuration specific to Table view */}
+						{view.viewType === viewTypeNames.table && (
+							<div className="boardConfigModalMainContent-Active-Body-InputItems">
+								<div className="boardConfigModalMainContent-Active-Body-boardNameTag">
+									<div className="boardConfigModalSettingName">{t("wrap-table-cell-text")}</div>
+									<div className="boardConfigModalSettingDescription">{t("wrap-table-cell-text-info")}</div>
+								</div>
+								<input
+									type="checkbox"
+									checked={view.tableView?.wrapText ?? true}
+									onChange={(e) => handleToggleTableViewWrapping(viewIndex, e.target.checked)}
+								/>
+							</div>
+						)}
+					</div>
+				</div>
+
+				<div className="boardConfigModalMainContent-Active-BottomSec">
+					<hr className="boardConfigModalHr-100" />
+					<div className="boardConfigModalDoubleBtnContainer">
+						<button className="boardConfigModalDuplicateBoardBtn" onClick={() => { void handleDuplicateCurrentView(); }}>{t("duplicate-this-view")}</button>
+						<button className="boardConfigModalDeleteBoardBtn" onClick={handleDeleteCurrentView}>{t("delete-this-view")}</button>
+					</div>
+				</div>
+			</div>
+		);
+	};
+
+	// Main render function for the board configuration modal which renders the sidebar with the list of views and the global settings tab and the main content area with the settings for the selected view or for the global settings based on the current state of the selected view index. This function also handles rendering the toggle button for the sidebar on small screens and rendering the add column modal when it is open.
+	return (
+		<>
+			{renderAddColumnModal()}
+			{allViewsData && (
+				<button className="boardConfigModalSidebarToggleBtn" onClick={toggleSidebar} aria-label="Toggle Sidebar">
+					<FaAlignJustify className="boardConfigModalSidebarToggleBtnIcon" size={15} enableBackground={0} />
+				</button>
+			)}
+			<div className="boardConfigModalHome">
+				{allViewsData && (
+					<>
+						<div ref={sidebarRef} className={`boardConfigModalSidebar ${isSidebarVisible ? "visible" : ""}`}>
+							<div className="boardConfigModalSidebarBtnArea" >
+								<div className="boardConfigModalSidebarBtnAreaGlobal" onClick={() => {
+									setSelectedViewIndex(-1);
+									toggleSidebar();
+								}}>
+									{t("board-settings")}
+								</div>
+
+								<hr className="boardConfigModalHr-100" />
+
+								{allViewsData.length > 0 && (
+									<>
+										<div className="boardConfigModalSettingDescription">{t("your-views")}</div>
+										<div ref={boardListRef} className="boardConfigModalSidebarBtnAreaBoardBtnsSection">
+											{allViewsData.map((view, index) => (
+												<div
+													key={view.viewName} // Changed key from index to view.name
+													className={`boardConfigModalSidebarBtnArea-btn${index === selectedViewIndex ? " active" : ""}`}
+													onClick={() => {
+														setSelectedViewIndex(index);
+														toggleSidebar();
+													}}
+												>
+													<div className="boardConfigModalSidebarBtnArea-btn-leftSec">
+														{getViewTypeIconComponent(view.viewType, 20)}
+														<span>
+															{view.viewName}
+														</span>
+													</div>
+
+													<RxDragHandleDots2 className="boardConfigModalSidebarBtnArea-btn-drag-handle" size={15} /> {/* Add drag handle */}
+												</div>
+											))}
+										</div>
+									</>
+								)}
+							</div>
+							<div className="boardConfigModalSidebarBtnAreaConfigBtnsSection">
+								<button className="boardConfigModalSidebarBtnAreaAddBoard" onClick={() => handleAddNewView()}>{t("add-view")}</button>
+								<hr className="boardConfigModalHr-100" />
+								<button
+									className="boardConfigModalSidebarSaveBtn"
+									onClick={() => {
+										void handleSave();
+									}}
+								>
+									{t("save")}
+								</button>
+							</div>
+						</div>
+
+						{/* <div className="boardConfigModalMainContent">
+							{selectedViewIndex === -2
+								? renderGlobalSettingsTab(selectedViewIndex)
+								: selectedViewIndex === -1
+									? renderBoardConfigTab()
+									: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
+						</div> */}
+					</>
+				)}
+			</div>
+
+			<button
+				className="boardConfigModalSaveBtn-mobile"
+				onClick={() => {
+					void handleSave();
+				}}
+			>
+				{t("save")}
+			</button>
+		</>
+	);
+};
+
+/**
+ * BoardConfigureModal is a modal component that provides a user interface for configuring the settings of a task board and its views in the TaskBoard plugin. It allows users to manage their boards and views, configure settings for each view, and save their configurations. The modal uses React for rendering the UI and manages its state using React's useState and useEffect hooks. It also integrates with the Obsidian plugin API to handle file management and settings management for the task boards.
+ */
+export class BoardConfigureModal extends Modal {
+	root: ReactDOM.Root;
+	currentBoardData: Board;
+	currentViewIndex: number;
+	isEdited: boolean;
+	onSave: (updatedBoard: Board) => void;
+	plugin: TaskBoard;
+
+	/**
+	 * Constructor for the BoardConfigureModal class which initializes the modal with the current board data, the index of the currently active view, and a callback function to handle saving the updated board data when the user saves their configurations. It also sets up the React root for rendering the modal content and initializes the settings manager for managing global settings in the modal.
+	 * @param plugin - The instance of the TaskBoard plugin that is opening the modal, used for accessing plugin settings and file management functionalities.
+	 * @param currentBoardData - The data of the currently active board that is being configured in the modal, used for populating the UI with the current settings and for saving the updated settings back to the file system.
+	 * @param currentViewIndex - The index of the currently active view in the board that is being configured, used for determining which view's settings to display and edit in the modal.
+	 * @param onSave - A callback function that is called when the user saves their configurations in the modal, which receives the updated board data as an argument and is responsible for handling the saving of the updated board data to the file system and updating the current view with the new board data after saving.
+	 */
+	constructor(
+		plugin: TaskBoard,
+		currentBoardData: Board,
+		currentViewIndex: number,
+		onSave: (updatedBoard: Board) => void
+	) {
+		super(plugin.app);
+		this.plugin = plugin;
+		this.currentBoardData = currentBoardData;
+		this.currentViewIndex = currentViewIndex;
+		this.onSave = onSave;
+
+		this.isEdited = false;
+		const { contentEl } = this;
+		this.root = ReactDOM.createRoot(contentEl);
+
+		this.modalEl.setAttribute('modal-type', 'task-board-config');
+	}
+
+	onOpen() {
+		this.root.render(
+			<ConfigModalContent
+				plugin={this.plugin}
+				currentBoardData={this.currentBoardData}
+				currentViewIndex={this.currentViewIndex}
+				onSave={(updatedBoard: Board) => {
+					this.isEdited = false;
+					this.onSave(updatedBoard);
+					this.close();
+				}}
+				onClose={() => this.close()}
+				setIsEdited={(value: boolean) => this.isEdited = value}
+			/>
+		);
+	}
+
+	handleCloseAttempt() {
+		// Open confirmation modal
+		const mssg = t("edit-task-modal-close-confirm-mssg");
+		const closeConfirmModal = new ClosePopupConfrimationModal(this.app, {
+			app: this.app,
+			mssg,
+			onDiscard: () => {
+				this.isEdited = false;
+				this.close();
+			},
+			onGoBack: () => {
+				// Do nothing
+			}
+		});
+		closeConfirmModal.open();
+	}
+
+	// handleSave() {
+	// 	// Trigger save functionality if required before closing
+	// 	this.onSave(this.boards);
+	// 	this.isEdited = false;
+	// 	this.close();
+	// }
+
+	onClose() {
+		// Clean up React rendering
+		if (this.root) {
+			this.root.unmount();
+		}
+
+		// Clear the content element
+		const { contentEl } = this;
+		contentEl.empty();
+
+		// Call the super method to correctly close the modal
+		super.onClose();
+	}
+
+	public close(): void {
+		if (this.isEdited) {
+			this.handleCloseAttempt();
+		} else {
+			this.onClose();
+			super.close();
+		}
+	}
+
+}

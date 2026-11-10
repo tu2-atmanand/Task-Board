@@ -7,27 +7,27 @@ import { Board } from "../interfaces/BoardConfigs.js";
 import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "../interfaces/Constants.js";
 import { VaultScannnerFilters } from "../interfaces/GlobalSettings.js";
 import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
-import { TaskEditorModal } from "../modals/TaskEditorModal.js";
-import { BoardConfigureModal } from "../modals/BoardConfigModal.js";
-import { BoardsExplorerModal } from "../modals/BoardsExplorer.js";
-import { BugReporterModal } from "../modals/BugReporterModal.js";
-import { DatePickerModal } from "../modals/date_picker/DatePickerModal.js";
-import { DiffContentCompareModal } from "../modals/DiffContentCompareModal.js";
-import { ScanFilterModal } from "../modals/ScanFilterModal.js";
-import { ScanVaultModal } from "../modals/ScanVaultModal.js";
-import { TaskEditorView } from "../obsidian_views/TaskEditorView.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
+import { TaskEditorModal } from "../components/modals/TaskEditorModal.js";
+import { BoardConfigureModal } from "../components/modals/BoardConfigModal.js";
+import { BoardsExplorerModal } from "../components/modals/BoardsExplorer.js";
+import { BugReporterModal } from "../components/modals/BugReporterModal.js";
+import { DatePickerModal } from "../components/modals/date_picker/DatePickerModal.js";
+import { DiffContentCompareModal } from "../components/modals/DiffContentCompareModal.js";
+import { ScanFilterModal } from "../components/modals/ScanFilterModal.js";
+import { ScanVaultModal } from "../components/modals/ScanVaultModal.js";
+import { TaskEditorView } from "../components/obsidian_views/TaskEditorView.js";
 import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
 import { writeDataToVaultFile } from "../utils/MarkdownFileOperations.js";
 import {
 	getFormattedTaskContent,
 	addIdToTaskContent,
-} from "../utils/taskLine/TaskContentFormatter.js";
+} from "../utils/task_line/TaskContentFormatter.js";
 import {
 	addTaskInNote,
 	updateTaskInFile,
-} from "../utils/taskLine/TaskLineUtils.js";
-import { updateFrontmatterInMarkdownFile } from "../utils/taskNote/TaskNoteUtils.js";
+} from "../utils/task_line/TaskLineUtils.js";
+import { updateFrontmatterInMarkdownFile } from "../utils/task_note/TaskNoteUtils.js";
 import { CommunityPlugins } from "./CommunityPlugins.js";
 import { eventEmitter } from "./EventEmitter.js";
 import { createFolderRecursively } from "./FileSystem.js";

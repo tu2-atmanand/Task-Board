@@ -1,0 +1,1478 @@
+// /src/components/TaskItem.tsx
+
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Notice, Platform, Menu, TFile, MenuItem, Component, View } from 'obsidian';
+import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
+import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
+import { t } from 'i18next';
+import TaskBoard from '../../../main.js';
+import { KanbanView } from '../../interfaces/BoardConfigs.js';
+import { DEFAULT_DATE_FORMAT } from '../../interfaces/Constants.js';
+import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames } from '../../interfaces/Enums.js';
+import { getCustomStatusOptionsForDropdown, getPriorityEmoji, getPriorityOptionsForDropdown, priorityNames } from '../../interfaces/Mapping.js';
+import { taskItem, UpdateTaskEventData } from '../../interfaces/TaskItem.js';
+import { bugReporterManagerInsatance } from '../../core/managers/BugReporter.js';
+import { currentDragDataPayload, dragDropTasksManagerInsatance } from '../../core/managers/DragDropTasksManager.js';
+import { DateTimePickerModal } from '../modals/date_time_picker/DateTimePickerModal.js';
+import { showTextInputModal } from '../modals/TextInputModal.js';
+import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from '../../regular_expressions/TasksPluginRegularExpr.js';
+import { eventEmitter } from '../../services/EventEmitter.js';
+import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from '../../services/MarkdownHoverPreview.js';
+import { MarkdownUIRenderer } from '../../services/MarkdownUIRenderer.js';
+import { openDateInputModal } from '../../services/OpenModals.js';
+import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../core/algorithms/ScanningFilterer.js';
+import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../utils/CheckBoxUtils.js';
+import { getUniversalDateFromTask, robustDateParser } from '../../utils/DateTimeCalculations.js';
+import { getAllTaskTags, getTaskFromId } from '../../utils/TaskItemUtils.js';
+import { cleanTaskTitleLegacy, dedentTaskBodyLines, shouldExpandTaskDescription } from '../../utils/task_line/TaskContentFormatter.js';
+import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../utils/task_line/TaskItemEventHandlers.js';
+import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../utils/task_note/TaskNoteEventHandlers.js';
+import { isTaskNotePresentInTags, getStatusNameFromStatusSymbol } from '../../utils/task_note/TaskNoteUtils.js';
+import { updateRGBAOpacity } from '../../utils/UIHelpers.js';
+import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from '../../utils/UserTaskEvents.js';
+import { TaskCardProps } from './index.js';
+
+const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, parentComponent, activeBoardID, activeViewIndex, activeViewType, kanbanViewData, columnIndex, swimlaneData }) => {
+	const globalSettings = plugin.settings.data;
+	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
+	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
+	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task.status, true, plugin.settings) : isTaskCompleted(task.title, false, plugin.settings)
+	const columnData = columnIndex !== undefined && kanbanViewData ? kanbanViewData.columns[columnIndex - 1] : undefined;
+	const showDescriptionSection = globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description) ?? true;
+
+	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
+	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
+	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(
+		() => !showDescriptionSection && shouldExpandTaskDescription(task),
+	);
+	useEffect(() => {
+		if (showDescriptionSection) {
+			setIsDescriptionExpanded(false);
+			return;
+		}
+		if (shouldExpandTaskDescription(task)) setIsDescriptionExpanded(true);
+	}, [task.id, task.title, task.body?.join("\n"), showDescriptionSection]);
+	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
+	useEffect(() => {
+		if (plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
+			setShowSubtasks(true);
+		} else {
+			setShowSubtasks(false);
+		}
+	}, [plugin.settings.data.propertiesVisibleInUI]);
+
+	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
+	useEffect(() => {
+		setUniversalDate(getUniversalDateFromTask(task, globalSettings.universalDate));
+	}, [task.due, task.startDate, task.scheduledDate]);
+
+
+	// const handleTaskInteraction = useCallback(
+	// 	(task: taskItem, type: string) => {
+	// 		if (type === "edit") handleEditTask(plugin, task);
+	// 		else if (type === "delete") handleDeleteTask(plugin, task);
+	// 		else if (type === "checkbox") handleCheckboxChange(plugin, task);
+	// 	},
+	// 	[handleEditTask, handleDeleteTask, handleCheckboxChange, plugin]
+	// );
+	const taskIdKey = task.id; // for rendering unique title
+
+	// const componentRef = useRef<Component | null>(null);
+	// useEffect(() => {
+	// 	// Initialize TaskBoardView Component on mount
+	// 	componentRef.current = plugin.view;
+	// }, []);
+
+
+	// Ref to access the DOM element of the task item
+	const taskItemRef = useRef<HTMLDivElement>(null);
+
+	// ========================================
+	// COMPONENT-LOCAL REFS FOR DESCRIPTION
+	// ========================================
+	const taskTitleRendererRef = useRef<HTMLDivElement | null>(null);
+	const subtaskTextRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+	const descriptionRef = useRef<HTMLDivElement | null>(null);
+	// const descriptionContentRefExpanded = useRef<HTMLDivElement | null>(null);
+	// const descriptionContentRefCollapsed = useRef<HTMLDivElement | null>(null);
+	const taskItemBodyDescriptionRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+	// useEffect(() => {
+	// 	if (taskTitleRendererRef.current && componentRef.current) {
+	// 		const titleElement = taskTitleRendererRef.current[taskIdKey];
+
+	// 		console.log("Task titleElement :", titleElement, "\nTask title content :", task.title);
+
+	// 		if (titleElement && task.title !== "") {
+	// 			let cleanedTitle = cleanTaskTitleLegacy(task);
+	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContainer.tsx
+	// 			// const searchQuery = plugin.settings.data.searchQuery || '';
+	// 			// if (searchQuery) {
+	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// 			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+	// 			// 	cleanedTitle = searchQuery ? cleanedTitle.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : cleanedTitle;
+	// 			// }
+
+	// 			titleElement.empty();
+	// 			// Call the MarkdownUIRenderer to render the description
+	// 			console.log("Obsidian Renderer : Will render following task : ", cleanedTitle);
+	// MarkdownUIRenderer.strictRender(
+	// 	plugin.app,
+	// 	cleanedTitle,
+	// 	titleElement,
+	// 	task.filePath,
+	// 	componentRef.current
+	// );
+
+	// hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, titleElement, task.filePath, task.filePath);
+	// 		}
+	// 	}
+	// }, [task.title, task.filePath]);
+
+	// ========================================
+	// MAIN TITLE RENDERING WITH STABLE useEffect
+	// ========================================
+	useEffect(() => {
+		const el = taskTitleRendererRef.current;
+		// if (!el || !componentRef.current) return;
+		if (!el) return;
+
+		try {
+			if (task.title === "") return;
+
+			const cleanedTitle = isTaskNote ? task.title : cleanTaskTitleLegacy(task);
+
+			void MarkdownUIRenderer.strictRender(
+				plugin.app,
+				cleanedTitle,
+				el,
+				task.filePath,
+				parentComponent,
+			);
+
+			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, el, task.filePath, task.filePath);
+		} catch (err) {
+			bugReporterManagerInsatance.addToLogs(
+				122,
+				String(err),
+				"TaskItem.tsx/Main title rendering useEffect",
+			);
+		}
+	}, [task.id, task.title, task.filePath]);
+
+	// useEffect(() => {
+	// 	const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
+	// 	// Render subtasks after componentRef is initialized
+	// 	allSubTasks.forEach((subtaskText, index) => {
+	// 		const uniqueKey = `${task.id}-${index}`;
+	// 		const element = subtaskTextRefs.current[uniqueKey];
+	// 		const match = subtaskText.match(TaskRegularExpressions.taskRegex);
+	// let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
+
+	// 		if (element && strippedSubtaskText !== "") {
+	// 			// console.log("renderSubTasks : This useEffect should only run when subTask updates | Calling rendered with:\n", subtaskText);
+	// 			element.empty(); // Clear previous content
+
+	// 			// NOTE : This search method is not working smoothly, hence using the first approach in file TaskBoardViewContainer.tsx
+	// 			// const searchQuery = plugin.settings.data.searchQuery || '';
+	// 			// if (searchQuery) {
+	// 			// 	const escapedQuery = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// 			// 	const regex = new RegExp(`(${escapedQuery})`, "gi");
+	// 			// 	strippedSubtaskText = searchQuery ? strippedSubtaskText.replace(regex, `<mark style="background: #FFF3A3A6;">$1</mark>`) : strippedSubtaskText;
+	// 			// }
+
+	// MarkdownUIRenderer.safeRender(
+	// 	plugin.app,
+	// 	strippedSubtaskText,
+	// 	element,
+	// 	task.filePath,
+	// 	componentRef.current
+	// );
+
+	// 			hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
+	// 		}
+	// 	});
+	// }, [task.body, task.filePath]);
+
+	// ========================================
+	// SUBTASKS RENDERING WITH STABLE useEffect
+	// ========================================
+	useEffect(() => {
+		// if (!componentRef.current) return;
+
+		const allSubTasks = task.body.filter(line => isTaskLine(line.trim()));
+		for (const [index, subtaskText] of allSubTasks.entries()) {
+
+			const uniqueKey = `${task.id}-${index}`;
+			const element = subtaskTextRefs.current.get(uniqueKey);
+			if (!element) continue;
+
+			try {
+				const match = subtaskText.match(TaskRegularExpressions.taskRegex);
+				let strippedSubtaskText = match ? match?.length >= 5 ? match[4].trim() : subtaskText.trim() : subtaskText.trim();
+				void MarkdownUIRenderer.safeRender(
+					plugin.app,
+					strippedSubtaskText,
+					element,
+					task.filePath,
+					parentComponent
+				);
+
+				hookMarkdownLinkMouseEventHandlers(plugin.app, plugin, element, task.filePath, task.filePath);
+
+			} catch (err) {
+				bugReporterManagerInsatance.addToLogs(
+					123,
+					String(err),
+					"TaskItem.tsx/Sub-tasks rendering useEffect",
+				);
+			}
+		}
+	}, [task.id, task.body, task.filePath]);
+
+
+	// ========================================
+	// DESCRIPTION RENDERING WITH STABLE useLayoutEffect
+	// ========================================
+	useEffect(() => {
+		const uniqueKey = `${taskIdKey}-desc`;
+		const container = taskItemBodyDescriptionRef.current[uniqueKey];
+		// const container =
+		// 	showDescriptionSection
+		// 		? descriptionContentRefExpanded.current
+		// 		: descriptionContentRefCollapsed.current;
+
+
+		if (!container) return;
+
+		let descriptionContent = dedentTaskBodyLines(
+			task.body?.filter((line) => !isTaskLine(line)) ?? [],
+		)
+			.join("\n")
+			.trim();
+
+		if (!descriptionContent) {
+			container.empty();
+			return;
+		}
+
+		container.empty();
+
+		void MarkdownUIRenderer.strictRender(
+			plugin.app,
+			descriptionContent,
+			container,
+			task.filePath,
+			parentComponent
+		);
+
+		hookMarkdownLinkMouseEventHandlers(
+			plugin.app,
+			plugin,
+			container,
+			task.filePath,
+			task.filePath
+		);
+	}, [
+		task.body?.join("\n"),
+		showDescriptionSection,
+		isDescriptionExpanded
+	]);
+
+	// ========================================
+	// RENDER DESCRIPTION SECTION (NO MEMO, NO DOM MANIPULATION)
+	// ========================================
+	const renderDescriptionSection = () => {
+		// const uniqueKey = `${taskIdKey}-desc`;
+		// const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+		const descriptionContent = task.body
+			? task.body.filter((line) => !isTaskLine(line)).join("\n").trim()
+			: "";
+
+		if (!descriptionContent) return null;
+
+		if (showDescriptionSection) {
+			return (
+				<div className="taskItemBodyDescriptionSection">
+					<div
+						className={`taskItemBodyDescription${isDescriptionExpanded ? '' : '-collapsed'}`}
+						ref={descriptionRef}
+					>
+						<div
+							className='taskItemBodyDescriptionRenderer'
+							ref={(el) => { taskItemBodyDescriptionRef.current[`${task.id}-desc`] = el; }}
+						/>
+					</div>
+				</div>
+			);
+		}
+		return null;
+	};
+
+	const toggleDescription = () => {
+		const status = isDescriptionExpanded;
+		setIsDescriptionExpanded((prev) => !prev);
+
+		if (!status) {
+			renderDescriptionSection();
+			if (descriptionRef.current) {
+				descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
+				descriptionRef.current.toggleClass('tb_opacity_1', true);
+			}
+		} else {
+			if (descriptionRef.current) {
+				descriptionRef.current.style.height = `0`;
+				descriptionRef.current.toggleClass('tb_opacity_0', true);
+			}
+			const uniqueKey = `${task.id}-desc`;
+			const descElement = taskItemBodyDescriptionRef.current[uniqueKey];
+			descElement?.empty();
+		}
+	};
+
+	// const renderDescriptionByDefault = () => {
+	// 	if (showDescriptionSection) {
+	// 		await renderTaskDescriptionWithObsidianAPI();
+	// 		return true;
+	// 	} else {
+	// 		return false;
+	// 	}
+	// };
+
+	// ========================================
+	// ALL UTIL FUNCTIONS
+	// ========================================
+
+	const getColorIndicator = useCallback(() => {
+		// Return grey if there's no universal date
+		if (!universalDate) {
+			return 'grey';
+		}
+
+		// Use robust date parser for reliable parsing
+		const dateFormatToUse = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+		const parsedTaskDate = robustDateParser(universalDate, dateFormatToUse);
+
+		if (!parsedTaskDate) {
+			return 'grey'; // Invalid date, return grey
+		}
+
+		// Set to start of day for accurate date comparison
+		const taskDateAtStartOfDay = startOfDay(parsedTaskDate);
+		const today = startOfDay(new Date());
+
+		// Check if the task date is today
+		if (isToday(taskDateAtStartOfDay)) {
+			// If there's a time component, use it for more detailed color indication
+			if (task.time && task.time.trim() !== "") {
+				try {
+					const [startStr, endStr] = task.time.includes('-') ? task.time.split('-') : [task.time, task.time];
+					const [startHours, startMinutes] = startStr.includes(':') ?
+						startStr.trim().split(':').map(Number) :
+						[parseInt(startStr.trim()), 0];
+					const [endHours, endMinutes] = endStr.includes(':') ?
+						endStr.trim().split(':').map(Number) :
+						[parseInt(endStr.trim()), 0];
+
+					const startTime = new Date(today);
+					startTime.setHours(startHours, startMinutes, 0, 0);
+
+					const endTime = new Date(today);
+					endTime.setHours(endHours, endMinutes, 0, 0);
+
+					const now = new Date();
+
+					if (compareAsc(now, startTime) < 0) {
+						// Not started yet
+						return 'var(--color-yellow)';
+					} else if (compareAsc(now, startTime) >= 0 && compareAsc(now, endTime) <= 0) {
+						// In progress
+						return 'var(--color-blue)';
+					} else if (compareAsc(now, endTime) > 0) {
+						// Past due
+						return '#f23a3ab8';
+					}
+				} catch (error) {
+					// If time parsing fails, return yellow for "due today"
+					return 'var(--color-yellow)';
+				}
+			} else {
+				// Due today but no time info
+				return 'var(--color-yellow)';
+			}
+		} else if (isAfter(taskDateAtStartOfDay, today)) {
+			// Due in future
+			return 'green';
+		} else if (isBefore(taskDateAtStartOfDay, today)) {
+			// Past due
+			return '#f23a3ab8';
+		} else {
+			return 'grey'; // No due date or comparison failed
+		}
+	}, [universalDate, task.time, plugin.settings.data.dateFormat]);
+
+
+	// Function to get the card background color based on tags
+	function getCardBgBasedOnTag(): string | undefined {
+		const allTags = getAllTaskTags(task);
+		if (globalSettings.tagColorsType === TagColorType.CardBg) {
+
+			const tagColors = plugin.settings.data.tagColors;
+
+			if (!Array.isArray(tagColors) || tagColors.length === 0) {
+				return undefined;
+			}
+
+			// Prepare a map for faster lookup
+			const tagColorMap = new Map(tagColors.map((t) => [t.name.toLowerCase(), t]));
+
+			let highestPriorityTag: { name: string; color: string; priority: number } | undefined = undefined;
+
+			for (const rawTag of allTags) {
+				const tagName = rawTag.toLowerCase();
+				let tagData = tagColorMap.get(tagName);
+
+				if (!tagData) {
+					tagColorMap.forEach((tagColor, tagNameKey, mapValue) => {
+						const result = matchTagsWithWildcards(tagNameKey, tagName || '');
+						// Return the first match found
+						if (result) tagData = tagColor;
+					});
+				}
+
+				if (tagData) {
+					if (
+						!highestPriorityTag ||
+						(tagData.priority) < (highestPriorityTag.priority)
+					) {
+						highestPriorityTag = tagData;
+					}
+				}
+			}
+
+			// const getOpacityValue = (color: string): number => {
+			// 	const rgbaMatch = color.match(/rgba?\((\d+), (\d+), (\d+)(, (\d+(\.\d+)?))?\)/);
+			// 	if (rgbaMatch) {
+			// 		const opacity = rgbaMatch[5] ? parseFloat(rgbaMatch[5]) : 1;
+			// 		return opacity;
+			// 	}
+			// 	return 1;
+			// };
+
+			// if (highestPriorityTag && getOpacityValue(highestPriorityTag.color) > 0.2) {
+			// 	return updateRGBAOpacity(highestPriorityTag.color, 0.2);
+			// }
+
+			return highestPriorityTag?.color;
+		}
+
+		return undefined;
+	}
+
+	// ========================================
+	// ALL EVENTS HANDLING
+	// ========================================
+
+	useEffect(() => {
+		const setCardLoading = (eventData: UpdateTaskEventData) => {
+			// console.log("Refreshing the animation of only following ID :", eventData.taskID, "\nWith state :", eventData.state, "\nCurrent task ID :", task.legacyId, taskIdKey, "\nCondition :", eventData.taskID !== taskIdKey);
+			if (!eventData || !eventData?.taskID) setCardLoadingAnimation(false);
+
+			// Only update this specific task's loading state
+			if (eventData.taskID !== taskIdKey) return;
+
+			setCardLoadingAnimation(eventData.state);
+		};
+		eventEmitter.on("UPDATE_TASK", setCardLoading);
+		return () => eventEmitter.off("UPDATE_TASK", setCardLoading);
+	}, [taskIdKey]);
+
+	// Function to handle the main checkbox click
+	const handleMainCheckBoxClick = async () => {
+		// Prevent repeated clicks while card is loading
+		if (cardLoadingAnimation) return;
+
+		setCardLoadingAnimation(true);
+		setIsChecked(true);
+		// const eventData: UpdateTaskEventData = { taskID: taskIdKey, state: true };
+		// eventEmitter.emit("UPDATE_TASK", eventData); // Trigger animation
+
+		const condition = await verifySubtasksAndChildtasksAreComplete(plugin, task);
+		if (condition || isThistaskCompleted) {
+			// if (isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+			// 	handleTaskNoteStatusChange(plugin, task);
+			// } else {
+			// 	handleCheckboxChange(plugin, task);
+			// }
+
+			const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
+
+			// The task update functions trigger a re-render, but we should ensure
+			// the loading state is reset in case the component instance is reused.
+			try {
+				// Route to appropriate handler based on task type
+				if (isTaskNote) {
+					await handleTaskNoteStatusChange(plugin, task);
+				} else {
+					handleCheckboxChange(plugin, task);
+				}
+			} catch (error) {
+				bugReporterManagerInsatance.addToLogs(
+					124,
+					String(error),
+					"BasesStyle.tsx/handleMainCheckBoxClick",
+				);
+			}
+
+			// The component might be unmounted by the time this runs, but this is a safeguard.
+			// The event-based system should ideally handle the final state.
+			// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
+			window.setTimeout(() => {
+				setCardLoadingAnimation(false);
+				// const isTaskCompletedNow = isTaskNote
+				// 	? isTaskCompleted(task.status, true, plugin.settings)
+				// 	: isTaskCompleted(task.title, false, plugin.settings);
+				// console.log("IsTaskNOte :", isTaskNote, "\nIsTaskCompletedNow : ", isTaskCompletedNow);
+				// setIsChecked(isTaskCompletedNow);
+			}, 2000);
+
+		} else {
+			new Notice(t("complete-all-child-tasks-before-completing-task"), 5000);
+			// Reset loading state immediately because we didn't proceed
+			setCardLoadingAnimation(false);
+			// const isTaskCompletedNow = isTaskNote
+			// 	? isTaskCompleted(task.status, true, plugin.settings)
+			// 	: isTaskCompleted(task.title, false, plugin.settings);
+			setIsChecked(isThistaskCompleted);
+		}
+	};
+
+	const handleMainTaskDelete = () => {
+		handleDeleteTask(plugin, task, isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags));
+	}
+
+	// Function to handle the checkbox toggle inside the task body
+	const handleSubtaskCheckboxChange = (subTaskLine: string, isCompleted: boolean) => {
+		const updatedBody = task.body.map((line, idx) => {
+			if (line === subTaskLine) {
+				// Toggle the checkbox status only for the specific line
+
+				const symbol = extractCheckboxSymbol(line);
+				const nextStatus = checkboxStateSwitcher(globalSettings.customStatuses, symbol);
+
+				return line.replace(`[${symbol}]`, `[${nextStatus.newSymbol}]`);
+			}
+			return line;
+		});
+
+		// Update the task with the modified body content
+		const updatedTask: taskItem = { ...task, body: updatedBody };
+
+		setCardLoadingAnimation(true);
+
+		try {
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags)) {
+				// onSubTasksChange(updatedTask); // Notify parent of the change
+				handleSubTasksChange(plugin, task, updatedTask);
+			} else {
+				// If it's a task note, open the note for editing
+				void handleTaskNoteBodyChange(plugin, task, updatedTask);
+			}
+		} finally {
+			// The component might be unmounted by the time this runs, but this is a safeguard.
+			// The event-based system should ideally handle the final state.
+			// A short delay can prevent a flicker if the re-render is immediate, hence providing 1 second.
+			window.setTimeout(() => setCardLoadingAnimation(false), 2000);
+		}
+	};
+
+	const handleMouseEnter = (event: React.MouseEvent) => {
+		const element = activeDocument.getElementById('taskItemFooterBtns');
+		if (element && event.ctrlKey) {
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+		}
+	};
+
+	const onEditButtonClicked = (event: React.MouseEvent) => {
+		const settingOption = plugin.settings.data.editButtonAction;
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
+		} else {
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+			event.ctrlKey = false;
+		}
+	}
+
+	const handleDoubleClickOnCard = (event: React.MouseEvent) => {
+		const settingOption = plugin.settings.data.cardDoubleClickAction;
+		if (settingOption === EditButtonMode.None) return;
+
+		if (settingOption !== EditButtonMode.NoteInHover) {
+			handleEditTask(plugin, task, settingOption);
+		} else {
+			event.ctrlKey = true;
+			markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+			event.ctrlKey = false;
+		}
+	}
+
+	const handleOpenChildTaskModal = async (event: React.MouseEvent, childTaskId: string) => {
+		event.stopPropagation();
+		try {
+			const childTask = await getTaskFromId(plugin, childTaskId);
+			if (!childTask) {
+				bugReporterManagerInsatance.showNotice(11, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "TaskItem.tsx/handleOpenChildTaskModal");
+				return;
+			}
+
+			const settingOption = plugin.settings.data.editButtonAction;
+			if (settingOption !== EditButtonMode.NoteInHover) {
+				handleEditTask(plugin, childTask, settingOption);
+			} else {
+				event.ctrlKey = true;
+				markdownButtonHoverPreviewEvent(plugin.app, event, childTask.filePath);
+				event.ctrlKey = false;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.showNotice(12, "Error opening child task modal", String(error), "TaskItem.tsx/handleOpenChildTaskModal");
+		}
+	}
+
+	const handleMenuButtonClicked = (event: React.MouseEvent) => {
+		event.stopPropagation();
+
+		const taskItemMenu = new Menu();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("properties"));
+			item.setIsLabel(true);
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("info");
+			item.setTitle(t("status"));
+			const statusMenu = item.setSubmenu()
+
+			const statusOptions = getCustomStatusOptionsForDropdown(
+				plugin.settings.data.customStatuses,
+				{ mode: 'flat' } // Context menus don't support optgroups, use flat
+			);
+
+			// Handle both output types for future-proofing
+			const options = statusOptions.type === 'flat'
+				? statusOptions.options
+				: statusOptions.groups.flatMap(group => group.options);
+
+			options.forEach((status) => {
+				statusMenu.addItem((item) => {
+					// Render status with markdown formatting
+					void MarkdownUIRenderer.safeRender(
+						plugin.app,
+						`- [${status.value}] ${status.label}`,
+						item.titleEl,
+						'',
+						parentComponent
+					);
+
+					item.onClick(() => {
+						void updateTaskItemStatus(plugin, task, task, status.value);
+					});
+				});
+			});
+
+			// Optional: Add visual separator groups if using grouped mode
+			if (statusOptions.type === 'grouped') {
+				// Rebuild menu with group separators (requires clearing and re-adding)
+				// Note: Obsidian Menu API doesn't natively support optgroups, 
+				// so this is a visual workaround using disabled items
+			}
+		});
+
+		// Priority submenu
+		taskItemMenu.addItem((item) => {
+			item.setIcon("flag");
+			item.setTitle(t("priority"));
+			const priMenu = item.setSubmenu();
+			const priorityOptions = getPriorityOptionsForDropdown();
+			priorityOptions.forEach((p) => {
+				priMenu.addItem((it) => {
+					it.setTitle(p.text);
+					it.onClick(() => updateTaskItemPriority(plugin, task, task, p.value));
+				});
+			});
+		});
+
+		// Tags editor modal - TODO : It doesnt make sense to build another modal specifically changing the tags, when the TaskEditorModal can itself do this.
+		// taskItemMenu.addItem((item) => {
+		// 	item.setTitle(t("tags"));
+		// 	item.setIcon("tag");
+		// 	item.onClick(() => {
+		// 		const modal = new EditTagsModal(plugin, task.tags || [], (newTags: string[]) => {
+		// 			updateTaskItemTags(plugin, task, task, newTags.map((tg) => (tg.startsWith('#') ? tg : `#${tg}`)));
+		// 		});
+		// 		modal.open();
+		// 	});
+		// });
+
+		// Dates submenu
+
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar-plus")
+			it.setTitle(t("start-date"));
+			it.onClick(() => {
+				void openDateInputModal(plugin, t("start"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
+				}, task.startDate)
+			});
+		});
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar-clock")
+			it.setTitle(t("scheduled-date"));
+			it.onClick(() => {
+				void openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
+				}, task.scheduledDate)
+			});
+		});
+		taskItemMenu.addItem((it) => {
+			it.setIcon("calendar")
+			it.setTitle(t("due-date"));
+			it.onClick(() => {
+				void openDateInputModal(plugin, t("due"), (newDate: string) => {
+					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
+				}, task.due)
+			});
+		});
+
+		// Reminder item - open prompt for date/time
+		taskItemMenu.addItem((item) => {
+			item.setIcon("clock");
+			item.setTitle(t("reminder"));
+			item.onClick(() => {
+				const modal = new DateTimePickerModal(plugin, t("reminder"), task.reminder);
+				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
+					updateTaskItemReminder(plugin, task, task, dateTime);
+				};
+				modal.open();
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("task-actions"));
+			item.setIsLabel(true);
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("copy");
+			item.setTitle(t("copy-task-title"));
+			item.onClick(() => {
+				try {
+					void navigator.clipboard.writeText(cleanTaskTitleLegacy(task));
+					new Notice(t("copy-task-title-successful"));
+				} catch (error) {
+					new Notice(t("copy-task-title-unsuccessful"));
+				}
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor"));
+			item.onClick(() => {
+				handleEditTask(plugin, task, EditButtonMode.Modal);
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("square-pen");
+			item.setTitle(t("open-task-editor-in"));
+			const taskEditorMenu = item.setSubmenu();
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("columns-2");
+				subItem.setTitle(t("right-split"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInSplitTab));
+			});
+
+			taskEditorMenu.addItem((subItem) => {
+				subItem.setIcon("picture-in-picture-2");
+				subItem.setTitle(t("new-window"));
+				subItem.onClick(() => handleEditTask(plugin, task, EditButtonMode.ViewInWindow));
+			});
+		});
+
+		taskItemMenu.addSeparator();
+
+		taskItemMenu.addItem((item) => {
+			item.setTitle(t("note-actions"));
+			item.setIsLabel(true);
+		});
+
+		taskItemMenu.addItem((item) => {
+			item.setIcon("file-input");
+			item.setTitle(t("open-note"));
+			item.onClick(() => {
+				handleEditTask(plugin, task, EditButtonMode.NoteInTab)
+			});
+		});
+		taskItemMenu.addItem((item) => {
+			item.setIcon("columns-2");
+			item.setTitle(t("open-note-to-right"));
+			item.onClick(() => {
+				handleEditTask(plugin, task, EditButtonMode.NoteInSplit)
+			});
+		});
+
+		// Note actions submenu
+		taskItemMenu.addItem((item) => {
+			item.setIcon("file-text");
+			item.setTitle(t("more-note-actions"));
+
+			const submenu = item.setSubmenu();
+
+			// Get the file for the task
+			const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
+			if (file instanceof TFile) {
+				// Try to populate with Obsidian's native file menu
+				try {
+					// Trigger the file-menu event to populate with default actions
+					plugin.app.workspace.trigger("file-menu", submenu, file, "file-explorer");
+				} catch (error) {
+					console.debug("Native file menu not available, using fallback");
+				}
+
+				// Add common file actions (these will either supplement or replace the native menu)
+				submenu.addItem((subItem: MenuItem) => {
+					subItem.setIcon("pencil");
+					subItem.setTitle(t("rename-note"));
+					subItem.onClick(() => {
+						try {
+							// Modal-based rename
+							const currentName = file.basename;
+							void showTextInputModal(plugin.app, {
+								title: t("rename-note"),
+								placeholder: t("rename-note-placeholder"),
+								initialValue: currentName,
+							}).then((newName: string | null) => {
+								if (newName && newName.trim() !== "" && newName !== currentName) {
+									// Ensure the new name has the correct extension
+									const extension = file.extension;
+									const finalName = newName.endsWith(`.${extension}`)
+										? newName
+										: `${newName}.${extension}`;
+
+									// Construct the new path
+									const newPath = file.parent
+										? `${file.parent.path}/${finalName}`
+										: finalName;
+
+									// Rename the file
+									void plugin.app.vault.rename(file, newPath);
+									new Notice("File renamed successfully.");
+								}
+							})
+
+						} catch (error) {
+							new Notice("There was an error while renaming the file.");
+							bugReporterManagerInsatance.addToLogs(
+								125,
+								String(error),
+								"TaskItem.tsx/handleMenuButtonClicked/renaming",
+							);
+						}
+					});
+				});
+
+				submenu.addItem((subItem: MenuItem) => {
+					subItem.setIcon("trash");
+					subItem.setTitle(t("delete-note"));
+					subItem.onClick(() => {
+						void plugin.app.fileManager.trashFile(file).then(() => {
+							new Notice("File deleted successfully. Moved to system trash.");
+						})
+						// handleDeleteTask(plugin, task, true);
+					});
+				});
+			}
+		});
+
+		// Use native event if available (React event has nativeEvent property)
+		taskItemMenu.showAtMouseEvent(
+			(event instanceof MouseEvent ? event : event.nativeEvent)
+		);
+	}
+
+	// Handlers for drag and drop
+	const handleDragStart = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+		// prevent column drag from also starting
+		e.stopPropagation();
+
+		if (!columnData) {
+			e.preventDefault();
+			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskItem.tsx/handleDragStart");
+			return;
+		}
+		try {
+			const el = taskItemRef.current as HTMLDivElement;
+			const payload: currentDragDataPayload = {
+				task,
+				taskIndex: String(dataAttributeIndex),
+				sourceColumnData: columnData,
+				currentViewIndex: activeViewIndex,
+				currentBoardID: activeBoardID,
+				swimlaneData: swimlaneData
+			};
+			// Delegate to manager for standardized behavior (sets current payload and dims element)
+			dragDropTasksManagerInsatance.handleDragStartEvent(e.nativeEvent, el, payload);
+		} catch (err) {
+			// fallback minimal behavior
+			// try {
+			// 	e.dataTransfer.setData('application/json', JSON.stringify({ task, sourceColumnData: columnData }));
+			// 	e.dataTransfer.effectAllowed = 'move';
+			// } catch (ex) {/* ignore */ }
+			bugReporterManagerInsatance.addToLogs(
+				126,
+				String(err),
+				"TaskItem.tsx/handleDragStart",
+			);
+		}
+	}, [task, columnData]);
+
+	const handleDragEnd = useCallback(() => {
+		// Clear manager drag payload and any styling on columns/task-items
+		dragDropTasksManagerInsatance.clearAllDragStyling();
+		dragDropTasksManagerInsatance.clearCurrentDragData();
+	}, []);
+
+	// Set up touch event handlers for touch devices
+	useEffect(() => {
+		const el = taskItemRef.current;
+		if (!el || !columnData) return () => { };
+
+		const payload: currentDragDataPayload = {
+			task,
+			taskIndex: String(dataAttributeIndex),
+			sourceColumnData: columnData,
+			currentViewIndex: activeViewIndex,
+			currentBoardID: activeBoardID,
+			swimlaneData: swimlaneData,
+		};
+
+		return dragDropTasksManagerInsatance.setupCardTouchHandlers(el, payload);
+	}, [
+		task,
+		dataAttributeIndex,
+		columnData,
+		activeViewIndex,
+		activeBoardID,
+		swimlaneData
+	]);
+
+	// ========================================
+	// ALL RENDERING CODE
+	// ========================================
+
+	const renderHeader = () => {
+		try {
+			return (
+				<div className="taskItemHeader">
+					{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader) && task.filePath && (
+						<div className='taskitemHeaderTopFilename' aria-label={task.filePath}>
+							<div className='taskitemHeaderTopFilenameValue'>{task.filePath.split('/').pop()}</div>
+						</div>
+					)}
+
+					<div className='taskItemHeaderBottom'>
+						<div className="taskItemHeaderLeft">
+							{/* Render tags individually */}
+							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Tags) && (task.tags.length > 0 || task.frontmatterTags.length > 0) && (
+								<div className="taskItemTags">
+									{/* Render line tags (editable) */}
+									{task.tags.map((tag: string, index: number) => {
+										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
+										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
+
+										const customTagColor = isCardBg ? undefined : plugin.settings.data.tagColors.find(t => compareTwoTags(t.name, tag));
+
+										const tagColor = customTagColor?.color;
+										const dimmedTagColor = customTagColor ? updateRGBAOpacity(customTagColor.color, 0.1) : undefined; // 10% opacity background
+										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
+
+										// If columnIndex is defined, proceed to get the column
+										if (
+											activeViewType === viewTypeNames.kanban &&
+											kanbanViewData &&
+											!kanbanViewData.showColumnTags &&
+											columnData &&
+											columnData?.colType === colTypeNames.namedTag &&
+											columnData?.coltag &&
+											compareTwoTags(columnData.coltag, tag)
+										) {
+											return null;
+										}
+
+										const tagKey = `${task.id}-${tag}-${index}`;
+										// Render the remaining tags
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTag"
+												style={{
+													color: isTagBg && tagColor ? 'white' : tagColor,
+													// border: `1px solid ${borderColor}`,
+													backgroundColor: isTagBg ? tagColor : dimmedTagColor
+												}}
+											>
+												{tag}
+											</div>
+										);
+									})}
+
+									{/* Render frontmatter tags (read-only) */}
+									{task.frontmatterTags && task.frontmatterTags.map((tag: string) => {
+										const tagKey = `${task.id}-fm-${tag}`;
+										// Render frontmatter tags with different styling
+										return (
+											<div
+												key={tagKey}
+												className="taskItemTagFrontmatter"
+												title="Tag from note's frontmatter (read-only)"
+											>
+												{tag}
+											</div>
+										);
+									})}
+								</div>
+							)}
+						</div>
+						<div className='taskItemHeaderRight'>
+							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ID) && task.legacyId && (
+								<div className='taskItemPropertyID'>
+									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task.legacyId}</div>
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+			);
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(13, error as string, "BasesStyle.tsx/renderHeader");
+			return null;
+		}
+	};
+
+	// Render sub-tasks and remaining body separately
+	const renderSubTasks = () => {
+		try {
+			const body = task.body ?? [];
+			if (body.length === 0) return null;
+
+			const allSubTasks = body.filter(line => TaskRegularExpressions.taskRegex.test(line));
+			// console.log("renderSubTasks : allSubTasks :", allSubTasks);
+			// if (allSubTasks.length === 0) return null;
+
+			const total = allSubTasks.length;
+			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
+
+			const showSubTaskSummaryBar = globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
+
+			return (
+				<>
+					{showSubTaskSummaryBar && total > 0 && (
+						<div className="subtask-summary-container">
+							{/* Progress bar */}
+							<div className="subtask-progress-bar-wrapper">
+								<div className="subtask-progress-bar-bg">
+									<div
+										className="subtask-progress-bar-fill"
+										style={{
+											width: `${(completed / total) * 100}%`,
+										}}
+									/>
+								</div>
+								<span className="subtask-progress-count">
+									[{completed}/{total}]
+								</span>
+
+								{/* Expand/collapse toggle */}
+								<span
+									className={`subtask-toggle-icon ${showSubtasks ? 'rotated' : ''}`}
+									onClick={() => setShowSubtasks((prev) => !prev)}
+								>
+									<ChevronDown size={18} style={{ verticalAlign: 'middle' }} />
+								</span>
+							</div>
+						</div>
+					)}
+					<div className={showSubtasks ? 'taskItemBodySubtaskSection-show' : 'taskItemBodySubtaskSection-hide'}>
+						{allSubTasks.map((line, index) => {
+							// console.log("renderSubTasks : This uses memo, so only run when the subTask state variable updates... | Value of isSubTask :", isSubTask);
+							const isSubTaskCompleted = isTaskCompleted(line, false, plugin.settings);
+
+							// Calculate padding based on the number of tabs
+							const tabString = getObsidianIndentationSetting(plugin);
+							const tabMatch = line.match(new RegExp(`^(${tabString})+`));
+							const tabMatchInTitle = task.title.match(new RegExp(`^(${tabString})+`));
+							const titleTabs = tabMatchInTitle && tabMatchInTitle[0] ? tabMatchInTitle[0].length / tabString.length : 0;
+							const numTabs = tabMatch && tabMatch[0] ? tabMatch[0].length / tabString.length : 0;
+							const numOfTabs = isTaskNote ? numTabs + 1 : numTabs;
+							const paddingLeft = numOfTabs > 1 ? `${(numOfTabs - titleTabs - 1) * 15}px` : '0px';
+
+							// Create a unique key for this subtask based on task.id and index
+							const uniqueKey = `${task.id}-${index}`;
+
+							return (
+								<div
+									className="taskItemBodySubtaskItem"
+									key={uniqueKey}
+									style={{ paddingInlineStart: paddingLeft }}
+									id={uniqueKey} // Assign a unique ID for each subtask element
+								>
+									<input
+										type="checkbox"
+										className="taskItemBodySubtaskItemCheckbox"
+										checked={isSubTaskCompleted}
+										onChange={() => handleSubtaskCheckboxChange(line, isSubTaskCompleted)}
+										onDoubleClick={(e) => {
+											e.preventDefault();
+										}}
+									/>
+									{/* Render each subtask separately */}
+									<div
+										className={isSubTaskCompleted ? `subtaskTextRenderer subtaskTextRenderer-checked` : `subtaskTextRenderer`}
+										ref={(el) => {
+											if (el) {
+												subtaskTextRefs.current.set(uniqueKey, el);
+											} else {
+												subtaskTextRefs.current.delete(uniqueKey);
+											}
+										}}
+									/>
+								</div>
+							);
+						})}
+					</div>
+				</>
+			);
+
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(14, error as string, "BasesStyle.tsx/renderSubTasks");
+			return null;
+		}
+	};
+
+	// Render Footer based on the settings
+	const renderFooter = () => {
+		try {
+			return (
+				<>
+					{cardLoadingAnimation ? (
+						<div className='taskItemFooterRefreshingMssg'>{t("refreshing")}</div>
+					) : (
+						<>
+							<div className="taskItemFooterPropertiesContainer">
+								{/* Conditionally render each property of the task */}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Priority) && task.priority > 0 && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("priority")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{priorityNames[task.priority]}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Status) && task?.status && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("status")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{getStatusNameFromStatusSymbol(task.status, globalSettings.customStatuses ?? [])}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Time) && task?.time && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("time")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.time}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Reminder) && task?.reminder && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("reminder")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.reminder}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CreatedDate) && task?.createdDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("created")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.createdDate}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.StartDate) && task?.startDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("start")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.startDate}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ScheduledDate) && task?.scheduledDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("scheduled")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.scheduledDate}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DueDate) && task?.due && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("due")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.due}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CompletionDate) && task?.completion && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("completed")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.completion}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CancelledDate) && task?.cancelledDate && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("cancelled")}</div>
+										<div className='taskItemFooterPropertyContainerValue'>{task.cancelledDate}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePath) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("file")}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').pop()}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ParentFolder) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("folder")}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/')[task.filePath.split('/').length - 2] ? task.filePath.split('/')[task.filePath.split('/').length - 2] : "Vault root"}</div>
+									</div>
+								)}
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FullPath) && task.filePath && (
+									<div className="taskItemFooterPropertyContainer">
+										<div className='taskItemFooterPropertyContainerLabel'>{t("path")}</div>
+										<div className='taskItemFooterPropertyContainerValue' aria-label={task.filePath}>{task.filePath.split('/').slice(0, -1).join("/") ? task.filePath.split('/').slice(0, -1).join("/") : "Vault root"}</div>
+									</div>
+								)}
+							</div>
+						</>
+					)}
+				</>
+			);
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(15, error as string, "BasesStyle.tsx/renderFooter");
+			return null;
+		}
+	};
+
+	// State to hold child tasks data
+	const [childTasksData, setChildTasksData] = useState<Record<string, taskItem | null>>({});
+
+	// Effect to load child tasks asynchronously
+	useEffect(() => {
+		if (task?.dependsOn && task.dependsOn.length > 0) {
+			const loadChildTasks = () => {
+				const childTasksMap: Record<string, taskItem | null> = {};
+				void Promise.all((task?.dependsOn ?? []).map(async (dependsOnId) => {
+					const childTask = await getTaskFromId(plugin, dependsOnId);
+					childTasksMap[dependsOnId] = childTask;
+				}));
+				setChildTasksData(childTasksMap);
+			};
+			loadChildTasks();
+		} else {
+			setChildTasksData({});
+		}
+	}, [task.dependsOn]);
+
+	const renderChildTasks = () => {
+		try {
+			// Render only if the last viewed history is Kanban and there are child tasks
+			if (activeViewType === viewTypeNames.kanban && task?.dependsOn && task.dependsOn.length > 0) {
+				return (
+					<div className="taskItemChildTasksSection">
+						{/* Placeholder for future child tasks rendering */}
+						<div className="taskItemChildTasks">
+							{task?.dependsOn && task?.dependsOn.map((dependsOnId) => {
+								const childTask = childTasksData[dependsOnId];
+								if (!childTask) return null; // Skip if child task not found in cache
+
+								const isThisATaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task.tags);
+								// Render each child task with a link to open it in the modal
+								const isChildTaskCompleted = isThisATaskNote ? isTaskCompleted(childTask.status, true, plugin.settings) : isTaskCompleted(childTask.status, false, plugin.settings);
+								const depTaskTitle = childTask.title || `There was an error fetching the task with ID: ${dependsOnId}`;
+
+								// Simple version just showing the ID and a symbol
+								return (
+									<div key={`${task.id}-dep-${dependsOnId}`} className="taskItemChildTask">
+										<div className='taskItemChildTaskContent' onClick={(event) => void handleOpenChildTaskModal(event, dependsOnId)}>
+											<span className='taskItemChildTaskSymbol' role="img" aria-label={t("child-task")}>{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
+											<span
+												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
+												title={depTaskTitle.slice(6)}
+											>
+												{cleanTaskTitleLegacy(childTask)}
+											</span></div>
+									</div>
+								)
+							})}
+						</div>
+					</div >);
+			} else {
+				return null;
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(16, error as string, "BasesStyle.tsx/renderChildTasks");
+			return null;
+		}
+	};
+
+	// Memoize the render functions to prevent unnecessary re-renders
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.propertiesVisibleInUI, task.priority, task.tags, columnData]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.propertiesVisibleInUI, task.body, showSubtasks]);
+	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task.dependsOn, childTasksData]);
+	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
+
+	const isCardDraggable = (Platform.isDesktopApp || dragDropTasksManagerInsatance.shouldEnableTouchDrag()) && activeViewType === viewTypeNames.kanban;
+
+	// ========================================
+	// RETURN STATEMENT
+	// ========================================
+	return (
+		<div className='taskItemContainer'>
+			<div
+				ref={taskItemRef}
+				className={`taskItem ${isThistaskCompleted ? 'completed' : ''}`}
+				key={taskIdKey}
+				style={{ backgroundColor: getCardBgBasedOnTag() }}
+				onDoubleClick={handleDoubleClickOnCard}
+				onContextMenu={handleMenuButtonClicked}
+				draggable={isCardDraggable}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
+			>
+				<div className="colorIndicator" style={{ backgroundColor: getColorIndicator() }} />
+				<div className="taskItemMainContent">
+
+					{memoizedRenderHeader}
+
+					{/* Drag Handle and Task Menu button */}
+					{
+						Platform.isDesktop && activeViewType !== viewTypeNames.map ? (
+							<div className="taskItemDragBtn">
+								<Grip size={18} enableBackground={0} opacity={0.4} />
+							</div>
+						) : (
+							<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
+						)
+					}
+
+					{/* Task Content */}
+					<div className="taskItemMainBody">
+						<div className="taskItemMainBodyTitleNsubTasks">
+							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox) && (
+								<input
+									id={`${task.id}-checkbox`}
+									type="checkbox"
+									checked={task.status === " " ? false : true}
+									className={`taskItemCheckbox${cardLoadingAnimation ? '-checked' : ''}`}
+									data-task={cardLoadingAnimation ? 'x' : task.status}
+									dir='auto'
+									onChange={() => handleMainCheckBoxClick}
+									onClick={(e) => {
+										if (cardLoadingAnimation) {
+											e.preventDefault();
+										}
+									}}
+									onDoubleClick={(e) => {
+										e.preventDefault();
+									}}
+									disabled={cardLoadingAnimation}
+									aria-disabled={cardLoadingAnimation}
+									aria-busy={cardLoadingAnimation}
+									readOnly={cardLoadingAnimation}
+								/>
+							)}
+							<div className="taskItemBodyContent">
+								<div className="taskItemTitle" ref={taskTitleRendererRef} />
+
+								{/* Sub-tasks section */}
+								{(globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) || globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) && (
+									<div className="taskItemSubTasksSection">
+										{memoizedRenderSubTasks}
+									</div>
+								)}
+							</div>
+						</div>
+
+
+						{showDescriptionSection && (
+							<div className='taskItemMainBodyDescriptionSectionVisible'>
+								{renderDescriptionSection()}
+							</div>
+						)}
+						{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized) && (
+							<div className="taskItemMainBodyDescription">
+								{task.body.some((line) => line.trim() !== "" && !isTaskLine(line)) && (
+									<div
+										className='taskItemMainBodyDescriptionSectionToggler'
+										onClick={toggleDescription}
+									>
+										{isDescriptionExpanded ? t("hide-description") : t("show-description")}
+									</div>
+								)}
+								{/* Expandable section */}
+								<div className='taskItemMainBodyDescriptionSection'>
+									<div
+										className={`taskItemBodyDescription${isDescriptionExpanded ? '-expanded' : ''}`}
+										ref={descriptionRef}
+									>
+										<div
+											className="taskItemBodyDescriptionRenderer"
+											ref={(el) => {
+												if (el) {
+													const uniqueKey = `${task.id}-desc`;
+													taskItemBodyDescriptionRef.current[uniqueKey] = el;
+												}
+											}}
+										></div>
+									</div>
+								</div>
+							</div>
+						)}
+
+						{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies) && (
+							<>
+								{memoizedRenderChildTasks}
+							</>
+						)}
+					</div>
+
+					{renderFooter()}
+
+					<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
+						<div className="taskItemiconButton taskItemiconButtonEdit">
+							<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+						</div>
+						<div className="taskItemiconButton taskItemiconButtonDelete">
+							<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	);
+};
+
+// export default memo(TaskItem, (prevProps, nextProps) => {
+// 	return (
+// 		prevProps.task.id === nextProps.task.id && // Immutable check
+// 		prevProps.task.title === nextProps.task.title &&
+// 		prevProps.task.body === nextProps.task.body &&
+// 		prevProps.task.due === nextProps.task.due &&
+// 		prevProps.task.tags.join(",") === nextProps.task.tags.join(",") &&
+// 		prevProps.task.priority === nextProps.task.priority &&
+// 		prevProps.task.completed === nextProps.task.completed &&
+// 		prevProps.task.filePath === nextProps.task.filePath &&
+// 		prevProps.columnIndex === nextProps.columnIndex &&
+// 		prevProps.activeBoardSettings === nextProps.activeBoardSettings
+// 	);
+// });
+
+export default memo(BasesStyle);

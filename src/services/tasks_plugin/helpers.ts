@@ -3,12 +3,12 @@
 import TaskBoard from "../../../main.js";
 import { CustomStatus } from "../../interfaces/GlobalSettings.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import {
 	getFormattedTaskContent,
 	addIdToTaskContent,
-} from "../../utils/taskLine/TaskContentFormatter.js";
-import { replaceOldTaskWithNewTask } from "../../utils/taskLine/TaskLineUtils.js";
+} from "../../utils/task_line/TaskContentFormatter.js";
+import { replaceOldTaskWithNewTask } from "../../utils/task_line/TaskLineUtils.js";
 import { eventEmitter } from "../EventEmitter.js";
 import { TasksPluginApi } from "./api.js";
 

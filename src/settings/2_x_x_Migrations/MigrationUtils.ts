@@ -18,7 +18,7 @@ import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
 } from "../../interfaces/GlobalSettings.js";
-import { bugReporterManagerInsatance } from "../../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { createFolderRecursively } from "../../services/FileSystem.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";

@@ -1,4 +1,4 @@
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { t } from "../utils/lang/helper.js";
 import { statusTypeNames } from "./Enums.js";
 import { CustomStatus } from "./GlobalSettings.js";

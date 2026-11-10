@@ -1,0 +1,217 @@
+// /src/modal/AddColumnModal.ts
+
+import { t } from "i18next";
+import { App, Modal } from "obsidian";
+import { ColumnData } from "../../interfaces/BoardConfigs.js";
+import { colTypeNames, UniversalDateOptions } from "../../interfaces/Enums.js";
+import { columnTypeAndNameMapping } from "../../interfaces/Mapping.js";
+import { generateRandomNumber } from "../../utils/TaskItemUtils.js";
+
+interface AddColumnModalProps {
+	app: App;
+	onCancel: () => void;
+	onSubmit: (columnData: ColumnData) => void;
+}
+
+export class AddColumnModal extends Modal {
+	private onSubmit: (columnData: ColumnData) => void;
+	private onCancel: () => void;
+	private colType: colTypeNames;
+	private name: string;
+
+	constructor(app: App, { onCancel, onSubmit }: AddColumnModalProps) {
+		super(app);
+		this.onCancel = onCancel;
+		this.onSubmit = onSubmit;
+		this.colType = colTypeNames.undated;
+		this.name = "";
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+
+		this.modalEl.setAttribute("data-type", "task-board-view");
+		contentEl.setAttribute("data-type", "task-board-view");
+
+		const modalContent = contentEl.createDiv({
+			cls: "addColumnModalOverlayContent",
+		});
+
+		// Header
+		modalContent.createEl("h2", { text: t("add-column") });
+
+		// Column Type Field
+		const colTypeField = modalContent.createDiv({
+			cls: "addColumnModalOverlayContentField",
+		});
+		colTypeField.createEl("label", {
+			attr: { for: "colType" },
+			text: t("column-type"),
+		});
+		const colTypeSelect = colTypeField.createEl("select", {
+			attr: { id: "colType" },
+		});
+
+		[
+			{
+				value: colTypeNames.undated,
+				text: columnTypeAndNameMapping.undated,
+			},
+			{ value: colTypeNames.dated, text: columnTypeAndNameMapping.dated },
+			{
+				value: colTypeNames.namedTag,
+				text: columnTypeAndNameMapping.namedTag,
+			},
+			{
+				value: colTypeNames.untagged,
+				text: columnTypeAndNameMapping.untagged,
+			},
+			{
+				value: colTypeNames.otherTags,
+				text: columnTypeAndNameMapping.otherTags,
+			},
+			{
+				value: colTypeNames.taskStatus,
+				text: columnTypeAndNameMapping.taskStatus,
+			},
+			{
+				value: colTypeNames.taskPriority,
+				text: columnTypeAndNameMapping.taskPriority,
+			},
+			{
+				value: colTypeNames.pathFiltered,
+				text: columnTypeAndNameMapping.pathFiltered,
+			},
+			{
+				value: colTypeNames.allPending,
+				text: columnTypeAndNameMapping.allPending,
+			},
+			{
+				value: colTypeNames.completed,
+				text: columnTypeAndNameMapping.completed,
+			},
+		].forEach((option) => {
+			colTypeSelect.createEl("option", {
+				attr: { value: option.value },
+				text: option.text,
+			});
+		});
+
+		colTypeSelect.addEventListener("change", (event: Event) => {
+			const target = event.target as HTMLSelectElement;
+			this.colType = target.value as colTypeNames;
+		});
+
+		// Name Field
+		const nameField = modalContent.createDiv({
+			cls: "addColumnModalOverlayContentField",
+		});
+		nameField.createEl("label", {
+			attr: { for: "name" },
+			text: t("column-name"),
+		});
+		const nameInput = nameField.createEl("input", {
+			attr: {
+				type: "text",
+				id: "name",
+				placeholder: t("enter-column-name"),
+			},
+		});
+		nameInput.addEventListener("input", (event: Event) => {
+			const target = event.target as HTMLInputElement;
+			this.name = target.value;
+		});
+
+		// Action Buttons
+		const actions = modalContent.createDiv({
+			cls: "addColumnModalOverlayContentActions",
+		});
+		const submitButton = actions.createEl("button", { text: t("submit") });
+		submitButton.addEventListener("click", () => {
+			if (
+				this.colType === colTypeNames.dated ||
+				this.colType === colTypeNames.undated
+			) {
+				this.onSubmit({
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
+					colType: this.colType,
+					name: this.name,
+					datedBasedColumn: {
+						dateType: UniversalDateOptions.dueDate,
+						from: 0,
+						to: 0,
+					},
+				}); // Add range data
+			} else if (this.colType === colTypeNames.namedTag) {
+				this.onSubmit({
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
+					colType: this.colType,
+					name: this.name,
+					coltag: "",
+				});
+			} else if (this.colType === colTypeNames.taskStatus) {
+				this.onSubmit({
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
+					colType: this.colType,
+					name: this.name,
+					taskStatus: " ",
+				});
+			} else if (this.colType === colTypeNames.taskPriority) {
+				this.onSubmit({
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
+					colType: this.colType,
+					name: this.name,
+					taskPriority: 1,
+				});
+			} else if (this.colType === colTypeNames.completed) {
+				this.onSubmit({
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
+					colType: this.colType,
+					name: this.name,
+					limit: 20,
+				}); // Add limit
+			} else if (this.colType === colTypeNames.pathFiltered) {
+				this.onSubmit({
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
+					colType: this.colType,
+					name: this.name,
+					filePaths: "",
+				}); // Add path filter
+			} else {
+				this.onSubmit({
+					id: generateRandomNumber(),
+					index: 9999,
+					active: true,
+					colType: this.colType,
+					name: this.name,
+				});
+			}
+			this.close();
+		});
+
+		const cancelButton = actions.createEl("button", { text: t("cancel") });
+		cancelButton.addEventListener("click", () => {
+			this.onCancel();
+			this.close();
+		});
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+		this.onCancel();
+		// this.close();
+	}
+}

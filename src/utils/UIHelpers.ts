@@ -1,5 +1,5 @@
 import { sanitizeHTMLToDom } from "obsidian";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
 
 /**

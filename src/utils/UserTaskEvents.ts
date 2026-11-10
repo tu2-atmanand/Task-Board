@@ -11,7 +11,7 @@ import {
 } from "../interfaces/Enums.js";
 import { globalSettingsData } from "../interfaces/GlobalSettings.js";
 import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import {
 	openEditTaskNoteModal,
@@ -19,7 +19,7 @@ import {
 	openEditTaskView,
 } from "../services/OpenModals.js";
 import { openTasksPluginEditModal } from "../services/tasks_plugin/helpers.js";
-import { verifySubtasksAndChildtasksAreComplete } from "./algorithms/ScanningFilterer.js";
+import { verifySubtasksAndChildtasksAreComplete } from "../core/algorithms/ScanningFilterer.js";
 import {
 	sanitizeStatus,
 	sanitizePriority,
@@ -28,12 +28,12 @@ import {
 	sanitizeDueDate,
 	sanitizeReminder,
 	sanitizeTags,
-} from "./taskLine/TaskContentFormatter.js";
-import { updateTaskInFile } from "./taskLine/TaskLineUtils.js";
+} from "./task_line/TaskContentFormatter.js";
+import { updateTaskInFile } from "./task_line/TaskLineUtils.js";
 import {
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,
-} from "./taskNote/TaskNoteUtils.js";
+} from "./task_note/TaskNoteUtils.js";
 
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
