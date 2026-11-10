@@ -11,13 +11,13 @@ import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, prior
 import { UpdateTaskEventData, taskItem } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../core/managers/BugReporter.js';
 import { currentDragDataPayload, dragDropTasksManagerInsatance } from '../../core/managers/DragDropTasksManager.js';
-import { DateTimePickerModal } from '../modals/date_time_picker/DateTimePickerModal.js';
-import { showTextInputModal } from '../modals/TextInputModal.js';
+import { DateTimePickerModal } from '../../ui/modals/date_time_picker/DateTimePickerModal.js';
+import { showTextInputModal } from '../../ui/modals/TextInputModal.js';
 import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from '../../regular_expressions/TasksPluginRegularExpr.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from '../../services/MarkdownHoverPreview.js';
 import { MarkdownUIRenderer } from '../../services/MarkdownUIRenderer.js';
-import { openDateInputModal } from '../../services/OpenModals.js';
+import { openDateInputModal } from '../../ui/modals/OpenModals.js';
 import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../core/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../utils/CheckBoxUtils.js';
 import { getUniversalDateFromTask, robustDateParser } from '../../utils/DateTimeCalculations.js';

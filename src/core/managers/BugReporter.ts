@@ -2,7 +2,7 @@ import { t } from "i18next";
 import { Notice } from "obsidian";
 import type TaskBoard from "../../../main.js";
 import { CURRENT_PLUGIN_VERSION } from "../../interfaces/Constants.js";
-import { BugReporterModal } from "../../components/modals/BugReporterModal.js";
+import { BugReporterModal } from "../../ui/modals/BugReporterModal.js";
 import { getObsidianDebugInfo } from "../../services/ObsidianDebugInfo.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { type ElectronOpenDialogReturnValue } from "obsidian-typings";

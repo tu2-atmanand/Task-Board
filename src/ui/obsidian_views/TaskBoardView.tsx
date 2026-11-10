@@ -5,14 +5,14 @@ import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
-import TaskBoardViewContainer from "../TaskBoardViewContainer.js";
+import TaskBoardViewContainer from "../../components/TaskBoardViewContainer.js";
 import { Board, DEFAULT_BOARD } from "../../interfaces/BoardConfigs.js";
 import { VIEW_TYPE_TASKBOARD, PENDING_SCAN_FILE_STACK, MANDATORY_SCAN_KEY } from "../../interfaces/Constants.js";
 import { TaskBoardIcon, funnelIcon, ScanVaultIcon, RefreshIcon } from "../../interfaces/Icons.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { revealFileFolderInExplorer } from "../../services/CommunityPlugins.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
-import { openScanVaultModal, openBoardsExplorerModal } from "../../services/OpenModals.js";
+import { openScanVaultModal, openBoardsExplorerModal } from "../modals/OpenModals.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 
 export class TaskBoardView extends ItemView {

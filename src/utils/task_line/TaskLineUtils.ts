@@ -4,9 +4,9 @@ import { normalizePath, Notice, TFile } from "obsidian";
 import TaskBoard from "../../../main.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
-import { isTheContentDiffAreOnlySpaces_V2 } from "../../components/modals/DiffContentCompareModal.js";
+import { isTheContentDiffAreOnlySpaces_V2 } from "../../ui/modals/DiffContentCompareModal.js";
 import { allowedFileExtensionsRegEx } from "../../regular_expressions/MiscelleneousRegExpr.js";
-import { openDiffContentCompareModal } from "../../services/OpenModals.js";
+import { openDiffContentCompareModal } from "../../ui/modals/OpenModals.js";
 import { TasksPluginApi } from "../../services/tasks_plugin/api.js";
 import {
 	readDataOfVaultFile,

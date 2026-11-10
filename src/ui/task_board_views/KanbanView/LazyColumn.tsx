@@ -15,10 +15,10 @@ import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSorting
 import { eventEmitter } from '../../../services/EventEmitter.js';
 import { isAdvancedFilterEmpty } from '../../../core/algorithms/AdvancedFilterer.js';
 import { matchTagsWithWildcards } from '../../../core/algorithms/ScanningFilterer.js';
-import { AdvancedFilterModal } from '../../advanced_filterer/index.js';
-import { AdvancedFilterPopover } from '../../advanced_filterer/Popover.js';
+import { AdvancedFilterModal } from '../../../components/advanced_filterer/index.js';
+import { AdvancedFilterPopover } from '../../../components/advanced_filterer/Popover.js';
 import { DEFAULT_SETTINGS } from '../../../interfaces/GlobalSettings.js';
-import { BasesStyle, EmojiStyle, swimlaneDataProp } from '../../task_card/index.js';
+import { BasesStyle, EmojiStyle, swimlaneDataProp } from '../../../components/task_card/index.js';
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;

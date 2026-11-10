@@ -5,7 +5,7 @@ import { statusTypeNames, colTypeNames } from "../../interfaces/Enums.js";
 import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
-import { openDateInputModal } from "../../services/OpenModals.js";
+import { openDateInputModal } from "../../ui/modals/OpenModals.js";
 import { getAllDatesInRelativeRange } from "../../utils/DateTimeCalculations.js";
 import { sanitizeStatus } from "../../utils/task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "../../utils/task_line/TaskLineUtils.js";

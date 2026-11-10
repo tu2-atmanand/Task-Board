@@ -2,35 +2,35 @@
 
 import { t } from "i18next";
 import { App, normalizePath, Notice, TFile, WorkspaceLeaf } from "obsidian";
-import TaskBoard from "../../main.js";
-import { Board } from "../interfaces/BoardConfigs.js";
-import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "../interfaces/Constants.js";
-import { VaultScannnerFilters } from "../interfaces/GlobalSettings.js";
-import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
-import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
-import { TaskEditorModal } from "../components/modals/TaskEditorModal.js";
-import { BoardConfigureModal } from "../components/modals/BoardConfigModal.js";
-import { BoardsExplorerModal } from "../components/modals/BoardsExplorer.js";
-import { BugReporterModal } from "../components/modals/BugReporterModal.js";
-import { DatePickerModal } from "../components/modals/date_picker/DatePickerModal.js";
-import { DiffContentCompareModal } from "../components/modals/DiffContentCompareModal.js";
-import { ScanFilterModal } from "../components/modals/ScanFilterModal.js";
-import { ScanVaultModal } from "../components/modals/ScanVaultModal.js";
-import { TaskEditorView } from "../components/obsidian_views/TaskEditorView.js";
-import { getCurrentLocalDateTimeString } from "../utils/DateTimeCalculations.js";
-import { writeDataToVaultFile } from "../utils/MarkdownFileOperations.js";
+import TaskBoard from "../../../main.js";
+import { Board } from "../../interfaces/BoardConfigs.js";
+import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "../../interfaces/Constants.js";
+import { VaultScannnerFilters } from "../../interfaces/GlobalSettings.js";
+import { taskItem, UpdateTaskEventData } from "../../interfaces/TaskItem.js";
+import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
+import { TaskEditorView } from "../../ui/obsidian_views/TaskEditorView.js";
+import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
+import { writeDataToVaultFile } from "../../utils/MarkdownFileOperations.js";
 import {
 	getFormattedTaskContent,
 	addIdToTaskContent,
-} from "../utils/task_line/TaskContentFormatter.js";
+} from "../../utils/task_line/TaskContentFormatter.js";
 import {
 	addTaskInNote,
 	updateTaskInFile,
-} from "../utils/task_line/TaskLineUtils.js";
-import { updateFrontmatterInMarkdownFile } from "../utils/task_note/TaskNoteUtils.js";
-import { CommunityPlugins } from "./CommunityPlugins.js";
-import { eventEmitter } from "./EventEmitter.js";
-import { createFolderRecursively } from "./FileSystem.js";
+} from "../../utils/task_line/TaskLineUtils.js";
+import { updateFrontmatterInMarkdownFile } from "../../utils/task_note/TaskNoteUtils.js";
+import { CommunityPlugins } from "../../services/CommunityPlugins.js";
+import { eventEmitter } from "../../services/EventEmitter.js";
+import { createFolderRecursively } from "../../services/FileSystem.js";
+import { BoardConfigureModal } from "../../ui/modals/BoardConfigModal.js";
+import { BoardsExplorerModal } from "../../ui/modals/BoardsExplorer.js";
+import { BugReporterModal } from "../../ui/modals/BugReporterModal.js";
+import { DatePickerModal } from "../../ui/modals/date_picker/DatePickerModal.js";
+import { DiffContentCompareModal } from "../../ui/modals/DiffContentCompareModal.js";
+import { ScanFilterModal } from "../../ui/modals/ScanFilterModal.js";
+import { ScanVaultModal } from "../../ui/modals/ScanVaultModal.js";
+import { TaskEditorModal } from "../../ui/modals/TaskEditorModal.js";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (

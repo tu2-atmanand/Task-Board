@@ -16,7 +16,7 @@ import { taskItemEmpty } from "../../../interfaces/Mapping.js";
 import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { eventEmitter } from "../../../services/EventEmitter.js";
-import { openAddNewTaskModal } from "../../../services/OpenModals.js";
+import { openAddNewTaskModal } from "../../modals/OpenModals.js";
 import {
 	formatDateStringAsPerSettings,
 	robustDateParser,

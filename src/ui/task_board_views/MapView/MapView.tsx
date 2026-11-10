@@ -32,7 +32,7 @@ import { isTaskCompleted } from '../../../utils/CheckBoxUtils.js';
 import { sanitizeDependsOn } from '../../../utils/task_line/TaskContentFormatter.js';
 import { updateTaskInFile } from '../../../utils/task_line/TaskLineUtils.js';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../../utils/task_note/TaskNoteUtils.js';
-import BasesStyle from '../../task_card/BasesStyle.js';
+import BasesStyle from '../../../components/task_card/BasesStyle.js';
 
 type MapViewProps = {
 	plugin: TaskBoard;

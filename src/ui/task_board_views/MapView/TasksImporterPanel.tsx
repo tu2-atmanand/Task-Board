@@ -11,7 +11,7 @@ import { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
 import { applyIdToTaskItem } from '../../../utils/TaskItemUtils.js';
-import BasesStyle from '../../task_card/BasesStyle.js';
+import BasesStyle from '../../../components/task_card/BasesStyle.js';
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;

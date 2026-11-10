@@ -6,8 +6,8 @@ import type { Board, TaskBoardViewType } from "../../../interfaces/BoardConfigs.
 import { DEFAULT_DATE_FORMAT } from "../../../interfaces/Constants.js";
 import { taskCardStyleNames, viewTypeNames } from "../../../interfaces/Enums.js";
 import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
-import TaskItem from "../../task_card/EmojiStyle.js";
-import BasesStyle from "../../task_card/BasesStyle.js";
+import TaskItem from "../../../components/task_card/EmojiStyle.js";
+import BasesStyle from "../../../components/task_card/BasesStyle.js";
 import { robustDateParser } from "../../../utils/DateTimeCalculations.js";
 
 interface ListViewProps {

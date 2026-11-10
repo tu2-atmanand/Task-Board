@@ -4,7 +4,7 @@ import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
-import { DeleteConfirmationModal } from "../../components/modals/DeleteConfirmationModal.js";
+import { DeleteConfirmationModal } from "../../ui/modals/DeleteConfirmationModal.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import { TasksPluginApi } from "../../services/tasks_plugin/api.js";
 import { checkboxStateSwitcher } from "../CheckBoxUtils.js";

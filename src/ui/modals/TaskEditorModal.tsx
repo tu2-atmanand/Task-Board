@@ -4,7 +4,7 @@ import { t } from "i18next";
 import { Modal, normalizePath } from "obsidian";
 import ReactDOM from "react-dom/client";
 import TaskBoard from "../../../main.js";
-import { TaskEditorRC } from "../TaskEditorRC.js";
+import { TaskEditorRC } from "../../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
 import { taskItemEmpty } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";

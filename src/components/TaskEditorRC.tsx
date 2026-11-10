@@ -21,7 +21,7 @@ import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "../ser
 import { markdownButtonHoverPreviewEvent } from "../services/MarkdownHoverPreview.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
 import { getTagSuggestions, MultiSuggest, getQuickAddPluginChoices, getFileSuggestions, getPendingTasksSuggestions } from "../services/MultiSuggest.js";
-import { openEditTaskView } from "../services/OpenModals.js";
+import { openEditTaskView } from "../ui/modals/OpenModals.js";
 import { compareTwoTags, verifySubtasksAndChildtasksAreComplete } from "../core/algorithms/ScanningFilterer.js";
 import { getObsidianIndentationSetting, isTaskLine } from "../utils/CheckBoxUtils.js";
 import { applyIdToTaskItem } from "../utils/TaskItemUtils.js";

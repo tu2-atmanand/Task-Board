@@ -72,9 +72,9 @@ import TaskBoardFileManager from "./src/core/managers/TaskBoardFileManager.js";
 import VaultScanner, {
 	fileTypeAllowedForScanning,
 } from "./src/core/managers/VaultScanner.js";
-import { MergeBoardsModal } from "./src/components/modals/MergeBoardsModal.js";
-import { ModifiedFilesModal } from "./src/components/modals/ModifiedFilesModal.js";
-import { TaskBoardView } from "./src/components/obsidian_views/TaskBoardView.js";
+import { MergeBoardsModal } from "./src/ui/modals/MergeBoardsModal.js";
+import { ModifiedFilesModal } from "./src/ui/modals/ModifiedFilesModal.js";
+import { TaskBoardView } from "./src/ui/obsidian_views/TaskBoardView.js";
 import {
 	isReminderPluginInstalled,
 	revealFileFolderInExplorer,
@@ -95,7 +95,7 @@ import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
 import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent.js";
 import { getHideClassForProperty } from "./src/utils/UIHelpers.js";
-import { openBoardsExplorerModal, openAddNewTaskModal, openAddNewTaskNoteModal, openAddNewTaskInCurrentFileModal, openScanVaultModal } from "./src/services/OpenModals.js";
+import { openBoardsExplorerModal, openAddNewTaskModal, openAddNewTaskNoteModal, openAddNewTaskInCurrentFileModal, openScanVaultModal } from "./src/ui/modals/OpenModals.js";
 
 /**
  * The entry-point of this project.

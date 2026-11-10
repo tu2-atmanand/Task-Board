@@ -12,17 +12,17 @@ import { funnelIcon, ScanVaultIcon } from '../interfaces/Icons.js';
 import { taskJsonMerged } from '../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../core/managers/BugReporter.js';
 import { eventEmitter } from '../services/EventEmitter.js';
-import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '../services/OpenModals.js';
+import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '../ui/modals/OpenModals.js';
 import { advancedFilterer } from '../core/algorithms/AdvancedFilterer.js';
 import { loadTasksAndMerge } from '../utils/JsonFileOperations.js';
 import { AdvancedFilterModal } from './advanced_filterer/index.js';
 import { AdvancedFilterPopover } from './advanced_filterer/Popover.js';
-import TableView from './task_board_views/TableView/TableView.js';
-import InboxView from './task_board_views/InboxView/InboxView.js';
-import CalendarView from './task_board_views/CalendarView/CalendarView.js';
-import KanbanBoardView from './task_board_views/KanbanView/KanbanBoardView.js';
-import ListView from './task_board_views/ListView/ListView.js';
-import MapView from './task_board_views/MapView/MapView.js';
+import TableView from '../ui/task_board_views/TableView/TableView.js';
+import InboxView from '../ui/task_board_views/InboxView/InboxView.js';
+import CalendarView from '../ui/task_board_views/CalendarView/CalendarView.js';
+import KanbanBoardView from '../ui/task_board_views/KanbanView/KanbanBoardView.js';
+import ListView from '../ui/task_board_views/ListView/ListView.js';
+import MapView from '../ui/task_board_views/MapView/MapView.js';
 
 const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Board, currentLeaf: WorkspaceLeaf | undefined, viewId: string }> = ({ plugin, currentBoardData, currentLeaf, viewId }) => {
 	const [boardData, setCurrentBoardData] = useState<Board>(currentBoardData);

@@ -3,7 +3,7 @@
 import { App } from "obsidian";
 import TaskBoard from "../../main.js";
 import { bugReporterManagerInsatance } from "./managers/BugReporter.js";
-import { TaskEditorModal } from "../components/modals/TaskEditorModal.js";
+import { TaskEditorModal } from "../ui/modals/TaskEditorModal.js";
 
 /**
  * TaskBoardApi provides external plugins with a public API to interact with Task Board functionality.
