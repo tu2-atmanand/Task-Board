@@ -13,7 +13,7 @@ import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.
 import { currentDragDataPayload, dragDropTasksManagerInsatance } from '../../../core/managers/DragDropTasksManager.js';
 import { DateTimePickerModal } from '../../modals/date_time_picker/DateTimePickerModal.js';
 import { showTextInputModal } from '../../modals/TextInputModal.js';
-import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from '../../../regular_expressions/TasksPluginRegularExpr.js';
+import { TaskRegularExpressions, TASKS_PLUGIN_DEFAULT_SYMBOLS } from '../../../utils/regular_expressions/TasksPluginRegularExpr.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
 import { hookMarkdownLinkMouseEventHandlers, markdownButtonHoverPreviewEvent } from '../../../services/MarkdownHoverPreview.js';
 import { MarkdownUIRenderer } from '../../../services/MarkdownUIRenderer.js';

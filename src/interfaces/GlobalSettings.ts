@@ -1,4 +1,4 @@
-import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regular_expressions/TasksPluginRegularExpr.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { Filter } from "./BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants.js";
 import {

@@ -55,7 +55,7 @@ import {
 	openIconPickerModal,
 	showIconPicker,
 } from "../ui/modals/icon_picker/index.js";
-import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../regular_expressions/TasksPluginRegularExpr.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { CommunityPlugins } from "../services/CommunityPlugins.js";
 import {
 	getFileSuggestions,

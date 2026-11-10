@@ -18,12 +18,12 @@ import {
 	jsonCacheData,
 	taskItem,
 } from "../../interfaces/TaskItem.js";
-import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../regular_expressions/DataviewPluginRegularExpr.js";
-import { allowedFileExtensionsRegEx } from "../../regular_expressions/MiscelleneousRegExpr.js";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../utils/regular_expressions/DataviewPluginRegularExpr.js";
+import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import {
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
 	TaskRegularExpressions,
-} from "../../regular_expressions/TasksPluginRegularExpr.js";
+} from "../../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import {
 	scanFilterForTags,

@@ -103,7 +103,7 @@ export async function downloadAndApplyLanguageFile(
 	const localesFolder = normalizePath(`${pluginFolder}/locales`);
 	const filePath = normalizePath(`${localesFolder}/${lang}.json`);
 	const tempPath = normalizePath(`${localesFolder}/${lang}.json.tmp`);
-	const url = `https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/src/utils/lang/locale/${lang}.json`;
+	const url = `https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/translations/${lang}.json`;
 
 	let progressNotice = new Notice(
 		`Downloading '${lang}' language file...`,

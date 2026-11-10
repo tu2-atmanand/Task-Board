@@ -19,11 +19,11 @@ import {
 	getHiddenPropertyConfigs,
 	SupportedPropertiesConfig,
 } from "../../interfaces/GlobalSettings.js";
-import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../regular_expressions/DataviewPluginRegularExpr.js";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../utils/regular_expressions/DataviewPluginRegularExpr.js";
 import {
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
 	TaskRegularExpressions,
-} from "../../regular_expressions/TasksPluginRegularExpr.js";
+} from "../../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { isTaskLine } from "../../utils/CheckBoxUtils.js";
 import { editorLivePreviewField, getFrontMatterInfo } from "obsidian";
 

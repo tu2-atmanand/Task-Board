@@ -8,7 +8,7 @@ import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
 import { taskItemEmpty } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
-import { allowedFileExtensionsRegEx } from "../../regular_expressions/MiscelleneousRegExpr.js";
+import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
 import { generateTaskId } from "../../utils/TaskItemUtils.js";

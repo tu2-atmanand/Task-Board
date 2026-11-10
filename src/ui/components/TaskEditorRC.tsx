@@ -14,7 +14,7 @@ import { taskItemEmpty, getPriorityOptionsForDropdown } from "../../interfaces/M
 import { coerceCustomTaskPropertyValue, taskItem, cursorLocationInterface } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
-import { allowedFileExtensionsRegEx } from "../../regular_expressions/MiscelleneousRegExpr.js";
+import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { CommunityPlugins } from "../../services/CommunityPlugins.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import { EmbeddableMarkdownEditor, createEmbeddableMarkdownEditor } from "../../services/MarkdownEditor.js";

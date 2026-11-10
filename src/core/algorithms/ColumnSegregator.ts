@@ -9,7 +9,7 @@ import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
 import { colTypeNames, UniversalDateOptions } from "../../interfaces/Enums.js";
 import { PluginDataJson } from "../../interfaces/GlobalSettings.js";
 import { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
-import { allowedFileExtensionsRegEx } from "../../regular_expressions/MiscelleneousRegExpr.js";
+import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { robustDateParser } from "../../utils/DateTimeCalculations.js";
 import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
 import { advancedFilterer } from "./AdvancedFilterer.js";

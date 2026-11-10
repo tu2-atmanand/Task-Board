@@ -5,7 +5,7 @@ import TaskBoard from "../../main.js";
 import { CustomStatus } from "../interfaces/GlobalSettings.js";
 import { taskItem } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
-import { allowedFileExtensionsRegEx } from "../regular_expressions/MiscelleneousRegExpr.js";
+import { allowedFileExtensionsRegEx } from "../utils/regular_expressions/MiscelleneousRegExpr.js";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
 	content: Set<string>;

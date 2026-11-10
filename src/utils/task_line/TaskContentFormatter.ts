@@ -27,11 +27,11 @@ import {
 	extractPriority,
 	extractDependsOn,
 } from "../../core/managers/VaultScanner.js";
-import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../regular_expressions/DataviewPluginRegularExpr.js";
+import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../regular_expressions/DataviewPluginRegularExpr.js";
 import {
 	TaskRegularExpressions,
 	TASKS_PLUGIN_DEFAULT_SYMBOLS,
-} from "../../regular_expressions/TasksPluginRegularExpr.js";
+} from "../regular_expressions/TasksPluginRegularExpr.js";
 import { isTaskLine } from "../CheckBoxUtils.js";
 import {
 	getCurrentLocalDateTimeString,
