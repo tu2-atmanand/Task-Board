@@ -5,7 +5,7 @@ import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
-import TaskBoardViewContainer from "../../components/TaskBoardViewContainer.js";
+import TaskBoardViewContainer from "../task_board_views/TaskBoardViewContainer.js";
 import { Board, DEFAULT_BOARD } from "../../interfaces/BoardConfigs.js";
 import { VIEW_TYPE_TASKBOARD, PENDING_SCAN_FILE_STACK, MANDATORY_SCAN_KEY } from "../../interfaces/Constants.js";
 import { TaskBoardIcon, funnelIcon, ScanVaultIcon, RefreshIcon } from "../../interfaces/Icons.js";

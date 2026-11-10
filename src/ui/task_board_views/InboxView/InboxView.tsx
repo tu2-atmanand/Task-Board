@@ -9,7 +9,7 @@ import { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
 import { ConfigureColumnSortingModal } from "../../modals/ConfigureColumnSortingModal.js";
 import { ClosePopupConfrimationModal } from "../../modals/ClosePopupConfrimationModal.js";
 import { eventEmitter } from "../../../services/EventEmitter.js";
-import { TaskEditorRC } from "../../../components/TaskEditorRC.js";
+import { TaskEditorRC } from "../../components/TaskEditorRC.js";
 import LazyColumn from "../KanbanView/LazyColumn.js";
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/task_note/TaskNoteUtils.js";
 import { readDataOfVaultFile, writeDataToVaultFile } from "../../../utils/MarkdownFileOperations.js";

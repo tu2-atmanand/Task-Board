@@ -5,7 +5,7 @@ import { Root, createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
-import { TaskEditorRC } from "../../components/TaskEditorRC.js";
+import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
 import { taskItemEmpty } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";

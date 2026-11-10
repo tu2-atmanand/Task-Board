@@ -22,7 +22,7 @@ import {
 } from "../../utils/UserTaskEvents.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import { compareTwoTags } from "../algorithms/ScanningFilterer.js";
-import { swimlaneDataProp } from "../../components/task_card/index.js";
+import { swimlaneDataProp } from "../../ui/components/task_card/index.js";
 
 type RectLike = Pick<DOMRect, "left" | "top" | "width" | "height">;
 type DragImageOffset = { x: number; y: number };

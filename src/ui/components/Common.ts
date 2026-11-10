@@ -7,9 +7,9 @@ import {
 	getActiveDocument,
 	createOwnerElement,
 	getOwnerDocument,
-} from "../utils/dom-compat.js";
-import { getWindowApp } from "../services/ObsidianApp.js";
-import { isSettingsScope, setSettingsScope } from "../settings/ScopeSettings.js";
+} from "../../utils/dom-compat.js";
+import { getWindowApp } from "../../services/ObsidianApp.js";
+import { isSettingsScope, setSettingsScope } from "../../settings/ScopeSettings.js";
 
 /**
  * Track native board transforms without reading or writing their data models.

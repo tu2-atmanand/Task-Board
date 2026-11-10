@@ -1,13 +1,13 @@
-import TaskBoard from "../../../main.js";
-import { DEFAULT_TASK_CACHE_KEYS, TagColorType } from "../../interfaces/Enums.js";
-import { priorityEmojis } from "../../interfaces/Mapping.js";
-import { taskItem } from "../../interfaces/TaskItem.js";
-import { isTaskCompleted } from "../../utils/CheckBoxUtils.js";
+import TaskBoard from "../../../../main.js";
+import { DEFAULT_TASK_CACHE_KEYS, TagColorType } from "../../../interfaces/Enums.js";
+import { priorityEmojis } from "../../../interfaces/Mapping.js";
+import { taskItem } from "../../../interfaces/TaskItem.js";
+import { isTaskCompleted } from "../../../utils/CheckBoxUtils.js";
 import {
 	isTaskNotePresentInTags,
 	getStatusNameFromStatusSymbol,
-} from "../../utils/task_note/TaskNoteUtils.js";
-import { updateRGBAOpacity } from "../../utils/UIHelpers.js";
+} from "../../../utils/task_note/TaskNoteUtils.js";
+import { updateRGBAOpacity } from "../../../utils/UIHelpers.js";
 
 /**
  * Creates an HTML DOM element to be rendered as a task card for the given taskitem data.

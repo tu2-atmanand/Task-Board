@@ -8,14 +8,6 @@ import { VIEW_TYPE_ADD_OR_EDIT_TASK } from "../../interfaces/Constants.js";
 import { VaultScannnerFilters } from "../../interfaces/GlobalSettings.js";
 import { taskItem, UpdateTaskEventData } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
-import { TaskEditorModal } from "./TaskEditorModal.js";
-import { BoardConfigureModal } from "./BoardConfigModal.js";
-import { BoardsExplorerModal } from "./BoardsExplorer.js";
-import { BugReporterModal } from "./BugReporterModal.js";
-import { DatePickerModal } from "./date_picker/DatePickerModal.js";
-import { DiffContentCompareModal } from "./DiffContentCompareModal.js";
-import { ScanFilterModal } from "./ScanFilterModal.js";
-import { ScanVaultModal } from "./ScanVaultModal.js";
 import { TaskEditorView } from "../obsidian_views/TaskEditorView.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { writeDataToVaultFile } from "../../utils/MarkdownFileOperations.js";
@@ -31,6 +23,14 @@ import { updateFrontmatterInMarkdownFile } from "../../utils/task_note/TaskNoteU
 import { CommunityPlugins } from "../../services/CommunityPlugins.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import { createFolderRecursively } from "../../services/FileSystem.js";
+import { BoardConfigureModal } from "./BoardConfigModal.js";
+import { BoardsExplorerModal } from "./BoardsExplorer.js";
+import { BugReporterModal } from "./BugReporterModal.js";
+import { DatePickerModal } from "./date_picker/DatePickerModal.js";
+import { DiffContentCompareModal } from "./DiffContentCompareModal.js";
+import { ScanFilterModal } from "./ScanFilterModal.js";
+import { ScanVaultModal } from "./ScanVaultModal.js";
+import { TaskEditorModal } from "./TaskEditorModal.js";
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (

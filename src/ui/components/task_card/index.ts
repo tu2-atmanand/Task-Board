@@ -7,10 +7,10 @@
  */
 
 import { Component, View } from "obsidian";
-import TaskBoard from "../../../main.js";
-import { KanbanView } from "../../interfaces/BoardConfigs.js";
-import { viewTypeNames } from "../../interfaces/Enums.js";
-import { taskItem } from "../../interfaces/TaskItem.js";
+import TaskBoard from "../../../../main.js";
+import { KanbanView } from "../../../interfaces/BoardConfigs.js";
+import { viewTypeNames } from "../../../interfaces/Enums.js";
+import { taskItem } from "../../../interfaces/TaskItem.js";
 import BasesStyle from "./BasesStyle.js";
 import EmojiStyle from "./EmojiStyle.js";
 import IconStyle from "./IconStyle.js";

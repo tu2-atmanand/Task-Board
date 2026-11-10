@@ -13,28 +13,28 @@ import {
 	Menu,
 } from "obsidian";
 import Sortable, { SortableEvent } from "sortablejs";
-import TaskBoard from "../../../main.js";
+import TaskBoard from "../../../../main.js";
 import {
 	Filter,
 	FilterCriterionGroup,
 	FilterCriterion,
 	AdvancedFilter,
-} from "../../interfaces/BoardConfigs.js";
-import { PropertyTypeConfig } from "../../interfaces/Enums.js";
+} from "../../../interfaces/BoardConfigs.js";
+import { PropertyTypeConfig } from "../../../interfaces/Enums.js";
 import {
 	getCustomStatusOptionsForDropdown,
 	getPriorityOptionsForDropdown,
 	priorityDropDownOption,
-} from "../../interfaces/Mapping.js";
-import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
+} from "../../../interfaces/Mapping.js";
+import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { FiltersWarehouseModal } from "./FiltersWarehouse.js";
 import {
 	MultiSuggest,
 	getTagSuggestions,
 	getFileSuggestions,
 	getFolderSuggestions,
-} from "../../services/MultiSuggest.js";
-import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
+} from "../../../services/MultiSuggest.js";
+import { generateRandomStringId } from "../../../utils/TaskItemUtils.js";
 
 export class AdvancedFilterComponent extends Component {
 	private hostEl: HTMLElement;

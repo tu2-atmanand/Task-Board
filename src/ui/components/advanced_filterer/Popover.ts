@@ -4,9 +4,9 @@ import { App, setIcon, setTooltip } from "obsidian";
 import { Component } from "obsidian";
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
 import { t } from "i18next";
-import TaskBoard from "../../../main.js";
-import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
-import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
+import TaskBoard from "../../../../main.js";
+import { AdvancedFilter } from "../../../interfaces/BoardConfigs.js";
+import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
 
 export class AdvancedFilterPopover

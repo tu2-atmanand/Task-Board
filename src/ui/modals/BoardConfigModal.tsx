@@ -21,7 +21,7 @@ import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
-import { AdvancedFilterModal } from "../../components/advanced_filterer/index.js";
+import { AdvancedFilterModal } from "../components/advanced_filterer/index.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;

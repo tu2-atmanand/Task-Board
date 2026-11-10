@@ -93,7 +93,7 @@ import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
 import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
-import { TaskBoardEmbedComponent } from "./src/components/TaskBoardEmbedComponent.js";
+import { TaskBoardEmbedComponent } from "./src/ui/components/TaskBoardEmbedComponent.js";
 import { getHideClassForProperty } from "./src/utils/UIHelpers.js";
 import { openBoardsExplorerModal, openAddNewTaskModal, openAddNewTaskNoteModal, openAddNewTaskInCurrentFileModal, openScanVaultModal } from "./src/ui/modals/OpenModals.js";
 

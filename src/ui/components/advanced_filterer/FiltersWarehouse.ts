@@ -5,24 +5,24 @@ import {
 	ExtraButtonComponent,
 	DropdownComponent,
 } from "obsidian";
-import type TaskBoard from "../../../main.js";
-import { PropertyTypeConfig } from "../../interfaces/Enums.js";
+import type TaskBoard from "../../../../main.js";
+import { PropertyTypeConfig } from "../../../interfaces/Enums.js";
 import type {
 	Filter,
 	FilterCriterionGroup,
 	FilterCriterion,
 	FiltersWarehouse,
-} from "../../interfaces/BoardConfigs.js";
+} from "../../../interfaces/BoardConfigs.js";
 import { generateIdForFilters } from "./Component.js";
 import {
 	getCustomStatusOptionsForDropdown,
 	getPriorityOptionsForDropdown,
-} from "../../interfaces/Mapping.js";
+} from "../../../interfaces/Mapping.js";
 import {
 	MultiSuggest,
 	getTagSuggestions,
 	getFileSuggestions,
-} from "../../services/MultiSuggest.js";
+} from "../../../services/MultiSuggest.js";
 
 export class FiltersWarehouseModal extends Modal {
 	private plugin: TaskBoard;

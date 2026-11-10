@@ -12,15 +12,12 @@ import {
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Notice } from "obsidian";
 import TaskBoard from "../../../../main.js";
-import { taskItemEmpty } from "../../../interfaces/Mapping.js";
-import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
+import { taskItemEmpty } from "../../../interfaces/Mapping.js";
+import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { eventEmitter } from "../../../services/EventEmitter.js";
 import { openAddNewTaskModal } from "../../modals/OpenModals.js";
-import {
-	formatDateStringAsPerSettings,
-	robustDateParser,
-} from "../../../utils/DateTimeCalculations.js";
+import { robustDateParser, formatDateStringAsPerSettings } from "../../../utils/DateTimeCalculations.js";
 import { sanitizeStartDate, sanitizeTime } from "../../../utils/task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "../../../utils/task_line/TaskLineUtils.js";
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/task_note/TaskNoteUtils.js";

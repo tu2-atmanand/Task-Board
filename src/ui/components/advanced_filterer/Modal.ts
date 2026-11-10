@@ -1,9 +1,9 @@
 import { t } from "i18next";
 import { Modal } from "obsidian";
-import TaskBoard from "../../../main.js";
-import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
+import TaskBoard from "../../../../main.js";
+import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { AdvancedFilterComponent } from "./Component.js";
-import { AdvancedFilter } from "../../interfaces/BoardConfigs.js";
+import { AdvancedFilter } from "../../../interfaces/BoardConfigs.js";
 
 export class AdvancedFilterModal extends Modal {
 	private plugin: TaskBoard;
