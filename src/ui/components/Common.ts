@@ -7,7 +7,7 @@ import {
 	getActiveDocument,
 	createOwnerElement,
 	getOwnerDocument,
-} from "../../utils/dom-compat.js";
+} from "../../utils/DomCompat.js";
 import { getWindowApp } from "../../services/ObsidianApp.js";
 import { isSettingsScope, setSettingsScope } from "../../settings/ScopeSettings.js";
 

@@ -1,6 +1,6 @@
 import { App, Modal, getIcon, getIconIds } from 'obsidian';
 import { t } from "i18next";
-import { getOwnerWindow } from '../../../utils/dom-compat.js';
+import { getOwnerWindow } from '../../../utils/DomCompat.js';
 import { searchLucideIcons } from './IconSearch.js';
 // import { setAccessibleLabelWithoutTooltip } from '../accessibility-label';
 

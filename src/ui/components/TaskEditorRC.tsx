@@ -30,7 +30,7 @@ import { formatTaskNoteContent, isTaskNotePresentInTags } from "../../utils/task
 import { updateRGBAOpacity } from "../../utils/UIHelpers.js";
 import { handleEditTask } from "../../utils/UserTaskEvents.js";
 import { t } from "../../utils/lang/helper.js";
-import { openTaskSelector } from "../../services/TaskSelectorWithCreateModal.js";
+import { openTaskSelector } from "../modals/TaskSelectorWithCreateModal.js";
 
 const BUILT_IN_TASK_ITEM_KEYS = new Set([
 	"id", "legacyId", "title", "body", "status", "priority", "tags", "frontmatterTags",
