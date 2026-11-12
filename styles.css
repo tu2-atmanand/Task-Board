@@ -222,6 +222,7 @@
 }
 
 @media (hover: none) {
+
 	.task-board-property-action.move-up-btn,
 	.task-board-property-action.move-down-btn {
 		visibility: visible;
@@ -3375,7 +3376,6 @@ li:hover .taskboard-hidden-property {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
-	margin: 0.75rem 0;
 	flex-wrap: nowrap;
 	justify-content: space-between;
 	align-content: center;
@@ -3383,6 +3383,7 @@ li:hover .taskboard-hidden-property {
 	padding: 5px;
 	border-radius: 5px;
 	flex-direction: column;
+	width: stretch;
 }
 
 .taskBoard-filter-row-heading {
@@ -3619,6 +3620,7 @@ li:hover .taskboard-hidden-property {
 	flex-direction: column;
 	gap: 8px;
 	margin-top: 1em;
+	width: stretch;
 }
 
 /* Each draggable tag color row */
@@ -3736,6 +3738,10 @@ li:hover .taskboard-hidden-property {
 
 .task-board-settingtab-add-tag-color-btn {
 	background-color: transparent !important;
+	width: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: flex-end;
 }
 
 .global-setting-tab-live-preview {
@@ -3790,6 +3796,8 @@ li:hover .taskboard-hidden-property {
 	border-radius: var(--radius-m);
 }
 
+.task-board-settings-tab-tag-colors-container .setting-items .setting-item,
+.task-board-settings-tab-filters-for-scanning-container .setting-items .setting-item,
 .taskBoard-settings-wide-input {
 	width: 100% !important;
 	display: flex !important;

@@ -3,7 +3,10 @@
 import { t } from "i18next";
 import {
 	App,
+	getIcon,
+	normalizePath,
 	Notice,
+	Platform,
 	PluginSettingTab,
 	setIcon,
 	Setting,
@@ -14,15 +17,73 @@ import {
 import TaskBoard from "../../main.js";
 import { PropertyConfigurationModal } from "../ui/modals/PropertyConfigurationModal.js";
 import {
+	CustomStatus,
 	globalSettingsData,
 	SupportedPropertiesConfig,
 } from "../interfaces/GlobalSettings.js";
-import { PropertyTypeConfig } from "../interfaces/Enums.js";
+import {
+	EditButtonMode,
+	mapViewArrowDirection,
+	mapViewBackgrounVariantTypes,
+	mapViewEdgeType,
+	mapViewNodeMapOrientation,
+	mapViewScrollAction,
+	NotificationService,
+	PropertyTypeConfig,
+	RibbonIconActions,
+	scanModeOptions,
+	statusTypeNames,
+	TagColorType,
+	taskCardStyleNames,
+	taskPropertyFormatOptions,
+	UniversalDateOptions,
+} from "../interfaces/Enums.js";
 import { TaskBoardIcon } from "../interfaces/Icons.js";
 import { SettingsManager, SettingsTabPagesKey } from "./SettingConstructUI.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import { setSettingsScope } from "./ScopeSettings.js";
-import { showReloadObsidianNotice } from "./SettingSynchronizer.js";
+import {
+	exportConfigurations,
+	importConfigurations,
+	showReloadObsidianNotice,
+} from "./SettingSynchronizer.js";
+import { createFragmentWithHTML } from "../utils/UIHelpers.js";
+import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
+import { downloadAndApplyLanguageFile } from "../utils/lang/helper.js";
+import { moveTasksCacheFileToNewPath } from "../utils/JsonFileOperations.js";
+import Sortable from "sortablejs";
+import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
+
+// Pickr library import
+import PickrImport from "@simonwep/pickr";
+import { CustomStatusModal } from "../ui/modals/CustomStatusConfigurator.js";
+import { fetchTasksPluginCustomStatuses } from "../services/tasks_plugin/helpers.js";
+import {
+	normalizeTaskIconValue,
+	openIconPickerModal,
+	showIconPicker,
+} from "../ui/modals/icon_picker/index.js";
+import {
+	getFileSuggestions,
+	getFolderSuggestions,
+	getQuickAddPluginChoices,
+	MultiSuggest,
+} from "../services/MultiSuggest.js";
+import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../utils/regular_expressions/TasksPluginRegularExpr.js";
+import { openScanFiltersModal } from "../ui/modals/OpenModals.js";
+import { CommunityPlugins } from "../services/CommunityPlugins.js";
+import { isValid, parse, format, differenceInHours } from "date-fns";
+
+interface PickrColor {
+	toRGBA(): number[];
+}
+interface PickrInstance {
+	on(event: string, cb: (...args: unknown[]) => void): this;
+	destroy(): void;
+	hide(): void;
+}
+type PickrConstructor = new (options: Record<string, unknown>) => PickrInstance;
+const Pickr = PickrImport as unknown as PickrConstructor;
 
 /**
  * Filters tab — list of user-defined filter sets.
@@ -81,7 +142,9 @@ export function attachDeclarativeSettingsPageTitleAction(
 			item,
 			true,
 		);
-		return button.closest(".task-board-settings-docs-tooltip-anchor") ?? button;
+		return (
+			button.closest(".task-board-settings-docs-tooltip-anchor") ?? button
+		);
 	});
 	return () => {
 		for (const anchor of anchors) anchor.remove();
@@ -144,6 +207,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	settingsManager: SettingsManager;
 	globalSettings: globalSettingsData;
 	icon: string = TaskBoardIcon;
+	allPickrs: unknown[] = [];
 	private reloadNoticeAlreadyShown = false;
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -162,29 +226,90 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		void this.settingsManager.constructUI(containerEl, t("task-board"));
 	}
 
-	private updateNativeSettingsDefinitions(): void {
-		this.update();
+	// Function to save settings back to data.json
+	async saveSettings(): Promise<void> {
+		if (!this.globalSettings) return;
+
+		try {
+			this.plugin.settings.data = this.globalSettings;
+			await this.plugin.saveSettings();
+		} catch (err) {
+			bugReporterManagerInsatance.showNotice(
+				43,
+				"Failed to save settings",
+				err as string,
+				"TaskBoardSettingConstructUI.ts/SettingsManager/saveSettings",
+			);
+		}
 	}
 
-	private showReloadNoticeIfNeeded(): void {
-		if (this.reloadNoticeAlreadyShown) return;
-		this.reloadNoticeAlreadyShown = true;
-		void showReloadObsidianNotice(this.plugin);
+	/**
+	 * Shows an Obsidian Notice to reload the application.
+	 * It tracks if such a notice has already been shown.
+	 * If already shown, will not show again.
+	 * @returns void
+	 */
+	private openReloadNoticeIfNeeded() {
+		if (!this.reloadNoticeAlreadyShown) {
+			window.setTimeout(() => {
+				void showReloadObsidianNotice(this.plugin);
+				this.reloadNoticeAlreadyShown = true;
+			}, 500);
+		}
+	}
+
+	private updateNativeSettingsDefinitions(): void {
+		this.update();
 	}
 
 	getSettingDefinitions(): SettingDefinitionItem[] {
 		this.containerEl.addClass("TaskBoardSettingTab");
 		const customStatusAliases =
-			this.plugin.settings.data.customStatuses?.flatMap((status) => [
+			this.globalSettings.customStatuses?.flatMap((status) => [
 				status.name,
 				status.symbol,
 			]) ?? [];
 		const tagColorAliases =
-			this.plugin.settings.data.tagColors?.map(
-				(tagColor) => tagColor.name,
-			) ?? [];
+			this.globalSettings.tagColors?.map((tagColor) => tagColor.name) ??
+			[];
+		const scanningModeDescription = () =>
+			createFragmentWithHTML(
+				t("scanning-mode-info") +
+					"<br/>" +
+					"<ul>" +
+					"<li>" +
+					"<b>" +
+					t("balanced") +
+					"</b>" +
+					" : " +
+					t("balanced-scanning-mode-info") +
+					"</li>" +
+					"<li>" +
+					"<b>" +
+					t("real-time") +
+					"</b>" +
+					" : " +
+					t("real-time-scanning-mode-info") +
+					"</li>" +
+					"<li>" +
+					"<b>" +
+					t("manual") +
+					"</b>" +
+					" : " +
+					t("manual-scanning-mode-info") +
+					"</li>" +
+					"</ul>",
+			);
+
+		// Setting for choosing the default QuickAdd plugin run command
+		const communityPlugins = new CommunityPlugins(this.plugin);
+		if (!communityPlugins.isQuickAddPluginEnabled()) {
+			this.globalSettings.compatiblePlugins.quickAddPlugin = false;
+			void this.saveSettings();
+		}
 
 		return [
+			// This is a simple group to show release notes and docs buttons.
 			{
 				type: "group",
 				items: [
@@ -258,58 +383,795 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					},
 				],
 			},
-			this.createLegacySettingsPage("general", [
-				"filters-for-scanning",
-				"scanning-mode",
-				"auto-add-unique-id",
-				"open-board-on-obsidian-startup",
-				"show-modified-files-message-on-startup",
-				"ribbon-icon-action",
-				"update-language-translations",
-				"tasks-cache-file-path",
-				"import-export-configurations",
-				"export-logs",
-				"Safeguard feature",
-			]),
-			// {
-			// 	type: "page",
-			// 	name: t("general"),
-			// 	items: [
-			// 		{
-			// 			type: "list",
-			// 			name: t("filters-for-scanning"),
-			// 			desc: createFragmentWithHTML(
-			// 				t("name-of-the-file-folder-tag-for-filter-info") +
-			// 					"<br/>" +
-			// 					"<b>" +
-			// 					t("note") +
-			// 					" :</b> " +
-			// 					t(
-			// 						"name-of-the-file-folder-tag-for-filter-info-2",
-			// 					),
-			// 			),
-			// 			items: ,
-			// 		},
-			// 	],
-			// },
-			this.createLegacySettingsPage("all-ui", [
-				"task-card-style",
-				"show-task-without-metadata",
-				"width-of-task-card",
-				"show-column-scroll-bar",
-				"interactions",
-				"edit-button-mode",
-				"double-click-card-action",
-				"drag-and-drop",
-				"tag-colors",
-				"tag-color-indicator-type",
-				"add-tag-color",
-				"tag-name",
-				...tagColorAliases,
-			]),
+			// General page
 			{
 				type: "page",
-				name: t("properties"),
+				name: t("general"),
+				items: [
+					{
+						type: "group",
+						heading: "filters-for-scanning",
+						cls: "task-board-settings-tab-filters-for-scanning-container",
+						items: [
+							{
+								name: "",
+								desc: createFragmentWithHTML(
+									t(
+										"name-of-the-file-folder-tag-for-filter-info",
+									) +
+										"<br/>" +
+										"<b>" +
+										t("note") +
+										" :</b> " +
+										t(
+											"name-of-the-file-folder-tag-for-filter-info-2",
+										),
+								),
+								render: (setting) =>
+									this.renderFiltersForScanningContainer(
+										setting.settingEl,
+									),
+							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("scanning"),
+						items: [
+							{
+								name: t("scanning-mode"),
+								desc: scanningModeDescription(),
+								render: (setting) => {
+									setting
+										.setName(t("scanning-mode"))
+										.setDesc(scanningModeDescription())
+										.addDropdown((dropdown) =>
+											dropdown
+												.addOptions({
+													[scanModeOptions.AUTOMATIC]:
+														t("balanced"),
+													[scanModeOptions.REAL_TIME]:
+														t("real-time"),
+													[scanModeOptions.MANUAL]:
+														t("manual"),
+												})
+												.setValue(
+													this.globalSettings
+														.scanMode,
+												)
+												.onChange(async (value) => {
+													this.globalSettings.scanMode =
+														value as scanModeOptions;
+													await this.saveSettings();
+
+													this.openReloadNoticeIfNeeded();
+												}),
+										);
+								},
+							},
+							{
+								name: t("auto-add-unique-id"),
+								desc: createFragmentWithHTML(
+									t("auto-add-unique-id-description") +
+										"<br/>" +
+										"<ul>" +
+										"<li>" +
+										t("map-view-feature") +
+										"</li>" +
+										"<li>" +
+										t(
+											"manual-sorting-inside-each-column-upcoming",
+										) +
+										"</li>" +
+										"<li>" +
+										t(
+											"pin-tasks-on-top-in-each-column-upcoming",
+										) +
+										"</li>" +
+										"</ul>",
+								),
+								render: (setting) => {
+									setting
+										.setName(t("scanning-mode"))
+										.setDesc(
+											createFragmentWithHTML(
+												t(
+													"auto-add-unique-id-description",
+												) +
+													"<br/>" +
+													"<ul>" +
+													"<li>" +
+													t("map-view-feature") +
+													"</li>" +
+													"<li>" +
+													t(
+														"manual-sorting-inside-each-column-upcoming",
+													) +
+													"</li>" +
+													"<li>" +
+													t(
+														"pin-tasks-on-top-in-each-column-upcoming",
+													) +
+													"</li>" +
+													"</ul>",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.autoAddUniqueID,
+												)
+												.onChange((value) => {
+													this.globalSettings.autoAddUniqueID =
+														value;
+													void this.saveSettings();
+
+													this.openReloadNoticeIfNeeded();
+												}),
+										);
+								},
+							},
+							{
+								name: t(
+									"show-modified-files-message-on-startup",
+								),
+								desc: t(
+									"show-modified-files-message-on-startup-info",
+								),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"show-modified-files-message-on-startup",
+											),
+										)
+										.setDesc(
+											t(
+												"show-modified-files-message-on-startup-info",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.showModifiedFilesNotice,
+												)
+												.onChange((value) => {
+													this.globalSettings.showModifiedFilesNotice =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("ribbon-icon-action"),
+								desc: t("ribbon-icon-action-info"),
+								render: (setting) => {
+									setting
+										.setName(t("ribbon-icon-action"))
+										.setDesc(t("ribbon-icon-action-info"))
+										.addDropdown((dropdown) =>
+											dropdown
+												.addOptions({
+													[RibbonIconActions.lastBoard]:
+														t("last-viewed-board"),
+													[RibbonIconActions.allBoardsMenu]:
+														t("all-boards-menu"),
+													[RibbonIconActions.boardsExplorer]:
+														t("boards-explorer"),
+												})
+												.setValue(
+													this.globalSettings
+														.ribbonIconAction,
+												)
+												.onChange((value) => {
+													this.globalSettings.ribbonIconAction =
+														value as RibbonIconActions;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("update-language-translations"),
+								desc: t("ribbon-icon-action-info"),
+								render: (setting) => {
+									setting
+										.setName(
+											t("update-language-translations"),
+										)
+										.setDesc(
+											createFragmentWithHTML(
+												t(
+													"update-language-translations-info",
+												) +
+													" <a href='https://tu2-atmanand.github.io/task-board-docs/docs/Advanced/Contribution_For_Languages/'>" +
+													t("task-board-docs") +
+													".",
+											),
+										)
+										.addButton((button) =>
+											button
+												.setButtonText("Update")
+												.onClick(async () => {
+													const result =
+														await downloadAndApplyLanguageFile(
+															this.plugin,
+														);
+													if (result) {
+														this.openReloadNoticeIfNeeded();
+													}
+												}),
+										);
+								},
+							},
+							{
+								name: t("tasks-cache-file-path"),
+								desc: t("ribbon-icon-action-info"),
+								render: (setting) => {
+									let newPath =
+										this.globalSettings.tasksCacheFilePath;
+									setting
+										.setClass(
+											"taskBoard-settings-wide-input",
+										)
+										.setName(t("tasks-cache-file-path"))
+										.setDesc(
+											createFragmentWithHTML(
+												t(
+													"tasks-cache-file-path-description",
+												) +
+													"<br/>" +
+													t(
+														"tasks-cache-file-path-description-2",
+													),
+											),
+										)
+										.addText((text) => {
+											text.setValue(newPath).onChange(
+												(editedPath: string) => {
+													if (
+														editedPath.endsWith(
+															".json",
+														)
+													) {
+														newPath =
+															normalizePath(
+																editedPath,
+															);
+													} else {
+														newPath = normalizePath(
+															editedPath +
+																"/task-board-cache.json",
+														);
+													}
+												},
+											);
+
+											// const inputEl = text.inputEl;
+											// const suggestionContent = getFolderSuggestions(this.app);
+											// const onSelectCallback = async (selectedPath: string) => {
+											// 	let newPath = "";
+											// 	if (this.globalSettings) {
+											// 		if (selectedPath.endsWith(".json")) {
+											// 			this.globalSettings.tasksCacheFilePath =
+											// 				selectedPath;
+											// 			newPath = selectedPath;
+											// 		} else {
+											// 			newPath = normalizePath(
+											// 				selectedPath + "/task-board-cache.json",
+											// 			);
+											// 			this.globalSettings.tasksCacheFilePath =
+											// 				newPath;
+											// 		}
+											// 	}
+											// 	renderTasksCachePathSetting();
+											// 	void this.saveSettings();
+											// };
+
+											// new MultiSuggest(
+											// 	inputEl,
+											// 	new Set(suggestionContent),
+											// 	onSelectCallback,
+											// 	this.app,
+											// );
+										})
+										.addButton((button) =>
+											button
+												.setButtonText(t("transfer"))
+												.onClick(async () => {
+													const result =
+														await moveTasksCacheFileToNewPath(
+															this.app,
+															this.globalSettings
+																.tasksCacheFilePath,
+															newPath,
+														);
+													if (result) {
+														this.globalSettings.tasksCacheFilePath =
+															newPath;
+														void this.saveSettings();
+
+														this.renderTab();
+														new Notice(
+															`Task Board cache file path changed to new location succussfully. New location : ${this.globalSettings.tasksCacheFilePath}`,
+														);
+													} else {
+														new Notice(
+															"Task board : Failed to change the path. Check logs for more info.",
+														);
+														this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+														void this.saveSettings();
+
+														this.renderTab();
+													}
+												}),
+										)
+										.addButton((button) =>
+											button
+												.setButtonText(t("reset"))
+												.onClick(async () => {
+													newPath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+
+													const result =
+														await moveTasksCacheFileToNewPath(
+															this.app,
+															this.globalSettings
+																.tasksCacheFilePath,
+															newPath,
+														);
+
+													if (result) {
+														this.globalSettings.tasksCacheFilePath =
+															newPath;
+														void this.saveSettings();
+
+														this.renderTab();
+														new Notice(
+															`Task board cache file path reset was succussfully.`,
+														);
+													} else {
+														new Notice(
+															"Task board : Failed to change the path. Check logs for more info.",
+														);
+														this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
+														void this.saveSettings();
+
+														this.renderTab();
+													}
+
+													this.renderTab();
+												}),
+										);
+								},
+							},
+							{
+								name: t("import-export-configurations"),
+								desc: t("import-export-configurations-info"),
+								render: (setting) => {
+									setting
+										.setName(
+											t("import-export-configurations"),
+										)
+										.setDesc(
+											t(
+												"import-export-configurations-info",
+											),
+										)
+										.addButton((button) =>
+											button
+												.setButtonText(t("import"))
+												.onClick(() => {
+													void importConfigurations(
+														this.plugin,
+													).then((result) => {
+														if (result) {
+															this.openReloadNoticeIfNeeded();
+														}
+													});
+												}),
+										)
+										.addButton((button) =>
+											button
+												.setButtonText(t("export"))
+												.onClick(() => {
+													void exportConfigurations(
+														this.plugin,
+													);
+												}),
+										);
+								},
+							},
+							{
+								name: t("export-logs"),
+								desc: t("export-logs-info"),
+								render: (setting) => {
+									setting
+										.setName(t("export-logs"))
+										.setDesc(t("export-logs-info"))
+										.addButton((button) =>
+											button
+												.setButtonText(t("export"))
+												.onClick(() => {
+													void bugReporterManagerInsatance.exportLogFile();
+												}),
+										);
+								},
+							},
+							// {
+							// 	name: "Safeguard feature",
+							// 	desc: createFragmentWithHTML(
+							// 		"This feature helps to ensure that task board should only update the task content in the note. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+							// 			"<br/>" +
+							// 			"<br/>" +
+							// 			"<b>" +
+							// 			"NOTE : " +
+							// 			"</b>" +
+							// 			"Disabling this feature will by-pass the security check which might lead to unwanted behavior like tempering the content of other inline-tasks right below the intended task. Only disable this feature if you feel this modal is popping-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but also ensure you are taking care of you data." +
+							// 			"<br/>" +
+							// 			"This setting was provided on the request of few users to tempararily disable safe-guard. In upcoming releasing, will remove this setting if everything is working as expected and safe-guard will be always doing the security checks.",
+							// 	),
+							// 	render: (setting) => {
+							// 		setting
+							// 			.setName("Safeguard feature")
+							// 			.setDesc(
+							// 				createFragmentWithHTML(
+							// 					"This feature helps to ensure that task board should only update the task content in the note. It shows you a conflict in the content if this plugin couldnt able to find the exact match in the current note." +
+							// 						"<br/>" +
+							// 						"<br/>" +
+							// 						"<b>" +
+							// 						"NOTE : " +
+							// 						"</b>" +
+							// 						"Disabling this feature will by-pass the security check which might lead to unwanted behavior like tempering the content of other inline-tasks right below the intended task. Only disable this feature if you feel this modal is popping-up too many times and also its irrelevant as the content is properly getting edited and matched. Obsidian definitely provides a file recovery feature, but also ensure you are taking care of you data." +
+							// 						"<br/>" +
+							// 						"This setting was provided on the request of few users to tempararily disable safe-guard. In upcoming releasing, will remove this setting if everything is working as expected and safe-guard will be always doing the security checks.",
+							// 				),
+							// 			)
+							// 			.addToggle((toggle) =>
+							// 				toggle
+							// 					.setValue(this.globalSettings.safeGuardFeature)
+							// 					.onChange((value) => {
+							// 						this.globalSettings.safeGuardFeature =
+							// 							value;
+							// 						void this.saveSettings();
+
+							// 						this.openReloadNoticeIfNeeded();
+							// 					}),
+							// 			);
+							// 	},
+							// },
+						],
+					},
+				],
+			},
+			// All UI page
+			{
+				type: "page",
+				name: t("all-ui"),
+				items: [
+					{
+						type: "group",
+						heading: t("appearance"),
+						items: [
+							{
+								name: t("task-card-style"),
+								desc: t("task-card-style-info"),
+								render: (setting) => {
+									setting
+										.setName(t("task-card-style"))
+										.setDesc(t("task-card-style-info"))
+										.addDropdown((dropdown) =>
+											dropdown
+												.addOptions({
+													[taskCardStyleNames.EMOJI]:
+														t("tasks-plugin-emoji"),
+													// [taskCardStyleNames.ICONS]: t("lucide-icons"),
+													[taskCardStyleNames.BASES]:
+														t("bases-cards-style"),
+													// [taskCardStyleNames.DATAVIEW]: t("dataview-style"),
+												})
+												.setValue(
+													this.globalSettings
+														.taskCardStyle,
+												)
+												.onChange((value) => {
+													this.globalSettings.taskCardStyle =
+														value as taskCardStyleNames;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("show-task-without-metadata"),
+								desc: t("show-task-without-metadata-info"),
+								render: (setting) => {
+									setting
+										.setName(
+											t("show-task-without-metadata"),
+										)
+										.setDesc(
+											t(
+												"show-task-without-metadata-info",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.showTaskWithoutMetadata,
+												)
+												.onChange((value) => {
+													this.globalSettings.showTaskWithoutMetadata =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("width-of-task-card"),
+								desc: t(
+									"enter-the-value-of-width-for-task-card",
+								),
+								render: (setting) => {
+									setting
+										.setName(t("width-of-task-card"))
+										.setDesc(
+											t(
+												"enter-the-value-of-width-for-task-card",
+											),
+										)
+										.addText((text) =>
+											text
+												.setValue(
+													this.globalSettings
+														.columnWidth,
+												)
+												.onChange((value) => {
+													this.globalSettings.columnWidth =
+														value;
+													void this.saveSettings();
+												})
+												.setPlaceholder("300"),
+										);
+								},
+							},
+							{
+								name: t("show-column-scroll-bar"),
+								desc: t(
+									"enable-to-see-a-scrollbar-for-each-column",
+								),
+								render: (setting) => {
+									setting
+										.setName(t("show-column-scroll-bar"))
+										.setDesc(
+											t(
+												"enable-to-see-a-scrollbar-for-each-column",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.showVerticalScroll,
+												)
+												.onChange((value) => {
+													this.globalSettings.showVerticalScroll =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("interactions"),
+						items: [
+							{
+								name: t("edit-button-mode"),
+								desc: t("edit-button-mode-info"),
+								render: (setting) => {
+									setting
+										.setName(t("edit-button-mode"))
+										.setDesc(t("edit-button-mode-info"))
+										.addDropdown((dropdown) =>
+											dropdown
+												.addOptions({
+													[EditButtonMode.Modal]: t(
+														"use-edit-task-modal-feature",
+													),
+													[EditButtonMode.ViewInSplitTab]:
+														t("task-editor-tab"),
+													[EditButtonMode.TasksPluginModal]:
+														t("tasks-plugin-modal"),
+													[EditButtonMode.NoteInTab]:
+														t(
+															"open-note-in-new-tab",
+														),
+													[EditButtonMode.NoteInSplit]:
+														t(
+															"open-note-in-right-split",
+														),
+													[EditButtonMode.NoteInWindow]:
+														t(
+															"open-note-in-new-window",
+														),
+													[EditButtonMode.NoteInHover]:
+														t(
+															"open-note-in-hover-preview",
+														),
+												})
+												.setValue(
+													this.globalSettings
+														.editButtonAction,
+												)
+												.onChange((value) => {
+													this.globalSettings.editButtonAction =
+														value as EditButtonMode;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("double-click-card-action"),
+								desc: t("double-click-card-action-info"),
+								render: (setting) => {
+									setting
+										.setName(t("double-click-card-action"))
+										.setDesc(
+											t("double-click-card-action-info"),
+										)
+										.addDropdown((dropdown) =>
+											dropdown
+												.addOptions({
+													[EditButtonMode.None]:
+														t("none"),
+													[EditButtonMode.Modal]: t(
+														"use-edit-task-window-feature",
+													),
+													[EditButtonMode.NoteInTab]:
+														t(
+															"open-note-in-new-tab",
+														),
+													[EditButtonMode.NoteInSplit]:
+														t(
+															"open-note-in-right-split",
+														),
+													[EditButtonMode.NoteInWindow]:
+														t(
+															"open-note-in-new-window",
+														),
+													[EditButtonMode.NoteInHover]:
+														t(
+															"open-note-in-hover-preview",
+														),
+												})
+												.setValue(
+													this.globalSettings
+														.cardDoubleClickAction,
+												)
+												.onChange((value) => {
+													this.globalSettings.cardDoubleClickAction =
+														value as EditButtonMode;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("drag-and-drop"),
+								visible: Platform.isMobile,
+								render: (setting) => {
+									setting
+										.setName(t("drag-and-drop"))
+										.setDesc(
+											createFragmentWithHTML(
+												t("drag-and-drop-info") +
+													"<ul>" +
+													"<li><b>" +
+													t("disable") +
+													":</b> " +
+													t("drag-and-drop-disable") +
+													"</li>" +
+													"<li><b>" +
+													t("enable") +
+													":</b> " +
+													t("drag-and-drop-enable") +
+													"</li>" +
+													"</ul>",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.enableDragnDropTouch,
+												)
+												.onChange((value) => {
+													this.globalSettings.enableDragnDropTouch =
+														value;
+													void this.saveSettings();
+
+													this.openReloadNoticeIfNeeded();
+												}),
+										);
+								},
+							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("tag-colors"),
+						items: [
+							{
+								name: t("tag-color-indicator-type"),
+								desc: t("tag-color-indicator-type-info"),
+								render: (setting) => {
+									setting
+										.setName(t("tag-color-indicator-type"))
+										.setDesc(
+											t("tag-color-indicator-type-info"),
+										)
+										.addDropdown((dropdown) =>
+											dropdown
+												.addOptions({
+													[TagColorType.TagText]:
+														t("text-of-the-tag"),
+													[TagColorType.TagBg]:
+														t("tag-background"),
+													[TagColorType.CardBg]: t(
+														"background-of-the-card",
+													),
+												})
+												.setValue(
+													this.globalSettings
+														.tagColorsType,
+												)
+												.onChange((value) => {
+													this.globalSettings.tagColorsType =
+														value as TagColorType;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								type: "page",
+								name: t("configure-tag-colors"),
+								items: [
+									{
+										type: "group",
+										cls: "task-board-settings-tab-tag-colors-container",
+										items: [
+											{
+												name: "",
+												desc: t(
+													"configure-tag-colors-info",
+												),
+												render: (setting) => {
+													this.renderTagColorsConfigurationContainer(
+														setting.settingEl,
+													);
+												},
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			// Task properties page
+			{
+				type: "page",
+				name: t("task-properties"),
 				items: [
 					{
 						type: "group",
@@ -336,6 +1198,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					},
 					{
 						type: "group",
+						heading: t("configure-default-properties"),
 						items: [
 							{
 								type: "page",
@@ -343,24 +1206,15 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								desc: t("custom-statuses-info"),
 								items: [
 									{
-										type: "list",
+										type: "group",
 										items: [
-											this.createLegacySettingsEntry(
-												"custom-statuses",
-												[
-													"custom-statuses",
-													"status-name",
-													"status-symbol",
-													"status-action",
-													"name",
-													"symbol",
-													"click-action",
-													"lucide-icon",
-													"add-new-status",
-													"import-from-tasks-plugin",
-													...customStatusAliases,
-												],
-											),
+											{
+												name: "",
+												render: (setting) =>
+													this.renderCustomStatusesTab(
+														setting.settingEl,
+													),
+											},
 										],
 									},
 								],
@@ -374,22 +1228,13 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										type: "list",
 										heading: t("custom-statuses"),
 										items: [
-											this.createLegacySettingsEntry(
-												"custom-priorities",
-												[
-													"custom-statuses",
-													"status-name",
-													"status-symbol",
-													"status-action",
-													"name",
-													"symbol",
-													"click-action",
-													"lucide-icon",
-													"add-new-status",
-													"import-from-tasks-plugin",
-													...customStatusAliases,
-												],
-											),
+											{
+												name: "",
+												render: (setting) =>
+													this.renderCustomPrioritiesTab(
+														setting.settingEl,
+													),
+											},
 										],
 									},
 								],
@@ -398,6 +1243,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					},
 				],
 			},
+			// Views page
 			{
 				type: "page",
 				name: t("views"),
@@ -407,71 +1253,1550 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						name: t("map-view"),
 						desc: t("map-view-tab-info"),
 						items: [
-							this.createLegacySettingsEntry("map-view", [
-								"render-only-visible-nodes",
-								"controls",
-								"mouse-wheel-behaviour",
-								"appearance",
-								"canvas-background",
-								"map-orientation",
-								"link-arrow-direction",
-								"link-style",
-								"animate-links",
-								"show-minimap",
-							]),
+							{
+								type: "group",
+								items: [
+									{
+										name: t("dfp-methodology"),
+										desc: createFragmentWithHTML(
+											t("dfp-methodology-description-1") +
+												"<br />" +
+												t(
+													"dfp-methodology-description-2",
+												) +
+												" <a href='https://github.com/tu2-atmanand/Task-Board/discussions/400'>" +
+												t("dfp-methodology") +
+												"." +
+												"</a>",
+										),
+										render: (setting) => {
+											setting
+												.setName(t("dfp-methodology"))
+												.setDesc(
+													createFragmentWithHTML(
+														t(
+															"dfp-methodology-description-1",
+														) +
+															"<br />" +
+															t(
+																"dfp-methodology-description-2",
+															) +
+															" <a href='https://github.com/tu2-atmanand/Task-Board/discussions/400'>" +
+															t(
+																"dfp-methodology",
+															) +
+															"." +
+															"</a>",
+													),
+												);
+										},
+									},
+								],
+							},
+							{
+								type: "group",
+								heading: t("performance"),
+								items: [
+									{
+										name: t("render-only-visible-nodes"),
+										desc: createFragmentWithHTML(
+											"<ul>" +
+												"<li>" +
+												t(
+													"render-only-visible-nodes-description-1",
+												) +
+												"</li>" +
+												"<li>" +
+												t(
+													"render-only-visible-nodes-description-2",
+												) +
+												"</li>" +
+												"</ul>",
+										),
+										render: (setting) => {
+											setting
+												.setName(
+													t(
+														"render-only-visible-nodes",
+													),
+												)
+												.setDesc(
+													createFragmentWithHTML(
+														"<ul>" +
+															"<li>" +
+															t(
+																"render-only-visible-nodes-description-1",
+															) +
+															"</li>" +
+															"<li>" +
+															t(
+																"render-only-visible-nodes-description-2",
+															) +
+															"</li>" +
+															"</ul>",
+													),
+												)
+												.addToggle((toggle) =>
+													toggle
+														.setValue(
+															this.globalSettings
+																.mapView
+																.renderVisibleNodes,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.renderVisibleNodes =
+																value;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+								],
+							},
+							{
+								type: "group",
+								heading: t("controls"),
+								items: [
+									{
+										name: t("mouse-wheel-behaviour"),
+										desc: t(
+											"mouse-wheel-behaviour-description",
+										),
+										render: (setting) => {
+											setting
+												.setName(
+													t("mouse-wheel-behaviour"),
+												)
+												.setDesc(
+													t(
+														"mouse-wheel-behaviour-description",
+													),
+												)
+												.addDropdown((dropdown) =>
+													dropdown
+														.addOptions({
+															[mapViewScrollAction.zoom]:
+																t("zoom"),
+															[mapViewScrollAction.pan]:
+																t("pan"),
+														})
+														.setValue(
+															this.globalSettings
+																.mapView
+																.scrollAction,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.scrollAction =
+																value as mapViewScrollAction;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+								],
+							},
+							{
+								type: "group",
+								heading: t("appearance"),
+								items: [
+									{
+										name: t("canvas-background"),
+										desc: t(
+											"canvas-background-description",
+										),
+										render: (setting) => {
+											setting
+												.setName(t("canvas-background"))
+												.setDesc(
+													t(
+														"canvas-background-description",
+													),
+												)
+												.addDropdown((dropdown) =>
+													dropdown
+														.addOptions({
+															[mapViewBackgrounVariantTypes.none]:
+																t("default"),
+															[mapViewBackgrounVariantTypes.transparent]:
+																t(
+																	"transparent",
+																),
+															[mapViewBackgrounVariantTypes.dots]:
+																t("dots"),
+															[mapViewBackgrounVariantTypes.lines]:
+																t("lines"),
+															[mapViewBackgrounVariantTypes.cross]:
+																t("cross"),
+														})
+														.setValue(
+															this.globalSettings
+																.mapView
+																.background,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.background =
+																value as mapViewBackgrounVariantTypes;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+									{
+										name: t("map-orientation"),
+										desc: t("map-orientation-description"),
+										render: (setting) => {
+											setting
+												.setName(t("map-orientation"))
+												.setDesc(
+													t(
+														"map-orientation-description",
+													),
+												)
+												.addDropdown((dropdown) =>
+													dropdown
+														.addOptions({
+															[mapViewNodeMapOrientation.horizontal]:
+																t("horizontal"),
+															[mapViewNodeMapOrientation.vertical]:
+																t("vertical"),
+														})
+														.setValue(
+															this.globalSettings
+																.mapView
+																.mapOrientation,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.mapOrientation =
+																value as mapViewNodeMapOrientation;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+									{
+										name: t("link-arrow-direction"),
+										desc: t(
+											"link-arrow-direction-description",
+										),
+										render: (setting) => {
+											setting
+												.setName(
+													t("link-arrow-direction"),
+												)
+												.setDesc(
+													t(
+														"link-arrow-direction-description",
+													),
+												)
+												.addDropdown((dropdown) =>
+													dropdown
+														.addOptions({
+															[mapViewArrowDirection.childToParent]:
+																t(
+																	"child-to-parent",
+																),
+															[mapViewArrowDirection.parentToChild]:
+																t(
+																	"parent-to-child",
+																),
+															[mapViewArrowDirection.bothWay]:
+																t("both-way"),
+														})
+														.setValue(
+															this.globalSettings
+																.mapView
+																.arrowDirection,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.arrowDirection =
+																value as mapViewArrowDirection;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+									{
+										name: t("link-style"),
+										desc: t("link-style-description"),
+										render: (setting) => {
+											setting
+												.setName(t("link-style"))
+												.setDesc(
+													t("link-style-description"),
+												)
+												.addDropdown((dropdown) =>
+													dropdown
+														.addOptions({
+															[mapViewEdgeType.straight]:
+																t("straight"),
+															[mapViewEdgeType.step]:
+																t("step"),
+															[mapViewEdgeType.smoothstep]:
+																t(
+																	"smooth-step",
+																),
+															[mapViewEdgeType.bezier]:
+																t("curved"),
+														})
+														.setValue(
+															this.globalSettings
+																.mapView
+																.edgeType,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.edgeType =
+																value as mapViewEdgeType;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+									{
+										name: t("animate-links"),
+										desc: t("animate-links-description"),
+										render: (setting) => {
+											setting
+												.setName(t("animate-links"))
+												.setDesc(
+													t(
+														"animate-links-description",
+													),
+												)
+												.addToggle((toggle) =>
+													toggle
+														.setValue(
+															this.globalSettings
+																.mapView
+																.animatedEdges,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.animatedEdges =
+																value;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+									{
+										name: t("show-minimap"),
+										desc: t("show-minimap-description"),
+										render: (setting) => {
+											setting
+												.setName(t("show-minimap"))
+												.setDesc(
+													t(
+														"show-minimap-description",
+													),
+												)
+												.addToggle((toggle) =>
+													toggle
+														.setValue(
+															this.globalSettings
+																.mapView
+																.showMinimap,
+														)
+														.onChange((value) => {
+															this.globalSettings.mapView.showMinimap =
+																value;
+															void this.saveSettings();
+														}),
+												);
+										},
+									},
+								],
+							},
 						],
 					},
 				],
 			},
-			this.createLegacySettingsPage("inline-tasks", [
-				"supported-plugin-formats",
-				"default-note-for-adding-new-tasks",
-				"file-for-archived-tasks",
-				"show-note-frontmatter-tags-in-the-card-header",
-				"ID",
-				"Tags",
-				"Priority",
-				"Created Date",
-				"Start Date",
-				"Scheduled Date",
-				"Due Date",
-				"Completion Date",
-				"Cancelled Date",
-				"Time",
-				"Reminder",
-				"Recurring",
-				"On-completion",
-				"Dependencies",
-			]),
-			this.createLegacySettingsPage("task-notes", [
-				"task-note-vs-tbnote",
-				"task-note-identifier-tag",
-				"default-location-for-new-task-notes",
-				"folder-for-archived-task-notes",
-			]),
-			this.createLegacySettingsPage("automation", [
-				"restrict-task-completion-to-child-tasks-and-sub-tasks",
-				"auto-add-universal-date-to-tasks",
-				"auto-add-created-date",
-				"auto-add-completed-date",
-				"auto-add-cancelled-date",
-				"compatible-plugins",
-				"daily-notes",
-				"Day Planner plugin compatibility",
-				"QuickAdd plugin compatibility",
-				"default-quickadd-choice",
-				"push-notification-compatibility",
-			]),
-			this.createLegacySettingsPage("formats", [
-				"universal-date",
-				"date-format",
-				"date-time-format",
-				"default-start-time",
-				"first-day-of-the-week",
-			]),
+			// Inline tasks page
+			{
+				type: "page",
+				name: t("inline-tasks"),
+				items: [
+					{
+						type: "group",
+						items: [
+							{
+								name: "",
+								render: (setting) =>
+									this.renderInlineTasksPreviewContainer(
+										setting.settingEl,
+									),
+							},
+						],
+					},
+					{
+						type: "group",
+						items: [
+							{
+								name: t("supported-plugin-formats"),
+								desc: t("supported-plugin-formats-info"),
+								render: (setting) => {
+									setting
+										.setName(t("supported-plugin-formats"))
+										.setDesc(
+											t("supported-plugin-formats-info"),
+										)
+										.addDropdown((dropdown) => {
+											dropdown.addOption(
+												taskPropertyFormatOptions.default,
+												t("default"),
+											);
+											dropdown.addOption(
+												taskPropertyFormatOptions.tasksPlugin,
+												"Tasks " + t("plugin"),
+											);
+											dropdown.addOption(
+												taskPropertyFormatOptions.dataviewPlugin,
+												"Dataview " + t("plugin"),
+											);
+											dropdown.addOption(
+												taskPropertyFormatOptions.obsidianNative,
+												"Obsidian " + t("native"),
+											);
+
+											dropdown.setValue(
+												this.globalSettings
+													.taskPropertyFormat,
+											);
+											dropdown.onChange((value) => {
+												this.globalSettings.taskPropertyFormat =
+													value as taskPropertyFormatOptions;
+												void this.saveSettings();
+												this.renderTab();
+
+												this.openReloadNoticeIfNeeded();
+											});
+										});
+								},
+							},
+							{
+								name: t("default-note-for-adding-new-tasks"),
+								desc: t(
+									"default-note-for-new-tasks-description",
+								),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"default-note-for-adding-new-tasks",
+											),
+										)
+										.setDesc(
+											t(
+												"default-note-for-new-tasks-description",
+											),
+										)
+										.addText((text) => {
+											text.setValue(
+												this.globalSettings
+													.preDefinedNote,
+											).onChange((value) => {
+												if (this.globalSettings) {
+													const normalized =
+														normalizePath(value);
+													this.globalSettings.preDefinedNote =
+														normalized;
+												}
+											});
+
+											const inputEl = text.inputEl;
+											const suggestionContent =
+												getFileSuggestions(this.app);
+											const onSelectCallback = (
+												selectedPath: string,
+											) => {
+												if (this.globalSettings) {
+													this.globalSettings.preDefinedNote =
+														selectedPath;
+												}
+												text.setValue(selectedPath);
+												void this.saveSettings();
+											};
+
+											new MultiSuggest(
+												inputEl,
+												new Set(suggestionContent),
+												onSelectCallback,
+												this.app,
+											);
+										});
+								},
+							},
+							{
+								name: t("file-for-archived-tasks"),
+								desc: t("file-for-archived-tasks-description"),
+								render: (setting) => {
+									setting
+										.setName(t("file-for-archived-tasks"))
+										.setDesc(
+											t(
+												"file-for-archived-tasks-description",
+											),
+										)
+										.addText((text) => {
+											text.setValue(
+												this.globalSettings
+													.archivedTasksFilePath,
+											).onChange((value) => {
+												if (this.globalSettings) {
+													const normalized =
+														normalizePath(value);
+													this.globalSettings.archivedTasksFilePath =
+														normalized;
+												}
+											});
+
+											const inputEl = text.inputEl;
+											const suggestionContent =
+												getFileSuggestions(this.app);
+											const onSelectCallback = (
+												selectedPath: string,
+											) => {
+												if (this.globalSettings) {
+													this.globalSettings.archivedTasksFilePath =
+														selectedPath;
+												}
+												text.setValue(selectedPath);
+												void this.saveSettings();
+											};
+
+											new MultiSuggest(
+												inputEl,
+												new Set(suggestionContent),
+												onSelectCallback,
+												this.app,
+											);
+										});
+								},
+							},
+							{
+								name: t(
+									"show-note-frontmatter-tags-in-the-card-header",
+								),
+								desc: t(
+									"show-note-frontmatter-tags-in-the-card-header-info",
+								),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"show-note-frontmatter-tags-in-the-card-header",
+											),
+										)
+										.setDesc(
+											t(
+												"show-note-frontmatter-tags-in-the-card-header-info",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.showFrontmatterTagsOnCards,
+												)
+												.onChange((value) => {
+													this.globalSettings.showFrontmatterTagsOnCards =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+						],
+					},
+				],
+			},
+			// Task notes page
+			{
+				type: "page",
+				name: t("task-note"),
+				items: [
+					{
+						type: "group",
+						items: [
+							{
+								name: t("task-note-vs-tbnote"),
+								desc: createFragmentWithHTML(
+									"<ul>" +
+										"<li><b>" +
+										t("task-note") +
+										":</b> " +
+										t("task-note-description") +
+										"</li>" +
+										"<li><b>" +
+										t("tbnote") +
+										":</b> " +
+										t("tbnote-description") +
+										" <a href='https://github.com/tu2-atmanand/Task-Board/issues/33'>" +
+										t("tbnote-development-ticker") +
+										"</a></li>" +
+										"</ul>",
+								),
+								// render: (setting) => {
+								// 	setting
+								// 		.setName(t("task-note-vs-tbnote"))
+								// 		.setDesc(
+								// 			createFragmentWithHTML(
+								// 				"<ul>" +
+								// 					"<li><b>" +
+								// 					t("task-note") +
+								// 					":</b> " +
+								// 					t("task-note-description") +
+								// 					"</li>" +
+								// 					"<li><b>" +
+								// 					t("tbnote") +
+								// 					":</b> " +
+								// 					t("tbnote-description") +
+								// 					" <a href='https://github.com/tu2-atmanand/Task-Board/issues/33'>" +
+								// 					t(
+								// 						"tbnote-development-ticker",
+								// 					) +
+								// 					"</a></li>" +
+								// 					"</ul>",
+								// 			),
+								// 		);
+								// },
+							},
+						],
+					},
+					{
+						type: "group",
+						items: [
+							{
+								name: t("task-note-identifier-tag"),
+								desc: t("task-note-identifier-tag-description"),
+								render: (setting) => {
+									setting
+										.setName(t("task-note-identifier-tag"))
+										.setDesc(
+											t(
+												"task-note-identifier-tag-description",
+											),
+										)
+										.addText((text) => {
+											text.setValue(
+												this.globalSettings
+													.taskNoteIdentifierTag,
+											).onChange((value) => {
+												if (this.globalSettings)
+													this.globalSettings.taskNoteIdentifierTag =
+														value
+															.trim()
+															.replace("#", "");
+											});
+
+											const inputEl = text.inputEl;
+											// eslint-disable-next-line obsidianmd/ui/sentence-case
+											inputEl.placeholder =
+												"E.g., taskNote";
+										});
+								},
+							},
+							{
+								name: t("default-location-for-new-task-notes"),
+								desc: t(
+									"default-location-for-new-task-notes-description",
+								),
+								render: (setting) => {
+									const folderSuggestions =
+										getFolderSuggestions(this.app);
+
+									setting
+										.setName(
+											t(
+												"default-location-for-new-task-notes",
+											),
+										)
+										.setDesc(
+											t(
+												"default-location-for-new-task-notes-description",
+											),
+										)
+										.addText((text) => {
+											text.setValue(
+												this.globalSettings
+													.taskNoteDefaultLocation,
+											).onChange((value) => {
+												if (this.globalSettings) {
+													const normalized =
+														normalizePath(value);
+													this.globalSettings.taskNoteDefaultLocation =
+														normalized;
+												}
+											});
+
+											const inputEl = text.inputEl;
+											// eslint-disable-next-line obsidianmd/ui/sentence-case
+											inputEl.placeholder =
+												"E.g., Task Notes/";
+											const onSelectCallback = (
+												selectedPath: string,
+											) => {
+												if (this.globalSettings) {
+													this.globalSettings.taskNoteDefaultLocation =
+														selectedPath;
+												}
+												text.setValue(selectedPath);
+												void this.saveSettings();
+											};
+
+											new MultiSuggest(
+												inputEl,
+												new Set(folderSuggestions),
+												onSelectCallback,
+												this.app,
+											);
+										});
+								},
+							},
+							{
+								name: t("folder-for-archived-task-notes"),
+								desc: t(
+									"folder-for-archived-task-notes-description",
+								),
+								render: (setting) => {
+									const folderSuggestions =
+										getFolderSuggestions(this.app);
+									setting
+										.setName(
+											t("folder-for-archived-task-notes"),
+										)
+										.setDesc(
+											t(
+												"folder-for-archived-task-notes-description",
+											),
+										)
+										.addText((text) => {
+											text.setValue(
+												this.globalSettings
+													.archivedTBNotesFolderPath,
+											).onChange((value) => {
+												if (this.globalSettings) {
+													const normalized =
+														normalizePath(value);
+													this.globalSettings.archivedTBNotesFolderPath =
+														normalized;
+												}
+											});
+
+											const inputEl = text.inputEl;
+											// eslint-disable-next-line obsidianmd/ui/sentence-case
+											inputEl.placeholder =
+												"e.g., TaskBoard/TaskNotes";
+											const onSelectCallback = (
+												selectedPath: string,
+											) => {
+												if (this.globalSettings) {
+													this.globalSettings.archivedTBNotesFolderPath =
+														selectedPath;
+												}
+												text.setValue(selectedPath);
+												void this.saveSettings();
+											};
+
+											new MultiSuggest(
+												inputEl,
+												new Set(folderSuggestions),
+												onSelectCallback,
+												this.app,
+											);
+										});
+								},
+							},
+						],
+					},
+				],
+			},
+			// Automations page
+			{
+				type: "page",
+				name: t("automations"),
+				items: [
+					{
+						type: "group",
+						items: [
+							{
+								name: t(
+									"restrict-task-completion-to-child-tasks-and-sub-tasks",
+								),
+								desc: t(
+									"restrict-task-completion-to-child-tasks-info",
+								),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"restrict-task-completion-to-child-tasks-and-sub-tasks",
+											),
+										)
+										.setDesc(
+											t(
+												"restrict-task-completion-to-child-tasks-info",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.boundTaskCompletionToChildTasks,
+												)
+												.onChange((value) => {
+													this.globalSettings.boundTaskCompletionToChildTasks =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("auto-add-universal-date-to-tasks"),
+								desc: t(
+									"auto-add-universal-date-to-tasks-info",
+								),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"auto-add-universal-date-to-tasks",
+											),
+										)
+										.setDesc(
+											t(
+												"auto-add-universal-date-to-tasks-info",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.autoAddUniversalDate,
+												)
+												.onChange((value) => {
+													this.globalSettings.autoAddUniversalDate =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("auto-add-created-date"),
+								desc: t("auto-add-created-date-desc"),
+								render: (setting) => {
+									setting
+										.setName(t("auto-add-created-date"))
+										.setDesc(
+											t("auto-add-created-date-desc"),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.autoAddCreatedDate,
+												)
+												.onChange((value) => {
+													this.globalSettings.autoAddCreatedDate =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("auto-add-completed-date"),
+								desc: t("auto-add-completed-date-desc"),
+								render: (setting) => {
+									setting
+										.setName(t("auto-add-completed-date"))
+										.setDesc(
+											t("auto-add-completed-date-desc"),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.autoAddCompletedDate,
+												)
+												.onChange((value) => {
+													this.globalSettings.autoAddCompletedDate =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t("auto-add-cancelled-date"),
+								desc: t("auto-add-cancelled-date-desc"),
+								render: (setting) => {
+									setting
+										.setName(t("auto-add-cancelled-date"))
+										.setDesc(
+											t("auto-add-cancelled-date-desc"),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.autoAddCancelledDate,
+												)
+												.onChange((value) => {
+													this.globalSettings.autoAddCancelledDate =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("compatible-plugins"),
+						items: [
+							{
+								name:
+									t("daily-notes") +
+									t("plugin-compatibility"),
+								desc: t("daily-notes-plugin-compatibility"),
+								render: (setting) => {
+									setting
+										.setName(
+											t("daily-notes") +
+												t("plugin-compatibility"),
+										)
+										.setDesc(
+											t(
+												"daily-notes-plugin-compatibility",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.dailyNotesPluginComp,
+												)
+												.onChange((value) => {
+													this.globalSettings.dailyNotesPluginComp =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name:
+									"Day Planner " + t("plugin-compatibility"),
+								desc: t("day-planner-plugin-compatibility"),
+								render: (setting) => {
+									setting
+										.setName(
+											"Day Planner " +
+												t("plugin-compatibility"),
+										)
+										.setDesc(
+											t(
+												"day-planner-plugin-compatibility",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.compatiblePlugins
+														.dayPlannerPlugin,
+												)
+												.onChange((value) => {
+													this.globalSettings.compatiblePlugins.dayPlannerPlugin =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: "QuickAdd " + t("plugin-compatibility"),
+								desc: t(
+									"quickadd-plugin-compatibility-description",
+								),
+								disabled:
+									!communityPlugins.isQuickAddPluginEnabled(),
+								render: (setting) => {
+									setting
+										.setName(
+											"QuickAdd " +
+												t("plugin-compatibility"),
+										)
+										.setDesc(
+											t(
+												"quickadd-plugin-compatibility-description",
+											),
+										)
+										.addToggle((toggle) => {
+											toggle.onChange((value) => {
+												if (
+													this.globalSettings &&
+													!communityPlugins.isQuickAddPluginEnabled()
+												) {
+													new Notice(
+														t(
+															"quickadd-plugin-not-enabled",
+														),
+													);
+													this.globalSettings.compatiblePlugins.quickAddPlugin = false;
+												} else if (
+													this.globalSettings
+												) {
+													this.globalSettings.compatiblePlugins.quickAddPlugin =
+														value;
+
+													this.openReloadNoticeIfNeeded();
+												}
+
+												void this.saveSettings();
+											});
+											// toggle.onClick();
+										});
+								},
+							},
+							{
+								name: t("default-quickadd-choice"),
+								desc: t("default-quickadd-choice-description"),
+								disabled:
+									!this.globalSettings.compatiblePlugins
+										.quickAddPlugin,
+								visible:
+									communityPlugins.isQuickAddPluginEnabled(),
+								render: (setting) => {
+									setting
+										.setName(t("default-quickadd-choice"))
+										.setDesc(
+											t(
+												"default-quickadd-choice-description",
+											),
+										)
+										.addText((text) => {
+											text.setValue(
+												this.globalSettings
+													.quickAddPluginDefaultChoice,
+											).onChange((value) => {
+												if (this.globalSettings)
+													this.globalSettings.quickAddPluginDefaultChoice =
+														value;
+											});
+
+											const inputEl = text.inputEl;
+											const suggestionContent =
+												getQuickAddPluginChoices(
+													this.app,
+													communityPlugins.quickAddPlugin,
+												);
+											const onSelectCallback = (
+												selectedChoiceName: string,
+											) => {
+												if (this.globalSettings) {
+													this.globalSettings.quickAddPluginDefaultChoice =
+														selectedChoiceName;
+												}
+												text.setValue(
+													selectedChoiceName,
+												);
+												void this.saveSettings();
+											};
+
+											new MultiSuggest(
+												inputEl,
+												new Set(suggestionContent),
+												onSelectCallback,
+												this.app,
+											);
+										});
+								},
+							},
+							{
+								name: t("push-notification-compatibility"),
+								desc: t(
+									"push-notification-compatibility-description",
+								),
+								disabled:
+									!this.globalSettings.compatiblePlugins
+										.quickAddPlugin,
+								visible:
+									communityPlugins.isQuickAddPluginEnabled(),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"push-notification-compatibility",
+											),
+										)
+										.setDesc(
+											t(
+												"push-notification-compatibility-description",
+											),
+										)
+										.addDropdown((dropdown) => {
+											dropdown.addOption(
+												NotificationService.None,
+												t("none"),
+											);
+											dropdown.addOption(
+												NotificationService.ReminderPlugin,
+												"Reminder " + t("plugin"),
+											);
+											// dropdown.addOption(
+											// 	NotificationService.NotifianApp,
+											// 	"Notifian " + t("app")
+											// );
+											dropdown.addOption(
+												NotificationService.ObsidApp,
+												"Obsi " + t("app"),
+											);
+
+											dropdown.setValue(
+												this.globalSettings
+													.notificationService,
+											);
+											dropdown.onChange((value) => {
+												this.globalSettings.notificationService =
+													value as NotificationService;
+												void this.saveSettings();
+											});
+										});
+								},
+							},
+						],
+					},
+				],
+			},
+			// Formats page
+			{
+				type: "page",
+				name: t("formats"),
+				items: [
+					{
+						type: "group",
+						heading: t("global"),
+						items: [
+							{
+								name: t("universal-date"),
+								desc: t("universal-date-description"),
+								render: (setting) => {
+									setting
+										.setName(t("universal-date"))
+										.setDesc(
+											t("universal-date-description"),
+										)
+										.addDropdown((dropdown) =>
+											dropdown
+												.addOptions({
+													[UniversalDateOptions.startDate]:
+														t("start-date"),
+													[UniversalDateOptions.scheduledDate]:
+														t("scheduled-date"),
+													[UniversalDateOptions.dueDate]:
+														t("due-date"),
+												})
+												.setValue(
+													this.globalSettings
+														.universalDate,
+												)
+												.onChange((value) => {
+													this.globalSettings.universalDate =
+														value as UniversalDateOptions;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("time-and-date"),
+						items: [
+							{
+								name: t("date-format"),
+								desc: createFragmentWithHTML(
+									t("date-format-info") +
+										"<br/>" +
+										"<br/>" +
+										"<b>" +
+										t("note") +
+										" :</b> " +
+										t("date-format-info-note") +
+										"<br/>" +
+										"<br/>" +
+										"<b>" +
+										t("note") +
+										" :</b> " +
+										t("date-format-date-fns-note") +
+										"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+										"date-fns library formatting guide." +
+										"</a>",
+								),
+								render: (setting) => {
+									const folderSuggestions =
+										getFolderSuggestions(this.app);
+
+									setting
+										.setClass(
+											"taskBoard-settings-wide-input",
+										)
+
+										.setName(t("date-format"))
+										.setDesc(
+											createFragmentWithHTML(
+												t("date-format-info") +
+													"<br/>" +
+													"<br/>" +
+													"<b>" +
+													t("note") +
+													" :</b> " +
+													t("date-format-info-note") +
+													"<br/>" +
+													"<br/>" +
+													"<b>" +
+													t("note") +
+													" :</b> " +
+													t(
+														"date-format-date-fns-note",
+													) +
+													"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+													"date-fns library formatting guide." +
+													"</a>",
+											),
+										)
+										.addText((text) =>
+											text
+												.setValue(
+													this.globalSettings
+														.dateFormat,
+												)
+												.onChange((value) => {
+													this.globalSettings.dateFormat =
+														value;
+													void this.saveSettings();
+												})
+												// eslint-disable-next-line obsidianmd/ui/sentence-case
+												.setPlaceholder("yyyy-MM-dd"),
+										)
+										.addButton((btn) => {
+											btn.setButtonText(t("validate"));
+											btn.onClick(() => {
+												try {
+													const testDate = new Date(
+														2026,
+														1,
+														18,
+													); // Fixed reference date: Feb 18, 2026
+													const userFormat =
+														this.globalSettings
+															?.dateFormat;
+
+													if (
+														!userFormat ||
+														userFormat.trim()
+															.length === 0
+													) {
+														new Notice(
+															"Please enter a date format.",
+														);
+														return;
+													}
+
+													// Format the test date using the user's format
+													const formattedDate =
+														format(
+															testDate,
+															userFormat,
+														);
+
+													// Try to parse it back
+													const parsed = parse(
+														formattedDate,
+														userFormat,
+														testDate,
+													);
+
+													// (1) Check if parsing succeeded
+													if (!isValid(parsed)) {
+														new Notice(
+															"❌ Invalid date format. Parsing failed.",
+															0,
+														);
+														return;
+													}
+
+													// (2) Check if the parsed date is reasonably close (within 48 hours)
+													// This catches common mistakes like swapped date parts
+													const hoursDiff = Math.abs(
+														differenceInHours(
+															parsed,
+															testDate,
+														),
+													);
+													if (hoursDiff > 48) {
+														new Notice(
+															"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+																parsed.toDateString() +
+																", expected: " +
+																testDate.toDateString() +
+																"). Please verify.",
+															0,
+														);
+														return;
+													}
+
+													// All checks passed
+													new Notice(
+														"✅ Date format is valid! Example: " +
+															formattedDate,
+													);
+												} catch (error) {
+													new Notice(
+														"❌ Format validation error: " +
+															(error instanceof
+															Error
+																? error.message
+																: String(
+																		error,
+																	)),
+														0,
+													);
+												}
+											});
+										});
+								},
+							},
+							{
+								name: t("date-time-format"),
+								desc: createFragmentWithHTML(
+									t("date-time-format-info") +
+										"<br/>" +
+										"<br/>" +
+										"<b>" +
+										t("note") +
+										" :</b> " +
+										t("date-format-date-fns-note") +
+										"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+										"date-fns library formatting guide." +
+										"</a>",
+								),
+								render: (setting) => {
+									const folderSuggestions =
+										getFolderSuggestions(this.app);
+									setting
+										.setName(t("date-time-format"))
+										.setDesc(
+											createFragmentWithHTML(
+												t("date-time-format-info") +
+													"<br/>" +
+													"<br/>" +
+													"<b>" +
+													t("note") +
+													" :</b> " +
+													t(
+														"date-format-date-fns-note",
+													) +
+													"<a href='https://date-fns.org/v4.1.0/docs/Unicode-Tokens'>" +
+													"date-fns library formatting guide." +
+													"</a>",
+											),
+										)
+										.addText((text) =>
+											text
+												.setValue(
+													this.globalSettings
+														.dateTimeFormat,
+												)
+												.onChange((value) => {
+													this.globalSettings.dateTimeFormat =
+														value;
+													void this.saveSettings();
+												})
+												// eslint-disable-next-line obsidianmd/ui/sentence-case
+												.setPlaceholder(
+													"yyyy-MM-dd/HH:mm",
+												),
+										)
+										.addButton((btn) => {
+											btn.setButtonText(t("validate"));
+											btn.onClick(() => {
+												try {
+													const testDate = new Date(
+														2026,
+														1,
+														18,
+														14,
+														30,
+														45,
+													); // Fixed reference date: Feb 18, 2026, 14:30:45
+													const userFormat =
+														this.globalSettings
+															?.dateTimeFormat;
+
+													if (
+														!userFormat ||
+														userFormat.trim()
+															.length === 0
+													) {
+														new Notice(
+															"Please enter a date-time format.",
+														);
+														return;
+													}
+
+													// Format the test date using the user's format
+													const formattedDateTime =
+														format(
+															testDate,
+															userFormat,
+														);
+
+													// Try to parse it back
+													const parsed = parse(
+														formattedDateTime,
+														userFormat,
+														testDate,
+													);
+
+													// (1) Check if parsing succeeded
+													if (!isValid(parsed)) {
+														new Notice(
+															"❌ Invalid date-time format. Parsing failed.",
+															0,
+														);
+														return;
+													}
+
+													// (2) Check if the parsed date is reasonably close (within 1 hour for time accuracy)
+													// This catches common mistakes like swapped date parts or time format issues
+													const hoursDiff = Math.abs(
+														differenceInHours(
+															parsed,
+															testDate,
+														),
+													);
+													if (hoursDiff > 48) {
+														new Notice(
+															"⚠️ Format is parsed but appears to have swapped date parts (parsed: " +
+																parsed.toISOString() +
+																", expected: " +
+																testDate.toISOString() +
+																"). Please verify.",
+															0,
+														);
+														return;
+													}
+
+													// All checks passed
+													new Notice(
+														"✅ Date-time format is valid! Example: " +
+															formattedDateTime,
+													);
+												} catch (error) {
+													new Notice(
+														"❌ Format validation error: " +
+															(error instanceof
+															Error
+																? error.message
+																: String(
+																		error,
+																	)),
+														0,
+													);
+												}
+											});
+										});
+								},
+							},
+							{
+								name: t("default-start-time"),
+								desc: t("default-start-time-info"),
+								render: (setting) => {
+									setting
+										.setName(t("default-start-time"))
+										.setDesc(t("default-start-time-info"))
+										.addText((text) =>
+											text
+												.setValue(
+													this.globalSettings
+														.defaultStartTime,
+												)
+												.onChange((value) => {
+													this.globalSettings.defaultStartTime =
+														value;
+													void this.saveSettings();
+												})
+												.setPlaceholder(
+													"Eg.: 00:00 or 23:59",
+												),
+										);
+								},
+							},
+							{
+								name: t("first-day-of-the-week"),
+								desc: t("first-day-of-the-week-info"),
+								render: (setting) => {
+									setting
+										.setName(t("first-day-of-the-week"))
+										.setDesc(
+											t("first-day-of-the-week-info"),
+										)
+										.addDropdown((dropdown) => {
+											dropdown.addOption(
+												"1",
+												t("sunday"),
+											);
+											dropdown.addOption(
+												"2",
+												t("monday"),
+											);
+											dropdown.addOption(
+												"3",
+												t("tuesday"),
+											);
+											dropdown.addOption(
+												"4",
+												t("monday"),
+											);
+											dropdown.addOption(
+												"5",
+												t("thursday"),
+											);
+											dropdown.addOption(
+												"6",
+												t("friday"),
+											);
+											dropdown.addOption(
+												"7",
+												t("saturday"),
+											);
+
+											dropdown.setValue(
+												this.globalSettings
+													.firstDayOfWeek as string,
+											);
+											dropdown.onChange((value) => {
+												this.globalSettings.firstDayOfWeek =
+													value;
+												void this.saveSettings();
+											});
+										});
+								},
+							},
+						],
+					},
+				],
+			},
+			// Experimental features page
 			this.createLegacySettingsPage("experimental-features", [
 				"embed-board",
 			]),
+			// This is a simple group to show donation links.
 			{
 				type: "group",
 				heading: t("support"),
@@ -485,50 +2810,648 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		];
 	}
 
-	private createLegacySettingsPage(
-		section: SettingsTabPagesKey,
-		searchAliases: string[],
-	): SettingDefinitionItem {
-		const name = t(section);
-		return {
-			type: "page",
-			name,
-			items: [
-				{
-					type: "group",
-					items: [
-						this.createLegacySettingsEntry(section, searchAliases),
-					],
-				},
-			],
-		};
+	// ================================================
+	//          Filters for Scanning Container
+	// ================================================
+
+	private renderFiltersForScanningContainer(container: HTMLElement) {
+		// new Setting(container)
+		// 	.setDesc(
+		// 		createFragmentWithHTML(
+		// 			t("name-of-the-file-folder-tag-for-filter-info") +
+		// 				"<br/>" +
+		// 				"<b>" +
+		// 				t("note") +
+		// 				" :</b> " +
+		// 				t("name-of-the-file-folder-tag-for-filter-info-2"),
+		// 		),
+		// 	);
+
+		["tags", "frontmatter", "files", "folders"].forEach((type) => {
+			const filterType =
+				type as keyof typeof this.globalSettings.scanFilters;
+			const filter = this.globalSettings.scanFilters[filterType];
+
+			const row = container.createDiv({
+				cls: "taskBoard-filter-row",
+			});
+
+			const rowHeading = row.createDiv({
+				cls: "taskBoard-filter-row-heading",
+			});
+
+			const rowBody = row.createDiv({
+				cls: "taskBoard-filter-row-body",
+			});
+
+			// Filter label
+			rowHeading.createEl("span", {
+				text: type.charAt(0).toUpperCase() + type.slice(1),
+				cls: "taskBoard-filter-label",
+			});
+
+			// Configure button
+			const configureBtn = rowHeading.createEl("button", {
+				text: "Configure",
+				cls: "taskBoard-filter-configure-button",
+			});
+			configureBtn.addEventListener("click", () => {
+				openScanFiltersModal(this.plugin, filterType, (newValues) => {
+					this.globalSettings.scanFilters[filterType].values =
+						newValues;
+					void this.saveSettings();
+					refreshTagList(); // Refresh the tag list after updating values
+				});
+			});
+
+			// Visual tag list
+			const tagList = rowBody.createDiv({
+				cls: "taskBoard-filter-values",
+			});
+
+			const refreshTagList = () => {
+				tagList.empty(); // Clear existing tags
+				if (filter.values.length === 0) {
+					tagList.createEl("em", {
+						text: "None",
+						attr: { style: "opacity: 0.5;" },
+					});
+				} else {
+					filter.values.forEach((val) => {
+						tagList.createEl("span", {
+							text: val,
+							cls: "taskBoard-filter-tag",
+						});
+					});
+				}
+			};
+
+			refreshTagList(); // Initial render of the tag list
+
+			// Polarity dropdown
+			const polarityDropdown = rowBody.createEl("select", {
+				attr: { "aria-label": "Select filter polarity" },
+				cls: "taskBoard-filter-dropdown",
+			});
+			[
+				{ label: "Only scan this", value: 1 },
+				{ label: "Don't scan this", value: 2 },
+				{ label: "Disable", value: 3 },
+			].forEach((opt) => {
+				const option = polarityDropdown.createEl("option", {
+					text: opt.label,
+					value: String(opt.value),
+				});
+				if (filter.polarity === opt.value) {
+					option.selected = true;
+				}
+			});
+			polarityDropdown.addEventListener("change", (e) => {
+				const newPolarity = Number(
+					(e.target as HTMLSelectElement).value,
+				);
+				this.globalSettings.scanFilters[filterType].polarity =
+					newPolarity;
+				void this.plugin.saveSettings();
+			});
+		});
 	}
 
-	private createLegacySettingsEntry(
-		section: SettingsTabPagesKey,
-		searchAliases: string[],
-	): SettingDefinition {
-		return {
-			name: t(section),
-			aliases: searchAliases.map((alias) => t(alias)),
-			render: (setting) => {
-				setting.settingEl.empty();
-				setting.settingEl.removeClass("setting-item");
-				setting.settingEl.addClass(
-					"task-board-declarative-settings-content",
-				);
-				this.settingsManager.renderDeclarativeSettingsSection(
-					section,
-					setting.settingEl,
-				);
+	// ================================================
+	//          Tag Colors Configuration
+	// ================================================
+
+	private renderTagColorsConfigurationContainer(container: HTMLElement) {
+		container.remove();
+		const tagColorsContainer = container.createDiv({
+			cls: "tag-colors-container",
+		});
+
+		// Initialize Sortable.js
+		Sortable.create(tagColorsContainer, {
+			animation: 150,
+			handle: ".taskboard-setting-tag-color-row-element-drag-handle",
+			ghostClass: "task-board-sortable-ghost",
+			chosenClass: "task-board-sortable-chosen",
+			dragClass: "task-board-sortable-drag",
+			dragoverBubble: true,
+			forceFallback: true,
+			fallbackClass: "task-board-sortable-fallback",
+			easing: "cubic-bezier(1, 0, 0, 1)",
+			onSort: () => {
+				const newOrder = Array.from(tagColorsContainer.children)
+					.map((child, index) => {
+						const tagName = child.getAttribute("data-tag-name");
+						const tag = this.globalSettings.tagColors.find(
+							(t) => t.name === tagName,
+						);
+						if (tag) {
+							tag.priority = index + 1;
+							return tag;
+						}
+						return null;
+					})
+					.filter(
+						(
+							tag,
+						): tag is {
+							name: string;
+							color: string;
+							priority: number;
+						} => tag !== null,
+					);
+
+				this.globalSettings.tagColors = newOrder;
+				void this.saveSettings();
 			},
+		});
+
+		const renderTagColors = () => {
+			tagColorsContainer.empty(); // Clear existing rendered rows
+
+			this.globalSettings.tagColors
+				.sort((a, b) => a.priority - b.priority)
+				.forEach((tag, index) => {
+					const row = tagColorsContainer.createDiv({
+						cls: "tag-color-row",
+						attr: { "data-tag-name": tag.name },
+					});
+					let colorInputRef: unknown;
+
+					new Setting(row)
+						.setClass("tag-color-row-element")
+						.addButton((drag) =>
+							drag
+								.setTooltip("Hold and drag")
+								.setIcon("grip-horizontal")
+								.setClass(
+									"taskboard-setting-tag-color-row-element-drag-handle",
+								)
+								.buttonEl.setCssStyles({
+									cursor: "grab",
+									backgroundColor:
+										this.globalSettings.tagColorsType !==
+										TagColorType.TagText
+											? tag.color
+											: "",
+									color:
+										this.globalSettings.tagColorsType ===
+										TagColorType.TagText
+											? tag.color
+											: "",
+									border:
+										this.globalSettings.tagColorsType ===
+										TagColorType.TagText
+											? `1px solid ${tag.color}`
+											: "",
+									maxWidth: "max-content !important",
+								}),
+						)
+						.addText((text) =>
+							text
+								.setPlaceholder(t("enter-tag-name"))
+								.setValue(tag.name)
+								.onChange((value) => {
+									tag.name = value.trim().replace("#", "");
+									row.setAttribute("data-tag-name", tag.name);
+									void this.saveSettings();
+								})
+								.inputEl.setCssStyles({
+									backgroundColor:
+										this.globalSettings.tagColorsType !==
+										TagColorType.TagText
+											? tag.color
+											: "",
+									color:
+										this.globalSettings.tagColorsType ===
+										TagColorType.TagText
+											? tag.color
+											: "",
+									border:
+										this.globalSettings.tagColorsType ===
+										TagColorType.TagText
+											? `1px solid ${tag.color}`
+											: "",
+									minWidth: "23vw !important",
+								}),
+						)
+						.addButton((btn) => {
+							btn.setTooltip(t("pick-color-for-tag"))
+								.setIcon("palette")
+								.setClass(
+									"taskboard-setting-tag-color-row-element-color-picker",
+								)
+								.then(() => {
+									const colorMap =
+										this.globalSettings.tagColors.map(
+											(tagColor) => ({
+												color:
+													this.globalSettings
+														.tagColors[
+														tagColor.priority - 1
+													]?.color || "#ff0000",
+											}),
+										);
+
+									const pickr = new Pickr({
+										el: btn.buttonEl,
+										theme: "nano",
+										swatches: colorMap.map(
+											(item) => item.color,
+										),
+										defaultRepresentation: "HEXA",
+										default: tag.color || "#ff0000",
+										comparison: false,
+										components: {
+											preview: true,
+											opacity: true,
+											hue: true,
+											interaction: {
+												hex: true,
+												rgba: true,
+												hsla: false,
+												hsva: false,
+												cmyk: false,
+												input: true,
+												clear: true,
+												cancel: true,
+												save: false,
+											},
+										},
+									});
+
+									this.allPickrs.push(pickr);
+
+									pickr
+										.on("change", (color: unknown) => {
+											const rgbaColor = `rgba(${(
+												color as PickrColor
+											)
+												.toRGBA()
+												.map((v: number, i: number) =>
+													i < 3 ? Math.round(v) : v,
+												)
+												.join(", ")})`;
+											tag.color = rgbaColor;
+											(
+												colorInputRef as {
+													setValue: (
+														val: string,
+													) => void;
+												}
+											).setValue(rgbaColor);
+										})
+										.on("hide", () => {
+											renderTagColors();
+											void this.saveSettings();
+										})
+										.on("cancel", () => pickr.destroy())
+										.on("clear", () => pickr.hide());
+								});
+						})
+						.addText((colorInput) => {
+							colorInputRef = colorInput;
+							colorInput
+								.setPlaceholder("Color value")
+								.setValue(tag.color)
+								.onChange(async (newColor) => {
+									tag.color = newColor;
+									void this.saveSettings();
+								})
+								.inputEl.setCssStyles({
+									backgroundColor:
+										this.globalSettings.tagColorsType !==
+										TagColorType.TagText
+											? tag.color
+											: "",
+									color:
+										this.globalSettings.tagColorsType ===
+										TagColorType.TagText
+											? tag.color
+											: "",
+									border:
+										this.globalSettings.tagColorsType ===
+										TagColorType.TagText
+											? `1px solid ${tag.color}`
+											: "",
+									minWidth: "23vw !important",
+								});
+						})
+						.addButton((del) =>
+							del
+								.setButtonText("Delete")
+								.setIcon("trash")
+								.setClass(
+									"taskboard-setting-tag-color-row-element-delete",
+								)
+								.setTooltip(t("delete-tag-color"))
+								.onClick(async () => {
+									this.globalSettings.tagColors.splice(
+										index,
+										1,
+									);
+									void this.saveSettings();
+									renderTagColors(); // Re-render after delete
+								}),
+						);
+				});
 		};
+
+		// Initial render
+		renderTagColors();
+
+		// Add "Add New Tag Color" button
+		new Setting(container)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-tag-color"))
+					.setCta()
+					.onClick(async () => {
+						const newTag = {
+							name: "",
+							color: "rgba(255, 0, 0, 1)",
+							priority: this.globalSettings.tagColors.length + 1,
+						};
+						this.globalSettings.tagColors.push(newTag);
+						void this.saveSettings();
+						renderTagColors();
+					}),
+			)
+			.setClass("task-board-settingtab-add-tag-color-btn");
 	}
 
-	// ---------------------------------------------
-	//      Custom Settings Sections Rendering
-	// ---------------------------------------------
+	// ================================================
+	//          Custom Statuses Configuration
+	// ================================================
 
+	private renderCustomStatusesTab(contentEl: HTMLElement) {
+		new Setting(contentEl)
+			// .setName(t("custom-statuses"))
+			.setDesc(t("custom-statuses-info"));
+
+		// Container for custom statuses list
+		const customStatusesContainer = contentEl.createDiv({
+			cls: "custom-statuses-container",
+		});
+
+		const renderCustomStatuses = () => {
+			customStatusesContainer.empty(); // Clear existing rendered rows
+
+			const customStatuses = this.globalSettings.customStatuses;
+
+			if (!customStatuses || customStatuses.length === 0) {
+				customStatusesContainer.createDiv({
+					cls: "custom-statuses-empty-message",
+					text: t("no-custom-statuses-configured"),
+				});
+				return;
+			}
+
+			customStatuses.forEach((status, index) => {
+				const row = customStatusesContainer.createDiv({
+					cls: "custom-status-row",
+				});
+
+				const statusInfoContainer = row.createDiv({
+					cls: "custom-status-info-container",
+				});
+
+				// Heading Row
+				const statusItemHeading = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element-heading setting-item-name",
+				});
+				// Status Icon - Lucide icon picker
+				const statusLucideIcon = statusItemHeading.createDiv({
+					cls: "custom-status-field-element-heading-icon",
+				});
+				const iconId = normalizeTaskIconValue(status.lucideIcon);
+				const isIconAvailable = iconId && getIcon(iconId);
+				const iconButton = statusLucideIcon.createEl("span", {
+					cls: `custom-status-icon-button${isIconAvailable ? "" : " faint"}`,
+					attr: {
+						type: "button",
+						title: t("select-status-icon"),
+						"aria-label": t("select-status-icon"),
+					},
+				});
+				setIcon(iconButton, isIconAvailable ? iconId : "plus");
+				iconButton.onclick = () => {
+					const updateStatusIcon = (value: string) => {
+						const currentStatus =
+							this.globalSettings.customStatuses[index];
+						if (!currentStatus) return;
+						currentStatus.lucideIcon =
+							normalizeTaskIconValue(value);
+						void this.saveSettings();
+						renderCustomStatuses();
+						this.openReloadNoticeIfNeeded();
+					};
+					const pickerOptions = {
+						value: iconId,
+						title: t("select-status-icon"),
+						onSelect: updateStatusIcon,
+						onClear: () => updateStatusIcon(""),
+					};
+
+					if (Platform.isMobile) {
+						openIconPickerModal(this.app, pickerOptions);
+					} else {
+						showIconPicker(iconButton, pickerOptions);
+					}
+				};
+				// Status Name
+				const statusInfoName = statusItemHeading.createDiv({
+					cls: "custom-status-field-element-heading-name",
+				});
+				statusInfoName.createDiv({
+					cls: "custom-status-field-value",
+					text: status.name,
+				});
+
+				// Status Symbol
+				const statusInfoSymbol = statusInfoContainer.createDiv({
+					cls: "custom-status-field-element setting-item-description",
+				});
+				statusInfoSymbol.createDiv({
+					cls: "custom-status-field-value",
+					text: `This status [${status.symbol}] will change to [${status.nextStatusSymbol}].`,
+				});
+
+				const rightSideContainer = row.createDiv({
+					cls: "custom-status-right-side",
+				});
+				// Status Type
+				rightSideContainer.createDiv({
+					cls: `custom-status-field-status-pill${
+						status.type === statusTypeNames.TODO ? " todo" : ""
+					}${status.type === statusTypeNames.DONE ? " done" : ""}${
+						status.type === statusTypeNames.CANCELLED
+							? " cancelled"
+							: ""
+					}${
+						status.type === statusTypeNames.IN_PROGRESS
+							? " wip"
+							: ""
+					}${status.type === statusTypeNames.ON_HOLD ? " hold" : ""}`,
+					text: status.type,
+				});
+
+				// Buttons container
+				const buttonsContainer = rightSideContainer.createDiv({
+					cls: "custom-status-buttons",
+				});
+
+				// Edit button
+				const editButton = buttonsContainer.createEl("span", {
+					cls: "edit-btn",
+					text: t("edit"),
+					title: t("edit"),
+				});
+				setIcon(editButton, "pencil");
+				editButton.onclick = async () => {
+					const modal = new CustomStatusModal(
+						this.plugin,
+						status,
+						false,
+					);
+					modal.onClose = () => {
+						if (modal.saved) {
+							const updatedStatus = modal.statusConfiguration();
+							const customStatus: CustomStatus = {
+								symbol: updatedStatus.symbol,
+								name: updatedStatus.name,
+								nextStatusSymbol:
+									updatedStatus.nextStatusSymbol === ""
+										? " "
+										: updatedStatus.nextStatusSymbol,
+								availableAsCommand:
+									updatedStatus.availableAsCommand,
+								type: updatedStatus.type,
+								lucideIcon: status.lucideIcon ?? "",
+							};
+							this.globalSettings.customStatuses[index] =
+								customStatus;
+							void this.saveSettings();
+							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
+						}
+					};
+					modal.open();
+				};
+
+				// Delete button
+				const deleteButton = buttonsContainer.createEl("span", {
+					cls: "delete-btn",
+					text: t("delete"),
+					title: t("delete"),
+				});
+				setIcon(deleteButton, "trash");
+				deleteButton.onclick = async () => {
+					this.globalSettings.customStatuses.splice(index, 1);
+					void this.saveSettings();
+					renderCustomStatuses();
+					this.openReloadNoticeIfNeeded();
+				};
+			});
+		};
+
+		// Initial render
+		renderCustomStatuses();
+
+		const isTasksPluginEnabled =
+			this.globalSettings.compatiblePlugins.tasksPlugin;
+		// Add "Add New Status" button
+		new Setting(contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("import-from-tasks-plugin"))
+					.setClass("import-from-tasks-plugin-btn")
+					.setCta()
+					.onClick(async () => {
+						const flag = await fetchTasksPluginCustomStatuses(
+							this.plugin,
+						);
+						if (flag) {
+							renderCustomStatuses();
+							this.openReloadNoticeIfNeeded();
+						}
+					})
+					.setDisabled(!isTasksPluginEnabled),
+			)
+			.addButton((btn) =>
+				btn
+					.setButtonText(t("add-new-status"))
+					.setCta()
+					.onClick(async () => {
+						const newStatus: CustomStatus = {
+							symbol: "",
+							name: "",
+							nextStatusSymbol: "",
+							availableAsCommand: false,
+							type: statusTypeNames.TODO,
+							lucideIcon: "",
+						};
+						const modal = new CustomStatusModal(
+							this.plugin,
+							newStatus,
+							false,
+						);
+						modal.onClose = () => {
+							if (modal.saved) {
+								const statusConfig =
+									modal.statusConfiguration();
+								const customStatus: CustomStatus = {
+									symbol: statusConfig.symbol,
+									name: statusConfig.name,
+									nextStatusSymbol:
+										statusConfig.nextStatusSymbol,
+									availableAsCommand:
+										statusConfig.availableAsCommand,
+									type: statusConfig.type,
+									lucideIcon: "",
+								};
+								if (!this.globalSettings.customStatuses) {
+									this.globalSettings.customStatuses = [];
+								}
+								this.globalSettings.customStatuses.push(
+									customStatus,
+								);
+								void this.saveSettings();
+								renderCustomStatuses();
+								this.openReloadNoticeIfNeeded();
+							}
+						};
+
+						modal.open();
+					}),
+			);
+	}
+
+	private renderCustomPrioritiesTab(contentEl: HTMLElement) {
+		new Setting(contentEl)
+			// .setName(t("custom-statuses"))
+			.setDesc(t("custom-priorities-info"));
+
+		// Container for custom statuses list
+		const customPrioritiesContainer = contentEl.createDiv({
+			cls: "custom-priorities-container",
+		});
+	}
+
+	// ================================================
+	//          Properties Configuration
+	// ================================================
+
+	/**
+	 * This was used to configure task properites (Default + Custom)
+	 * Now this will be handled by a modal. Keeping this function as backup
+	 * for future use.
+	 *
+	 * @param current The task property
+	 * @param propertyGroup Whether this property is default or custom
+	 * @param isNew Whether we are creating a new property.
+	 * @returns
+	 */
 	private renderSupportedPropertyConfigurationPage(
 		current: SupportedPropertiesConfig,
 		propertyGroup: "default" | "custom",
@@ -655,7 +3578,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										current.hidePropertyInNotesForInlineTasks =
 											value;
 										save();
-										this.showReloadNoticeIfNeeded();
+										this.openReloadNoticeIfNeeded();
 									}),
 							);
 
@@ -689,7 +3612,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 							new Setting(host).addButton((button) =>
 								button
 									.setButtonText("Delete property")
-									.setWarning()
+									.setDestructive()
 									.onClick(() => {
 										const propertyIndex =
 											properties.indexOf(current);
@@ -951,8 +3874,10 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										propertyGroup,
 										async (updatedProperty) => {
 											const duplicate = [
-												...this.globalSettings.defaultProperties,
-												...this.globalSettings.customProperties,
+												...this.globalSettings
+													.defaultProperties,
+												...this.globalSettings
+													.customProperties,
 											].find(
 												(candidate) =>
 													candidate !== property &&
@@ -985,7 +3910,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 											}
 											renderRows();
 											if (shouldShowReloadNotice)
-												this.showReloadNoticeIfNeeded();
+												this.openReloadNoticeIfNeeded();
 										},
 									).open();
 								},
@@ -1060,8 +3985,10 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										"custom",
 										async (updatedProperty) => {
 											const duplicate = [
-												...this.globalSettings.defaultProperties,
-												...this.globalSettings.customProperties,
+												...this.globalSettings
+													.defaultProperties,
+												...this.globalSettings
+													.customProperties,
 											].some(
 												(property) =>
 													property.id ===
@@ -1072,12 +3999,11 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 													`The property key "${updatedProperty.id}" is already in use.`,
 												);
 											}
-											const previousRanks = properties.map(
-												(property) => ({
+											const previousRanks =
+												properties.map((property) => ({
 													property,
 													rank: property.rank,
-												}),
-											);
+												}));
 											properties.push(updatedProperty);
 											this.normalizePropertyRanks(
 												properties,
@@ -1125,7 +4051,189 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		];
 	}
 
+	// ================================================
+	//          Inline Tasks Preview Section
+	// ================================================
+
+	private renderInlineTasksPreviewContainer(contentEl: HTMLElement) {
+		// Create the live preview element
+		const previewEl = contentEl.createDiv({
+			cls: "global-setting-tab-live-preview",
+		});
+
+		const readingPreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-label",
+		});
+		readingPreviewLabel.setText(t("reading-mode-preview"));
+		// Render markdown preview above the raw preview
+		const markdownPreviewEl = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview-markdown",
+		});
+
+		const sourcePreviewLabel = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-label",
+		});
+		sourcePreviewLabel.setText(t("source-mode-preview"));
+		const previewData = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview-data",
+		});
+
+		// Helper to render markdown using MarkdownUIRenderer
+		const renderMarkdownPreview = (markdown: string) => {
+			// Remove previous preview if any
+			markdownPreviewEl.empty();
+			// Use Obsidian's MarkdownUIRenderer to render markdown
+			// @ts-ignore
+			// MarkdownUIRenderer.safeRender(
+			// 	this.app,
+			// 	markdown,
+			// 	markdownPreviewEl,
+			// 	"",
+			// 	this.plugin.view,
+			// );
+
+			void MarkdownUIRenderer.strictRender(
+				this.app,
+				markdown,
+				markdownPreviewEl,
+				"",
+				null, // @todo - Need to pass the window of the settings modal.
+			);
+		};
+		const updatePreview = () => {
+			let taskTitle = t("dummy-task-title");
+			let priority = "⏫";
+			let time = "10:00 - 11:00";
+			let universalDateEmoji = "";
+			let universalDateString = "";
+			if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.startDate
+			) {
+				universalDateEmoji =
+					TASKS_PLUGIN_DEFAULT_SYMBOLS.startDateSymbol;
+				universalDateString = "start";
+			} else if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.scheduledDate
+			) {
+				universalDateEmoji =
+					TASKS_PLUGIN_DEFAULT_SYMBOLS.scheduledDateSymbol;
+				universalDateString = "scheduled";
+			} else if (
+				this.globalSettings?.universalDate ===
+				UniversalDateOptions.dueDate
+			) {
+				universalDateEmoji = TASKS_PLUGIN_DEFAULT_SYMBOLS.dueDateSymbol;
+				universalDateString = "due";
+			}
+			let date = "2024-09-21";
+			let tags = `#tag #test`;
+			let completionDate = "2024-09-21/12:20:33";
+
+			let preview = "";
+			switch (this.globalSettings.taskPropertyFormat) {
+				// Default
+				case taskPropertyFormatOptions.default: {
+					if (
+						this.globalSettings.compatiblePlugins.dayPlannerPlugin
+					) {
+						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
+					} else {
+						preview = `- [>] ${taskTitle} ${priority} ⏰[${time}] ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
+					}
+					break;
+				}
+				// Tasks Plugin
+				case taskPropertyFormatOptions.tasksPlugin: {
+					if (
+						this.globalSettings.compatiblePlugins.dayPlannerPlugin
+					) {
+						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji} ${date} ${tags} ✅ ${
+							completionDate.split("/")[0]
+						}`;
+					} else {
+						preview = `- [>] ${taskTitle} ${priority} ⏰ ${time} ${universalDateEmoji} ${date} ${tags} ✅${
+							completionDate.split("/")[0]
+						}`;
+					}
+					break;
+				}
+				// Dataview Plugin
+				case taskPropertyFormatOptions.dataviewPlugin: {
+					if (
+						this.globalSettings.compatiblePlugins.dayPlannerPlugin
+					) {
+						preview = `- [>] ${time} ${taskTitle} [priority:: 2] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
+					} else {
+						preview = `- [>] ${taskTitle} [priority:: 2] [time:: ${time}] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
+					}
+					break;
+				}
+				// Obsidian Native
+				case taskPropertyFormatOptions.obsidianNative: {
+					if (
+						this.globalSettings.compatiblePlugins.dayPlannerPlugin
+					) {
+						preview = `- [>] ${time} ${taskTitle} @priority(2) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
+					} else {
+						preview = `- [>] ${taskTitle} @priority(2) @time(${time}) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
+					}
+					break;
+				}
+			}
+			renderMarkdownPreview(preview);
+			previewData.setText(preview);
+		};
+
+		updatePreview();
+	}
+
 	hide(): void {
 		this.settingsManager.cleanUp();
+	}
+
+	// ================================================
+	//          Deprecated
+	// ================================================
+
+	private createLegacySettingsPage(
+		section: SettingsTabPagesKey,
+		searchAliases: string[],
+	): SettingDefinitionItem {
+		const name = t(section);
+		return {
+			type: "page",
+			name,
+			items: [
+				{
+					type: "group",
+					items: [
+						this.createLegacySettingsEntry(section, searchAliases),
+					],
+				},
+			],
+		};
+	}
+
+	private createLegacySettingsEntry(
+		section: SettingsTabPagesKey,
+		searchAliases: string[],
+	): SettingDefinition {
+		return {
+			name: t(section),
+			aliases: searchAliases.map((alias) => t(alias)),
+			render: (setting) => {
+				setting.settingEl.empty();
+				setting.settingEl.removeClass("setting-item");
+				setting.settingEl.addClass(
+					"task-board-declarative-settings-content",
+				);
+				this.settingsManager.renderDeclarativeSettingsSection(
+					section,
+					setting.settingEl,
+				);
+			},
+		};
 	}
 }

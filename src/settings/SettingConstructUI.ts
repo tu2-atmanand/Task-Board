@@ -79,10 +79,6 @@ import { setSettingsScope } from "./ScopeSettings.js";
 export type SettingsTabPagesKey =
 	| "general"
 	| "all-ui"
-	| "default-properties"
-	| "custom-properties"
-	| "custom-statuses"
-	| "custom-priorities"
 	| "inline-tasks"
 	| "task-notes"
 	| "map-view"
@@ -184,7 +180,7 @@ export class SettingsManager {
 			},
 			{
 				key: t("properties"),
-				handler: () => this.renderCustomStatusesTab(tabContent),
+				handler: () => this.renderPropertiesTab(tabContent),
 			},
 			{
 				key: t("inline-tasks"),
@@ -275,9 +271,6 @@ export class SettingsManager {
 				break;
 			case "all-ui":
 				this.renderAllUISettingsTab(contentEl);
-				break;
-			case "custom-statuses":
-				this.renderCustomStatusesTab(contentEl);
 				break;
 			case "inline-tasks":
 				this.renderInlineTasksSettingsTab(contentEl);
@@ -1328,7 +1321,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "All properties" tab content
-	private renderCustomStatusesTab(contentEl: HTMLElement) {
+	private renderPropertiesTab(contentEl: HTMLElement) {
 		new Setting(contentEl)
 			// .setName(t("custom-statuses"))
 			.setDesc(t("custom-statuses-info"));
