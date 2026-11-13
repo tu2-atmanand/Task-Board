@@ -38,7 +38,7 @@ export class PropertyConfigurationModal extends Modal {
 		};
 		this.setTitle(
 			isNew
-				? "add-custom-property"
+				? t("add-custom-property")
 				: `${t("configure")} ${property.name}`,
 		);
 	}
@@ -57,15 +57,29 @@ export class PropertyConfigurationModal extends Modal {
 
 		const addTextField = (
 			name: string,
-			infor: string,
+			info: string,
 			value: string,
 			onChange: (value: string) => void,
+			textArea: boolean,
 			placeholder?: string,
 		) => {
-			new Setting(contentEl).setName(name).addText((text) => {
-				text.setValue(value).onChange(onChange);
-				if (placeholder) text.setPlaceholder(placeholder);
-			});
+			if (textArea) {
+				new Setting(contentEl)
+					.setName(name)
+					.setDesc(info)
+					.addTextArea((text) => {
+						text.setValue(value).onChange(onChange);
+						if (placeholder) text.setPlaceholder(placeholder);
+					});
+			} else {
+				new Setting(contentEl)
+					.setName(name)
+					.setDesc(info)
+					.addText((text) => {
+						text.setValue(value).onChange(onChange);
+						if (placeholder) text.setPlaceholder(placeholder);
+					});
+			}
 		};
 
 		addTextField(
@@ -77,6 +91,7 @@ export class PropertyConfigurationModal extends Modal {
 				if (this.propertyGroup === "custom")
 					this.draft.key = this.draft.id;
 			},
+			false,
 		);
 
 		if (this.propertyGroup === "custom") {
@@ -85,6 +100,7 @@ export class PropertyConfigurationModal extends Modal {
 				t("property-name-info"),
 				this.draft.name,
 				(value) => (this.draft.name = value),
+				false,
 				"e.g. Project",
 			);
 		}
@@ -101,6 +117,7 @@ export class PropertyConfigurationModal extends Modal {
 			(value) => {
 				this.draft.desc = value;
 			},
+			true,
 		);
 
 		new Setting(contentEl)
@@ -122,6 +139,7 @@ export class PropertyConfigurationModal extends Modal {
 			(value) => {
 				this.draft.emoji = value;
 			},
+			false,
 		);
 		const iconSetting = new Setting(contentEl)
 			.setName(t("property-lucide-icon"))
@@ -197,6 +215,7 @@ export class PropertyConfigurationModal extends Modal {
 					this.draft.defaultValue = value;
 				}
 			},
+			false,
 		);
 
 		this.renderFooter(contentEl);

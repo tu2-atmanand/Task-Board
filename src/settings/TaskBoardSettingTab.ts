@@ -58,8 +58,6 @@ import { moveTasksCacheFileToNewPath } from "../utils/JsonFileOperations.js";
 import Sortable from "sortablejs";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
 
-// Pickr library import
-import PickrImport from "@simonwep/pickr";
 import { CustomStatusModal } from "../ui/modals/CustomStatusConfigurator.js";
 import { fetchTasksPluginCustomStatuses } from "../services/tasks_plugin/helpers.js";
 import {
@@ -77,17 +75,7 @@ import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../utils/regular_expressions/Tasks
 import { openScanFiltersModal } from "../ui/modals/OpenModals.js";
 import { CommunityPlugins } from "../services/CommunityPlugins.js";
 import { isValid, parse, format, differenceInHours } from "date-fns";
-
-interface PickrColor {
-	toRGBA(): number[];
-}
-interface PickrInstance {
-	on(event: string, cb: (...args: unknown[]) => void): this;
-	destroy(): void;
-	hide(): void;
-}
-type PickrConstructor = new (options: Record<string, unknown>) => PickrInstance;
-const Pickr = PickrImport as unknown as PickrConstructor;
+import { showColorPicker } from "../ui/modals/color_picker/ColorPickerModal.js";
 
 /**
  * Filters tab — list of user-defined filter sets.
@@ -211,7 +199,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	settingsManager: SettingsManager;
 	globalSettings: globalSettingsData;
 	icon: string = TaskBoardIcon;
-	allPickrs: unknown[] = [];
 	private reloadNoticeAlreadyShown = false;
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -3166,60 +3153,23 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						void this.saveSettings();
 					});
 
-					const colorMap = this.globalSettings.tagColors.map(
-						(tagColor) => ({
-							color:
-								this.globalSettings.tagColors[
-									tagColor.priority - 1
-								]?.color || "#ff0000",
-						}),
-					);
-					const pickr = new Pickr({
-						el: colorPickerButton,
-						container: tagColorsContainer,
-						theme: "nano",
-						closeOnScroll: true,
-						swatches: colorMap.map((item) => item.color),
-						defaultRepresentation: "HEXA",
-						default: tag.color || "#ff0000",
-						comparison: false,
-						components: {
-							preview: true,
-							opacity: true,
-							hue: true,
-							interaction: {
-								hex: true,
-								rgba: true,
-								hsla: false,
-								hsva: false,
-								cmyk: false,
-								input: true,
-								clear: true,
-								cancel: true,
-								save: true,
+					colorPickerButton.addEventListener("click", () => {
+						showColorPicker(colorPickerButton, {
+							value: tag.color,
+							onSelect: (color) => {
+								tag.color = `#${color}`;
+								colorInput.value = tag.color;
+								renderTagColors();
+								void this.saveSettings();
 							},
-						},
+							onClear: () => {
+								tag.color = "";
+								colorInput.value = "";
+								renderTagColors();
+								void this.saveSettings();
+							},
+						});
 					});
-
-					this.allPickrs.push(pickr);
-					pickr
-						.on("change", (color: unknown) => {
-							const rgbaColor = `rgba(${(color as PickrColor)
-								.toRGBA()
-								.map((v: number, i: number) =>
-									i < 3 ? Math.round(v) : v,
-								)
-								.join(", ")})`;
-							tag.color = rgbaColor;
-							colorInput.value = rgbaColor;
-							void this.saveSettings();
-						})
-						.on("hide", () => {
-							renderTagColors();
-							void this.saveSettings();
-						})
-						.on("cancel", () => pickr.destroy())
-						.on("clear", () => pickr.hide());
 
 					const deleteButton = controls.createEl("span", {
 						cls: "clickable-icon mod-cta taskboard-setting-tag-color-row-element-delete",

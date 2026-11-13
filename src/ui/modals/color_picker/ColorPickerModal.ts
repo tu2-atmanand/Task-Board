@@ -3,7 +3,7 @@ import { FloatingHostOptions, getFloatingRectAnchorOwner, createFloatingPanel, c
 import { asHTMLElement, getOwnerWindow } from "../../../utils/DomCompat.js";
 import { ColorPaletteEntry, localizeColorPaletteNames } from "./ColorPalette.js";
 import { t } from "i18next";
-import { setAccessibleLabelWithoutTooltip } from "../../utils/AccessibilityLabel.js";
+// import { setAccessibleLabelWithoutTooltip } from "../../utils/AccessibilityLabel.js";
 
 interface ColorPickerOptions extends FloatingHostOptions {
 	value?: string;
@@ -48,8 +48,18 @@ function clamp(value: number, min: number, max: number): number {
 
 function normalizeHex(value: string | null | undefined): string | null {
 	const normalized = (value ?? "").trim().replace(/^#/, "");
-	if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return null;
-	return `#${normalized.toUpperCase()}`;
+	if (/^[0-9a-fA-F]{6}$/.test(normalized)) {
+		return `#${normalized.toUpperCase()}`;
+	}
+	const rgbMatch = value?.trim().match(
+		/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*[\d.]+)?\s*\)$/i,
+	);
+	if (!rgbMatch) return null;
+	return rgbToHex({
+		r: Number(rgbMatch[1]),
+		g: Number(rgbMatch[2]),
+		b: Number(rgbMatch[3]),
+	});
 }
 
 function hexToRgb(hex: string): RgbColor {
@@ -252,8 +262,8 @@ export function showColorPicker(
 	const input = panel.createEl("input");
 	input.type = "text";
 	input.className = "task-board-floating-input task-board-color-picker-search";
-	input.placeholder = t("taskEditor", "searchColor");
-	setAccessibleLabelWithoutTooltip(input, t("taskEditor", "searchColor"));
+	input.placeholder = t("search-color-info");
+	// setAccessibleLabelWithoutTooltip(input, t("searchColor"));
 
 	const toneStrip = panel.createDiv("task-board-color-picker-tone-strip");
 
@@ -267,7 +277,7 @@ export function showColorPicker(
 	const freePlane = customColumn.createDiv("task-board-color-picker-free-plane");
 	freePlane.tabIndex = 0;
 	freePlane.setAttribute("role", "application");
-	setAccessibleLabelWithoutTooltip(freePlane, t("taskEditor", "customColor"));
+	// setAccessibleLabelWithoutTooltip(freePlane, t("customColor"));
 	const freeHandle = freePlane.createSpan("task-board-color-picker-free-handle");
 	const freeEmpty = freePlane.createDiv("task-board-color-picker-free-empty");
 	freeEmpty.textContent = t("taskEditor", "noColorSelected");
@@ -279,10 +289,10 @@ export function showColorPicker(
 	hueSliderWrap.setAttribute("role", "slider");
 	hueSliderWrap.setAttribute("aria-valuemin", "0");
 	hueSliderWrap.setAttribute("aria-valuemax", "359");
-	setAccessibleLabelWithoutTooltip(
-		hueSliderWrap,
-		t("taskEditor", "colorHue"),
-	);
+	// setAccessibleLabelWithoutTooltip(
+	// 	hueSliderWrap,
+	// 	t("colorHue"),
+	// );
 	const hueHandle = hueSliderWrap.createSpan(
 		"task-board-color-picker-hue-handle",
 	);
@@ -322,10 +332,10 @@ export function showColorPicker(
 		attr: { type: "button" },
 	});
 	setIcon(copyButton, "copy");
-	setAccessibleLabelWithoutTooltip(
-		copyButton,
-		t("taskEditor", "copyColorHex"),
-	);
+	// setAccessibleLabelWithoutTooltip(
+	// 	copyButton,
+	// 	t("copyHexCode"),
+	// );
 
 	const chooseButton = createButton(
 		t("buttons", "choose"),
@@ -535,12 +545,12 @@ export function showColorPicker(
 			});
 			button.disabled = !toneHex;
 			setToneCellSwatch(button, toneHex);
-			if (toneHex) {
-				setAccessibleLabelWithoutTooltip(
-					button,
-					`${t("taskEditor", "colorToneStrip")} ${index + 1}: ${toneHex}`,
-				);
-			}
+			// if (toneHex) {
+			// 	setAccessibleLabelWithoutTooltip(
+			// 		button,
+			// 		`${t("colorToneStrip")} ${index + 1}: ${toneHex}`,
+			// 	);
+			// }
 			if (toneHex && index === activeStripIndex) {
 				button.classList.add("is-active");
 				button.createSpan({
@@ -582,10 +592,10 @@ export function showColorPicker(
 				"--task-board-color-picker-cell-accent",
 				preset.hex,
 			);
-			setAccessibleLabelWithoutTooltip(
-				button,
-				`${preset.name} ${preset.hex}`,
-			);
+			// setAccessibleLabelWithoutTooltip(
+			// 	button,
+			// 	`${preset.name} ${preset.hex}`,
+			// );
 			button.classList.toggle("is-active", index === activeGridIndex);
 			button.classList.toggle(
 				"is-selected",

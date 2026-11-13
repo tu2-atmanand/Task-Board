@@ -741,7 +741,8 @@ const en: Lang = {
 	"property-lucide-icon": "Lucide icon",
 	"property-lucide-icon-info": "To distinguish different properties with the help of icons in various task containers. Unique icons for each property will help for better mind-mapping.",
 	"hide-property-in-notes-for-inline-tasks": "Hide property in notes for inline-tasks",
-	"hide-property-in-notes-setting-info": "Enable to hide this property in notes to remove visual noise."
+	"hide-property-in-notes-setting-info": "Enable to hide this property in notes to remove visual noise.",
+	"search-color-placeholder": "Search color using hex value..."
 };
 
 export default en;

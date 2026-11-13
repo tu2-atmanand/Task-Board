@@ -11,18 +11,6 @@ import {
 	normalizePath,
 	setIcon,
 } from "obsidian";
-import PickrImport from "@simonwep/pickr";
-
-interface PickrColor {
-	toRGBA(): number[];
-}
-interface PickrInstance {
-	on(event: string, cb: (...args: unknown[]) => void): this;
-	destroy(): void;
-	hide(): void;
-}
-type PickrConstructor = new (options: Record<string, unknown>) => PickrInstance;
-const Pickr = PickrImport as unknown as PickrConstructor;
 import Sortable from "sortablejs";
 import { isValid, parse, format, differenceInHours } from "date-fns";
 import { t } from "i18next";
@@ -75,6 +63,7 @@ import {
 } from "./SettingSynchronizer.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
 import { setSettingsScope } from "./ScopeSettings.js";
+import { showColorPicker } from "../ui/modals/color_picker/ColorPickerModal.js";
 
 export type SettingsTabPagesKey =
 	| "general"
@@ -86,17 +75,14 @@ export type SettingsTabPagesKey =
 	| "formats";
 
 export class SettingsManager {
-	win: Window;
 	app: App;
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData;
-	allPickrs: unknown[] = [];
 	reloadNoticeAlreadyShown: boolean = false;
 
 	constructor(plugin: TaskBoard) {
 		this.app = plugin.app;
 		this.plugin = plugin;
-		this.win = window;
 		this.globalSettings = this.plugin.settings.data;
 	}
 
@@ -296,16 +282,6 @@ export class SettingsManager {
 
 		this.reloadNoticeAlreadyShown = false;
 
-		//Destroy all Pickr instances
-		this.allPickrs.forEach((pickr) => (pickr as PickrInstance).destroy());
-
-		//find all the div with calls picr-app using query-selector and remove them from the main window
-		const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
-		if (pickrApps) {
-			pickrApps.forEach((app) => {
-				app.remove();
-			});
-		}
 	}
 
 	// Function to render the "Filters for scanning" tab content
@@ -1201,72 +1177,39 @@ export class SettingsManager {
 									"taskboard-setting-tag-color-row-element-color-picker",
 								)
 								.then(() => {
-									const colorMap =
-										this.plugin.settings.data.tagColors.map(
-											(tagColor) => ({
-												color:
-													this.plugin.settings.data
-														.tagColors[
-														tagColor.priority - 1
-													]?.color || "#ff0000",
-											}),
-										);
-
-									const pickr = new Pickr({
-										el: btn.buttonEl,
-										theme: "nano",
-										swatches: colorMap.map(
-											(item) => item.color,
-										),
-										defaultRepresentation: "HEXA",
-										default: tag.color || "#ff0000",
-										comparison: false,
-										components: {
-											preview: true,
-											opacity: true,
-											hue: true,
-											interaction: {
-												hex: true,
-												rgba: true,
-												hsla: false,
-												hsva: false,
-												cmyk: false,
-												input: true,
-												clear: true,
-												cancel: true,
-												save: false,
-											},
+									btn.buttonEl.addEventListener(
+										"click",
+										() => {
+											showColorPicker(btn.buttonEl, {
+												value: tag.color,
+												onSelect: (color) => {
+													tag.color = `#${color}`;
+													(
+														colorInputRef as {
+															setValue: (
+																val: string,
+															) => void;
+														}
+													).setValue(tag.color);
+													renderTagColors();
+													void this.saveSettings();
+												},
+												onClear: () => {
+													tag.color = "";
+													(
+														colorInputRef as {
+															setValue: (
+																val: string,
+															) => void;
+														}
+													).setValue("");
+													renderTagColors();
+													void this.saveSettings();
+												},
+											});
 										},
-									});
-
-									this.allPickrs.push(pickr);
-
-									pickr
-										.on("change", (color: unknown) => {
-											const rgbaColor = `rgba(${(
-												color as PickrColor
-											)
-												.toRGBA()
-												.map((v: number, i: number) =>
-													i < 3 ? Math.round(v) : v,
-												)
-												.join(", ")})`;
-											tag.color = rgbaColor;
-											(
-												colorInputRef as {
-													setValue: (
-														val: string,
-													) => void;
-												}
-											).setValue(rgbaColor);
-										})
-										.on("hide", () => {
-											renderTagColors();
-											void this.saveSettings();
-										})
-										.on("cancel", () => pickr.destroy())
-										.on("clear", () => pickr.hide());
-								});
+									);
+								})
 						})
 						.addText((colorInput) => {
 							colorInputRef = colorInput;
