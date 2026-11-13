@@ -3499,7 +3499,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 			[...priorities]
 				.sort((a, b) => a.rank - b.rank)
-				.forEach((priority) => {
+				.forEach((priority, orderIndex, orderedPriorities) => {
 					const priorityIndex =
 						this.globalSettings.customPriorities.indexOf(priority);
 					const row = customPrioritiesContainer.createDiv({
@@ -3543,8 +3543,34 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					});
 
 					const buttons = row.createDiv({
-						cls: "custom-status-buttons",
+						cls: "custom-status-buttons task-board-property-actions",
 					});
+					this.createPropertyActionButton(
+						buttons,
+						"arrow-up",
+						t("move-priority-up"),
+						() => {
+							void this.movePriority(
+								priority,
+								-1,
+								renderCustomPriorities,
+							);
+						},
+						"move-up-btn",
+					).disabled = orderIndex === 0;
+					this.createPropertyActionButton(
+						buttons,
+						"arrow-down",
+						t("move-priority-down"),
+						() => {
+							void this.movePriority(
+								priority,
+								1,
+								renderCustomPriorities,
+							);
+						},
+						"move-down-btn",
+					).disabled = orderIndex === orderedPriorities.length - 1;
 					const editButton = buttons.createEl("span", {
 						cls: "edit-btn",
 						text: t("edit"),
@@ -3620,6 +3646,48 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					modal.open();
 				}),
 		);
+	}
+
+	private async movePriority(
+		priority: CustomPriority,
+		direction: -1 | 1,
+		renderRows: () => void,
+	): Promise<void> {
+		const priorities = this.globalSettings.customPriorities;
+		const orderedPriorities = priorities
+			.slice()
+			.sort((a, b) => a.rank - b.rank);
+		const currentIndex = orderedPriorities.indexOf(priority);
+		const targetIndex = currentIndex + direction;
+		if (
+			currentIndex < 0 ||
+			targetIndex < 0 ||
+			targetIndex >= orderedPriorities.length
+		) {
+			return;
+		}
+
+		const previousRanks = priorities.map((item) => ({
+			item,
+			rank: item.rank,
+		}));
+		orderedPriorities.splice(currentIndex, 1);
+		orderedPriorities.splice(targetIndex, 0, priority);
+		orderedPriorities.forEach((item, index) => {
+			item.rank = index + 1;
+		});
+
+		try {
+			await this.plugin.saveSettings();
+			renderRows();
+		} catch (error) {
+			previousRanks.forEach(({ item, rank }) => {
+				item.rank = rank;
+			});
+			console.error("Failed to save priority order", error);
+			new Notice(t("failed-to-save-priority-order"));
+			renderRows();
+		}
 	}
 
 	// ================================================

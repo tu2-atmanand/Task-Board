@@ -759,6 +759,9 @@ const en: Lang = {
 	"priority-icon": "Icon",
 	"priority-color": "Color",
 	"priority-description": "Description",
+	"move-priority-up": "Move priority up",
+	"move-priority-down": "Move priority down",
+	"failed-to-save-priority-order": "Failed to save priority order.",
 };
 
 export default en;

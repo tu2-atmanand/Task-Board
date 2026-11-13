@@ -11,7 +11,7 @@ import { showColorPicker } from "./color_picker/ColorPickerModal.js";
 export class CustomPriorityModal extends Modal {
 	saved = false;
 	name: string;
-	rank: number;
+	private readonly rank: number;
 	emoji: string;
 	lucideIcon: string;
 	color: string;
@@ -50,18 +50,6 @@ export class CustomPriorityModal extends Modal {
 					this.name = value;
 				}),
 			);
-
-		new Setting(contentEl)
-			.setName(t("priority-rank"))
-			.addText((text) => {
-				text.inputEl.type = "number";
-				text.inputEl.min = "1";
-				text.inputEl.step = "1";
-				text.setValue(String(this.rank)).onChange((value) => {
-					const rank = Number(value);
-					if (Number.isFinite(rank)) this.rank = rank;
-				});
-			});
 
 		new Setting(contentEl)
 			.setName(t("priority-emoji"))

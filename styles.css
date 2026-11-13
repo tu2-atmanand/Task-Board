@@ -197,6 +197,14 @@
 	opacity: 1;
 }
 
+.custom-priority-row:hover .task-board-property-action.move-up-btn,
+.custom-priority-row:hover .task-board-property-action.move-down-btn,
+.custom-priority-row:focus-within .task-board-property-action.move-up-btn,
+.custom-priority-row:focus-within .task-board-property-action.move-down-btn {
+	visibility: visible;
+	opacity: 1;
+}
+
 .task-board-property-action:disabled {
 	opacity: 0.35;
 	cursor: default;
