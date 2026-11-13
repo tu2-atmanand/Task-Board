@@ -37,7 +37,9 @@ export class PropertyConfigurationModal extends Modal {
 				: property.defaultValue,
 		};
 		this.setTitle(
-			isNew ? "Add custom property" : `Configure ${property.name}`,
+			isNew
+				? "add-custom-property"
+				: `${t("configure")} ${property.name}`,
 		);
 	}
 
@@ -55,6 +57,7 @@ export class PropertyConfigurationModal extends Modal {
 
 		const addTextField = (
 			name: string,
+			infor: string,
 			value: string,
 			onChange: (value: string) => void,
 			placeholder?: string,
@@ -65,15 +68,21 @@ export class PropertyConfigurationModal extends Modal {
 			});
 		};
 
-		addTextField("Property ID", this.draft.id, (value) => {
-			this.draft.id = value.trim();
-			if (this.propertyGroup === "custom")
-				this.draft.key = this.draft.id;
-		});
+		addTextField(
+			t("property-id"),
+			t("property-id-info"),
+			this.draft.id,
+			(value) => {
+				this.draft.id = value.trim();
+				if (this.propertyGroup === "custom")
+					this.draft.key = this.draft.id;
+			},
+		);
 
 		if (this.propertyGroup === "custom") {
 			addTextField(
-				"Property name",
+				t("property-name"),
+				t("property-name-info"),
 				this.draft.name,
 				(value) => (this.draft.name = value),
 				"e.g. Project",
@@ -85,12 +94,18 @@ export class PropertyConfigurationModal extends Modal {
 			return;
 		}
 
-		addTextField("Description", this.draft.desc, (value) => {
-			this.draft.desc = value;
-		});
+		addTextField(
+			t("description"),
+			t("property-description-info"),
+			this.draft.desc,
+			(value) => {
+				this.draft.desc = value;
+			},
+		);
 
 		new Setting(contentEl)
-			.setName("Type")
+			.setName(t("value-type"))
+			.setDesc(t("value-type-info"))
 			.addDropdown((dropdown) => {
 				Object.values(PropertyTypeConfig).forEach((type) => {
 					dropdown.addOption(type, type);
@@ -100,10 +115,17 @@ export class PropertyConfigurationModal extends Modal {
 				});
 			});
 
-		addTextField("Emoji", this.draft.emoji, (value) => {
-			this.draft.emoji = value;
-		});
-		const iconSetting = new Setting(contentEl).setName("Lucide icon");
+		addTextField(
+			t("emoji"),
+			t("emoji-property-info"),
+			this.draft.emoji,
+			(value) => {
+				this.draft.emoji = value;
+			},
+		);
+		const iconSetting = new Setting(contentEl)
+			.setName(t("property-lucide-icon"))
+			.setDesc(t("property-lucide-icon-info"));
 		const iconControl = iconSetting.controlEl.createDiv(
 			"task-board-property-icon-control",
 		);
@@ -111,26 +133,27 @@ export class PropertyConfigurationModal extends Modal {
 			cls: `custom-status-icon-button${this.draft.icon ? "" : " faint"}`,
 			attr: {
 				type: "button",
-				title: "Select icon",
-				"aria-label": "Select icon",
+				title: t("select-icon"),
+				"aria-label": t("select-icon"),
 			},
 		});
 		let iconValue = normalizeTaskIconValue(this.draft.icon);
-		setIcon(iconButton, iconValue && getIcon(iconValue) ? iconValue : "plus");
+		setIcon(
+			iconButton,
+			iconValue && getIcon(iconValue) ? iconValue : "plus",
+		);
 		const iconName = iconControl.createSpan({
 			cls: "task-board-property-icon-name",
-			text: iconValue || "Select icon",
+			text: iconValue || t("select-icon"),
 		});
 		iconButton.addEventListener("click", () => {
 			const updateIcon = (value: string) => {
 				iconValue = normalizeTaskIconValue(value);
 				this.draft.icon = iconValue;
-				const hasIcon = Boolean(
-					iconValue && getIcon(iconValue),
-				);
+				const hasIcon = Boolean(iconValue && getIcon(iconValue));
 				iconButton.toggleClass("faint", !hasIcon);
 				setIcon(iconButton, hasIcon ? iconValue : "plus");
-				iconName.setText(hasIcon ? iconValue : "Select icon");
+				iconName.setText(hasIcon ? iconValue : t("select-icon"));
 			};
 			const pickerOptions = {
 				value: iconValue,
@@ -138,13 +161,13 @@ export class PropertyConfigurationModal extends Modal {
 				onSelect: updateIcon,
 				onClear: () => updateIcon(""),
 			};
-			if (Platform.isMobile)
-				openIconPickerModal(this.app, pickerOptions);
+			if (Platform.isMobile) openIconPickerModal(this.app, pickerOptions);
 			else showIconPicker(iconButton, pickerOptions);
 		});
 
 		new Setting(contentEl)
-			.setName("Hide property in inline task notes")
+			.setName(t("hide-property-in-notes-for-inline-tasks"))
+			.setDesc(t("hide-property-in-notes-setting-info"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.draft.hidePropertyInNotesForInlineTasks)
@@ -154,7 +177,8 @@ export class PropertyConfigurationModal extends Modal {
 			);
 
 		addTextField(
-			"Default value",
+			t("property-initial-value"),
+			t("property-initial-value-info"),
 			Array.isArray(this.draft.defaultValue)
 				? this.draft.defaultValue.join(", ")
 				: String(this.draft.defaultValue),
@@ -213,9 +237,7 @@ export class PropertyConfigurationModal extends Modal {
 				}),
 		);
 		footer.addButton((button) =>
-			button
-				.setButtonText(t("cancel"))
-				.onClick(() => this.close()),
+			button.setButtonText(t("cancel")).onClick(() => this.close()),
 		);
 	}
 }
