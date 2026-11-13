@@ -38,7 +38,11 @@ import {
 	taskPropertyFormatOptions,
 	UniversalDateOptions,
 } from "../interfaces/Enums.js";
-import { TaskBoardIcon } from "../interfaces/Icons.js";
+import {
+	buyMeCoffeeSVGIcon,
+	kofiSVGIcon,
+	TaskBoardIcon,
+} from "../interfaces/Icons.js";
 import { SettingsManager, SettingsTabPagesKey } from "./SettingConstructUI.js";
 import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import { setSettingsScope } from "./ScopeSettings.js";
@@ -314,8 +318,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				type: "group",
 				items: [
 					{
-						name: "task-board" + " " + CURRENT_PLUGIN_VERSION,
-						desc: "Read the release notes to learn whats new!",
+						name: t("task-board") + " " + CURRENT_PLUGIN_VERSION,
+						desc: t("release-notes-setting-button-info"),
 						searchable: false,
 						render: (setting) => {
 							setting.settingEl.addClass(
@@ -323,11 +327,11 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 							);
 							setting
 								.setName(
-									"task-board" + " " + CURRENT_PLUGIN_VERSION,
+									t("task-board") +
+										" " +
+										CURRENT_PLUGIN_VERSION,
 								)
-								.setDesc(
-									"Read the release notes to learn whats new!",
-								)
+								.setDesc(t("release-notes-setting-button-info"))
 								.addButton((button) => {
 									button
 										.setButtonText(t("release-notes"))
@@ -362,7 +366,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								.setDesc(t("task-board-docs-setting-info"))
 								.addButton((button) => {
 									button
-										.setButtonText(t("Open docs"))
+										.setButtonText(t("open-docs"))
 										.onClick(() => {
 											new Notice("Not Implemented!");
 											// scopeSettingsModal(
@@ -390,7 +394,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				items: [
 					{
 						type: "group",
-						heading: "filters-for-scanning",
+						heading: t("filters-for-scanning"),
 						cls: "task-board-settings-tab-filters-for-scanning-container",
 						items: [
 							{
@@ -443,69 +447,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 													this.globalSettings.scanMode =
 														value as scanModeOptions;
 													await this.saveSettings();
-
-													this.openReloadNoticeIfNeeded();
-												}),
-										);
-								},
-							},
-							{
-								name: t("auto-add-unique-id"),
-								desc: createFragmentWithHTML(
-									t("auto-add-unique-id-description") +
-										"<br/>" +
-										"<ul>" +
-										"<li>" +
-										t("map-view-feature") +
-										"</li>" +
-										"<li>" +
-										t(
-											"manual-sorting-inside-each-column-upcoming",
-										) +
-										"</li>" +
-										"<li>" +
-										t(
-											"pin-tasks-on-top-in-each-column-upcoming",
-										) +
-										"</li>" +
-										"</ul>",
-								),
-								render: (setting) => {
-									setting
-										.setName(t("scanning-mode"))
-										.setDesc(
-											createFragmentWithHTML(
-												t(
-													"auto-add-unique-id-description",
-												) +
-													"<br/>" +
-													"<ul>" +
-													"<li>" +
-													t("map-view-feature") +
-													"</li>" +
-													"<li>" +
-													t(
-														"manual-sorting-inside-each-column-upcoming",
-													) +
-													"</li>" +
-													"<li>" +
-													t(
-														"pin-tasks-on-top-in-each-column-upcoming",
-													) +
-													"</li>" +
-													"</ul>",
-											),
-										)
-										.addToggle((toggle) =>
-											toggle
-												.setValue(
-													this.globalSettings
-														.autoAddUniqueID,
-												)
-												.onChange((value) => {
-													this.globalSettings.autoAddUniqueID =
-														value;
-													void this.saveSettings();
 
 													this.openReloadNoticeIfNeeded();
 												}),
@@ -574,9 +515,14 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										);
 								},
 							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("interface-language"),
+						items: [
 							{
 								name: t("update-language-translations"),
-								desc: t("ribbon-icon-action-info"),
 								render: (setting) => {
 									setting
 										.setName(
@@ -607,9 +553,14 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										);
 								},
 							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("advanced"),
+						items: [
 							{
 								name: t("tasks-cache-file-path"),
-								desc: t("ribbon-icon-action-info"),
 								render: (setting) => {
 									let newPath =
 										this.globalSettings.tasksCacheFilePath;
@@ -784,22 +735,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										);
 								},
 							},
-							{
-								name: t("export-logs"),
-								desc: t("export-logs-info"),
-								render: (setting) => {
-									setting
-										.setName(t("export-logs"))
-										.setDesc(t("export-logs-info"))
-										.addButton((button) =>
-											button
-												.setButtonText(t("export"))
-												.onClick(() => {
-													void bugReporterManagerInsatance.exportLogFile();
-												}),
-										);
-								},
-							},
 							// {
 							// 	name: "Safeguard feature",
 							// 	desc: createFragmentWithHTML(
@@ -842,6 +777,28 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 							// 			);
 							// 	},
 							// },
+						],
+					},
+					{
+						type: "group",
+						heading: t("debugging"),
+						items: [
+							{
+								name: t("export-logs"),
+								desc: t("export-logs-info"),
+								render: (setting) => {
+									setting
+										.setName(t("export-logs"))
+										.setDesc(t("export-logs-info"))
+										.addButton((button) =>
+											button
+												.setButtonText(t("export"))
+												.onClick(() => {
+													void bugReporterManagerInsatance.exportLogFile();
+												}),
+										);
+								},
+							},
 						],
 					},
 				],
@@ -1180,19 +1137,23 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								type: "page",
 								name: t("default-properties"),
 								desc: t("default-properties-info"),
-								items: this.renderPropertiesConfigurationSection(
-									this.containerEl,
-									"default",
-								),
+								items: [
+									this.renderPropertiesConfigurationSection(
+										this.containerEl,
+										"default",
+									),
+								],
 							},
 							{
 								type: "page",
 								name: t("custom-properties"),
 								desc: t("custom-properties-info"),
-								items: this.renderPropertiesConfigurationSection(
-									this.containerEl,
-									"custom",
-								),
+								items: [
+									this.renderPropertiesConfigurationSection(
+										this.containerEl,
+										"custom",
+									),
+								],
 							},
 						],
 					},
@@ -1207,9 +1168,11 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								items: [
 									{
 										type: "group",
+										cls: "task-board-settings-custom-statuses-container",
 										items: [
 											{
 												name: "",
+												desc: t("custom-statuses-info"),
 												render: (setting) =>
 													this.renderCustomStatusesTab(
 														setting.settingEl,
@@ -2018,6 +1981,50 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						type: "group",
 						items: [
 							{
+								name: t("auto-add-unique-id"),
+								render: (setting) => {
+									setting
+										.setName(t("auto-add-unique-id"))
+										.setDesc(
+											createFragmentWithHTML(
+												t(
+													"auto-add-unique-id-description",
+												) +
+													"<br/>" +
+													"<ul>" +
+													"<li>" +
+													t("map-view-feature") +
+													"</li>" +
+													"<li>" +
+													t(
+														"manual-sorting-inside-each-column-upcoming",
+													) +
+													"</li>" +
+													"<li>" +
+													t(
+														"pin-tasks-on-top-in-each-column-upcoming",
+													) +
+													"</li>" +
+													"</ul>",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.autoAddUniqueID,
+												)
+												.onChange((value) => {
+													this.globalSettings.autoAddUniqueID =
+														value;
+													void this.saveSettings();
+
+													this.openReloadNoticeIfNeeded();
+												}),
+										);
+								},
+							},
+							{
 								name: t(
 									"restrict-task-completion-to-child-tasks-and-sub-tasks",
 								),
@@ -2320,11 +2327,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								desc: t(
 									"push-notification-compatibility-description",
 								),
-								disabled:
-									!this.globalSettings.compatiblePlugins
-										.quickAddPlugin,
-								visible:
-									communityPlugins.isQuickAddPluginEnabled(),
 								render: (setting) => {
 									setting
 										.setName(
@@ -2793,18 +2795,128 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				],
 			},
 			// Experimental features page
-			this.createLegacySettingsPage("experimental-features", [
-				"embed-board",
-			]),
+			{
+				type: "page",
+				name: t("experimental-features"),
+				items: [
+					{
+						type: "group",
+						items: [
+							{
+								name: "",
+								desc:
+									t("embed-task-boards") +
+									t("embed-task-boards-info"),
+								render: (setting) => {
+									setting
+										.setName(
+											t("enable-experimental-features"),
+										)
+										.setDesc(
+											createFragmentWithHTML(
+												t(
+													"enable-experimental-features-info-2",
+												) +
+													"<br/>" +
+													"<br/>" +
+													t(
+														"enable-experimental-features-info-3",
+													) +
+													"<br/>" +
+													"<br/>" +
+													"<ul>" +
+													"<li>" +
+													"<b>" +
+													t("embed-task-boards") +
+													" : " +
+													"</b>" +
+													t(
+														"embed-task-boards-info",
+													) +
+													"</li>" +
+													"<li>" +
+													"<b>" +
+													t("inbox-view") +
+													" : " +
+													"</b>" +
+													t("inbox-view-info") +
+													"</li>" +
+													"<li>" +
+													"<b>" +
+													t("calendar-view") +
+													" : " +
+													"</b>" +
+													t("calendar-view-info") +
+													"</li>" +
+													"<li>" +
+													"<b>" +
+													t("table-view") +
+													" : " +
+													"</b>" +
+													t("table-view-info") +
+													"</li>" +
+													"<li>" +
+													"<b>" +
+													t("list-view") +
+													" : " +
+													"</b>" +
+													t("list-view-info") +
+													"</li>" +
+													"</ul>",
+											),
+										);
+								},
+							},
+						],
+					},
+					{
+						type: "group",
+						items: [
+							{
+								name: t("enable-experimental-features"),
+								desc: t("enable-experimental-features-info-1"),
+								render: (setting) => {
+									setting
+										.setName(
+											t("enable-experimental-features"),
+										)
+										.setDesc(
+											t(
+												"enable-experimental-features-info-1",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.experimentalFeatures,
+												)
+												.onChange((value) => {
+													this.globalSettings.experimentalFeatures =
+														value;
+													void this.saveSettings();
+
+													this.openReloadNoticeIfNeeded();
+												}),
+										);
+								},
+							},
+						],
+					},
+				],
+			},
 			// This is a simple group to show donation links.
 			{
 				type: "group",
 				heading: t("support"),
 				items: [
-					this.createLegacySettingsEntry("support-development", [
-						"support-development",
-						"donation",
-					]),
+					{
+						name: "",
+						render: (setting) =>
+							this.renderSupportDevelopmentSection(
+								setting.settingEl,
+							),
+					},
 				],
 			},
 		];
@@ -2976,184 +3088,153 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						cls: "tag-color-row",
 						attr: { "data-tag-name": tag.name },
 					});
-					let colorInputRef: unknown;
+					const controls = row.createDiv({
+						cls: "tag-color-row-element setting-item-control",
+					});
+					const isTagText =
+						this.globalSettings.tagColorsType ===
+						TagColorType.TagText;
+					const tagColorStyles = (element: HTMLElement) => {
+						element.style.backgroundColor = isTagText
+							? ""
+							: tag.color;
+						element.style.color = isTagText ? tag.color : "";
+						element.style.border = isTagText
+							? `1px solid ${tag.color}`
+							: "";
+					};
 
-					new Setting(row)
-						.setClass("tag-color-row-element")
-						.addButton((drag) =>
-							drag
-								.setTooltip("Hold and drag")
-								.setIcon("grip-horizontal")
-								.setClass(
-									"taskboard-setting-tag-color-row-element-drag-handle",
+					const dragButton = controls.createEl("button", {
+						cls: "clickable-icon taskboard-setting-tag-color-row-element-drag-handle",
+						attr: { type: "button", title: "Hold and drag" },
+					});
+					setIcon(dragButton, "grip-horizontal");
+					dragButton.style.cursor = "grab";
+					dragButton.style.setProperty(
+						"max-width",
+						"max-content",
+						"important",
+					);
+					tagColorStyles(dragButton);
+
+					const tagNameInput = controls.createEl("input", {
+						cls: "setting-input",
+						attr: {
+							type: "text",
+							placeholder: t("enter-tag-name"),
+						},
+					});
+					tagNameInput.value = tag.name;
+					tagColorStyles(tagNameInput);
+					tagNameInput.style.setProperty(
+						"min-width",
+						"23vw",
+						"important",
+					);
+					tagNameInput.addEventListener("input", () => {
+						tag.name = tagNameInput.value.trim().replace("#", "");
+						row.setAttribute("data-tag-name", tag.name);
+						void this.saveSettings();
+					});
+
+					const colorPickerButton = controls.createEl("button", {
+						cls: "clickable-icon taskboard-setting-tag-color-row-element-color-picker",
+						attr: {
+							type: "button",
+							title: t("pick-color-for-tag"),
+							"aria-label": t("pick-color-for-tag"),
+						},
+					});
+					setIcon(colorPickerButton, "palette");
+
+					const colorInput = controls.createEl("input", {
+						cls: "setting-input",
+						attr: {
+							type: "text",
+							placeholder: "Color value",
+						},
+					});
+					colorInput.value = tag.color;
+					tagColorStyles(colorInput);
+					colorInput.style.setProperty(
+						"min-width",
+						"23vw",
+						"important",
+					);
+					colorInput.addEventListener("input", () => {
+						tag.color = colorInput.value;
+						void this.saveSettings();
+					});
+
+					const colorMap = this.globalSettings.tagColors.map(
+						(tagColor) => ({
+							color:
+								this.globalSettings.tagColors[
+									tagColor.priority - 1
+								]?.color || "#ff0000",
+						}),
+					);
+					const pickr = new Pickr({
+						el: colorPickerButton,
+						container: tagColorsContainer,
+						theme: "nano",
+						closeOnScroll: true,
+						swatches: colorMap.map((item) => item.color),
+						defaultRepresentation: "HEXA",
+						default: tag.color || "#ff0000",
+						comparison: false,
+						components: {
+							preview: true,
+							opacity: true,
+							hue: true,
+							interaction: {
+								hex: true,
+								rgba: true,
+								hsla: false,
+								hsva: false,
+								cmyk: false,
+								input: true,
+								clear: true,
+								cancel: true,
+								save: true,
+							},
+						},
+					});
+
+					this.allPickrs.push(pickr);
+					pickr
+						.on("change", (color: unknown) => {
+							const rgbaColor = `rgba(${(color as PickrColor)
+								.toRGBA()
+								.map((v: number, i: number) =>
+									i < 3 ? Math.round(v) : v,
 								)
-								.buttonEl.setCssStyles({
-									cursor: "grab",
-									backgroundColor:
-										this.globalSettings.tagColorsType !==
-										TagColorType.TagText
-											? tag.color
-											: "",
-									color:
-										this.globalSettings.tagColorsType ===
-										TagColorType.TagText
-											? tag.color
-											: "",
-									border:
-										this.globalSettings.tagColorsType ===
-										TagColorType.TagText
-											? `1px solid ${tag.color}`
-											: "",
-									maxWidth: "max-content !important",
-								}),
-						)
-						.addText((text) =>
-							text
-								.setPlaceholder(t("enter-tag-name"))
-								.setValue(tag.name)
-								.onChange((value) => {
-									tag.name = value.trim().replace("#", "");
-									row.setAttribute("data-tag-name", tag.name);
-									void this.saveSettings();
-								})
-								.inputEl.setCssStyles({
-									backgroundColor:
-										this.globalSettings.tagColorsType !==
-										TagColorType.TagText
-											? tag.color
-											: "",
-									color:
-										this.globalSettings.tagColorsType ===
-										TagColorType.TagText
-											? tag.color
-											: "",
-									border:
-										this.globalSettings.tagColorsType ===
-										TagColorType.TagText
-											? `1px solid ${tag.color}`
-											: "",
-									minWidth: "23vw !important",
-								}),
-						)
-						.addButton((btn) => {
-							btn.setTooltip(t("pick-color-for-tag"))
-								.setIcon("palette")
-								.setClass(
-									"taskboard-setting-tag-color-row-element-color-picker",
-								)
-								.then(() => {
-									const colorMap =
-										this.globalSettings.tagColors.map(
-											(tagColor) => ({
-												color:
-													this.globalSettings
-														.tagColors[
-														tagColor.priority - 1
-													]?.color || "#ff0000",
-											}),
-										);
-
-									const pickr = new Pickr({
-										el: btn.buttonEl,
-										theme: "nano",
-										swatches: colorMap.map(
-											(item) => item.color,
-										),
-										defaultRepresentation: "HEXA",
-										default: tag.color || "#ff0000",
-										comparison: false,
-										components: {
-											preview: true,
-											opacity: true,
-											hue: true,
-											interaction: {
-												hex: true,
-												rgba: true,
-												hsla: false,
-												hsva: false,
-												cmyk: false,
-												input: true,
-												clear: true,
-												cancel: true,
-												save: false,
-											},
-										},
-									});
-
-									this.allPickrs.push(pickr);
-
-									pickr
-										.on("change", (color: unknown) => {
-											const rgbaColor = `rgba(${(
-												color as PickrColor
-											)
-												.toRGBA()
-												.map((v: number, i: number) =>
-													i < 3 ? Math.round(v) : v,
-												)
-												.join(", ")})`;
-											tag.color = rgbaColor;
-											(
-												colorInputRef as {
-													setValue: (
-														val: string,
-													) => void;
-												}
-											).setValue(rgbaColor);
-										})
-										.on("hide", () => {
-											renderTagColors();
-											void this.saveSettings();
-										})
-										.on("cancel", () => pickr.destroy())
-										.on("clear", () => pickr.hide());
-								});
+								.join(", ")})`;
+							tag.color = rgbaColor;
+							colorInput.value = rgbaColor;
+							void this.saveSettings();
 						})
-						.addText((colorInput) => {
-							colorInputRef = colorInput;
-							colorInput
-								.setPlaceholder("Color value")
-								.setValue(tag.color)
-								.onChange(async (newColor) => {
-									tag.color = newColor;
-									void this.saveSettings();
-								})
-								.inputEl.setCssStyles({
-									backgroundColor:
-										this.globalSettings.tagColorsType !==
-										TagColorType.TagText
-											? tag.color
-											: "",
-									color:
-										this.globalSettings.tagColorsType ===
-										TagColorType.TagText
-											? tag.color
-											: "",
-									border:
-										this.globalSettings.tagColorsType ===
-										TagColorType.TagText
-											? `1px solid ${tag.color}`
-											: "",
-									minWidth: "23vw !important",
-								});
+						.on("hide", () => {
+							renderTagColors();
+							void this.saveSettings();
 						})
-						.addButton((del) =>
-							del
-								.setButtonText("Delete")
-								.setIcon("trash")
-								.setClass(
-									"taskboard-setting-tag-color-row-element-delete",
-								)
-								.setTooltip(t("delete-tag-color"))
-								.onClick(async () => {
-									this.globalSettings.tagColors.splice(
-										index,
-										1,
-									);
-									void this.saveSettings();
-									renderTagColors(); // Re-render after delete
-								}),
-						);
+						.on("cancel", () => pickr.destroy())
+						.on("clear", () => pickr.hide());
+
+					const deleteButton = controls.createEl("span", {
+						cls: "clickable-icon mod-cta taskboard-setting-tag-color-row-element-delete",
+						attr: {
+							type: "span",
+							title: t("delete-tag-color"),
+							"aria-label": t("delete-tag-color"),
+						},
+					});
+					setIcon(deleteButton, "trash");
+					deleteButton.addEventListener("click", () => {
+						this.globalSettings.tagColors.splice(index, 1);
+						void this.saveSettings();
+						renderTagColors();
+					});
 				});
 		};
 
@@ -3185,9 +3266,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	// ================================================
 
 	private renderCustomStatusesTab(contentEl: HTMLElement) {
-		new Setting(contentEl)
-			// .setName(t("custom-statuses"))
-			.setDesc(t("custom-statuses-info"));
+		// new Setting(contentEl)
+		// 	// .setName(t("custom-statuses"))
+		// 	.setDesc(t("custom-statuses-info"));
 
 		// Container for custom statuses list
 		const customStatusesContainer = contentEl.createDiv({
@@ -3568,7 +3649,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						});
 
 						new Setting(host)
-							.setName("Hide property in inline task notes")
+							.setName("Hide property in notes for inline-tasks")
 							.addToggle((toggle) =>
 								toggle
 									.setValue(
@@ -3664,8 +3745,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 		const footer = info.createDiv("task-board-property-footer");
 		const values = footer.createDiv("task-board-property-values");
+		// this.createPropertyValuePill(values, "ID", current.id);
 		this.createPropertyValuePill(values, "Key", current.key);
-		this.createPropertyValuePill(values, "ID", current.id);
+		this.createPropertyValuePill(values, "emoji", current.emoji);
 
 		const actions = footer.createDiv("task-board-property-actions");
 		this.createPropertyActionButton(
@@ -3814,241 +3896,260 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	private renderPropertiesConfigurationSection(
 		_contentEl: HTMLElement,
 		type: "default" | "custom",
-	): SettingDefinitionItem[] {
+	): SettingDefinitionGroup {
 		const propertyGroup = type;
 		const properties =
 			propertyGroup === "default"
 				? this.globalSettings.defaultProperties
 				: this.globalSettings.customProperties;
 		const pageTitle = t(`${propertyGroup}-properties-mapping`);
-		const helpText = t(`${propertyGroup}-properties-mapping-info`);
+		const helpText = t(`${propertyGroup}-properties-mapping-info-2`);
 
-		return [
-			{
-				name: "",
-				searchable: false,
-				aliases: properties.flatMap((property) => [
-					property.name,
-					property.id,
-					property.key,
-					property.type,
-				]),
-				render: (setting) => {
-					const host = setting.settingEl;
-					host.empty();
-					host.removeClass("setting-item");
-					host.addClass(
-						"task-board-property-list",
-						"task-board-settings-tab-root",
-					);
+		return {
+			type: "group",
+			cls: "task-board-settings-properties-configuration-container",
+			heading: "",
+			items: [
+				{
+					name: "",
+					searchable: false,
+					aliases: properties.flatMap((property) => [
+						property.name,
+						property.id,
+						property.key,
+						property.type,
+					]),
+					render: (setting) => {
+						const host = setting.settingEl;
+						host.empty();
+						host.addClass(
+							"task-board-property-list",
+							"task-board-settings-tab-root",
+						);
 
-					const help = host.createDiv(
-						"setting-item-description task-board-key-mappings-help",
-					);
-					help.createEl("p", { text: helpText });
+						const help = host.createDiv(
+							"setting-item-description task-board-key-mappings-help",
+						);
+						help.createEl("p", { text: t(helpText) });
 
-					const list = host.createDiv(
-						"task-board-property-list-items",
-					);
-					const renderRows = () => {
-						list.empty();
-						const orderedProperties = properties
-							.slice()
-							.sort((a, b) => a.rank - b.rank);
-						if (orderedProperties.length === 0) {
-							list.createDiv({
-								cls: "task-board-property-empty-message",
-								text: "No properties configured.",
-							});
-						}
+						const list = host.createDiv(
+							"task-board-property-list-items",
+						);
+						const renderRows = () => {
+							list.empty();
+							const orderedProperties = properties
+								.slice()
+								.sort((a, b) => a.rank - b.rank);
+							if (orderedProperties.length === 0) {
+								list.createDiv({
+									cls: "task-board-property-empty-message",
+									text: "No properties configured.",
+								});
+							}
 
-						orderedProperties.forEach((property, index) => {
-							this.renderKeyMappingRow(
-								list,
-								property,
-								propertyGroup,
-								() => {
-									new PropertyConfigurationModal(
-										this.app,
-										property,
-										propertyGroup,
-										async (updatedProperty) => {
-											const duplicate = [
-												...this.globalSettings
-													.defaultProperties,
-												...this.globalSettings
-													.customProperties,
-											].find(
-												(candidate) =>
-													candidate !== property &&
-													candidate.id ===
-														updatedProperty.id,
-											);
-											if (duplicate) {
-												throw new Error(
-													`The property key "${updatedProperty.id}" is already in use.`,
+							orderedProperties.forEach((property, index) => {
+								this.renderKeyMappingRow(
+									list,
+									property,
+									propertyGroup,
+									() => {
+										new PropertyConfigurationModal(
+											this.app,
+											property,
+											propertyGroup,
+											async (updatedProperty) => {
+												const duplicate = [
+													...this.globalSettings
+														.defaultProperties,
+													...this.globalSettings
+														.customProperties,
+												].find(
+													(candidate) =>
+														candidate !==
+															property &&
+														candidate.id ===
+															updatedProperty.id,
 												);
-											}
-											const shouldShowReloadNotice =
-												property.hidePropertyInNotesForInlineTasks !==
-												updatedProperty.hidePropertyInNotesForInlineTasks;
-											const previousProperty = {
-												...property,
-											};
-											Object.assign(
-												property,
-												updatedProperty,
-											);
-											try {
-												await this.settingsManager.saveSettings();
-											} catch (error) {
+												if (duplicate) {
+													throw new Error(
+														`The property key "${updatedProperty.id}" is already in use.`,
+													);
+												}
+												const shouldShowReloadNotice =
+													property.hidePropertyInNotesForInlineTasks !==
+													updatedProperty.hidePropertyInNotesForInlineTasks;
+												const previousProperty = {
+													...property,
+												};
 												Object.assign(
 													property,
-													previousProperty,
+													updatedProperty,
 												);
-												throw error;
-											}
-											renderRows();
-											if (shouldShowReloadNotice)
-												this.openReloadNoticeIfNeeded();
-										},
-									).open();
-								},
-								(direction) => {
-									void this.moveProperty(
-										properties,
-										property,
-										direction,
-										renderRows,
-									);
-								},
-								index > 0,
-								index < orderedProperties.length - 1,
-								propertyGroup === "custom"
-									? () => {
-											const index =
-												properties.indexOf(property);
-											if (index < 0) return;
-											const previousRanks =
-												properties.map((item) => ({
-													item,
-													rank: item.rank,
-												}));
-											properties.splice(index, 1);
-											this.normalizePropertyRanks(
-												properties,
-											);
-											void (async () => {
 												try {
 													await this.settingsManager.saveSettings();
-													renderRows();
 												} catch (error) {
-													properties.splice(
-														index,
-														0,
+													Object.assign(
+														property,
+														previousProperty,
+													);
+													throw error;
+												}
+												renderRows();
+												if (shouldShowReloadNotice)
+													this.openReloadNoticeIfNeeded();
+											},
+										).open();
+									},
+									(direction) => {
+										void this.moveProperty(
+											properties,
+											property,
+											direction,
+											renderRows,
+										);
+									},
+									index > 0,
+									index < orderedProperties.length - 1,
+									propertyGroup === "custom"
+										? () => {
+												const index =
+													properties.indexOf(
 														property,
 													);
+												if (index < 0) return;
+												const previousRanks =
+													properties.map((item) => ({
+														item,
+														rank: item.rank,
+													}));
+												properties.splice(index, 1);
+												this.normalizePropertyRanks(
+													properties,
+												);
+												void (async () => {
+													try {
+														await this.settingsManager.saveSettings();
+														renderRows();
+													} catch (error) {
+														properties.splice(
+															index,
+															0,
+															property,
+														);
+														previousRanks.forEach(
+															({
+																item,
+																rank,
+															}) => {
+																item.rank =
+																	rank;
+															},
+														);
+														console.error(
+															"Failed to delete property",
+															error,
+														);
+														new Notice(
+															"Failed to delete property.",
+														);
+														renderRows();
+													}
+												})();
+											}
+										: undefined,
+								);
+							});
+						};
+
+						renderRows();
+
+						if (propertyGroup === "custom") {
+							new Setting(host).addButton((button) =>
+								button
+									.setButtonText("Add custom property")
+									.setCta()
+									.onClick(() => {
+										const newProperty =
+											this.createNewCustomProperty();
+										new PropertyConfigurationModal(
+											this.app,
+											newProperty,
+											"custom",
+											async (updatedProperty) => {
+												const duplicate = [
+													...this.globalSettings
+														.defaultProperties,
+													...this.globalSettings
+														.customProperties,
+												].some(
+													(property) =>
+														property.id ===
+														updatedProperty.id,
+												);
+												if (duplicate) {
+													throw new Error(
+														`The property key "${updatedProperty.id}" is already in use.`,
+													);
+												}
+												const previousRanks =
+													properties.map(
+														(property) => ({
+															property,
+															rank: property.rank,
+														}),
+													);
+												properties.push(
+													updatedProperty,
+												);
+												this.normalizePropertyRanks(
+													properties,
+												);
+												try {
+													await this.settingsManager.saveSettings();
+												} catch (error) {
+													properties.pop();
 													previousRanks.forEach(
-														({ item, rank }) => {
-															item.rank = rank;
+														({
+															property,
+															rank,
+														}) => {
+															property.rank =
+																rank;
 														},
 													);
-													console.error(
-														"Failed to delete property",
-														error,
-													);
-													new Notice(
-														"Failed to delete property.",
-													);
-													renderRows();
+													throw error;
 												}
-											})();
-										}
-									: undefined,
+												renderRows();
+											},
+											true,
+										).open();
+									}),
 							);
-						});
-					};
+						}
 
-					renderRows();
+						const cleanupTitleAction =
+							attachDeclarativeSettingsPageTitleAction(
+								host,
+								pageTitle,
+								[
+									"DOCS-039 Key mappings",
+									"DOCS-018 Task properties",
+								].map(
+									(target) =>
+										buildNativeSettingsDocsAction(
+											pageTitle,
+											target,
+										).action,
+								),
+							);
 
-					if (propertyGroup === "custom") {
-						new Setting(host).addButton((button) =>
-							button
-								.setButtonText("Add custom property")
-								.setCta()
-								.onClick(() => {
-									const newProperty =
-										this.createNewCustomProperty();
-									new PropertyConfigurationModal(
-										this.app,
-										newProperty,
-										"custom",
-										async (updatedProperty) => {
-											const duplicate = [
-												...this.globalSettings
-													.defaultProperties,
-												...this.globalSettings
-													.customProperties,
-											].some(
-												(property) =>
-													property.id ===
-													updatedProperty.id,
-											);
-											if (duplicate) {
-												throw new Error(
-													`The property key "${updatedProperty.id}" is already in use.`,
-												);
-											}
-											const previousRanks =
-												properties.map((property) => ({
-													property,
-													rank: property.rank,
-												}));
-											properties.push(updatedProperty);
-											this.normalizePropertyRanks(
-												properties,
-											);
-											try {
-												await this.settingsManager.saveSettings();
-											} catch (error) {
-												properties.pop();
-												previousRanks.forEach(
-													({ property, rank }) => {
-														property.rank = rank;
-													},
-												);
-												throw error;
-											}
-											renderRows();
-										},
-										true,
-									).open();
-								}),
-						);
-					}
-
-					const cleanupTitleAction =
-						attachDeclarativeSettingsPageTitleAction(
-							host,
-							pageTitle,
-							[
-								"DOCS-039 Key mappings",
-								"DOCS-018 Task properties",
-							].map(
-								(target) =>
-									buildNativeSettingsDocsAction(
-										pageTitle,
-										target,
-									).action,
-							),
-						);
-
-					return () => {
-						cleanupTitleAction?.();
-					};
+						return () => {
+							cleanupTitleAction?.();
+						};
+					},
 				},
-			},
-		];
+			],
+		};
 	}
 
 	// ================================================
@@ -4189,6 +4290,50 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		updatePreview();
 	}
 
+	private renderSupportDevelopmentSection(contentEl: HTMLElement) {
+		const footerSection = contentEl.createEl("div", {
+			cls: "settingTabFooterSection setting-item-name",
+		});
+
+		// footerSection
+		// 	.createEl("p", {
+		// 		text: t("this-plugin-is-created-by"),
+		// 	})
+		// 	.createEl("a", {
+		// 		text: t("author-name"),
+		// 		href: "https://www.github.com/tu2-atmanand",
+		// 	});
+
+		const footerText = createEl("p");
+		footerText.appendText(t("donation-message"));
+
+		footerSection.appendChild(footerText);
+
+		const parser = new DOMParser();
+
+		const donationSection = createEl("div", {
+			cls: "settingTabFooterDonationsSec",
+		});
+		donationSection.appendChild(
+			paypalButton("https://paypal.me/tu2atmanand"),
+		);
+		donationSection.appendChild(
+			buyMeACoffeeButton(
+				"https://www.buymeacoffee.com/tu2_atmanand",
+				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
+					.documentElement,
+			),
+		);
+		donationSection.appendChild(
+			kofiButton(
+				"https://ko-fi.com/atmanandgauns",
+				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement,
+			),
+		);
+
+		footerSection.appendChild(donationSection);
+	}
+
 	hide(): void {
 		this.settingsManager.cleanUp();
 	}
@@ -4237,3 +4382,114 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		};
 	}
 }
+
+const paypalButton = (link: string): HTMLElement => {
+	const a = createEl("a", {
+		href: link,
+		cls: "buymeacoffee-tu2-atmanand-img",
+	});
+	const svg = createSvg("svg", {
+		attr: {
+			xmlns: "http://www.w3.org/2000/svg",
+			width: "150",
+			height: "40",
+		},
+	});
+	// Append `path` elements to `svg`
+	svg.appendChild(
+		createSvg("path", {
+			attr: {
+				fill: "#253B80",
+				d: "M46.211 6.749h-6.839a.95.95 0 0 0-.939.802l-2.766 17.537a.57.57 0 0 0 .564.658h3.265a.95.95 0 0 0 .939-.803l.746-4.73a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.972-1.142-2.696-1.746-4.985-1.746zM47 13.154c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583a.57.57 0 0 1 .563-.481h.473c1.235 0 2.4 0 3.002.704.359.42.469 1.044.332 1.906zM66.654 13.075h-3.275a.57.57 0 0 0-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .562.66h2.95a.95.95 0 0 0 .939-.803l1.77-11.209a.568.568 0 0 0-.561-.658zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.499.589.697 1.411.554 2.317zM84.096 13.075h-3.291a.954.954 0 0 0-.787.417l-4.539 6.686-1.924-6.425a.953.953 0 0 0-.912-.678h-3.234a.57.57 0 0 0-.541.754l3.625 10.638-3.408 4.811a.57.57 0 0 0 .465.9h3.287a.949.949 0 0 0 .781-.408l10.946-15.8a.57.57 0 0 0-.468-.895z",
+			},
+		}),
+	);
+	svg.appendChild(
+		createSvg("path", {
+			attr: {
+				fill: "#179BD7",
+				d: "M94.992 6.749h-6.84a.95.95 0 0 0-.938.802l-2.766 17.537a.569.569 0 0 0 .562.658h3.51a.665.665 0 0 0 .656-.562l.785-4.971a.95.95 0 0 1 .938-.803h2.164c4.506 0 7.105-2.18 7.785-6.5.307-1.89.012-3.375-.873-4.415-.971-1.142-2.694-1.746-4.983-1.746zm.789 6.405c-.373 2.454-2.248 2.454-4.062 2.454h-1.031l.725-4.583a.568.568 0 0 1 .562-.481h.473c1.234 0 2.4 0 3.002.704.359.42.468 1.044.331 1.906zM115.434 13.075h-3.273a.567.567 0 0 0-.562.481l-.145.916-.23-.332c-.709-1.029-2.289-1.373-3.867-1.373-3.619 0-6.709 2.741-7.311 6.586-.312 1.918.131 3.752 1.219 5.031 1 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .564.66h2.949a.95.95 0 0 0 .938-.803l1.771-11.209a.571.571 0 0 0-.565-.658zm-4.565 6.374c-.314 1.871-1.801 3.127-3.695 3.127-.949 0-1.711-.305-2.199-.883-.484-.574-.666-1.391-.514-2.301.297-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.501.589.699 1.411.554 2.317zM119.295 7.23l-2.807 17.858a.569.569 0 0 0 .562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536a.57.57 0 0 0-.562-.659h-3.16a.571.571 0 0 0-.562.482z",
+			},
+		}),
+	);
+	svg.appendChild(
+		createSvg("path", {
+			attr: {
+				fill: "#253B80",
+				d: "M7.266 29.154l.523-3.322-1.165-.027H1.061L4.927 1.292a.316.316 0 0 1 .314-.268h9.38c3.114 0 5.263.648 6.385 1.927.526.6.861 1.227 1.023 1.917.17.724.173 1.589.007 2.644l-.012.077v.676l.526.298a3.69 3.69 0 0 1 1.065.812c.45.513.741 1.165.864 1.938.127.795.085 1.741-.123 2.812-.24 1.232-.628 2.305-1.152 3.183a6.547 6.547 0 0 1-1.825 2c-.696.494-1.523.869-2.458 1.109-.906.236-1.939.355-3.072.355h-.73c-.522 0-1.029.188-1.427.525a2.21 2.21 0 0 0-.744 1.328l-.055.299-.924 5.855-.042.215c-.011.068-.03.102-.058.125a.155.155 0 0 1-.096.035H7.266z",
+			},
+		}),
+	);
+	svg.appendChild(
+		createSvg("path", {
+			attr: {
+				fill: "#179BD7",
+				d: "M23.048 7.667c-.028.179-.06.362-.096.55-1.237 6.351-5.469 8.545-10.874 8.545H9.326c-.661 0-1.218.48-1.321 1.132L6.596 26.83l-.399 2.533a.704.704 0 0 0 .695.814h4.881c.578 0 1.069-.42 1.16-.99l.048-.248.919-5.832.059-.32c.09-.572.582-.992 1.16-.992h.73c4.729 0 8.431-1.92 9.513-7.476.452-2.321.218-4.259-.978-5.622a4.667 4.667 0 0 0-1.336-1.03z",
+			},
+		}),
+	);
+	svg.appendChild(
+		createSvg("path", {
+			attr: {
+				fill: "#222D65",
+				d: "M21.754 7.151a9.757 9.757 0 0 0-1.203-.267 15.284 15.284 0 0 0-2.426-.177h-7.352a1.172 1.172 0 0 0-1.159.992L8.05 17.605l-.045.289a1.336 1.336 0 0 1 1.321-1.132h2.752c5.405 0 9.637-2.195 10.874-8.545.037-.188.068-.371.096-.55a6.594 6.594 0 0 0-1.017-.429 9.045 9.045 0 0 0-.277-.087z",
+			},
+		}),
+	);
+	svg.appendChild(
+		createSvg("path", {
+			attr: {
+				fill: "#253B80",
+				d: "M9.614 7.699a1.169 1.169 0 0 1 1.159-.991h7.352c.871 0 1.684.057 2.426.177a9.757 9.757 0 0 1 1.481.353c.365.121.704.264 1.017.429.368-2.347-.003-3.945-1.272-5.392C20.378.682 17.853 0 14.622 0h-9.38c-.66 0-1.223.48-1.325 1.133L.01 25.898a.806.806 0 0 0 .795.932h5.791l1.454-9.225 1.564-9.906z",
+			},
+		}),
+	);
+
+	a.appendChild(svg);
+	return a;
+};
+
+// const buyMeACoffeeButton = (link: string): HTMLElement => {
+// 	const a = createEl("a", {
+// 		href: link,
+// 		cls: "buymeacoffee-tu2-atmanand-img",
+// 	});
+// 	const img = createEl("img", {
+// 		attr: {
+// 			src: "https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00",
+// 		},
+// 	});
+// 	a.appendChild(img);
+// 	return a;
+// };
+
+const buyMeACoffeeButton = (link: string, img: HTMLElement): HTMLElement => {
+	const a = activeDocument.createElement("a");
+	a.setAttribute("href", link);
+	a.addClass("buymeacoffee-tu2-atmanand-img");
+	a.appendChild(img);
+	return a;
+};
+
+// const kofiButton = (link: string): HTMLElement => {
+// 	const a = createEl("a", {
+// 		href: link,
+// 		cls: "buymeacoffee-tu2-atmanand-img",
+// 	});
+// 	const img = createEl("img", {
+// 		attr: {
+// 			src: "https://raw.githubusercontent.com/tu2-atmanand/Task-Board/main/assets/kofi_color.svg",
+// 			height: "40",
+// 		},
+// 	});
+// 	a.appendChild(img);
+// 	return a;
+// };
+
+const kofiButton = (link: string, img: HTMLElement): HTMLElement => {
+	const a = activeDocument.createElement("a");
+	a.setAttribute("href", link);
+	a.addClass("buymeacoffee-tu2-atmanand-img");
+	a.appendChild(img);
+	return a;
+};

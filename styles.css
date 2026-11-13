@@ -27,6 +27,7 @@
 	flex-direction: column;
 	gap: 0.65em;
 	margin-block: 1em;
+	width: stretch;
 }
 
 .task-board-property-empty-message {
@@ -168,9 +169,10 @@
 	justify-content: center;
 	padding: 0.3em;
 	border: 0;
-	background: transparent;
-	color: var(--text-muted);
+	color: var(--text-muted) !important;
+	background-color: transparent !important;
 	cursor: var(--cursor);
+	box-shadow: none !important;
 }
 
 .task-board-property-action svg.svg-icon {
@@ -3460,6 +3462,7 @@ li:hover .taskboard-hidden-property {
 	gap: 8px;
 	margin-top: 1em;
 	margin-bottom: 1em;
+	width: stretch;
 }
 
 .custom-statuses-empty-message {
@@ -3478,7 +3481,6 @@ li:hover .taskboard-hidden-property {
 	justify-content: space-between;
 	padding: 4px 12px;
 	padding-bottom: 6px;
-	margin-inline: 1rem;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 8px;
 	background-color: var(--background-primary);
@@ -3634,15 +3636,6 @@ li:hover .taskboard-hidden-property {
 	transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.setting-item.tag-color-row-element {
-	border: none !important;
-	background-color: transparent !important;
-}
-
-.tag-color-row-element .setting-item-info {
-	display: none !important;
-}
-
 .tag-color-row .setting-item-control {
 	display: flex;
 	align-items: center;
@@ -3659,7 +3652,7 @@ li:hover .taskboard-hidden-property {
 	box-shadow: 0 0 8px var(--interactive-accent);
 }
 
-/* Inside setting layout (small tweak to better align) */
+/* Tag row controls */
 .tag-color-row-element {
 	flex-grow: 1;
 	display: flex;
@@ -3716,8 +3709,6 @@ li:hover .taskboard-hidden-property {
 
 /* Delete button */
 .tag-color-row-element .mod-cta {
-	background-color: var(--color-red);
-	color: white;
 	padding: 4px 8px;
 	border-radius: 4px;
 	font-size: 12px;
@@ -3798,14 +3789,12 @@ li:hover .taskboard-hidden-property {
 
 .task-board-settings-tab-tag-colors-container .setting-items .setting-item,
 .task-board-settings-tab-filters-for-scanning-container .setting-items .setting-item,
+.task-board-settings-custom-statuses-container .setting-items .setting-item,
+.task-board-settings-properties-configuration-container .setting-items .setting-item,
 .taskBoard-settings-wide-input {
 	width: 100% !important;
 	display: flex !important;
 	flex-direction: column !important;
-}
-
-.settingTabFooterSection {
-	padding-inline: 20px;
 }
 
 @media (max-width: 768px) {

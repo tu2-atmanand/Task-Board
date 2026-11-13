@@ -83,9 +83,7 @@ export type SettingsTabPagesKey =
 	| "task-notes"
 	| "map-view"
 	| "automation"
-	| "formats"
-	| "support-development"
-	| "experimental-features";
+	| "formats";
 
 export class SettingsManager {
 	win: Window;
@@ -286,12 +284,6 @@ export class SettingsManager {
 				break;
 			case "formats":
 				this.renderFormatsSettingsTab(contentEl);
-				break;
-			case "experimental-features":
-				this.renderExperimentalSettingsTab(contentEl);
-				break;
-			case "support-development":
-				this.renderSupportDevelopmentSection(contentEl);
 				break;
 		}
 	}
@@ -742,6 +734,39 @@ export class SettingsManager {
 
 					this.openReloadNoticeIfNeeded();
 				}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						"<br/>" +
+						"<br/>" +
+						t("enable-experimental-features-info-2") +
+						"<br/>" +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("embed-task-boards") +
+						" : " +
+						"</b>" +
+						t("embed-task-boards-info") +
+						"</li>" +
+						"</ul>",
+				),
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.globalSettings.experimentalFeatures)
+					.onChange((value) => {
+						this.globalSettings.experimentalFeatures = value;
+						void this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
+					}),
 			);
 
 		// // Helper to add filter rows
@@ -2609,85 +2634,6 @@ export class SettingsManager {
 		// 				void this.saveSettings();
 		// 			}),
 		// 	);
-	}
-
-	private renderExperimentalSettingsTab(contentEl: HTMLElement) {
-		new Setting(contentEl)
-			.setName(t("enable-experimental-features"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("enable-experimental-features-info-1") +
-						"<br/>" +
-						"<br/>" +
-						"<br/>" +
-						t("enable-experimental-features-info-2") +
-						"<br/>" +
-						"<br/>" +
-						"<ul>" +
-						"<li>" +
-						"<b>" +
-						t("embed-task-boards") +
-						" : " +
-						"</b>" +
-						t("embed-task-boards-info") +
-						"</li>" +
-						"</ul>",
-				),
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.globalSettings.experimentalFeatures)
-					.onChange((value) => {
-						this.globalSettings.experimentalFeatures = value;
-						void this.saveSettings();
-
-						this.openReloadNoticeIfNeeded();
-					}),
-			);
-	}
-
-	private renderSupportDevelopmentSection(contentEl: HTMLElement) {
-		const footerSection = contentEl.createEl("div", {
-			cls: "settingTabFooterSection setting-item-name",
-		});
-
-		// footerSection
-		// 	.createEl("p", {
-		// 		text: t("this-plugin-is-created-by"),
-		// 	})
-		// 	.createEl("a", {
-		// 		text: t("author-name"),
-		// 		href: "https://www.github.com/tu2-atmanand",
-		// 	});
-
-		const footerText = createEl("p");
-		footerText.appendText(t("donation-message"));
-
-		footerSection.appendChild(footerText);
-
-		const parser = new DOMParser();
-
-		const donationSection = createEl("div", {
-			cls: "settingTabFooterDonationsSec",
-		});
-		donationSection.appendChild(
-			paypalButton("https://paypal.me/tu2atmanand"),
-		);
-		donationSection.appendChild(
-			buyMeACoffeeButton(
-				"https://www.buymeacoffee.com/tu2_atmanand",
-				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
-					.documentElement,
-			),
-		);
-		donationSection.appendChild(
-			kofiButton(
-				"https://ko-fi.com/atmanandgauns",
-				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement,
-			),
-		);
-
-		footerSection.appendChild(donationSection);
 	}
 }
 
