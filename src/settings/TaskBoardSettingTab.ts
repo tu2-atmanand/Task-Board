@@ -17,6 +17,7 @@ import {
 import TaskBoard from "../../main.js";
 import { PropertyConfigurationModal } from "../ui/modals/PropertyConfigurationModal.js";
 import {
+	CustomPriority,
 	CustomStatus,
 	globalSettingsData,
 	SupportedPropertiesConfig,
@@ -59,6 +60,7 @@ import Sortable from "sortablejs";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
 
 import { CustomStatusModal } from "../ui/modals/CustomStatusConfigurator.js";
+import { CustomPriorityModal } from "../ui/modals/CustomPriorityConfigurator.js";
 import { fetchTasksPluginCustomStatuses } from "../services/tasks_plugin/helpers.js";
 import {
 	normalizeTaskIconValue,
@@ -1150,8 +1152,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						items: [
 							{
 								type: "page",
-								name: t("custom-statuses"),
-								desc: t("custom-statuses-info"),
+								name: t("statuses"),
+								desc: t("statuses-configuration-info"),
 								items: [
 									{
 										type: "group",
@@ -1159,7 +1161,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										items: [
 											{
 												name: "",
-												desc: t("custom-statuses-info"),
+												desc: t(
+													"statuses-configuration-info",
+												),
 												render: (setting) =>
 													this.renderCustomStatusesTab(
 														setting.settingEl,
@@ -1171,15 +1175,18 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 							},
 							{
 								type: "page",
-								name: t("custom-priorities"),
-								desc: t("custom-priorities-info"),
+								name: t("priorities"),
+								desc: t("priorities-configuration-info"),
 								items: [
 									{
-										type: "list",
-										heading: t("custom-statuses"),
+										type: "group",
+										cls: "task-board-settings-custom-priorities-container",
 										items: [
 											{
 												name: "",
+												desc: t(
+													"priorities-configuration-info",
+												),
 												render: (setting) =>
 													this.renderCustomPrioritiesTab(
 														setting.settingEl,
@@ -3267,6 +3274,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					},
 				});
 				setIcon(iconButton, isIconAvailable ? iconId : "plus");
+				if (status.color) iconButton.style.color = status.color;
 				iconButton.onclick = () => {
 					const updateStatusIcon = (value: string) => {
 						const currentStatus =
@@ -3295,10 +3303,18 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 				const statusInfoName = statusItemHeading.createDiv({
 					cls: "custom-status-field-element-heading-name",
 				});
-				statusInfoName.createDiv({
+				const statusName = statusInfoName.createDiv({
 					cls: "custom-status-field-value",
 					text: status.name,
 				});
+				if (status.color) statusName.style.color = status.color;
+
+				if (status.desc?.trim()) {
+					statusInfoContainer.createDiv({
+						cls: "custom-status-field-value custom-status-description",
+						text: status.desc,
+					});
+				}
 
 				// Status Symbol
 				const statusInfoSymbol = statusInfoContainer.createDiv({
@@ -3360,6 +3376,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,
 								lucideIcon: status.lucideIcon ?? "",
+								color: updatedStatus.color,
+								desc: updatedStatus.desc,
 							};
 							this.globalSettings.customStatuses[index] =
 								customStatus;
@@ -3441,6 +3459,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										statusConfig.availableAsCommand,
 									type: statusConfig.type,
 									lucideIcon: "",
+									color: statusConfig.color,
+									desc: statusConfig.desc,
 								};
 								if (!this.globalSettings.customStatuses) {
 									this.globalSettings.customStatuses = [];
@@ -3460,14 +3480,146 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	}
 
 	private renderCustomPrioritiesTab(contentEl: HTMLElement) {
-		new Setting(contentEl)
-			// .setName(t("custom-statuses"))
-			.setDesc(t("custom-priorities-info"));
-
-		// Container for custom statuses list
+		this.globalSettings.customPriorities ??= [];
 		const customPrioritiesContainer = contentEl.createDiv({
 			cls: "custom-priorities-container",
 		});
+
+		const renderCustomPriorities = () => {
+			customPrioritiesContainer.empty();
+			const priorities = this.globalSettings.customPriorities ?? [];
+
+			if (priorities.length === 0) {
+				customPrioritiesContainer.createDiv({
+					cls: "custom-statuses-empty-message",
+					text: t("no-custom-priorities-configured"),
+				});
+				return;
+			}
+
+			[...priorities]
+				.sort((a, b) => a.rank - b.rank)
+				.forEach((priority) => {
+					const priorityIndex =
+						this.globalSettings.customPriorities.indexOf(priority);
+					const row = customPrioritiesContainer.createDiv({
+						cls: "custom-status-row custom-priority-row",
+					});
+					const info = row.createDiv({
+						cls: "custom-status-info-container",
+					});
+					const heading = info.createDiv({
+						cls: "custom-status-field-element-heading setting-item-name",
+					});
+					if (priority.emoji) {
+						heading.createSpan({
+							cls: "custom-priority-emoji",
+							text: priority.emoji,
+						});
+					}
+					if (priority.lucideIcon) {
+						const icon = heading.createSpan({
+							cls: "custom-status-field-element-heading-icon",
+						});
+						setIcon(icon, priority.lucideIcon);
+						if (priority.color) icon.style.color = priority.color;
+					}
+					const name = heading.createDiv({
+						cls: "custom-status-field-value",
+						text: priority.name,
+					});
+					if (priority.color) name.style.color = priority.color;
+					if (priority.desc?.trim()) {
+						info.createDiv({
+							cls: "custom-status-field-value custom-status-description",
+							text: priority.desc,
+						});
+					}
+					info.createDiv({
+						cls: "custom-status-field-value setting-item-description",
+						text: t("priority-rank-value", {
+							rank: priority.rank,
+						}),
+					});
+
+					const buttons = row.createDiv({
+						cls: "custom-status-buttons",
+					});
+					const editButton = buttons.createEl("span", {
+						cls: "edit-btn",
+						text: t("edit"),
+						title: t("edit"),
+					});
+					setIcon(editButton, "pencil");
+					editButton.addEventListener("click", () => {
+						const modal = new CustomPriorityModal(
+							this.app,
+							priority,
+						);
+						modal.onClose = () => {
+							if (!modal.saved) return;
+							this.globalSettings.customPriorities[
+								priorityIndex
+							] = modal.priorityConfiguration();
+							void this.saveSettings();
+							renderCustomPriorities();
+						};
+						modal.open();
+					});
+
+					const deleteButton = buttons.createEl("span", {
+						cls: "delete-btn",
+						text: t("delete"),
+						title: t("delete"),
+					});
+					setIcon(deleteButton, "trash");
+					deleteButton.addEventListener("click", () => {
+						this.globalSettings.customPriorities.splice(
+							priorityIndex,
+							1,
+						);
+						[...this.globalSettings.customPriorities]
+							.sort((a, b) => a.rank - b.rank)
+							.forEach((item, rank) => (item.rank = rank + 1));
+						void this.saveSettings();
+						renderCustomPriorities();
+					});
+				});
+		};
+
+		renderCustomPriorities();
+
+		new Setting(contentEl).addButton((button) =>
+			button
+				.setButtonText(t("add-new-priority"))
+				.setCta()
+				.onClick(() => {
+					const priority: CustomPriority = {
+						name: "",
+						rank:
+							Math.max(
+								0,
+								...this.globalSettings.customPriorities.map(
+									(item) => item.rank,
+								),
+							) + 1,
+						emoji: "",
+						lucideIcon: "",
+						color: "",
+						desc: "",
+					};
+					const modal = new CustomPriorityModal(this.app, priority);
+					modal.onClose = () => {
+						if (!modal.saved) return;
+						this.globalSettings.customPriorities.push(
+							modal.priorityConfiguration(),
+						);
+						void this.saveSettings();
+						renderCustomPriorities();
+					};
+					modal.open();
+				}),
+		);
 	}
 
 	// ================================================

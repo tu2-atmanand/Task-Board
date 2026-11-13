@@ -72,6 +72,17 @@ export interface CustomStatus {
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
 	type: statusTypeNames; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
 	lucideIcon: string; // Lucide icon id
+	color?: string; // This will be used to color the icon.
+	desc?: string;
+}
+
+export interface CustomPriority {
+	name: string;
+	rank: number;
+	emoji: string;
+	lucideIcon: string;
+	color?: string;
+	desc?: string;
 }
 
 export interface RecurrenceConfigs {
@@ -137,6 +148,7 @@ export interface globalSettingsData {
 	defaultProperties: SupportedPropertiesConfig[];
 	customProperties: SupportedPropertiesConfig[];
 	customStatuses: CustomStatus[];
+	customPriorities: CustomPriority[];
 
 	// Views
 	//     Map View
@@ -599,6 +611,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 				lucideIcon: "",
 			},
 		],
+		customPriorities: [],
 		compatiblePlugins: {
 			dailyNotesPlugin: false,
 			dayPlannerPlugin: false,

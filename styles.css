@@ -3458,7 +3458,8 @@ li:hover .taskboard-hidden-property {
 
 /* Container for all tag rows */
 /* Custom Statuses Container and Rows */
-.custom-statuses-container {
+.custom-statuses-container,
+.custom-priorities-container {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
@@ -3491,6 +3492,31 @@ li:hover .taskboard-hidden-property {
 
 .custom-status-row:hover {
 	background-color: var(--background-secondary-alt);
+}
+
+.custom-status-description {
+	margin-top: 3px;
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	white-space: pre-wrap;
+}
+
+.custom-priority-row {
+	align-items: center;
+}
+
+.custom-priority-emoji {
+	font-size: 1.1em;
+	line-height: 1;
+}
+
+.task-board-custom-status-color-button {
+	min-width: 120px;
+	padding: 4px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	color: var(--text-normal);
+	cursor: pointer;
 }
 
 .custom-status-info-container {
@@ -3776,6 +3802,7 @@ li:hover .taskboard-hidden-property {
 .task-board-settings-tab-tag-colors-container .setting-items .setting-item,
 .task-board-settings-tab-filters-for-scanning-container .setting-items .setting-item,
 .task-board-settings-custom-statuses-container .setting-items .setting-item,
+.task-board-settings-custom-priorities-container .setting-items .setting-item,
 .task-board-settings-properties-configuration-container .setting-items .setting-item,
 .taskBoard-settings-wide-input {
 	width: 100% !important;

@@ -1341,6 +1341,7 @@ export class SettingsManager {
 					},
 				});
 				setIcon(iconButton, isIconAvailable ? iconId : "plus");
+				if (status.color) iconButton.style.color = status.color;
 				iconButton.onclick = () => {
 					const updateStatusIcon = (value: string) => {
 						const currentStatus =
@@ -1369,10 +1370,18 @@ export class SettingsManager {
 				const statusInfoName = statusItemHeading.createDiv({
 					cls: "custom-status-field-element-heading-name",
 				});
-				statusInfoName.createDiv({
+				const statusName = statusInfoName.createDiv({
 					cls: "custom-status-field-value",
 					text: status.name,
 				});
+				if (status.color) statusName.style.color = status.color;
+
+				if (status.desc?.trim()) {
+					statusInfoContainer.createDiv({
+						cls: "custom-status-field-value custom-status-description",
+						text: status.desc,
+					});
+				}
 
 				// Status Symbol
 				const statusInfoSymbol = statusInfoContainer.createDiv({
@@ -1434,6 +1443,8 @@ export class SettingsManager {
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,
 								lucideIcon: status.lucideIcon ?? "",
+								color: updatedStatus.color,
+								desc: updatedStatus.desc,
 							};
 							this.plugin.settings.data.customStatuses[index] =
 								customStatus;
@@ -1515,6 +1526,8 @@ export class SettingsManager {
 										statusConfig.availableAsCommand,
 									type: statusConfig.type,
 									lucideIcon: "",
+									color: statusConfig.color,
+									desc: statusConfig.desc,
 								};
 								if (!this.globalSettings.customStatuses) {
 									this.globalSettings.customStatuses = [];

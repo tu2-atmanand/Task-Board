@@ -220,5 +220,5 @@ export enum PropertyTypeConfig {
 }
 
 export enum DefaultLucideIconsForProperties {
-	id = "id",
+	id = "fingerprint-pattern",
 }
