@@ -1,13 +1,22 @@
 import { Notice, setIcon } from "obsidian";
-import { FloatingHostOptions, getFloatingRectAnchorOwner, createFloatingPanel, createButton, focusFloatingInput } from "../../components/Common.js";
+import {
+	FloatingHostOptions,
+	getFloatingRectAnchorOwner,
+	createFloatingPanel,
+	createButton,
+	focusFloatingInput,
+} from "../../components/Common.js";
 import { asHTMLElement, getOwnerWindow } from "../../../utils/DomCompat.js";
-import { ColorPaletteEntry, localizeColorPaletteNames } from "./ColorPalette.js";
+import {
+	ColorPaletteEntry,
+	localizeColorPaletteNames,
+} from "./ColorPalette.js";
 import { t } from "i18next";
-// import { setAccessibleLabelWithoutTooltip } from "../../utils/AccessibilityLabel.js";
 
 interface ColorPickerOptions extends FloatingHostOptions {
 	value?: string;
 	palette?: ColorPaletteEntry[];
+	outputFormat?: "hex" | "rgb";
 	retainInputFocus?: boolean;
 	onSelect: (value: string) => void;
 	onClear?: () => void;
@@ -48,10 +57,10 @@ function clamp(value: number, min: number, max: number): number {
 
 function normalizeHex(value: string | null | undefined): string | null {
 	const normalized = (value ?? "").trim().replace(/^#/, "");
-	if (/^[0-9a-fA-F]{6}$/.test(normalized)) {
-		return `#${normalized.toUpperCase()}`;
+	if (/^[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?$/.test(normalized)) {
+		return `#${normalized.slice(0, 6).toUpperCase()}`;
 	}
-	const rgbMatch = value?.trim().match(
+	const rgbMatch = normalized.match(
 		/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*[\d.]+)?\s*\)$/i,
 	);
 	if (!rgbMatch) return null;
@@ -60,6 +69,21 @@ function normalizeHex(value: string | null | undefined): string | null {
 		g: Number(rgbMatch[2]),
 		b: Number(rgbMatch[3]),
 	});
+}
+
+function getColorOpacity(value: string | null | undefined): number {
+	const normalized = (value ?? "").trim().replace(/^#/, "");
+	if (/^[0-9a-fA-F]{8}$/.test(normalized)) {
+		return Number.parseInt(normalized.slice(6), 16) / 255;
+	}
+	const rgbMatch = value
+		?.trim()
+		.match(
+			/^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*([\d.]+)\s*\)$/i,
+		);
+	if (!rgbMatch) return 1;
+	const alpha = Number(rgbMatch[1]);
+	return Number.isFinite(alpha) ? clamp(alpha, 0, 1) : 1;
 }
 
 function hexToRgb(hex: string): RgbColor {
@@ -80,6 +104,22 @@ function componentToHex(value: number): string {
 
 function rgbToHex(color: RgbColor): string {
 	return `#${componentToHex(color.r)}${componentToHex(color.g)}${componentToHex(color.b)}`;
+}
+
+function formatColor(
+	hex: string,
+	opacity: number,
+	format: "hex" | "rgb",
+): string {
+	const color = hexToRgb(hex);
+	if (format === "rgb") {
+		const channels = `${Math.round(color.r)}, ${Math.round(color.g)}, ${Math.round(color.b)}`;
+		return opacity < 1
+			? `rgba(${channels}, ${Number(opacity.toFixed(2))})`
+			: `rgb(${channels})`;
+	}
+	const alpha = componentToHex(opacity * 255);
+	return opacity < 1 ? `${hex}${alpha}` : hex;
 }
 
 function mixRgb(color: RgbColor, target: RgbColor, amount: number): RgbColor {
@@ -261,24 +301,33 @@ export function showColorPicker(
 
 	const input = panel.createEl("input");
 	input.type = "text";
-	input.className = "task-board-floating-input task-board-color-picker-search";
+	input.className =
+		"task-board-floating-input task-board-color-picker-search";
 	input.placeholder = t("search-color-info");
 	// setAccessibleLabelWithoutTooltip(input, t("searchColor"));
 
 	const toneStrip = panel.createDiv("task-board-color-picker-tone-strip");
 
 	const body = panel.createDiv("task-board-color-picker-body");
-	const paletteColumn = body.createDiv("task-board-color-picker-palette-column");
+	const paletteColumn = body.createDiv(
+		"task-board-color-picker-palette-column",
+	);
 
 	const grid = paletteColumn.createDiv("task-board-color-picker-grid");
 	grid.setAttribute("role", "grid");
 
-	const customColumn = body.createDiv("task-board-color-picker-custom-column");
-	const freePlane = customColumn.createDiv("task-board-color-picker-free-plane");
+	const customColumn = body.createDiv(
+		"task-board-color-picker-custom-column",
+	);
+	const freePlane = customColumn.createDiv(
+		"task-board-color-picker-free-plane",
+	);
 	freePlane.tabIndex = 0;
 	freePlane.setAttribute("role", "application");
 	// setAccessibleLabelWithoutTooltip(freePlane, t("customColor"));
-	const freeHandle = freePlane.createSpan("task-board-color-picker-free-handle");
+	const freeHandle = freePlane.createSpan(
+		"task-board-color-picker-free-handle",
+	);
 	const freeEmpty = freePlane.createDiv("task-board-color-picker-free-empty");
 	freeEmpty.textContent = t("taskEditor", "noColorSelected");
 
@@ -307,6 +356,29 @@ export function showColorPicker(
 	});
 	hueSlider.tabIndex = -1;
 	hueSlider.setAttribute("aria-hidden", "true");
+
+	const opacityControl = customColumn.createDiv(
+		"task-board-color-picker-opacity-control",
+	);
+	// const opacityLabel = opacityControl.createEl("label", {
+	// 	cls: "task-board-color-picker-opacity-label",
+	// 	text: t("color-opacity"),
+	// });
+	const opacitySlider = opacityControl.createEl("input", {
+		cls: "task-board-color-picker-opacity-slider",
+		attr: {
+			type: "range",
+			min: "0",
+			max: "100",
+			step: "1",
+			"aria-label": t("color-opacity"),
+		},
+	});
+	const opacityValue = opacityControl.createSpan(
+		"task-board-color-picker-opacity-value",
+	);
+	// opacityLabel.htmlFor = opacitySlider.id =
+	// 	`task-board-color-picker-opacity-${Math.random().toString(36).slice(2)}`;
 
 	const footer = customColumn.createDiv("task-board-color-picker-footer");
 	const actions = footer.createDiv(
@@ -348,6 +420,7 @@ export function showColorPicker(
 	actions.appendChild(chooseButton);
 
 	let baseHex = normalizeHex(options.value);
+	let opacity = getColorOpacity(options.value);
 	let selectedPresetIndex = baseHex
 		? findPresetIndexByHex(baseHex)
 		: CUSTOM_GRID_INDEX;
@@ -396,6 +469,7 @@ export function showColorPicker(
 	function previewTypedHexInput(): boolean {
 		const normalized = normalizeHex(input.value);
 		if (!normalized) return false;
+		opacity = getColorOpacity(input.value);
 		const presetIndex = findPresetIndexByHex(normalized);
 		baseHex = normalized;
 		activeHex = normalized;
@@ -411,7 +485,9 @@ export function showColorPicker(
 		const normalized = normalizeHex(activeHex);
 		if (!normalized) return;
 		completed = true;
-		options.onSelect(normalized.replace(/^#/, ""));
+		options.onSelect(
+			formatColor(normalized, opacity, options.outputFormat ?? "hex"),
+		);
 		close();
 	}
 
@@ -491,7 +567,7 @@ export function showColorPicker(
 			return;
 		}
 		void clipboard
-			.writeText(normalized)
+			.writeText(formatColor(normalized, opacity, "hex"))
 			.then(() => {
 				new Notice(t("notifications", "colorHexCopied"));
 			})
@@ -545,6 +621,7 @@ export function showColorPicker(
 			});
 			button.disabled = !toneHex;
 			setToneCellSwatch(button, toneHex);
+			button.style.opacity = String(opacity);
 			// if (toneHex) {
 			// 	setAccessibleLabelWithoutTooltip(
 			// 		button,
@@ -606,7 +683,9 @@ export function showColorPicker(
 				hasQuery && matchSet.has(index),
 			);
 
-			const swatch = button.createSpan("task-board-color-picker-grid-swatch");
+			const swatch = button.createSpan(
+				"task-board-color-picker-grid-swatch",
+			);
 			setElementSwatch(swatch, preset.hex);
 
 			button.addEventListener("click", (event) => {
@@ -632,7 +711,9 @@ export function showColorPicker(
 		freeHandle.classList.toggle("is-hidden", !normalized);
 		freeEmpty.classList.toggle("is-hidden", !!normalized);
 		if (!normalized) {
-			freePlane.style.removeProperty("--task-board-color-picker-free-hue");
+			freePlane.style.removeProperty(
+				"--task-board-color-picker-free-hue",
+			);
 			freePlane.style.removeProperty("--task-board-color-picker-free-x");
 			freePlane.style.removeProperty("--task-board-color-picker-free-y");
 			return;
@@ -674,6 +755,12 @@ export function showColorPicker(
 			`${Math.round(freeHue)} degrees`,
 		);
 		hueHandle.removeAttribute("hidden");
+		opacitySlider.value = String(Math.round(opacity * 100));
+		opacityValue.textContent = `${Math.round(opacity * 100)}%`;
+		opacitySlider.style.setProperty(
+			"--task-board-color-picker-opacity-color",
+			normalized ?? "transparent",
+		);
 	}
 
 	function render(): void {
@@ -880,6 +967,11 @@ export function showColorPicker(
 
 	copyButton.addEventListener("click", copyActiveHex);
 	hueSlider.addEventListener("input", updateHueFromSlider);
+	opacitySlider.addEventListener("input", () => {
+		opacity = Number(opacitySlider.value) / 100;
+		renderToneStrip();
+		renderFooter();
+	});
 
 	hueSliderWrap.addEventListener("pointerdown", (event) => {
 		event.preventDefault();

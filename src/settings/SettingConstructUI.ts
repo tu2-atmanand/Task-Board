@@ -1182,8 +1182,9 @@ export class SettingsManager {
 										() => {
 											showColorPicker(btn.buttonEl, {
 												value: tag.color,
+												outputFormat: "rgb",
 												onSelect: (color) => {
-													tag.color = `#${color}`;
+													tag.color = color;
 													(
 														colorInputRef as {
 															setValue: (

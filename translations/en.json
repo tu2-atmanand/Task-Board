@@ -13,6 +13,7 @@
 	"submit": "Submit",
 	"cancel": "Cancel",
 	"copy-suffix": "(copy)",
+	"color-opacity": "Opacity",
 	"enter-column-name": "Enter column name",
 	"add-new-task": "Add new task",
 	"preview": "Preview",

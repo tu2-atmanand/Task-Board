@@ -11123,6 +11123,86 @@ body .task-board-color-picker-panel button.task-board-color-picker-grid-cell:is(
 	pointer-events: none;
 }
 
+.task-board-color-picker-opacity-control {
+	display: flex;
+	flex-direction: row;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: 5px 8px;
+	min-width: 0;
+}
+
+.task-board-color-picker-opacity-label,
+.task-board-color-picker-opacity-value {
+	color: var(--text-muted);
+	font-size: 11px;
+	font-weight: 650;
+	line-height: 1.2;
+}
+
+.task-board-color-picker-opacity-value {
+	font-family: var(--font-monospace);
+}
+
+.task-board-color-picker-opacity-slider {
+	grid-column: 1 / -1;
+	width: 100% !important;
+	min-width: 100px;
+	height: 18px;
+	margin: 0;
+	padding: 0;
+	appearance: none;
+	-webkit-appearance: none;
+	background: transparent;
+	cursor: pointer;
+}
+
+.task-board-color-picker-opacity-slider::-webkit-slider-runnable-track {
+	height: 8px;
+	border: 1px solid var(--task-board-color-picker-border);
+	border-radius: 8px;
+	background-image:
+		linear-gradient(90deg, transparent, var(--task-board-color-picker-opacity-color)),
+		repeating-conic-gradient(var(--background-modifier-border) 0% 25%, var(--background-secondary) 0% 50%);
+	background-size: 100% 100%, 8px 8px;
+}
+
+.task-board-color-picker-opacity-slider::-moz-range-track {
+	height: 8px;
+	border: 1px solid var(--task-board-color-picker-border);
+	border-radius: 8px;
+	background-image:
+		linear-gradient(90deg, transparent, var(--task-board-color-picker-opacity-color)),
+		repeating-conic-gradient(var(--background-modifier-border) 0% 25%, var(--background-secondary) 0% 50%);
+	background-size: 100% 100%, 8px 8px;
+}
+
+.task-board-color-picker-opacity-slider::-webkit-slider-thumb {
+	width: 14px;
+	height: 14px;
+	margin-top: -4px;
+	appearance: none;
+	-webkit-appearance: none;
+	border: 2px solid white;
+	border-radius: 50%;
+	background: var(--interactive-accent);
+	box-shadow: 0 0 0 1px rgb(0 0 0 / 45%);
+}
+
+.task-board-color-picker-opacity-slider::-moz-range-thumb {
+	width: 10px;
+	height: 10px;
+	border: 2px solid white;
+	border-radius: 50%;
+	background: var(--interactive-accent);
+	box-shadow: 0 0 0 1px rgb(0 0 0 / 45%);
+}
+
+.task-board-color-picker-opacity-slider:focus-visible {
+	outline: 2px solid var(--task-board-color-picker-focus-ring);
+	outline-offset: 2px;
+}
+
 .task-board-color-picker-footer {
 	display: flex;
 	flex-direction: column;

@@ -3156,8 +3156,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					colorPickerButton.addEventListener("click", () => {
 						showColorPicker(colorPickerButton, {
 							value: tag.color,
+							outputFormat: "rgb",
 							onSelect: (color) => {
-								tag.color = `#${color}`;
+								tag.color = color;
 								colorInput.value = tag.color;
 								renderTagColors();
 								void this.saveSettings();
