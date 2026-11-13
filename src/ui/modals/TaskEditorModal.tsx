@@ -54,6 +54,7 @@ export class TaskEditorModal extends Modal {
 
 		this.containerEl.setAttribute('modal-type', 'task-board-edit-task');
 		this.modalEl.setAttribute('modal-type', 'task-board-edit-task');
+		this.modalEl.addClass('task-board-task-editor-modal');
 		contentEl.setAttribute('modal-type', 'task-board-edit-task');
 
 		const root = ReactDOM.createRoot(this.contentEl);
