@@ -943,7 +943,7 @@ const DEFAULT_FRONTMATTER_FORMATTING: FrontmatterFormattingInterface[] = [
  * note.
  *
  * @deprecated - This complete setting has been deprecated in 2.0.0.
- * Use {@link SupportedPropertiesConfig} for both the
+ * Use {@link SupportedPropertiesConfig} for the
  * {@link globalSettingsData.taskProperties}.
  */
 export interface FrontmatterFormattingInterface {
