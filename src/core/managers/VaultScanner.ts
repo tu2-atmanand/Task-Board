@@ -52,6 +52,8 @@ import {
 } from "../../utils/task_note/TaskNoteUtils.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import type { VaultScannnerFilters } from "../../interfaces/GlobalSettings.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -187,7 +189,7 @@ export default class VaultScanner {
 				);
 				if (
 					scanFilterForTags(
-						taskNoteProperties?.tags || [],
+						taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Tags] || [],
 						scanFilters,
 					)
 				) {
@@ -217,24 +219,24 @@ export default class VaultScanner {
 					// Create task item for the task note
 					const taskNoteItem: taskItem = {
 						...taskNoteProperties,
-						id: taskNoteProperties?.id
-							? taskNoteProperties.id
+						id: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.ID]
+							? taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.ID]
 							: generateRandomStringId(),
-						legacyId: taskNoteProperties?.id
-							? taskNoteProperties.id
+						legacyId: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.ID]
+							? taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.ID]
 							: "", // Storing the legacyId for backward compatibility
-						title: taskNoteProperties?.title || file.basename,
+						title: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Title] || file.basename,
 						body: subTasks, // Store sub-tasks in body
-						createdDate: taskNoteProperties?.createdDate || "",
-						startDate: taskNoteProperties?.startDate || "",
-						scheduledDate: taskNoteProperties?.scheduledDate || "",
-						dueDate: taskNoteProperties?.dueDate || "",
-						tags: taskNoteProperties?.tags || [],
+						createdDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || "",
+						startDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.StartDate] || "",
+						scheduledDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "",
+						dueDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.DueDate] || "",
+						tags: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Tags] || [],
 						frontmatterTags: [],
-						time: taskNoteProperties?.time || "",
-						priority: taskNoteProperties?.priority || 0,
-						dependsOn: taskNoteProperties?.dependsOn || [],
-						status: taskNoteProperties?.status || " ", // Default to unchecked
+						time: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Time] || "",
+						priority: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Priority] || 0,
+						dependsOn: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] || [],
+						status: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Status] || " ", // Default to unchecked
 						filePath: fileNameWithPath,
 						taskLocation: {
 							startLine: 1,
@@ -242,14 +244,14 @@ export default class VaultScanner {
 							endLine: lines.length,
 							endCharIndex: lines[lines.length - 1]?.length || 0,
 						},
-						completionDate: taskNoteProperties?.completionDate || "",
-						cancelledDate: taskNoteProperties?.cancelledDate || "",
-						reminder: taskNoteProperties?.reminder || "",
+						completionDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || "",
+						cancelledDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || "",
+						reminder: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "",
 					};
 
 					// Add to appropriate cache based on completion status
 					const isTaskNoteCompleted = isTaskCompleted(
-						taskNoteProperties.status || " ",
+						taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.Status] || " ",
 						true,
 						this.plugin.settings,
 					);
@@ -718,7 +720,7 @@ export default class VaultScanner {
 			for (const tasks of Object.values(pendingTasksObj)) {
 				if (id) {
 					foundTask = tasks.find(
-						(task) => task.legacyId === id || task.id === id,
+						(task) => task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id || task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
 					);
 				}
 				if (foundTask) return foundTask;
@@ -729,7 +731,7 @@ export default class VaultScanner {
 			for (const tasks of Object.values(completedTasksObj)) {
 				if (id) {
 					foundTask = tasks.find(
-						(task) => task.legacyId === id || task.id === id,
+						(task) => task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id || task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
 					);
 				}
 				if (foundTask) return foundTask;

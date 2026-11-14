@@ -20,6 +20,8 @@ import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
 } from "./task_note/FrontmatterOperations.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
+
 
 /**
  * @deprecated Since version `1.3.0`, Task Board no longer updates the cache data directly after user events. Now the task is updated first in the file and then immediately after some delay the file is re-scanned to updated the cache automatically and refresh the view.
@@ -37,15 +39,15 @@ export const moveFromPendingToCompleted = async (
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Move task from Pending to Completed
-		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = (
-				allTasks.Pending[task.filePath] || []
-			).filter((t: taskItem) => t.id !== task.id);
+		if (allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
+			allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = (
+				allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] || []
+			).filter((t: taskItem) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
 
-			if (!allTasks.Completed[task.filePath]) {
-				allTasks.Completed[task.filePath] = [];
+			if (!allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
+				allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = [];
 			}
-			allTasks.Completed[task.filePath].push(task);
+			allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]].push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -78,15 +80,15 @@ export const moveFromCompletedToPending = async (
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Move task from Completed to Pending
-		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = (
-				allTasks.Completed[task.filePath] || []
-			).filter((t: taskItem) => t.id !== task.id);
+		if (allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
+			allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = (
+				allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] || []
+			).filter((t: taskItem) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
 
-			if (!allTasks.Pending[task.filePath]) {
-				allTasks.Pending[task.filePath] = [];
+			if (!allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
+				allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = [];
 			}
-			allTasks.Pending[task.filePath].push(task);
+			allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]].push(task);
 		}
 
 		// Write the updated data back to the JSON file
@@ -113,24 +115,24 @@ export const moveFromCompletedToPending = async (
 export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 	const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
-	const file = plugin.app.vault.getFileByPath(newTask.filePath);
+	const file = plugin.app.vault.getFileByPath(newTask[DEFAULT_TASK_CACHE_KEYS.FilePath]);
 	const frontmatter = file ? extractFrontmatterFromFile(plugin, file) : {};
 	const frontmatterTags = extractFrontmatterTags(frontmatter);
 
 	const newTaskWithId = {
 		...newTask,
 		id: generateTaskId(plugin),
-		filePath: newTask.filePath,
+		filePath: newTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 		completed: "",
 		frontmatterTags: frontmatterTags,
 	};
 
 	// Update the task list (assuming it's a file-based task structure)
-	if (!allTasks.Pending[newTask.filePath]) {
-		allTasks.Pending[newTask.filePath] = [];
+	if (!allTasks.Pending[newTask[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
+		allTasks.Pending[newTask[DEFAULT_TASK_CACHE_KEYS.FilePath]] = [];
 	}
 
-	allTasks.Pending[newTask.filePath].push(newTaskWithId);
+	allTasks.Pending[newTask[DEFAULT_TASK_CACHE_KEYS.FilePath]].push(newTaskWithId);
 
 	await writeJsonCacheDataToDisk(plugin, allTasks);
 
@@ -162,7 +164,7 @@ export const updateTaskInJson = async (
 					[filePath, tasks]: [string, taskItem[]],
 				) => {
 					acc[filePath] = tasks.map((task: taskItem) =>
-						task.id === updatedTask.id ? updatedTask : task,
+						task[DEFAULT_TASK_CACHE_KEYS.ID] === updatedTask[DEFAULT_TASK_CACHE_KEYS.ID] ? updatedTask : task,
 					);
 					return acc;
 				},
@@ -208,15 +210,15 @@ export const deleteTaskFromJson = async (plugin: TaskBoard, task: taskItem) => {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Remove task from Pending or Completed in tasks.json
-		if (allTasks.Pending[task.filePath]) {
-			allTasks.Pending[task.filePath] = allTasks.Pending[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
+		if (allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
+			allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = allTasks.Pending[
+				task[DEFAULT_TASK_CACHE_KEYS.FilePath]
+			].filter((t: taskItem) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
 		}
-		if (allTasks.Completed[task.filePath]) {
-			allTasks.Completed[task.filePath] = allTasks.Completed[
-				task.filePath
-			].filter((t: taskItem) => t.id !== task.id);
+		if (allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
+			allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = allTasks.Completed[
+				task[DEFAULT_TASK_CACHE_KEYS.FilePath]
+			].filter((t: taskItem) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
 		}
 
 		await writeJsonCacheDataToDisk(plugin, allTasks);

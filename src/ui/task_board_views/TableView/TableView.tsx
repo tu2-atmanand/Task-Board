@@ -51,9 +51,20 @@ const columnVisibilityProperty: Partial<Record<TableColumnKey, DEFAULT_TASK_CACH
 };
 
 const editableColumns = new Set<TableColumnKey>([
-	"title", "body", "status", "priority", "tags", "time", "reminder",
-	"createdDate", "startDate", "scheduledDate", "dueDate", "dependsOn",
-	"completionDate", "cancelledDate",
+	DEFAULT_TASK_CACHE_KEYS.Title,
+	DEFAULT_TASK_CACHE_KEYS.Body,
+	DEFAULT_TASK_CACHE_KEYS.Status,
+	DEFAULT_TASK_CACHE_KEYS.Priority,
+	DEFAULT_TASK_CACHE_KEYS.Tags,
+	DEFAULT_TASK_CACHE_KEYS.Time,
+	DEFAULT_TASK_CACHE_KEYS.Reminder,
+	DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+	DEFAULT_TASK_CACHE_KEYS.StartDate,
+	DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+	DEFAULT_TASK_CACHE_KEYS.DueDate,
+	DEFAULT_TASK_CACHE_KEYS.Dependencies,
+	DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+	DEFAULT_TASK_CACHE_KEYS.CancelledDate,
 ]);
 
 const defaultColumnWidth = (column: TableColumnKey): number => {
@@ -153,7 +164,7 @@ const TableView: React.FC<TableViewProps> = ({
 
 	const getCellValue = useCallback((task: taskItem, column: TableColumnKey): string | number => {
 		if (column === "dateModified") {
-			const file = plugin.app.vault.getAbstractFileByPath(task.filePath);
+			const file = plugin.app.vault.getAbstractFileByPath(task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
 			return file instanceof TFile ? file.stat.mtime : "";
 		}
 
@@ -291,52 +302,52 @@ const TableView: React.FC<TableViewProps> = ({
 		if (value === renderCellValue(task, column)) return;
 
 		try {
-			const isTaskNote = isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task.tags);
+			const isTaskNote = isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags]);
 			const updatedTask: taskItem = { ...task };
 
 			switch (column) {
 				case "title":
-					updatedTask.title = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = value;
 					break;
 				case "body":
-					updatedTask.body = value ? value.split(/\r?\n/) : [];
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Body] = value ? value.split(/\r?\n/) : [];
 					break;
 				case "status":
-					updatedTask.status = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Status] = value;
 					break;
 				case "priority":
-					updatedTask.priority = Number(value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority] = Number(value);
 					break;
 				case "tags":
-					updatedTask.tags = value.split(",").map((tag) => tag.trim()).filter(Boolean)
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags] = value.split(",").map((tag) => tag.trim()).filter(Boolean)
 						.map((tag) => tag.startsWith("#") ? tag : `#${tag}`);
 					break;
 				case "time":
-					updatedTask.time = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] = value;
 					break;
 				case "reminder":
-					updatedTask.reminder = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] = value;
 					break;
 				case "createdDate":
-					updatedTask.createdDate = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate] = value;
 					break;
 				case "startDate":
-					updatedTask.startDate = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = value;
 					break;
 				case "scheduledDate":
-					updatedTask.scheduledDate = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = value;
 					break;
 				case "dueDate":
-					updatedTask.dueDate = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = value;
 					break;
 				case "dependsOn":
-					updatedTask.dependsOn = value.split(",").map((id) => id.trim()).filter(Boolean);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Dependencies] = value.split(",").map((id) => id.trim()).filter(Boolean);
 					break;
 				case "completionDate":
-					updatedTask.completionDate = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = value;
 					break;
 				case "cancelledDate":
-					updatedTask.cancelledDate = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = value;
 					break;
 				default:
 					throw new Error(`Editing ${column} is not supported.`);
@@ -344,34 +355,34 @@ const TableView: React.FC<TableViewProps> = ({
 
 			if (!isTaskNote) {
 				if (column === "tags") {
-					updatedTask.title = sanitizeTags(task.title, updatedTask.tags);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeTags(task[DEFAULT_TASK_CACHE_KEYS.Title], updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags]);
 				} else if (column === "status") {
-					updatedTask.title = sanitizeStatus(
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStatus(
 						plugin.settings.data,
-						task.title,
+						task[DEFAULT_TASK_CACHE_KEYS.Title],
 						value,
 						plugin.settings.data.customStatuses.find((status) => status.symbol === value)?.type ?? statusTypeNames.TODO,
 					);
 				} else if (column === "priority") {
-					updatedTask.title = sanitizePriority(plugin.settings.data, task.title, Number(value));
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizePriority(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], Number(value));
 				} else if (column === "time") {
-					updatedTask.title = sanitizeTime(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeTime(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "createdDate") {
-					updatedTask.title = sanitizeCreatedDate(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeCreatedDate(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "startDate") {
-					updatedTask.title = sanitizeStartDate(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStartDate(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "scheduledDate") {
-					updatedTask.title = sanitizeScheduledDate(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeScheduledDate(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "dueDate") {
-					updatedTask.title = sanitizeDueDate(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeDueDate(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "reminder") {
-					updatedTask.title = sanitizeReminder(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeReminder(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "completionDate") {
-					updatedTask.title = sanitizeCompletionDate(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeCompletionDate(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "cancelledDate") {
-					updatedTask.title = sanitizeCancelledDate(plugin.settings.data, task.title, value);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeCancelledDate(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], value);
 				} else if (column === "dependsOn") {
-					updatedTask.title = sanitizeDependsOn(plugin.settings.data, task.title, updatedTask.dependsOn ?? []);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeDependsOn(plugin.settings.data, task[DEFAULT_TASK_CACHE_KEYS.Title], updatedTask[DEFAULT_TASK_CACHE_KEYS.Dependencies] ?? []);
 				}
 			}
 
@@ -380,12 +391,12 @@ const TableView: React.FC<TableViewProps> = ({
 					await handleTaskNoteBodyChange(plugin, task, updatedTask);
 				} else {
 					await updateFrontmatterInMarkdownFile(plugin, updatedTask);
-					await plugin.realTimeScanner.processAllUpdatedFiles(task.filePath, task.id);
+					await plugin.realTimeScanner.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.ID]);
 				}
 			} else {
 				const updated = await updateTaskInFile(plugin, updatedTask, task);
-				if (!updated) throw new Error(`Could not update task ${task.id} in ${task.filePath}`);
-				await plugin.realTimeScanner.processAllUpdatedFiles(task.filePath, task.id);
+				if (!updated) throw new Error(`Could not update task ${task[DEFAULT_TASK_CACHE_KEYS.ID]} in ${task[DEFAULT_TASK_CACHE_KEYS.FilePath]}`);
+				await plugin.realTimeScanner.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.ID]);
 			}
 		} catch (error) {
 			new Notice(`Could not update ${taskItemKeyToNameMapping[column]}: ${String(error)}`);
@@ -440,7 +451,7 @@ const TableView: React.FC<TableViewProps> = ({
 					value={editingCell?.value ?? ""}
 					onChange={(event) => setEditingCell((current) => current ? { ...current, value: event.target.value } : current)}
 					onKeyDown={onKeyDown}
-					aria-label={`Edit ${taskItemKeyToNameMapping[column]} for ${task.title}`}
+					aria-label={`Edit ${taskItemKeyToNameMapping[column]} for ${task[DEFAULT_TASK_CACHE_KEYS.Title]}`}
 				/>
 			);
 		}
@@ -452,7 +463,7 @@ const TableView: React.FC<TableViewProps> = ({
 				value={editingCell?.value ?? ""}
 				onChange={(event) => setEditingCell((current) => current ? { ...current, value: event.target.value } : current)}
 				onKeyDown={onKeyDown}
-				aria-label={`Edit ${taskItemKeyToNameMapping[column]} for ${task.title}`}
+				aria-label={`Edit ${taskItemKeyToNameMapping[column]} for ${task[DEFAULT_TASK_CACHE_KEYS.Title]}`}
 			/>
 		);
 	};
@@ -499,7 +510,7 @@ const TableView: React.FC<TableViewProps> = ({
 					</thead>
 					<tbody>
 						{visibleTasks.map((task, index) => (
-							<tr key={`${task.id}-${index}`}>
+							<tr key={`${task[DEFAULT_TASK_CACHE_KEYS.ID]}-${index}`}>
 								{visibleColumns.map((column) => (
 									<td
 										key={column}
@@ -507,7 +518,7 @@ const TableView: React.FC<TableViewProps> = ({
 										onDoubleClick={() => beginCellEdit(task, column)}
 										className={editableColumns.has(column) ? "taskBoardTableEditableCell" : ""}
 									>
-										{editingCell?.task.id === task.id && editingCell.column === column
+										{editingCell?.task[DEFAULT_TASK_CACHE_KEYS.ID] === task[DEFAULT_TASK_CACHE_KEYS.ID] && editingCell.column === column
 											? renderCellEditor(task, column)
 											: renderCellValue(task, column)}
 									</td>

@@ -13,6 +13,8 @@ import {
 } from "../interfaces/Constants.js";
 import { UniversalDateOptions } from "../interfaces/Enums.js";
 import { taskItem } from "../interfaces/TaskItem.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
+
 
 /**
  * A simple function to get today's date in the user's custom format from the plugin's setting using the date-fns library.
@@ -313,11 +315,11 @@ export const getUniversalDateFromTask = (
 ): string => {
 	// Method 1 - Comparing
 	if (universalDateType === UniversalDateOptions.dueDate) {
-		return task.dueDate;
+		return task[DEFAULT_TASK_CACHE_KEYS.DueDate];
 	} else if (universalDateType === UniversalDateOptions.startDate) {
-		return task.startDate || "";
+		return task[DEFAULT_TASK_CACHE_KEYS.StartDate] || "";
 	} else if (universalDateType === UniversalDateOptions.scheduledDate) {
-		return task.scheduledDate || "";
+		return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "";
 	}
 	return "";
 

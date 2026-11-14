@@ -387,19 +387,19 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			searchFilteredTasks = {
 				Pending: fileteredAllTasks.Pending.filter((task) => {
 					if (lowerQuery.startsWith("file:")) {
-						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+						return task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(lowerQuery.replace("file:", "").trim());
 					} else {
-						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
-						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						const titleMatch = task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(lowerQuery);
+						const bodyMatch = task[DEFAULT_TASK_CACHE_KEYS.Body].join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
 				}),
 				Completed: fileteredAllTasks.Completed.filter((task) => {
 					if (lowerQuery.startsWith("file:")) {
-						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+						return task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(lowerQuery.replace("file:", "").trim());
 					} else {
-						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
-						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						const titleMatch = task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(lowerQuery);
+						const bodyMatch = task[DEFAULT_TASK_CACHE_KEYS.Body].join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
 				})

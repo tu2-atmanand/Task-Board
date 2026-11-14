@@ -31,6 +31,8 @@ import { updateRGBAOpacity } from "../../utils/UIHelpers.js";
 import { handleEditTask } from "../../utils/UserTaskEvents.js";
 import { t } from "../../utils/lang/helper.js";
 import { openTaskSelector } from "../modals/TaskSelectorWithCreateModal.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 const BUILT_IN_TASK_ITEM_KEYS = new Set([
 	"id", "legacyId", "title", "body", "status", "priority", "tags", "frontmatterTags",
@@ -62,23 +64,23 @@ export const TaskEditorRC: React.FC<{
 
 	// All useState
 	const [title, setTitle] = useState(
-		task.title
-			? task.title
+		task[DEFAULT_TASK_CACHE_KEYS.Title]
+			? task[DEFAULT_TASK_CACHE_KEYS.Title]
 			: isTaskNote ? "" : "- [ ] "
 	);
-	const [bodyContent, setBodyContent] = useState(isTaskNote ? noteContent : task.body?.join('\n') || '');
-	const [createdDate, setCreatedDate] = useState(task.createdDate || '');
-	const [startDate, setStartDate] = useState(task.startDate || '');
-	const [scheduledDate, setScheduledDate] = useState(task.scheduledDate || '');
-	const [due, setDue] = useState(task.dueDate || '');
-	const [tags, setTags] = useState<string[]>(task.tags || []);
-	const [startTime, setStartTime] = useState(task.time ? task?.time?.split('-')[0]?.trim() || '' : "");
-	const [endTime, setEndTime] = useState(task.time ? task?.time?.split('-')[1]?.trim() || '' : "");
-	const [newTime, setNewTime] = useState(task.time || '');
-	const [priority, setPriority] = useState(task.priority || 0);
-	const [status, setStatus] = useState(task.status || ' ');
-	const [reminder, setReminder] = useState(task?.reminder || "");
-	const [dependsOn, setDependsOn] = useState<string[]>(task?.dependsOn || []);
+	const [bodyContent, setBodyContent] = useState(isTaskNote ? noteContent : task[DEFAULT_TASK_CACHE_KEYS.Body]?.join('\n') || '');
+	const [createdDate, setCreatedDate] = useState(task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || '');
+	const [startDate, setStartDate] = useState(task[DEFAULT_TASK_CACHE_KEYS.StartDate] || '');
+	const [scheduledDate, setScheduledDate] = useState(task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || '');
+	const [due, setDue] = useState(task[DEFAULT_TASK_CACHE_KEYS.DueDate] || '');
+	const [tags, setTags] = useState<string[]>(task[DEFAULT_TASK_CACHE_KEYS.Tags] || []);
+	const [startTime, setStartTime] = useState(task[DEFAULT_TASK_CACHE_KEYS.Time] ? task?.[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[0]?.trim() || '' : "");
+	const [endTime, setEndTime] = useState(task[DEFAULT_TASK_CACHE_KEYS.Time] ? task?.[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[1]?.trim() || '' : "");
+	const [newTime, setNewTime] = useState(task[DEFAULT_TASK_CACHE_KEYS.Time] || '');
+	const [priority, setPriority] = useState(task[DEFAULT_TASK_CACHE_KEYS.Priority] || 0);
+	const [status, setStatus] = useState(task[DEFAULT_TASK_CACHE_KEYS.Status] || ' ');
+	const [reminder, setReminder] = useState(task?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "");
+	const [dependsOn, setDependsOn] = useState<string[]>(task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] || []);
 	const [customPropertyValues, setCustomPropertyValues] = useState<Record<string, unknown>>(() =>
 		Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [
 			property.id,
@@ -581,8 +583,8 @@ export const TaskEditorRC: React.FC<{
 			time: newTime,
 			priority,
 			filePath: editedFilePath,
-			taskLocation: task.taskLocation,
-			cancelledDate: task.cancelledDate || '',
+			taskLocation: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
+			cancelledDate: task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || '',
 			status,
 			reminder,
 		};
@@ -628,12 +630,12 @@ export const TaskEditorRC: React.FC<{
 			dueDate: newDue,
 			tags: [...tags, '#taskNote'], // Add taskNote tag
 			time: newTime,
-			priority: modifiedTask.priority,
+			priority: modifiedTask[DEFAULT_TASK_CACHE_KEYS.Priority],
 			filePath: taskNoteFilePath,
-			taskLocation: modifiedTask.taskLocation,
-			cancelledDate: modifiedTask.cancelledDate || '',
-			status: modifiedTask.status,
-			reminder: modifiedTask.reminder,
+			taskLocation: modifiedTask[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
+			cancelledDate: modifiedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || '',
+			status: modifiedTask[DEFAULT_TASK_CACHE_KEYS.Status],
+			reminder: modifiedTask[DEFAULT_TASK_CACHE_KEYS.Reminder],
 			dependsOn: dependsOn,
 		};
 
@@ -660,11 +662,11 @@ export const TaskEditorRC: React.FC<{
 		filePath: newFilePath,
 		status: status,
 		reminder: reminder,
-		taskLocation: task?.taskLocation || taskItemEmpty.taskLocation,
+		taskLocation: task?.[DEFAULT_TASK_CACHE_KEYS.TaskLocation] || taskItemEmpty[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
 		dependsOn: dependsOn,
 		...customPropertyValues,
-		completionDate: task.completionDate || '',
-		cancelledDate: task.cancelledDate || '',
+		completionDate: task[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || '',
+		cancelledDate: task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || '',
 	};
 
 
@@ -707,7 +709,7 @@ export const TaskEditorRC: React.FC<{
 		// }
 
 		await applyIdToTaskItem(plugin, task).then((newId) => {
-			plugin.settings.data.lastViewHistory.taskId = newId ? String(newId) : (task.legacyId ? task.legacyId : String(globalSettings.uniqueIdCounter));
+			plugin.settings.data.lastViewHistory.taskId = newId ? String(newId) : (task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : String(globalSettings.uniqueIdCounter));
 
 			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
 
@@ -763,7 +765,7 @@ export const TaskEditorRC: React.FC<{
 			const leaf = plugin.app.workspace.getLeaf('window');
 			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
 			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
+				await leaf.openFile(file, { eState: { line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine - 1 } });
 			} else {
 				bugReporterManagerInsatance.showNotice(21, "File not found", `The file at path ${newFilePath} could not be found.`, "TaskEditorModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 			}
@@ -780,7 +782,7 @@ export const TaskEditorRC: React.FC<{
 			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
 
 			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task.taskLocation.startLine - 1 } });
+				await leaf.openFile(file, { eState: { line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine - 1 } });
 			} else {
 				// bugReporterManagerInsatance.showNotice(22, "File not found", `The file at path ${newFilePath} could not be found.`, "TaskEditorModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 				new Notice(`The file at path ${newFilePath} could not be found. Maybe after you click on the save button, this file will be automatically created with the task you have entered.`, 7000);
@@ -805,19 +807,19 @@ export const TaskEditorRC: React.FC<{
 
 		const updatedTask = buildTaskFromRawContent(value, indentationString, undefined, globalSettings);
 
-		setTitle(updatedTask.title || '');
-		setBodyContent(updatedTask.body?.join('\n') || '');
-		setCreatedDate(updatedTask.createdDate || '');
-		setStartDate(updatedTask.startDate || '');
-		setScheduledDate(updatedTask.scheduledDate || '');
-		setDue(updatedTask.dueDate || '');
-		setTags(updatedTask.tags || []);
-		setStartTime(updatedTask.time ? updatedTask.time?.split('-')[0].trim() || '' : "");
-		setEndTime(updatedTask.time ? updatedTask.time?.split('-')[1]?.trim() || '' : "");
-		setNewTime(updatedTask.time ? updatedTask.time : "");
-		setPriority(updatedTask.priority || 0);
-		setStatus(updatedTask.status || ' ');
-		setReminder(updatedTask.reminder || '');
+		setTitle(updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] || '');
+		setBodyContent(updatedTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join('\n') || '');
+		setCreatedDate(updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || '');
+		setStartDate(updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] || '');
+		setScheduledDate(updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || '');
+		setDue(updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] || '');
+		setTags(updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags] || []);
+		setStartTime(updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ? updatedTask[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[0].trim() || '' : "");
+		setEndTime(updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ? updatedTask[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[1]?.trim() || '' : "");
+		setNewTime(updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ? updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] : "");
+		setPriority(updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority] || 0);
+		setStatus(updatedTask[DEFAULT_TASK_CACHE_KEYS.Status] || ' ');
+		setReminder(updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] || '');
 		setCustomPropertyValues(Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [property.id, (updatedTask as unknown as Record<string, unknown>)[property.id]])));
 	}, 50);
 
@@ -1056,15 +1058,15 @@ export const TaskEditorRC: React.FC<{
 				const newId = await applyIdToTaskItem(plugin, selected);
 
 				if (newId) {
-					await plugin.realTimeScanner.processAllUpdatedFiles(selected.filePath, selected.id);
+					await plugin.realTimeScanner.processAllUpdatedFiles(selected[DEFAULT_TASK_CACHE_KEYS.FilePath], selected[DEFAULT_TASK_CACHE_KEYS.ID]);
 
 					const getUpdatedDependsOnIds = (prev: string[]) => {
-						if (!prev.includes(task.legacyId ? task.legacyId : task.id)) {
-							if (newId === undefined && !selected?.legacyId) {
-								bugReporterManagerInsatance.showNotice(24, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selected.title}.`, "AddOrEditTaskModal.tsx/handleOpenChildTaskSelector/getUpdatedDependsOnIds");
+						if (!prev.includes(task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : task[DEFAULT_TASK_CACHE_KEYS.ID])) {
+							if (newId === undefined && !selected?.[DEFAULT_TASK_CACHE_KEYS.LegacyID]) {
+								bugReporterManagerInsatance.showNotice(24, "Both newId and legacyId are undefined", `Both newId and legacyId are undefined for the selected task titled ${selected[DEFAULT_TASK_CACHE_KEYS.Title]}.`, "AddOrEditTaskModal.tsx/handleOpenChildTaskSelector/getUpdatedDependsOnIds");
 								return [...prev, String(globalSettings.uniqueIdCounter)];
 							} else if (newId === undefined) {
-								return [...prev, selected.legacyId];
+								return [...prev, selected[DEFAULT_TASK_CACHE_KEYS.LegacyID]];
 							} else if (newId) {
 								return [...prev, newId];
 							}
@@ -1079,9 +1081,9 @@ export const TaskEditorRC: React.FC<{
 							setTitle(newTitle);
 						}
 
-						selected.legacyId = selected.legacyId ? selected.legacyId : (newId ? String(newId) : String(globalSettings.uniqueIdCounter));
+						selected[DEFAULT_TASK_CACHE_KEYS.LegacyID] = selected[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? selected[DEFAULT_TASK_CACHE_KEYS.LegacyID] : (newId ? String(newId) : String(globalSettings.uniqueIdCounter));
 						setChildTasks(prevChildTasks => {
-							if (!prevChildTasks.find(t => t.id === selected.id)) {
+							if (!prevChildTasks.find(t => t[DEFAULT_TASK_CACHE_KEYS.ID] === selected[DEFAULT_TASK_CACHE_KEYS.ID])) {
 								return [...prevChildTasks, selected];
 							}
 							return prevChildTasks;
@@ -1098,8 +1100,8 @@ export const TaskEditorRC: React.FC<{
 				// });
 			}
 
-			let pendingTaskItems = getPendingTasksSuggestions(plugin).filter(t => t.id !== task.id);
-			pendingTaskItems = pendingTaskItems.filter((t) => !dependsOn.includes(t.legacyId));
+			let pendingTaskItems = getPendingTasksSuggestions(plugin).filter(t => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
+			pendingTaskItems = pendingTaskItems.filter((t) => !dependsOn.includes(t[DEFAULT_TASK_CACHE_KEYS.LegacyID]));
 			openTaskSelector(plugin, pendingTaskItems, (selected) => {
 				void handleOnChooseTask(selected);
 			}, {
@@ -1133,15 +1135,15 @@ export const TaskEditorRC: React.FC<{
 	// Render child task titles when childTasks changes
 	useEffect(() => {
 		childTasks.forEach((childTask, index) => {
-			const element = childTaskTitleRefs.current[childTask.legacyId ? childTask.legacyId : childTask.id];
+			const element = childTaskTitleRefs.current[childTask[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? childTask[DEFAULT_TASK_CACHE_KEYS.LegacyID] : childTask[DEFAULT_TASK_CACHE_KEYS.ID]];
 			if (!element) return;
 
-			const childTaskTitle = childTask.title;
+			const childTaskTitle = childTask[DEFAULT_TASK_CACHE_KEYS.Title];
 			void MarkdownUIRenderer.safeRender(
 				plugin.app,
 				childTaskTitle,
 				element,
-				task.filePath,
+				task[DEFAULT_TASK_CACHE_KEYS.FilePath],
 				componentRef.current
 			);
 		});
@@ -1149,7 +1151,7 @@ export const TaskEditorRC: React.FC<{
 
 	const handleOpenChildTaskModal = async (event: React.MouseEvent, taskId: string) => {
 		event.stopPropagation();
-		const childTask = childTasks.find(t => t.legacyId === taskId);
+		const childTask = childTasks.find(t => t[DEFAULT_TASK_CACHE_KEYS.LegacyID] === taskId);
 		if (!childTask) {
 			bugReporterManagerInsatance.showNotice(26, "Child task not found", `The child task with ID ${taskId} was not found in pending tasks.`, "TaskEditorModal.tsx/EditTaskContent/handleOpenChildTaskModal");
 			return;
@@ -1170,7 +1172,7 @@ export const TaskEditorRC: React.FC<{
 				break;
 			case EditButtonMode.NoteInHover:
 				event.ctrlKey = true;
-				markdownButtonHoverPreviewEvent(plugin.app, event, task.filePath);
+				markdownButtonHoverPreviewEvent(plugin.app, event, task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
 				event.ctrlKey = false;
 				break;
 			case EditButtonMode.Modal:
@@ -1178,8 +1180,8 @@ export const TaskEditorRC: React.FC<{
 			case EditButtonMode.TasksPluginModal:
 			default:
 				{
-					const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask.tags);
-					void openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask.filePath, "window");
+					const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask[DEFAULT_TASK_CACHE_KEYS.Tags]);
+					void openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask[DEFAULT_TASK_CACHE_KEYS.FilePath], "window");
 					break;
 				}
 		}
@@ -1212,7 +1214,7 @@ export const TaskEditorRC: React.FC<{
 		const newDependsOn = dependsOn.filter(id => id !== taskId);
 		setDependsOn(newDependsOn);
 		setChildTasks(prevChildTasks => {
-			const newChildTasks = prevChildTasks.filter((t) => t.id !== taskId)
+			const newChildTasks = prevChildTasks.filter((t) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== taskId)
 			return newChildTasks;
 		});
 		if (!isTaskNote) {

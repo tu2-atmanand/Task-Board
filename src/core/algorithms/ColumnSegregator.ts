@@ -15,6 +15,8 @@ import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
 import { advancedFilterer } from "./AdvancedFilterer.js";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 /**
  * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
@@ -53,17 +55,17 @@ export const columnSegregator = (
 					columnData.datedBasedColumn?.dateType ===
 					UniversalDateOptions.dueDate
 				) {
-					return !task.dueDate;
+					return !task[DEFAULT_TASK_CACHE_KEYS.DueDate];
 				} else if (
 					columnData.datedBasedColumn?.dateType ===
 					UniversalDateOptions.startDate
 				) {
-					return !task.startDate;
+					return !task[DEFAULT_TASK_CACHE_KEYS.StartDate];
 				} else if (
 					columnData.datedBasedColumn?.dateType ===
 					UniversalDateOptions.scheduledDate
 				) {
-					return !task.scheduledDate;
+					return !task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 				}
 			});
 			break;
@@ -75,11 +77,11 @@ export const columnSegregator = (
 			};
 
 			tasksToDisplay = pendingTasks.filter((task) => {
-				let taskUniversalDate = task.dueDate;
+				let taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
 				if (dateType === UniversalDateOptions.startDate) {
-					taskUniversalDate = task.startDate;
+					taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
 				} else if (dateType === UniversalDateOptions.scheduledDate) {
-					taskUniversalDate = task.scheduledDate;
+					taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 				}
 				if (!taskUniversalDate || taskUniversalDate === "")
 					return false;
@@ -215,11 +217,11 @@ export const columnSegregator = (
 
 				if (pathPatterns.length > 0) {
 					tasksToDisplay = pendingTasks.filter((task) => {
-						if (!task?.filePath) {
+						if (!task?.[DEFAULT_TASK_CACHE_KEYS.FilePath]) {
 							return false;
 						}
 
-						const lowerCasePath = task.filePath;
+						const lowerCasePath = task[DEFAULT_TASK_CACHE_KEYS.FilePath];
 						const matchedPattern = pathPatterns.some(
 							(pattern: string) => {
 								if (allowedFileExtensionsRegEx.test(pattern)) {
@@ -273,13 +275,13 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.taskPriority:
 			tasksToDisplay = pendingTasks.filter(
-				(task) => task.priority === columnData.taskPriority,
+				(task) => task[DEFAULT_TASK_CACHE_KEYS.Priority] === columnData.taskPriority,
 			);
 			break;
 		case colTypeNames.taskStatus: {
 			const allTasks = [...pendingTasks, ...completedTasks];
 			tasksToDisplay = allTasks.filter(
-				(task) => task.status === columnData.taskStatus,
+				(task) => task[DEFAULT_TASK_CACHE_KEYS.Status] === columnData.taskStatus,
 			);
 			break;
 		}
@@ -326,7 +328,7 @@ export const columnSegregator = (
 			}
 
 			// Add any new tasks (not present in manual order) to the TOP of the manual order array
-			const currentIds = tasksToDisplay.map((t) => t.id);
+			const currentIds = tasksToDisplay.map((t) => t[DEFAULT_TASK_CACHE_KEYS.ID]);
 			const missingIds = currentIds.filter(
 				(id) => !columnData.tasksIdManualOrder!.includes(id),
 			);
@@ -343,7 +345,7 @@ export const columnSegregator = (
 
 			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
-			const idToTask = new Map(tasksToDisplay.map((t) => [t.id, t]));
+			const idToTask = new Map(tasksToDisplay.map((t) => [t[DEFAULT_TASK_CACHE_KEYS.ID], t]));
 			const sorted: taskItem[] = [];
 			for (const id of columnData.tasksIdManualOrder) {
 				const task = idToTask.get(id);

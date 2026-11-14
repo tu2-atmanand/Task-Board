@@ -14,6 +14,8 @@ import { MarkdownUIRenderer } from "../../services/MarkdownUIRenderer.js";
 import { scanFilterForFilesNFoldersNFrontmatter } from "../../core/algorithms/ScanningFilterer.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { getFormattedTaskContent } from "../../utils/task_line/TaskContentFormatter.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	let maxId = 0;
@@ -21,7 +23,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	// Check Pending tasks
 	Object.values(plugin.vaultScanner.tasksCache.Pending).forEach((tasks) => {
 		tasks.forEach((task) => {
-			const taskIdNum = task.legacyId ? parseInt(task.legacyId, 10) : 0;
+			const taskIdNum = task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? parseInt(task[DEFAULT_TASK_CACHE_KEYS.LegacyID], 10) : 0;
 			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
 				maxId = taskIdNum;
 			}
@@ -31,7 +33,7 @@ export const findMaxIdCounterAndUpdateSettings = (plugin: TaskBoard) => {
 	// Check Completed tasks
 	Object.values(plugin.vaultScanner.tasksCache.Completed).forEach((tasks) => {
 		tasks.forEach((task) => {
-			const taskIdNum = task.legacyId ? parseInt(task.legacyId, 10) : 0;
+			const taskIdNum = task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? parseInt(task[DEFAULT_TASK_CACHE_KEYS.LegacyID], 10) : 0;
 			if (!isNaN(taskIdNum) && taskIdNum > maxId) {
 				maxId = taskIdNum;
 			}
@@ -128,12 +130,12 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 				tasks.forEach((task, taskIndex) => {
 					const newTaskContent: taskItem = {
 						...task,
-						title: task.title,
-						body: task.body,
-						dueDate: task.dueDate,
-						tags: task.tags,
-						time: task.time,
-						priority: task.priority,
+						title: task[DEFAULT_TASK_CACHE_KEYS.Title],
+						body: task[DEFAULT_TASK_CACHE_KEYS.Body],
+						dueDate: task[DEFAULT_TASK_CACHE_KEYS.DueDate],
+						tags: task[DEFAULT_TASK_CACHE_KEYS.Tags],
+						time: task[DEFAULT_TASK_CACHE_KEYS.Time],
+						priority: task[DEFAULT_TASK_CACHE_KEYS.Priority],
 					};
 
 					void getFormattedTaskContent(newTaskContent).then((formatedContent) => {
@@ -148,7 +150,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 								app,
 								formatedContent,
 								descElement,
-								task.filePath,
+								task[DEFAULT_TASK_CACHE_KEYS.FilePath],
 								componentRef.current
 							);
 						}

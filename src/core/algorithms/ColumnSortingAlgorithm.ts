@@ -3,6 +3,8 @@
 import { columnSortingCriteria } from "../../interfaces/BoardConfigs.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { PropertyTypeConfig } from "../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 /**
  * Gets the property value from a task based on the criteria name
@@ -18,26 +20,26 @@ function getTaskPropertyValue(
 	}
 	switch (criteria) {
 		case "content":
-			return task.title;
+			return task[DEFAULT_TASK_CACHE_KEYS.Title];
 		case "id":
-			return task.id;
+			return task[DEFAULT_TASK_CACHE_KEYS.ID];
 		case "status":
-			return task.status;
+			return task[DEFAULT_TASK_CACHE_KEYS.Status];
 		case "completed":
 		case "completedDate":
-			return task.completionDate;
+			return task[DEFAULT_TASK_CACHE_KEYS.CompletionDate];
 		case "priority":
-			return task.priority;
+			return task[DEFAULT_TASK_CACHE_KEYS.Priority];
 		case "dueDate":
-			return task.dueDate;
+			return task[DEFAULT_TASK_CACHE_KEYS.DueDate];
 		case "startDate":
-			return task.startDate;
+			return task[DEFAULT_TASK_CACHE_KEYS.StartDate];
 		case "scheduledDate":
-			return task.scheduledDate;
+			return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 		case "createdDate":
-			return task.createdDate;
+			return task[DEFAULT_TASK_CACHE_KEYS.CreatedDate];
 		case "tags":
-			return task.tags;
+			return task[DEFAULT_TASK_CACHE_KEYS.Tags];
 		case "project":
 			// Project is not yet implemented in taskItem
 			return "";
@@ -45,8 +47,8 @@ function getTaskPropertyValue(
 			// Context is not yet implemented in taskItem
 			return "";
 		case "time":
-			if (task.time) {
-				return task.time;
+			if (task[DEFAULT_TASK_CACHE_KEYS.Time]) {
+				return task[DEFAULT_TASK_CACHE_KEYS.Time];
 			}
 			if (startTimeConfig) {
 				return `${startTimeConfig} - ${
@@ -61,9 +63,9 @@ function getTaskPropertyValue(
 			// Recurrence is not yet implemented in taskItem
 			return "";
 		case "filePath":
-			return task.filePath;
+			return task[DEFAULT_TASK_CACHE_KEYS.FilePath];
 		case "lineNumber":
-			return task.taskLocation.startLine;
+			return task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine;
 		default:
 			return undefined;
 	}

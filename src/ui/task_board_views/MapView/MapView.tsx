@@ -33,6 +33,8 @@ import { sanitizeDependsOn } from '../../../utils/task_line/TaskContentFormatter
 import { updateTaskInFile } from '../../../utils/task_line/TaskLineUtils.js';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../../utils/task_note/TaskNoteUtils.js';
 import BasesStyle from '../../components/task_card/BasesStyle.js';
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 type MapViewProps = {
 	plugin: TaskBoard;
@@ -329,7 +331,7 @@ const MapView: React.FC<MapViewProps> = ({
 		let maxColumnCount = 0;
 
 		allTasksFlattened.forEach((task) => {
-			if (task.legacyId) {
+			if (task[DEFAULT_TASK_CACHE_KEYS.LegacyID]) {
 				/**
 				 * We should cast this value to string cumpulsorily even though 
 				 * its already a string, else there is a possibility 
@@ -338,7 +340,7 @@ const MapView: React.FC<MapViewProps> = ({
 				 * 
 				 * @link - https://github.com/tu2-atmanand/Task-Board/issues/665
 				 */
-				const id = String(task.legacyId);
+				const id = String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]);
 				if (usedIds.has(id)) {
 					duplicateIds.add(id);
 					return;
@@ -482,7 +484,7 @@ const MapView: React.FC<MapViewProps> = ({
 		const edges: Edge[] = [];
 		const idToTask = new Map<string, taskItem>();
 		tasks.forEach(task => {
-			const id = task.legacyId ? task.legacyId : String(task.id);
+			const id = task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : String(task[DEFAULT_TASK_CACHE_KEYS.ID]);
 			idToTask.set(id, task);
 		});
 
@@ -506,15 +508,15 @@ const MapView: React.FC<MapViewProps> = ({
 		// const safeMarkerSize: number = Number.isFinite(mapped) ? 15 * mapped : 15;
 
 		tasks.forEach(task => {
-			const sourceId = task.legacyId ? task.legacyId : String(task.id);
-			if (Array.isArray(task.dependsOn)) {
-				task.dependsOn.forEach(depId => {
+			const sourceId = task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : String(task[DEFAULT_TASK_CACHE_KEYS.ID]);
+			if (Array.isArray(task[DEFAULT_TASK_CACHE_KEYS.Dependencies])) {
+				task[DEFAULT_TASK_CACHE_KEYS.Dependencies].forEach(depId => {
 					if (idToTask.has(depId)) {
 						const childTask = idToTask.get(depId);
 						if (childTask) {
-							const isChildTaskCompleted = isTaskNotePresentInTags(taskNoteIdentifierTag, childTask.tags) ?
-								isTaskCompleted(childTask.status, true, plugin.settings)
-								: isTaskCompleted(childTask.title, false, plugin.settings);
+							const isChildTaskCompleted = isTaskNotePresentInTags(taskNoteIdentifierTag, childTask[DEFAULT_TASK_CACHE_KEYS.Tags]) ?
+								isTaskCompleted(childTask[DEFAULT_TASK_CACHE_KEYS.Status], true, plugin.settings)
+								: isTaskCompleted(childTask[DEFAULT_TASK_CACHE_KEYS.Title], false, plugin.settings);
 							edges.push({
 								id: `${sourceId}->${depId}`,
 								source: depId,
@@ -619,32 +621,32 @@ const MapView: React.FC<MapViewProps> = ({
 		// console.log('Source Task:', allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId));
 		// console.log('Target Task:', allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId));
 
-		const sourceTask = allTasks.find(t => t.legacyId === sourceNodeId || String(t.id) === sourceNodeId);
+		const sourceTask = allTasks.find(t => t[DEFAULT_TASK_CACHE_KEYS.LegacyID] === sourceNodeId || String(t[DEFAULT_TASK_CACHE_KEYS.ID]) === sourceNodeId);
 		if (!sourceTask) return;
-		const targetTask = allTasks.find(t => t.legacyId === targetNodeId || String(t.id) === targetNodeId);
+		const targetTask = allTasks.find(t => t[DEFAULT_TASK_CACHE_KEYS.LegacyID] === targetNodeId || String(t[DEFAULT_TASK_CACHE_KEYS.ID]) === targetNodeId);
 		if (!targetTask) return;
 
 		const updatedTargetTask = {
 			...targetTask,
-			dependsOn: Array.isArray(targetTask.dependsOn) ? [...targetTask.dependsOn] : []
+			dependsOn: Array.isArray(targetTask[DEFAULT_TASK_CACHE_KEYS.Dependencies]) ? [...targetTask[DEFAULT_TASK_CACHE_KEYS.Dependencies]] : []
 		};
 
-		const sourceLegacyId = sourceTask.legacyId ? sourceTask.legacyId : String(sourceTask.id);
+		const sourceLegacyId = sourceTask[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? sourceTask[DEFAULT_TASK_CACHE_KEYS.LegacyID] : String(sourceTask[DEFAULT_TASK_CACHE_KEYS.ID]);
 		// console.log('Adding dependency on targetLegacyId:', targetLegacyId);
 		if (!updatedTargetTask.dependsOn.includes(sourceLegacyId)) {
 			updatedTargetTask.dependsOn.push(sourceLegacyId);
 			let eventData: UpdateTaskEventData = {
-				taskID: updatedTargetTask.id,
+				taskID: updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.ID],
 				state: true,
 			};
 			eventEmitter.emit("UPDATE_TASK", eventData);
-			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
-				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
-				updatedTargetTask.title = updatedTargetTaskTitle;
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Tags])) {
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title], updatedTargetTask.dependsOn);
+				updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title] = updatedTargetTaskTitle;
 
 				// console.log('Updated source task :', updatedSourceTask, "\nOld source task:", sourceTask);
 				void updateTaskInFile(plugin, updatedTargetTask, targetTask).then((newId) => {
-					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask.filePath).catch((error) => {
+					plugin.realTimeScanner.processAllUpdatedFiles(updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.FilePath]).catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
 							String(error),
@@ -657,7 +659,7 @@ const MapView: React.FC<MapViewProps> = ({
 					// This delay is required to rescan the updated file and refresh the board.
 					window.setTimeout(() => {
 						plugin.realTimeScanner.processAllUpdatedFiles(
-							updatedTargetTask.filePath
+							updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.FilePath]
 						).catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -864,40 +866,40 @@ const MapView: React.FC<MapViewProps> = ({
 		// Edge id format: `${targetId}->${sourceId}`
 		const [targetId, sourceId] = edge.id.split('->');
 		const allTasks = allTasksFlattened;
-		const targetTask = allTasks.find(t => (t.legacyId ? t.legacyId : String(t.id)) === targetId);
+		const targetTask = allTasks.find(t => (t[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? t[DEFAULT_TASK_CACHE_KEYS.LegacyID] : String(t[DEFAULT_TASK_CACHE_KEYS.ID])) === targetId);
 		if (!targetTask) {
 			bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
 			return;
 		}
 
-		if (!Array.isArray(targetTask.dependsOn)) {
+		if (!Array.isArray(targetTask[DEFAULT_TASK_CACHE_KEYS.Dependencies])) {
 			bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
 			return;
 		}
 
-		const updatedDependsOn = targetTask.dependsOn.filter((dep: string) => dep !== sourceId);
+		const updatedDependsOn = targetTask[DEFAULT_TASK_CACHE_KEYS.Dependencies].filter((dep: string) => dep !== sourceId);
 		const updatedTargetTask = {
 			...targetTask,
 			dependsOn: updatedDependsOn
 		};
 
 		let eventData: UpdateTaskEventData = {
-			taskID: updatedTargetTask.id,
+			taskID: updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.ID],
 			state: true,
 		};
 		eventEmitter.emit("UPDATE_TASK", eventData);
 
 		try {
-			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask.tags)) {
-				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask.title, updatedTargetTask.dependsOn);
-				updatedTargetTask.title = updatedTargetTaskTitle;
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Tags])) {
+				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title], updatedTargetTask.dependsOn);
+				updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title] = updatedTargetTaskTitle;
 
 				await updateTaskInFile(plugin, updatedTargetTask, targetTask);
 				new Notice(t("dependency-deleted"));
 				// This delay is required to rescan the updated file and refresh the board.
 				window.setTimeout(() => {
 					plugin.realTimeScanner.processAllUpdatedFiles(
-						updatedTargetTask.filePath
+						updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.FilePath]
 					).catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -914,7 +916,7 @@ const MapView: React.FC<MapViewProps> = ({
 					// This delay is required to rescan the updated file and refresh the board.
 					window.setTimeout(() => {
 						plugin.realTimeScanner.processAllUpdatedFiles(
-							updatedTargetTask.filePath
+							updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.FilePath]
 						).catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,

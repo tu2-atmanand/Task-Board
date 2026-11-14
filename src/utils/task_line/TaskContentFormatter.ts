@@ -82,7 +82,7 @@ export const dedentTaskBodyLines = (bodyLines: string[]): string[] => {
 export const getFormattedTaskContent = async (
 	task: taskItem,
 ): Promise<string> => {
-	if (!task || !task.title) {
+	if (!task || !task[DEFAULT_TASK_CACHE_KEYS.Title]) {
 		return "";
 	}
 
@@ -90,10 +90,10 @@ export const getFormattedTaskContent = async (
 	// let taskLine = `${checkBoxStat} ${task.title}`;
 
 	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
-	let taskLine = task.title.replace(/\[(.)\]/, `[${task.status}]`);
+	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(/\[(.)\]/, `[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = task.body
+	const bodyLines = task[DEFAULT_TASK_CACHE_KEYS.Body]
 		.map((line: string) => {
 			// if (line.startsWith("\t")) {
 			// 	return line;
@@ -176,7 +176,7 @@ export const addIdToTaskContent = async (
  * @returns A string containing the formatted task content.
  */
 export const getFormattedTaskContentSync = (task: taskItem): string => {
-	if (!task || !task.title) {
+	if (!task || !task[DEFAULT_TASK_CACHE_KEYS.Title]) {
 		return "";
 	}
 
@@ -184,10 +184,10 @@ export const getFormattedTaskContentSync = (task: taskItem): string => {
 	// let taskLine = `${checkBoxStat} ${task.title}`;
 
 	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
-	let taskLine = task.title.replace(/\[(.)\]/, `[${task.status}]`);
+	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(/\[(.)\]/, `[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = task.body
+	const bodyLines = task[DEFAULT_TASK_CACHE_KEYS.Body]
 		.map((line: string) => {
 			// if (line.startsWith("\t")) {
 			// 	return line;
@@ -223,69 +223,69 @@ export const getSanitizedTaskContent = (
 	// }
 
 	const globalSettings = plugin.settings.data;
-	const checkBoxStat = `- [${updatedTask.status}]`;
+	const checkBoxStat = `- [${updatedTask[DEFAULT_TASK_CACHE_KEYS.Status]}]`;
 
 	// TODO : Sanitizations not only correcting the format and replacing the old content with the latest one, but also very important is to clean if any old properties are there.
 
 	// Sanitize all the properties from the task title
-	let updatedTitle = updatedTask.title;
+	let updatedTitle = updatedTask[DEFAULT_TASK_CACHE_KEYS.Title];
 	updatedTitle = sanitizePriority(
 		globalSettings,
 		updatedTitle,
-		updatedTask.priority,
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority],
 	);
 
-	updatedTitle = sanitizeTime(globalSettings, updatedTitle, updatedTask.time);
+	updatedTitle = sanitizeTime(globalSettings, updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Time]);
 
 	updatedTitle = sanitizeCreatedDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.createdDate,
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
 	);
 
 	updatedTitle = sanitizeStartDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.startDate,
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate],
 	);
 
 	updatedTitle = sanitizeScheduledDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.scheduledDate,
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
 	);
 
 	updatedTitle = sanitizeDueDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.dueDate,
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate],
 	);
 
-	updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
+	updatedTitle = sanitizeTags(updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags]);
 
 	updatedTitle = sanitizeReminder(
 		globalSettings,
 		updatedTitle,
-		updatedTask?.reminder || "",
+		updatedTask?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "",
 	);
 
 	updatedTitle = sanitizeCompletionDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.completionDate || "",
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || "",
 	);
 
 	updatedTitle = sanitizeCancelledDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.cancelledDate || "",
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || "",
 	);
 
 	// Build the formatted string for the main task
 	let formattedTask = `${checkBoxStat} ${updatedTitle}`;
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = updatedTask.body
+	const bodyLines = updatedTask[DEFAULT_TASK_CACHE_KEYS.Body]
 		.map((line: string) => {
 			// if (line.startsWith("\t")) {
 			// 	return line;
@@ -1428,10 +1428,10 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		hiddenProperties.length === 0 &&
 		!plugin.settings.data.showTaskWithoutMetadata
 	) {
-		return task.title;
+		return task[DEFAULT_TASK_CACHE_KEYS.Title];
 	}
 
-	let cleanedTitle = task.title;
+	let cleanedTitle = task[DEFAULT_TASK_CACHE_KEYS.Title];
 
 	// Remove the initial indentation and checkbox markdown
 	cleanedTitle = cleanedTitle
@@ -1451,7 +1451,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		switch (property) {
 			case DEFAULT_TASK_CACHE_KEYS.Tags:
 				// Remove tags
-				task.tags.forEach((tag) => {
+				task[DEFAULT_TASK_CACHE_KEYS.Tags].forEach((tag) => {
 					const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
 					const tagsMatch = cleanedTitle.match(tagRegex);
 					if (tagsMatch) {
@@ -1462,7 +1462,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.Time:
 				// Remove time (handles both formats)
-				if (task.time) {
+				if (task[DEFAULT_TASK_CACHE_KEYS.Time]) {
 					const timeRegex =
 						/\s*(⏰\s*\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|@time\(.*?\))/g;
 					const timeMatch = cleanedTitle.match(timeRegex);
@@ -1474,7 +1474,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.DueDate:
 				// Remove due date in various formats
-				if (task.dueDate) {
+				if (task[DEFAULT_TASK_CACHE_KEYS.DueDate]) {
 					const dueDateRegex =
 						/\s*(📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::.*?\]|@due\(.*?\))/g;
 					cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
@@ -1483,7 +1483,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.CreatedDate:
 				// Remove Created date in various formats
-				if (task.createdDate) {
+				if (task[DEFAULT_TASK_CACHE_KEYS.CreatedDate]) {
 					const createdDateRegex =
 						/\s*(➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::.*?\]|@created\(.*?\))/g;
 					cleanedTitle = cleanedTitle.replace(createdDateRegex, "");
@@ -1492,7 +1492,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.StartDate:
 				// Remove start date in various formats
-				if (task.startDate) {
+				if (task[DEFAULT_TASK_CACHE_KEYS.StartDate]) {
 					const startDateRegex =
 						/\s*(🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::.*?\]|@start\(.*?\))/g;
 					cleanedTitle = cleanedTitle.replace(startDateRegex, "");
@@ -1501,7 +1501,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.ScheduledDate:
 				// Remove scheduled date in various formats
-				if (task.scheduledDate) {
+				if (task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]) {
 					const scheduledDateRegex =
 						/\s*(⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::.*?\]|@scheduled\(.*?\))/g;
 					cleanedTitle = cleanedTitle.replace(scheduledDateRegex, "");
@@ -1510,7 +1510,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.CompletionDate:
 				// Remove completion date in various formats
-				if (task.completionDate) {
+				if (task[DEFAULT_TASK_CACHE_KEYS.CompletionDate]) {
 					const completionRegex =
 						/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
 					cleanedTitle = cleanedTitle.replace(completionRegex, "");
@@ -1519,7 +1519,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.Priority:
 				// Remove priority in various formats
-				if (task.priority > 0) {
+				if (task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
 					let match = cleanedTitle.match(
 						/\[priority::\s*(\d{1,2})\]/,
 					);
@@ -1532,7 +1532,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 						cleanedTitle = cleanedTitle.replace(match[0], "");
 					}
 
-					const priorityIcon = priorityEmojis[task.priority];
+					const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority]];
 
 					if (priorityIcon) {
 						// Create a regex pattern to match any priority emoji in text
@@ -1585,7 +1585,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
  * @todo Improve the performance of this function as its called at extermely high rate.
  */
 export const cleanTaskTitleLegacy = (task: taskItem): string => {
-	let cleanedTitle = task.title;
+	let cleanedTitle = task[DEFAULT_TASK_CACHE_KEYS.Title];
 
 	cleanedTitle = cleanedTitle
 		.replace(
@@ -1598,7 +1598,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	// If pipe symbol is present (` | `), then remove everything after the pipe symbol.
 
 	// Remove tags
-	task.tags.forEach((tag) => {
+	task[DEFAULT_TASK_CACHE_KEYS.Tags].forEach((tag) => {
 		const tagRegex = new RegExp(`\\s*#${tag}\\s*`, "g");
 		const tagsMatch = cleanedTitle.match(tagRegex);
 		if (tagsMatch) {
@@ -1607,7 +1607,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	});
 
 	// Remove id
-	if (task.legacyId) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.LegacyID]) {
 		const combinedIdRegex = new RegExp(
 			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
 			"g", // add the 'g' flag if you want to match all occurrences
@@ -1619,7 +1619,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove time (handles both formats)
-	if (task.time) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.Time]) {
 		const timeRegex =
 			/\s*(⏰\s*\[.*?\]|\b\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\b|⏰\s*(.*?)|\[time::.*?\]|@time\(.*?\))/g;
 		const timeMatch = cleanedTitle.match(timeRegex);
@@ -1629,48 +1629,48 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove due date in various formats
-	if (task.dueDate) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.DueDate]) {
 		const dueDateRegex = /\s*(📅\s*.*?(?=\s|$)|\[due::.*?\]|@due\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
 	}
 
 	// Remove Created date in various formats
-	if (task.createdDate) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.CreatedDate]) {
 		const createdDateRegex =
 			/\s*(➕\s*.*?(?=\s|$)|\[created::.*?\]|@created\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(createdDateRegex, "");
 	}
 
 	// Remove start date in various formats
-	if (task.startDate) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.StartDate]) {
 		const startDateRegex =
 			/\s*(🛫\s*.*?(?=\s|$)|\[start::.*?\]|@start\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(startDateRegex, "");
 	}
 
 	// Remove scheduled date in various formats
-	if (task.scheduledDate) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]) {
 		const scheduledDateRegex =
 			/\s*(⏳\s*.*?(?=\s|$)|\[scheduled::.*?\]|@scheduled\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(scheduledDateRegex, "");
 	}
 
 	// Remove completion date in various formats
-	if (task.completionDate) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.CompletionDate]) {
 		const completionRegex =
 			/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(completionRegex, "");
 	}
 
 	// Remove cancelled date in various formats
-	if (task.cancelledDate) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.CancelledDate]) {
 		const cancelledRegex =
 			/\s*(❌\s*.*?(?=\s|$)|\[cancelled::.*?\]|@cancelled\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(cancelledRegex, "");
 	}
 
 	// Remove priority in various formats
-	if (task.priority > 0) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
 		let match = cleanedTitle.match(/\[priority::\s*(\d{1,2})\]/);
 		if (match) {
 			cleanedTitle = cleanedTitle.replace(match[0], "");
@@ -1681,7 +1681,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 			cleanedTitle = cleanedTitle.replace(match[0], "");
 		}
 
-		const priorityIcon = priorityEmojis[task.priority];
+		const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority]];
 
 		if (priorityIcon) {
 			// Create a regex pattern to match any priority emoji in text
@@ -1700,7 +1700,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove dependsOn in various formats
-	if (task.dependsOn && task.dependsOn.length > 0) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.Dependencies] && task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0) {
 		const combinedDependsOnRegex = new RegExp(
 			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dependsOnRegex.source})`,
 			"g", // add the 'g' flag if you want to match all occurrences
@@ -1712,7 +1712,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove reminder if it exists
-	if (task.reminder) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.Reminder]) {
 		const reminderRegex =
 			/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/;
 		const reminderMatch = cleanedTitle.match(reminderRegex);
@@ -1768,7 +1768,7 @@ export const isTaskTitleWithoutText = (task: taskItem): boolean => {
  * @returns True when the task has description lines and no meaningful title.
  */
 export const shouldExpandTaskDescription = (task: taskItem): boolean => {
-	const hasDescriptionLines = task.body?.some(
+	const hasDescriptionLines = task[DEFAULT_TASK_CACHE_KEYS.Body]?.some(
 		(line) => line.trim() !== "" && !isTaskLine(line),
 	);
 	return !!hasDescriptionLines && isTaskTitleWithoutText(task);

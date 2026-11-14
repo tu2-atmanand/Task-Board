@@ -15,6 +15,8 @@ import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../
 import { readDataOfVaultFile, writeDataToVaultFile } from "../../../utils/MarkdownFileOperations.js";
 import { updateTaskInFile } from "../../../utils/task_line/TaskLineUtils.js";
 import { columnSortingAlgorithm } from "../../../core/algorithms/ColumnSortingAlgorithm.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 interface InboxViewProps {
 	plugin: TaskBoard;
@@ -51,7 +53,7 @@ const InboxView: React.FC<InboxViewProps> = ({
 	const [inboxConfig, setInboxConfig] = useState<InboxViewConfig>(() => currentView.inboxView ?? DEFAULT_INBOX_CONFIG);
 	const columnData = inboxConfig.column;
 	const [listWidth, setListWidth] = useState(inboxConfig?.listWidth ?? DEFAULT_LIST_WIDTH);
-	const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(() => filteredTasks.Pending[0]?.id ?? filteredTasks.Completed[0]?.id);
+	const [selectedTaskId, setSelectedTaskId] = useState<string | undefined>(() => filteredTasks.Pending[0]?.[DEFAULT_TASK_CACHE_KEYS.ID] ?? filteredTasks.Completed[0]?.[DEFAULT_TASK_CACHE_KEYS.ID]);
 	const [editorTask, setEditorTask] = useState<{ task: taskItem; noteContent: string }>();
 	const [editorLoadError, setEditorLoadError] = useState<string>();
 	const [editorVersion, setEditorVersion] = useState(0);
@@ -68,40 +70,40 @@ const InboxView: React.FC<InboxViewProps> = ({
 
 		if (!sortCriteria.length) return allTasks;
 		if (manualOrder) {
-			const taskById = new Map(allTasks.map((task) => [task.id, task]));
+			const taskById = new Map(allTasks.map((task) => [task[DEFAULT_TASK_CACHE_KEYS.ID], task]));
 			const orderedTasks = (columnData?.tasksIdManualOrder ?? [])
 				.map((id) => taskById.get(id))
 				.filter((task): task is taskItem => task !== undefined);
-			const orderedIds = new Set(orderedTasks.map((task) => task.id));
-			return [...orderedTasks, ...allTasks.filter((task) => !orderedIds.has(task.id))];
+			const orderedIds = new Set(orderedTasks.map((task) => task[DEFAULT_TASK_CACHE_KEYS.ID]));
+			return [...orderedTasks, ...allTasks.filter((task) => !orderedIds.has(task[DEFAULT_TASK_CACHE_KEYS.ID]))];
 		}
 
 		return columnSortingAlgorithm(plugin.settings.data.defaultStartTime, allTasks, sortCriteria);
 	}, [filteredTasks, columnData?.sortCriteria, columnData?.tasksIdManualOrder, plugin.settings.data.defaultStartTime]);
 
-	const selectedTask = tasks.find((task) => task.id === selectedTaskId);
-	const editorSelectedTask = selectedTask ?? (editorTask && editorTask.task.id === selectedTaskId ? editorTask.task : undefined);
+	const selectedTask = tasks.find((task) => task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTaskId);
+	const editorSelectedTask = selectedTask ?? (editorTask && editorTask.task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTaskId ? editorTask.task : undefined);
 	const isTaskNote = editorSelectedTask
-		? isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, editorSelectedTask.tags)
+		? isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, editorSelectedTask[DEFAULT_TASK_CACHE_KEYS.Tags])
 		: false;
 
 	useEffect(() => {
-		if (!selectedTaskId || (!isEditorEdited && !tasks.some((task) => task.id === selectedTaskId))) {
-			setSelectedTaskId(tasks[0]?.id);
+		if (!selectedTaskId || (!isEditorEdited && !tasks.some((task) => task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTaskId))) {
+			setSelectedTaskId(tasks[0]?.[DEFAULT_TASK_CACHE_KEYS.ID]);
 		}
 	}, [isEditorEdited, selectedTaskId, tasks]);
 
 	useEffect(() => {
 		let cancelled = false;
 		if (!selectedTask && isEditorEdited) return;
-		if (selectedTask && editorTask?.task.id === selectedTask.id) return;
+		if (selectedTask && editorTask?.task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTask[DEFAULT_TASK_CACHE_KEYS.ID]) return;
 		setEditorTask(undefined);
 		setEditorLoadError(undefined);
 		if (!selectedTask) return;
 
 		const loadEditorTask = async () => {
 			const noteContent = isTaskNote
-				? await readDataOfVaultFile(plugin, selectedTask.filePath, true)
+				? await readDataOfVaultFile(plugin, selectedTask[DEFAULT_TASK_CACHE_KEYS.FilePath], true)
 				: "";
 			if (!cancelled) {
 				if (isTaskNote && noteContent === null) {
@@ -116,7 +118,7 @@ const InboxView: React.FC<InboxViewProps> = ({
 		return () => {
 			cancelled = true;
 		};
-	}, [selectedTask?.id, isTaskNote, isEditorEdited, editorTask?.task.id, plugin]);
+	}, [selectedTask?.[DEFAULT_TASK_CACHE_KEYS.ID], isTaskNote, isEditorEdited, editorTask?.task[DEFAULT_TASK_CACHE_KEYS.ID], plugin]);
 
 	useEffect(() => {
 		setListWidth(inboxConfig?.listWidth ?? DEFAULT_LIST_WIDTH);
@@ -171,20 +173,20 @@ const InboxView: React.FC<InboxViewProps> = ({
 	};
 
 	const handleTaskSelect = (task: taskItem) => {
-		if (task.id === selectedTaskId) return;
+		if (task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTaskId) return;
 		if (isEditorEdited) {
 			new ClosePopupConfrimationModal(plugin.app, {
 				app: plugin.app,
 				mssg: t("edit-task-modal-close-confirm-mssg"),
 				onDiscard: () => {
 					setIsEditorEdited(false);
-					setSelectedTaskId(task.id);
+					setSelectedTaskId(task[DEFAULT_TASK_CACHE_KEYS.ID]);
 				},
 				onGoBack: () => undefined,
 			}).open();
 			return;
 		}
-		setSelectedTaskId(task.id);
+		setSelectedTaskId(task[DEFAULT_TASK_CACHE_KEYS.ID]);
 	};
 
 	const saveListWidth = (width: number) => {
@@ -228,7 +230,7 @@ const InboxView: React.FC<InboxViewProps> = ({
 		updatedNoteContent?: string,
 	) => {
 		if (!editorTask) return;
-		const taskToSave = { ...updatedTask, filePath: editorTask.task.filePath };
+		const taskToSave = { ...updatedTask, filePath: editorTask.task[DEFAULT_TASK_CACHE_KEYS.FilePath] };
 		if (isTaskNote) {
 			if (updatedNoteContent !== undefined) {
 				await writeDataToVaultFile(plugin, taskToSave.filePath, updatedNoteContent);
@@ -304,11 +306,11 @@ const InboxView: React.FC<InboxViewProps> = ({
 			<section className="taskBoardInboxEditor" ref={editorRootRef}>
 				{editorTask && editorRootRef.current ? (
 					<TaskEditorRC
-						key={`${editorTask.task.id}-${editorVersion}`}
+						key={`${editorTask.task[DEFAULT_TASK_CACHE_KEYS.ID]}-${editorVersion}`}
 						plugin={plugin}
 						root={editorRootRef.current}
 						activeNote={false}
-						filePath={editorTask.task.filePath}
+						filePath={editorTask.task[DEFAULT_TASK_CACHE_KEYS.FilePath]}
 						isTaskNote={isTaskNote}
 						inboxView
 						noteContent={editorTask.noteContent}

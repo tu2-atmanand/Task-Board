@@ -9,6 +9,8 @@ import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
 import TaskItem from "../../components/task_card/EmojiStyle.js";
 import BasesStyle from "../../components/task_card/BasesStyle.js";
 import { robustDateParser } from "../../../utils/DateTimeCalculations.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 interface ListViewProps {
 	plugin: TaskBoard;
@@ -55,12 +57,12 @@ const ListView: React.FC<ListViewProps> = ({
 			.sort(({ task: first, index: firstIndex }, { task: second, index: secondIndex }) => {
 				let comparison = 0;
 				if (taskSort === "title") {
-					comparison = first.title.localeCompare(second.title, undefined, { numeric: true, sensitivity: "base" });
+					comparison = first[DEFAULT_TASK_CACHE_KEYS.Title].localeCompare(second[DEFAULT_TASK_CACHE_KEYS.Title], undefined, { numeric: true, sensitivity: "base" });
 				} else if (taskSort === "priority") {
-					comparison = first.priority - second.priority;
+					comparison = first[DEFAULT_TASK_CACHE_KEYS.Priority] - second[DEFAULT_TASK_CACHE_KEYS.Priority];
 				} else {
-					const firstDate = first.dueDate ? robustDateParser(first.dueDate, dateFormat)?.getTime() : undefined;
-					const secondDate = second.dueDate ? robustDateParser(second.dueDate, dateFormat)?.getTime() : undefined;
+					const firstDate = first[DEFAULT_TASK_CACHE_KEYS.DueDate] ? robustDateParser(first[DEFAULT_TASK_CACHE_KEYS.DueDate], dateFormat)?.getTime() : undefined;
+					const secondDate = second[DEFAULT_TASK_CACHE_KEYS.DueDate] ? robustDateParser(second[DEFAULT_TASK_CACHE_KEYS.DueDate], dateFormat)?.getTime() : undefined;
 					if (firstDate === undefined && secondDate !== undefined) return 1;
 					if (secondDate === undefined && firstDate !== undefined) return -1;
 					comparison = (firstDate ?? 0) - (secondDate ?? 0);
@@ -88,7 +90,7 @@ const ListView: React.FC<ListViewProps> = ({
 	};
 
 	const renderTask = (task: taskItem, index: number) => React.createElement(taskCardComponent, {
-		key: task.id,
+		key: task[DEFAULT_TASK_CACHE_KEYS.ID],
 		dataAttributeIndex: index,
 		plugin,
 		task,

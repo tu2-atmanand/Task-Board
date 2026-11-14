@@ -14,6 +14,8 @@ import { robustDateParser } from "../../utils/DateTimeCalculations.js";
 import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
 import { getFormattedTaskContentSync } from "../../utils/task_line/TaskContentFormatter.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -312,57 +314,57 @@ function getTaskPropertyValue(
 		case "content":
 			return getFormattedTaskContentSync(task);
 		case "title":
-			return task.title || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.Title] || "";
 		case "body":
 		case "description":
-			return task.body.join("\n") || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.Body].join("\n") || "";
 		case "createdDate":
 		case "created":
-			return task.createdDate || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || "";
 		case "dueDate":
 		case "due":
-			return task.dueDate || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.DueDate] || "";
 		case "startDate":
 		case "start":
-			return task.startDate || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.StartDate] || "";
 		case "scheduledDate":
 		case "scheduled":
-			return task.scheduledDate || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "";
 		case "completion":
 		case "completedDate":
 		case "done":
-			return task?.completionDate || "";
+			return task?.[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || "";
 		case "cancelled":
 		case "cancelledDate":
-			return task?.cancelledDate || "";
+			return task?.[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || "";
 		case "priority":
-			return task.priority || 0;
+			return task[DEFAULT_TASK_CACHE_KEYS.Priority] || 0;
 		case "status":
-			return task.status || " ";
+			return task[DEFAULT_TASK_CACHE_KEYS.Status] || " ";
 		case "tags":
 			return getAllTaskTags(task) || [];
 		case "frontmatterTags":
-			return task.frontmatterTags || [];
+			return task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags] || [];
 		case "filePath":
 		case "path":
-			return task.filePath || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.FilePath] || "";
 		case "folderPath": {
-			const parts = task.filePath.split("/");
+			const parts = task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/");
 			const folderPath = parts.slice(0, -1).join("/");
 			return folderPath + "/" || "";
 		}
 		case "startTime":
-			return task.time ? task.time.split("-")[0].trim() : "";
+			return task[DEFAULT_TASK_CACHE_KEYS.Time] ? task[DEFAULT_TASK_CACHE_KEYS.Time].split("-")[0].trim() : "";
 		case "reminder":
-			return task?.reminder || "";
+			return task?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "";
 		case "dependsOn":
 		case "dependencies":
-			return task?.dependsOn || [];
+			return task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] || [];
 		default:
 			// Handle tag properties like "tags.myTag"
 			if (property.startsWith("tags.")) {
 				const tagName = property.substring(5);
-				return task.tags.some(
+				return task[DEFAULT_TASK_CACHE_KEYS.Tags].some(
 					(tag) => tag.toLowerCase() === tagName.toLowerCase(),
 				);
 			}

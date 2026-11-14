@@ -9,6 +9,8 @@ import {
 	isTaskNotePresentInTags,
 	updateFrontmatterInMarkdownFile,
 } from "./task_note/TaskNoteUtils.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
+
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
@@ -16,8 +18,8 @@ import {
  * @returns string[] - Array of tags
  */
 export const getAllTaskTags = (task: taskItem): string[] => {
-	const lineTags = task.tags || [];
-	const frontmatterTags = task.frontmatterTags || [];
+	const lineTags = task[DEFAULT_TASK_CACHE_KEYS.Tags] || [];
+	const frontmatterTags = task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags] || [];
 	return [...lineTags, ...frontmatterTags];
 };
 
@@ -39,7 +41,7 @@ export const getTaskFromId = async (
 		for (const tasks of Object.values(pendingTasksObj)) {
 			if (id) {
 				foundTask = tasks.find(
-					(task) => task.legacyId === id || task.id === id,
+					(task) => task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id || task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
 				);
 			}
 			if (foundTask) return foundTask;
@@ -51,7 +53,7 @@ export const getTaskFromId = async (
 		for (const tasks of Object.values(completedTasksObj)) {
 			if (id) {
 				foundTask = tasks.find(
-					(task) => task.legacyId === id || task.id === id,
+					(task) => task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id || task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
 				);
 			}
 			if (foundTask) return foundTask;
@@ -129,21 +131,21 @@ export const applyIdToTaskItem = async (
 	task: taskItem,
 ): Promise<string | undefined> => {
 	// If the task already has an ID, return it and avoid assigning a new one.
-	if (task.legacyId && String(task.legacyId).trim() !== "") {
-		return String(task.legacyId);
+	if (task[DEFAULT_TASK_CACHE_KEYS.LegacyID] && String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]).trim() !== "") {
+		return String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]);
 	}
 
 	// If it's a task note, ensure frontmatter has an ID and return it.
 	if (
 		isTaskNotePresentInTags(
 			plugin.settings.data.taskNoteIdentifierTag,
-			task.tags,
+			task[DEFAULT_TASK_CACHE_KEYS.Tags],
 		)
 	) {
-		let newId = task.legacyId;
+		let newId = task[DEFAULT_TASK_CACHE_KEYS.LegacyID];
 		if (!newId || String(newId).trim() === "") {
 			newId = generateTaskId(plugin);
-			task.legacyId = newId;
+			task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = newId;
 		}
 		void updateFrontmatterInMarkdownFile(plugin, task, true);
 
@@ -151,7 +153,7 @@ export const applyIdToTaskItem = async (
 	}
 
 	// Try to extract an ID from the title (legacy inline format)
-	const extractedTaskId = extractTaskId(task.title)?.[1];
+	const extractedTaskId = extractTaskId(task[DEFAULT_TASK_CACHE_KEYS.Title])?.[1];
 	if (extractedTaskId) return extractedTaskId;
 
 	// Otherwise, update the task line in the file which should return a new ID

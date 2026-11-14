@@ -226,15 +226,15 @@ export function createFrontmatterFromTask(
 	const frontmatterObj: Partial<customFrontmatterCache> = {};
 
 	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
-		task?.title || "";
+		task?.[DEFAULT_TASK_CACHE_KEYS.Title] || "";
 	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
 		getStatusNameFromStatusSymbol(
-			task?.status,
+			task?.[DEFAULT_TASK_CACHE_KEYS.Status],
 			plugin.settings.data.customStatuses ?? [],
 		) || "pending";
 	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
 		plugin.settings.data.taskNoteIdentifierTag,
-		...(task?.tags?.filter(
+		...(task?.[DEFAULT_TASK_CACHE_KEYS.Tags]?.filter(
 			(tag) =>
 				!compareTwoTags(
 					tag,
@@ -243,57 +243,57 @@ export function createFrontmatterFromTask(
 		) ?? []),
 	];
 
-	if (task.id && plugin.settings.data.autoAddUniqueID)
+	if (task[DEFAULT_TASK_CACHE_KEYS.ID] && plugin.settings.data.autoAddUniqueID)
 		frontmatterObj[
 			getCustomFrontmatterKey(
 				DEFAULT_TASK_CACHE_KEYS.ID,
 				frontmatterFormatting,
 			)
-		] = task.legacyId ? task.legacyId : task.id;
-	if (task.priority && task.priority > 0) {
+		] = task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : task[DEFAULT_TASK_CACHE_KEYS.ID];
+	if (task[DEFAULT_TASK_CACHE_KEYS.Priority] && task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
 		frontmatterObj[
 			getCustomFrontmatterKey("priority", frontmatterFormatting)
-		] = getPriorityNameForTaskNote(task.priority) || "";
+		] = getPriorityNameForTaskNote(task[DEFAULT_TASK_CACHE_KEYS.Priority]) || "";
 	}
-	if (task.createdDate)
+	if (task[DEFAULT_TASK_CACHE_KEYS.CreatedDate])
 		frontmatterObj[
 			getCustomFrontmatterKey("createdDate", frontmatterFormatting)
-		] = task.createdDate;
-	if (task.startDate)
+		] = task[DEFAULT_TASK_CACHE_KEYS.CreatedDate];
+	if (task[DEFAULT_TASK_CACHE_KEYS.StartDate])
 		frontmatterObj[
 			getCustomFrontmatterKey("startDate", frontmatterFormatting)
-		] = task.startDate;
-	if (task.scheduledDate)
+		] = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
+	if (task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate])
 		frontmatterObj[
 			getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
-		] = task.scheduledDate;
-	if (task.dueDate)
+		] = task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
+	if (task[DEFAULT_TASK_CACHE_KEYS.DueDate])
 		frontmatterObj[
 			getCustomFrontmatterKey(
 				DEFAULT_TASK_CACHE_KEYS.DueDate,
 				frontmatterFormatting,
 			)
-		] = task.dueDate;
-	if (task.time)
+		] = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
+	if (task[DEFAULT_TASK_CACHE_KEYS.Time])
 		frontmatterObj[getCustomFrontmatterKey("time", frontmatterFormatting)] =
-			task.time;
-	if (task.reminder)
+			task[DEFAULT_TASK_CACHE_KEYS.Time];
+	if (task[DEFAULT_TASK_CACHE_KEYS.Reminder])
 		frontmatterObj[
 			getCustomFrontmatterKey("reminder", frontmatterFormatting)
-		] = task.reminder;
-	if (task.dependsOn && task.dependsOn.length > 0)
+		] = task[DEFAULT_TASK_CACHE_KEYS.Reminder];
+	if (task[DEFAULT_TASK_CACHE_KEYS.Dependencies] && task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0)
 		frontmatterObj[
 			getCustomFrontmatterKey("dependsOn", frontmatterFormatting)
-		] = task.dependsOn.join(", ");
+		] = task[DEFAULT_TASK_CACHE_KEYS.Dependencies].join(", ");
 
-	if (task.cancelledDate)
+	if (task[DEFAULT_TASK_CACHE_KEYS.CancelledDate])
 		frontmatterObj[
 			getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
-		] = task.cancelledDate;
-	if (task.completionDate)
+		] = task[DEFAULT_TASK_CACHE_KEYS.CancelledDate];
+	if (task[DEFAULT_TASK_CACHE_KEYS.CompletionDate])
 		frontmatterObj[
 			getCustomFrontmatterKey("completionDate", frontmatterFormatting)
-		] = task.completionDate;
+		] = task[DEFAULT_TASK_CACHE_KEYS.CompletionDate];
 
 	// Order the frontmatter properties based on index values
 	const orderedFrontmatter = orderFrontmatterProperties(
@@ -326,9 +326,9 @@ export function updateFrontmatterProperties(
 	// Step 1: Build a temporary object with all the updated values
 	const tempUpdates: Record<string, unknown> = {};
 
-	if (task.title) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.Title]) {
 		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] =
-			task.title;
+			task[DEFAULT_TASK_CACHE_KEYS.Title];
 	} else {
 		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] =
 			"";
@@ -365,7 +365,7 @@ export function updateFrontmatterProperties(
 	// 		: []
 	// 	: [];
 
-	const taskTags: string[] = task.tags.filter(Boolean);
+	const taskTags: string[] = task[DEFAULT_TASK_CACHE_KEYS.Tags].filter(Boolean);
 
 	const identifierTag = plugin.settings.data.taskNoteIdentifierTag;
 
@@ -395,8 +395,8 @@ export function updateFrontmatterProperties(
 	);
 	if (!existingFrontmatter?.[idKey]) {
 		if (forceId || plugin.settings.data.autoAddUniqueID) {
-			tempUpdates[idKey] = task.legacyId
-				? task.legacyId
+			tempUpdates[idKey] = task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
+				? task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
 				: generateTaskId(plugin);
 		}
 	} else {
@@ -405,20 +405,20 @@ export function updateFrontmatterProperties(
 	}
 
 	const statusKey = getCustomFrontmatterKey("status", frontmatterFormatting);
-	if (task.status) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.Status]) {
 		const statusName = getStatusNameFromStatusSymbol(
-			task.status,
+			task[DEFAULT_TASK_CACHE_KEYS.Status],
 			plugin.settings.data.customStatuses ?? [],
 		);
-		tempUpdates[statusKey] = statusName ?? `"${task.status}"`;
+		tempUpdates[statusKey] = statusName ?? `"${task[DEFAULT_TASK_CACHE_KEYS.Status]}"`;
 	}
 
 	// All the below properties are optional
 
 	// Update time property
 	const timeKey = getCustomFrontmatterKey("time", frontmatterFormatting);
-	if (task.time) {
-		tempUpdates[timeKey] = task.time;
+	if (task[DEFAULT_TASK_CACHE_KEYS.Time]) {
+		tempUpdates[timeKey] = task[DEFAULT_TASK_CACHE_KEYS.Time];
 	} else {
 		delete tempUpdates[timeKey];
 		delete oldFrontmatter?.[timeKey];
@@ -429,8 +429,8 @@ export function updateFrontmatterProperties(
 		"createdDate",
 		frontmatterFormatting,
 	);
-	if (task.createdDate) {
-		tempUpdates[createdDateKey] = task.createdDate;
+	if (task[DEFAULT_TASK_CACHE_KEYS.CreatedDate]) {
+		tempUpdates[createdDateKey] = task[DEFAULT_TASK_CACHE_KEYS.CreatedDate];
 	} else {
 		delete tempUpdates[createdDateKey];
 		delete oldFrontmatter?.[createdDateKey];
@@ -440,8 +440,8 @@ export function updateFrontmatterProperties(
 		"startDate",
 		frontmatterFormatting,
 	);
-	if (task.startDate) {
-		tempUpdates[startDateKey] = task.startDate;
+	if (task[DEFAULT_TASK_CACHE_KEYS.StartDate]) {
+		tempUpdates[startDateKey] = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
 	} else {
 		delete tempUpdates[startDateKey];
 		delete oldFrontmatter?.[startDateKey];
@@ -451,23 +451,23 @@ export function updateFrontmatterProperties(
 		"scheduledDate",
 		frontmatterFormatting,
 	);
-	if (task.scheduledDate) {
-		tempUpdates[scheduledDateKey] = task.scheduledDate;
+	if (task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]) {
+		tempUpdates[scheduledDateKey] = task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 	} else {
 		delete tempUpdates[scheduledDateKey];
 		delete oldFrontmatter?.[scheduledDateKey];
 	}
 
 	const dueKey = getCustomFrontmatterKey("due", frontmatterFormatting);
-	if (task.dueDate) {
-		tempUpdates[dueKey] = task.dueDate;
+	if (task[DEFAULT_TASK_CACHE_KEYS.DueDate]) {
+		tempUpdates[dueKey] = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
 	} else {
 		delete tempUpdates[dueKey];
 		delete oldFrontmatter?.[dueKey];
 	}
 
 	const statusConfig = plugin.settings.data.customStatuses.find(
-		(status) => status.symbol === task.status,
+		(status) => status.symbol === task[DEFAULT_TASK_CACHE_KEYS.Status],
 	);
 	const statusType = statusConfig ? statusConfig.type : undefined;
 
@@ -476,8 +476,8 @@ export function updateFrontmatterProperties(
 		frontmatterFormatting,
 	);
 	if (statusType === statusTypeNames.CANCELLED) {
-		if (task.cancelledDate) {
-			tempUpdates[cancelledDateKey] = task.cancelledDate;
+		if (task[DEFAULT_TASK_CACHE_KEYS.CancelledDate]) {
+			tempUpdates[cancelledDateKey] = task[DEFAULT_TASK_CACHE_KEYS.CancelledDate];
 		} else {
 			const globalSettings = plugin.settings.data;
 			// const moment = _moment as unknown as typeof _moment.default;
@@ -498,8 +498,8 @@ export function updateFrontmatterProperties(
 		frontmatterFormatting,
 	);
 	if (statusType === statusTypeNames.DONE) {
-		if (task.cancelledDate) {
-			tempUpdates[completionKey] = task.completionDate;
+		if (task[DEFAULT_TASK_CACHE_KEYS.CancelledDate]) {
+			tempUpdates[completionKey] = task[DEFAULT_TASK_CACHE_KEYS.CompletionDate];
 		} else {
 			const globalSettings = plugin.settings.data;
 			// const moment = _moment as unknown as typeof _moment.default;
@@ -519,9 +519,9 @@ export function updateFrontmatterProperties(
 		"priority",
 		frontmatterFormatting,
 	);
-	if (task.priority && task.priority > 0) {
+	if (task[DEFAULT_TASK_CACHE_KEYS.Priority] && task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
 		tempUpdates[priorityKey] =
-			getPriorityNameForTaskNote(task.priority) || "";
+			getPriorityNameForTaskNote(task[DEFAULT_TASK_CACHE_KEYS.Priority]) || "";
 	} else {
 		delete tempUpdates[priorityKey];
 		delete oldFrontmatter?.[priorityKey];
@@ -531,8 +531,8 @@ export function updateFrontmatterProperties(
 		"reminder",
 		frontmatterFormatting,
 	);
-	if (task?.reminder) {
-		tempUpdates[reminderKey] = task.reminder;
+	if (task?.[DEFAULT_TASK_CACHE_KEYS.Reminder]) {
+		tempUpdates[reminderKey] = task[DEFAULT_TASK_CACHE_KEYS.Reminder];
 	} else {
 		delete tempUpdates[reminderKey];
 		delete oldFrontmatter?.[reminderKey];
@@ -542,8 +542,8 @@ export function updateFrontmatterProperties(
 		"dependsOn",
 		frontmatterFormatting,
 	);
-	if (task?.dependsOn && task.dependsOn.length > 0) {
-		tempUpdates[dependsOnKey] = task.dependsOn;
+	if (task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] && task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0) {
+		tempUpdates[dependsOnKey] = task[DEFAULT_TASK_CACHE_KEYS.Dependencies];
 	} else {
 		delete tempUpdates[dependsOnKey];
 		delete oldFrontmatter?.[dependsOnKey];

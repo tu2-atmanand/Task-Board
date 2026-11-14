@@ -21,6 +21,8 @@ import { robustDateParser, formatDateStringAsPerSettings } from "../../../utils/
 import { sanitizeStartDate, sanitizeTime } from "../../../utils/task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "../../../utils/task_line/TaskLineUtils.js";
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/task_note/TaskNoteUtils.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 type CalendarMode = "day" | "week" | "month";
 
@@ -97,7 +99,7 @@ const getTaskTimeRange = (value: string): { start: number; end: number } | null 
 };
 
 const getTaskDisplayTitle = (task: taskItem): string =>
-	task.title
+	task[DEFAULT_TASK_CACHE_KEYS.Title]
 		.replace(/^\s*[-*]\s*\[[^\]]\]\s*/, "")
 		.trim();
 
@@ -116,11 +118,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 	const calendarTasks = useMemo(() => {
 		const allTasks = [...tasks.Pending, ...tasks.Completed];
 		return allTasks.reduce<CalendarTask[]>((scheduledTasks, task) => {
-			const dateValue = task.startDate || task.scheduledDate || task.dueDate;
+			const dateValue = task[DEFAULT_TASK_CACHE_KEYS.StartDate] || task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || task[DEFAULT_TASK_CACHE_KEYS.DueDate];
 			const parsedDate = dateValue ? robustDateParser(dateValue, dateFormat) : null;
 			if (!parsedDate) return scheduledTasks;
 
-			const timeRange = getTaskTimeRange(task.time || "");
+			const timeRange = getTaskTimeRange(task[DEFAULT_TASK_CACHE_KEYS.Time] || "");
 			scheduledTasks.push({
 				task,
 				dateKey: format(parsedDate, "yyyy-MM-dd"),
@@ -227,11 +229,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 		const timeValue = `${formatClockTime(startMinutes)} - ${formatClockTime(endMinutes)}`;
 		const updatedTask = { ...task, startDate: dateValue, time: timeValue };
 
-		eventEmitter.emit("UPDATE_TASK", { taskID: task.id, state: true });
-		if (isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task.tags)) {
+		eventEmitter.emit("UPDATE_TASK", { taskID: task[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
+		if (isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags])) {
 			await updateFrontmatterInMarkdownFile(plugin, updatedTask);
 			try {
-				await plugin.realTimeScanner.processAllUpdatedFiles(task.filePath, task.id);
+				await plugin.realTimeScanner.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.ID]);
 			} catch (error) {
 				bugReporterManagerInsatance.addToLogs(
 					217,
@@ -243,11 +245,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 			return;
 		}
 
-		updatedTask.title = sanitizeStartDate(plugin.settings.data, updatedTask.title, dateValue);
-		updatedTask.title = sanitizeTime(plugin.settings.data, updatedTask.title, timeValue);
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStartDate(plugin.settings.data, updatedTask[DEFAULT_TASK_CACHE_KEYS.Title], dateValue);
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeTime(plugin.settings.data, updatedTask[DEFAULT_TASK_CACHE_KEYS.Title], timeValue);
 		await updateTaskInFile(plugin, updatedTask, task);
 		try {
-			await plugin.realTimeScanner.processAllUpdatedFiles(task.filePath, task.id);
+			await plugin.realTimeScanner.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.ID]);
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				217,
@@ -450,9 +452,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 									<div className="taskBoardCalendarMonthTasks">
 										{dayTasks.slice(0, 3).map((calendarTask, index) => (
 											<div
-												key={`${calendarTask.task.id}-${index}`}
+												key={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.ID]}-${index}`}
 												className="taskBoardCalendarMonthTask"
-												title={calendarTask.task.title}
+												title={calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}
 											>
 												{getTaskDisplayTitle(calendarTask.task)}
 											</div>
@@ -501,9 +503,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 									<div className="taskBoardCalendarAllDayCell" key={format(day, "yyyy-MM-dd")}>
 										{allDayTasks.map((calendarTask, index) => (
 											<div
-												key={`${calendarTask.task.id}-${index}`}
+												key={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.ID]}-${index}`}
 												className="taskBoardCalendarAllDayTask"
-												title={calendarTask.task.title}
+												title={calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}
 												onPointerDown={(event) => startInteraction(event, {
 													kind: "move",
 													dayIndex: visibleDays.findIndex((visibleDay) =>
@@ -568,16 +570,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 												const end = calendarTask.endMinutes ?? start + HALF_HOUR_MINUTES;
 												return (
 													<div
-														key={`${calendarTask.task.id}-${index}`}
+														key={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.ID]}-${index}`}
 														className="taskBoardCalendarTimedTask"
 														style={{
 															top: (start / HALF_HOUR_MINUTES) * rowHeight,
 															height: Math.max(rowHeight, ((end - start) / HALF_HOUR_MINUTES) * rowHeight),
 														}}
-														title={`${calendarTask.task.title}${calendarTask.task.time ? ` · ${calendarTask.task.time}` : ""}`}
+														title={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time] ? ` · ${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time]}` : ""}`}
 													>
 														<strong>{getTaskDisplayTitle(calendarTask.task)}</strong>
-														<span>{calendarTask.task.time}</span>
+														<span>{calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time]}</span>
 														<span
 															className="taskBoardCalendarResizeHandle"
 															role="presentation"

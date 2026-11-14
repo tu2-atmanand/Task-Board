@@ -13,6 +13,8 @@ import { getAllTaskTags } from '../../../utils/TaskItemUtils.js';
 import LazyColumn from './LazyColumn.js';
 import { getStatusNameFromStatusSymbol } from '../../../utils/task_note/TaskNoteUtils.js';
 import { Component, View } from 'obsidian';
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -598,24 +600,24 @@ function getPropertyValues(
 			}
 
 		case 'priority':
-			if (typeof task.priority === 'number') {
-				values = [String(task.priority)];
+			if (typeof task[DEFAULT_TASK_CACHE_KEYS.Priority] === 'number') {
+				values = [String(task[DEFAULT_TASK_CACHE_KEYS.Priority])];
 			}
 			break;
 
 		case 'status':
-			if (task.status) {
-				values = [task.status.trim()];
+			if (task[DEFAULT_TASK_CACHE_KEYS.Status]) {
+				values = [task[DEFAULT_TASK_CACHE_KEYS.Status].trim()];
 			}
 			break;
 
 		case 'filePath':
-			if (task?.filePath)
-				values = [task.filePath];
+			if (task?.[DEFAULT_TASK_CACHE_KEYS.FilePath])
+				values = [task[DEFAULT_TASK_CACHE_KEYS.FilePath]];
 			break;
 		case 'folderPath':
-			if (task?.filePath) {
-				const parts = task.filePath.split("/");
+			if (task?.[DEFAULT_TASK_CACHE_KEYS.FilePath]) {
+				const parts = task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/");
 				const folderPath = parts.slice(0, -1).join("/");
 				values = [folderPath + "/" || ""];
 			}

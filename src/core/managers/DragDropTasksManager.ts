@@ -23,6 +23,8 @@ import {
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import { compareTwoTags } from "../algorithms/ScanningFilterer.js";
 import { swimlaneDataProp } from "../../ui/components/task_card/index.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 type RectLike = Pick<DOMRect, "left" | "top" | "width" | "height">;
 type DragImageOffset = { x: number; y: number };
@@ -433,13 +435,13 @@ class DragDropTasksManager {
 				plugin.settings.data,
 			);
 			eventEmitter.emit("UPDATE_TASK", {
-				taskID: oldTask.id,
+				taskID: oldTask[DEFAULT_TASK_CACHE_KEYS.ID],
 				state: true,
 			});
 
 			const isThisTaskNote = isTaskNotePresentInTags(
 				plugin.settings.data.taskNoteIdentifierTag,
-				oldTask.tags,
+				oldTask[DEFAULT_TASK_CACHE_KEYS.Tags],
 			);
 
 			if (isThisTaskNote) {
@@ -448,8 +450,8 @@ class DragDropTasksManager {
 						window.setTimeout(() => {
 							plugin.realTimeScanner
 								.processAllUpdatedFiles(
-									oldTask.filePath,
-									oldTask.id,
+									oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+									oldTask[DEFAULT_TASK_CACHE_KEYS.ID],
 								)
 								.catch((error) => {
 									bugReporterManagerInsatance.addToLogs(
@@ -464,7 +466,7 @@ class DragDropTasksManager {
 			} else {
 				void updateTaskInFile(plugin, newTask, oldTask).then(() => {
 					plugin.realTimeScanner
-						.processAllUpdatedFiles(oldTask.filePath, oldTask.id)
+						.processAllUpdatedFiles(oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath], oldTask[DEFAULT_TASK_CACHE_KEYS.ID])
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -541,7 +543,7 @@ class DragDropTasksManager {
 
 		// Remove the source column tag if it exists
 		const sourceTag = sourceColumn?.coltag ?? "";
-		let newTags = newTask.tags.filter(
+		let newTags = newTask[DEFAULT_TASK_CACHE_KEYS.Tags].filter(
 			(tag: string) => !compareTwoTags(sourceTag, tag),
 		);
 
@@ -816,12 +818,12 @@ class DragDropTasksManager {
 		if (
 			!isTaskNotePresentInTags(
 				plugin.settings.data.taskNoteIdentifierTag,
-				task.tags,
+				task[DEFAULT_TASK_CACHE_KEYS.Tags],
 			)
 		) {
-			newTask.title = sanitizeStatus(
+			newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStatus(
 				plugin.settings.data,
-				task.title,
+				task[DEFAULT_TASK_CACHE_KEYS.Title],
 				" ",
 				statusTypeNames.TODO,
 			);
@@ -991,7 +993,7 @@ class DragDropTasksManager {
 		}
 
 		// STEP 3 - Add the target column tag if it doesn't already exist
-		let newTags = newTask.tags ?? [];
+		let newTags = newTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [];
 		if (targetColumn.coltag) {
 			const columnTag = targetColumn.coltag;
 
@@ -1196,7 +1198,7 @@ class DragDropTasksManager {
 		// Remove any existing occurrence of the task id
 		updatedTargetColumnData.tasksIdManualOrder =
 			updatedTargetColumnData.tasksIdManualOrder!.filter(
-				(id) => id !== task.id,
+				(id) => id !== task[DEFAULT_TASK_CACHE_KEYS.ID],
 			);
 
 		// Insert at desired index or push to end
@@ -1208,10 +1210,10 @@ class DragDropTasksManager {
 			updatedTargetColumnData.tasksIdManualOrder.splice(
 				desiredIndex,
 				0,
-				task.id,
+				task[DEFAULT_TASK_CACHE_KEYS.ID],
 			);
 		} else {
-			updatedTargetColumnData.tasksIdManualOrder.push(task.id);
+			updatedTargetColumnData.tasksIdManualOrder.push(task[DEFAULT_TASK_CACHE_KEYS.ID]);
 		}
 
 		let newBoardData =
@@ -1250,7 +1252,7 @@ class DragDropTasksManager {
 		let newTask: taskItem = { ...task };
 
 		if (property === "tags") {
-			const oldTags = task.tags ?? [];
+			const oldTags = task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [];
 			let newTags: string[] = oldTags;
 			// Remove old tag of source swimlane
 			if (sourceColumnSwimlaneData) {
@@ -1888,7 +1890,7 @@ class DragDropTasksManager {
 		if (
 			this.currentDragData &&
 			cardEl.getAttribute("data-taskitem-id") ===
-				this.currentDragData.task.id
+				this.currentDragData.task[DEFAULT_TASK_CACHE_KEYS.ID]
 		) {
 			return;
 		}

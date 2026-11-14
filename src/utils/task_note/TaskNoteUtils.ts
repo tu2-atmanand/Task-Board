@@ -118,11 +118,11 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["title"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.Title] = value;
 	}
 
 	// Extract tags
-	taskItemData["tags"] = extractFrontmatterTags(frontmatter);
+	taskItemData[DEFAULT_TASK_CACHE_KEYS.Tags] = extractFrontmatterTags(frontmatter);
 
 	// Extract time
 	value = validateFrontmatterValue(
@@ -131,7 +131,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["time"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.Time] = value;
 	}
 
 	// Extract createdDate
@@ -141,7 +141,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["createdDate"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.CreatedDate] = value;
 	}
 
 	// Extract startDate
@@ -151,7 +151,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["startDate"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.StartDate] = value;
 	}
 
 	// Extract scheduledDate
@@ -161,7 +161,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["scheduledDate"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = value;
 	}
 
 	// Extract due
@@ -171,7 +171,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["dueDate"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.DueDate] = value;
 	}
 
 	// Extract cancelledDate
@@ -181,7 +181,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["cancelledDate"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = value;
 	}
 
 	// Extract completion
@@ -191,7 +191,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["completionDate"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = value;
 	}
 
 	// Extract priority
@@ -202,7 +202,7 @@ export function extractTaskNoteProperties(
 	);
 	if (value && typeof value === "string") {
 		const priorityNumber = getPriorityNumberForTaskNote(value);
-		taskItemData["priority"] = priorityNumber;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.Priority] = priorityNumber;
 	}
 
 	// Extract status
@@ -212,7 +212,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["status"] = getStatusSymbolFromStatusName(value, settings);
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.Status] = getStatusSymbolFromStatusName(value, settings);
 	}
 
 	// Extract dependsOn
@@ -222,7 +222,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (Array.isArray(value)) {
-		taskItemData["dependsOn"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.Dependencies] = value;
 	}
 
 	// Extract reminder
@@ -232,7 +232,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["reminder"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.Reminder] = value;
 	}
 
 	// Custom properties use their configured frontmatter ID as the cache key.
@@ -445,9 +445,9 @@ export async function updateFrontmatterInMarkdownFile(
 	forceId?: boolean,
 ): Promise<void> {
 	try {
-		const file = plugin.app.vault.getFileByPath(task.filePath);
+		const file = plugin.app.vault.getFileByPath(task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
 		if (!file) {
-			throw new Error(`File not found: ${task.filePath}`);
+			throw new Error(`File not found: ${task[DEFAULT_TASK_CACHE_KEYS.FilePath]}`);
 		}
 
 		// Method 1 - Using Obsidian's filemanager API.

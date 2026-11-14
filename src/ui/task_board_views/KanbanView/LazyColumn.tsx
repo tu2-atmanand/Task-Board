@@ -19,6 +19,8 @@ import { AdvancedFilterModal } from '../../components/advanced_filterer/index.js
 import { AdvancedFilterPopover } from '../../components/advanced_filterer/Popover.js';
 import { DEFAULT_SETTINGS } from '../../../interfaces/GlobalSettings.js';
 import { BasesStyle, EmojiStyle, swimlaneDataProp } from '../../components/task_card/index.js';
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -231,7 +233,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				const hoveredElement = e.currentTarget;
 				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
 				const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
-				const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+				const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task[DEFAULT_TASK_CACHE_KEYS.ID];
 
 				if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
 					const clientY = e.clientY;
@@ -335,7 +337,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const hoveredElement = e.currentTarget;
 			const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
 			const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
-			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task[DEFAULT_TASK_CACHE_KEYS.ID];
 			// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
 			if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
 				const clientY = e.clientY;
@@ -759,13 +761,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 														);
 													}
 													const task = visibleTasks[i];
-													const isSelected = selectedTaskId === task.id;
+													const isSelected = selectedTaskId === task[DEFAULT_TASK_CACHE_KEYS.ID];
 													elements.push(
 														<div
-															key={task.id}
+															key={task[DEFAULT_TASK_CACHE_KEYS.ID]}
 															className={`taskItemFadeIn${isSelected ? ' inboxTaskSelected' : ''}`}
 															data-taskitem-index={i}
-															data-taskitem-id={task.id}
+															data-taskitem-id={task[DEFAULT_TASK_CACHE_KEYS.ID]}
 															onClick={onTaskSelect ? () => onTaskSelect(task) : undefined}
 															aria-selected={onTaskSelect ? isSelected : undefined}
 															role={onTaskSelect ? "option" : undefined}
@@ -780,7 +782,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 															onDrop={activeViewType === viewTypeNames.kanban ? (e) => handleDrop(e) : undefined}
 														>
 															{React.createElement(taskItemComponent, {
-																key: task.id,
+																key: task[DEFAULT_TASK_CACHE_KEYS.ID],
 																dataAttributeIndex: i,
 																plugin: plugin,
 																task: task,

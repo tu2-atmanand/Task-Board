@@ -42,11 +42,11 @@ export function taskMatchesSelectorQuery(
 	task: taskItem,
 	lowerQuery: string,
 ): boolean {
-	if (searchableValueIncludes(task.title, lowerQuery)) return true;
-	if (searchableValueIncludes(task.dueDate, lowerQuery)) return true;
+	if (searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.Title], lowerQuery)) return true;
+	if (searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.DueDate], lowerQuery)) return true;
 	if (
-		task.priority !== 0 &&
-		searchableValueIncludes(task.priority, lowerQuery)
+		task[DEFAULT_TASK_CACHE_KEYS.Priority] !== 0 &&
+		searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.Priority], lowerQuery)
 	) {
 		return true;
 	}
@@ -251,10 +251,10 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 			})
 			.sort((a, b) => {
 				// Sort by due date second
-				if (a.dueDate && !b.dueDate) return -1;
-				if (!a.dueDate && b.dueDate) return 1;
-				if (a.dueDate && b.dueDate) {
-					const dateCompare = a.dueDate.localeCompare(b.dueDate);
+				if (a[DEFAULT_TASK_CACHE_KEYS.DueDate] && !b[DEFAULT_TASK_CACHE_KEYS.DueDate]) return -1;
+				if (!a[DEFAULT_TASK_CACHE_KEYS.DueDate] && b[DEFAULT_TASK_CACHE_KEYS.DueDate]) return 1;
+				if (a[DEFAULT_TASK_CACHE_KEYS.DueDate] && b[DEFAULT_TASK_CACHE_KEYS.DueDate]) {
+					const dateCompare = a[DEFAULT_TASK_CACHE_KEYS.DueDate].localeCompare(b[DEFAULT_TASK_CACHE_KEYS.DueDate]);
 					if (dateCompare !== 0) return dateCompare;
 				}
 
@@ -264,12 +264,12 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 					normal: 1,
 					low: 2,
 				};
-				const aPriority = priorityOrder[a.priority] ?? 1;
-				const bPriority = priorityOrder[b.priority] ?? 1;
+				const aPriority = priorityOrder[a[DEFAULT_TASK_CACHE_KEYS.Priority]] ?? 1;
+				const bPriority = priorityOrder[b[DEFAULT_TASK_CACHE_KEYS.Priority]] ?? 1;
 				if (aPriority !== bPriority) return aPriority - bPriority;
 
 				// Finally by title
-				return a.title.localeCompare(b.title);
+				return a[DEFAULT_TASK_CACHE_KEYS.Title].localeCompare(b[DEFAULT_TASK_CACHE_KEYS.Title]);
 			});
 	}
 
