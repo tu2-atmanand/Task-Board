@@ -45,7 +45,7 @@
     "autoAddCompletedDate": true,
     "autoAddCancelledDate": false,
     "showModifiedFilesNotice": true,
-    "scanMode": "automatic",
+    "scanMode": "realtime",
     "columnWidth": "340px",
     "propertiesVisibleInUI": [
       "checkbox",
@@ -73,7 +73,7 @@
     "tagColors": [
       {
         "name": "bug",
-        "color": "rgba(167, 6, 6, 0.71)",
+        "color": "rgba(216, 29, 37, 0.62)",
         "priority": 1
       },
       {
@@ -93,7 +93,7 @@
       },
       {
         "name": "feat",
-        "color": "rgba(69, 15, 183, 1)",
+        "color": "rgba(140, 82, 239, 0.6)",
         "priority": 5
       }
     ],
@@ -108,7 +108,9 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": "circle"
+        "lucideIcon": "circle",
+        "color": "rgb(161, 98, 7)",
+        "desc": ""
       },
       {
         "symbol": "<",
@@ -116,7 +118,9 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": "alarm-check"
+        "lucideIcon": "alarm-check",
+        "color": "",
+        "desc": ""
       },
       {
         "symbol": "?",
@@ -124,7 +128,9 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": "scan-search"
+        "lucideIcon": "scan-search",
+        "color": "rgb(196, 136, 249)",
+        "desc": ""
       },
       {
         "symbol": "/",
@@ -157,6 +163,24 @@
         "availableAsCommand": true,
         "type": "CANCELLED",
         "lucideIcon": ""
+      },
+      {
+        "symbol": "u",
+        "name": "Just temporary",
+        "nextStatusSymbol": "y",
+        "availableAsCommand": false,
+        "type": "IN_PROGRESS",
+        "lucideIcon": "airplay"
+      }
+    ],
+    "customPriorities": [
+      {
+        "name": "Highest",
+        "rank": 1,
+        "emoji": "🔺",
+        "lucideIcon": "chevrons-up",
+        "color": "rgb(220, 38, 38)",
+        "desc": "This is the hight priority and tasks with this priority should be complete before all other tasks."
       }
     ],
     "compatiblePlugins": {
@@ -184,7 +208,7 @@
       }
     ],
     "autoAddUniqueID": true,
-    "uniqueIdCounter": 2304,
+    "uniqueIdCounter": 2307,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
@@ -365,6 +389,13 @@
                 "property": "tags",
                 "condition": "contains",
                 "value": "learn"
+              },
+              {
+                "id": "filter_1794675492181_2703558727",
+                "property": "custom-property-2",
+                "condition": "is",
+                "value": "",
+                "propertyType": "time"
               }
             ]
           }
@@ -373,8 +404,9 @@
       }
     ],
     "ribbonIconAction": "menu",
-    "defaultProperties": [
+    "taskProperties": [
       {
+        "default": true,
         "key": "id",
         "id": "id",
         "name": "ID",
@@ -387,6 +419,7 @@
         "rank": 1
       },
       {
+        "default": true,
         "key": "title",
         "id": "title",
         "name": "Title",
@@ -396,154 +429,189 @@
         "icon": "",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 2
+        "rank": 6
       },
       {
+        "default": true,
         "key": "status",
         "id": "status",
         "name": "Status",
         "desc": "",
         "type": "text",
         "emoji": "",
-        "icon": "",
+        "icon": "info",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 3
+        "rank": 8
       },
       {
+        "default": true,
         "key": "priority",
         "id": "priority",
         "name": "Priority",
         "desc": "",
         "type": "numeric",
         "emoji": "",
-        "icon": "",
+        "icon": "signal-high",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 4
+        "rank": 10
       },
       {
+        "default": true,
         "key": "tags",
         "id": "tags",
         "name": "Tags",
         "desc": "",
         "type": "list",
         "emoji": "",
-        "icon": "",
+        "icon": "tag",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 5
+        "rank": 11
       },
       {
+        "default": true,
         "key": "time",
         "id": "time",
         "name": "Time",
         "desc": "",
         "type": "time",
         "emoji": "",
-        "icon": "",
+        "icon": "clock",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 6
+        "rank": 12
       },
       {
+        "default": true,
         "key": "reminder",
         "id": "reminder",
         "name": "Reminder",
         "desc": "",
         "type": "text",
         "emoji": "",
-        "icon": "",
+        "icon": "bell-ring",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 7
+        "rank": 13
       },
       {
+        "default": true,
         "key": "createdDate",
         "id": "created-date",
         "name": "Created date",
         "desc": "",
         "type": "date",
         "emoji": "",
-        "icon": "",
+        "icon": "calendar-plus",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 8
+        "rank": 14
       },
       {
+        "default": true,
         "key": "startDate",
         "id": "start-date",
         "name": "Start date",
         "desc": "",
         "type": "date",
         "emoji": "",
-        "icon": "",
+        "icon": "calendar-plus-2",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 9
+        "rank": 15
       },
       {
+        "default": true,
         "key": "scheduledDate",
         "id": "scheduled-date",
         "name": "Scheduled date",
         "desc": "",
         "type": "date",
         "emoji": "",
-        "icon": "",
+        "icon": "calendar-1",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 10
+        "rank": 16
       },
       {
-        "key": "due",
-        "id": "due-date",
+        "default": true,
+        "key": "dueDate",
+        "id": "dueDate",
         "name": "Due date",
-        "desc": "",
-        "type": "date",
+        "desc": "A date-time value which is the last date/time for this task to be completed.",
+        "type": "date-time",
         "emoji": "",
-        "icon": "",
+        "icon": "calendar-clock",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 11
+        "rank": 2
       },
       {
-        "key": "dependsOn",
-        "id": "depends-on",
-        "name": "Depends on",
-        "desc": "",
-        "type": "list",
-        "emoji": "",
-        "icon": "",
-        "hidePropertyInNotesForInlineTasks": false,
-        "defaultValue": "",
-        "rank": 12
-      },
-      {
-        "key": "cancelledDate",
-        "id": "cancelled-date",
-        "name": "Completed date",
-        "desc": "",
-        "type": "date",
-        "emoji": "",
-        "icon": "",
-        "hidePropertyInNotesForInlineTasks": false,
-        "defaultValue": "",
-        "rank": 13
-      },
-      {
+        "default": true,
         "key": "completionDate",
         "id": "completed-date",
         "name": "Completed date",
         "desc": "",
         "type": "date",
         "emoji": "",
-        "icon": "",
+        "icon": "calendar-x",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 14
-      }
-    ],
-    "customProperties": [
+        "rank": 19
+      },
+      {
+        "default": true,
+        "key": "cancelledDate",
+        "id": "cancelled-date",
+        "name": "Completed date",
+        "desc": "",
+        "type": "date",
+        "emoji": "",
+        "icon": "calendar-check",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 18
+      },
+      {
+        "default": true,
+        "key": "parentTasks",
+        "id": "parentTasks",
+        "desc": "A list of all the task ids which the current task is blocking. The current task is a child-task for them. And they cannot be worked on until this current task is completed.",
+        "type": "list",
+        "emoji": "",
+        "icon": "git-branch",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 3
+      },
+      {
+        "default": true,
+        "key": "dependsOn",
+        "id": "depends-on",
+        "name": "Depends on",
+        "desc": "",
+        "type": "list",
+        "emoji": "",
+        "icon": "list-tree",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 17
+      },
+      {
+        "default": true,
+        "key": "filePath",
+        "id": "filePath",
+        "name": "Source file",
+        "desc": "Incase of inline-task, this will be the filepath from where the task-note was created. Only applicable for inline-task to task-note conversion.",
+        "type": "text",
+        "emoji": "",
+        "icon": "file-input",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 4
+      },
       {
         "key": "assignee",
         "id": "assignee",
@@ -551,10 +619,37 @@
         "desc": "To whome the task is assigned to.",
         "type": "text",
         "emoji": "🧑",
-        "icon": "",
+        "icon": "user-round",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 1
+        "rank": 5,
+        "default": false
+      },
+      {
+        "key": "custom-property-2",
+        "id": "custom-property-2",
+        "name": "Custom property 2",
+        "desc": "This is a test",
+        "type": "time",
+        "emoji": "⏰",
+        "icon": "discord",
+        "hidePropertyInNotesForInlineTasks": true,
+        "defaultValue": "",
+        "rank": 7,
+        "default": false
+      },
+      {
+        "key": "reminders",
+        "id": "reminders",
+        "name": "Reminder",
+        "desc": "This property will add date-time value for Reminder plugin integration.",
+        "type": "date-time",
+        "emoji": "⏰",
+        "icon": "bell-ring",
+        "hidePropertyInNotesForInlineTasks": false,
+        "defaultValue": "",
+        "rank": 9,
+        "default": false
       }
     ],
     "visiblePropertiesList": [
