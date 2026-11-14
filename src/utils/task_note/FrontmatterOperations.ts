@@ -319,7 +319,7 @@ export function updateFrontmatterProperties(
 	forceId?: boolean,
 ): Partial<customFrontmatterCache> {
 	const frontmatterFormatting = getDefaultPropertyFrontmatterFormatting(
-		plugin.settings.data.defaultProperties,
+		plugin.settings.data.taskProperties,
 	);
 	const oldFrontmatter = existingFrontmatter;
 
@@ -551,9 +551,13 @@ export function updateFrontmatterProperties(
 
 	// Persist configured custom values under each configured frontmatter ID.
 	const builtInIds = new Set(
-		plugin.settings.data.defaultProperties.map((property) => property.id),
+		plugin.settings.data.taskProperties
+			.filter((property) => property.default)
+			.map((property) => property.id),
 	);
-	for (const property of plugin.settings.data.customProperties ?? []) {
+	for (const property of plugin.settings.data.taskProperties.filter(
+		(property) => !property.default,
+	)) {
 		if (!property.id || builtInIds.has(property.id)) continue;
 		if (Object.prototype.hasOwnProperty.call(task, property.id)) {
 			const value = (task as unknown as Record<string, unknown>)[

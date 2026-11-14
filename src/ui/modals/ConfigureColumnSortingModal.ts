@@ -53,8 +53,10 @@ export class ConfigureColumnSortingModal extends Modal {
 					(criteria: columnSortingCriteria) => ({
 						...criteria,
 						uid: criteria.uid || generateRandomStringId("sort"),
-						propertyType: this.plugin.settings.data.customProperties?.find(
-							(property) => property.id === criteria.criteria,
+						propertyType: this.plugin.settings.data.taskProperties.find(
+							(property) =>
+								!property.default &&
+								property.id === criteria.criteria,
 						)?.type,
 					}),
 				);
@@ -169,7 +171,7 @@ export class ConfigureColumnSortingModal extends Modal {
 								.addOption("dueDate", t("due-date"))
 								.addOption("completedDate", t("completed-date"))
 								.addOption("filePath", t("file-path"));
-								this.plugin.settings.data.customProperties?.forEach((property) => {
+								this.plugin.settings.data.taskProperties.filter((property) => !property.default).forEach((property) => {
 									dropdown.addOption(property.id, property.name);
 								});
 								dropdown
@@ -205,7 +207,7 @@ export class ConfigureColumnSortingModal extends Modal {
 
 											if (foundCriteria) {
 												foundCriteria.criteria = value;
-												const configuredProperty = this.plugin.settings.data.customProperties?.find((property) => property.id === value);
+												const configuredProperty = this.plugin.settings.data.taskProperties.find((property) => !property.default && property.id === value);
 												if (configuredProperty) {
 													foundCriteria.propertyType = configuredProperty.type;
 												} else {

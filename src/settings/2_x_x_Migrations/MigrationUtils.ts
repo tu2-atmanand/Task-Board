@@ -778,8 +778,7 @@ export async function migrateVersion1_to_Version2(
 			version: oldPluginSettings.version,
 			data: {
 				...oldPluginSettings.data.globalSettings,
-				defaultProperties: [],
-				customProperties: [],
+				taskProperties: [],
 				customPriorities: [],
 			},
 		};

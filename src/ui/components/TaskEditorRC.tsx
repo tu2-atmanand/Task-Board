@@ -80,7 +80,7 @@ export const TaskEditorRC: React.FC<{
 	const [reminder, setReminder] = useState(task?.reminder || "");
 	const [dependsOn, setDependsOn] = useState<string[]>(task?.dependsOn || []);
 	const [customPropertyValues, setCustomPropertyValues] = useState<Record<string, unknown>>(() =>
-		Object.fromEntries((globalSettings.customProperties ?? []).filter(property => !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [
+		Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [
 			property.id,
 			(task as unknown as Record<string, unknown>)[property.id] !== undefined
 					? (task as unknown as Record<string, unknown>)[property.id]
@@ -512,7 +512,7 @@ export const TaskEditorRC: React.FC<{
 
 	const withCustomInlineProperties = (rawTitle: string): string => {
 		let result = rawTitle;
-		for (const property of globalSettings.customProperties ?? []) {
+		for (const property of globalSettings.taskProperties.filter((property) => !property.default)) {
 			if (!property.id || BUILT_IN_TASK_ITEM_KEYS.has(property.id)) continue;
 			const escaped = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 			let existing: RegExp | undefined;
@@ -818,7 +818,7 @@ export const TaskEditorRC: React.FC<{
 		setPriority(updatedTask.priority || 0);
 		setStatus(updatedTask.status || ' ');
 		setReminder(updatedTask.reminder || '');
-		setCustomPropertyValues(Object.fromEntries((globalSettings.customProperties ?? []).filter(property => !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [property.id, (updatedTask as unknown as Record<string, unknown>)[property.id]])));
+		setCustomPropertyValues(Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [property.id, (updatedTask as unknown as Record<string, unknown>)[property.id]])));
 	}, 50);
 
 	// // This useEffect is used to get the formatted content of the updated task, which will be rendered in the editor(s).
@@ -1517,7 +1517,7 @@ export const TaskEditorRC: React.FC<{
 							</div>
 						)}
 
-						{(globalSettings.customProperties ?? []).filter(property => !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => {
+						{globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => {
 							const value = customPropertyValues[property.id];
 							const displayValue = Array.isArray(value) ? value.join(", ") : value === undefined || value === null ? "" : String(value);
 							return <div className="EditTaskModalHomeField" key={property.id}>

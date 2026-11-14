@@ -89,7 +89,7 @@ export function extractTaskNoteProperties(
 
 	const frontmatterFormatting =
 		getDefaultPropertyFrontmatterFormatting(
-			settings.data.defaultProperties,
+			settings.data.taskProperties,
 		);
 	let taskItemData: Partial<taskItem> = {};
 
@@ -236,8 +236,14 @@ export function extractTaskNoteProperties(
 	}
 
 	// Custom properties use their configured frontmatter ID as the cache key.
-	const builtInKeys = new Set(settings.data.defaultProperties.map((property) => property.id));
-	for (const property of settings.data.customProperties ?? []) {
+	const builtInKeys = new Set(
+		settings.data.taskProperties
+			.filter((property) => property.default)
+			.map((property) => property.id),
+	);
+	for (const property of settings.data.taskProperties.filter(
+		(property) => !property.default,
+	)) {
 		if (!property.id || builtInKeys.has(property.id)) continue;
 		const customValue = coerceCustomTaskPropertyValue(frontmatter[property.id], property.type);
 		if (customValue !== undefined) (taskItemData as Record<string, unknown>)[property.id] = customValue;

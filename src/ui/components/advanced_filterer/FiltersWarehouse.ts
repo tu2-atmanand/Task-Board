@@ -821,7 +821,7 @@ export class FiltersWarehouseModal extends Modal {
 			}
 
 			const propertyValue = propertySelect.getValue();
-			if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.customProperties?.some((item) => item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
+			if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.taskProperties.some((item) => !item.default && item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
 				valueInput.hide();
 				if (valueActuallyNeeded) dropdownInputContainer.show();
 				else dropdownInputContainer.hide();
@@ -934,7 +934,7 @@ export class FiltersWarehouseModal extends Modal {
 				dependencies: t("dependencies"),
 				filePath: t("file-path"),
 			});
-			for (const configuredProperty of this.plugin.settings.data.customProperties ?? []) {
+			for (const configuredProperty of this.plugin.settings.data.taskProperties.filter((property) => !property.default)) {
 				propertySelect.addOption(configuredProperty.id, configuredProperty.name);
 			}
 		}
@@ -947,7 +947,7 @@ export class FiltersWarehouseModal extends Modal {
 		) => {
 			conditionOptions = options;
 		};
-		const configuredProperty = this.plugin.settings.data.customProperties?.find((item) => item.id === property);
+		const configuredProperty = this.plugin.settings.data.taskProperties.find((item) => !item.default && item.id === property);
 		if (configuredProperty) {
 			filterData.propertyType = configuredProperty.type;
 			switch (configuredProperty.type) {
@@ -1185,7 +1185,7 @@ export class FiltersWarehouseModal extends Modal {
 		}
 
 		const propertyValue = propertySelect.getValue();
-		if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.customProperties?.some((item) => item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
+		if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.taskProperties.some((item) => !item.default && item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
 			valueInput.hide();
 			if (valueActuallyNeeded) dropdownInputContainer.show();
 			else dropdownInputContainer.hide();

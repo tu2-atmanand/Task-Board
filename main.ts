@@ -606,8 +606,7 @@ export default class TaskBoard extends Plugin {
 
 		// Register task property hiding extension
 		const hiddenProperties = getHiddenPropertyConfigs(
-			this.settings.data.defaultProperties,
-			this.settings.data.customProperties,
+			this.settings.data.taskProperties,
 		);
 		if (hiddenProperties.length > 0) {
 			this.registerEditorExtension(taskPropertyHidingExtension(this));
@@ -616,12 +615,10 @@ export default class TaskBoard extends Plugin {
 
 	registerReadingModePostProcessor() {
 		const hiddenPropertyConfigs = getHiddenPropertyConfigs(
-			this.settings.data.defaultProperties,
-			this.settings.data.customProperties,
+			this.settings.data.taskProperties,
 		);
 		const hiddenProperties = getPropertiesHiddenInNotes(
-			this.settings.data.defaultProperties,
-			this.settings.data.customProperties,
+			this.settings.data.taskProperties,
 		);
 		this.clearTaskPropertyVisibilityStyles();
 		if (hiddenPropertyConfigs.length === 0) {

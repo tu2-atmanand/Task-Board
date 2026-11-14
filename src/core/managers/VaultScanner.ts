@@ -823,7 +823,9 @@ export function extractTaskPropertiesOfSingleFormat(
 	]);
 	const escapeRegExp = (value: string) =>
 		value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	for (const property of settings.customProperties ?? []) {
+	for (const property of settings.taskProperties.filter(
+		(property) => !property.default,
+	)) {
 		if (!property.id || builtInKeys.has(property.id)) continue;
 		let expression: RegExp | undefined;
 		switch (settings.taskPropertyFormat) {
@@ -910,7 +912,9 @@ export function extractCustomTaskProperties(
 	]);
 	const escapeRegExp = (value: string) =>
 		value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	for (const property of settings.customProperties ?? []) {
+	for (const property of settings.taskProperties.filter(
+		(property) => !property.default,
+	)) {
 		if (!property.id || builtInKeys.has(property.id)) continue;
 		let expression: RegExp | undefined;
 		switch (settings.taskPropertyFormat) {

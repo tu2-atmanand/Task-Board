@@ -279,8 +279,7 @@ function createPropertyDecorations(
 ): DecorationSet {
 	const decorations: Range<Decoration>[] = [];
 	const hiddenProperties = getHiddenPropertyConfigs(
-		plugin.settings.data.defaultProperties,
-		plugin.settings.data.customProperties,
+		plugin.settings.data.taskProperties,
 	);
 
 	const cursorPos = view.state.selection.main.head;

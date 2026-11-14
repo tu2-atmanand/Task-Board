@@ -1216,7 +1216,7 @@ export class AdvancedFilterComponent extends Component {
 			}
 
 			const propertyValue = propertySelect.getValue();
-			if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.customProperties?.some((item) => item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
+			if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.taskProperties.some((item) => !item.default && item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
 				valueInput.hide();
 
 				if (valueActuallyNeeded) dropdownInputContainer.show();
@@ -1335,7 +1335,7 @@ export class AdvancedFilterComponent extends Component {
 				filePath: t("file-path"),
 				folderPath: t("folder-path"),
 			});
-			for (const configuredProperty of this.plugin.settings.data.customProperties ?? []) {
+			for (const configuredProperty of this.plugin.settings.data.taskProperties.filter((property) => !property.default)) {
 				propertySelect.addOption(configuredProperty.id, configuredProperty.name);
 			}
 		}
@@ -1343,7 +1343,7 @@ export class AdvancedFilterComponent extends Component {
 		valueSelect.selectEl.empty();
 
 		let conditionOptions: { value: string; text: string }[] = [];
-		const configuredProperty = this.plugin.settings.data.customProperties?.find((item) => item.id === property);
+		const configuredProperty = this.plugin.settings.data.taskProperties.find((item) => !item.default && item.id === property);
 		if (configuredProperty) {
 			filterData.propertyType = configuredProperty.type;
 			switch (configuredProperty.type) {
@@ -1759,7 +1759,7 @@ export class AdvancedFilterComponent extends Component {
 		}
 
 		const propertyValue = propertySelect.getValue();
-		if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.customProperties?.some((item) => item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
+		if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.taskProperties.some((item) => !item.default && item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
 			valueInput.hide();
 
 			if (valueActuallyNeeded) dropdownInputContainer.show();

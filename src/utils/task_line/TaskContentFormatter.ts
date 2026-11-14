@@ -1420,8 +1420,7 @@ export const sanitizeDependsOn = (
 export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 	// Get the list of properties to hide
 	const hiddenProperties = getPropertiesHiddenInNotes(
-		plugin.settings.data.defaultProperties,
-		plugin.settings.data.customProperties,
+		plugin.settings.data.taskProperties,
 	);
 
 	// If no properties are configured to hide and the legacy setting is false, return original title

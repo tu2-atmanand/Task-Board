@@ -53,7 +53,8 @@ export interface TagColor {
  * This can be default ones or custom properties added by user.
  */
 export interface SupportedPropertiesConfig {
-	key: string; // This is the value used to store this property in task cache. For customProperties, this will be same as id below. User cannot change this.
+	default: boolean;
+	key: string; // This is the value used to store this property in task cache. For custom properties, it matches id below.
 	id: string; // for frontmatter, dataview format inline-tasks and other use-cases
 	name: string; // which will be visible in UI
 	desc: string; // If user wants to explain something about the property.
@@ -129,8 +130,7 @@ export interface globalSettingsData {
 	tagColors: TagColor[];
 
 	// Properties Tab
-	defaultProperties: SupportedPropertiesConfig[];
-	customProperties: SupportedPropertiesConfig[];
+	taskProperties: SupportedPropertiesConfig[];
 	customStatuses: CustomStatus[];
 	customPriorities: CustomPriority[];
 
@@ -159,7 +159,7 @@ export interface globalSettingsData {
 	taskNoteIdentifierTag: string;
 	taskNoteDefaultLocation: string;
 	archivedTBNotesFolderPath: string;
-	/** @deprecated Migrate to defaultProperties. */
+	/** @deprecated Migrate to taskProperties. */
 	frontmatterFormatting?: FrontmatterFormattingInterface[];
 
 	// Automations
@@ -211,6 +211,11 @@ export interface globalSettingsData {
 	// scanVaultAtStartup: boolean; - @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
 }
 
+export interface LegacyTaskPropertySettings {
+	defaultProperties?: SupportedPropertiesConfig[];
+	customProperties?: SupportedPropertiesConfig[];
+}
+
 // Define the interface for GlobalSettings based on your JSON structure
 export interface PluginDataJson {
 	version: string;
@@ -219,6 +224,7 @@ export interface PluginDataJson {
 
 const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.ID,
 		id: DEFAULT_TASK_CACHE_KEYS.ID,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ID],
@@ -231,6 +237,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Title,
 		id: DEFAULT_TASK_CACHE_KEYS.Title,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Title],
@@ -243,6 +250,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 2,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Status,
 		id: DEFAULT_TASK_CACHE_KEYS.Status,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Status],
@@ -255,6 +263,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Priority,
 		id: DEFAULT_TASK_CACHE_KEYS.Priority,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Priority],
@@ -267,6 +276,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Tags,
 		id: DEFAULT_TASK_CACHE_KEYS.Tags,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Tags],
@@ -279,6 +289,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Time,
 		id: DEFAULT_TASK_CACHE_KEYS.Time,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Time],
@@ -291,6 +302,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Reminder,
 		id: DEFAULT_TASK_CACHE_KEYS.Reminder,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Reminder],
@@ -303,6 +315,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.CreatedDate,
 		id: DEFAULT_TASK_CACHE_KEYS.CreatedDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
@@ -317,6 +330,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.StartDate,
 		id: DEFAULT_TASK_CACHE_KEYS.StartDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.StartDate],
@@ -331,6 +345,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
 		id: DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
@@ -345,6 +360,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.DueDate,
 		id: DEFAULT_TASK_CACHE_KEYS.DueDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.DueDate],
@@ -357,6 +373,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.CompletionDate,
 		id: DEFAULT_TASK_CACHE_KEYS.CompletionDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CompletionDate],
@@ -371,6 +388,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.CancelledDate,
 		id: DEFAULT_TASK_CACHE_KEYS.CancelledDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
@@ -385,6 +403,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.ParentTasks,
 		id: DEFAULT_TASK_CACHE_KEYS.ParentTasks,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ParentTasks],
@@ -399,6 +418,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Dependencies,
 		id: DEFAULT_TASK_CACHE_KEYS.Dependencies,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Dependencies],
@@ -413,6 +433,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		rank: 1,
 	},
 	{
+		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.FilePath,
 		id: DEFAULT_TASK_CACHE_KEYS.FilePath,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.FilePath],
@@ -432,21 +453,66 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
  */
 export function migrateLegacyPropertySettings(
 	settings: globalSettingsData,
-	previousData: Partial<globalSettingsData> | undefined,
+	previousData:
+		| (Partial<globalSettingsData> & LegacyTaskPropertySettings)
+		| undefined,
 ): void {
 	const oldFormatting = previousData?.frontmatterFormatting ?? [];
-	const configuredProperties = previousData?.defaultProperties ?? [];
-	const propertyKeys = new Set<string>();
+	const builtInKeys = new Set(
+		DEFAULT_PROPERTY_PRESENTATION.map((property) => property.key),
+	);
+	const hasUnifiedProperties =
+		(previousData?.taskProperties?.length ?? 0) > 0 ||
+		!previousData?.defaultProperties?.length &&
+			!previousData?.customProperties?.length;
+	const savedProperties = hasUnifiedProperties
+		? [...(previousData?.taskProperties ?? [])]
+		: [
+				...(previousData?.defaultProperties ?? []).map((property) => ({
+					...property,
+					default: true,
+				})),
+				...(previousData?.customProperties ?? []).map((property) => ({
+					...property,
+					default: false,
+				})),
+			];
+	if (hasUnifiedProperties) {
+		const existingKeys = new Set(
+			savedProperties.flatMap((property) => [property.key, property.id]),
+		);
+		let rank =
+			Math.max(0, ...savedProperties.map((property) => property.rank)) +
+			1;
+		for (const property of previousData?.customProperties ?? []) {
+			if (existingKeys.has(property.key) || existingKeys.has(property.id))
+				continue;
+			savedProperties.push({
+				...property,
+				default: false,
+				rank: rank++,
+			});
+			existingKeys.add(property.key);
+			existingKeys.add(property.id);
+		}
+	}
+	const configuredProperties = savedProperties.map((property) => ({
+		...property,
+		default: property.default ?? builtInKeys.has(property.key),
+	}));
+	const savedByKey = new Map(
+		configuredProperties.map((property) => [property.key, property]),
+	);
+	const nextRank =
+		Math.max(0, ...configuredProperties.map((property) => property.rank)) +
+		1;
 
-	settings.defaultProperties = DEFAULT_PROPERTY_PRESENTATION.map(
-		(defaultProperty) => {
-			propertyKeys.add(defaultProperty.key);
+	const defaultProperties = DEFAULT_PROPERTY_PRESENTATION.map(
+		(defaultProperty, index) => {
 			const legacy = oldFormatting.find(
 				(item) => item.taskItemKey === defaultProperty.key,
 			);
-			const configured = configuredProperties.find(
-				(item) => item.key === defaultProperty.key,
-			);
+			const configured = savedByKey.get(defaultProperty.key);
 			return {
 				...defaultProperty,
 				...(legacy && {
@@ -455,19 +521,29 @@ export function migrateLegacyPropertySettings(
 					name: legacy.property || defaultProperty.name,
 				}),
 				...configured,
+				default: true,
+				...(!configured &&
+					hasUnifiedProperties && {
+						rank: nextRank + index,
+					}),
 			};
 		},
 	);
-	settings.defaultProperties.push(
-		...configuredProperties.filter(
-			(property) => !propertyKeys.has(property.key),
-		),
-	);
+	const customProperties = configuredProperties
+		.filter((property) => !property.default && !builtInKeys.has(property.key))
+		.sort((a, b) => a.rank - b.rank);
 
-	for (const property of [
-		...settings.defaultProperties,
-		...settings.customProperties,
-	]) {
+	settings.taskProperties = [...defaultProperties, ...customProperties];
+	if (!hasUnifiedProperties) {
+		settings.taskProperties
+			.slice()
+			.sort((a, b) => a.rank - b.rank)
+			.forEach((property, index) => {
+				property.rank = index + 1;
+			});
+	}
+
+	for (const property of [...settings.taskProperties]) {
 		if (
 			previousData?.propertiesHiddenInNotes?.includes(
 				property.key as DEFAULT_TASK_CACHE_KEYS,
@@ -479,16 +555,19 @@ export function migrateLegacyPropertySettings(
 
 	delete settings.frontmatterFormatting;
 	delete settings.propertiesHiddenInNotes;
+	const legacySettings =
+		settings as globalSettingsData & LegacyTaskPropertySettings;
+	delete legacySettings.defaultProperties;
+	delete legacySettings.customProperties;
 }
 
 export function getPropertiesHiddenInNotes(
-	defaultProperties: SupportedPropertiesConfig[],
-	customProperties: SupportedPropertiesConfig[],
+	taskProperties: SupportedPropertiesConfig[],
 ): DEFAULT_TASK_CACHE_KEYS[] {
 	const knownKeys = new Set<string>(Object.values(DEFAULT_TASK_CACHE_KEYS));
 	return Array.from(
 		new Set(
-			[...defaultProperties, ...customProperties]
+			taskProperties
 				.filter(
 					(property) =>
 						property.hidePropertyInNotesForInlineTasks &&
@@ -500,23 +579,24 @@ export function getPropertiesHiddenInNotes(
 }
 
 export function getHiddenPropertyConfigs(
-	defaultProperties: SupportedPropertiesConfig[],
-	customProperties: SupportedPropertiesConfig[],
+	taskProperties: SupportedPropertiesConfig[],
 ): SupportedPropertiesConfig[] {
-	return [...defaultProperties, ...customProperties].filter(
+	return taskProperties.filter(
 		(property) => property.hidePropertyInNotesForInlineTasks,
 	);
 }
 
 export function getDefaultPropertyFrontmatterFormatting(
-	defaultProperties: SupportedPropertiesConfig[],
+	taskProperties: SupportedPropertiesConfig[],
 ): FrontmatterFormattingInterface[] {
-	return defaultProperties.map((property) => ({
-		index: property.rank,
-		property: property.name,
-		key: property.id,
-		taskItemKey: property.key,
-	}));
+	return taskProperties
+		.filter((property) => property.default)
+		.map((property) => ({
+			index: property.rank,
+			property: property.name,
+			key: property.id,
+			taskItemKey: property.key,
+		}));
 }
 
 /**
@@ -728,8 +808,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		enableDragnDropTouch: false,
 		filtersWarehouse: [],
 		ribbonIconAction: RibbonIconActions.allBoardsMenu,
-		defaultProperties: DEFAULT_PROPERTY_PRESENTATION,
-		customProperties: [],
+		taskProperties: DEFAULT_PROPERTY_PRESENTATION,
 	},
 };
 
@@ -865,7 +944,7 @@ const DEFAULT_FRONTMATTER_FORMATTING: FrontmatterFormattingInterface[] = [
  *
  * @deprecated - This complete setting has been deprecated in 2.0.0.
  * Use {@link SupportedPropertiesConfig} for both the
- * {@link globalSettingsData.defaultProperties} and {@link globalSettingsData.customProperties}.
+ * {@link globalSettingsData.taskProperties}.
  */
 export interface FrontmatterFormattingInterface {
 	index: number;

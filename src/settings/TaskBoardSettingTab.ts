@@ -1124,23 +1124,11 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						items: [
 							{
 								type: "page",
-								name: t("default-properties"),
-								desc: t("default-properties-info"),
+								name: t("task-properties"),
+								desc: t("task-properties-info"),
 								items: [
 									this.renderPropertiesConfigurationSection(
 										this.containerEl,
-										"default",
-									),
-								],
-							},
-							{
-								type: "page",
-								name: t("custom-properties"),
-								desc: t("custom-properties-info"),
-								items: [
-									this.renderPropertiesConfigurationSection(
-										this.containerEl,
-										"custom",
 									),
 								],
 							},
@@ -3721,10 +3709,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						host.removeClass("setting-item");
 						host.addClass("task-board-property-editor");
 
-						const properties =
-							propertyGroup === "default"
-								? this.globalSettings.defaultProperties
-								: this.globalSettings.customProperties;
+						const properties = this.globalSettings.taskProperties;
+						if (isNew) current.default = propertyGroup === "default";
 						if (isNew && !properties.includes(current)) {
 							properties.push(current);
 							void this.settingsManager.saveSettings();
@@ -3748,13 +3734,12 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 						addTextField("Frontmatter key", current.id, (value) => {
 							const id = value.trim();
-							const duplicate = [
-								...this.globalSettings.defaultProperties,
-								...this.globalSettings.customProperties,
-							].find(
-								(property) =>
-									property !== current && property.id === id,
-							);
+							const duplicate =
+								this.globalSettings.taskProperties.find(
+									(property) =>
+										property !== current &&
+										property.id === id,
+								);
 							if (id && duplicate) {
 								new Notice(
 									`The property key "${id}" is already in use.`,
@@ -3990,18 +3975,19 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 	private createNewCustomProperty(): SupportedPropertiesConfig {
 		const existingIds = new Set(
-			[
-				...this.globalSettings.defaultProperties,
-				...this.globalSettings.customProperties,
-			].map((property) => property.id),
+			this.globalSettings.taskProperties.map((property) => property.id),
 		);
-		let suffix = this.globalSettings.customProperties.length + 1;
+		let suffix =
+			this.globalSettings.taskProperties.filter(
+				(property) => !property.default,
+			).length + 1;
 		let id = `custom-property-${suffix}`;
 		while (existingIds.has(id)) {
 			suffix += 1;
 			id = `custom-property-${suffix}`;
 		}
 		return {
+			default: false,
 			key: id,
 			id,
 			name: `Custom property ${suffix}`,
@@ -4011,7 +3997,13 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			icon: "",
 			hidePropertyInNotesForInlineTasks: false,
 			defaultValue: "",
-			rank: this.globalSettings.customProperties.length + 1,
+			rank:
+				Math.max(
+					0,
+					...this.globalSettings.taskProperties.map(
+						(property) => property.rank,
+					),
+				) + 1,
 		};
 	}
 
@@ -4066,15 +4058,10 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 	private renderPropertiesConfigurationSection(
 		_contentEl: HTMLElement,
-		type: "default" | "custom",
 	): SettingDefinitionGroup {
-		const propertyGroup = type;
-		const properties =
-			propertyGroup === "default"
-				? this.globalSettings.defaultProperties
-				: this.globalSettings.customProperties;
-		const pageTitle = t(`${propertyGroup}-properties-mapping`);
-		const helpText = t(`${propertyGroup}-properties-mapping-info-2`);
+		const properties = this.globalSettings.taskProperties;
+		const pageTitle = t("task-properties");
+		const helpText = t("task-properties-info");
 
 		return {
 			type: "group",
@@ -4101,7 +4088,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						const help = host.createDiv(
 							"setting-item-description task-board-key-mappings-help",
 						);
-						help.createEl("p", { text: t(helpText) });
+						help.createEl("p", { text: helpText });
 
 						const list = host.createDiv(
 							"task-board-property-list-items",
@@ -4119,6 +4106,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 							}
 
 							orderedProperties.forEach((property, index) => {
+								const propertyGroup = property.default
+									? "default"
+									: "custom";
 								this.renderKeyMappingRow(
 									list,
 									property,
@@ -4129,18 +4119,14 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 											property,
 											propertyGroup,
 											async (updatedProperty) => {
-												const duplicate = [
-													...this.globalSettings
-														.defaultProperties,
-													...this.globalSettings
-														.customProperties,
-												].find(
-													(candidate) =>
-														candidate !==
+												const duplicate =
+													this.globalSettings.taskProperties.find(
+														(candidate) =>
+															candidate !==
 															property &&
-														candidate.id ===
-															updatedProperty.id,
-												);
+															candidate.id ===
+																updatedProperty.id,
+													);
 												if (duplicate) {
 													throw new Error(
 														`The property key "${updatedProperty.id}" is already in use.`,
@@ -4181,7 +4167,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 									},
 									index > 0,
 									index < orderedProperties.length - 1,
-									propertyGroup === "custom"
+									!property.default
 										? () => {
 												const index =
 													properties.indexOf(
@@ -4234,69 +4220,55 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 
 						renderRows();
 
-						if (propertyGroup === "custom") {
-							new Setting(host).addButton((button) =>
-								button
-									.setButtonText("Add custom property")
-									.setCta()
-									.onClick(() => {
-										const newProperty =
-											this.createNewCustomProperty();
-										new PropertyConfigurationModal(
-											this.app,
-											newProperty,
-											"custom",
-											async (updatedProperty) => {
-												const duplicate = [
-													...this.globalSettings
-														.defaultProperties,
-													...this.globalSettings
-														.customProperties,
-												].some(
+						new Setting(host).addButton((button) =>
+							button
+								.setButtonText(t("add-custom-property"))
+								.setCta()
+								.onClick(() => {
+									const newProperty =
+										this.createNewCustomProperty();
+									new PropertyConfigurationModal(
+										this.app,
+										newProperty,
+										"custom",
+										async (updatedProperty) => {
+											const duplicate =
+												this.globalSettings.taskProperties.some(
 													(property) =>
 														property.id ===
 														updatedProperty.id,
 												);
-												if (duplicate) {
-													throw new Error(
-														`The property key "${updatedProperty.id}" is already in use.`,
-													);
-												}
-												const previousRanks =
-													properties.map(
-														(property) => ({
-															property,
-															rank: property.rank,
-														}),
-													);
-												properties.push(
-													updatedProperty,
+											if (duplicate) {
+												throw new Error(
+													`The property key "${updatedProperty.id}" is already in use.`,
 												);
-												this.normalizePropertyRanks(
-													properties,
+											}
+											const previousRanks =
+												properties.map((property) => ({
+													property,
+													rank: property.rank,
+												}));
+											properties.push(updatedProperty);
+											this.normalizePropertyRanks(
+												properties,
+											);
+											try {
+												await this.settingsManager.saveSettings();
+											} catch (error) {
+												properties.pop();
+												previousRanks.forEach(
+													({ property, rank }) => {
+														property.rank = rank;
+													},
 												);
-												try {
-													await this.settingsManager.saveSettings();
-												} catch (error) {
-													properties.pop();
-													previousRanks.forEach(
-														({
-															property,
-															rank,
-														}) => {
-															property.rank =
-																rank;
-														},
-													);
-													throw error;
-												}
-												renderRows();
-											},
-											true,
-										).open();
-									}),
-							);
-						}
+												throw error;
+											}
+											renderRows();
+										},
+										true,
+									).open();
+								}),
+						);
 
 						const cleanupTitleAction =
 							attachDeclarativeSettingsPageTitleAction(

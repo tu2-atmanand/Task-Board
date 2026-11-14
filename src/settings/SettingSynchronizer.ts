@@ -5,6 +5,7 @@ import { CURRENT_PLUGIN_VERSION } from "../interfaces/Constants.js";
 import {
 	type PluginDataJson,
 	type globalSettingsData,
+	type LegacyTaskPropertySettings,
 	DEFAULT_SETTINGS,
 	migrateLegacyPropertySettings,
 } from "../interfaces/GlobalSettings.js";
@@ -26,17 +27,26 @@ export function migrateSettings(
 	try {
 		if (settings == undefined) return defaults as PluginDataJson;
 
-		const previousPropertySettings = settings.data
+		const previousData = settings.data as
+			| (Partial<globalSettingsData> & LegacyTaskPropertySettings)
+			| undefined;
+		const previousPropertySettings = previousData
 			? {
-					defaultProperties: settings.data.defaultProperties
-						? [...settings.data.defaultProperties]
-						: undefined,
+					taskProperties: previousData.taskProperties?.map(
+						(property) => ({ ...property }),
+					),
+					defaultProperties: previousData.defaultProperties?.map(
+						(property) => ({ ...property }),
+					),
+					customProperties: previousData.customProperties?.map(
+						(property) => ({ ...property }),
+					),
 					frontmatterFormatting:
-						settings.data.frontmatterFormatting?.map(
+						previousData.frontmatterFormatting?.map(
 							(formatting) => ({ ...formatting }),
 						),
 					propertiesHiddenInNotes:
-						settings.data.propertiesHiddenInNotes?.slice(),
+						previousData.propertiesHiddenInNotes?.slice(),
 				}
 			: undefined;
 		const s = settings as Record<string, unknown>;
