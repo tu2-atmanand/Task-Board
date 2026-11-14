@@ -130,7 +130,7 @@ const ScanVaultModalContent: React.FC<{ app: App, plugin: TaskBoard, vaultScanne
 						...task,
 						title: task.title,
 						body: task.body,
-						due: task.due,
+						dueDate: task.dueDate,
 						tags: task.tags,
 						time: task.time,
 						priority: task.priority,

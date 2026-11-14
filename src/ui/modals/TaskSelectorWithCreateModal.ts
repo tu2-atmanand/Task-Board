@@ -6,6 +6,7 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
 import { createNewInlineTask } from "../../utils/task_line/TaskItemEventHandlers.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
 export type TaskSelectorWithCreateResult =
 	| { type: "selected"; task: taskItem }
@@ -42,7 +43,7 @@ export function taskMatchesSelectorQuery(
 	lowerQuery: string,
 ): boolean {
 	if (searchableValueIncludes(task.title, lowerQuery)) return true;
-	if (searchableValueIncludes(task.due, lowerQuery)) return true;
+	if (searchableValueIncludes(task.dueDate, lowerQuery)) return true;
 	if (
 		task.priority !== 0 &&
 		searchableValueIncludes(task.priority, lowerQuery)
@@ -108,7 +109,10 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 		this.titleEl.setText(
 			options.title || t("Search an existing task or create a new one"),
 		);
-		this.titleEl.setAttribute("id", "task-selector-with-create-title");
+		this.titleEl.setAttribute(
+			DEFAULT_TASK_CACHE_KEYS.ID,
+			"task-selector-with-create-title",
+		);
 
 		// Set aria attributes on the modal
 		this.containerEl.setAttribute(
@@ -209,7 +213,7 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 		try {
 			// Build task creation data
 			let taskData = buildTaskFromRawContent(`- [ ] ${query}`, "", undefined, this.plugin.settings.data);
-			taskData["id"] = generateRandomStringId();
+			taskData[DEFAULT_TASK_CACHE_KEYS.ID] = generateRandomStringId();
 			let completeTask: taskItem = taskData as taskItem;
 			// Create the task
 			await createNewInlineTask(this.plugin, completeTask);
@@ -247,10 +251,10 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 			})
 			.sort((a, b) => {
 				// Sort by due date second
-				if (a.due && !b.due) return -1;
-				if (!a.due && b.due) return 1;
-				if (a.due && b.due) {
-					const dateCompare = a.due.localeCompare(b.due);
+				if (a.dueDate && !b.dueDate) return -1;
+				if (!a.dueDate && b.dueDate) return 1;
+				if (a.dueDate && b.dueDate) {
+					const dateCompare = a.dueDate.localeCompare(b.dueDate);
 					if (dateCompare !== 0) return dateCompare;
 				}
 

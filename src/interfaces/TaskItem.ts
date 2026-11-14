@@ -1,5 +1,5 @@
 import { FrontMatterCache } from "obsidian";
-import { PropertyTypeConfig } from "./Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "./Enums.js";
 
 export interface taskLocation {
 	startLine: number; // The line number where the task starts
@@ -47,26 +47,26 @@ export function coerceCustomTaskPropertyValue(
 }
 
 export interface taskItem {
-	id: string;
-	legacyId: string; // Legacy ID to support Tasks plugin id property
-	title: string;
-	body: string[];
-	status: string;
-	priority: number;
-	tags: string[];
-	frontmatterTags: string[]; // Tags extracted from frontmatter
-	time: string;
-	createdDate: string;
-	startDate: string;
-	scheduledDate: string;
-	due: string;
-	filePath: string;
-	taskLocation: taskLocation;
+	[DEFAULT_TASK_CACHE_KEYS.ID]: string;
+	[DEFAULT_TASK_CACHE_KEYS.LegacyID]: string; // Legacy ID to support Tasks plugin id property
+	[DEFAULT_TASK_CACHE_KEYS.Title]: string;
+	[DEFAULT_TASK_CACHE_KEYS.Body]: string[];
+	[DEFAULT_TASK_CACHE_KEYS.Status]: string;
+	[DEFAULT_TASK_CACHE_KEYS.Priority]: number;
+	[DEFAULT_TASK_CACHE_KEYS.Tags]: string[];
+	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]: string[]; // Tags extracted from frontmatter
+	[DEFAULT_TASK_CACHE_KEYS.Time]: string;
+	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]: string;
+	[DEFAULT_TASK_CACHE_KEYS.StartDate]: string;
+	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]: string;
+	[DEFAULT_TASK_CACHE_KEYS.DueDate]: string;
+	[DEFAULT_TASK_CACHE_KEYS.FilePath]: string;
+	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: taskLocation;
+	[DEFAULT_TASK_CACHE_KEYS.Dependencies]?: string[]; // Array of task IDs that this task depends on
+	[DEFAULT_TASK_CACHE_KEYS.Reminder]?: string; // A date-time value.
+	[DEFAULT_TASK_CACHE_KEYS.CompletionDate]?: string;
+	[DEFAULT_TASK_CACHE_KEYS.CancelledDate]?: string;
 	// onCompletion?: number;
-	dependsOn?: string[]; // Array of task IDs that this task depends on
-	reminder?: string; // A date-time value.
-	completion?: string;
-	cancelledDate?: string;
 }
 
 /** A task plus configured custom properties keyed by their property IDs. */

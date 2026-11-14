@@ -11,6 +11,7 @@ import {
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
 export class ConfigureColumnSortingModal extends Modal {
 	plugin: TaskBoard;
@@ -156,7 +157,7 @@ export class ConfigureColumnSortingModal extends Modal {
 							);
 							dropdown
 								.addOption("content", t("title"))
-								.addOption("id", t("id"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.ID, t("id"))
 								.addOption("status", t("status"))
 								.addOption("priority", t("priority"))
 								.addOption("tags", t("tags"))

@@ -64,7 +64,7 @@ const EmojiStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
 		setUniversalDate(getUniversalDateFromTask(task, globalSettings.universalDate));
-	}, [task.due, task.startDate, task.scheduledDate]);
+	}, [task.dueDate, task.startDate, task.scheduledDate]);
 
 
 	// const handleTaskInteraction = useCallback(
@@ -739,7 +739,7 @@ const EmojiStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("due"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
-				}, task.due)
+				}, task.dueDate)
 			});
 		});
 
@@ -1231,14 +1231,14 @@ const EmojiStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 										⏳ <div className='taskItemFooterPropertyContainerValue'>{task.scheduledDate}</div>
 									</div>
 								)}
-								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DueDate) && task?.due && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DueDate) && task?.dueDate && (
 									<div className="taskItemFooterPropertyContainerEmoji">
-										📅 <div className='taskItemFooterPropertyContainerValue'>{task.due}</div>
+										📅 <div className='taskItemFooterPropertyContainerValue'>{task.dueDate}</div>
 									</div>
 								)}
-								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CompletionDate) && task?.completion && (
+								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CompletionDate) && task?.completionDate && (
 									<div className="taskItemFooterPropertyContainerEmoji">
-										✅ <div className='taskItemFooterPropertyContainerValue'>{task.completion}</div>
+										✅ <div className='taskItemFooterPropertyContainerValue'>{task.completionDate}</div>
 									</div>
 								)}
 								{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CancelledDate) && task?.cancelledDate && (

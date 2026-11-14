@@ -70,7 +70,7 @@ export const TaskEditorRC: React.FC<{
 	const [createdDate, setCreatedDate] = useState(task.createdDate || '');
 	const [startDate, setStartDate] = useState(task.startDate || '');
 	const [scheduledDate, setScheduledDate] = useState(task.scheduledDate || '');
-	const [due, setDue] = useState(task.due || '');
+	const [due, setDue] = useState(task.dueDate || '');
 	const [tags, setTags] = useState<string[]>(task.tags || []);
 	const [startTime, setStartTime] = useState(task.time ? task?.time?.split('-')[0]?.trim() || '' : "");
 	const [endTime, setEndTime] = useState(task.time ? task?.time?.split('-')[1]?.trim() || '' : "");
@@ -625,7 +625,7 @@ export const TaskEditorRC: React.FC<{
 			createdDate: newCreatedDate,
 			startDate: newStartDate,
 			scheduledDate: newScheduledDate,
-			due: newDue,
+			dueDate: newDue,
 			tags: [...tags, '#taskNote'], // Add taskNote tag
 			time: newTime,
 			priority: modifiedTask.priority,
@@ -653,7 +653,7 @@ export const TaskEditorRC: React.FC<{
 		createdDate: createdDate,
 		startDate: startDate,
 		scheduledDate: scheduledDate,
-		due: due,
+		dueDate: due,
 		tags: tags,
 		time: newTime,
 		priority: priority,
@@ -663,7 +663,7 @@ export const TaskEditorRC: React.FC<{
 		taskLocation: task?.taskLocation || taskItemEmpty.taskLocation,
 		dependsOn: dependsOn,
 		...customPropertyValues,
-		completion: task.completion || '',
+		completionDate: task.completionDate || '',
 		cancelledDate: task.cancelledDate || '',
 	};
 
@@ -810,7 +810,7 @@ export const TaskEditorRC: React.FC<{
 		setCreatedDate(updatedTask.createdDate || '');
 		setStartDate(updatedTask.startDate || '');
 		setScheduledDate(updatedTask.scheduledDate || '');
-		setDue(updatedTask.due || '');
+		setDue(updatedTask.dueDate || '');
 		setTags(updatedTask.tags || []);
 		setStartTime(updatedTask.time ? updatedTask.time?.split('-')[0].trim() || '' : "");
 		setEndTime(updatedTask.time ? updatedTask.time?.split('-')[1]?.trim() || '' : "");

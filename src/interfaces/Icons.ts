@@ -1,3 +1,5 @@
+import { DEFAULT_TASK_CACHE_KEYS } from "./Enums.js";
+
 export const TaskBoardIcon = "brick-wall";
 
 export const RefreshIcon = "rotate-cw";
@@ -55,3 +57,35 @@ export const kofiSVGIcon = `
   </g>
 </svg>
 `;
+
+/**
+ * Default unique lucide icons for each of the default task properties.
+ */
+export const TASK_PROPERTIES_TO_ICON_MAPPING: { [key: string]: string } = {
+	[DEFAULT_TASK_CACHE_KEYS.ID]: "fingerprint-pattern",
+	[DEFAULT_TASK_CACHE_KEYS.Title]: "", // There wont be any icon
+	[DEFAULT_TASK_CACHE_KEYS.Body]: "text-initial",
+	[DEFAULT_TASK_CACHE_KEYS.SubTasks]: "list-todo",
+	[DEFAULT_TASK_CACHE_KEYS.Status]: "info",
+	[DEFAULT_TASK_CACHE_KEYS.Priority]: "flag-triangle-right",
+	[DEFAULT_TASK_CACHE_KEYS.Tags]: "tag",
+	[DEFAULT_TASK_CACHE_KEYS.Time]: "clock",
+	[DEFAULT_TASK_CACHE_KEYS.Reminder]: "bell-ring",
+	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]: "circle-plus",
+	[DEFAULT_TASK_CACHE_KEYS.StartDate]: "circle-plus-2",
+	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]: "calendar-1",
+	[DEFAULT_TASK_CACHE_KEYS.DueDate]: "calendar-clock",
+	[DEFAULT_TASK_CACHE_KEYS.CompletionDate]: "calendar-check",
+	[DEFAULT_TASK_CACHE_KEYS.CancelledDate]: "calnedar-x",
+	[DEFAULT_TASK_CACHE_KEYS.Dependencies]: "list-tree",
+	[DEFAULT_TASK_CACHE_KEYS.ParentTasks]: "git-branch",
+	[DEFAULT_TASK_CACHE_KEYS.FilePath]: "file-input",
+	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]: "file-spreadsheet",
+	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: "Task location",
+
+	// Below properties are not supported yet but will be implemented soon.
+	[DEFAULT_TASK_CACHE_KEYS.LastModified]: "file-pen",
+	[DEFAULT_TASK_CACHE_KEYS.OnCompletion]: "check-square",
+	[DEFAULT_TASK_CACHE_KEYS.Recurrence]: "calendar-sync",
+};
+

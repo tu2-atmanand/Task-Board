@@ -810,7 +810,7 @@ class DragDropTasksManager {
 		let newTask: taskItem = {
 			...task,
 			status: " ",
-			completion: "",
+			completionDate: "",
 			cancelledDate: "",
 		};
 		if (

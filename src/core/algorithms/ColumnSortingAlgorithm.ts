@@ -25,11 +25,11 @@ function getTaskPropertyValue(
 			return task.status;
 		case "completed":
 		case "completedDate":
-			return task.completion;
+			return task.completionDate;
 		case "priority":
 			return task.priority;
 		case "dueDate":
-			return task.due;
+			return task.dueDate;
 		case "startDate":
 			return task.startDate;
 		case "scheduledDate":

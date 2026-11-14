@@ -6,7 +6,7 @@ import {
 	DropdownComponent,
 } from "obsidian";
 import type TaskBoard from "../../../../main.js";
-import { PropertyTypeConfig } from "../../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "../../../interfaces/Enums.js";
 import type {
 	Filter,
 	FilterCriterionGroup,
@@ -1088,7 +1088,7 @@ export class FiltersWarehouseModal extends Modal {
 					{ value: "isNotEmpty", text: t("is-not-empty") },
 				]);
 				break;
-			case "id":
+			case DEFAULT_TASK_CACHE_KEYS.ID:
 				valueInput.type = "text";
 				setConditionOptions([
 					{ value: "is", text: t("is") },

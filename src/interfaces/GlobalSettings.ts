@@ -19,8 +19,8 @@ import {
 	statusTypeNames,
 	PropertyTypeConfig,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
-	DefaultLucideIconsForProperties,
 } from "./Enums.js";
+import { TASK_PROPERTIES_TO_ICON_MAPPING } from "./Icons.js";
 import { defaultTaskStatuses, taskItemKeyToNameMapping } from "./Mapping.js";
 
 export type VaultScannnerFilters = {
@@ -94,22 +94,6 @@ export interface TaskBoardAction {
 	trigger: "Complete" | "Incomplete";
 	type: "move" | "copy";
 	targetColumn: string;
-}
-/**
- * Interface for storing the mapping of default supported task properties and their key.
- * The key will be used in the frontmatter for creating task-notes. And the index will
- * be used to keep a fixed order when a specific task properties are added to the task-
- * note.
- * 
- * @deprecated - This complete setting has been deprecated in 2.0.0. 
- * Use {@link SupportedPropertiesConfig} for both the 
- * {@link globalSettingsData.defaultProperties} and {@link globalSettingsData.customProperties}.
- */
-export interface FrontmatterFormattingInterface {
-	index: number;
-	property: string;
-	key: string;
-	taskItemKey: string;
 }
 
 export interface taskBoardFilesRegistryType {
@@ -233,135 +217,214 @@ export interface PluginDataJson {
 	data: globalSettingsData;
 }
 
-const DEFAULT_FRONTMATTER_FORMATTING: FrontmatterFormattingInterface[] = [
+const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 	{
-		index: 0,
-		property: taskItemKeyToNameMapping.id,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
-		taskItemKey: "id",
-	},
-	{
-		index: 1,
-		property: taskItemKeyToNameMapping.title,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.title,
-		taskItemKey: "title",
-	},
-	{
-		index: 2,
-		property: taskItemKeyToNameMapping.status,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.status,
-		taskItemKey: "status",
-	},
-	{
-		index: 3,
-		property: taskItemKeyToNameMapping.priority,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.priority,
-		taskItemKey: "priority",
-	},
-	{
-		index: 4,
-		property: taskItemKeyToNameMapping.tags,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.tags,
-		taskItemKey: "tags",
-	},
-	{
-		index: 5,
-		property: taskItemKeyToNameMapping.time,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.time,
-		taskItemKey: "time",
-	},
-	{
-		index: 6,
-		property: taskItemKeyToNameMapping.reminder,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.reminder,
-		taskItemKey: "reminder",
-	},
-	{
-		index: 7,
-		property: taskItemKeyToNameMapping.createdDate,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.createdDate,
-		taskItemKey: "createdDate",
-	},
-	{
-		index: 8,
-		property: taskItemKeyToNameMapping.startDate,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.startDate,
-		taskItemKey: "startDate",
-	},
-	{
-		index: 9,
-		property: taskItemKeyToNameMapping.scheduledDate,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.scheduledDate,
-		taskItemKey: "scheduledDate",
-	},
-	{
-		index: 10,
-		property: taskItemKeyToNameMapping.dueDate,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.due,
-		taskItemKey: "due",
-	},
-	{
-		index: 11,
-		property: taskItemKeyToNameMapping.dependsOn,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dependsOn,
-		taskItemKey: "dependsOn",
-	},
-	{
-		index: 12,
-		property: taskItemKeyToNameMapping.cancelledDate,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
-		taskItemKey: "cancelledDate",
-	},
-	{
-		index: 13,
-		property: taskItemKeyToNameMapping.completionDate,
-		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.completionDate,
-		taskItemKey: "completionDate",
-	},
-];
-
-const DEFAULT_PROPERTY_TYPES: Partial<Record<string, PropertyTypeConfig>> = {
-	priority: PropertyTypeConfig.numeric,
-	tags: PropertyTypeConfig.list,
-	dependsOn: PropertyTypeConfig.list,
-	time: PropertyTypeConfig.time,
-	createdDate: PropertyTypeConfig.date,
-	startDate: PropertyTypeConfig.date,
-	scheduledDate: PropertyTypeConfig.date,
-	due: PropertyTypeConfig.date,
-	cancelledDate: PropertyTypeConfig.date,
-	completionDate: PropertyTypeConfig.date,
-};
-
-const DEFAULT_PROPERTY_PRESENTATION: Partial<
-	Record<string, Pick<SupportedPropertiesConfig, "desc" | "emoji" | "icon">>
-> = {
-	id: {
-		desc: "Property to uniquely identify a task across the vault.",
+		key: DEFAULT_TASK_CACHE_KEYS.ID,
+		id: DEFAULT_TASK_CACHE_KEYS.ID,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ID],
+		desc: "An incremental numeric id to uniquely identify a task across the vault.",
+		type: PropertyTypeConfig.numeric,
 		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.idSymbol,
-		icon: DefaultLucideIconsForProperties.id,
-	},
-};
-
-function createDefaultSupportedProperties(): SupportedPropertiesConfig[] {
-	return DEFAULT_FRONTMATTER_FORMATTING.map((formatting, index) => ({
-		key: formatting.taskItemKey,
-		id: formatting.key,
-		name: formatting.property,
-		desc:
-			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.desc ?? "",
-		type:
-			DEFAULT_PROPERTY_TYPES[formatting.taskItemKey] ??
-			PropertyTypeConfig.text,
-		emoji:
-			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.emoji ?? "",
-		icon:
-			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.icon ?? "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.ID],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: index + 1,
-	}));
-}
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.Title,
+		id: DEFAULT_TASK_CACHE_KEYS.Title,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Title],
+		desc: "A short summary about the task.",
+		type: PropertyTypeConfig.text,
+		emoji: "",
+		icon: "",
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 2,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.Status,
+		id: DEFAULT_TASK_CACHE_KEYS.Status,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Status],
+		desc: "The current state of the task, whether is pending, in-progress or completed.",
+		type: PropertyTypeConfig.text,
+		emoji: "", // There is no emoji for status
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Status],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.Priority,
+		id: DEFAULT_TASK_CACHE_KEYS.Priority,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Priority],
+		desc: "To rank different tasks in your queue based on their urgency.",
+		type: PropertyTypeConfig.text,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.prioritySymbols.Medium,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Priority],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.Tags,
+		id: DEFAULT_TASK_CACHE_KEYS.Tags,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Tags],
+		desc: "To add context to the tasks, add multiple tags as list.",
+		type: PropertyTypeConfig.list,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Tags],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.Time,
+		id: DEFAULT_TASK_CACHE_KEYS.Time,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Time],
+		desc: "Add a start and end time seperated by hyphen(-).",
+		type: PropertyTypeConfig.time,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Time],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.Reminder,
+		id: DEFAULT_TASK_CACHE_KEYS.Reminder,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Reminder],
+		desc: "A date-time value when a reminder notification should be sent.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Reminder],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+		id: DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
+		desc: "A date-time value when the task was created.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.CreatedDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.StartDate,
+		id: DEFAULT_TASK_CACHE_KEYS.StartDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.StartDate],
+		desc: "A date-time value from when user should or can start working on the task.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.StartDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+		id: DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
+		desc: "A date-time value when this task should be actually worked on.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.DueDate,
+		id: DEFAULT_TASK_CACHE_KEYS.DueDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.DueDate],
+		desc: "A date-time value which is the last date/time for this task to be completed.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.DueDate],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+		id: DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CompletionDate],
+		desc: "A date-time value when the task will be marked as finished/completed.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.CompletionDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+		id: DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
+		desc: "A date-time value when the task will be marked as cancelled.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.CancelledDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.ParentTasks,
+		id: DEFAULT_TASK_CACHE_KEYS.ParentTasks,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ParentTasks],
+		desc: "A list of all the task ids which the current task is blocking. The current task is a child-task for them. And they cannot be worked on until this current task is completed.",
+		type: PropertyTypeConfig.list,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.ParentTasks
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.Dependencies,
+		id: DEFAULT_TASK_CACHE_KEYS.Dependencies,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Dependencies],
+		desc: "A list of all the task ids on which the current task is dependent on. The current task is blocked-by these child-tasks.",
+		type: PropertyTypeConfig.list,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.Dependencies
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		key: DEFAULT_TASK_CACHE_KEYS.FilePath,
+		id: DEFAULT_TASK_CACHE_KEYS.FilePath,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		desc: "Incase of inline-task, this will be the filepath from where the task-note was created. Only applicable for inline-task to task-note conversion.",
+		type: PropertyTypeConfig.text,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+];
 
 /**
  * Converts settings from before the supported-properties configuration was
@@ -375,7 +438,7 @@ export function migrateLegacyPropertySettings(
 	const configuredProperties = previousData?.defaultProperties ?? [];
 	const propertyKeys = new Set<string>();
 
-	settings.defaultProperties = createDefaultSupportedProperties().map(
+	settings.defaultProperties = DEFAULT_PROPERTY_PRESENTATION.map(
 		(defaultProperty) => {
 			propertyKeys.add(defaultProperty.key);
 			const legacy = oldFormatting.find(
@@ -431,10 +494,7 @@ export function getPropertiesHiddenInNotes(
 						property.hidePropertyInNotesForInlineTasks &&
 						knownKeys.has(property.key),
 				)
-				.map(
-					(property) =>
-						property.key as DEFAULT_TASK_CACHE_KEYS,
-				),
+				.map((property) => property.key as DEFAULT_TASK_CACHE_KEYS),
 		),
 	);
 }
@@ -668,7 +728,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		enableDragnDropTouch: false,
 		filtersWarehouse: [],
 		ribbonIconAction: RibbonIconActions.allBoardsMenu,
-		defaultProperties: createDefaultSupportedProperties(),
+		defaultProperties: DEFAULT_PROPERTY_PRESENTATION,
 		customProperties: [],
 	},
 };
@@ -700,3 +760,116 @@ export const langCodes: { [key: string]: string } = {
 	"zh-TW": "繁體中文",
 };
 export { taskCardStyleNames };
+
+// -----------------------------------------
+//        DEPRECATED
+// -----------------------------------------
+
+/**
+ * Default task properties and their frontmatter key mapping.
+ *
+ * @deprecated - Do not use this, as the {@link FrontmatterFormattingInterface} has been deprecated.
+ */
+const DEFAULT_FRONTMATTER_FORMATTING: FrontmatterFormattingInterface[] = [
+	{
+		index: 0,
+		property: taskItemKeyToNameMapping.id,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.id,
+		taskItemKey: "id",
+	},
+	{
+		index: 1,
+		property: taskItemKeyToNameMapping.title,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.title,
+		taskItemKey: "title",
+	},
+	{
+		index: 2,
+		property: taskItemKeyToNameMapping.status,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.status,
+		taskItemKey: "status",
+	},
+	{
+		index: 3,
+		property: taskItemKeyToNameMapping.priority,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.priority,
+		taskItemKey: "priority",
+	},
+	{
+		index: 4,
+		property: taskItemKeyToNameMapping.tags,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.tags,
+		taskItemKey: "tags",
+	},
+	{
+		index: 5,
+		property: taskItemKeyToNameMapping.time,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.time,
+		taskItemKey: "time",
+	},
+	{
+		index: 6,
+		property: taskItemKeyToNameMapping.reminder,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.reminder,
+		taskItemKey: "reminder",
+	},
+	{
+		index: 7,
+		property: taskItemKeyToNameMapping.createdDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.createdDate,
+		taskItemKey: "createdDate",
+	},
+	{
+		index: 8,
+		property: taskItemKeyToNameMapping.startDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.startDate,
+		taskItemKey: "startDate",
+	},
+	{
+		index: 9,
+		property: taskItemKeyToNameMapping.scheduledDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.scheduledDate,
+		taskItemKey: "scheduledDate",
+	},
+	{
+		index: 10,
+		property: taskItemKeyToNameMapping.dueDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.due,
+		taskItemKey: "due",
+	},
+	{
+		index: 11,
+		property: taskItemKeyToNameMapping.dependsOn,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.dependsOn,
+		taskItemKey: "dependsOn",
+	},
+	{
+		index: 12,
+		property: taskItemKeyToNameMapping.cancelledDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.cancelledDate,
+		taskItemKey: "cancelledDate",
+	},
+	{
+		index: 13,
+		property: taskItemKeyToNameMapping.completionDate,
+		key: DEFAULT_TASK_NOTE_FRONTMATTER_KEYS.completionDate,
+		taskItemKey: "completionDate",
+	},
+];
+
+/**
+ * Interface for storing the mapping of default supported task properties and their key.
+ * The key will be used in the frontmatter for creating task-notes. And the index will
+ * be used to keep a fixed order when a specific task properties are added to the task-
+ * note.
+ *
+ * @deprecated - This complete setting has been deprecated in 2.0.0.
+ * Use {@link SupportedPropertiesConfig} for both the
+ * {@link globalSettingsData.defaultProperties} and {@link globalSettingsData.customProperties}.
+ */
+export interface FrontmatterFormattingInterface {
+	index: number;
+	property: string;
+	key: string;
+	taskItemKey: string;
+}

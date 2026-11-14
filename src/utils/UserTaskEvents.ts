@@ -379,7 +379,7 @@ export const updateTaskItemDate = (
 			newTask.scheduledDate = newDate;
 			break;
 		case UniversalDateOptions.dueDate:
-			newTask.due = newDate;
+			newTask.dueDate = newDate;
 			break;
 		default:
 			bugReporterManagerInsatance.addToLogs(
@@ -628,10 +628,10 @@ export const updateTaskItemProperty = async (
 			updatedTask.scheduledDate = newValue as string;
 			break;
 		case "due":
-			updatedTask.due = newValue as string;
+			updatedTask.dueDate = newValue as string;
 			break;
 		case "completion":
-			updatedTask.completion = newValue as string;
+			updatedTask.completionDate = newValue as string;
 			break;
 		case "cancelledDate":
 			updatedTask.cancelledDate = newValue as string;

@@ -20,7 +20,7 @@ import {
 	FilterCriterion,
 	AdvancedFilter,
 } from "../../../interfaces/BoardConfigs.js";
-import { PropertyTypeConfig } from "../../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "../../../interfaces/Enums.js";
 import {
 	getCustomStatusOptionsForDropdown,
 	getPriorityOptionsForDropdown,
@@ -1572,7 +1572,7 @@ export class AdvancedFilterComponent extends Component {
 					},
 				];
 				break;
-			case "id":
+			case DEFAULT_TASK_CACHE_KEYS.ID:
 				valueInput.type = "text";
 				conditionOptions = [
 					{ value: "is", text: t("is") },

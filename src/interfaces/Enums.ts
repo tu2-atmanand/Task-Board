@@ -41,6 +41,7 @@ export enum NotificationService {
  */
 export enum DEFAULT_TASK_CACHE_KEYS {
 	ID = "id",
+	LegacyID = "legacyId",
 	Title = "title",
 	Body = "body",
 	SubTasks = "subTasks",
@@ -56,14 +57,18 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	DueDate = "dueDate",
 	CompletionDate = "completionDate",
 	CancelledDate = "cancelledDate",
-	Dependencies = "dependsOn",
+	Dependencies = "dependsOn", // TODO : rename this to "childTasks"
+	ParentTasks = "parentTasks",
 	FilePath = "filePath",
+
+	// Below 2 values are not user configurable, they will be stored for internal purposes.
+	TaskLocation = "taskLocation",
 	FrontMatterTags = "frontmatterTags",
 
-	// These two properties are not supported yet but will be implemented soon.
-	DateModified = "dateModified",
+	// Below 2 properties are not supported yet but will be implemented soon.
+	LastModified = "lastModified",
 	OnCompletion = "onCompletion",
-	Recurring = "recurring",
+	Recurrence = "recurrence",
 
 	// Below properties are not stored in cache, but this same enum is used at other places hence placing them here.
 	Checkbox = "checkbox",
@@ -213,12 +218,8 @@ export enum PropertyTypeConfig {
 	text = "text",
 	boolean = "boolean",
 	numeric = "numeric",
-	time = "time",
-	date = "date",
-	dateTime = "date-time",
-	list = "list",
-}
-
-export enum DefaultLucideIconsForProperties {
-	id = "fingerprint-pattern",
+	time = "time", // Stored as string
+	date = "date", // Stored as string
+	dateTime = "date-time", // Stored as string
+	list = "list", // All values will be converted to string.
 }

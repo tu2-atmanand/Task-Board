@@ -53,7 +53,7 @@ export const columnSegregator = (
 					columnData.datedBasedColumn?.dateType ===
 					UniversalDateOptions.dueDate
 				) {
-					return !task.due;
+					return !task.dueDate;
 				} else if (
 					columnData.datedBasedColumn?.dateType ===
 					UniversalDateOptions.startDate
@@ -75,7 +75,7 @@ export const columnSegregator = (
 			};
 
 			tasksToDisplay = pendingTasks.filter((task) => {
-				let taskUniversalDate = task.due;
+				let taskUniversalDate = task.dueDate;
 				if (dateType === UniversalDateOptions.startDate) {
 					taskUniversalDate = task.startDate;
 				} else if (dateType === UniversalDateOptions.scheduledDate) {

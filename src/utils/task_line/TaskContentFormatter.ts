@@ -258,7 +258,7 @@ export const getSanitizedTaskContent = (
 	updatedTitle = sanitizeDueDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.due,
+		updatedTask.dueDate,
 	);
 
 	updatedTitle = sanitizeTags(updatedTitle, updatedTask.tags);
@@ -272,7 +272,7 @@ export const getSanitizedTaskContent = (
 	updatedTitle = sanitizeCompletionDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask.completion || "",
+		updatedTask.completionDate || "",
 	);
 
 	updatedTitle = sanitizeCancelledDate(
@@ -1475,7 +1475,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.DueDate:
 				// Remove due date in various formats
-				if (task.due) {
+				if (task.dueDate) {
 					const dueDateRegex =
 						/\s*(📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::.*?\]|@due\(.*?\))/g;
 					cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
@@ -1511,7 +1511,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.CompletionDate:
 				// Remove completion date in various formats
-				if (task.completion) {
+				if (task.completionDate) {
 					const completionRegex =
 						/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
 					cleanedTitle = cleanedTitle.replace(completionRegex, "");
@@ -1630,7 +1630,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove due date in various formats
-	if (task.due) {
+	if (task.dueDate) {
 		const dueDateRegex = /\s*(📅\s*.*?(?=\s|$)|\[due::.*?\]|@due\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(dueDateRegex, "");
 	}
@@ -1657,7 +1657,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove completion date in various formats
-	if (task.completion) {
+	if (task.completionDate) {
 		const completionRegex =
 			/\s*(✅\s*.*?(?=\s|$)|\[completion::.*?\]|@completion\(.*?\))/g;
 		cleanedTitle = cleanedTitle.replace(completionRegex, "");

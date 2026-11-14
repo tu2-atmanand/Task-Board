@@ -43,17 +43,17 @@ const columnVisibilityProperty: Partial<Record<TableColumnKey, DEFAULT_TASK_CACH
 	createdDate: [DEFAULT_TASK_CACHE_KEYS.CreatedDate],
 	startDate: [DEFAULT_TASK_CACHE_KEYS.StartDate],
 	scheduledDate: [DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
-	due: [DEFAULT_TASK_CACHE_KEYS.DueDate],
+	dueDate: [DEFAULT_TASK_CACHE_KEYS.DueDate],
 	dependsOn: [DEFAULT_TASK_CACHE_KEYS.Dependencies],
-	completion: [DEFAULT_TASK_CACHE_KEYS.CompletionDate],
+	completionDate: [DEFAULT_TASK_CACHE_KEYS.CompletionDate],
 	cancelledDate: [DEFAULT_TASK_CACHE_KEYS.CancelledDate],
 	filePath: [DEFAULT_TASK_CACHE_KEYS.FilePath],
 };
 
 const editableColumns = new Set<TableColumnKey>([
 	"title", "body", "status", "priority", "tags", "time", "reminder",
-	"createdDate", "startDate", "scheduledDate", "due", "dependsOn",
-	"completion", "cancelledDate",
+	"createdDate", "startDate", "scheduledDate", "dueDate", "dependsOn",
+	"completionDate", "cancelledDate",
 ]);
 
 const defaultColumnWidth = (column: TableColumnKey): number => {
@@ -326,14 +326,14 @@ const TableView: React.FC<TableViewProps> = ({
 				case "scheduledDate":
 					updatedTask.scheduledDate = value;
 					break;
-				case "due":
-					updatedTask.due = value;
+				case "dueDate":
+					updatedTask.dueDate = value;
 					break;
 				case "dependsOn":
 					updatedTask.dependsOn = value.split(",").map((id) => id.trim()).filter(Boolean);
 					break;
-				case "completion":
-					updatedTask.completion = value;
+				case "completionDate":
+					updatedTask.completionDate = value;
 					break;
 				case "cancelledDate":
 					updatedTask.cancelledDate = value;
@@ -362,11 +362,11 @@ const TableView: React.FC<TableViewProps> = ({
 					updatedTask.title = sanitizeStartDate(plugin.settings.data, task.title, value);
 				} else if (column === "scheduledDate") {
 					updatedTask.title = sanitizeScheduledDate(plugin.settings.data, task.title, value);
-				} else if (column === "due") {
+				} else if (column === "dueDate") {
 					updatedTask.title = sanitizeDueDate(plugin.settings.data, task.title, value);
 				} else if (column === "reminder") {
 					updatedTask.title = sanitizeReminder(plugin.settings.data, task.title, value);
-				} else if (column === "completion") {
+				} else if (column === "completionDate") {
 					updatedTask.title = sanitizeCompletionDate(plugin.settings.data, task.title, value);
 				} else if (column === "cancelledDate") {
 					updatedTask.title = sanitizeCancelledDate(plugin.settings.data, task.title, value);

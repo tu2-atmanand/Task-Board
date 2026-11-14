@@ -3,7 +3,10 @@
 import { parseYaml, stringifyYaml, TFile } from "obsidian";
 
 import TaskBoard from "../../../main.js";
-import { statusTypeNames } from "../../interfaces/Enums.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	statusTypeNames,
+} from "../../interfaces/Enums.js";
 import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { formatToday } from "../DateTimeCalculations.js";
@@ -241,8 +244,12 @@ export function createFrontmatterFromTask(
 	];
 
 	if (task.id && plugin.settings.data.autoAddUniqueID)
-		frontmatterObj[getCustomFrontmatterKey("id", frontmatterFormatting)] =
-			task.legacyId ? task.legacyId : task.id;
+		frontmatterObj[
+			getCustomFrontmatterKey(
+				DEFAULT_TASK_CACHE_KEYS.ID,
+				frontmatterFormatting,
+			)
+		] = task.legacyId ? task.legacyId : task.id;
 	if (task.priority && task.priority > 0) {
 		frontmatterObj[
 			getCustomFrontmatterKey("priority", frontmatterFormatting)
@@ -260,9 +267,13 @@ export function createFrontmatterFromTask(
 		frontmatterObj[
 			getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
 		] = task.scheduledDate;
-	if (task.due)
-		frontmatterObj[getCustomFrontmatterKey("due", frontmatterFormatting)] =
-			task.due;
+	if (task.dueDate)
+		frontmatterObj[
+			getCustomFrontmatterKey(
+				DEFAULT_TASK_CACHE_KEYS.DueDate,
+				frontmatterFormatting,
+			)
+		] = task.dueDate;
 	if (task.time)
 		frontmatterObj[getCustomFrontmatterKey("time", frontmatterFormatting)] =
 			task.time;
@@ -279,10 +290,10 @@ export function createFrontmatterFromTask(
 		frontmatterObj[
 			getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
 		] = task.cancelledDate;
-	if (task.completion)
+	if (task.completionDate)
 		frontmatterObj[
-			getCustomFrontmatterKey("completion", frontmatterFormatting)
-		] = task.completion;
+			getCustomFrontmatterKey("completionDate", frontmatterFormatting)
+		] = task.completionDate;
 
 	// Order the frontmatter properties based on index values
 	const orderedFrontmatter = orderFrontmatterProperties(
@@ -307,10 +318,9 @@ export function updateFrontmatterProperties(
 	task: taskItem,
 	forceId?: boolean,
 ): Partial<customFrontmatterCache> {
-	const frontmatterFormatting =
-		getDefaultPropertyFrontmatterFormatting(
-			plugin.settings.data.defaultProperties,
-		);
+	const frontmatterFormatting = getDefaultPropertyFrontmatterFormatting(
+		plugin.settings.data.defaultProperties,
+	);
 	const oldFrontmatter = existingFrontmatter;
 
 	// Step 1: Build a temporary object with all the updated values
@@ -326,7 +336,9 @@ export function updateFrontmatterProperties(
 
 	// Ensure taskNote tag exists and respect removed tags (task.tags is source of truth)
 	const tagsKey = getCustomFrontmatterKey("tags", frontmatterFormatting);
-	const existingTagsRaw = existingFrontmatter?.[tagsKey as keyof customFrontmatterCache] as unknown;
+	const existingTagsRaw = existingFrontmatter?.[
+		tagsKey as keyof customFrontmatterCache
+	] as unknown;
 
 	// Normalize existing tags to array of strings
 	let existingTags: string[] = [];
@@ -377,7 +389,10 @@ export function updateFrontmatterProperties(
 	);
 
 	// Update or add unique ID
-	const idKey = getCustomFrontmatterKey("id", frontmatterFormatting);
+	const idKey = getCustomFrontmatterKey(
+		DEFAULT_TASK_CACHE_KEYS.ID,
+		frontmatterFormatting,
+	);
 	if (!existingFrontmatter?.[idKey]) {
 		if (forceId || plugin.settings.data.autoAddUniqueID) {
 			tempUpdates[idKey] = task.legacyId
@@ -444,8 +459,8 @@ export function updateFrontmatterProperties(
 	}
 
 	const dueKey = getCustomFrontmatterKey("due", frontmatterFormatting);
-	if (task.due) {
-		tempUpdates[dueKey] = task.due;
+	if (task.dueDate) {
+		tempUpdates[dueKey] = task.dueDate;
 	} else {
 		delete tempUpdates[dueKey];
 		delete oldFrontmatter?.[dueKey];
@@ -484,7 +499,7 @@ export function updateFrontmatterProperties(
 	);
 	if (statusType === statusTypeNames.DONE) {
 		if (task.cancelledDate) {
-			tempUpdates[completionKey] = task.completion;
+			tempUpdates[completionKey] = task.completionDate;
 		} else {
 			const globalSettings = plugin.settings.data;
 			// const moment = _moment as unknown as typeof _moment.default;
@@ -535,11 +550,15 @@ export function updateFrontmatterProperties(
 	}
 
 	// Persist configured custom values under each configured frontmatter ID.
-	const builtInIds = new Set(plugin.settings.data.defaultProperties.map((property) => property.id));
+	const builtInIds = new Set(
+		plugin.settings.data.defaultProperties.map((property) => property.id),
+	);
 	for (const property of plugin.settings.data.customProperties ?? []) {
 		if (!property.id || builtInIds.has(property.id)) continue;
 		if (Object.prototype.hasOwnProperty.call(task, property.id)) {
-			const value = (task as unknown as Record<string, unknown>)[property.id];
+			const value = (task as unknown as Record<string, unknown>)[
+				property.id
+			];
 			if (value === undefined || value === null || value === "") {
 				delete tempUpdates[property.id];
 				delete oldFrontmatter?.[property.id];

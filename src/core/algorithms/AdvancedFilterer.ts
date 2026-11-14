@@ -211,7 +211,7 @@ function evaluateFilterCriterion(
 					.includes(String(value).toLowerCase());
 			}
 			if (Array.isArray(taskValue)) {
-				return taskValue.some((item) =>
+				return taskValue.some((item: string) =>
 					matchTagsWithWildcards(String(value), item),
 				);
 			}
@@ -223,7 +223,7 @@ function evaluateFilterCriterion(
 					.includes(String(value).toLowerCase());
 			}
 			if (Array.isArray(taskValue)) {
-				return !taskValue.some((item) =>
+				return !taskValue.some((item: string) =>
 					matchTagsWithWildcards(String(value), item),
 				);
 			}
@@ -321,7 +321,7 @@ function getTaskPropertyValue(
 			return task.createdDate || "";
 		case "dueDate":
 		case "due":
-			return task.due || "";
+			return task.dueDate || "";
 		case "startDate":
 		case "start":
 			return task.startDate || "";
@@ -331,7 +331,7 @@ function getTaskPropertyValue(
 		case "completion":
 		case "completedDate":
 		case "done":
-			return task?.completion || "";
+			return task?.completionDate || "";
 		case "cancelled":
 		case "cancelledDate":
 			return task?.cancelledDate || "";

@@ -313,7 +313,7 @@ export const getUniversalDateFromTask = (
 ): string => {
 	// Method 1 - Comparing
 	if (universalDateType === UniversalDateOptions.dueDate) {
-		return task.due;
+		return task.dueDate;
 	} else if (universalDateType === UniversalDateOptions.startDate) {
 		return task.startDate || "";
 	} else if (universalDateType === UniversalDateOptions.scheduledDate) {

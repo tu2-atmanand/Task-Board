@@ -228,7 +228,7 @@ export default class VaultScanner {
 						createdDate: taskNoteProperties?.createdDate || "",
 						startDate: taskNoteProperties?.startDate || "",
 						scheduledDate: taskNoteProperties?.scheduledDate || "",
-						due: taskNoteProperties?.due || "",
+						dueDate: taskNoteProperties?.dueDate || "",
 						tags: taskNoteProperties?.tags || [],
 						frontmatterTags: [],
 						time: taskNoteProperties?.time || "",
@@ -242,7 +242,7 @@ export default class VaultScanner {
 							endLine: lines.length,
 							endCharIndex: lines[lines.length - 1]?.length || 0,
 						},
-						completion: taskNoteProperties?.completion || "",
+						completionDate: taskNoteProperties?.completionDate || "",
 						cancelledDate: taskNoteProperties?.cancelledDate || "",
 						reminder: taskNoteProperties?.reminder || "",
 					};
@@ -433,7 +433,7 @@ export default class VaultScanner {
 								scheduledDate: scheduledDate
 									? scheduledDate
 									: "",
-								due: dueDate ? dueDate : "",
+								dueDate: dueDate ? dueDate : "",
 								tags: tags,
 								frontmatterTags: frontmatterTags,
 								priority: priority.value,
@@ -453,7 +453,7 @@ export default class VaultScanner {
 													.length
 											: line.length,
 								},
-								completion: completionDate
+								completionDate: completionDate
 									? completionDate
 									: "",
 								cancelledDate: cancelledDate
@@ -993,10 +993,10 @@ export function buildTaskFromRawContent(
 		createdDate: createdDate?.[1] ?? "",
 		startDate: startDate?.[1] ?? "",
 		scheduledDate: scheduledDate?.[1] ?? "",
-		due: due?.[1] ?? "",
+		dueDate: due?.[1] ?? "",
 		tags: tags,
 		priority: priority.value,
-		completion: completionDate?.[1] ?? "",
+		completionDate: completionDate?.[1] ?? "",
 		cancelledDate: cancelledDate?.[1] ?? "",
 		filePath: filePath || "",
 	};

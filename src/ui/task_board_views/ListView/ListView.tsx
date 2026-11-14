@@ -59,8 +59,8 @@ const ListView: React.FC<ListViewProps> = ({
 				} else if (taskSort === "priority") {
 					comparison = first.priority - second.priority;
 				} else {
-					const firstDate = first.due ? robustDateParser(first.due, dateFormat)?.getTime() : undefined;
-					const secondDate = second.due ? robustDateParser(second.due, dateFormat)?.getTime() : undefined;
+					const firstDate = first.dueDate ? robustDateParser(first.dueDate, dateFormat)?.getTime() : undefined;
+					const secondDate = second.dueDate ? robustDateParser(second.dueDate, dateFormat)?.getTime() : undefined;
 					if (firstDate === undefined && secondDate !== undefined) return 1;
 					if (secondDate === undefined && firstDate !== undefined) return -1;
 					comparison = (firstDate ?? 0) - (secondDate ?? 0);

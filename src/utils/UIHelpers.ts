@@ -122,7 +122,7 @@ export function getHideClassForProperty(property: DEFAULT_TASK_CACHE_KEYS): stri
 			return "hide-task-dependsOn";
 		case DEFAULT_TASK_CACHE_KEYS.OnCompletion:
 			return "hide-task-onCompletion";
-		case DEFAULT_TASK_CACHE_KEYS.Recurring:
+		case DEFAULT_TASK_CACHE_KEYS.Recurrence:
 			return "hide-task-recurring";
 		default:
 			return "";

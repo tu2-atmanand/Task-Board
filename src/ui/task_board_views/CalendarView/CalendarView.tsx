@@ -116,7 +116,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 	const calendarTasks = useMemo(() => {
 		const allTasks = [...tasks.Pending, ...tasks.Completed];
 		return allTasks.reduce<CalendarTask[]>((scheduledTasks, task) => {
-			const dateValue = task.startDate || task.scheduledDate || task.due;
+			const dateValue = task.startDate || task.scheduledDate || task.dueDate;
 			const parsedDate = dateValue ? robustDateParser(dateValue, dateFormat) : null;
 			if (!parsedDate) return scheduledTasks;
 

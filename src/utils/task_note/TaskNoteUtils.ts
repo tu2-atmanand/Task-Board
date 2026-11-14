@@ -17,6 +17,7 @@ import {
 	extractFrontmatterTags,
 } from "./FrontmatterOperations.js";
 import { defaultTaskStatuses } from "../../interfaces/Mapping.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -103,11 +104,11 @@ export function extractTaskNoteProperties(
 	// Extract id
 	value = validateFrontmatterValue(
 		frontmatter,
-		getCustomFrontmatterKey("id", frontmatterFormatting),
+		getCustomFrontmatterKey(DEFAULT_TASK_CACHE_KEYS.ID, frontmatterFormatting),
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["id"] = value;
+		taskItemData[DEFAULT_TASK_CACHE_KEYS.ID] = value;
 	}
 
 	// Extract title
@@ -170,7 +171,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["due"] = value;
+		taskItemData["dueDate"] = value;
 	}
 
 	// Extract cancelledDate
@@ -190,7 +191,7 @@ export function extractTaskNoteProperties(
 		"string",
 	);
 	if (typeof value === "string") {
-		taskItemData["completion"] = value;
+		taskItemData["completionDate"] = value;
 	}
 
 	// Extract priority

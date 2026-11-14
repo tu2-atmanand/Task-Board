@@ -1,6 +1,6 @@
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { t } from "../utils/lang/helper.js";
-import { statusTypeNames } from "./Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, statusTypeNames } from "./Enums.js";
 import { CustomStatus } from "./GlobalSettings.js";
 import { taskItem } from "./TaskItem.js";
 
@@ -272,6 +272,79 @@ export const defaultTaskStatuses = {
 	secret: "s",
 };
 
+export const taskItemEmpty: taskItem = {
+	id: "",
+	legacyId: "",
+	title: "",
+	body: [],
+	createdDate: "",
+	startDate: "",
+	scheduledDate: "",
+	dueDate: "",
+	tags: [],
+	frontmatterTags: [],
+	time: "",
+	priority: 0,
+	reminder: "",
+	completionDate: "",
+	cancelledDate: "",
+	filePath: "",
+	taskLocation: {
+		startLine: 0,
+		startCharIndex: 0,
+		endLine: 0,
+		endCharIndex: 0,
+	},
+	status: defaultTaskStatuses.unchecked,
+};
+
+/**
+ * The keys from this constant should be same as the values in {@link DEFAULT_TASK_CACHE_KEYS} enum.
+ */
+export const taskItemKeyToNameMapping: { [key: string]: string } = {
+	[DEFAULT_TASK_CACHE_KEYS.ID]: "ID",
+	[DEFAULT_TASK_CACHE_KEYS.Title]: "Title",
+	[DEFAULT_TASK_CACHE_KEYS.Body]: "Body",
+	[DEFAULT_TASK_CACHE_KEYS.SubTasks]: "Sub tasks",
+	[DEFAULT_TASK_CACHE_KEYS.Status]: "Status",
+	[DEFAULT_TASK_CACHE_KEYS.Priority]: "Priority",
+	[DEFAULT_TASK_CACHE_KEYS.Tags]: "Tags",
+	[DEFAULT_TASK_CACHE_KEYS.Time]: "Time",
+	[DEFAULT_TASK_CACHE_KEYS.Reminder]: "Reminder",
+	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]: "Created date",
+	[DEFAULT_TASK_CACHE_KEYS.StartDate]: "Start date",
+	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]: "Scheduled date",
+	[DEFAULT_TASK_CACHE_KEYS.DueDate]: "Due date",
+	[DEFAULT_TASK_CACHE_KEYS.CompletionDate]: "Completed date",
+	[DEFAULT_TASK_CACHE_KEYS.CancelledDate]: "Cancelled date",
+	[DEFAULT_TASK_CACHE_KEYS.Dependencies]: "Depends on",
+	[DEFAULT_TASK_CACHE_KEYS.FilePath]: "Source file",
+	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]: "Frontmatter tags",
+	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: "Task location",
+
+	// Below properties are not supported yet but will be implemented soon.
+	[DEFAULT_TASK_CACHE_KEYS.LastModified]: "Last modified",
+	[DEFAULT_TASK_CACHE_KEYS.OnCompletion]: "On completion",
+	[DEFAULT_TASK_CACHE_KEYS.Recurrence]: "Recurrence",
+};
+
+export const columnTypeAndNameMapping: { [key: string]: string } = {
+	undated: "Undated",
+	dated: "Dated",
+	namedTag: "Tagged",
+	untagged: "Untagged",
+	otherTags: "Other Tags",
+	taskStatus: "Status",
+	taskPriority: "Priority",
+	pathFiltered: "Path filtered",
+	completed: "Completed",
+	allPending: "All pending tasks",
+};
+
+// -----------------------------------------
+//        DEPRECATED
+// -----------------------------------------
+
 /**
  * @deprecated - Dont use the below array for dropdowns directly.
  * Use the "Custom statuses" setting configured by user.
@@ -318,71 +391,4 @@ export const taskStatusesDropdown = [
 	{ value: defaultTaskStatuses.secret, text: "Secret [s]" },
 ];
 
-export const taskItemEmpty: taskItem = {
-	id: "",
-	legacyId: "",
-	title: "",
-	body: [],
-	createdDate: "",
-	startDate: "",
-	scheduledDate: "",
-	due: "",
-	tags: [],
-	frontmatterTags: [],
-	time: "",
-	priority: 0,
-	reminder: "",
-	completion: "",
-	cancelledDate: "",
-	filePath: "",
-	taskLocation: {
-		startLine: 0,
-		startCharIndex: 0,
-		endLine: 0,
-		endCharIndex: 0,
-	},
-	status: defaultTaskStatuses.unchecked,
-};
 
-/**
- * The keys from this constant should be same as the values in {@link DEFAULT_TASK_CACHE_KEYS} enum.
- */
-export const taskItemKeyToNameMapping: { [key: string]: string } = {
-	id: "ID",
-	title: "Title",
-	body: "Body",
-	subTasks: "Sub tasks",
-	status: "Status",
-	priority: "Priority",
-	tags: "Tags",
-	time: "Time",
-	reminder: "Reminder",
-	createdDate: "Created date",
-	startDate: "Start date",
-	scheduledDate: "Scheduled date",
-	dueDate: "Due date",
-	completionDate: "Completed date",
-	cancelledDate: "Cancelled date",
-	dependsOn: "Depends on",
-	filePath: "Source file",
-	frontmatterTags: "Frontmatter tags",
-	taskLocation: "Task location",
-
-	// Below properties are not supported yet but will be implemented soon.
-	dateModified: "Last modified",
-	onCompletion: "On completion",
-	recurring: "Recurring",
-};
-
-export const columnTypeAndNameMapping: { [key: string]: string } = {
-	undated: "Undated",
-	dated: "Dated",
-	namedTag: "Tagged",
-	untagged: "Untagged",
-	otherTags: "Other Tags",
-	taskStatus: "Status",
-	taskPriority: "Priority",
-	pathFiltered: "Path filtered",
-	completed: "Completed",
-	allPending: "All pending tasks",
-};
