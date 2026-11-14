@@ -137,7 +137,7 @@ export function extractFrontmatterTags(
 
 	let tags: string[] = [];
 
-	const tagValue = frontmatter[tagsPropertyKey];
+	const tagValue: unknown = frontmatter[tagsPropertyKey] as unknown;
 	if (tagValue) {
 		if (Array.isArray(tagValue)) {
 			// If tags is an array, process each tag
@@ -219,30 +219,45 @@ export function createFrontmatterFromTask(
 		if (!property.id || !property.key) continue;
 		const value = taskValues[property.key];
 
-		switch (property.key) {
-			case DEFAULT_TASK_CACHE_KEYS.Title:
+		switch (String(property.key)) {
+			case String(DEFAULT_TASK_CACHE_KEYS.Title):
 				frontmatterObj[property.id] = value ?? "";
 				break;
-			case DEFAULT_TASK_CACHE_KEYS.Status:
+			case String(DEFAULT_TASK_CACHE_KEYS.Status):
 				frontmatterObj[property.id] =
 					getStatusNameFromStatusSymbol(
 						typeof value === "string" ? value : undefined,
 						plugin.settings.data.customStatuses ?? [],
 					) || "pending";
 				break;
-			case DEFAULT_TASK_CACHE_KEYS.Tags: {
-				const tags = Array.isArray(value) ? value : [];
+			case String(DEFAULT_TASK_CACHE_KEYS.Tags): {
+				const tags: string[] = Array.isArray(value)
+					? value.map((tag: unknown) => String(tag))
+					: [];
 				const identifierTag =
 					plugin.settings.data.taskNoteIdentifierTag;
-				frontmatterObj[property.id] = [
+				const candidates = [
 					identifierTag,
 					...tags.filter(
-						(tag) => !compareTwoTags(String(tag), identifierTag),
+						(tag) => !compareTwoTags(tag, identifierTag),
 					),
 				];
+				frontmatterObj[property.id] = candidates.reduce<string[]>(
+					(uniqueTags, tag) => {
+						if (
+							!uniqueTags.some((existingTag) =>
+								compareTwoTags(existingTag, tag),
+							)
+						) {
+							uniqueTags.push(tag);
+						}
+						return uniqueTags;
+					},
+					[],
+				);
 				break;
 			}
-			case DEFAULT_TASK_CACHE_KEYS.ID:
+			case String(DEFAULT_TASK_CACHE_KEYS.ID):
 				if (
 					value &&
 					plugin.settings.data.autoAddUniqueID
@@ -251,7 +266,7 @@ export function createFrontmatterFromTask(
 						task[DEFAULT_TASK_CACHE_KEYS.LegacyID] || value;
 				}
 				break;
-			case DEFAULT_TASK_CACHE_KEYS.Priority:
+			case String(DEFAULT_TASK_CACHE_KEYS.Priority):
 				if (typeof value === "number" && value > 0) {
 					frontmatterObj[property.id] =
 						getPriorityNameForTaskNote(value);
@@ -261,8 +276,8 @@ export function createFrontmatterFromTask(
 				if (value !== undefined && value !== null && value !== "") {
 					frontmatterObj[property.id] =
 						property.type === PropertyTypeConfig.list &&
-						property.key ===
-							DEFAULT_TASK_CACHE_KEYS.Dependencies &&
+						String(property.key) ===
+							String(DEFAULT_TASK_CACHE_KEYS.Dependencies) &&
 						Array.isArray(value)
 							? value
 							: coerceCustomTaskPropertyValue(
@@ -274,7 +289,7 @@ export function createFrontmatterFromTask(
 	}
 
 	const orderedFrontmatter = orderFrontmatterProperties(
-		frontmatterObj as Partial<customFrontmatterCache>,
+		frontmatterObj,
 		plugin.settings.data.taskProperties,
 	);
 
@@ -341,13 +356,19 @@ export function updateFrontmatterProperties(
 	}
 
 	const tagsProperty = taskProperties.find(
-		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.Tags,
+		(property) =>
+			String(property.key) ===
+			String(DEFAULT_TASK_CACHE_KEYS.Tags),
 	);
 	if (tagsProperty?.id) {
-		const existingTagsRaw = existingFrontmatter?.[tagsProperty.id];
+		const existingTagsRaw: unknown = existingFrontmatter?.[
+			tagsProperty.id
+		] as unknown;
 		const existingTags =
 			Array.isArray(existingTagsRaw)
-				? existingTagsRaw.map(String).filter(Boolean)
+				? existingTagsRaw
+						.map((tag: unknown) => String(tag))
+						.filter(Boolean)
 				: typeof existingTagsRaw === "string"
 					? existingTagsRaw
 							.split(",")
@@ -355,27 +376,47 @@ export function updateFrontmatterProperties(
 							.filter(Boolean)
 					: [];
 		const taskTags = Array.isArray(task[DEFAULT_TASK_CACHE_KEYS.Tags])
-			? task[DEFAULT_TASK_CACHE_KEYS.Tags].filter(Boolean)
+			? task[DEFAULT_TASK_CACHE_KEYS.Tags]
+					.map((tag) => String(tag).trim())
+					.filter(Boolean)
 			: [];
-		const finalTags = [
-			...taskTags,
-			...existingTags.filter((tag) => taskTags.includes(tag)),
-		];
 		const identifierTag = plugin.settings.data.taskNoteIdentifierTag;
-		if (!finalTags.some((tag) => compareTwoTags(tag, identifierTag))) {
-			finalTags.push(identifierTag);
-		}
-		tempUpdates[tagsProperty.id] = Array.from(
-			new Set(finalTags.map((tag) => String(tag).trim()).filter(Boolean)),
+		const tagCandidates = [
+			identifierTag,
+			...taskTags,
+			...existingTags.filter((existingTag) =>
+				taskTags.some((taskTag) =>
+					compareTwoTags(existingTag, taskTag),
+				),
+			),
+		]
+			.map((tag) => tag.trim())
+			.filter(Boolean);
+		tempUpdates[tagsProperty.id] = tagCandidates.reduce<string[]>(
+			(uniqueTags, tag) => {
+				if (
+					!uniqueTags.some((existingTag) =>
+						compareTwoTags(existingTag, tag),
+					)
+				) {
+					uniqueTags.push(tag);
+				}
+				return uniqueTags;
+			},
+			[],
 		);
 	}
 
 	const idProperty = taskProperties.find(
-		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.ID,
+		(property) =>
+			String(property.key) === String(DEFAULT_TASK_CACHE_KEYS.ID),
 	);
 	if (idProperty?.id) {
-		if (existingFrontmatter?.[idProperty.id]) {
-			tempUpdates[idProperty.id] = existingFrontmatter[idProperty.id];
+		const existingId: unknown = existingFrontmatter?.[
+			idProperty.id
+		] as unknown;
+		if (existingId) {
+			tempUpdates[idProperty.id] = existingId;
 		} else if (forceId || plugin.settings.data.autoAddUniqueID) {
 			tempUpdates[idProperty.id] =
 				task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ||
@@ -384,7 +425,9 @@ export function updateFrontmatterProperties(
 	}
 
 	const statusProperty = taskProperties.find(
-		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.Status,
+		(property) =>
+			String(property.key) ===
+			String(DEFAULT_TASK_CACHE_KEYS.Status),
 	);
 	if (statusProperty?.id && task[DEFAULT_TASK_CACHE_KEYS.Status]) {
 		const statusName = getStatusNameFromStatusSymbol(
@@ -396,7 +439,9 @@ export function updateFrontmatterProperties(
 	}
 
 	const priorityProperty = taskProperties.find(
-		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.Priority,
+		(property) =>
+			String(property.key) ===
+			String(DEFAULT_TASK_CACHE_KEYS.Priority),
 	);
 	if (priorityProperty?.id) {
 		const priority = task[DEFAULT_TASK_CACHE_KEYS.Priority];
@@ -411,7 +456,9 @@ export function updateFrontmatterProperties(
 	}
 
 	const cancelledDateProperty = taskProperties.find(
-		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+		(property) =>
+			String(property.key) ===
+			String(DEFAULT_TASK_CACHE_KEYS.CancelledDate),
 	);
 	if (cancelledDateProperty?.id) {
 		if (statusType === statusTypeNames.CANCELLED) {
@@ -426,7 +473,9 @@ export function updateFrontmatterProperties(
 	}
 
 	const completionDateProperty = taskProperties.find(
-		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+		(property) =>
+			String(property.key) ===
+			String(DEFAULT_TASK_CACHE_KEYS.CompletionDate),
 	);
 	if (completionDateProperty?.id) {
 		if (statusType === statusTypeNames.DONE) {
@@ -441,7 +490,7 @@ export function updateFrontmatterProperties(
 	}
 
 	const orderedFrontmatter = orderFrontmatterProperties(
-		tempUpdates as Partial<customFrontmatterCache>,
+		tempUpdates,
 		taskProperties,
 		existingFrontmatter,
 	);

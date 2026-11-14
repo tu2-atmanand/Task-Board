@@ -8,10 +8,7 @@ import { isTheContentDiffAreOnlySpaces_V2 } from "../../ui/modals/DiffContentCom
 import { allowedFileExtensionsRegEx } from "../regular_expressions/MiscelleneousRegExpr.js";
 import { openDiffContentCompareModal } from "../../ui/modals/OpenModals.js";
 import { TasksPluginApi } from "../../services/tasks_plugin/api.js";
-import {
-	readDataOfVaultFile,
-	writeDataToVaultFile,
-} from "../MarkdownFileOperations.js";
+import { writeDataToVaultFile } from "../MarkdownFileOperations.js";
 import {
 	getFormattedTaskContent,
 	addIdToTaskContent,
@@ -19,7 +16,6 @@ import {
 import { createFolderRecursively } from "../../services/FileSystem.js";
 import { t } from "i18next";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
-
 
 /**
  * This function will simpy check if the task title contains the recurring tag:
@@ -726,7 +722,9 @@ export const replaceOldTaskWithNewTask = async (
 	oldTaskContent: string,
 	newTaskContent: string,
 ): Promise<boolean> => {
-	const filePath = allowedFileExtensionsRegEx.test(oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath])
+	const filePath = allowedFileExtensionsRegEx.test(
+		oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+	)
 		? oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath]
 		: `${oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath]}.md`;
 
@@ -752,7 +750,11 @@ export const replaceOldTaskWithNewTask = async (
 			if (
 				!startLineText
 					.trim()
-					.startsWith(oldTask[DEFAULT_TASK_CACHE_KEYS.Title].trim().substring(0, 5))
+					.startsWith(
+						oldTask[DEFAULT_TASK_CACHE_KEYS.Title]
+							.trim()
+							.substring(0, 5),
+					)
 			) {
 				bugReporterManagerInsatance.showNotice(
 					62,
