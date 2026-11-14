@@ -5,21 +5,22 @@ import { parseYaml, stringifyYaml, TFile } from "obsidian";
 import TaskBoard from "../../../main.js";
 import {
 	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
 	statusTypeNames,
 } from "../../interfaces/Enums.js";
-import { customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
+import {
+	coerceCustomTaskPropertyValue,
+	customFrontmatterCache,
+	taskItem,
+} from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { formatToday } from "../DateTimeCalculations.js";
 import { generateTaskId } from "../TaskItemUtils.js";
 import {
-	getCustomFrontmatterKey,
 	getStatusNameFromStatusSymbol,
 	getPriorityNameForTaskNote,
 } from "./TaskNoteUtils.js";
-import {
-	FrontmatterFormattingInterface,
-	getDefaultPropertyFrontmatterFormatting,
-} from "../../interfaces/GlobalSettings.js";
+import type { SupportedPropertiesConfig } from "../../interfaces/GlobalSettings.js";
 import { compareTwoTags } from "../../core/algorithms/ScanningFilterer.js";
 
 /**
@@ -128,6 +129,7 @@ export function extractFrontmatterFromContent(
  */
 export function extractFrontmatterTags(
 	frontmatter: Partial<customFrontmatterCache> | undefined,
+	tagsPropertyKey: string = DEFAULT_TASK_CACHE_KEYS.Tags,
 ): string[] {
 	if (!frontmatter) {
 		return [];
@@ -135,18 +137,18 @@ export function extractFrontmatterTags(
 
 	let tags: string[] = [];
 
-	// Check if there's a 'tags' property in frontmatter
-	if (frontmatter.tags) {
-		if (Array.isArray(frontmatter.tags)) {
+	const tagValue = frontmatter[tagsPropertyKey];
+	if (tagValue) {
+		if (Array.isArray(tagValue)) {
 			// If tags is an array, process each tag
-			tags = frontmatter.tags.map((tag: unknown) => {
+			tags = tagValue.map((tag: unknown) => {
 				const tagStr = String(tag).trim();
 				// Ensure tags start with # if they don't already
 				return tagStr.replace("#", "");
 			});
-		} else if (typeof frontmatter.tags === "string") {
+		} else if (typeof tagValue === "string") {
 			// If tags is a string, split by commas and process
-			tags = frontmatter.tags
+			tags = tagValue
 				.split(",")
 				.map((tag: string) => {
 					const tagStr = tag.trim();
@@ -160,50 +162,39 @@ export function extractFrontmatterTags(
 }
 
 /**
- * Helper function to order frontmatter properties based on frontmatterFormatting index values
+ * Helper function to order frontmatter properties based on configured ranks
  * @param frontmatterObj - Unordered frontmatter object
- * @param frontmatterFormatting - Array of frontmatter formatting configs
+ * @param taskProperties - Configured task properties
  * @param existingFrontmatter - Optional existing frontmatter for additional properties
  * @returns Ordered frontmatter object
  */
 function orderFrontmatterProperties(
 	frontmatterObj: Partial<customFrontmatterCache>,
-	frontmatterFormatting: FrontmatterFormattingInterface[],
+	taskProperties: SupportedPropertiesConfig[],
 	existingFrontmatter?: customFrontmatterCache,
 ): Partial<customFrontmatterCache> {
 	const orderedFrontmatter: Partial<customFrontmatterCache> = {};
-
-	// Create a set of all custom frontmatter keys for quick lookup
-	const customKeys = new Set(
-		frontmatterFormatting.map((format) => format.key),
+	const orderedProperties = [...taskProperties].sort(
+		(a, b) => a.rank - b.rank,
 	);
 
-	// Sort frontmatter formatting by index and add properties in order
-	const sortedFormatting = [...frontmatterFormatting].sort(
-		(a, b) => a.index - b.index,
-	);
-
-	for (const format of sortedFormatting) {
-		const key = format.key;
-		// If the key exists in the frontmatter object, add it to the ordered object
-		if (key in frontmatterObj) {
-			orderedFrontmatter[key] = frontmatterObj[key] as unknown;
+	for (const property of orderedProperties) {
+		if (property.id in frontmatterObj) {
+			orderedFrontmatter[property.id] = frontmatterObj[
+				property.id
+			] as unknown;
 		}
 	}
 
-	// Add any additional properties from the frontmatter object that aren't in the formatted list
 	for (const [key, value] of Object.entries(frontmatterObj)) {
-		if (!(key in orderedFrontmatter) && !customKeys.has(key)) {
+		if (!(key in orderedFrontmatter)) {
 			orderedFrontmatter[key] = value as unknown;
 		}
 	}
 
-	// Add any additional properties from existingFrontmatter if provided
 	if (existingFrontmatter) {
 		for (const [key, value] of Object.entries(existingFrontmatter)) {
-			// Skip the index__ function
 			if (key === "index__") continue;
-			// Skip keys that are already in the ordered frontmatter
 			if (!(key in orderedFrontmatter)) {
 				orderedFrontmatter[key] = value as unknown;
 			}
@@ -221,84 +212,70 @@ function orderFrontmatterProperties(
 export function createFrontmatterFromTask(
 	plugin: TaskBoard,
 	task: taskItem,
-	frontmatterFormatting: FrontmatterFormattingInterface[],
 ): string {
-	const frontmatterObj: Partial<customFrontmatterCache> = {};
+	const frontmatterObj: Record<string, unknown> = {};
+	const taskValues = task as taskItem & Record<string, unknown>;
+	for (const property of plugin.settings.data.taskProperties) {
+		if (!property.id || !property.key) continue;
+		const value = taskValues[property.key];
 
-	frontmatterObj[getCustomFrontmatterKey("title", frontmatterFormatting)] =
-		task?.[DEFAULT_TASK_CACHE_KEYS.Title] || "";
-	frontmatterObj[getCustomFrontmatterKey("status", frontmatterFormatting)] =
-		getStatusNameFromStatusSymbol(
-			task?.[DEFAULT_TASK_CACHE_KEYS.Status],
-			plugin.settings.data.customStatuses ?? [],
-		) || "pending";
-	frontmatterObj[getCustomFrontmatterKey("tags", frontmatterFormatting)] = [
-		plugin.settings.data.taskNoteIdentifierTag,
-		...(task?.[DEFAULT_TASK_CACHE_KEYS.Tags]?.filter(
-			(tag) =>
-				!compareTwoTags(
-					tag,
-					plugin.settings.data.taskNoteIdentifierTag,
-				),
-		) ?? []),
-	];
-
-	if (task[DEFAULT_TASK_CACHE_KEYS.ID] && plugin.settings.data.autoAddUniqueID)
-		frontmatterObj[
-			getCustomFrontmatterKey(
-				DEFAULT_TASK_CACHE_KEYS.ID,
-				frontmatterFormatting,
-			)
-		] = task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : task[DEFAULT_TASK_CACHE_KEYS.ID];
-	if (task[DEFAULT_TASK_CACHE_KEYS.Priority] && task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
-		frontmatterObj[
-			getCustomFrontmatterKey("priority", frontmatterFormatting)
-		] = getPriorityNameForTaskNote(task[DEFAULT_TASK_CACHE_KEYS.Priority]) || "";
+		switch (property.key) {
+			case DEFAULT_TASK_CACHE_KEYS.Title:
+				frontmatterObj[property.id] = value ?? "";
+				break;
+			case DEFAULT_TASK_CACHE_KEYS.Status:
+				frontmatterObj[property.id] =
+					getStatusNameFromStatusSymbol(
+						typeof value === "string" ? value : undefined,
+						plugin.settings.data.customStatuses ?? [],
+					) || "pending";
+				break;
+			case DEFAULT_TASK_CACHE_KEYS.Tags: {
+				const tags = Array.isArray(value) ? value : [];
+				const identifierTag =
+					plugin.settings.data.taskNoteIdentifierTag;
+				frontmatterObj[property.id] = [
+					identifierTag,
+					...tags.filter(
+						(tag) => !compareTwoTags(String(tag), identifierTag),
+					),
+				];
+				break;
+			}
+			case DEFAULT_TASK_CACHE_KEYS.ID:
+				if (
+					value &&
+					plugin.settings.data.autoAddUniqueID
+				) {
+					frontmatterObj[property.id] =
+						task[DEFAULT_TASK_CACHE_KEYS.LegacyID] || value;
+				}
+				break;
+			case DEFAULT_TASK_CACHE_KEYS.Priority:
+				if (typeof value === "number" && value > 0) {
+					frontmatterObj[property.id] =
+						getPriorityNameForTaskNote(value);
+				}
+				break;
+			default:
+				if (value !== undefined && value !== null && value !== "") {
+					frontmatterObj[property.id] =
+						property.type === PropertyTypeConfig.list &&
+						property.key ===
+							DEFAULT_TASK_CACHE_KEYS.Dependencies &&
+						Array.isArray(value)
+							? value
+							: coerceCustomTaskPropertyValue(
+									value,
+									property.type,
+								) ?? value;
+				}
+		}
 	}
-	if (task[DEFAULT_TASK_CACHE_KEYS.CreatedDate])
-		frontmatterObj[
-			getCustomFrontmatterKey("createdDate", frontmatterFormatting)
-		] = task[DEFAULT_TASK_CACHE_KEYS.CreatedDate];
-	if (task[DEFAULT_TASK_CACHE_KEYS.StartDate])
-		frontmatterObj[
-			getCustomFrontmatterKey("startDate", frontmatterFormatting)
-		] = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
-	if (task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate])
-		frontmatterObj[
-			getCustomFrontmatterKey("scheduledDate", frontmatterFormatting)
-		] = task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
-	if (task[DEFAULT_TASK_CACHE_KEYS.DueDate])
-		frontmatterObj[
-			getCustomFrontmatterKey(
-				DEFAULT_TASK_CACHE_KEYS.DueDate,
-				frontmatterFormatting,
-			)
-		] = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-	if (task[DEFAULT_TASK_CACHE_KEYS.Time])
-		frontmatterObj[getCustomFrontmatterKey("time", frontmatterFormatting)] =
-			task[DEFAULT_TASK_CACHE_KEYS.Time];
-	if (task[DEFAULT_TASK_CACHE_KEYS.Reminder])
-		frontmatterObj[
-			getCustomFrontmatterKey("reminder", frontmatterFormatting)
-		] = task[DEFAULT_TASK_CACHE_KEYS.Reminder];
-	if (task[DEFAULT_TASK_CACHE_KEYS.Dependencies] && task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0)
-		frontmatterObj[
-			getCustomFrontmatterKey("dependsOn", frontmatterFormatting)
-		] = task[DEFAULT_TASK_CACHE_KEYS.Dependencies].join(", ");
 
-	if (task[DEFAULT_TASK_CACHE_KEYS.CancelledDate])
-		frontmatterObj[
-			getCustomFrontmatterKey("cancelledDate", frontmatterFormatting)
-		] = task[DEFAULT_TASK_CACHE_KEYS.CancelledDate];
-	if (task[DEFAULT_TASK_CACHE_KEYS.CompletionDate])
-		frontmatterObj[
-			getCustomFrontmatterKey("completionDate", frontmatterFormatting)
-		] = task[DEFAULT_TASK_CACHE_KEYS.CompletionDate];
-
-	// Order the frontmatter properties based on index values
 	const orderedFrontmatter = orderFrontmatterProperties(
-		frontmatterObj,
-		frontmatterFormatting,
+		frontmatterObj as Partial<customFrontmatterCache>,
+		plugin.settings.data.taskProperties,
 	);
 
 	return createYamlFromObject(orderedFrontmatter);
@@ -318,265 +295,155 @@ export function updateFrontmatterProperties(
 	task: taskItem,
 	forceId?: boolean,
 ): Partial<customFrontmatterCache> {
-	const frontmatterFormatting = getDefaultPropertyFrontmatterFormatting(
-		plugin.settings.data.taskProperties,
-	);
-	const oldFrontmatter = existingFrontmatter;
-
-	// Step 1: Build a temporary object with all the updated values
+	const taskProperties = plugin.settings.data.taskProperties;
+	const taskValues = task as taskItem & Record<string, unknown>;
 	const tempUpdates: Record<string, unknown> = {};
-
-	if (task[DEFAULT_TASK_CACHE_KEYS.Title]) {
-		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] =
-			task[DEFAULT_TASK_CACHE_KEYS.Title];
-	} else {
-		tempUpdates[getCustomFrontmatterKey("title", frontmatterFormatting)] =
-			"";
-	}
-
-	// Ensure taskNote tag exists and respect removed tags (task.tags is source of truth)
-	const tagsKey = getCustomFrontmatterKey("tags", frontmatterFormatting);
-	const existingTagsRaw = existingFrontmatter?.[
-		tagsKey as keyof customFrontmatterCache
-	] as unknown;
-
-	// Normalize existing tags to array of strings
-	let existingTags: string[] = [];
-	if (Array.isArray(existingTagsRaw)) {
-		existingTags = existingTagsRaw.filter(Boolean) as string[];
-	} else if (typeof existingTagsRaw === "string" && existingTagsRaw.length) {
-		existingTags = existingTagsRaw
-			.split(",")
-			.map((t) => t.replace("#", "").trim())
-			.filter(Boolean);
-	}
-
-	// Normalize task tags to array of strings (task.tags is the source of truth)
-	// const taskTags: string[] = task.tags
-	// 	? Array.isArray(task.tags)
-	// 		? task.tags.map((t) => String(t).trim()).filter(Boolean)
-	// 		: typeof task.tags === "string" &&
-	// 		  task.tags &&
-	// 		  task.tags.trim().length
-	// 		? task.tags
-	// 				.split(",")
-	// 				.map((t) => t.trim())
-	// 				.filter(Boolean)
-	// 		: []
-	// 	: [];
-
-	const taskTags: string[] = task[DEFAULT_TASK_CACHE_KEYS.Tags].filter(Boolean);
-
-	const identifierTag = plugin.settings.data.taskNoteIdentifierTag;
-
-	// // Step 1: Add any new tags from task.tags that are not in existingTags
-	// let newTagsToAdd = taskTags.filter((t) => !existingTags.includes(t));
-
-	// Do not carry over tags that exist in existingTags but were removed from task.tags
-	existingTags = existingTags.filter((tag: string) => taskTags.includes(tag));
-
-	// Build final tags: identifier + all tags from taskTags (which covers common + new)
-	let finalTags = [...taskTags, ...existingTags];
-
-	const hasIdentifierTag = finalTags.some((tag) =>
-		compareTwoTags(tag, identifierTag),
-	);
-	finalTags = hasIdentifierTag ? finalTags : [...finalTags, identifierTag];
-
-	// Remove duplicates and empty entries
-	tempUpdates[tagsKey] = Array.from(
-		new Set(finalTags.map((t) => String(t).trim()).filter(Boolean)),
-	);
-
-	// Update or add unique ID
-	const idKey = getCustomFrontmatterKey(
-		DEFAULT_TASK_CACHE_KEYS.ID,
-		frontmatterFormatting,
-	);
-	if (!existingFrontmatter?.[idKey]) {
-		if (forceId || plugin.settings.data.autoAddUniqueID) {
-			tempUpdates[idKey] = task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
-				? task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
-				: generateTaskId(plugin);
-		}
-	} else {
-		// Preserve existing ID
-		tempUpdates[idKey] = existingFrontmatter[idKey];
-	}
-
-	const statusKey = getCustomFrontmatterKey("status", frontmatterFormatting);
-	if (task[DEFAULT_TASK_CACHE_KEYS.Status]) {
-		const statusName = getStatusNameFromStatusSymbol(
-			task[DEFAULT_TASK_CACHE_KEYS.Status],
-			plugin.settings.data.customStatuses ?? [],
-		);
-		tempUpdates[statusKey] = statusName ?? `"${task[DEFAULT_TASK_CACHE_KEYS.Status]}"`;
-	}
-
-	// All the below properties are optional
-
-	// Update time property
-	const timeKey = getCustomFrontmatterKey("time", frontmatterFormatting);
-	if (task[DEFAULT_TASK_CACHE_KEYS.Time]) {
-		tempUpdates[timeKey] = task[DEFAULT_TASK_CACHE_KEYS.Time];
-	} else {
-		delete tempUpdates[timeKey];
-		delete oldFrontmatter?.[timeKey];
-	}
-
-	// Update date properties
-	const createdDateKey = getCustomFrontmatterKey(
-		"createdDate",
-		frontmatterFormatting,
-	);
-	if (task[DEFAULT_TASK_CACHE_KEYS.CreatedDate]) {
-		tempUpdates[createdDateKey] = task[DEFAULT_TASK_CACHE_KEYS.CreatedDate];
-	} else {
-		delete tempUpdates[createdDateKey];
-		delete oldFrontmatter?.[createdDateKey];
-	}
-
-	const startDateKey = getCustomFrontmatterKey(
-		"startDate",
-		frontmatterFormatting,
-	);
-	if (task[DEFAULT_TASK_CACHE_KEYS.StartDate]) {
-		tempUpdates[startDateKey] = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
-	} else {
-		delete tempUpdates[startDateKey];
-		delete oldFrontmatter?.[startDateKey];
-	}
-
-	const scheduledDateKey = getCustomFrontmatterKey(
-		"scheduledDate",
-		frontmatterFormatting,
-	);
-	if (task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]) {
-		tempUpdates[scheduledDateKey] = task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
-	} else {
-		delete tempUpdates[scheduledDateKey];
-		delete oldFrontmatter?.[scheduledDateKey];
-	}
-
-	const dueKey = getCustomFrontmatterKey("due", frontmatterFormatting);
-	if (task[DEFAULT_TASK_CACHE_KEYS.DueDate]) {
-		tempUpdates[dueKey] = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-	} else {
-		delete tempUpdates[dueKey];
-		delete oldFrontmatter?.[dueKey];
-	}
-
 	const statusConfig = plugin.settings.data.customStatuses.find(
 		(status) => status.symbol === task[DEFAULT_TASK_CACHE_KEYS.Status],
 	);
 	const statusType = statusConfig ? statusConfig.type : undefined;
+	const specialPropertyKeys = new Set<string>([
+		DEFAULT_TASK_CACHE_KEYS.ID,
+		DEFAULT_TASK_CACHE_KEYS.Status,
+		DEFAULT_TASK_CACHE_KEYS.Tags,
+		DEFAULT_TASK_CACHE_KEYS.Priority,
+		DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+		DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+	]);
 
-	const cancelledDateKey = getCustomFrontmatterKey(
-		"cancelledDate",
-		frontmatterFormatting,
+	for (const property of taskProperties) {
+		if (
+			!property.id ||
+			!property.key ||
+			specialPropertyKeys.has(property.key)
+		) {
+			continue;
+		}
+		if (
+			!property.default &&
+			!Object.prototype.hasOwnProperty.call(taskValues, property.key)
+		) {
+			continue;
+		}
+
+		const value = taskValues[property.key];
+		if (value === undefined || value === null || value === "") {
+			delete tempUpdates[property.id];
+			if (existingFrontmatter) delete existingFrontmatter[property.id];
+			continue;
+		}
+
+		const convertedValue = coerceCustomTaskPropertyValue(
+			value,
+			property.type,
+		);
+		tempUpdates[property.id] = convertedValue ?? value;
+	}
+
+	const tagsProperty = taskProperties.find(
+		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.Tags,
 	);
-	if (statusType === statusTypeNames.CANCELLED) {
-		if (task[DEFAULT_TASK_CACHE_KEYS.CancelledDate]) {
-			tempUpdates[cancelledDateKey] = task[DEFAULT_TASK_CACHE_KEYS.CancelledDate];
+	if (tagsProperty?.id) {
+		const existingTagsRaw = existingFrontmatter?.[tagsProperty.id];
+		const existingTags =
+			Array.isArray(existingTagsRaw)
+				? existingTagsRaw.map(String).filter(Boolean)
+				: typeof existingTagsRaw === "string"
+					? existingTagsRaw
+							.split(",")
+							.map((tag) => tag.replace("#", "").trim())
+							.filter(Boolean)
+					: [];
+		const taskTags = Array.isArray(task[DEFAULT_TASK_CACHE_KEYS.Tags])
+			? task[DEFAULT_TASK_CACHE_KEYS.Tags].filter(Boolean)
+			: [];
+		const finalTags = [
+			...taskTags,
+			...existingTags.filter((tag) => taskTags.includes(tag)),
+		];
+		const identifierTag = plugin.settings.data.taskNoteIdentifierTag;
+		if (!finalTags.some((tag) => compareTwoTags(tag, identifierTag))) {
+			finalTags.push(identifierTag);
+		}
+		tempUpdates[tagsProperty.id] = Array.from(
+			new Set(finalTags.map((tag) => String(tag).trim()).filter(Boolean)),
+		);
+	}
+
+	const idProperty = taskProperties.find(
+		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.ID,
+	);
+	if (idProperty?.id) {
+		if (existingFrontmatter?.[idProperty.id]) {
+			tempUpdates[idProperty.id] = existingFrontmatter[idProperty.id];
+		} else if (forceId || plugin.settings.data.autoAddUniqueID) {
+			tempUpdates[idProperty.id] =
+				task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ||
+				generateTaskId(plugin);
+		}
+	}
+
+	const statusProperty = taskProperties.find(
+		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.Status,
+	);
+	if (statusProperty?.id && task[DEFAULT_TASK_CACHE_KEYS.Status]) {
+		const statusName = getStatusNameFromStatusSymbol(
+			task[DEFAULT_TASK_CACHE_KEYS.Status],
+			plugin.settings.data.customStatuses ?? [],
+		);
+		tempUpdates[statusProperty.id] =
+			statusName ?? `"${task[DEFAULT_TASK_CACHE_KEYS.Status]}"`;
+	}
+
+	const priorityProperty = taskProperties.find(
+		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.Priority,
+	);
+	if (priorityProperty?.id) {
+		const priority = task[DEFAULT_TASK_CACHE_KEYS.Priority];
+		if (priority > 0) {
+			tempUpdates[priorityProperty.id] =
+				getPriorityNameForTaskNote(priority);
 		} else {
-			const globalSettings = plugin.settings.data;
-			// const moment = _moment as unknown as typeof _moment.default;
-			// const currentDateValue = moment().format(
-			// 	globalSettings?.dateTimeFormat,
-			// );
-			const currentDateValue = formatToday(globalSettings.dateFormat);
-
-			tempUpdates[cancelledDateKey] = currentDateValue;
+			delete tempUpdates[priorityProperty.id];
+			if (existingFrontmatter)
+				delete existingFrontmatter[priorityProperty.id];
 		}
-	} else {
-		delete tempUpdates[cancelledDateKey];
-		delete oldFrontmatter?.[cancelledDateKey];
 	}
 
-	const completionKey = getCustomFrontmatterKey(
-		"completion",
-		frontmatterFormatting,
+	const cancelledDateProperty = taskProperties.find(
+		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.CancelledDate,
 	);
-	if (statusType === statusTypeNames.DONE) {
-		if (task[DEFAULT_TASK_CACHE_KEYS.CancelledDate]) {
-			tempUpdates[completionKey] = task[DEFAULT_TASK_CACHE_KEYS.CompletionDate];
+	if (cancelledDateProperty?.id) {
+		if (statusType === statusTypeNames.CANCELLED) {
+			tempUpdates[cancelledDateProperty.id] =
+				task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] ||
+				formatToday(plugin.settings.data.dateFormat);
 		} else {
-			const globalSettings = plugin.settings.data;
-			// const moment = _moment as unknown as typeof _moment.default;
-			// const currentDateValue = moment().format(
-			// 	globalSettings?.dateTimeFormat,
-			// );
-			const currentDateValue = formatToday(globalSettings.dateFormat);
-
-			tempUpdates[completionKey] = currentDateValue;
-		}
-	} else {
-		delete tempUpdates[completionKey];
-		delete oldFrontmatter?.[completionKey];
-	}
-
-	const priorityKey = getCustomFrontmatterKey(
-		"priority",
-		frontmatterFormatting,
-	);
-	if (task[DEFAULT_TASK_CACHE_KEYS.Priority] && task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
-		tempUpdates[priorityKey] =
-			getPriorityNameForTaskNote(task[DEFAULT_TASK_CACHE_KEYS.Priority]) || "";
-	} else {
-		delete tempUpdates[priorityKey];
-		delete oldFrontmatter?.[priorityKey];
-	}
-
-	const reminderKey = getCustomFrontmatterKey(
-		"reminder",
-		frontmatterFormatting,
-	);
-	if (task?.[DEFAULT_TASK_CACHE_KEYS.Reminder]) {
-		tempUpdates[reminderKey] = task[DEFAULT_TASK_CACHE_KEYS.Reminder];
-	} else {
-		delete tempUpdates[reminderKey];
-		delete oldFrontmatter?.[reminderKey];
-	}
-
-	const dependsOnKey = getCustomFrontmatterKey(
-		"dependsOn",
-		frontmatterFormatting,
-	);
-	if (task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] && task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0) {
-		tempUpdates[dependsOnKey] = task[DEFAULT_TASK_CACHE_KEYS.Dependencies];
-	} else {
-		delete tempUpdates[dependsOnKey];
-		delete oldFrontmatter?.[dependsOnKey];
-	}
-
-	// Persist configured custom values under each configured frontmatter ID.
-	const builtInIds = new Set(
-		plugin.settings.data.taskProperties
-			.filter((property) => property.default)
-			.map((property) => property.id),
-	);
-	for (const property of plugin.settings.data.taskProperties.filter(
-		(property) => !property.default,
-	)) {
-		if (!property.id || builtInIds.has(property.id)) continue;
-		if (Object.prototype.hasOwnProperty.call(task, property.id)) {
-			const value = (task as unknown as Record<string, unknown>)[
-				property.id
-			];
-			if (value === undefined || value === null || value === "") {
-				delete tempUpdates[property.id];
-				delete oldFrontmatter?.[property.id];
-			} else {
-				tempUpdates[property.id] = value;
-			}
+			delete tempUpdates[cancelledDateProperty.id];
+			if (existingFrontmatter)
+				delete existingFrontmatter[cancelledDateProperty.id];
 		}
 	}
 
-	// Step 2: Order the frontmatter properties and add additional properties from existing frontmatter
+	const completionDateProperty = taskProperties.find(
+		(property) => property.key === DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+	);
+	if (completionDateProperty?.id) {
+		if (statusType === statusTypeNames.DONE) {
+			tempUpdates[completionDateProperty.id] =
+				task[DEFAULT_TASK_CACHE_KEYS.CompletionDate] ||
+				formatToday(plugin.settings.data.dateFormat);
+		} else {
+			delete tempUpdates[completionDateProperty.id];
+			if (existingFrontmatter)
+				delete existingFrontmatter[completionDateProperty.id];
+		}
+	}
+
 	const orderedFrontmatter = orderFrontmatterProperties(
-		tempUpdates,
-		frontmatterFormatting,
-		oldFrontmatter,
+		tempUpdates as Partial<customFrontmatterCache>,
+		taskProperties,
+		existingFrontmatter,
 	);
 
 	return orderedFrontmatter;

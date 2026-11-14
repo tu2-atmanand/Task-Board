@@ -5,8 +5,7 @@ import TaskBoard from "../../../main.js";
 import {
 	PluginDataJson,
 	CustomStatus,
-	FrontmatterFormattingInterface,
-	getDefaultPropertyFrontmatterFormatting,
+	SupportedPropertiesConfig,
 } from "../../interfaces/GlobalSettings.js";
 import { coerceCustomTaskPropertyValue, customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
@@ -27,17 +26,19 @@ import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 export function isTaskNotePresentInFrontmatter(
 	taskNoteIdentifierTag: string,
 	frontmatter: Partial<customFrontmatterCache> | undefined,
+	tagsPropertyKey: string = DEFAULT_TASK_CACHE_KEYS.Tags,
 ): boolean {
-	if (!frontmatter || !frontmatter.tags) {
+	const tagValue = frontmatter?.[tagsPropertyKey];
+	if (!tagValue) {
 		return false;
 	}
 
 	let tags: string[] = [];
 
-	if (Array.isArray(frontmatter.tags)) {
-		tags = frontmatter.tags.map((tag: unknown) => String(tag).trim());
-	} else if (typeof frontmatter.tags === "string") {
-		tags = frontmatter.tags.split(",").map((tag: string) => tag.trim());
+	if (Array.isArray(tagValue)) {
+		tags = tagValue.map((tag: unknown) => String(tag).trim());
+	} else if (typeof tagValue === "string") {
+		tags = tagValue.split(",").map((tag: string) => tag.trim());
 	}
 
 	// Check for TASK_NOTE_IDENTIFIER_TAG tag (with or without #)
@@ -87,166 +88,50 @@ export function extractTaskNoteProperties(
 		return {};
 	}
 
-	const frontmatterFormatting =
-		getDefaultPropertyFrontmatterFormatting(
-			settings.data.taskProperties,
-		);
+	const taskProperties = settings.data.taskProperties;
 	let taskItemData: Partial<taskItem> = {};
 
-	// console.log(
-	// 	"Type of time :",
-	// 	typeof frontmatter[
-	// 		getCustomFrontmatterKey("time", frontmatterFormatting)
-	// 	],
-	// );
+	const taskPropertiesByKey = taskItemData as Record<string, unknown>;
+	for (const property of taskProperties) {
+		if (!property.id || !property.key) continue;
+		const rawValue = frontmatter[property.id];
+		if (rawValue === undefined || rawValue === null) continue;
 
-	let value: string | string[] | number | undefined = "";
-	// Extract id
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey(DEFAULT_TASK_CACHE_KEYS.ID, frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.ID] = value;
-	}
-
-	// Extract title
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("title", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.Title] = value;
-	}
-
-	// Extract tags
-	taskItemData[DEFAULT_TASK_CACHE_KEYS.Tags] = extractFrontmatterTags(frontmatter);
-
-	// Extract time
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("time", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.Time] = value;
-	}
-
-	// Extract createdDate
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("createdDate", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.CreatedDate] = value;
-	}
-
-	// Extract startDate
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("startDate", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.StartDate] = value;
-	}
-
-	// Extract scheduledDate
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("scheduledDate", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = value;
-	}
-
-	// Extract due
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("due", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.DueDate] = value;
-	}
-
-	// Extract cancelledDate
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("cancelledDate", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = value;
-	}
-
-	// Extract completion
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("completion", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = value;
-	}
-
-	// Extract priority
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("priority", frontmatterFormatting),
-		"string",
-	);
-	if (value && typeof value === "string") {
-		const priorityNumber = getPriorityNumberForTaskNote(value);
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.Priority] = priorityNumber;
-	}
-
-	// Extract status
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("status", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.Status] = getStatusSymbolFromStatusName(value, settings);
-	}
-
-	// Extract dependsOn
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("dependsOn", frontmatterFormatting),
-		"string",
-	);
-	if (Array.isArray(value)) {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.Dependencies] = value;
-	}
-
-	// Extract reminder
-	value = validateFrontmatterValue(
-		frontmatter,
-		getCustomFrontmatterKey("reminder", frontmatterFormatting),
-		"string",
-	);
-	if (typeof value === "string") {
-		taskItemData[DEFAULT_TASK_CACHE_KEYS.Reminder] = value;
-	}
-
-	// Custom properties use their configured frontmatter ID as the cache key.
-	const builtInKeys = new Set(
-		settings.data.taskProperties
-			.filter((property) => property.default)
-			.map((property) => property.id),
-	);
-	for (const property of settings.data.taskProperties.filter(
-		(property) => !property.default,
-	)) {
-		if (!property.id || builtInKeys.has(property.id)) continue;
-		const customValue = coerceCustomTaskPropertyValue(frontmatter[property.id], property.type);
-		if (customValue !== undefined) (taskItemData as Record<string, unknown>)[property.id] = customValue;
+		switch (property.key) {
+			case DEFAULT_TASK_CACHE_KEYS.Tags:
+				taskPropertiesByKey[property.key] =
+					extractFrontmatterTags(frontmatter, property.id);
+				break;
+			case DEFAULT_TASK_CACHE_KEYS.Status:
+				if (typeof rawValue === "string") {
+					taskPropertiesByKey[property.key] =
+						getStatusSymbolFromStatusName(rawValue, settings);
+				}
+				break;
+			case DEFAULT_TASK_CACHE_KEYS.Priority:
+				if (
+					typeof rawValue === "string" ||
+					typeof rawValue === "number"
+				) {
+					taskPropertiesByKey[property.key] =
+						getPriorityNumberForTaskNote(String(rawValue));
+				}
+				break;
+			case DEFAULT_TASK_CACHE_KEYS.Dependencies:
+				taskPropertiesByKey[property.key] =
+					coerceCustomTaskPropertyValue(rawValue, property.type) ??
+					(typeof rawValue === "string" && rawValue.trim()
+						? rawValue.split(",").map((item) => item.trim())
+						: undefined);
+				break;
+			default: {
+				const value = coerceCustomTaskPropertyValue(
+					rawValue,
+					property.type,
+				);
+				if (value !== undefined) taskPropertiesByKey[property.key] = value;
+			}
+		}
 	}
 
 	return taskItemData;
@@ -300,15 +185,12 @@ export function getPriorityNameForTaskNote(priority: number): string {
 
 export function getCustomFrontmatterKey(
 	taskItemKey: string,
-	frontmatterFormatting: FrontmatterFormattingInterface[],
+	taskProperties: SupportedPropertiesConfig[],
 ): string {
-	// Find the custom mapping for this task item key
-	const customMapping = frontmatterFormatting.find(
-		(mapping) => mapping.taskItemKey === taskItemKey,
+	const property = taskProperties.find(
+		(configuredProperty) => configuredProperty.key === taskItemKey,
 	);
-
-	// Return custom frontmatter key if found, otherwise return the original key
-	return customMapping?.key || taskItemKey;
+	return property?.id || taskItemKey;
 }
 
 /**

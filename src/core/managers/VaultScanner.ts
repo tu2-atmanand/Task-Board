@@ -180,6 +180,10 @@ export default class VaultScanner {
 				isTaskNotePresentInFrontmatter(
 					this.plugin.settings.data.taskNoteIdentifierTag,
 					frontmatter,
+					this.plugin.settings.data.taskProperties.find(
+						(property) =>
+							property.key === DEFAULT_TASK_CACHE_KEYS.Tags,
+					)?.id,
 				)
 			) {
 				// Extract properties from frontmatter
