@@ -10,8 +10,6 @@ import {
 	migrateLegacyPropertySettings,
 } from "../interfaces/GlobalSettings.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
-import { fsPromises, NodePickedFile } from "../services/FileSystem.js";
-import { type ElectronOpenDialogReturnValue } from "obsidian-typings";
 
 /**
  * Recursively migrates settings by adding missing fields from defaults to settings.
@@ -66,31 +64,6 @@ export function migrateSettings(
 					);
 					scanFilter.tags = cleanedTags;
 				}
-			}
-
-			// -----------------------------------
-			/**
-			 * @since v1.9.0
-			 * @type Temporary
-			 * @note Remove this on the next version release where this migration will run.
-			 *
-			 * This is migration is only applied to replace the older settings available in users configs with the new settings as per the new Settinsg section added in the global settings.
-			 */
-			if (key === "customStatuses") {
-				s[key] = DEFAULT_SETTINGS.data.customStatuses;
-			}
-
-			// -----------------------------------
-			/**
-			 * @since v1.9.2
-			 * @type Temporary
-			 * @note Remove this on the next version release where this migration will run.
-			 *
-			 * Because of the name change, we had to do this migration.
-			 */
-			if (key === "frontmatter" && s["frontMatter"]) {
-				s[key] = s["frontMatter"];
-				delete s["frontMatter"];
 			}
 
 			// -------------------------------------
