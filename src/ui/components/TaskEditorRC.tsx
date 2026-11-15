@@ -10,7 +10,7 @@ import { ViewUpdate } from "@codemirror/view";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import TaskBoard from "../../../main.js";
 import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService, PropertyTypeConfig, taskPropertyFormatOptions } from "../../interfaces/Enums.js";
-import { taskItemEmpty, getPriorityOptionsForDropdown } from "../../interfaces/Mapping.js";
+import { taskItemEmpty } from "../../interfaces/Mapping.js";
 import { coerceCustomTaskPropertyValue, taskItem, cursorLocationInterface } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
@@ -24,7 +24,7 @@ import { getTagSuggestions, MultiSuggest, getQuickAddPluginChoices, getFileSugge
 import { openEditTaskView } from "../modals/OpenModals.js";
 import { compareTwoTags, verifySubtasksAndChildtasksAreComplete } from "../../core/algorithms/ScanningFilterer.js";
 import { getObsidianIndentationSetting, isTaskLine } from "../../utils/CheckBoxUtils.js";
-import { applyIdToTaskItem } from "../../utils/TaskItemUtils.js";
+import { applyIdToTaskItem, getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
 import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn } from "../../utils/task_line/TaskContentFormatter.js";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "../../utils/task_note/TaskNoteUtils.js";
 import { updateRGBAOpacity } from "../../utils/UIHelpers.js";
@@ -85,8 +85,8 @@ export const TaskEditorRC: React.FC<{
 		Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [
 			property.id,
 			(task as unknown as Record<string, unknown>)[property.id] !== undefined
-					? (task as unknown as Record<string, unknown>)[property.id]
-					: coerceCustomTaskPropertyValue(property.defaultValue, property.type),
+				? (task as unknown as Record<string, unknown>)[property.id]
+				: coerceCustomTaskPropertyValue(property.defaultValue, property.type),
 		])));
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -527,7 +527,7 @@ export const TaskEditorRC: React.FC<{
 				existing = new RegExp(`@${escaped(property.id)}\\(([^)]*)\\)`);
 				if (value !== undefined && value !== null && value !== "") serialized = `@${property.id}(${Array.isArray(value) ? value.join(",") : String(value)})`;
 			} else if (property.emoji) {
-			existing = new RegExp(`(?:^|\\s)${escaped(property.emoji)}\\s+(?:"(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`);
+				existing = new RegExp(`(?:^|\\s)${escaped(property.emoji)}\\s+(?:"(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`);
 				if (value !== undefined && value !== null && value !== "") {
 					const text = Array.isArray(value) ? value.join(",") : String(value);
 					serialized = `${property.emoji} ${/\s/.test(text) ? JSON.stringify(text) : text}`;

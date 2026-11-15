@@ -15,10 +15,6 @@ import type {
 } from "../../../interfaces/BoardConfigs.js";
 import { generateIdForFilters } from "./Component.js";
 import {
-	getCustomStatusOptionsForDropdown,
-	getPriorityOptionsForDropdown,
-} from "../../../interfaces/Mapping.js";
-import {
 	MultiSuggest,
 	getTagSuggestions,
 	getFileSuggestions,
@@ -28,6 +24,7 @@ import {
 	getPropertyTypeFilterConfig,
 	isBooleanFilterProperty,
 } from "./Helpers.js";
+import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../../utils/TaskItemUtils.js";
 
 export class FiltersWarehouseModal extends Modal {
 	private plugin: TaskBoard;

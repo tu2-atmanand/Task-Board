@@ -15,11 +15,11 @@ import {
 } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { formatToday } from "../DateTimeCalculations.js";
-import { generateTaskId } from "../TaskItemUtils.js";
 import {
+	generateTaskId,
+	getPriorityNameUsingPriorityPriorityNumber,
 	getStatusNameFromStatusSymbol,
-	getPriorityNameForTaskNote,
-} from "./TaskNoteUtils.js";
+} from "../TaskItemUtils.js";
 import type { SupportedPropertiesConfig } from "../../interfaces/GlobalSettings.js";
 import { compareTwoTags } from "../../core/algorithms/ScanningFilterer.js";
 
@@ -258,10 +258,7 @@ export function createFrontmatterFromTask(
 				break;
 			}
 			case String(DEFAULT_TASK_CACHE_KEYS.ID):
-				if (
-					value &&
-					plugin.settings.data.autoAddUniqueID
-				) {
+				if (value && plugin.settings.data.autoAddUniqueID) {
 					frontmatterObj[property.id] =
 						task[DEFAULT_TASK_CACHE_KEYS.LegacyID] || value;
 				}
@@ -269,7 +266,7 @@ export function createFrontmatterFromTask(
 			case String(DEFAULT_TASK_CACHE_KEYS.Priority):
 				if (typeof value === "number" && value > 0) {
 					frontmatterObj[property.id] =
-						getPriorityNameForTaskNote(value);
+						getPriorityNameUsingPriorityPriorityNumber(value);
 				}
 				break;
 			default:
@@ -280,10 +277,10 @@ export function createFrontmatterFromTask(
 							String(DEFAULT_TASK_CACHE_KEYS.Dependencies) &&
 						Array.isArray(value)
 							? value
-							: coerceCustomTaskPropertyValue(
+							: (coerceCustomTaskPropertyValue(
 									value,
 									property.type,
-								) ?? value;
+								) ?? value);
 				}
 		}
 	}
@@ -357,24 +354,20 @@ export function updateFrontmatterProperties(
 
 	const tagsProperty = taskProperties.find(
 		(property) =>
-			String(property.key) ===
-			String(DEFAULT_TASK_CACHE_KEYS.Tags),
+			String(property.key) === String(DEFAULT_TASK_CACHE_KEYS.Tags),
 	);
 	if (tagsProperty?.id) {
 		const existingTagsRaw: unknown = existingFrontmatter?.[
 			tagsProperty.id
 		] as unknown;
-		const existingTags =
-			Array.isArray(existingTagsRaw)
+		const existingTags = Array.isArray(existingTagsRaw)
+			? existingTagsRaw.map((tag: unknown) => String(tag)).filter(Boolean)
+			: typeof existingTagsRaw === "string"
 				? existingTagsRaw
-						.map((tag: unknown) => String(tag))
+						.split(",")
+						.map((tag) => tag.replace("#", "").trim())
 						.filter(Boolean)
-				: typeof existingTagsRaw === "string"
-					? existingTagsRaw
-							.split(",")
-							.map((tag) => tag.replace("#", "").trim())
-							.filter(Boolean)
-					: [];
+				: [];
 		const taskTags = Array.isArray(task[DEFAULT_TASK_CACHE_KEYS.Tags])
 			? task[DEFAULT_TASK_CACHE_KEYS.Tags]
 					.map((tag) => String(tag).trim())
@@ -426,8 +419,7 @@ export function updateFrontmatterProperties(
 
 	const statusProperty = taskProperties.find(
 		(property) =>
-			String(property.key) ===
-			String(DEFAULT_TASK_CACHE_KEYS.Status),
+			String(property.key) === String(DEFAULT_TASK_CACHE_KEYS.Status),
 	);
 	if (statusProperty?.id && task[DEFAULT_TASK_CACHE_KEYS.Status]) {
 		const statusName = getStatusNameFromStatusSymbol(
@@ -440,14 +432,13 @@ export function updateFrontmatterProperties(
 
 	const priorityProperty = taskProperties.find(
 		(property) =>
-			String(property.key) ===
-			String(DEFAULT_TASK_CACHE_KEYS.Priority),
+			String(property.key) === String(DEFAULT_TASK_CACHE_KEYS.Priority),
 	);
 	if (priorityProperty?.id) {
 		const priority = task[DEFAULT_TASK_CACHE_KEYS.Priority];
 		if (priority > 0) {
 			tempUpdates[priorityProperty.id] =
-				getPriorityNameForTaskNote(priority);
+				getPriorityNameUsingPriorityPriorityNumber(priority);
 		} else {
 			delete tempUpdates[priorityProperty.id];
 			if (existingFrontmatter)

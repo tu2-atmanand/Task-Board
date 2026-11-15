@@ -7,7 +7,11 @@ import {
 	CustomStatus,
 	SupportedPropertiesConfig,
 } from "../../interfaces/GlobalSettings.js";
-import { coerceCustomTaskPropertyValue, customFrontmatterCache, taskItem } from "../../interfaces/TaskItem.js";
+import {
+	coerceCustomTaskPropertyValue,
+	customFrontmatterCache,
+	taskItem,
+} from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import {
 	extractFrontmatterFromContent,
@@ -15,8 +19,11 @@ import {
 	createYamlFromObject,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations.js";
-import { defaultTaskStatuses } from "../../interfaces/Mapping.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import {
+	getPriorityNumberUsingPriorityName,
+	getStatusSymbolFromStatusName,
+} from "../TaskItemUtils.js";
 
 /**
  * Check if a note is a Task Note by looking for TASK_NOTE_IDENTIFIER_TAG tag in frontmatter
@@ -99,8 +106,10 @@ export function extractTaskNoteProperties(
 
 		switch (property.key) {
 			case DEFAULT_TASK_CACHE_KEYS.Tags:
-				taskPropertiesByKey[property.key] =
-					extractFrontmatterTags(frontmatter, property.id);
+				taskPropertiesByKey[property.key] = extractFrontmatterTags(
+					frontmatter,
+					property.id,
+				);
 				break;
 			case DEFAULT_TASK_CACHE_KEYS.Status:
 				if (typeof rawValue === "string") {
@@ -114,7 +123,7 @@ export function extractTaskNoteProperties(
 					typeof rawValue === "number"
 				) {
 					taskPropertiesByKey[property.key] =
-						getPriorityNumberForTaskNote(String(rawValue));
+						getPriorityNumberUsingPriorityName(String(rawValue));
 				}
 				break;
 			case DEFAULT_TASK_CACHE_KEYS.Dependencies:
@@ -129,58 +138,13 @@ export function extractTaskNoteProperties(
 					rawValue,
 					property.type,
 				);
-				if (value !== undefined) taskPropertiesByKey[property.key] = value;
+				if (value !== undefined)
+					taskPropertiesByKey[property.key] = value;
 			}
 		}
 	}
 
 	return taskItemData;
-}
-
-/**
- * Map priority emoji from frontmatter to priority number
- * @param priorityValue - Priority value from frontmatter
- * @returns number - Priority number (0-5)
- */
-export function getPriorityNumberForTaskNote(priorityValue: string): number {
-	if (!priorityValue) return 0;
-
-	if (priorityValue.length === 1 && Number(priorityValue))
-		return Number(priorityValue);
-
-	const priorityStr = String(priorityValue).trim().toLowerCase();
-	// Map emojis to priority numbers
-	switch (priorityStr) {
-		case "highest":
-			return 1; // Highest
-		case "high":
-			return 2; // High
-		case "medium":
-			return 3; // Medium
-		case "low":
-			return 4; // Low
-		case "lowest":
-			return 5; // Lowest
-		default:
-			return 0; // None
-	}
-}
-
-/**
- * Get priority name from priority number
- * @param priority - Priority number (1-5)
- * @returns string - Priority emoji
- */
-export function getPriorityNameForTaskNote(priority: number): string {
-	const priorityNames: { [key: number]: string } = {
-		0: "none",
-		1: "highest",
-		2: "high",
-		3: "medium",
-		4: "low",
-		5: "lowest",
-	};
-	return priorityNames[priority] || "URGENT";
 }
 
 export function getCustomFrontmatterKey(
@@ -191,73 +155,6 @@ export function getCustomFrontmatterKey(
 		(configuredProperty) => configuredProperty.key === taskItemKey,
 	);
 	return property?.id || taskItemKey;
-}
-
-/**
- * Map status string to status symbol
- * Eg. statusValue="Pending" then output will be " ".
- * @param statusName - Status value from frontmatter
- * @returns string - Status symbol
- */
-export function getStatusSymbolFromStatusName(
-	statusName: string | undefined,
-	settings: PluginDataJson,
-): string {
-	if (!statusName) return " ";
-
-	// const statusStr = statusValue.trim().toLowerCase();
-
-	// // Handle both symbol and name formats
-	// if (Object.prototype.hasOwnProperty.call(taskStatuses, statusStr)) {
-	// 	return (taskStatuses as Record<string, string>)[statusStr];
-	// }
-	// return " ";
-
-	const tasksPluginStatusConfigs = settings.data.customStatuses;
-	let statusSymbol = "";
-	tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
-		if (customStatus.name === statusName) {
-			statusSymbol = customStatus.symbol;
-			return true;
-		}
-	});
-	return statusSymbol;
-}
-
-/**
- * Map status symbol to status name
- * Eg. statusValue="/" then output will be "inprogress".
- * @param statusSymbol - Status value from frontmatter
- * @returns string - Status symbol
- */
-export function getStatusNameFromStatusSymbol(
-	statusSymbol: string | undefined,
-	customStatuses: CustomStatus[],
-): string {
-	if (!statusSymbol) return "pending";
-
-	if (customStatuses.length > 0) {
-		const tasksPluginStatusConfigs = customStatuses;
-		let statusName = "";
-		tasksPluginStatusConfigs.some((customStatus: CustomStatus) => {
-			if (customStatus.symbol === statusSymbol) {
-				statusName = customStatus.name;
-				return true;
-			}
-		});
-		return statusName;
-	}
-
-	// Create a reverse mapping from taskStatuses enum
-	// taskStatuses contains mappings like: { unchecked: " ", regular: "x", "in-progress": "/" }
-	const statusMapping: { [symbol: string]: string } = {};
-
-	for (const [statusName, symbol] of Object.entries(defaultTaskStatuses)) {
-		statusMapping[symbol] = statusName;
-	}
-
-	// Return the status name for the given symbol, default to "pending" if not found
-	return statusMapping[statusSymbol] || "pending";
 }
 
 /**
@@ -327,9 +224,13 @@ export async function updateFrontmatterInMarkdownFile(
 	forceId?: boolean,
 ): Promise<void> {
 	try {
-		const file = plugin.app.vault.getFileByPath(task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
+		const file = plugin.app.vault.getFileByPath(
+			task[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		);
 		if (!file) {
-			throw new Error(`File not found: ${task[DEFAULT_TASK_CACHE_KEYS.FilePath]}`);
+			throw new Error(
+				`File not found: ${task[DEFAULT_TASK_CACHE_KEYS.FilePath]}`,
+			);
 		}
 
 		// Method 1 - Using Obsidian's filemanager API.

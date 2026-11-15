@@ -5,13 +5,14 @@ import { GripVertical } from "lucide-react";
 import TaskBoard from "../../../../main.js";
 import { Board, TaskBoardViewType, TableView as TableViewConfig } from "../../../interfaces/BoardConfigs.js";
 import { DEFAULT_TASK_CACHE_KEYS, statusTypeNames } from "../../../interfaces/Enums.js";
-import { taskItemKeyToNameMapping, getPriorityOptionsForDropdown } from "../../../interfaces/Mapping.js";
+import { taskItemKeyToNameMapping } from "../../../interfaces/Mapping.js";
 import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { sanitizeTags, sanitizeStatus, sanitizePriority, sanitizeTime, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizeCompletionDate, sanitizeCancelledDate, sanitizeDependsOn } from "../../../utils/task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "../../../utils/task_line/TaskLineUtils.js";
 import { handleTaskNoteBodyChange } from "../../../utils/task_note/TaskNoteEventHandlers.js";
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/task_note/TaskNoteUtils.js";
+import { getPriorityOptionsForDropdown } from "../../../utils/TaskItemUtils.js";
 
 interface TableViewProps {
 	plugin: TaskBoard;

@@ -11,10 +11,9 @@ import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../../interfaces/BoardConfigs.js";
 import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions } from "../../interfaces/Enums.js";
-import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../../services/MultiSuggest.js";
-import { generateRandomNumber, generateRandomStringId } from "../../utils/TaskItemUtils.js";
+import { generateRandomNumber, generateRandomStringId, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
 import { AddColumnModal } from "./AddColumnModal.js";
 import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
@@ -22,6 +21,7 @@ import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import { AdvancedFilterModal } from "../components/advanced_filterer/index.js";
+import { columnTypeAndNameMapping } from "../../interfaces/Mapping.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;

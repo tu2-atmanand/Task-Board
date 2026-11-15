@@ -6,11 +6,8 @@ import { Notice, Platform, Menu, TFile, MenuItem, Component, View } from 'obsidi
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { t } from 'i18next';
-import TaskBoard from '../../../../main.js';
-import { KanbanView } from '../../../interfaces/BoardConfigs.js';
 import { DEFAULT_DATE_FORMAT } from '../../../interfaces/Constants.js';
 import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames } from '../../../interfaces/Enums.js';
-import { getCustomStatusOptionsForDropdown, getPriorityEmoji, getPriorityOptionsForDropdown, priorityNames } from '../../../interfaces/Mapping.js';
 import { taskItem, UpdateTaskEventData } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { currentDragDataPayload, dragDropTasksManagerInsatance } from '../../../core/managers/DragDropTasksManager.js';
@@ -24,14 +21,15 @@ import { openDateInputModal } from '../../modals/OpenModals.js';
 import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../../core/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../../utils/CheckBoxUtils.js';
 import { getUniversalDateFromTask, robustDateParser } from '../../../utils/DateTimeCalculations.js';
-import { getAllTaskTags, getTaskFromId } from '../../../utils/TaskItemUtils.js';
+import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId } from '../../../utils/TaskItemUtils.js';
 import { cleanTaskTitleLegacy, dedentTaskBodyLines, shouldExpandTaskDescription } from '../../../utils/task_line/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskItemEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../../utils/task_note/TaskNoteEventHandlers.js';
-import { isTaskNotePresentInTags, getStatusNameFromStatusSymbol } from '../../../utils/task_note/TaskNoteUtils.js';
+import { isTaskNotePresentInTags } from '../../../utils/task_note/TaskNoteUtils.js';
 import { updateRGBAOpacity } from '../../../utils/UIHelpers.js';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from '../../../utils/UserTaskEvents.js';
 import { TaskCardProps } from './index.js';
+import { priorityNames } from '../../../interfaces/Mapping.js';
 
 const BasesStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, parentComponent, activeBoardID, activeViewIndex, activeViewType, kanbanViewData, columnIndex, swimlaneData }) => {
 	const globalSettings = plugin.settings.data;

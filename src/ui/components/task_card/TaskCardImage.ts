@@ -1,19 +1,20 @@
 import TaskBoard from "../../../../main.js";
-import { DEFAULT_TASK_CACHE_KEYS, TagColorType } from "../../../interfaces/Enums.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	TagColorType,
+} from "../../../interfaces/Enums.js";
 import { priorityEmojis } from "../../../interfaces/Mapping.js";
 import { taskItem } from "../../../interfaces/TaskItem.js";
 import { isTaskCompleted } from "../../../utils/CheckBoxUtils.js";
-import {
-	isTaskNotePresentInTags,
-	getStatusNameFromStatusSymbol,
-} from "../../../utils/task_note/TaskNoteUtils.js";
+import { isTaskNotePresentInTags } from "../../../utils/task_note/TaskNoteUtils.js";
+import { getStatusNameFromStatusSymbol } from "../../../utils/TaskItemUtils.js";
 import { updateRGBAOpacity } from "../../../utils/UIHelpers.js";
 
 /**
  * Creates an HTML DOM element to be rendered as a task card for the given taskitem data.
  * This DOM element has no interaction capabilities and should be only used for rendering purposes.
  * In functionalities where we simply want to show the tasks as card to select them as option.
- * This will allow an efficient rendering of huge number of tasks as cards without consuming much 
+ * This will allow an efficient rendering of huge number of tasks as cards without consuming much
  * rendering resources and creating unnecessary hooks and event listeners.
  *
  * @param plugin - The plugin instance.
@@ -28,8 +29,16 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		task[DEFAULT_TASK_CACHE_KEYS.Tags],
 	);
 	const isThisTaskCompleted = isTaskNote
-		? isTaskCompleted(task[DEFAULT_TASK_CACHE_KEYS.Status], true, plugin.settings)
-		: isTaskCompleted(task[DEFAULT_TASK_CACHE_KEYS.Title], false, plugin.settings);
+		? isTaskCompleted(
+				task[DEFAULT_TASK_CACHE_KEYS.Status],
+				true,
+				plugin.settings,
+			)
+		: isTaskCompleted(
+				task[DEFAULT_TASK_CACHE_KEYS.Title],
+				false,
+				plugin.settings,
+			);
 
 	const container = activeDocument.createDiv("div");
 	container.className = "taskItemContainer";
@@ -57,10 +66,14 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	) {
 		const topFile = activeDocument.createDiv("div");
 		topFile.className = "taskitemHeaderTopFilename";
-		topFile.setAttribute("aria-label", task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
+		topFile.setAttribute(
+			"aria-label",
+			task[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		);
 		const val = activeDocument.createDiv("div");
 		val.className = "taskitemHeaderTopFilenameValue";
-		val.textContent = task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/").pop() || "";
+		val.textContent =
+			task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/").pop() || "";
 		topFile.appendChild(val);
 		header.appendChild(topFile);
 	}
@@ -79,7 +92,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	) {
 		const pr = activeDocument.createDiv("div");
 		pr.className = "taskItemPrio";
-		pr.textContent = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority]] || "";
+		pr.textContent =
+			priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority]] || "";
 		headerLeft.appendChild(pr);
 	}
 
@@ -87,7 +101,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		globalSettings.propertiesVisibleInUI?.includes(
 			DEFAULT_TASK_CACHE_KEYS.Tags,
 		) &&
-		(task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 || task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0)
+		(task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 ||
+			task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0)
 	) {
 		const tagsDiv = activeDocument.createDiv("div");
 		tagsDiv.className = "taskItemTags";
@@ -169,9 +184,13 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 	) {
 		const cb = activeDocument.createElement("input");
 		cb.type = "checkbox";
-		cb.checked = task[DEFAULT_TASK_CACHE_KEYS.Status] === " " ? false : true;
+		cb.checked =
+			task[DEFAULT_TASK_CACHE_KEYS.Status] === " " ? false : true;
 		cb.className = "taskItemCheckbox";
-		cb.setAttribute("data-task", String(task[DEFAULT_TASK_CACHE_KEYS.Status]));
+		cb.setAttribute(
+			"data-task",
+			String(task[DEFAULT_TASK_CACHE_KEYS.Status]),
+		);
 		titleWrap.appendChild(cb);
 	}
 
@@ -216,7 +235,8 @@ export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
 		const val = activeDocument.createDiv("div");
 		val.className = "taskItemFooterPropertyContainerValue";
 		val.setAttribute("aria-label", task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
-		val.textContent = task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/").pop() || "";
+		val.textContent =
+			task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/").pop() || "";
 		fp.appendChild(val);
 		footer.appendChild(fp);
 	}

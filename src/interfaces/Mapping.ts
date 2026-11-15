@@ -1,6 +1,5 @@
-import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { t } from "../utils/lang/helper.js";
-import { DEFAULT_TASK_CACHE_KEYS, statusTypeNames } from "./Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "./Enums.js";
 import { CustomStatus } from "./GlobalSettings.js";
 import { taskItem } from "./TaskItem.js";
 
@@ -19,31 +18,13 @@ export const priorityNames: { [key: number]: string } = {
 	2: t("high"),
 	3: t("medium"),
 	4: t("low"),
-	5: "lowest",
+	5: t("lowest"),
 };
 
 export interface priorityDropDownOption {
 	value: number;
 	text: string;
 }
-
-// Helper function to get priority emoji
-export const getPriorityEmoji = (priority: number): string => {
-	return priorityEmojis[priority] || "";
-};
-
-// Priority Options - function to ensure translations are loaded
-export const getPriorityOptionsForDropdown = (): priorityDropDownOption[] => [
-	{ value: 0, text: "0 - " + t("none") },
-	{ value: 1, text: "1 - " + t("highest") + " : 🔺" },
-	{ value: 2, text: "2 - " + t("high") + " : ⏫" },
-	{ value: 3, text: "3 - " + t("medium") + " : 🔼" },
-	{ value: 4, text: "4 - " + t("low") + " : 🔽" },
-	{ value: 5, text: "5 - " + t("lowest") + " : ⏬" },
-];
-
-// Legacy export for backward compatibility
-export const priorityOptions = getPriorityOptionsForDropdown();
 
 export interface StatusDropdownOption {
 	value: string; // The symbol used as option value
@@ -72,157 +53,6 @@ export interface GetCustomStatusOptionsConfig {
 	groupLabelFormatter?: (type: string) => string; // Custom group label
 	validateSymbols?: boolean; // Check for duplicate symbols
 }
-
-/**
- * Generates dropdown options from CustomStatus array with validation and grouping support.
- *
- * @param statusConfigs - Array of CustomStatus objects from settings
- * @param config - Optional configuration for output format and behavior
- * @returns Structured options ready for rendering in <select>
- */
-export const getCustomStatusOptionsForDropdown = (
-	statusConfigs: CustomStatus[] | null | undefined,
-	config: GetCustomStatusOptionsConfig = {},
-): StatusDropdownOutput => {
-	const {
-		mode = "flat",
-		includePlaceholder = false,
-		placeholderText = t("select-status") || "Select a status...",
-		showTooltips = true,
-		formatLabel = (status) => `${status.name} [${status.symbol}]`,
-		groupLabelFormatter = (type) => type,
-		validateSymbols = true,
-	} = config;
-
-	// 🔒 Validation: Handle null/undefined/empty input
-	if (
-		!statusConfigs ||
-		!Array.isArray(statusConfigs) ||
-		statusConfigs.length === 0
-	) {
-		bugReporterManagerInsatance.addToLogs(
-			189,
-			"Empty or invalid statusConfigs provided",
-			"Mapping.ts/getCustomStatusOptionsForDropdown",
-		);
-		return mode === "grouped"
-			? { type: "grouped", groups: [] }
-			: {
-					type: "flat",
-					options: includePlaceholder
-						? [
-								{
-									value: " ",
-									label: placeholderText,
-									tooltip: undefined,
-								},
-							]
-						: [],
-				};
-	}
-
-	// 🔒 Validation: Filter out invalid status entries
-	const validStatuses = statusConfigs.filter((status, index) => {
-		const isValid =
-			status &&
-			typeof status.symbol === "string" &&
-			typeof status.name === "string" &&
-			status.name.trim() !== "" &&
-			typeof status.type === typeof statusTypeNames;
-
-		if (!isValid) {
-			bugReporterManagerInsatance.addToLogs(
-				190,
-				`Invalid status at index ${index}: ${JSON.stringify(status)}`,
-				"Mapping.ts/getCustomStatusOptionsForDropdown",
-			);
-		}
-		return isValid;
-	});
-
-	if (validStatuses.length === 0) {
-		bugReporterManagerInsatance.addToLogs(
-			197,
-			`No valid statuses after filtering`,
-			"Mapping.ts/getCustomStatusOptionsForDropdown",
-		);
-		return mode === "grouped"
-			? { type: "grouped", groups: [] }
-			: { type: "flat", options: [] };
-	}
-
-	// 🔒 Validation: Check for duplicate symbols (can cause select bugs)
-	if (validateSymbols) {
-		const symbolCounts = new Map<string, number>();
-		validStatuses.forEach((s) => {
-			symbolCounts.set(s.symbol, (symbolCounts.get(s.symbol) || 0) + 1);
-		});
-
-		const duplicates = Array.from(symbolCounts.entries())
-			.filter(([_, count]) => count > 1)
-			.map(([symbol]) => symbol);
-
-		if (duplicates.length > 0) {
-			bugReporterManagerInsatance.addToLogs(
-				191,
-				`Duplicate status symbols detected: ${duplicates.join(", ")}.\nThis may cause unexpected behavior in dropdown selection.`,
-				"Mapping.ts/getCustomStatusOptionsForDropdown",
-			);
-			// Optional: Deduplicate by keeping first occurrence
-			// validStatuses = Array.from(new Map(validStatuses.map(s => [s.symbol, s])).values());
-		}
-	}
-
-	// 🔧 Transform statuses into dropdown options
-	const createOption = (status: CustomStatus): StatusDropdownOption => ({
-		value: status.symbol,
-		label: formatLabel(status),
-		tooltip: showTooltips
-			? `${t("next")}: [${status.nextStatusSymbol}]`
-			: undefined,
-		group: status.type,
-		metadata: status, // Keep full object for advanced use cases
-	});
-
-	const baseOptions = validStatuses.map(createOption);
-
-	// 🎯 Return flat structure
-	if (mode === "flat") {
-		const options = includePlaceholder
-			? [
-					{ value: " ", label: placeholderText, tooltip: undefined },
-					...baseOptions,
-				]
-			: baseOptions;
-
-		return { type: "flat", options };
-	}
-
-	// 🎯 Return grouped structure
-	const grouped = validStatuses.reduce(
-		(acc, status) => {
-			const existingGroup = acc.find((g) => g.type === status.type);
-			if (existingGroup) {
-				existingGroup.statuses.push(status);
-			} else {
-				acc.push({ type: status.type, statuses: [status] });
-			}
-			return acc;
-		},
-		[] as Array<{ type: statusTypeNames; statuses: CustomStatus[] }>,
-	);
-
-	const groups: GroupedStatusOptions[] = grouped.map((group) => ({
-		type: group.type,
-		label: groupLabelFormatter(group.type),
-		options: group.statuses.map(createOption),
-	}));
-
-	// Sort groups alphabetically by label (optional)
-	groups.sort((a, b) => a.label.localeCompare(b.label));
-
-	return { type: "grouped", groups };
-};
 
 export const defaultTaskStatuses = {
 	unchecked: " ",
@@ -390,5 +220,3 @@ export const taskStatusesDropdown = [
 	{ value: defaultTaskStatuses.symbolism, text: "Symbolism [&]" },
 	{ value: defaultTaskStatuses.secret, text: "Secret [s]" },
 ];
-
-

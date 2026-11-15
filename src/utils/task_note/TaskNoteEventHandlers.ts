@@ -7,12 +7,9 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { checkboxStateSwitcher } from "../CheckBoxUtils.js";
 import { formatToday } from "../DateTimeCalculations.js";
-import {
-	getStatusNameFromStatusSymbol,
-	updateFrontmatterInMarkdownFile,
-} from "./TaskNoteUtils.js";
+import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
-
+import { getStatusNameFromStatusSymbol } from "../TaskItemUtils.js";
 
 /**
  * Handle task note status change (checkbox change)
@@ -44,13 +41,15 @@ export const handleTaskNoteStatusChange = async (
 			globalSettings.autoAddCompletedDate &&
 			newStatus.newSymbolType === statusTypeNames.DONE
 		) {
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = currentDateValue;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] =
+				currentDateValue;
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = "";
 		} else if (
 			globalSettings.autoAddCancelledDate &&
 			newStatus.newSymbolType === statusTypeNames.CANCELLED
 		) {
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = currentDateValue;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] =
+				currentDateValue;
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = "";
 		} else {
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = "";
@@ -66,7 +65,10 @@ export const handleTaskNoteStatusChange = async (
 			// This delay is required to rescan the updated file and refresh the board.
 			window.setTimeout(() => {
 				plugin.realTimeScanner
-					.processAllUpdatedFiles(updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.LegacyID])
+					.processAllUpdatedFiles(
+						updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+						task[DEFAULT_TASK_CACHE_KEYS.LegacyID],
+					)
 					.catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -105,7 +107,9 @@ export const handleTaskNotePropertyUpdate = async (
 			// This delay is required to rescan the updated file and refresh the board.
 			window.setTimeout(() => {
 				plugin.realTimeScanner
-					.processAllUpdatedFiles(updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath])
+					.processAllUpdatedFiles(
+						updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+					)
 					.catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -137,9 +141,13 @@ export const handleTaskNote2NormalNote = async (
 	task: taskItem,
 ) => {
 	try {
-		const file = plugin.app.vault.getFileByPath(task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
+		const file = plugin.app.vault.getFileByPath(
+			task[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		);
 		if (!file) {
-			throw new Error(`File not found: ${task[DEFAULT_TASK_CACHE_KEYS.FilePath]}`);
+			throw new Error(
+				`File not found: ${task[DEFAULT_TASK_CACHE_KEYS.FilePath]}`,
+			);
 		}
 
 		// Get current frontmatter
@@ -183,15 +191,23 @@ export const handleTaskNoteBodyChange = async (
 	updatedTask: taskItem,
 ) => {
 	try {
-		const file = plugin.app.vault.getFileByPath(updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath]);
+		const file = plugin.app.vault.getFileByPath(
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		);
 		if (!file)
-			throw new Error(`Task note not found: ${updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath]}`);
+			throw new Error(
+				`Task note not found: ${updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath]}`,
+			);
 
 		await plugin.app.vault.process(file, (fileContent) => {
-			const oldBodyLines = Array.isArray(oldTask[DEFAULT_TASK_CACHE_KEYS.Body])
+			const oldBodyLines = Array.isArray(
+				oldTask[DEFAULT_TASK_CACHE_KEYS.Body],
+			)
 				? oldTask[DEFAULT_TASK_CACHE_KEYS.Body]
 				: [];
-			const newBodyLines = Array.isArray(updatedTask[DEFAULT_TASK_CACHE_KEYS.Body])
+			const newBodyLines = Array.isArray(
+				updatedTask[DEFAULT_TASK_CACHE_KEYS.Body],
+			)
 				? updatedTask[DEFAULT_TASK_CACHE_KEYS.Body]
 				: [];
 			const lineEnding = fileContent.includes("\r\n") ? "\r\n" : "\n";
@@ -234,7 +250,10 @@ export const handleTaskNoteBodyChange = async (
 		});
 
 		await plugin.realTimeScanner
-			.processAllUpdatedFiles(updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath], oldTask[DEFAULT_TASK_CACHE_KEYS.ID])
+			.processAllUpdatedFiles(
+				updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+				oldTask[DEFAULT_TASK_CACHE_KEYS.ID],
+			)
 			.catch((error) => {
 				bugReporterManagerInsatance.addToLogs(
 					217,

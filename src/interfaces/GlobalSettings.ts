@@ -21,7 +21,7 @@ import {
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 } from "./Enums.js";
 import { TASK_PROPERTIES_TO_ICON_MAPPING } from "./Icons.js";
-import { defaultTaskStatuses, taskItemKeyToNameMapping } from "./Mapping.js";
+import { defaultTaskStatuses, priorityEmojis, priorityNames, taskItemKeyToNameMapping } from "./Mapping.js";
 
 export type VaultScannnerFilters = {
 	files: {
@@ -260,7 +260,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Status],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 3,
 	},
 	{
 		default: true,
@@ -273,7 +273,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Priority],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 4,
 	},
 	{
 		default: true,
@@ -286,7 +286,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Tags],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 5,
 	},
 	{
 		default: true,
@@ -299,7 +299,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Time],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 6,
 	},
 	{
 		default: true,
@@ -312,7 +312,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Reminder],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 7,
 	},
 	{
 		default: true,
@@ -327,7 +327,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 8,
 	},
 	{
 		default: true,
@@ -342,7 +342,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 9,
 	},
 	{
 		default: true,
@@ -357,7 +357,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 10,
 	},
 	{
 		default: true,
@@ -370,7 +370,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.DueDate],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 11,
 	},
 	{
 		default: true,
@@ -385,7 +385,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 12,
 	},
 	{
 		default: true,
@@ -400,7 +400,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 13,
 	},
 	{
 		default: true,
@@ -415,7 +415,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
-		rank: 1,
+		rank: 14,
 	},
 	{
 		default: true,
@@ -428,7 +428,109 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.FilePath],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
+		rank: 15,
+	},
+];
+
+const DEFAULT_CUSTOM_STATUSES_PRESENTATION: CustomStatus[] = [
+	{
+		symbol: defaultTaskStatuses.todo,
+		name: "Todo",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: false,
+		type: statusTypeNames.TODO,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.scheduled,
+		name: "Ready to start",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: false,
+		type: statusTypeNames.TODO,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.question,
+		name: "In Review",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: false,
+		type: statusTypeNames.TODO,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.inprogress,
+		name: "In Progress",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: true,
+		type: statusTypeNames.IN_PROGRESS,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.done,
+		name: "Done",
+		nextStatusSymbol: defaultTaskStatuses.todo,
+		availableAsCommand: true,
+		type: statusTypeNames.DONE,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.checked,
+		name: "Completed",
+		nextStatusSymbol: defaultTaskStatuses.todo,
+		availableAsCommand: true,
+		type: statusTypeNames.DONE,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.dropped,
+		name: "Cancelled",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: true,
+		type: statusTypeNames.CANCELLED,
+		lucideIcon: "",
+	},
+];
+
+const DEFAULT_CUSTOM_PRIORITIES_PRESENTATION: CustomPriority[] = [
+	{
 		rank: 1,
+		name: priorityNames[1],
+		emoji: priorityEmojis[1],
+		lucideIcon: "",
+		color: "rgb(220,38,38)",
+		desc: "This is the highest priority. Tasks with this priority should be complete before all other tasks.",
+	},
+	{
+		rank: 2,
+		name: priorityNames[2],
+		emoji: priorityEmojis[2],
+		lucideIcon: "",
+		color: "rgb(213, 31, 174)",
+		desc: "A high priority, but not the highest.",
+	},
+	{
+		rank: 3,
+		name: priorityNames[3],
+		emoji: priorityEmojis[3],
+		lucideIcon: "",
+		color: "rgb(220, 217, 43)",
+		desc: "A medium priority for tasks which needs an attention.",
+	},
+	{
+		rank: 4,
+		name: priorityNames[4],
+		emoji: priorityEmojis[4],
+		lucideIcon: "",
+		color: "rgb(12, 161, 187)",
+		desc: "Tasks with this priority can be completed the last.",
+	},
+	{
+		rank: 5,
+		name: priorityNames[5],
+		emoji: priorityEmojis[5],
+		lucideIcon: "",
+		color: "rgb(22, 88, 187)",
+		desc: "Tasks with this priority are least important tasks.",
 	},
 ];
 
@@ -448,8 +550,8 @@ export function migrateLegacyPropertySettings(
 	);
 	const hasUnifiedProperties =
 		(previousData?.taskProperties?.length ?? 0) > 0 ||
-		!previousData?.defaultProperties?.length &&
-			!previousData?.customProperties?.length;
+		(!previousData?.defaultProperties?.length &&
+			!previousData?.customProperties?.length);
 	const savedProperties = hasUnifiedProperties
 		? [...(previousData?.taskProperties ?? [])]
 		: [
@@ -515,7 +617,9 @@ export function migrateLegacyPropertySettings(
 		},
 	);
 	const customProperties = configuredProperties
-		.filter((property) => !property.default && !builtInKeys.has(property.key))
+		.filter(
+			(property) => !property.default && !builtInKeys.has(property.key),
+		)
 		.sort((a, b) => a.rank - b.rank);
 
 	settings.taskProperties = [...defaultProperties, ...customProperties];
@@ -540,8 +644,8 @@ export function migrateLegacyPropertySettings(
 
 	delete settings.frontmatterFormatting;
 	delete settings.propertiesHiddenInNotes;
-	const legacySettings =
-		settings as globalSettingsData & LegacyTaskPropertySettings;
+	const legacySettings = settings as globalSettingsData &
+		LegacyTaskPropertySettings;
 	delete legacySettings.defaultProperties;
 	delete legacySettings.customProperties;
 }
@@ -571,18 +675,32 @@ export function getHiddenPropertyConfigs(
 	);
 }
 
-export function getDefaultPropertyFrontmatterFormatting(
-	taskProperties: SupportedPropertiesConfig[],
-): FrontmatterFormattingInterface[] {
-	return taskProperties
-		.filter((property) => property.default)
-		.map((property) => ({
-			index: property.rank,
-			property: property.name,
-			key: property.id,
-			taskItemKey: property.key,
-		}));
-}
+export const langCodes: { [key: string]: string } = {
+	en: "English",
+	ar: "العربية",
+	cs: "čeština",
+	da: "Dansk",
+	de: "Deutsch",
+	es: "Español",
+	fr: "français",
+	hi: "हिन्दी",
+	id: "Bahasa Indonesia",
+	it: "Italiano",
+	ja: "日本語",
+	ko: "한국어",
+	nl: "Nederlands",
+	no: "Norsk",
+	pl: "język polski",
+	pt: "Português",
+	ro: "Română",
+	ru: "Русский",
+	sq: "Shqip",
+	tr: "Türkçe",
+	uk: "Українська",
+	"pt-BR": "Portugues do Brasil",
+	zh: "简体中文",
+	"zh-TW": "繁體中文",
+};
 
 /**
  * @note There are hardcoded ids present in this data
@@ -678,65 +796,8 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		cardDoubleClickAction: EditButtonMode.None,
 		universalDate: UniversalDateOptions.dueDate,
 		tagColorsType: TagColorType.TagText,
-		customStatuses: [
-			{
-				symbol: defaultTaskStatuses.todo,
-				name: "Todo",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: false,
-				type: statusTypeNames.TODO,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.scheduled,
-				name: "Ready to start",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: false,
-				type: statusTypeNames.TODO,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.question,
-				name: "In Review",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: false,
-				type: statusTypeNames.TODO,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.inprogress,
-				name: "In Progress",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: true,
-				type: statusTypeNames.IN_PROGRESS,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.done,
-				name: "Done",
-				nextStatusSymbol: defaultTaskStatuses.todo,
-				availableAsCommand: true,
-				type: statusTypeNames.DONE,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.checked,
-				name: "Completed",
-				nextStatusSymbol: defaultTaskStatuses.todo,
-				availableAsCommand: true,
-				type: statusTypeNames.DONE,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.dropped,
-				name: "Cancelled",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: true,
-				type: statusTypeNames.CANCELLED,
-				lucideIcon: "",
-			},
-		],
-		customPriorities: [],
+		customStatuses: DEFAULT_CUSTOM_STATUSES_PRESENTATION,
+		customPriorities: DEFAULT_CUSTOM_PRIORITIES_PRESENTATION,
 		compatiblePlugins: {
 			dailyNotesPlugin: false,
 			dayPlannerPlugin: false,
@@ -796,34 +857,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		taskProperties: DEFAULT_PROPERTY_PRESENTATION,
 	},
 };
-
-export const langCodes: { [key: string]: string } = {
-	en: "English",
-	ar: "العربية",
-	cs: "čeština",
-	da: "Dansk",
-	de: "Deutsch",
-	es: "Español",
-	fr: "français",
-	hi: "हिन्दी",
-	id: "Bahasa Indonesia",
-	it: "Italiano",
-	ja: "日本語",
-	ko: "한국어",
-	nl: "Nederlands",
-	no: "Norsk",
-	pl: "język polski",
-	pt: "Português",
-	ro: "Română",
-	ru: "Русский",
-	sq: "Shqip",
-	tr: "Türkçe",
-	uk: "Українська",
-	"pt-BR": "Portugues do Brasil",
-	zh: "简体中文",
-	"zh-TW": "繁體中文",
-};
-export { taskCardStyleNames };
 
 // -----------------------------------------
 //        DEPRECATED
@@ -936,4 +969,24 @@ export interface FrontmatterFormattingInterface {
 	property: string;
 	key: string;
 	taskItemKey: string;
+}
+
+/**
+ *
+ * @param taskProperties
+ * @returns
+ *
+ * @deprecated - This is no longer required as the FrontmatterFormattingInterface has been deprecated.
+ */
+export function getDefaultPropertyFrontmatterFormatting(
+	taskProperties: SupportedPropertiesConfig[],
+): FrontmatterFormattingInterface[] {
+	return taskProperties
+		.filter((property) => property.default)
+		.map((property) => ({
+			index: property.rank,
+			property: property.name,
+			key: property.id,
+			taskItemKey: property.key,
+		}));
 }

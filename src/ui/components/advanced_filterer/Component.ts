@@ -21,11 +21,6 @@ import {
 	AdvancedFilter,
 } from "../../../interfaces/BoardConfigs.js";
 import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "../../../interfaces/Enums.js";
-import {
-	getCustomStatusOptionsForDropdown,
-	getPriorityOptionsForDropdown,
-	priorityDropDownOption,
-} from "../../../interfaces/Mapping.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { FiltersWarehouseModal } from "./FiltersWarehouse.js";
 import {
@@ -34,12 +29,13 @@ import {
 	getFileSuggestions,
 	getFolderSuggestions,
 } from "../../../services/MultiSuggest.js";
-import { generateRandomStringId } from "../../../utils/TaskItemUtils.js";
+import { generateRandomStringId, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../../utils/TaskItemUtils.js";
 import {
 	conditionRequiresValue,
 	getPropertyTypeFilterConfig,
 	isBooleanFilterProperty,
 } from "./Helpers.js";
+import { priorityDropDownOption } from "../../../interfaces/Mapping.js";
 
 export class AdvancedFilterComponent extends Component {
 	private hostEl: HTMLElement;

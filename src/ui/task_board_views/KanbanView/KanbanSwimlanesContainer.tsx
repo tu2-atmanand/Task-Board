@@ -9,9 +9,8 @@ import { HeaderTruncationOptions, HeaderUITypeOptions } from '../../../interface
 import { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
-import { getAllTaskTags } from '../../../utils/TaskItemUtils.js';
+import { getAllTaskTags, getStatusNameFromStatusSymbol } from '../../../utils/TaskItemUtils.js';
 import LazyColumn from './LazyColumn.js';
-import { getStatusNameFromStatusSymbol } from '../../../utils/task_note/TaskNoteUtils.js';
 import { Component, View } from 'obsidian';
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 

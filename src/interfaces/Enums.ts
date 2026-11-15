@@ -94,8 +94,7 @@ export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 	dependsOn = "depends-on",
 	cancelledDate = "cancelled-date",
 	completionDate = "completed-date",
-	dateCreated = "Created date",
-	dateModified = "Last modified",
+	dateModified = "last-modified",
 	filePath = "source-file",
 	taskLocation = "task-location",
 }
