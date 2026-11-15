@@ -25,22 +25,30 @@ export function coerceCustomTaskPropertyValue(
 			}
 			return undefined;
 		case PropertyTypeConfig.numeric: {
-			const numberValue = typeof value === "number" ? value : Number(value);
+			const numberValue =
+				typeof value === "number" ? value : Number(value);
 			return Number.isFinite(numberValue) ? numberValue : undefined;
 		}
 		case PropertyTypeConfig.list:
 			return Array.isArray(value)
 				? value.map(String)
-				: typeof value === "string" ? value.split(",").map(item => item.trim()).filter(Boolean) : undefined;
+				: typeof value === "string"
+					? value
+							.split(",")
+							.map((item) => item.trim())
+							.filter(Boolean)
+					: undefined;
 		case PropertyTypeConfig.text:
 		case PropertyTypeConfig.time:
 		case PropertyTypeConfig.date:
 		case PropertyTypeConfig.dateTime:
 			if (value instanceof Date && Number.isFinite(value.getTime())) {
 				const isoValue = value.toISOString();
-				return type === PropertyTypeConfig.date ? isoValue.slice(0, 10) : isoValue;
+				return type === PropertyTypeConfig.date
+					? isoValue.slice(0, 10)
+					: isoValue;
 			}
-			return typeof value === "string" ? value : String(value);
+			return typeof value === "string" ? value : JSON.stringify(value);
 		default:
 			return undefined;
 	}
@@ -70,10 +78,8 @@ export interface taskItem {
 }
 
 /** A task plus configured custom properties keyed by their property IDs. */
-export type taskItemWithCustomProperties = taskItem & Record<
-	string,
-	CustomTaskPropertyValue | taskLocation | undefined
->;
+export type taskItemWithCustomProperties = taskItem &
+	Record<string, CustomTaskPropertyValue | taskLocation | undefined>;
 
 export interface customFrontmatterCache extends FrontMatterCache {
 	title?: string;

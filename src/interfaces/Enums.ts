@@ -58,7 +58,6 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	CompletionDate = "completionDate",
 	CancelledDate = "cancelledDate",
 	Dependencies = "dependsOn", // TODO : rename this to "childTasks"
-	ParentTasks = "parentTasks",
 	FilePath = "filePath",
 
 	// Below 2 values are not user configurable, they will be stored for internal purposes.
@@ -71,6 +70,7 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	Recurrence = "recurrence",
 
 	// Below properties are not stored in cache, but this same enum is used at other places hence placing them here.
+	ParentTasks = "parentTasks",
 	Checkbox = "checkbox",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",

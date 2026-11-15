@@ -404,21 +404,6 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 	},
 	{
 		default: true,
-		key: DEFAULT_TASK_CACHE_KEYS.ParentTasks,
-		id: DEFAULT_TASK_CACHE_KEYS.ParentTasks,
-		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ParentTasks],
-		desc: "A list of all the task ids which the current task is blocking. The current task is a child-task for them. And they cannot be worked on until this current task is completed.",
-		type: PropertyTypeConfig.list,
-		emoji: "",
-		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
-			DEFAULT_TASK_CACHE_KEYS.ParentTasks
-		],
-		hidePropertyInNotesForInlineTasks: false,
-		defaultValue: "",
-		rank: 1,
-	},
-	{
-		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.Dependencies,
 		id: DEFAULT_TASK_CACHE_KEYS.Dependencies,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Dependencies],
