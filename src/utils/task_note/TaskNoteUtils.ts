@@ -123,7 +123,10 @@ export function extractTaskNoteProperties(
 					typeof rawValue === "number"
 				) {
 					taskPropertiesByKey[property.key] =
-						getPriorityNumberUsingPriorityName(String(rawValue));
+						getPriorityNumberUsingPriorityName(
+							String(rawValue),
+							settings.data.customPriorities ?? [],
+						);
 				}
 				break;
 			case DEFAULT_TASK_CACHE_KEYS.Dependencies:

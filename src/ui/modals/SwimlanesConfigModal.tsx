@@ -336,7 +336,9 @@ export class SwimlanesConfigModal extends Modal {
 					cls: 'swimlanesConfigSortRowDropdown',
 					attr: { 'aria-label': t('priority') },
 				});
-				const priorityOptions = getPriorityOptionsForDropdown();
+				const priorityOptions = getPriorityOptionsForDropdown(
+					this.plugin.settings.data.customPriorities,
+				);
 
 				priorityOptions.forEach((option) => {
 					prioritySelect.createEl('option', {

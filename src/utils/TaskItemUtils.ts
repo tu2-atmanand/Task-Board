@@ -14,6 +14,7 @@ import {
 	statusTypeNames,
 } from "../interfaces/Enums.js";
 import {
+	CustomPriority,
 	CustomStatus,
 	PluginDataJson,
 } from "../interfaces/GlobalSettings.js";
@@ -23,6 +24,7 @@ import {
 	GroupedStatusOptions,
 	priorityDropDownOption,
 	priorityEmojis,
+	priorityNames,
 	StatusDropdownOption,
 	StatusDropdownOutput,
 } from "../interfaces/Mapping.js";
@@ -187,12 +189,14 @@ export const applyIdToTaskItem = async (
 };
 
 /**
- * Map priority emoji from frontmatter to priority number
+ * Map a priority name from frontmatter to its configured numeric rank.
  * @param priorityValue - Priority value from frontmatter
- * @returns number - Priority number (0-5)
+ * @param customPriorities - Configured custom priorities.
+ * @returns The matching priority rank, or 0 when no name is recognized.
  */
 export function getPriorityNumberUsingPriorityName(
 	priorityValue: string,
+	customPriorities?: CustomPriority[],
 ): number {
 	if (!priorityValue) return 0;
 
@@ -200,8 +204,15 @@ export function getPriorityNumberUsingPriorityName(
 		return Number(priorityValue);
 
 	const priorityStr = String(priorityValue).trim().toLowerCase();
+	const customPriority = customPriorities?.find(
+		(priority) => priority.name.trim().toLowerCase() === priorityStr,
+	);
+	if (customPriority) return customPriority.rank;
+
 	// Map emojis to priority numbers
 	switch (priorityStr) {
+		case "none":
+			return 0;
 		case "highest":
 			return 1; // Highest
 		case "high":
@@ -218,13 +229,20 @@ export function getPriorityNumberUsingPriorityName(
 }
 
 /**
- * Get priority name from priority number
- * @param priority - Priority number (1-5)
- * @returns string - Priority emoji
+ * Get the configured priority name for a numeric rank.
+ * @param priority - Priority rank.
+ * @param customPriorities - Configured custom priorities.
+ * @returns The matching priority name, or the legacy name for standard ranks.
  */
-export function getPriorityNameUsingPriorityPriorityNumber(
+export function getPriorityNameUsingPriorityNumber(
 	priority: number,
+	customPriorities?: CustomPriority[],
 ): string {
+	const customPriority = customPriorities?.find(
+		(customPriority) => customPriority.rank === priority,
+	);
+	if (customPriority) return customPriority.name;
+
 	const priorityNames: { [key: number]: string } = {
 		0: "none",
 		1: "highest",
@@ -241,15 +259,29 @@ export const getPriorityEmoji = (priority: number): string => {
 	return priorityEmojis[priority] || "";
 };
 
-// Priority Options - function to ensure translations are loaded
-export const getPriorityOptionsForDropdown = (): priorityDropDownOption[] => [
-	{ value: 0, text: "0 - " + t("none") },
-	{ value: 1, text: "1 - " + t("highest") + " : 🔺" },
-	{ value: 2, text: "2 - " + t("high") + " : ⏫" },
-	{ value: 3, text: "3 - " + t("medium") + " : 🔼" },
-	{ value: 4, text: "4 - " + t("low") + " : 🔽" },
-	{ value: 5, text: "5 - " + t("lowest") + " : ⏬" },
-];
+// Include configured priorities while retaining defaults for legacy callers.
+export const getPriorityOptionsForDropdown = (
+	customPriorities?: CustomPriority[],
+): priorityDropDownOption[] => {
+	const priorities =
+		customPriorities ??
+		[1, 2, 3, 4, 5].map((rank) => ({
+			rank,
+			name: priorityNames[rank],
+			emoji: priorityEmojis[rank],
+		}));
+
+	return [
+		{ value: 0, text: "0 - " + t("none") },
+		...priorities
+			.slice()
+			.sort((a, b) => a.rank - b.rank)
+			.map(({ rank, name, emoji }) => ({
+				value: rank,
+				text: `${rank} - ${name}${emoji ? ` : ${emoji}` : ""}`,
+			})),
+	];
+};
 
 // Legacy export for backward compatibility
 export const priorityOptions = getPriorityOptionsForDropdown();

@@ -693,7 +693,7 @@ const EmojiStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task,
 			item.setIcon("flag");
 			item.setTitle(t("priority"));
 			const priMenu = item.setSubmenu();
-			const priorityOptions = getPriorityOptionsForDropdown();
+			const priorityOptions = getPriorityOptionsForDropdown(plugin.settings.data.customPriorities);
 			priorityOptions.forEach((p) => {
 				priMenu.addItem((it) => {
 					it.setTitle(p.text);

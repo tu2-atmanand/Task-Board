@@ -424,7 +424,7 @@ const TableView: React.FC<TableViewProps> = ({
 				<select className="taskBoardEditableCellSelect" autoFocus value={editingCell?.value ?? ""} onChange={(event) => {
 					setEditingCell((current) => current ? { ...current, value: event.target.value } : current);
 				}} onKeyDown={onKeyDown}>
-					{getPriorityOptionsForDropdown().map((option) => (
+					{getPriorityOptionsForDropdown(plugin.settings.data.customPriorities).map((option) => (
 						<option key={option.value} value={option.value}>{option.text}</option>
 					))}
 				</select>

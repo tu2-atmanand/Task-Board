@@ -1439,7 +1439,9 @@ export class AdvancedFilterComponent extends Component {
 
 				valueSelect.setValue(
 					filterData.value ||
-						getPriorityOptionsForDropdown()[0].value.toString(),
+						getPriorityOptionsForDropdown(
+							this.plugin.settings.data.customPriorities,
+						)[0].value.toString(),
 				);
 				valueSelect.onChange((newValue) => {
 					filterData.value = newValue;
@@ -1491,7 +1493,9 @@ export class AdvancedFilterComponent extends Component {
 			case "priority":
 				valueInput.hide();
 				valueSelect.addOptions(
-					getPriorityOptionsForDropdown().reduce(
+					getPriorityOptionsForDropdown(
+						this.plugin.settings.data.customPriorities,
+					).reduce(
 						(
 							acc: Record<number | string, string>,
 							opt: priorityDropDownOption,
@@ -1504,7 +1508,9 @@ export class AdvancedFilterComponent extends Component {
 				);
 				valueSelect.setValue(
 					filterData.value ||
-						getPriorityOptionsForDropdown()[0].value.toString(),
+						getPriorityOptionsForDropdown(
+							this.plugin.settings.data.customPriorities,
+						)[0].value.toString(),
 				);
 				valueSelect.onChange((newValue) => {
 					filterData.value = newValue;

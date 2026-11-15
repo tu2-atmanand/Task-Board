@@ -1538,7 +1538,7 @@ export const TaskEditorRC: React.FC<{
 						<div className="EditTaskModalHomeField">
 							<label className="EditTaskModalHomeFieldTitle">{t("priority")}</label>
 							<select className="EditTaskModalHome-priorityValue" value={priority} onChange={(e) => handlePriorityChange(parseInt(e.target.value))}>
-								{getPriorityOptionsForDropdown().map((option) => (
+								{getPriorityOptionsForDropdown(globalSettings.customPriorities).map((option) => (
 									<option key={option.value} value={option.value}>{option.text}</option>
 								))}
 							</select>

@@ -1025,7 +1025,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																</div>
 																<select
 																	aria-label="Select priority"
-																	value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+																	value={column.taskPriority || getPriorityOptionsForDropdown(plugin.settings.data.customPriorities)[0].value}
 																	onChange={(e) =>
 																		handleColumnChange(
 																			viewIndex,
@@ -1036,7 +1036,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																	}
 																	className="boardConfigModalColumnRowContentPriorityDropdown"
 																>
-																	{getPriorityOptionsForDropdown().map((option) => (
+																	{getPriorityOptionsForDropdown(plugin.settings.data.customPriorities).map((option) => (
 																		<option key={option.value} value={option.value}>{option.text}</option>
 																	))}
 																</select>

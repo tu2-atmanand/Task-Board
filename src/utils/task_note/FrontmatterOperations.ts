@@ -17,7 +17,7 @@ import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js"
 import { formatToday } from "../DateTimeCalculations.js";
 import {
 	generateTaskId,
-	getPriorityNameUsingPriorityPriorityNumber,
+	getPriorityNameUsingPriorityNumber,
 	getStatusNameFromStatusSymbol,
 } from "../TaskItemUtils.js";
 import type { SupportedPropertiesConfig } from "../../interfaces/GlobalSettings.js";
@@ -266,7 +266,10 @@ export function createFrontmatterFromTask(
 			case String(DEFAULT_TASK_CACHE_KEYS.Priority):
 				if (typeof value === "number" && value > 0) {
 					frontmatterObj[property.id] =
-						getPriorityNameUsingPriorityPriorityNumber(value);
+						getPriorityNameUsingPriorityNumber(
+							value,
+							plugin.settings.data.customPriorities ?? [],
+						);
 				}
 				break;
 			default:
@@ -438,7 +441,10 @@ export function updateFrontmatterProperties(
 		const priority = task[DEFAULT_TASK_CACHE_KEYS.Priority];
 		if (priority > 0) {
 			tempUpdates[priorityProperty.id] =
-				getPriorityNameUsingPriorityPriorityNumber(priority);
+				getPriorityNameUsingPriorityNumber(
+					priority,
+					plugin.settings.data.customPriorities ?? [],
+				);
 		} else {
 			delete tempUpdates[priorityProperty.id];
 			if (existingFrontmatter)
