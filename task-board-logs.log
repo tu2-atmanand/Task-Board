@@ -9,40 +9,14 @@
 - **Base color scheme**: dark
 - **Community theme**: none
 - **Snippets enabled**: 0
-- **Plugins installed**: 58
+- **Plugins installed**: 57
 - **Plugins enabled**: 
+  - Task Board v2.0.0-beta-5
   - Advanced Debug Mode v1.9.1
   - Plugin Reloader v0.0.3
   - Tasks v7.22.0
-  - Task Board v2.0.0-beta-5
 
 ## Recent Bug Reports
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
 
 Timestamp : undefined
 ID : 17
@@ -266,6 +240,32 @@ No valid statuses after filtering
 -------------
 
 Timestamp : 2026-11-14T23:04:09
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-14T23:32:39
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-15T21:54:29
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown

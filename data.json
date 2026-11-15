@@ -51,8 +51,6 @@
       "checkbox",
       "id",
       "title",
-      "subTasksMinimized",
-      "descriptionMinimized",
       "status",
       "tags",
       "time",
@@ -573,18 +571,6 @@
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
         "rank": 18
-      },
-      {
-        "default": true,
-        "key": "parentTasks",
-        "id": "parentTasks",
-        "desc": "A list of all the task ids which the current task is blocking. The current task is a child-task for them. And they cannot be worked on until this current task is completed.",
-        "type": "list",
-        "emoji": "",
-        "icon": "git-branch",
-        "hidePropertyInNotesForInlineTasks": false,
-        "defaultValue": "",
-        "rank": 3
       },
       {
         "default": true,
