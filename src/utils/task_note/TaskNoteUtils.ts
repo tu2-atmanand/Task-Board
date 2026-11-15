@@ -11,6 +11,7 @@ import {
 	coerceCustomTaskPropertyValue,
 	customFrontmatterCache,
 	taskItem,
+	taskItemWithCustomProperties,
 } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import {
@@ -90,13 +91,13 @@ export function validateFrontmatterValue(
 export function extractTaskNoteProperties(
 	frontmatter: Partial<customFrontmatterCache> | undefined,
 	settings: PluginDataJson,
-): Partial<taskItem> {
+): Partial<taskItemWithCustomProperties> {
 	if (!frontmatter) {
 		return {};
 	}
 
 	const taskProperties = settings.data.taskProperties;
-	let taskItemData: Partial<taskItem> = {};
+	let taskItemData: Partial<taskItemWithCustomProperties> = {};
 
 	const taskPropertiesByKey = taskItemData as Record<string, unknown>;
 	for (const property of taskProperties) {

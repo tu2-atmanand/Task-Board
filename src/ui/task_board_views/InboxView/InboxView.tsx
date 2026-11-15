@@ -5,7 +5,11 @@ import { t } from "i18next";
 import TaskBoard from "../../../../main.js";
 import type { Board, ColumnData, InboxView as InboxViewConfig, TaskBoardViewType } from "../../../interfaces/BoardConfigs.js";
 import { colTypeNames, HeaderTruncationOptions, HeaderUITypeOptions, viewTypeNames } from "../../../interfaces/Enums.js";
-import { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
+import {
+	taskItem,
+	taskItemWithCustomProperties,
+	taskJsonMerged,
+} from "../../../interfaces/TaskItem.js";
 import { ConfigureColumnSortingModal } from "../../modals/ConfigureColumnSortingModal.js";
 import { ClosePopupConfrimationModal } from "../../modals/ClosePopupConfrimationModal.js";
 import { eventEmitter } from "../../../services/EventEmitter.js";
@@ -73,7 +77,10 @@ const InboxView: React.FC<InboxViewProps> = ({
 			const taskById = new Map(allTasks.map((task) => [task[DEFAULT_TASK_CACHE_KEYS.ID], task]));
 			const orderedTasks = (columnData?.tasksIdManualOrder ?? [])
 				.map((id) => taskById.get(id))
-				.filter((task): task is taskItem => task !== undefined);
+				.filter(
+					(task): task is taskItemWithCustomProperties =>
+						task !== undefined,
+				);
 			const orderedIds = new Set(orderedTasks.map((task) => task[DEFAULT_TASK_CACHE_KEYS.ID]));
 			return [...orderedTasks, ...allTasks.filter((task) => !orderedIds.has(task[DEFAULT_TASK_CACHE_KEYS.ID]))];
 		}
@@ -84,7 +91,7 @@ const InboxView: React.FC<InboxViewProps> = ({
 	const selectedTask = tasks.find((task) => task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTaskId);
 	const editorSelectedTask = selectedTask ?? (editorTask && editorTask.task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTaskId ? editorTask.task : undefined);
 	const isTaskNote = editorSelectedTask
-		? isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, editorSelectedTask[DEFAULT_TASK_CACHE_KEYS.Tags])
+		? isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, editorSelectedTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [])
 		: false;
 
 	useEffect(() => {

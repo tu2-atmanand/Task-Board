@@ -300,11 +300,11 @@ function compareValues(
  * @param sortCriteria - Array of sorting criteria to apply
  * @returns Sorted array of tasks
  */
-export function columnSortingAlgorithm(
+export function columnSortingAlgorithm<T extends taskItem>(
 	startTimeConfig: string,
-	tasksToDisplay: taskItem[],
+	tasksToDisplay: T[],
 	sortCriteria: columnSortingCriteria[],
-): taskItem[] {
+): T[] {
 	// Return empty array if no tasks
 	if (!tasksToDisplay || tasksToDisplay.length === 0) {
 		return [];

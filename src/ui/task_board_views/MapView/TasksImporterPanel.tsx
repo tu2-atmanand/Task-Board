@@ -64,7 +64,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 		return tasksWithoutId.filter(task =>
 			task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(query) ||
 			task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(query) ||
-			task[DEFAULT_TASK_CACHE_KEYS.Tags].some(tag => tag.toLowerCase().includes(query))
+			(task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).some(tag => tag.toLowerCase().includes(query))
 		);
 	}, [tasksWithoutId, searchQuery]);
 

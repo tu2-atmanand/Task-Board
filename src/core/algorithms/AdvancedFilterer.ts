@@ -24,11 +24,11 @@ import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
  * @param dateFormat - The date format string (e.g., DEFAULT_DATE_FORMAT)
  * @returns Filtered array of tasks
  */
-export function advancedFilterer(
-	tasks: taskItem[],
+export function advancedFilterer<T extends taskItem>(
+	tasks: T[],
 	advancedFilter: AdvancedFilter | undefined,
 	dateFormat: string = DEFAULT_DATE_FORMAT,
-): taskItem[] {
+): T[] {
 	// TODO : This function runs more number of times than it should be running.
 	// Find only the filters which has been enabled by the user
 	if (!advancedFilter?.filters || !advancedFilter?.rootCondition)
@@ -41,7 +41,7 @@ export function advancedFilterer(
 
 	const filtersRootCondition = advancedFilter.rootCondition;
 
-	return tasks.filter((task: taskItem) => {
+	return tasks.filter((task) => {
 		const allFiltersResults = enabledFilters.map((filter: Filter) =>
 			evaluateFilter(task, filter, dateFormat),
 		);
@@ -317,7 +317,7 @@ function getTaskPropertyValue(
 			return task[DEFAULT_TASK_CACHE_KEYS.Title] || "";
 		case "body":
 		case "description":
-			return task[DEFAULT_TASK_CACHE_KEYS.Body].join("\n") || "";
+			return task[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n") || "";
 		case "createdDate":
 		case "created":
 			return task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || "";
@@ -364,7 +364,7 @@ function getTaskPropertyValue(
 			// Handle tag properties like "tags.myTag"
 			if (property.startsWith("tags.")) {
 				const tagName = property.substring(5);
-				return task[DEFAULT_TASK_CACHE_KEYS.Tags].some(
+				return (task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).some(
 					(tag) => tag.toLowerCase() === tagName.toLowerCase(),
 				);
 			}

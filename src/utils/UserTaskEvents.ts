@@ -51,7 +51,7 @@ export const handleEditTask = (
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isThisATaskNote = isTaskNotePresentInTags(
 		taskNoteIdentifierTag,
-		task[DEFAULT_TASK_CACHE_KEYS.Tags],
+		task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 	);
 	switch (settingOption) {
 		case EditButtonMode.Modal:
@@ -247,7 +247,7 @@ export const updateTaskItemStatus = async (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags],
+		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 	);
 	if (isThisTaskNote) {
 		updateFrontmatterInMarkdownFile(plugin, newTask)
@@ -316,7 +316,7 @@ export const updateTaskItemPriority = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags],
+		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 	);
 
 	if (isThisTaskNote) {
@@ -395,7 +395,7 @@ export const updateTaskItemDate = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags],
+		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 	);
 
 	if (isThisTaskNote) {
@@ -481,7 +481,7 @@ export const updateTaskItemReminder = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags],
+		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 	);
 
 	if (isThisTaskNote) {
@@ -541,7 +541,7 @@ export const updateTaskItemTags = (
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
-		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags],
+		taskOld[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 	);
 
 	if (isThisTaskNote) {
@@ -594,7 +594,7 @@ export const updateTaskItemProperty = async (
 	const updatedTask: taskItem = { ...task };
 	const isThisTaskNote = isTaskNotePresentInTags(
 		globalSettings.taskNoteIdentifierTag,
-		task[DEFAULT_TASK_CACHE_KEYS.Tags],
+		task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 	);
 
 	switch (property) {

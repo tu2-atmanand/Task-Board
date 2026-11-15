@@ -332,8 +332,8 @@ export const useTasksPluginToUpdateInFile = async (
 					await addIdToTaskContent(plugin, tasksPluginApiOutput);
 				const tasksPluginApiOutputWithId = formattedTaskContent;
 				newContent = `${tasksPluginApiOutputWithId}${
-					oldTask[DEFAULT_TASK_CACHE_KEYS.Body].length > 0
-						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body].join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}`;
 				await replaceOldTaskWithNewTask(
@@ -345,12 +345,12 @@ export const useTasksPluginToUpdateInFile = async (
 			} else if (twoTaskTitles.length === 2) {
 				// if (twoTaskTitles[1].trim().startsWith("- [x]")) {
 				newContent = `${twoTaskTitles[0]}${
-					oldTask[DEFAULT_TASK_CACHE_KEYS.Body].length > 0
-						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body].join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}\n${twoTaskTitles[1]}${
-					oldTask[DEFAULT_TASK_CACHE_KEYS.Body].length > 0
-						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body].join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}`;
 

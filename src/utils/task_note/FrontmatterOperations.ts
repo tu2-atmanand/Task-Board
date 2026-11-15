@@ -439,7 +439,7 @@ export function updateFrontmatterProperties(
 	);
 	if (priorityProperty?.id) {
 		const priority = task[DEFAULT_TASK_CACHE_KEYS.Priority];
-		if (priority > 0) {
+		if (priority !== undefined && priority > 0) {
 			tempUpdates[priorityProperty.id] =
 				getPriorityNameUsingPriorityNumber(
 					priority,

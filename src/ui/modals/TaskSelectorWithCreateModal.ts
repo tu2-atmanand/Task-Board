@@ -264,8 +264,12 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 					normal: 1,
 					low: 2,
 				};
-				const aPriority = priorityOrder[a[DEFAULT_TASK_CACHE_KEYS.Priority]] ?? 1;
-				const bPriority = priorityOrder[b[DEFAULT_TASK_CACHE_KEYS.Priority]] ?? 1;
+				const aPriority =
+					priorityOrder[String(a[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)] ??
+					1;
+				const bPriority =
+					priorityOrder[String(b[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)] ??
+					1;
 				if (aPriority !== bPriority) return aPriority - bPriority;
 
 				// Finally by title

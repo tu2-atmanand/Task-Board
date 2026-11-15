@@ -15,8 +15,10 @@ import {
 import { priorityEmojis } from "../../interfaces/Mapping.js";
 import {
 	coerceCustomTaskPropertyValue,
+	CustomTaskPropertyValue,
 	jsonCacheData,
 	taskItem,
+	taskItemWithCustomProperties,
 } from "../../interfaces/TaskItem.js";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../utils/regular_expressions/DataviewPluginRegularExpr.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
@@ -221,7 +223,7 @@ export default class VaultScanner {
 					}
 
 					// Create task item for the task note
-					const taskNoteItem: taskItem = {
+					const taskNoteItem: taskItemWithCustomProperties = {
 						...taskNoteProperties,
 						id: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.ID]
 							? taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.ID]
@@ -421,7 +423,7 @@ export default class VaultScanner {
 									extractFrontmatterTags(frontmatter);
 							}
 
-							const task: taskItem = {
+							const task: taskItemWithCustomProperties = {
 								...extractCustomTaskProperties(
 									line,
 									this.plugin.settings.data,
@@ -804,8 +806,8 @@ export function fileTypeAllowedForScanning(
 export function extractTaskPropertiesOfSingleFormat(
 	line: string,
 	settings: globalSettingsData,
-): Record<string, unknown> {
-	const result: Record<string, unknown> = {};
+): Record<string, CustomTaskPropertyValue> {
+	const result: Record<string, CustomTaskPropertyValue> = {};
 	const builtInKeys = new Set([
 		"id",
 		"legacyId",
@@ -893,8 +895,8 @@ export function extractTaskPropertiesOfSingleFormat(
 export function extractCustomTaskProperties(
 	line: string,
 	settings: globalSettingsData,
-): Record<string, unknown> {
-	const result: Record<string, unknown> = {};
+): Record<string, CustomTaskPropertyValue> {
+	const result: Record<string, CustomTaskPropertyValue> = {};
 	const builtInKeys = new Set([
 		"id",
 		"legacyId",
@@ -978,7 +980,7 @@ export function buildTaskFromRawContent(
 	indentationString: string,
 	filePath?: string,
 	settings?: globalSettingsData,
-): Partial<taskItem> {
+): Partial<taskItemWithCustomProperties> {
 	const lines = rawTaskContent.split("\n");
 	const taskStatus = extractCheckboxSymbol(lines[0]);
 	const firstLine = lines[0] || "";

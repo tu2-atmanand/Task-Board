@@ -8,7 +8,10 @@ import {
 import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
 import { colTypeNames, UniversalDateOptions } from "../../interfaces/Enums.js";
 import { PluginDataJson } from "../../interfaces/GlobalSettings.js";
-import { taskJsonMerged, taskItem } from "../../interfaces/TaskItem.js";
+import {
+	taskJsonMerged,
+	taskItemWithCustomProperties,
+} from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { robustDateParser } from "../../utils/DateTimeCalculations.js";
 import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
@@ -26,7 +29,7 @@ import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
  * @param {ColumnData} columnData - The single column configs.
  * @param {taskJsonMerged | null} allTasks - The collection of all tasks to segregate.
  * @param {function} onBoardDataChange - Optional callback function to update the board data when changes occur (e.g., when manual ordering is enabled and tasks are reordered).
- * @returns {taskItem[]} - The tasks to display in the column.
+ * @returns {taskItemWithCustomProperties[]} - The tasks to display in the column.
  */
 export const columnSegregator = (
 	settings: PluginDataJson,
@@ -35,11 +38,11 @@ export const columnSegregator = (
 	columnData: ColumnData,
 	allTasks: taskJsonMerged | null,
 	onBoardDataChange?: (updatedViewData: TaskBoardViewType) => void,
-): taskItem[] => {
+): taskItemWithCustomProperties[] => {
 	if (!allTasks || !activeViewData || !activeViewData.kanbanView) return [];
 
 	// Call the filter function based on the column's tag and properties
-	let tasksToDisplay: taskItem[] = [];
+	let tasksToDisplay: taskItemWithCustomProperties[] = [];
 	const pendingTasks = allTasks.Pending;
 	const completedTasks = allTasks.Completed;
 
@@ -346,7 +349,7 @@ export const columnSegregator = (
 			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
 			const idToTask = new Map(tasksToDisplay.map((t) => [t[DEFAULT_TASK_CACHE_KEYS.ID], t]));
-			const sorted: taskItem[] = [];
+			const sorted: taskItemWithCustomProperties[] = [];
 			for (const id of columnData.tasksIdManualOrder) {
 				const task = idToTask.get(id);
 				if (task) {

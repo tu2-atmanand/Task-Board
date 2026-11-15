@@ -7,7 +7,10 @@ import { priorityEmojis } from "../../../interfaces/Mapping.js";
 import { taskItem } from "../../../interfaces/TaskItem.js";
 import { isTaskCompleted } from "../../../utils/CheckBoxUtils.js";
 import { isTaskNotePresentInTags } from "../../../utils/task_note/TaskNoteUtils.js";
-import { getStatusNameFromStatusSymbol } from "../../../utils/TaskItemUtils.js";
+import {
+	getStatusNameFromStatusSymbol,
+	normalizeTaskItem,
+} from "../../../utils/TaskItemUtils.js";
 import { updateRGBAOpacity } from "../../../utils/UIHelpers.js";
 
 /**
@@ -21,7 +24,11 @@ import { updateRGBAOpacity } from "../../../utils/UIHelpers.js";
  * @param task - The task to be rendered as card.
  * @returns An HTML DOM element which looks exactly like the task card but without any interaction capabilities.
  */
-export function createTaskCard(plugin: TaskBoard, task: taskItem): HTMLElement {
+export function createTaskCard(
+	plugin: TaskBoard,
+	taskItemValue: taskItem,
+): HTMLElement {
+	const task = normalizeTaskItem(taskItemValue);
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(

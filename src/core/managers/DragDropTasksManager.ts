@@ -441,7 +441,7 @@ class DragDropTasksManager {
 
 			const isThisTaskNote = isTaskNotePresentInTags(
 				plugin.settings.data.taskNoteIdentifierTag,
-				oldTask[DEFAULT_TASK_CACHE_KEYS.Tags],
+				oldTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 			);
 
 			if (isThisTaskNote) {
@@ -543,7 +543,7 @@ class DragDropTasksManager {
 
 		// Remove the source column tag if it exists
 		const sourceTag = sourceColumn?.coltag ?? "";
-		let newTags = newTask[DEFAULT_TASK_CACHE_KEYS.Tags].filter(
+		let newTags = (newTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).filter(
 			(tag: string) => !compareTwoTags(sourceTag, tag),
 		);
 
@@ -818,7 +818,7 @@ class DragDropTasksManager {
 		if (
 			!isTaskNotePresentInTags(
 				plugin.settings.data.taskNoteIdentifierTag,
-				task[DEFAULT_TASK_CACHE_KEYS.Tags],
+				task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 			)
 		) {
 			newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStatus(

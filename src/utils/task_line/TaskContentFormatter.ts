@@ -93,7 +93,7 @@ export const getFormattedTaskContent = async (
 	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(/\[(.)\]/, `[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = task[DEFAULT_TASK_CACHE_KEYS.Body]
+	const bodyLines = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? [])
 		.map((line: string) => {
 			// if (line.startsWith("\t")) {
 			// 	return line;
@@ -187,7 +187,7 @@ export const getFormattedTaskContentSync = (task: taskItem): string => {
 	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(/\[(.)\]/, `[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = task[DEFAULT_TASK_CACHE_KEYS.Body]
+	const bodyLines = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? [])
 		.map((line: string) => {
 			// if (line.startsWith("\t")) {
 			// 	return line;
@@ -232,36 +232,36 @@ export const getSanitizedTaskContent = (
 	updatedTitle = sanitizePriority(
 		globalSettings,
 		updatedTitle,
-		updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority],
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0,
 	);
 
-	updatedTitle = sanitizeTime(globalSettings, updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Time]);
+	updatedTitle = sanitizeTime(globalSettings, updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ?? "");
 
 	updatedTitle = sanitizeCreatedDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate] ?? "",
 	);
 
 	updatedTitle = sanitizeStartDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate],
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] ?? "",
 	);
 
 	updatedTitle = sanitizeScheduledDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] ?? "",
 	);
 
 	updatedTitle = sanitizeDueDate(
 		globalSettings,
 		updatedTitle,
-		updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate],
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] ?? "",
 	);
 
-	updatedTitle = sanitizeTags(updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags]);
+	updatedTitle = sanitizeTags(updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []);
 
 	updatedTitle = sanitizeReminder(
 		globalSettings,
@@ -285,7 +285,7 @@ export const getSanitizedTaskContent = (
 	let formattedTask = `${checkBoxStat} ${updatedTitle}`;
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = updatedTask[DEFAULT_TASK_CACHE_KEYS.Body]
+	const bodyLines = (updatedTask[DEFAULT_TASK_CACHE_KEYS.Body] ?? [])
 		.map((line: string) => {
 			// if (line.startsWith("\t")) {
 			// 	return line;
@@ -1451,7 +1451,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 		switch (property) {
 			case DEFAULT_TASK_CACHE_KEYS.Tags:
 				// Remove tags
-				task[DEFAULT_TASK_CACHE_KEYS.Tags].forEach((tag) => {
+				(task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).forEach((tag) => {
 					const tagRegex = new RegExp(`\\s*${tag}\\s*`, "g");
 					const tagsMatch = cleanedTitle.match(tagRegex);
 					if (tagsMatch) {
@@ -1519,7 +1519,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 
 			case DEFAULT_TASK_CACHE_KEYS.Priority:
 				// Remove priority in various formats
-				if (task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
+				if ((task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0) > 0) {
 					let match = cleanedTitle.match(
 						/\[priority::\s*(\d{1,2})\]/,
 					);
@@ -1532,7 +1532,7 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 						cleanedTitle = cleanedTitle.replace(match[0], "");
 					}
 
-					const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority]];
+					const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0];
 
 					if (priorityIcon) {
 						// Create a regex pattern to match any priority emoji in text
@@ -1598,7 +1598,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	// If pipe symbol is present (` | `), then remove everything after the pipe symbol.
 
 	// Remove tags
-	task[DEFAULT_TASK_CACHE_KEYS.Tags].forEach((tag) => {
+	(task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).forEach((tag) => {
 		const tagRegex = new RegExp(`\\s*#${tag}\\s*`, "g");
 		const tagsMatch = cleanedTitle.match(tagRegex);
 		if (tagsMatch) {
@@ -1670,7 +1670,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove priority in various formats
-	if (task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0) {
+	if ((task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0) > 0) {
 		let match = cleanedTitle.match(/\[priority::\s*(\d{1,2})\]/);
 		if (match) {
 			cleanedTitle = cleanedTitle.replace(match[0], "");
@@ -1681,7 +1681,7 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 			cleanedTitle = cleanedTitle.replace(match[0], "");
 		}
 
-		const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority]];
+		const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0];
 
 		if (priorityIcon) {
 			// Create a regex pattern to match any priority emoji in text

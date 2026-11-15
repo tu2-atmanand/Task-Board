@@ -11,7 +11,12 @@ import { RxDragHandleHorizontal } from "react-icons/rx";
 import TaskBoard from "../../../main.js";
 import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService, PropertyTypeConfig, taskPropertyFormatOptions } from "../../interfaces/Enums.js";
 import { taskItemEmpty } from "../../interfaces/Mapping.js";
-import { coerceCustomTaskPropertyValue, taskItem, cursorLocationInterface } from "../../interfaces/TaskItem.js";
+import {
+	coerceCustomTaskPropertyValue,
+	taskItem,
+	taskItemWithCustomProperties,
+	cursorLocationInterface,
+} from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
@@ -61,6 +66,8 @@ export const TaskEditorRC: React.FC<{
 	setIsEdited: (value: boolean) => void;
 }> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, inboxView = false, activeNote, filePath, onSave, onClose, setIsEdited: reportEdited }) => {
 	const globalSettings = plugin.settings.data;
+	const taskWithCustomProperties =
+		task as taskItemWithCustomProperties;
 
 	// All useState
 	const [title, setTitle] = useState(
@@ -84,8 +91,8 @@ export const TaskEditorRC: React.FC<{
 	const [customPropertyValues, setCustomPropertyValues] = useState<Record<string, unknown>>(() =>
 		Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [
 			property.id,
-			(task as unknown as Record<string, unknown>)[property.id] !== undefined
-				? (task as unknown as Record<string, unknown>)[property.id]
+			taskWithCustomProperties[property.id] !== undefined
+				? taskWithCustomProperties[property.id]
 				: coerceCustomTaskPropertyValue(property.defaultValue, property.type),
 		])));
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
@@ -820,7 +827,7 @@ export const TaskEditorRC: React.FC<{
 		setPriority(updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority] || 0);
 		setStatus(updatedTask[DEFAULT_TASK_CACHE_KEYS.Status] || ' ');
 		setReminder(updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] || '');
-		setCustomPropertyValues(Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [property.id, (updatedTask as unknown as Record<string, unknown>)[property.id]])));
+		setCustomPropertyValues(Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [property.id, updatedTask[property.id]])));
 	}, 50);
 
 	// // This useEffect is used to get the formatted content of the updated task, which will be rendered in the editor(s).
@@ -1180,7 +1187,7 @@ export const TaskEditorRC: React.FC<{
 			case EditButtonMode.TasksPluginModal:
 			default:
 				{
-					const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask[DEFAULT_TASK_CACHE_KEYS.Tags]);
+					const isTaskNotePresent = isTaskNotePresentInTags(globalSettings.taskNoteIdentifierTag, childTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []);
 					void openEditTaskView(plugin, isTaskNotePresent, false, true, childTask, childTask[DEFAULT_TASK_CACHE_KEYS.FilePath], "window");
 					break;
 				}

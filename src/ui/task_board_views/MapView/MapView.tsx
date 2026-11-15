@@ -514,7 +514,7 @@ const MapView: React.FC<MapViewProps> = ({
 					if (idToTask.has(depId)) {
 						const childTask = idToTask.get(depId);
 						if (childTask) {
-							const isChildTaskCompleted = isTaskNotePresentInTags(taskNoteIdentifierTag, childTask[DEFAULT_TASK_CACHE_KEYS.Tags]) ?
+							const isChildTaskCompleted = isTaskNotePresentInTags(taskNoteIdentifierTag, childTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []) ?
 								isTaskCompleted(childTask[DEFAULT_TASK_CACHE_KEYS.Status], true, plugin.settings)
 								: isTaskCompleted(childTask[DEFAULT_TASK_CACHE_KEYS.Title], false, plugin.settings);
 							edges.push({
@@ -640,7 +640,7 @@ const MapView: React.FC<MapViewProps> = ({
 				state: true,
 			};
 			eventEmitter.emit("UPDATE_TASK", eventData);
-			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Tags])) {
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [])) {
 				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title], updatedTargetTask.dependsOn);
 				updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title] = updatedTargetTaskTitle;
 
@@ -890,7 +890,7 @@ const MapView: React.FC<MapViewProps> = ({
 		eventEmitter.emit("UPDATE_TASK", eventData);
 
 		try {
-			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Tags])) {
+			if (!isTaskNotePresentInTags(taskNoteIdentifierTag, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [])) {
 				const updatedTargetTaskTitle = sanitizeDependsOn(plugin.settings.data, updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title], updatedTargetTask.dependsOn);
 				updatedTargetTask[DEFAULT_TASK_CACHE_KEYS.Title] = updatedTargetTaskTitle;
 

@@ -390,7 +390,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 						return task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(lowerQuery.replace("file:", "").trim());
 					} else {
 						const titleMatch = task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(lowerQuery);
-						const bodyMatch = task[DEFAULT_TASK_CACHE_KEYS.Body].join("\n").toLowerCase().includes(lowerQuery);
+						const bodyMatch = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? []).join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
 				}),
@@ -399,7 +399,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 						return task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(lowerQuery.replace("file:", "").trim());
 					} else {
 						const titleMatch = task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(lowerQuery);
-						const bodyMatch = task[DEFAULT_TASK_CACHE_KEYS.Body].join("\n").toLowerCase().includes(lowerQuery);
+						const bodyMatch = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? []).join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
 				})

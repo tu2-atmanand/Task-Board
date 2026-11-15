@@ -1,7 +1,10 @@
 // /src/utils/TaskItemUtils.ts
 
 import TaskBoard from "../../main.js";
-import { taskItem } from "../interfaces/TaskItem.js";
+import {
+	taskItem,
+	taskItemWithCustomProperties,
+} from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { extractTaskId } from "../core/managers/VaultScanner.js";
 import { updateTaskInFile } from "./task_line/TaskLineUtils.js";
@@ -40,6 +43,44 @@ export const getAllTaskTags = (task: taskItem): string[] => {
 	const frontmatterTags = task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags] || [];
 	return [...lineTags, ...frontmatterTags];
 };
+
+const EMPTY_TASK_STRING_ARRAY: string[] = [];
+
+export function normalizeTaskItem(
+	task: taskItem,
+): Required<taskItemWithCustomProperties> {
+	return {
+		...task,
+		[DEFAULT_TASK_CACHE_KEYS.Body]:
+			task[DEFAULT_TASK_CACHE_KEYS.Body] ?? EMPTY_TASK_STRING_ARRAY,
+		[DEFAULT_TASK_CACHE_KEYS.Priority]:
+			task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0,
+		[DEFAULT_TASK_CACHE_KEYS.Tags]:
+			task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? EMPTY_TASK_STRING_ARRAY,
+		[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]:
+			task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags] ??
+			EMPTY_TASK_STRING_ARRAY,
+		[DEFAULT_TASK_CACHE_KEYS.Time]:
+			task[DEFAULT_TASK_CACHE_KEYS.Time] ?? "",
+		[DEFAULT_TASK_CACHE_KEYS.CreatedDate]:
+			task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] ?? "",
+		[DEFAULT_TASK_CACHE_KEYS.StartDate]:
+			task[DEFAULT_TASK_CACHE_KEYS.StartDate] ?? "",
+		[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]:
+			task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] ?? "",
+		[DEFAULT_TASK_CACHE_KEYS.DueDate]:
+			task[DEFAULT_TASK_CACHE_KEYS.DueDate] ?? "",
+		[DEFAULT_TASK_CACHE_KEYS.Dependencies]:
+			task[DEFAULT_TASK_CACHE_KEYS.Dependencies] ??
+			EMPTY_TASK_STRING_ARRAY,
+		[DEFAULT_TASK_CACHE_KEYS.Reminder]:
+			task[DEFAULT_TASK_CACHE_KEYS.Reminder] ?? "",
+		[DEFAULT_TASK_CACHE_KEYS.CompletionDate]:
+			task[DEFAULT_TASK_CACHE_KEYS.CompletionDate] ?? "",
+		[DEFAULT_TASK_CACHE_KEYS.CancelledDate]:
+			task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] ?? "",
+	} as Required<taskItemWithCustomProperties>;
+}
 
 /**
  * Retrieves a task from the TaskBoard plugin's task cache using its ID.
@@ -164,7 +205,7 @@ export const applyIdToTaskItem = async (
 	if (
 		isTaskNotePresentInTags(
 			plugin.settings.data.taskNoteIdentifierTag,
-			task[DEFAULT_TASK_CACHE_KEYS.Tags],
+			task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 		)
 	) {
 		let newId = task[DEFAULT_TASK_CACHE_KEYS.LegacyID];

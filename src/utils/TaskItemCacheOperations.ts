@@ -7,7 +7,11 @@
  */
 
 import TaskBoard from "../../main.js";
-import { taskItem, jsonCacheData } from "../interfaces/TaskItem.js";
+import {
+	jsonCacheData,
+	taskItem,
+	taskItemWithCustomProperties,
+} from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import { getCurrentLocalDateTimeString } from "./DateTimeCalculations.js";
@@ -33,7 +37,7 @@ import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
  */
 export const moveFromPendingToCompleted = async (
 	plugin: TaskBoard,
-	task: taskItem,
+	task: taskItemWithCustomProperties,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -42,7 +46,7 @@ export const moveFromPendingToCompleted = async (
 		if (allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
 			allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = (
 				allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] || []
-			).filter((t: taskItem) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
+			).filter((t: taskItemWithCustomProperties) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
 
 			if (!allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
 				allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = [];
@@ -74,7 +78,7 @@ export const moveFromPendingToCompleted = async (
  */
 export const moveFromCompletedToPending = async (
 	plugin: TaskBoard,
-	task: taskItem,
+	task: taskItemWithCustomProperties,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
@@ -83,7 +87,7 @@ export const moveFromCompletedToPending = async (
 		if (allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
 			allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = (
 				allTasks.Completed[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] || []
-			).filter((t: taskItem) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
+			).filter((t: taskItemWithCustomProperties) => t[DEFAULT_TASK_CACHE_KEYS.ID] !== task[DEFAULT_TASK_CACHE_KEYS.ID]);
 
 			if (!allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]]) {
 				allTasks.Pending[task[DEFAULT_TASK_CACHE_KEYS.FilePath]] = [];
@@ -149,26 +153,26 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
  */
 export const updateTaskInJson = async (
 	plugin: TaskBoard,
-	updatedTask: taskItem,
+	updatedTask: taskItemWithCustomProperties,
 ) => {
 	try {
 		const allTasks = await loadJsonCacheDataFromDisk(plugin);
 
 		// Function to update a task in a given task category (Pending or Completed)
 		const updateTasksInCategory = (taskCategory: {
-			[filePath: string]: taskItem[];
+			[filePath: string]: taskItemWithCustomProperties[];
 		}) => {
 			return Object.entries(taskCategory).reduce(
 				(
-					acc: { [filePath: string]: taskItem[] },
-					[filePath, tasks]: [string, taskItem[]],
+					acc: { [filePath: string]: taskItemWithCustomProperties[] },
+					[filePath, tasks]: [string, taskItemWithCustomProperties[]],
 				) => {
-					acc[filePath] = tasks.map((task: taskItem) =>
+					acc[filePath] = tasks.map((task: taskItemWithCustomProperties) =>
 						task[DEFAULT_TASK_CACHE_KEYS.ID] === updatedTask[DEFAULT_TASK_CACHE_KEYS.ID] ? updatedTask : task,
 					);
 					return acc;
 				},
-				{} as { [filePath: string]: taskItem[] }, // Set the initial accumulator type
+				{} as { [filePath: string]: taskItemWithCustomProperties[] }, // Set the initial accumulator type
 			);
 		};
 

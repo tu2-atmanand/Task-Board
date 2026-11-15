@@ -230,7 +230,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 		const updatedTask = { ...task, startDate: dateValue, time: timeValue };
 
 		eventEmitter.emit("UPDATE_TASK", { taskID: task[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
-		if (isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags])) {
+		if (isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [])) {
 			await updateFrontmatterInMarkdownFile(plugin, updatedTask);
 			try {
 				await plugin.realTimeScanner.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.ID]);

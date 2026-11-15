@@ -20,7 +20,7 @@ import { openDateInputModal } from '../../modals/OpenModals.js';
 import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../../core/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../../utils/CheckBoxUtils.js';
 import { getUniversalDateFromTask, robustDateParser } from '../../../utils/DateTimeCalculations.js';
-import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId } from '../../../utils/TaskItemUtils.js';
+import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId, normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
 import { cleanTaskTitleLegacy, dedentTaskBodyLines, shouldExpandTaskDescription } from '../../../utils/task_line/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskItemEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../../utils/task_note/TaskNoteEventHandlers.js';
@@ -31,7 +31,19 @@ import { t } from '../../../utils/lang/helper.js';
 import { TaskCardProps } from './index.js';
 import { priorityEmojis } from '../../../interfaces/Mapping.js';
 
-const EmojiStyle: React.FC<TaskCardProps> = ({ dataAttributeIndex, plugin, task, parentComponent, activeBoardID, activeViewIndex, activeViewType, kanbanViewData, columnIndex, swimlaneData }) => {
+const EmojiStyle: React.FC<TaskCardProps> = (props) => {
+	const {
+		dataAttributeIndex,
+		plugin,
+		parentComponent,
+		activeBoardID,
+		activeViewIndex,
+		activeViewType,
+		kanbanViewData,
+		columnIndex,
+		swimlaneData,
+	} = props;
+	const task = normalizeTaskItem(props.task);
 	const globalSettings = plugin.settings.data;
 	const taskNoteIdentifierTag = plugin.settings.data.taskNoteIdentifierTag;
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags]);

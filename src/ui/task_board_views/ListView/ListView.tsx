@@ -59,7 +59,9 @@ const ListView: React.FC<ListViewProps> = ({
 				if (taskSort === "title") {
 					comparison = first[DEFAULT_TASK_CACHE_KEYS.Title].localeCompare(second[DEFAULT_TASK_CACHE_KEYS.Title], undefined, { numeric: true, sensitivity: "base" });
 				} else if (taskSort === "priority") {
-					comparison = first[DEFAULT_TASK_CACHE_KEYS.Priority] - second[DEFAULT_TASK_CACHE_KEYS.Priority];
+					comparison =
+						(first[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0) -
+						(second[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0);
 				} else {
 					const firstDate = first[DEFAULT_TASK_CACHE_KEYS.DueDate] ? robustDateParser(first[DEFAULT_TASK_CACHE_KEYS.DueDate], dateFormat)?.getTime() : undefined;
 					const secondDate = second[DEFAULT_TASK_CACHE_KEYS.DueDate] ? robustDateParser(second[DEFAULT_TASK_CACHE_KEYS.DueDate], dateFormat)?.getTime() : undefined;

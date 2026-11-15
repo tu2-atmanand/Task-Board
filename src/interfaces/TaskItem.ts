@@ -58,16 +58,16 @@ export interface taskItem {
 	[DEFAULT_TASK_CACHE_KEYS.ID]: string;
 	[DEFAULT_TASK_CACHE_KEYS.LegacyID]: string; // Legacy ID to support Tasks plugin id property
 	[DEFAULT_TASK_CACHE_KEYS.Title]: string;
-	[DEFAULT_TASK_CACHE_KEYS.Body]: string[];
+	[DEFAULT_TASK_CACHE_KEYS.Body]?: string[];
 	[DEFAULT_TASK_CACHE_KEYS.Status]: string;
-	[DEFAULT_TASK_CACHE_KEYS.Priority]: number;
-	[DEFAULT_TASK_CACHE_KEYS.Tags]: string[];
-	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]: string[]; // Tags extracted from frontmatter
-	[DEFAULT_TASK_CACHE_KEYS.Time]: string;
-	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]: string;
-	[DEFAULT_TASK_CACHE_KEYS.StartDate]: string;
-	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]: string;
-	[DEFAULT_TASK_CACHE_KEYS.DueDate]: string;
+	[DEFAULT_TASK_CACHE_KEYS.Priority]?: number;
+	[DEFAULT_TASK_CACHE_KEYS.Tags]?: string[];
+	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]?: string[]; // Tags extracted from frontmatter
+	[DEFAULT_TASK_CACHE_KEYS.Time]?: string;
+	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]?: string;
+	[DEFAULT_TASK_CACHE_KEYS.StartDate]?: string;
+	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]?: string;
+	[DEFAULT_TASK_CACHE_KEYS.DueDate]?: string;
 	[DEFAULT_TASK_CACHE_KEYS.FilePath]: string;
 	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: taskLocation;
 	[DEFAULT_TASK_CACHE_KEYS.Dependencies]?: string[]; // Array of task IDs that this task depends on
@@ -105,26 +105,26 @@ export interface jsonCacheData {
 	VaultName: string; // Name of the vault
 	Modified_at: string; // Last modified date of the JSON file
 	Pending: {
-		[filePath: string]: taskItem[]; // Maps file paths to arrays of pending tasks
+		[filePath: string]: taskItemWithCustomProperties[]; // Maps file paths to arrays of pending tasks
 	};
 	Completed: {
-		[filePath: string]: taskItem[]; // Maps file paths to arrays of completed tasks
+		[filePath: string]: taskItemWithCustomProperties[]; // Maps file paths to arrays of completed tasks
 	};
 	// Notes: noteItem[]; -- @deprecated v1.9.0
 }
 
 export interface tasksJsonData {
 	Pending: {
-		[filePath: string]: taskItem[]; // Maps file paths to arrays of pending tasks
+		[filePath: string]: taskItemWithCustomProperties[]; // Maps file paths to arrays of pending tasks
 	};
 	Completed: {
-		[filePath: string]: taskItem[]; // Maps file paths to arrays of completed tasks
+		[filePath: string]: taskItemWithCustomProperties[]; // Maps file paths to arrays of completed tasks
 	};
 }
 
 export interface taskJsonMerged {
-	Pending: taskItem[];
-	Completed: taskItem[];
+	Pending: taskItemWithCustomProperties[];
+	Completed: taskItemWithCustomProperties[];
 }
 
 export interface cursorLocationInterface {

@@ -315,7 +315,7 @@ export const getUniversalDateFromTask = (
 ): string => {
 	// Method 1 - Comparing
 	if (universalDateType === UniversalDateOptions.dueDate) {
-		return task[DEFAULT_TASK_CACHE_KEYS.DueDate];
+		return task[DEFAULT_TASK_CACHE_KEYS.DueDate] || "";
 	} else if (universalDateType === UniversalDateOptions.startDate) {
 		return task[DEFAULT_TASK_CACHE_KEYS.StartDate] || "";
 	} else if (universalDateType === UniversalDateOptions.scheduledDate) {

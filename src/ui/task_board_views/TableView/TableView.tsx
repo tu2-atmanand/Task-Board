@@ -303,7 +303,7 @@ const TableView: React.FC<TableViewProps> = ({
 		if (value === renderCellValue(task, column)) return;
 
 		try {
-			const isTaskNote = isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags]);
+			const isTaskNote = isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []);
 			const updatedTask: taskItem = { ...task };
 
 			switch (column) {
@@ -356,7 +356,7 @@ const TableView: React.FC<TableViewProps> = ({
 
 			if (!isTaskNote) {
 				if (column === "tags") {
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeTags(task[DEFAULT_TASK_CACHE_KEYS.Title], updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags]);
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeTags(task[DEFAULT_TASK_CACHE_KEYS.Title], updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []);
 				} else if (column === "status") {
 					updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStatus(
 						plugin.settings.data,
