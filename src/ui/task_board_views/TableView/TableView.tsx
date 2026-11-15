@@ -178,6 +178,11 @@ const TableView: React.FC<TableViewProps> = ({
 			}
 			return JSON.stringify(value);
 		}
+		if (typeof value === "boolean") {
+			if (value) return "true";
+			else return "false";
+		}
+
 		return value;
 	}, [plugin]);
 

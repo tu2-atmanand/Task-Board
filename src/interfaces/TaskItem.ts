@@ -54,7 +54,7 @@ export function coerceCustomTaskPropertyValue(
 	}
 }
 
-export interface taskItem {
+export interface oldTaskItem {
 	[DEFAULT_TASK_CACHE_KEYS.ID]: string;
 	[DEFAULT_TASK_CACHE_KEYS.LegacyID]: string; // Legacy ID to support Tasks plugin id property
 	[DEFAULT_TASK_CACHE_KEYS.Title]: string;
@@ -77,8 +77,22 @@ export interface taskItem {
 	// onCompletion?: number;
 }
 
-/** A task plus configured custom properties keyed by their property IDs. */
-export type taskItemWithCustomProperties = taskItem &
+/**
+ * An interface to build a cache for a task object with default
+ * properties as well as user's custom properties.
+ * 
+ * @note - This interface has been modified from the older interface {@link oldTaskItem} 
+ * just for testing phase. If everything works fine, then we can keep it, else 
+ * rename back the {@link oldTaskItem} to taskItem and delete this interface.
+ */
+export type taskItem = oldTaskItem &
+	Record<string, CustomTaskPropertyValue | taskLocation | undefined>;
+
+/**
+ * An interface to build a cache for a task object with default
+ * properties as well as user's custom properties.
+ */
+export type taskItemWithCustomProperties = oldTaskItem &
 	Record<string, CustomTaskPropertyValue | taskLocation | undefined>;
 
 export interface customFrontmatterCache extends FrontMatterCache {
