@@ -82,10 +82,14 @@ export const TASK_PROPERTIES_TO_ICON_MAPPING: { [key: string]: string } = {
 	[DEFAULT_TASK_CACHE_KEYS.FilePath]: "file-input",
 	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]: "file-spreadsheet",
 	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: "Task location",
-
+	
 	// Below properties are not supported yet but will be implemented soon.
 	[DEFAULT_TASK_CACHE_KEYS.LastModified]: "file-pen",
 	[DEFAULT_TASK_CACHE_KEYS.OnCompletion]: "check-square",
 	[DEFAULT_TASK_CACHE_KEYS.Recurrence]: "calendar-sync",
+
+	// Below properties are not user configurable but they are shown 
+	// in UI, hence mapping here
+	[DEFAULT_TASK_CACHE_KEYS.ParentFolder]: "folder-input",
 };
 

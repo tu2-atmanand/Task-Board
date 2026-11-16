@@ -4,10 +4,9 @@ import { Component, View } from "obsidian";
 import TaskBoard from "../../../../main.js";
 import type { Board, TaskBoardViewType } from "../../../interfaces/BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT } from "../../../interfaces/Constants.js";
-import { taskCardStyleNames, viewTypeNames } from "../../../interfaces/Enums.js";
+import { viewTypeNames } from "../../../interfaces/Enums.js";
 import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
-import TaskItem from "../../components/task_card/EmojiStyle.js";
-import BasesStyle from "../../components/task_card/BasesStyle.js";
+import Parent from "../../components/task_card/Parent.js";
 import { robustDateParser } from "../../../utils/DateTimeCalculations.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
@@ -38,9 +37,7 @@ const ListView: React.FC<ListViewProps> = ({
 	const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
 	const [taskSort, setTaskSort] = useState<TaskSort>("default");
 	const [visibleTaskCount, setVisibleTaskCount] = useState(INITIAL_TASK_COUNT);
-	const taskCardComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI
-		? TaskItem
-		: BasesStyle;
+	const taskCardComponent = Parent;
 	const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 	const sortedTasks = useMemo(() => {

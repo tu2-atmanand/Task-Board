@@ -7,7 +7,7 @@ import { t } from 'i18next';
 import { AlertOctagon, EllipsisVertical } from 'lucide-react';
 import TaskBoard from '../../../../main.js';
 import type { Board, KanbanView, ColumnData, AdvancedFilter } from '../../../interfaces/BoardConfigs.js';
-import { taskCardStyleNames, viewTypeNames } from '../../../interfaces/Enums.js';
+import { viewTypeNames } from '../../../interfaces/Enums.js';
 import type { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { dragDropTasksManagerInsatance } from '../../../core/managers/DragDropTasksManager.js';
@@ -18,7 +18,8 @@ import { matchTagsWithWildcards } from '../../../core/algorithms/ScanningFiltere
 import { AdvancedFilterModal } from '../../components/advanced_filterer/index.js';
 import { AdvancedFilterPopover } from '../../components/advanced_filterer/Popover.js';
 import { DEFAULT_SETTINGS } from '../../../interfaces/GlobalSettings.js';
-import { BasesStyle, EmojiStyle, swimlaneDataProp } from '../../components/task_card/index.js';
+import Parent from '../../components/task_card/Parent.js';
+import type { swimlaneDataProp } from '../../components/task_card/index.js';
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
 
@@ -688,7 +689,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 	}
 
-	const taskItemComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI ? EmojiStyle : BasesStyle;
+	const taskItemComponent = Parent;
 
 	try {
 		return (

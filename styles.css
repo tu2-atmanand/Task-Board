@@ -1872,6 +1872,16 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--canvas-card-label-color);
 }
 
+.taskBoard_taskCard_iconStyle_icon {
+	display: inline-flex;
+	align-items: center;
+}
+
+.taskBoard_taskCard_iconStyle_icon .svg-icon {
+	width: 14px;
+	height: 14px;
+}
+
 .taskItemFooterPropertyContainerValue {
 	font-style: italic;
 	overflow: hidden;

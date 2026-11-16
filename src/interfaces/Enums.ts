@@ -172,7 +172,6 @@ export enum taskCardStyleNames {
 	EMOJI = "emoji",
 	ICONS = "icons",
 	BASES = "bases",
-	DATAVIEW = "custom",
 }
 
 export enum onCompletionOptions {

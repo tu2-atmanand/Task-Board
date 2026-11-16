@@ -813,9 +813,10 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 												.addOptions({
 													[taskCardStyleNames.EMOJI]:
 														t("tasks-plugin-emoji"),
-													// [taskCardStyleNames.ICONS]: t("lucide-icons"),
 													[taskCardStyleNames.BASES]:
 														t("bases-cards-style"),
+													[taskCardStyleNames.ICONS]:
+														t("lucide-icons-style"),
 													// [taskCardStyleNames.DATAVIEW]: t("dataview-style"),
 												})
 												.setValue(
@@ -3710,7 +3711,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 						host.addClass("task-board-property-editor");
 
 						const properties = this.globalSettings.taskProperties;
-						if (isNew) current.default = propertyGroup === "default";
+						if (isNew)
+							current.default = propertyGroup === "default";
 						if (isNew && !properties.includes(current)) {
 							properties.push(current);
 							void this.settingsManager.saveSettings();
@@ -4123,7 +4125,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 													this.globalSettings.taskProperties.find(
 														(candidate) =>
 															candidate !==
-															property &&
+																property &&
 															candidate.id ===
 																updatedProperty.id,
 													);

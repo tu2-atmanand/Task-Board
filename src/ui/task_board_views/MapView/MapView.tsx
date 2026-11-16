@@ -32,7 +32,7 @@ import { isTaskCompleted } from '../../../utils/CheckBoxUtils.js';
 import { sanitizeDependsOn } from '../../../utils/task_line/TaskContentFormatter.js';
 import { updateTaskInFile } from '../../../utils/task_line/TaskLineUtils.js';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../../utils/task_note/TaskNoteUtils.js';
-import BasesStyle from '../../components/task_card/BasesStyle.js';
+import Parent from '../../components/task_card/Parent.js';
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
 
@@ -379,7 +379,7 @@ const MapView: React.FC<MapViewProps> = ({
 					id,
 					type: 'ResizableNodeSelected',
 					data: {
-						label: <BasesStyle
+						label: <Parent
 							dataAttributeIndex={0}
 							plugin={plugin}
 							task={task}
