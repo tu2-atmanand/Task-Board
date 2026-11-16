@@ -1,3 +1,5 @@
+import { SupportedPropertiesConfig } from "./GlobalSettings.js";
+
 export enum taskPropertyFormatOptions {
 	default = "1",
 	tasksPlugin = "2",
@@ -72,12 +74,24 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	// Below properties are not stored in cache, but this same enum is used at other places hence placing them here.
 	ParentTasks = "parentTasks",
 	Checkbox = "checkbox",
+	CheckboxIcon = "checkboxIcon",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",
 	FilePathInHeader = "filePathInHeader",
 	ParentFolder = "parentFolder",
 	FullPath = "fullPath",
 }
+
+export const getAllUIVisibleTaskProperties = (
+	supportedProperties: SupportedPropertiesConfig[],
+) => {
+	return [
+		DEFAULT_TASK_CACHE_KEYS.Checkbox,
+		DEFAULT_TASK_CACHE_KEYS.SubTasks,
+		DEFAULT_TASK_CACHE_KEYS.Description,
+		...supportedProperties.map((property) => property.key),
+	];
+};
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 	id = "id",

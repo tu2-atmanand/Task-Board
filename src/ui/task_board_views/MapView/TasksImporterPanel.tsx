@@ -239,6 +239,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 											activeViewIndex={activeViewIndex}
 											activeViewType={viewTypeNames.map}
 											activeBoardID={activeBoardSettings.id}
+											propertiesVisibleInUI={activeViewData.propertiesVisibleInUI}
 										/>
 									</div>
 								))}

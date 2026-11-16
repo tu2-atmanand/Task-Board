@@ -185,6 +185,7 @@ export interface TaskBoardViewType {
 	viewIndex: number;
 	viewName: string;
 	viewType: viewTypeNames;
+	propertiesVisibleInUI: string[];
 	description?: string;
 	showFilteredTags: boolean;
 	taskCount: {
@@ -305,6 +306,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
+			propertiesVisibleInUI: [],
 			kanbanView: {
 				columns: [
 					{
@@ -414,6 +416,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
+			propertiesVisibleInUI: [],
 			kanbanView: {
 				columns: [
 					{
@@ -493,6 +496,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
+			propertiesVisibleInUI: [],
 			kanbanView: {
 				columns: [
 					{
@@ -582,6 +586,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
+			propertiesVisibleInUI: [],
 			mapView: {
 				viewPortData: {
 					x: 0,

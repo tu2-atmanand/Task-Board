@@ -387,6 +387,7 @@ const MapView: React.FC<MapViewProps> = ({
 							activeViewType={viewTypeNames.map}
 							activeViewIndex={currentViewIndex}
 							activeBoardID={activeBoardData.id}
+							propertiesVisibleInUI={currentView.propertiesVisibleInUI}
 						/>
 					},
 					position: {

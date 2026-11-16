@@ -27,6 +27,7 @@ import { updateRGBAOpacity } from "../../../utils/UIHelpers.js";
 export function createTaskCard(
 	plugin: TaskBoard,
 	taskItemValue: taskItem,
+	propertiesVisibleInUI: string[],
 ): HTMLElement {
 	const task = normalizeTaskItem(taskItemValue);
 	const globalSettings = plugin.settings.data;
@@ -66,7 +67,7 @@ export function createTaskCard(
 	header.className = "taskItemHeader";
 
 	if (
-		globalSettings.propertiesVisibleInUI?.includes(
+		propertiesVisibleInUI.includes(
 			DEFAULT_TASK_CACHE_KEYS.FilePathInHeader,
 		) &&
 		task[DEFAULT_TASK_CACHE_KEYS.FilePath]
@@ -92,9 +93,7 @@ export function createTaskCard(
 	headerLeft.className = "taskItemHeaderLeft";
 
 	if (
-		globalSettings.propertiesVisibleInUI?.includes(
-			DEFAULT_TASK_CACHE_KEYS.Priority,
-		) &&
+		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Priority) &&
 		task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0
 	) {
 		const pr = activeDocument.createDiv("div");
@@ -105,9 +104,7 @@ export function createTaskCard(
 	}
 
 	if (
-		globalSettings.propertiesVisibleInUI?.includes(
-			DEFAULT_TASK_CACHE_KEYS.Tags,
-		) &&
+		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Tags) &&
 		(task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 ||
 			task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0)
 	) {
@@ -156,9 +153,7 @@ export function createTaskCard(
 	const headerRight = activeDocument.createDiv("div");
 	headerRight.className = "taskItemHeaderRight";
 	if (
-		globalSettings.propertiesVisibleInUI?.includes(
-			DEFAULT_TASK_CACHE_KEYS.ID,
-		) &&
+		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.ID) &&
 		task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
 	) {
 		const idCont = activeDocument.createDiv("div");
@@ -184,12 +179,8 @@ export function createTaskCard(
 	const titleWrap = activeDocument.createDiv("div");
 	titleWrap.className = "taskItemMainBodyTitleNsubTasks";
 
-	if (
-		globalSettings.propertiesVisibleInUI?.includes(
-			DEFAULT_TASK_CACHE_KEYS.Checkbox,
-		)
-	) {
-		const cb = activeDocument.createElement("input");
+	if (propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox)) {
+		const cb = activeDocument.createEl("input");
 		cb.type = "checkbox";
 		cb.checked =
 			task[DEFAULT_TASK_CACHE_KEYS.Status] === " " ? false : true;
@@ -215,13 +206,11 @@ export function createTaskCard(
 	const footer = activeDocument.createDiv("div");
 	footer.className = "taskItemFooter";
 	if (
-		globalSettings.propertiesVisibleInUI?.includes(
-			DEFAULT_TASK_CACHE_KEYS.Status,
-		) &&
+		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Status) &&
 		task[DEFAULT_TASK_CACHE_KEYS.Status]
 	) {
 		const stat = activeDocument.createDiv("div");
-		stat.className = "taskItemFooterPropertyContainerEmoji";
+		stat.className = "taskItemFooterPropertyContainer_EmojiStyle";
 		const val = activeDocument.createDiv("div");
 		val.className = "taskItemFooterPropertyContainerValue";
 		val.textContent = getStatusNameFromStatusSymbol(
@@ -232,13 +221,11 @@ export function createTaskCard(
 		footer.appendChild(stat);
 	}
 	if (
-		globalSettings.propertiesVisibleInUI?.includes(
-			DEFAULT_TASK_CACHE_KEYS.FilePath,
-		) &&
+		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.FilePath) &&
 		task[DEFAULT_TASK_CACHE_KEYS.FilePath]
 	) {
 		const fp = activeDocument.createDiv("div");
-		fp.className = "taskItemFooterPropertyContainerEmoji";
+		fp.className = "taskItemFooterPropertyContainer_EmojiStyle";
 		const val = activeDocument.createDiv("div");
 		val.className = "taskItemFooterPropertyContainerValue";
 		val.setAttribute("aria-label", task[DEFAULT_TASK_CACHE_KEYS.FilePath]);

@@ -195,7 +195,6 @@ export interface globalSettingsData {
 	experimentalFeatures: boolean;
 
 	// Other Caching Settings
-	propertiesVisibleInUI: DEFAULT_TASK_CACHE_KEYS[]; // TODO : Need to move this setting to view specific.
 	dragAutoScrollEdgePercent: number;
 	notificationService: NotificationService;
 	actions: TaskBoardAction[];
@@ -748,26 +747,6 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		showModifiedFilesNotice: false,
 		scanMode: scanModeOptions.AUTOMATIC,
 		columnWidth: "300px",
-		propertiesVisibleInUI: [
-			DEFAULT_TASK_CACHE_KEYS.Checkbox,
-			DEFAULT_TASK_CACHE_KEYS.ID,
-			DEFAULT_TASK_CACHE_KEYS.Title,
-			DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized,
-			DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized,
-			DEFAULT_TASK_CACHE_KEYS.Status,
-			DEFAULT_TASK_CACHE_KEYS.Tags,
-			DEFAULT_TASK_CACHE_KEYS.Time,
-			DEFAULT_TASK_CACHE_KEYS.Reminder,
-			DEFAULT_TASK_CACHE_KEYS.Priority,
-			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
-			DEFAULT_TASK_CACHE_KEYS.StartDate,
-			DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
-			DEFAULT_TASK_CACHE_KEYS.DueDate,
-			DEFAULT_TASK_CACHE_KEYS.CompletionDate,
-			DEFAULT_TASK_CACHE_KEYS.CancelledDate,
-			DEFAULT_TASK_CACHE_KEYS.Dependencies,
-			DEFAULT_TASK_CACHE_KEYS.FilePath,
-		],
 		taskCardStyle: taskCardStyleNames.EMOJI,
 		showVerticalScroll: true,
 		dragAutoScrollEdgePercent: 20,

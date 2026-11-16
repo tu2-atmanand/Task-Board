@@ -10,7 +10,7 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../../interfaces/BoardConfigs.js";
-import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions } from "../../interfaces/Enums.js";
+import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions, getAllUIVisibleTaskProperties } from "../../interfaces/Enums.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../../services/MultiSuggest.js";
 import { generateRandomNumber, generateRandomStringId, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
@@ -344,6 +344,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			app,
 			boardWithCurrentEdits,
 			{
+				propertiesVisibleInUI: getAllUIVisibleTaskProperties(plugin.settings.data.taskProperties),
 				onCancel: () => {
 					// Do nothing on cancel
 				},

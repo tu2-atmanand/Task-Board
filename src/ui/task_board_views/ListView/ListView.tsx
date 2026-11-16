@@ -97,6 +97,7 @@ const ListView: React.FC<ListViewProps> = ({
 		activeBoardID: currentBoardData.id,
 		activeViewIndex: currentViewIndex,
 		activeViewType: viewTypeNames.list,
+		propertiesVisibleInUI: currentView.propertiesVisibleInUI,
 	});
 
 	return (

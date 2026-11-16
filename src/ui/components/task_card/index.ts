@@ -24,6 +24,7 @@ export interface TaskCardProps {
 	activeBoardID: string;
 	activeViewIndex: number;
 	activeViewType: viewTypeNames;
+	propertiesVisibleInUI: string[];
 	// These are optional as this TaskItem can be shown either on Kanban view or Map view.
 	kanbanViewData?: KanbanView;
 	columnIndex?: number;
@@ -33,6 +34,7 @@ export interface TaskCardProps {
 export interface TaskCardFooterComponent {
 	parentComponent: Component | View;
 	cardLoadingAnimation: boolean;
+	propertiesVisibleInUI: string[];
 }
 
 export type TaskCardFooterStyle = "emoji" | "bases" | "icons";

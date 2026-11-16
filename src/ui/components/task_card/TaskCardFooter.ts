@@ -72,10 +72,15 @@ function getTaskPropertyValue(
 export function getTaskCardFooterProperties(
 	task: taskItem,
 	globalSetting: globalSettingsData,
+	propertiesVisibleInUI: string[],
 ): TaskCardFooterPropertyValue[] {
 	return (globalSetting.taskProperties ?? [])
 		.map((property, index) => ({ property, index }))
-		.filter(({ property }) => !NON_FOOTER_PROPERTIES.has(property.key))
+		.filter(
+			({ property }) =>
+				!NON_FOOTER_PROPERTIES.has(property.key) &&
+				propertiesVisibleInUI.includes(property.key),
+		)
 		.sort(
 			(first, second) =>
 				first.property.rank - second.property.rank ||
@@ -132,9 +137,9 @@ export function renderTaskCardFooter(
 				const propertyContainer = container.createDiv({
 					cls:
 						style === "emoji"
-							? "taskItemFooterPropertyContainerEmoji"
+							? "taskItemFooterPropertyContainer_EmojiStyle"
 							: style === "icons"
-								? "taskItemFooterPropertyContainer taskItemFooterPropertyContainerIcon"
+								? "taskItemFooterPropertyContainer_IconStyle"
 								: "taskItemFooterPropertyContainer",
 				});
 				if (style === "icons" && property.color) {

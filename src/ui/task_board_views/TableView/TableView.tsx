@@ -4,7 +4,7 @@ import Sortable from "sortablejs";
 import { GripVertical } from "lucide-react";
 import TaskBoard from "../../../../main.js";
 import { Board, TaskBoardViewType, TableView as TableViewConfig } from "../../../interfaces/BoardConfigs.js";
-import { DEFAULT_TASK_CACHE_KEYS, statusTypeNames } from "../../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, getAllUIVisibleTaskProperties, statusTypeNames } from "../../../interfaces/Enums.js";
 import { taskItemKeyToNameMapping } from "../../../interfaces/Mapping.js";
 import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
@@ -91,7 +91,7 @@ const TableView: React.FC<TableViewProps> = ({
 	const isLoadingMoreRef = useRef(false);
 	const resizeCleanupRef = useRef<(() => void) | null>(null);
 
-	const visiblePropertyKeys = (plugin.settings.data.propertiesVisibleInUI ?? []).join("\u0000");
+	const visiblePropertyKeys = (currentView.propertiesVisibleInUI ?? getAllUIVisibleTaskProperties(plugin.settings.data.taskProperties)).join("\u0000");
 	const visibleColumns = useMemo(() => {
 		const visibleProperties = new Set(visiblePropertyKeys.split("\u0000"));
 		const orderedColumns = tableColumns.filter((column) => (tableViewData.columnOrder ?? []).includes(column));

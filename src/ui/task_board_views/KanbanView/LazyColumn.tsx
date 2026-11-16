@@ -791,6 +791,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																activeBoardID: activeBoardData.id,
 																activeViewIndex: currentViewIndex,
 																activeViewType: activeViewType,
+																propertiesVisibleInUI: activeBoardData.views[currentViewIndex].propertiesVisibleInUI,
 																kanbanViewData: kanbanViewData,
 																columnIndex: columnData.index,
 																swimlaneData: swimlaneData

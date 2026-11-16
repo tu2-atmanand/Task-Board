@@ -15,7 +15,11 @@ export function renderEmojiStyleFooter(
 ): ReactNode {
 	return renderTaskCardFooter(
 		component,
-		getTaskCardFooterProperties(taskItem, globalSetting),
+		getTaskCardFooterProperties(
+			taskItem,
+			globalSetting,
+			component.propertiesVisibleInUI,
+		),
 		taskCardStyleNames.EMOJI,
 	);
 }

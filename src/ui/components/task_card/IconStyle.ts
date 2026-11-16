@@ -12,7 +12,11 @@ export function renderIconStyleFooter(
 ): ReactNode {
 	return renderTaskCardFooter(
 		component,
-		getTaskCardFooterProperties(taskItem, globalSetting),
+		getTaskCardFooterProperties(
+			taskItem,
+			globalSetting,
+			component.propertiesVisibleInUI,
+		),
 		taskCardStyleNames.ICONS,
 	);
 }

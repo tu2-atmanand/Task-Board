@@ -76,6 +76,7 @@ export function addViewToBoard(
 	board: Board,
 	viewType: viewTypeNames,
 	viewName: string,
+	propertiesVisibleInUI: string[],
 ): Board {
 	const newViewId = generateRandomStringId("view");
 
@@ -85,6 +86,7 @@ export function addViewToBoard(
 		viewIndex: board.views.length,
 		viewName: viewName,
 		viewType: viewType,
+		propertiesVisibleInUI: [...propertiesVisibleInUI],
 		showFilteredTags: true,
 		viewFilter: {
 			rootCondition: "any",

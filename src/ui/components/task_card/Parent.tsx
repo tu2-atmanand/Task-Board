@@ -2,7 +2,7 @@
 
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Component, Notice, Platform, Menu, TFile, MenuItem } from 'obsidian';
+import { Component, Notice, Platform, Menu, TFile, MenuItem, setIcon } from 'obsidian';
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from '../../../interfaces/Constants.js';
@@ -32,6 +32,7 @@ import type { TaskCardProps } from './index.js';
 import { renderBasesStyleFooter } from './BasesStyle.js';
 import { renderEmojiStyleFooter } from './EmojiStyle.js';
 import { renderIconStyleFooter } from './IconStyle.js';
+import { normalizeTaskIconValue } from '../../modals/icon_picker/index.js';
 
 const Parent: React.FC<TaskCardProps> = (props) => {
 	const {
@@ -41,6 +42,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 		activeBoardID,
 		activeViewIndex,
 		activeViewType,
+		propertiesVisibleInUI,
 		kanbanViewData,
 		columnIndex,
 		swimlaneData,
@@ -51,18 +53,18 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags]);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task[DEFAULT_TASK_CACHE_KEYS.Status], true, plugin.settings) : isTaskCompleted(task[DEFAULT_TASK_CACHE_KEYS.Title], false, plugin.settings)
 	const columnData = columnIndex !== undefined && kanbanViewData ? kanbanViewData.columns[columnIndex - 1] : undefined;
-	const showDescriptionSection = globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description) ?? true;
+	const showDescriptionSection = propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Description);
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
-	const [showSubtasks, setShowSubtasks] = useState(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
+	const [showSubtasks, setShowSubtasks] = useState(propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
 	useEffect(() => {
-		if (plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
+		if (propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
 			setShowSubtasks(true);
 		} else {
 			setShowSubtasks(false);
 		}
-	}, [plugin.settings.data.propertiesVisibleInUI]);
+	}, [propertiesVisibleInUI]);
 
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(
 		() => !showDescriptionSection && shouldExpandTaskDescription(task),
@@ -1004,11 +1006,32 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 	// ALL RENDERING CODE
 	// ========================================
 
+	const renderColoredCustomStatusIcon = () => {
+		const customStatus = globalSettings.customStatuses?.find(
+			(status) => status.symbol === task[DEFAULT_TASK_CACHE_KEYS.Status],
+		);
+		const icon = normalizeTaskIconValue(customStatus?.lucideIcon);
+
+		if (!customStatus || !icon) return null;
+
+		return (
+			<span
+				className="taskItemCustomStatusIcon"
+				aria-label={customStatus.name}
+				title={customStatus.name}
+				style={{ color: customStatus.color }}
+				ref={(element) => {
+					if (element) setIcon(element, icon);
+				}}
+			/>
+		);
+	};
+
 	const renderHeader = () => {
 		try {
 			return (
 				<div className="taskItemHeader">
-					{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader) && task[DEFAULT_TASK_CACHE_KEYS.FilePath] && (
+					{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader) && task[DEFAULT_TASK_CACHE_KEYS.FilePath] && (
 						<div className='taskitemHeaderTopFilename' aria-label={task[DEFAULT_TASK_CACHE_KEYS.FilePath]}>
 							<div className='taskitemHeaderTopFilenameValue'>{task[DEFAULT_TASK_CACHE_KEYS.FilePath].split('/').pop()}</div>
 						</div>
@@ -1017,7 +1040,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 					<div className='taskItemHeaderBottom'>
 						<div className="taskItemHeaderLeft">
 							{/* Render tags individually */}
-							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Tags) && (task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 || task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0) && (
+							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Tags) && (task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 || task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0) && (
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
 									{task[DEFAULT_TASK_CACHE_KEYS.Tags].map((tag: string, index: number) => {
@@ -1078,7 +1101,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 							)}
 						</div>
 						<div className='taskItemHeaderRight'>
-							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ID) && task[DEFAULT_TASK_CACHE_KEYS.LegacyID] && (
+							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.ID) && task[DEFAULT_TASK_CACHE_KEYS.LegacyID] && (
 								<div className='taskItemPropertyID'>
 									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task[DEFAULT_TASK_CACHE_KEYS.LegacyID]}</div>
 								</div>
@@ -1107,7 +1130,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 			const total = allSubTasks.length;
 			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
 
-			const showSubTaskSummaryBar = globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
+			const showSubTaskSummaryBar = propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
 
 			return (
 				<>
@@ -1197,7 +1220,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 	// Render Footer based on the settings
 	const renderFooter = () => {
 		try {
-			const component = { parentComponent, cardLoadingAnimation };
+			const component = { parentComponent, cardLoadingAnimation, propertiesVisibleInUI };
 			switch (globalSettings.taskCardStyle) {
 				case taskCardStyleNames.EMOJI:
 					return renderEmojiStyleFooter(component, task, globalSettings);
@@ -1275,8 +1298,8 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [plugin.settings.data.propertiesVisibleInUI, task[DEFAULT_TASK_CACHE_KEYS.Priority], task[DEFAULT_TASK_CACHE_KEYS.Tags], columnData]);
-	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [plugin.settings.data.propertiesVisibleInUI, task[DEFAULT_TASK_CACHE_KEYS.Body], showSubtasks]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [propertiesVisibleInUI, task[DEFAULT_TASK_CACHE_KEYS.Priority], task[DEFAULT_TASK_CACHE_KEYS.Tags], columnData]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [propertiesVisibleInUI, task[DEFAULT_TASK_CACHE_KEYS.Body], showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task[DEFAULT_TASK_CACHE_KEYS.Dependencies], childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
 
@@ -1317,7 +1340,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 					{/* Task Content */}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
-							{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox) && (
+							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox) && (
 								<input
 									id={`${task[DEFAULT_TASK_CACHE_KEYS.ID]}-checkbox`}
 									type="checkbox"
@@ -1340,11 +1363,33 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 									readOnly={cardLoadingAnimation}
 								/>
 							)}
+							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.CheckboxIcon) && (
+								<span
+									id={`${task[DEFAULT_TASK_CACHE_KEYS.ID]}-checkbox`}
+									className="taskItemCheckboxIcon"
+									data-task={cardLoadingAnimation ? 'x' : task[DEFAULT_TASK_CACHE_KEYS.Status]}
+									dir='auto'
+									onClick={(e) => {
+										if (cardLoadingAnimation) {
+											e.preventDefault();
+										}
+
+										handleMainCheckBoxClick()
+									}}
+									onDoubleClick={(e) => {
+										e.preventDefault();
+									}}
+									aria-disabled={cardLoadingAnimation}
+									aria-busy={cardLoadingAnimation}
+								>
+									{renderColoredCustomStatusIcon()}
+								</span>
+							)}
 							<div className="taskItemBodyContent">
 								<div className="taskItemTitle" ref={taskTitleRendererRef} />
 
 								{/* Sub-tasks section */}
-								{(globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) || globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) && (
+								{(propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) || propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) && (
 									<div className="taskItemSubTasksSection">
 										{memoizedRenderSubTasks}
 									</div>
@@ -1357,7 +1402,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 								{renderDescriptionSection()}
 							</div>
 						)}
-						{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized) && (
+						{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized) && (
 							<div className="taskItemMainBodyDescription">
 								{task[DEFAULT_TASK_CACHE_KEYS.Body].some((line) => line.trim() !== "" && !isTaskLine(line)) && (
 									<div
@@ -1387,7 +1432,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 							</div>
 						)}
 
-						{globalSettings.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies) && (
+						{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies) && (
 							<>
 								{memoizedRenderChildTasks}
 							</>
