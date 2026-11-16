@@ -1848,14 +1848,20 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/src/components/BasesStyle.tsx 
 -------------------------------------------------*/
 
-.taskItemFooterPropertiesContainer {
+.taskItemFooterPropertiesContainer_IconStyle,
+.taskItemFooterPropertiesContainer_EmojiStyle {
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
 	align-items: flex-start;
 	margin-top: 0.7rem;
 	gap: 0.4rem;
-	margin-inline-start: 5px;
+}
+
+.taskItemFooterPropertiesContainer_BasesStyle {
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem;
 }
 
 .taskItemFooterPropertyContainer {
@@ -1864,6 +1870,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 1em;
 	align-items: center;
 	max-width: 100%;
+}
+
+.taskItemFooterPropertyContainerIcon {
+	display: inline-flex;
+	gap: 0.4rem;
+	padding: 2px 4px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	align-items: flex-start;
 }
 
 .taskItemFooterPropertyContainerLabel {
@@ -1878,8 +1893,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskBoard_taskCard_iconStyle_icon .svg-icon {
-	width: 14px;
-	height: 14px;
+	width: 16px;
+	height: 16px;
 }
 
 .taskItemFooterPropertyContainerValue {
@@ -1888,7 +1903,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	font-size: 0.75rem;
-	/* max-width: calc(var(--task-board-column-width) - 5rem); */
+	color: var(--text-muted);
 }
 
 

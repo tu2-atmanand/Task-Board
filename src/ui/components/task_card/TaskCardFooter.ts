@@ -1,10 +1,7 @@
 import { createElement, type ReactNode } from "react";
 import { setIcon } from "obsidian";
 import { t } from "../../../utils/lang/helper.js";
-import {
-	DEFAULT_TASK_CACHE_KEYS,
-	taskCardStyleNames,
-} from "../../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 import type {
 	globalSettingsData,
 	SupportedPropertiesConfig,
@@ -112,16 +109,16 @@ export function renderTaskCardFooter(
 	style: TaskCardFooterStyle,
 ): ReactNode {
 	const rootClass =
-		style === taskCardStyleNames.EMOJI
-			? "taskItemFooter"
-			: "taskItemFooterPropertiesContainer";
+		style === "emoji"
+			? "taskItemFooterPropertiesContainer_EmojiStyle"
+			: style === "icons"
+				? "taskItemFooterPropertiesContainer_IconStyle"
+				: "taskItemFooterPropertiesContainer_BasesStyle";
 	if (component.cardLoadingAnimation) {
 		return createElement(
 			"div",
 			{ className: "taskItemFooterRefreshingMssg" },
-			style === taskCardStyleNames.EMOJI
-				? "Refreshing..."
-				: t("refreshing"),
+			style === "emoji" ? "Refreshing..." : t("refreshing"),
 		);
 	}
 
@@ -134,22 +131,30 @@ export function renderTaskCardFooter(
 			for (const { property, value, ariaLabel } of properties) {
 				const propertyContainer = container.createDiv({
 					cls:
-						style === taskCardStyleNames.EMOJI
+						style === "emoji"
 							? "taskItemFooterPropertyContainerEmoji"
-							: "taskItemFooterPropertyContainer",
+							: style === "icons"
+								? "taskItemFooterPropertyContainer taskItemFooterPropertyContainerIcon"
+								: "taskItemFooterPropertyContainer",
 				});
+				if (style === "icons" && property.color) {
+					propertyContainer.style.borderColor = property.color;
+				}
 				const label = propertyContainer.createDiv({
 					cls:
-						style === taskCardStyleNames.EMOJI
+						style === "emoji"
 							? "taskItemFooterPropertyContainerEmojiLabel"
 							: "taskItemFooterPropertyContainerLabel",
 				});
 
-				if (style === taskCardStyleNames.ICONS) {
+				if (style === "icons") {
 					if (property.icon) {
 						const iconContainer = label.createSpan({
 							cls: "taskBoard_taskCard_iconStyle_icon",
 						});
+						if (property.color) {
+							iconContainer.style.color = property.color;
+						}
 						setIcon(iconContainer, property.icon);
 					}
 				} else {
@@ -169,7 +174,7 @@ export function renderTaskCardFooter(
 
 function propertyLabel(
 	property: SupportedPropertiesConfig,
-	style: Exclude<TaskCardFooterStyle, taskCardStyleNames.ICONS>,
+	style: Exclude<TaskCardFooterStyle, "icons">,
 ): string {
-	return style === taskCardStyleNames.EMOJI ? property.emoji : property.name;
+	return style === "emoji" ? property.emoji : property.name;
 }

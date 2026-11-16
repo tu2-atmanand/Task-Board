@@ -18,6 +18,7 @@ import {
 	openIconPickerModal,
 	showIconPicker,
 } from "./icon_picker/index.js";
+import { showColorPicker } from "./color_picker/ColorPickerModal.js";
 
 export class PropertyConfigurationModal extends Modal {
 	private draft: SupportedPropertiesConfig;
@@ -181,6 +182,34 @@ export class PropertyConfigurationModal extends Modal {
 			};
 			if (Platform.isMobile) openIconPickerModal(this.app, pickerOptions);
 			else showIconPicker(iconButton, pickerOptions);
+		});
+
+		const colorSetting = new Setting(contentEl).setName(t("status-color"));
+		const colorButton = colorSetting.controlEl.createEl("button", {
+			cls: "task-board-custom-status-color-button",
+			attr: {
+				type: "button",
+				"aria-label": t("status-color"),
+			},
+		});
+		colorButton.textContent = this.draft.color || t("choose-color");
+		if (this.draft.color)
+			colorButton.style.backgroundColor = this.draft.color;
+		colorButton.addEventListener("click", () => {
+			showColorPicker(colorButton, {
+				value: this.draft.color ?? "",
+				outputFormat: "rgb",
+				onSelect: (value) => {
+					this.draft.color = value;
+					colorButton.textContent = value;
+					colorButton.style.backgroundColor = value;
+				},
+				onClear: () => {
+					this.draft.color = "";
+					colorButton.textContent = t("choose-color");
+					colorButton.style.removeProperty("background-color");
+				},
+			});
 		});
 
 		new Setting(contentEl)
