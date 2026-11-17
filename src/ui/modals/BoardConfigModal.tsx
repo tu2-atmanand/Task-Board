@@ -732,7 +732,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											String(error),
 											"BoardConfigModal.tsx/renderViewSettings/copy-view-id",
 										);
-										new Notice(t("copy-task-title-unsuccessful"));
+										new Notice(t("copy-view-id-unsuccessful"));
 									}
 								}} />
 							</div>
