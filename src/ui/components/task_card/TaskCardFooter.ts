@@ -28,7 +28,6 @@ const NON_FOOTER_PROPERTIES = new Set<string>([
 export interface TaskCardFooterPropertyValue {
 	property: SupportedPropertiesConfig;
 	value: string;
-	ariaLabel?: string;
 }
 
 function getTaskPropertyValue(
@@ -133,7 +132,7 @@ export function renderTaskCardFooter(
 			if (!container) return;
 			container.empty();
 
-			for (const { property, value, ariaLabel } of properties) {
+			for (const { property, value } of properties) {
 				const propertyContainer = container.createDiv({
 					cls:
 						style === "emoji"
@@ -170,8 +169,7 @@ export function renderTaskCardFooter(
 					cls: "taskItemFooterPropertyContainerValue",
 					text: value,
 				});
-				if (ariaLabel)
-					propertyValue.setAttribute("aria-label", ariaLabel);
+				propertyValue.setAttribute("aria-label", value);
 			}
 		},
 	});
