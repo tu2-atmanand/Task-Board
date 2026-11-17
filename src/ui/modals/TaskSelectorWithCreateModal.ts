@@ -6,7 +6,10 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
 import { createNewInlineTask } from "../../utils/task_line/TaskItemEventHandlers.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
-import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	getAllUIVisibleTaskProperties,
+} from "../../interfaces/Enums.js";
 
 export type TaskSelectorWithCreateResult =
 	| { type: "selected"; task: taskItem }
@@ -42,11 +45,23 @@ export function taskMatchesSelectorQuery(
 	task: taskItem,
 	lowerQuery: string,
 ): boolean {
-	if (searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.Title], lowerQuery)) return true;
-	if (searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.DueDate], lowerQuery)) return true;
+	if (
+		searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.Title], lowerQuery)
+	)
+		return true;
+	if (
+		searchableValueIncludes(
+			task[DEFAULT_TASK_CACHE_KEYS.DueDate],
+			lowerQuery,
+		)
+	)
+		return true;
 	if (
 		task[DEFAULT_TASK_CACHE_KEYS.Priority] !== 0 &&
-		searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.Priority], lowerQuery)
+		searchableValueIncludes(
+			task[DEFAULT_TASK_CACHE_KEYS.Priority],
+			lowerQuery,
+		)
 	) {
 		return true;
 	}
@@ -212,7 +227,12 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 
 		try {
 			// Build task creation data
-			let taskData = buildTaskFromRawContent(`- [ ] ${query}`, "", undefined, this.plugin.settings.data);
+			let taskData = buildTaskFromRawContent(
+				`- [ ] ${query}`,
+				"",
+				undefined,
+				this.plugin.settings.data,
+			);
 			taskData[DEFAULT_TASK_CACHE_KEYS.ID] = generateRandomStringId();
 			let completeTask: taskItem = taskData as taskItem;
 			// Create the task
@@ -251,10 +271,23 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 			})
 			.sort((a, b) => {
 				// Sort by due date second
-				if (a[DEFAULT_TASK_CACHE_KEYS.DueDate] && !b[DEFAULT_TASK_CACHE_KEYS.DueDate]) return -1;
-				if (!a[DEFAULT_TASK_CACHE_KEYS.DueDate] && b[DEFAULT_TASK_CACHE_KEYS.DueDate]) return 1;
-				if (a[DEFAULT_TASK_CACHE_KEYS.DueDate] && b[DEFAULT_TASK_CACHE_KEYS.DueDate]) {
-					const dateCompare = a[DEFAULT_TASK_CACHE_KEYS.DueDate].localeCompare(b[DEFAULT_TASK_CACHE_KEYS.DueDate]);
+				if (
+					a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
+					!b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+				)
+					return -1;
+				if (
+					!a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
+					b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+				)
+					return 1;
+				if (
+					a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
+					b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+				) {
+					const dateCompare = a[
+						DEFAULT_TASK_CACHE_KEYS.DueDate
+					].localeCompare(b[DEFAULT_TASK_CACHE_KEYS.DueDate]);
 					if (dateCompare !== 0) return dateCompare;
 				}
 
@@ -265,21 +298,31 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 					low: 2,
 				};
 				const aPriority =
-					priorityOrder[String(a[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)] ??
-					1;
+					priorityOrder[
+						String(a[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)
+					] ?? 1;
 				const bPriority =
-					priorityOrder[String(b[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)] ??
-					1;
+					priorityOrder[
+						String(b[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)
+					] ?? 1;
 				if (aPriority !== bPriority) return aPriority - bPriority;
 
 				// Finally by title
-				return a[DEFAULT_TASK_CACHE_KEYS.Title].localeCompare(b[DEFAULT_TASK_CACHE_KEYS.Title]);
+				return a[DEFAULT_TASK_CACHE_KEYS.Title].localeCompare(
+					b[DEFAULT_TASK_CACHE_KEYS.Title],
+				);
 			});
 	}
 
 	renderSuggestion(task: taskItem, el: HTMLElement): void {
 		// Use TaskCard component with default layout for full styling
-		const taskCard = createTaskCard(this.plugin, task);
+		const taskCard = createTaskCard(
+			this.plugin,
+			task,
+			getAllUIVisibleTaskProperties(
+				this.plugin.settings.data.taskProperties,
+			),
+		);
 
 		// Add modal-specific class for any additional styling
 		taskCard.classList.add("taskboard-task-selector-modal-taskitem");

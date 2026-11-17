@@ -7,6 +7,7 @@ import {
 	UniversalDateOptions,
 	HeaderTruncationOptions,
 	PropertyTypeConfig,
+	DEFAULT_TASK_CACHE_KEYS,
 } from "./Enums.js";
 import { defaultTaskStatuses } from "./Mapping.js";
 
@@ -282,6 +283,18 @@ export type Board = {
 	pluginVersion?: string;
 };
 
+export const ESSENTIAL_VISIBLE_TASK_PROPERTIES = [
+	DEFAULT_TASK_CACHE_KEYS.Checkbox,
+	DEFAULT_TASK_CACHE_KEYS.SubTasks,
+	DEFAULT_TASK_CACHE_KEYS.Description,
+	DEFAULT_TASK_CACHE_KEYS.Status,
+	DEFAULT_TASK_CACHE_KEYS.Priority,
+	DEFAULT_TASK_CACHE_KEYS.Tags,
+	DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+	DEFAULT_TASK_CACHE_KEYS.DueDate,
+	DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+];
+
 // A single board is a single project, inside a board user will create multiple types of views to visualize their tasks in different ways. Hence, when user will install this plugin for the first time, will only going to have a single board to which will be enought show the capabilities of this plugin and later user can easily create more boards.
 export const DEFAULT_BOARD: Board = {
 	id: "3103563481",
@@ -306,7 +319,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
-			propertiesVisibleInUI: [],
+			propertiesVisibleInUI: ESSENTIAL_VISIBLE_TASK_PROPERTIES,
 			kanbanView: {
 				columns: [
 					{
@@ -416,7 +429,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
-			propertiesVisibleInUI: [],
+			propertiesVisibleInUI: ESSENTIAL_VISIBLE_TASK_PROPERTIES,
 			kanbanView: {
 				columns: [
 					{
@@ -496,7 +509,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
-			propertiesVisibleInUI: [],
+			propertiesVisibleInUI: ESSENTIAL_VISIBLE_TASK_PROPERTIES,
 			kanbanView: {
 				columns: [
 					{
@@ -586,7 +599,7 @@ export const DEFAULT_BOARD: Board = {
 				pending: 0,
 				completed: 0,
 			},
-			propertiesVisibleInUI: [],
+			propertiesVisibleInUI: ESSENTIAL_VISIBLE_TASK_PROPERTIES,
 			mapView: {
 				viewPortData: {
 					x: 0,
