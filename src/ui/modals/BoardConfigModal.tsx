@@ -1415,13 +1415,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							</div>
 						</div>
 
-						{/* <div className="boardConfigModalMainContent">
-							{selectedViewIndex === -2
-								? renderGlobalSettingsTab(selectedViewIndex)
-								: selectedViewIndex === -1
-									? renderBoardConfigTab()
-									: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
-						</div> */}
+						<div className="boardConfigModalMainContent">
+							{selectedViewIndex === -1
+								? renderBoardConfigTab()
+								: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
+						</div>
 					</>
 				)}
 			</div>
