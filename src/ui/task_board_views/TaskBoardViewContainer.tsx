@@ -682,6 +682,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		});
 
 		const menuExcludedProperties = new Set<string>([
+			DEFAULT_TASK_CACHE_KEYS.Title,
 			DEFAULT_TASK_CACHE_KEYS.SubTasks,
 			DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized,
 			DEFAULT_TASK_CACHE_KEYS.Description,
