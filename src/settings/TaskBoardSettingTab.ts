@@ -23,6 +23,7 @@ import {
 	SupportedPropertiesConfig,
 } from "../interfaces/GlobalSettings.js";
 import {
+	DEFAULT_TASK_CACHE_KEYS,
 	EditButtonMode,
 	mapViewArrowDirection,
 	mapViewBackgrounVariantTypes,
@@ -1128,6 +1129,69 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								name: t("task-properties"),
 								desc: t("task-properties-info"),
 								items: [
+									{
+										type: "group",
+										heading: "",
+										items: [
+											{
+												name: "",
+												desc: createFragmentWithHTML(
+													"<ul>" +
+														"<li>" +
+														"<b>" +
+														t(
+															"default-properties",
+														) +
+														"</b>" +
+														" : " +
+														t(
+															"default-properties-info",
+														) +
+														"</li>" +
+														"<li>" +
+														"<b>" +
+														t("custom-properties") +
+														"</b>" +
+														" : " +
+														t(
+															"custom-properties-info",
+														) +
+														"</li>" +
+														"</ul>",
+												),
+												render: (setting) => {
+													setting.setDesc(
+														createFragmentWithHTML(
+															"<ul>" +
+																"<li>" +
+																"<b>" +
+																t(
+																	"default-properties",
+																) +
+																"</b>" +
+																" : " +
+																t(
+																	"default-properties-info",
+																) +
+																"</li>" +
+																"<li>" +
+																"<b>" +
+																t(
+																	"custom-properties",
+																) +
+																"</b>" +
+																" : " +
+																t(
+																	"custom-properties-info",
+																) +
+																"</li>" +
+																"</ul>",
+														),
+													);
+												},
+											},
+										],
+									},
 									this.renderPropertiesConfigurationSection(
 										this.containerEl,
 									),
@@ -1137,7 +1201,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					},
 					{
 						type: "group",
-						heading: t("configure-default-properties"),
+						heading: t("custom-values"),
 						items: [
 							{
 								type: "page",
@@ -3891,6 +3955,8 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			cls: "task-board-property-name",
 			text: current.name,
 		});
+		if (current?.color) left.style.color = current.color;
+
 		heading.createSpan({
 			cls: `task-board-property-type task-board-property-type-${current.type}`,
 			text: current.type,
@@ -3904,8 +3970,9 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		const footer = info.createDiv("task-board-property-footer");
 		const values = footer.createDiv("task-board-property-values");
 		// this.createPropertyValuePill(values, "ID", current.id);
-		this.createPropertyValuePill(values, "Key", current.key);
-		this.createPropertyValuePill(values, "emoji", current.emoji);
+		this.createPropertyValuePill(values, t("id"), current.id);
+		if (current.key !== DEFAULT_TASK_CACHE_KEYS.Title)
+			this.createPropertyValuePill(values, t("emoji"), current.emoji);
 
 		const actions = footer.createDiv("task-board-property-actions");
 		this.createPropertyActionButton(
@@ -4063,7 +4130,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	): SettingDefinitionGroup {
 		const properties = this.globalSettings.taskProperties;
 		const pageTitle = t("task-properties");
-		const helpText = t("task-properties-info");
 
 		return {
 			type: "group",
@@ -4087,10 +4153,10 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 							"task-board-settings-tab-root",
 						);
 
-						const help = host.createDiv(
-							"setting-item-description task-board-key-mappings-help",
-						);
-						help.createEl("p", { text: helpText });
+						// const help = host.createDiv(
+						// 	"setting-item-description task-board-key-mappings-help",
+						// );
+						// help.createEl("p", { text: helpText });
 
 						const list = host.createDiv(
 							"task-board-property-list-items",
@@ -4272,24 +4338,24 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								}),
 						);
 
-						const cleanupTitleAction =
-							attachDeclarativeSettingsPageTitleAction(
-								host,
-								pageTitle,
-								[
-									"DOCS-039 Key mappings",
-									"DOCS-018 Task properties",
-								].map(
-									(target) =>
-										buildNativeSettingsDocsAction(
-											pageTitle,
-											target,
-										).action,
-								),
-							);
+						// const cleanupTitleAction =
+						// 	attachDeclarativeSettingsPageTitleAction(
+						// 		host,
+						// 		pageTitle,
+						// 		[
+						// 			"DOCS-039 Key mappings",
+						// 			"DOCS-018 Task properties",
+						// 		].map(
+						// 			(target) =>
+						// 				buildNativeSettingsDocsAction(
+						// 					pageTitle,
+						// 					target,
+						// 				).action,
+						// 		),
+						// 	);
 
 						return () => {
-							cleanupTitleAction?.();
+							// cleanupTitleAction?.();
 						};
 					},
 				},
