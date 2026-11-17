@@ -6,7 +6,7 @@ import type { Board, TaskBoardViewType } from "../../../interfaces/BoardConfigs.
 import { DEFAULT_DATE_FORMAT } from "../../../interfaces/Constants.js";
 import { viewTypeNames } from "../../../interfaces/Enums.js";
 import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
-import Parent from "../../components/task_card/Parent.js";
+import TaskCardParent from "../../components/task_card/TaskCardParent.js";
 import { robustDateParser } from "../../../utils/DateTimeCalculations.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
@@ -37,7 +37,7 @@ const ListView: React.FC<ListViewProps> = ({
 	const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
 	const [taskSort, setTaskSort] = useState<TaskSort>("default");
 	const [visibleTaskCount, setVisibleTaskCount] = useState(INITIAL_TASK_COUNT);
-	const taskCardComponent = Parent;
+	const taskCardComponent = TaskCardParent;
 	const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
 
 	const sortedTasks = useMemo(() => {

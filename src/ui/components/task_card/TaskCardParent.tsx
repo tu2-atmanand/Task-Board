@@ -6,7 +6,7 @@ import { Component, Notice, Platform, Menu, TFile, MenuItem, setIcon } from 'obs
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from '../../../interfaces/Constants.js';
-import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames, taskCardStyleNames } from '../../../interfaces/Enums.js';
+import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames, taskCardStyleNames, getAllUIVisibleTaskProperties } from '../../../interfaces/Enums.js';
 import { UpdateTaskEventData, taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { currentDragDataPayload, dragDropTasksManagerInsatance } from '../../../core/managers/DragDropTasksManager.js';
@@ -34,7 +34,7 @@ import { renderEmojiStyleFooter } from './EmojiStyle.js';
 import { renderIconStyleFooter } from './IconStyle.js';
 import { normalizeTaskIconValue } from '../../modals/icon_picker/index.js';
 
-const Parent: React.FC<TaskCardProps> = (props) => {
+const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	const {
 		dataAttributeIndex,
 		plugin,
@@ -53,18 +53,19 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 	const isTaskNote = isTaskNotePresentInTags(taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags]);
 	const isThistaskCompleted = isTaskNote ? isTaskCompleted(task[DEFAULT_TASK_CACHE_KEYS.Status], true, plugin.settings) : isTaskCompleted(task[DEFAULT_TASK_CACHE_KEYS.Title], false, plugin.settings)
 	const columnData = columnIndex !== undefined && kanbanViewData ? kanbanViewData.columns[columnIndex - 1] : undefined;
-	const showDescriptionSection = propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Description);
+	const propertiesVisibleInUIsafe = propertiesVisibleInUI ?? getAllUIVisibleTaskProperties(globalSettings.taskProperties);
+	const showDescriptionSection = propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.Description);
 
 	const [isChecked, setIsChecked] = useState(isThistaskCompleted);
 	const [cardLoadingAnimation, setCardLoadingAnimation] = useState(false);
-	const [showSubtasks, setShowSubtasks] = useState(propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
+	const [showSubtasks, setShowSubtasks] = useState(propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
 	useEffect(() => {
-		if (propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
+		if (propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
 			setShowSubtasks(true);
 		} else {
 			setShowSubtasks(false);
 		}
-	}, [propertiesVisibleInUI]);
+	}, [propertiesVisibleInUIsafe]);
 
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(
 		() => !showDescriptionSection && shouldExpandTaskDescription(task),
@@ -170,7 +171,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 			bugReporterManagerInsatance.addToLogs(
 				122,
 				String(err),
-				"Parent.tsx/Main title rendering useEffect",
+				"TaskCardParent.tsx/Main title rendering useEffect",
 			);
 		}
 	}, [task[DEFAULT_TASK_CACHE_KEYS.ID], task[DEFAULT_TASK_CACHE_KEYS.Title], task[DEFAULT_TASK_CACHE_KEYS.FilePath]]);
@@ -239,7 +240,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 				bugReporterManagerInsatance.addToLogs(
 					123,
 					String(err),
-					"Parent.tsx/Sub-tasks rendering useEffect",
+					"TaskCardParent.tsx/Sub-tasks rendering useEffect",
 				);
 			}
 		}
@@ -536,7 +537,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 				bugReporterManagerInsatance.addToLogs(
 					124,
 					String(error),
-					"Parent.tsx/handleMainCheckBoxClick",
+					"TaskCardParent.tsx/handleMainCheckBoxClick",
 				);
 			}
 
@@ -638,7 +639,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 		try {
 			const childTask = await getTaskFromId(plugin, childTaskId);
 			if (!childTask) {
-				bugReporterManagerInsatance.showNotice(5, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "Parent.tsx/handleOpenChildTaskModal");
+				bugReporterManagerInsatance.showNotice(5, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "TaskCardParent.tsx/handleOpenChildTaskModal");
 				return;
 			}
 
@@ -651,7 +652,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 				event.ctrlKey = false;
 			}
 		} catch (error) {
-			bugReporterManagerInsatance.showNotice(6, "Error opening child task modal", String(error), "Parent.tsx/handleOpenChildTaskModal");
+			bugReporterManagerInsatance.showNotice(6, "Error opening child task modal", String(error), "TaskCardParent.tsx/handleOpenChildTaskModal");
 		}
 	}
 
@@ -789,7 +790,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 					bugReporterManagerInsatance.addToLogs(
 						125,
 						String(error),
-						"Parent.tsx/handleMenuButtonClicked/copy-task-title",
+						"TaskCardParent.tsx/handleMenuButtonClicked/copy-task-title",
 					);
 					new Notice(t("copy-task-title-unsuccessful"));
 				}
@@ -865,7 +866,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 					bugReporterManagerInsatance.addToLogs(
 						125,
 						String(error),
-						"Parent.tsx/handleMenuButtonClicked/more-note-actions",
+						"TaskCardParent.tsx/handleMenuButtonClicked/more-note-actions",
 					);
 					console.debug("Native file menu not available, using fallback");
 				}
@@ -906,7 +907,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 							bugReporterManagerInsatance.addToLogs(
 								125,
 								String(error),
-								"Parent.tsx/handleMenuButtonClicked/renaming",
+								"TaskCardParent.tsx/handleMenuButtonClicked/renaming",
 							);
 						}
 					});
@@ -922,7 +923,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 							bugReporterManagerInsatance.addToLogs(
 								125,
 								String(error),
-								"Parent.tsx/handleMenuButtonClicked/renaming/trashFile",
+								"TaskCardParent.tsx/handleMenuButtonClicked/renaming/trashFile",
 							);
 						})
 					});
@@ -943,7 +944,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 
 		if (!columnData) {
 			e.preventDefault();
-			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "Parent.tsx/handleDragStart");
+			bugReporterManagerInsatance.addToLogs(91, `Column data : undefined`, "TaskCardParent.tsx/handleDragStart");
 			return;
 		}
 		try {
@@ -967,7 +968,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 			bugReporterManagerInsatance.addToLogs(
 				126,
 				String(err),
-				"Parent.tsx/handleDragStart",
+				"TaskCardParent.tsx/handleDragStart",
 			);
 		}
 	}, [task, columnData]);
@@ -1012,18 +1013,20 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 		);
 		const icon = normalizeTaskIconValue(customStatus?.lucideIcon);
 
-		if (!customStatus || !icon) return null;
+		if (!customStatus || (!icon && !cardLoadingAnimation)) return null;
 
 		return (
 			<span
+				key={cardLoadingAnimation ? "loading" : "status-icon"}
 				className="taskItemCustomStatusIcon"
 				aria-label={customStatus.name}
-				title={customStatus.name}
 				style={{ color: customStatus.color }}
 				ref={(element) => {
-					if (element) setIcon(element, icon);
+					if (element && icon && !cardLoadingAnimation) setIcon(element, icon);
 				}}
-			/>
+			>
+				{cardLoadingAnimation && <span className="taskItemCustomStatusSpinner" aria-hidden="true" />}
+			</span>
 		);
 	};
 
@@ -1031,7 +1034,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 		try {
 			return (
 				<div className="taskItemHeader">
-					{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader) && task[DEFAULT_TASK_CACHE_KEYS.FilePath] && (
+					{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader) && task[DEFAULT_TASK_CACHE_KEYS.FilePath] && (
 						<div className='taskitemHeaderTopFilename' aria-label={task[DEFAULT_TASK_CACHE_KEYS.FilePath]}>
 							<div className='taskitemHeaderTopFilenameValue'>{task[DEFAULT_TASK_CACHE_KEYS.FilePath].split('/').pop()}</div>
 						</div>
@@ -1040,7 +1043,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 					<div className='taskItemHeaderBottom'>
 						<div className="taskItemHeaderLeft">
 							{/* Render tags individually */}
-							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Tags) && (task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 || task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0) && (
+							{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.Tags) && (task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 || task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0) && (
 								<div className="taskItemTags">
 									{/* Render line tags (editable) */}
 									{task[DEFAULT_TASK_CACHE_KEYS.Tags].map((tag: string, index: number) => {
@@ -1091,7 +1094,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 											<div
 												key={tagKey}
 												className="taskItemTagFrontmatter"
-												title="Tag from note's frontmatter (read-only)"
+												aria-label="Tag from note's frontmatter (read-only)"
 											>
 												{tag}
 											</div>
@@ -1101,7 +1104,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 							)}
 						</div>
 						<div className='taskItemHeaderRight'>
-							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.ID) && task[DEFAULT_TASK_CACHE_KEYS.LegacyID] && (
+							{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.ID) && task[DEFAULT_TASK_CACHE_KEYS.LegacyID] && (
 								<div className='taskItemPropertyID'>
 									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task[DEFAULT_TASK_CACHE_KEYS.LegacyID]}</div>
 								</div>
@@ -1112,7 +1115,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 				</div>
 			);
 		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(7, error as string, "Parent.tsx/renderHeader");
+			bugReporterManagerInsatance.addToLogs(7, error as string, "TaskCardParent.tsx/renderHeader");
 			return null;
 		}
 	};
@@ -1130,7 +1133,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 			const total = allSubTasks.length;
 			const completed = allSubTasks.filter(line => isTaskCompleted(line, false, plugin.settings)).length;
 
-			const showSubTaskSummaryBar = propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
+			const showSubTaskSummaryBar = propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
 
 			return (
 				<>
@@ -1212,7 +1215,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 			);
 
 		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(8, error as string, "Parent.tsx/renderSubTasks");
+			bugReporterManagerInsatance.addToLogs(8, error as string, "TaskCardParent.tsx/renderSubTasks");
 			return null;
 		}
 	};
@@ -1220,7 +1223,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 	// Render Footer based on the settings
 	const renderFooter = () => {
 		try {
-			const component = { parentComponent, cardLoadingAnimation, propertiesVisibleInUI };
+			const component = { parentComponent, cardLoadingAnimation, propertiesVisibleInUI: propertiesVisibleInUIsafe };
 			switch (globalSettings.taskCardStyle) {
 				case taskCardStyleNames.EMOJI:
 					return renderEmojiStyleFooter(component, task, globalSettings);
@@ -1230,7 +1233,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 					return renderBasesStyleFooter(component, task, globalSettings);
 			}
 		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(9, error as string, "Parent.tsx/renderFooter");
+			bugReporterManagerInsatance.addToLogs(9, error as string, "TaskCardParent.tsx/renderFooter");
 			return null;
 		}
 	};
@@ -1279,7 +1282,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 											<span className='taskItemChildTaskSymbol' role="img" aria-label={t("child-task")}>{isChildTaskCompleted ? TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnCompletedSymbol : TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol}</span>
 											<span
 												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
-												title={depTaskTitle.slice(6)}
+												aria-label={depTaskTitle.slice(6)}
 											>
 												{cleanTaskTitleLegacy(childTask)}
 											</span></div>
@@ -1292,14 +1295,14 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 				return null;
 			}
 		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(10, error as string, "Parent.tsx/renderChildTasks");
+			bugReporterManagerInsatance.addToLogs(10, error as string, "TaskCardParent.tsx/renderChildTasks");
 			return null;
 		}
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [propertiesVisibleInUI, task[DEFAULT_TASK_CACHE_KEYS.Priority], task[DEFAULT_TASK_CACHE_KEYS.Tags], columnData]);
-	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [propertiesVisibleInUI, task[DEFAULT_TASK_CACHE_KEYS.Body], showSubtasks]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [propertiesVisibleInUIsafe, task[DEFAULT_TASK_CACHE_KEYS.Priority], task[DEFAULT_TASK_CACHE_KEYS.Tags], columnData]);
+	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [propertiesVisibleInUIsafe, task[DEFAULT_TASK_CACHE_KEYS.Body], showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task[DEFAULT_TASK_CACHE_KEYS.Dependencies], childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);
 
@@ -1340,7 +1343,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 					{/* Task Content */}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
-							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox) && (
+							{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox) && (
 								<input
 									id={`${task[DEFAULT_TASK_CACHE_KEYS.ID]}-checkbox`}
 									type="checkbox"
@@ -1356,6 +1359,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 									}}
 									onDoubleClick={(e) => {
 										e.preventDefault();
+										e.stopPropagation();
 									}}
 									disabled={cardLoadingAnimation}
 									aria-disabled={cardLoadingAnimation}
@@ -1363,33 +1367,28 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 									readOnly={cardLoadingAnimation}
 								/>
 							)}
-							{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.CheckboxIcon) && (
-								<span
+							{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.CheckboxIcon) && (
+								<div
 									id={`${task[DEFAULT_TASK_CACHE_KEYS.ID]}-checkbox`}
 									className="taskItemCheckboxIcon"
-									data-task={cardLoadingAnimation ? 'x' : task[DEFAULT_TASK_CACHE_KEYS.Status]}
-									dir='auto'
-									onClick={(e) => {
-										if (cardLoadingAnimation) {
-											e.preventDefault();
-										}
-
-										handleMainCheckBoxClick()
-									}}
+									onClick={() => handleMainCheckBoxClick()}
+									data-busy={cardLoadingAnimation}
 									onDoubleClick={(e) => {
 										e.preventDefault();
+										e.stopPropagation();
 									}}
 									aria-disabled={cardLoadingAnimation}
 									aria-busy={cardLoadingAnimation}
+									aria-label={t("toggle-task-status")}
 								>
 									{renderColoredCustomStatusIcon()}
-								</span>
+								</div>
 							)}
 							<div className="taskItemBodyContent">
 								<div className="taskItemTitle" ref={taskTitleRendererRef} />
 
 								{/* Sub-tasks section */}
-								{(propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) || propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) && (
+								{(propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) || propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) && (
 									<div className="taskItemSubTasksSection">
 										{memoizedRenderSubTasks}
 									</div>
@@ -1402,7 +1401,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 								{renderDescriptionSection()}
 							</div>
 						)}
-						{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized) && (
+						{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized) && (
 							<div className="taskItemMainBodyDescription">
 								{task[DEFAULT_TASK_CACHE_KEYS.Body].some((line) => line.trim() !== "" && !isTaskLine(line)) && (
 									<div
@@ -1432,7 +1431,7 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 							</div>
 						)}
 
-						{propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies) && (
+						{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies) && (
 							<>
 								{memoizedRenderChildTasks}
 							</>
@@ -1443,10 +1442,10 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 
 					<div id='taskItemFooterBtns' className="taskItemFooterBtns" onMouseOver={handleMouseEnter}>
 						<div className="taskItemiconButton taskItemiconButtonEdit">
-							<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} title={t("edit-task")} />
+							<FaEdit size={16} enableBackground={0} opacity={0.4} onClick={onEditButtonClicked} aria-label={t("edit-task")} />
 						</div>
 						<div className="taskItemiconButton taskItemiconButtonDelete">
-							<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} title={t("delete-task")} />
+							<FaTrash size={13} enableBackground={0} opacity={0.4} onClick={handleMainTaskDelete} aria-label={t("delete-task")} />
 						</div>
 					</div>
 
@@ -1471,4 +1470,4 @@ const Parent: React.FC<TaskCardProps> = (props) => {
 // 	);
 // });
 
-export default memo(Parent);
+export default memo(TaskCardParent);

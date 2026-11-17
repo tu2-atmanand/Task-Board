@@ -8,7 +8,7 @@ import TaskBoard from "../../../../main.js";
 import { KanbanView } from "../../../interfaces/BoardConfigs.js";
 import { viewTypeNames } from "../../../interfaces/Enums.js";
 import { taskItem } from "../../../interfaces/TaskItem.js";
-import Parent from "./Parent.js";
+import TaskCardParent from "./TaskCardParent.js";
 import createTaskCard from "./TaskCardImage.js";
 
 export interface swimlaneDataProp {
@@ -39,7 +39,7 @@ export interface TaskCardFooterComponent {
 
 export type TaskCardFooterStyle = "emoji" | "bases" | "icons";
 
-export { Parent, createTaskCard };
+export { TaskCardParent, createTaskCard };
 export { renderBasesStyleFooter } from "./BasesStyle.js";
 export { renderEmojiStyleFooter } from "./EmojiStyle.js";
 export { renderIconStyleFooter } from "./IconStyle.js";

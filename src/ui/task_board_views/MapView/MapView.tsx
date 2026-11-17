@@ -32,7 +32,7 @@ import { isTaskCompleted } from '../../../utils/CheckBoxUtils.js';
 import { sanitizeDependsOn } from '../../../utils/task_line/TaskContentFormatter.js';
 import { updateTaskInFile } from '../../../utils/task_line/TaskLineUtils.js';
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from '../../../utils/task_note/TaskNoteUtils.js';
-import Parent from '../../components/task_card/Parent.js';
+import TaskCardParent from '../../components/task_card/TaskCardParent.js';
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
 
@@ -379,7 +379,7 @@ const MapView: React.FC<MapViewProps> = ({
 					id,
 					type: 'ResizableNodeSelected',
 					data: {
-						label: <Parent
+						label: <TaskCardParent
 							dataAttributeIndex={0}
 							plugin={plugin}
 							task={task}
@@ -869,12 +869,12 @@ const MapView: React.FC<MapViewProps> = ({
 		const allTasks = allTasksFlattened;
 		const targetTask = allTasks.find(t => (t[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? t[DEFAULT_TASK_CACHE_KEYS.LegacyID] : String(t[DEFAULT_TASK_CACHE_KEYS.ID])) === targetId);
 		if (!targetTask) {
-			bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `Parent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
+			bugReporterManagerInsatance.showNotice(18, "The parent task was not found in the cache. Maybe the ID didnt match or the task itself was not present in the file. Or the file has been moved to a different location.", `TaskCardParent task id : ${targetId}\nChild task id : ${sourceId}`, "MapView.tsx/handleEdgeClick");
 			return;
 		}
 
 		if (!Array.isArray(targetTask[DEFAULT_TASK_CACHE_KEYS.Dependencies])) {
-			bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `Parent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
+			bugReporterManagerInsatance.showNotice(19, "The parent task contains no such dependency. There is some descripancy in the cache or the cache might have been corrupted.", `TaskCardParent task id : ${targetId}\nChild task id : ${sourceId}\nParent task cache : ${JSON.stringify(targetTask)}`, "MapView.tsx/handleEdgeClick");
 			return;
 		}
 

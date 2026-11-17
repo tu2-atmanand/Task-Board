@@ -18,7 +18,7 @@ import { matchTagsWithWildcards } from '../../../core/algorithms/ScanningFiltere
 import { AdvancedFilterModal } from '../../components/advanced_filterer/index.js';
 import { AdvancedFilterPopover } from '../../components/advanced_filterer/Popover.js';
 import { DEFAULT_SETTINGS } from '../../../interfaces/GlobalSettings.js';
-import Parent from '../../components/task_card/Parent.js';
+import TaskCardParent from '../../components/task_card/TaskCardParent.js';
 import type { swimlaneDataProp } from '../../components/task_card/index.js';
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
@@ -689,7 +689,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 	}
 
-	const taskItemComponent = Parent;
+	const taskItemComponent = TaskCardParent;
 
 	try {
 		return (
