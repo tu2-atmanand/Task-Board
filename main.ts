@@ -95,7 +95,13 @@ import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
 import { TaskBoardEmbedComponent } from "./src/ui/components/TaskBoardEmbedComponent.js";
 import { getHideClassForProperty } from "./src/utils/UIHelpers.js";
-import { openBoardsExplorerModal, openAddNewTaskModal, openAddNewTaskNoteModal, openAddNewTaskInCurrentFileModal, openScanVaultModal } from "./src/ui/modals/OpenModals.js";
+import {
+	openBoardsExplorerModal,
+	openAddNewTaskModal,
+	openAddNewTaskNoteModal,
+	openAddNewTaskInCurrentFileModal,
+	openScanVaultModal,
+} from "./src/ui/modals/OpenModals.js";
 
 /**
  * The entry-point of this project.
@@ -352,7 +358,7 @@ export default class TaskBoard extends Plugin {
 		// Create a ribbon icon to open the Kanban board view
 		this.ribbonIconEl = this.addRibbonIcon(
 			TaskBoardIcon,
-			t("open-task-board") ?? "Open task board",
+			t("open-task-board"),
 			(evt: MouseEvent) => {
 				const registry: taskBoardFilesRegistryType =
 					this.settings.data.taskBoardFilesRegistry ?? {};
@@ -438,10 +444,7 @@ export default class TaskBoard extends Plugin {
 				...storedSettings?.data,
 			},
 		};
-		migrateLegacyPropertySettings(
-			this.settings.data,
-			storedSettings?.data,
-		);
+		migrateLegacyPropertySettings(this.settings.data, storedSettings?.data);
 		// this.migrateSettings(DEFAULT_SETTINGS, this.settings);
 		void this.saveSettings();
 	}
@@ -655,13 +658,12 @@ export default class TaskBoard extends Plugin {
 					document.body.classList.add(hideClass);
 				}
 			});
-			const customProperties =
-				hiddenPropertyConfigs.filter(
-					(property) =>
-						!Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
-							property.key as DEFAULT_TASK_CACHE_KEYS,
-						),
-				);
+			const customProperties = hiddenPropertyConfigs.filter(
+				(property) =>
+					!Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
+						property.key as DEFAULT_TASK_CACHE_KEYS,
+					),
+			);
 			if (customProperties.length > 0) {
 				this.registerMarkdownPostProcessor((element) => {
 					element.querySelectorAll("li").forEach((listItem) => {
@@ -1258,10 +1260,7 @@ export default class TaskBoard extends Plugin {
 				// Add delay between processing each file to prevent blocking UI
 				if (allowedFiles.length > 0) {
 					await new Promise((resolve) =>
-						window.setTimeout(
-							resolve,
-							this.PROCESSING_INTERVAL,
-						),
+						window.setTimeout(resolve, this.PROCESSING_INTERVAL),
 					);
 				}
 			}

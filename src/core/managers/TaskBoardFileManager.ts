@@ -728,7 +728,7 @@ export default class TaskBoardFileManager {
 				new Notice(
 					`Task Board : The board file already exists at the path : ${normalizePath(filePath)}`,
 				);
-				return false;
+				return true;
 			}
 
 			const normalizedFilePath = normalizePath(filePath);
