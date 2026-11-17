@@ -464,7 +464,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 											<div className='swimlaneHeaderSwimlaneCount-vertical'>
 												{swimlane.tasks.flat().length ?? 0}
 											</div>
-											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName} style={!swimlane.minimized && swimlaneRowHeights[rowIndex] ? { width: `${Math.max(0, swimlaneRowHeights[rowIndex] - 80)}px` } : undefined}>
+											<div className="swimlaneHeaderName-vertical" aria-label={swimlane.swimlaneName} style={!swimlane.minimized && swimlaneRowHeights[rowIndex] ? { width: `${Math.max(0, swimlaneRowHeights[rowIndex] - 80)}px` } : undefined}>
 												<div className='swimlaneHeaderNameLable-vertical'>{property}:</div>
 												{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue-vertical')}
 											</div>
@@ -508,7 +508,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
 													{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
 												</div>
-												<div className="swimlaneHeaderName" title={swimlane.swimlaneName}>
+												<div className="swimlaneHeaderName" aria-label={swimlane.swimlaneName}>
 													<div className='swimlaneHeaderNameLable'>{property}:</div>
 													{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue')}
 												</div>

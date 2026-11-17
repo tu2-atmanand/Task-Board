@@ -1289,7 +1289,6 @@ export const TaskEditorRC: React.FC<{
 								className="EditTaskModalInboxSaveBtn"
 								onClick={() => void handleSave()}
 								aria-label={t("save")}
-								title={t("save")}
 							>
 								{t("save")}
 							</button>

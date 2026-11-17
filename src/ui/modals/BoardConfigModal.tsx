@@ -829,7 +829,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														)}
 													</div>
 													<div className="boardConfigModalColumnRowHeaderRightSec">
-														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
+														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} aria-label={t("delete-column")} />
 													</div>
 												</div>
 
@@ -975,7 +975,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																				<option
 																					key={`${opt.value}-${group.type}`}
 																					value={opt.value}
-																					title={opt.tooltip}
+																					aria-label={opt.tooltip}
 																				>
 																					{opt.label}
 																				</option>

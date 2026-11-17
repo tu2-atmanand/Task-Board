@@ -265,7 +265,6 @@ const InboxView: React.FC<InboxViewProps> = ({
 						type="button"
 						className="taskBoardInboxSortButton"
 						aria-label={t("configure-column-sorting")}
-						title={t("configure-column-sorting")}
 						onClick={openSortingModal}
 					>
 						<ArrowUpDown size={16} />

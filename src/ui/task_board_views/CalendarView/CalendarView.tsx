@@ -393,7 +393,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 						className="taskBoardCalendarIconButton"
 						onClick={() => navigate(-1)}
 						aria-label={`Previous ${mode}`}
-						title={`Previous ${mode}`}
 					>
 						<ChevronLeft size={18} />
 					</button>
@@ -409,7 +408,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 						className="taskBoardCalendarIconButton"
 						onClick={() => navigate(1)}
 						aria-label={`Next ${mode}`}
-						title={`Next ${mode}`}
 					>
 						<ChevronRight size={18} />
 					</button>
@@ -454,7 +452,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 											<div
 												key={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.ID]}-${index}`}
 												className="taskBoardCalendarMonthTask"
-												title={calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}
+												aria-label={calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}
 											>
 												{getTaskDisplayTitle(calendarTask.task)}
 											</div>
@@ -473,7 +471,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 					className="taskBoardCalendarTimeScroll"
 					ref={scrollRef}
 					onWheel={handleCalendarWheel}
-					title="Hold Ctrl and scroll to zoom the time grid"
+					aria-label="Hold Ctrl and scroll to zoom the time grid"
 				>
 					<div className="taskBoardCalendarTimeView" style={{ minWidth: mode === "week" ? 7 * 170 + 56 : 420 }}>
 						<div
@@ -505,7 +503,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 											<div
 												key={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.ID]}-${index}`}
 												className="taskBoardCalendarAllDayTask"
-												title={calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}
+												aria-label={calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}
 												onPointerDown={(event) => startInteraction(event, {
 													kind: "move",
 													dayIndex: visibleDays.findIndex((visibleDay) =>
@@ -576,7 +574,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 															top: (start / HALF_HOUR_MINUTES) * rowHeight,
 															height: Math.max(rowHeight, ((end - start) / HALF_HOUR_MINUTES) * rowHeight),
 														}}
-														title={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time] ? ` · ${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time]}` : ""}`}
+														aria-label={`${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Title]}${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time] ? ` · ${calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time]}` : ""}`}
 													>
 														<strong>{getTaskDisplayTitle(calendarTask.task)}</strong>
 														<span>{calendarTask.task[DEFAULT_TASK_CACHE_KEYS.Time]}</span>

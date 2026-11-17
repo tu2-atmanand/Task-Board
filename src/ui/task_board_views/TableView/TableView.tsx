@@ -520,7 +520,7 @@ const TableView: React.FC<TableViewProps> = ({
 								{visibleColumns.map((column) => (
 									<td
 										key={column}
-										title={renderCellValue(task, column)}
+										aria-label={renderCellValue(task, column)}
 										onDoubleClick={() => beginCellEdit(task, column)}
 										className={editableColumns.has(column) ? "taskBoardTableEditableCell" : ""}
 									>
