@@ -1,6 +1,10 @@
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { Filter } from "./BoardConfigs.js";
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants.js";
+import {
+	DEFAULT_DATE_FORMAT,
+	DEFAULT_DATE_TIME_FORMAT,
+	FRESH_INSTALL_BOARD,
+} from "./Constants.js";
 import {
 	EditButtonMode,
 	TagColorType,
@@ -21,7 +25,12 @@ import {
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
 } from "./Enums.js";
 import { TASK_PROPERTIES_TO_ICON_MAPPING } from "./Icons.js";
-import { defaultTaskStatuses, priorityEmojis, priorityNames, taskItemKeyToNameMapping } from "./Mapping.js";
+import {
+	defaultTaskStatuses,
+	priorityEmojis,
+	priorityNames,
+	taskItemKeyToNameMapping,
+} from "./Mapping.js";
 
 export type VaultScannnerFilters = {
 	files: {
@@ -200,9 +209,22 @@ export interface globalSettingsData {
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	lastViewHistory: {
-		boardFilePath: string;
-		settingTab: number;
 		taskId?: string;
+		/**
+		 * To store the .taskboard file path which was viewed last time.
+		 *
+		 * @deprecated - This is no longer required as we can directly update the {@link taskBoardFilesRegistry}.
+		 * And from the {@file TaskBoardFileManager.ts} there are helper functions which can get and set the
+		 * last viewed board file object.
+		 */
+		boardFilePath?: string;
+		/**
+		 * To open the same tab which user viwed last time.
+		 *
+		 * @deprecated - The setting tab has been modified to use the new {@link getSettingDefinitions}.
+		 * The section will be now rendered as pages and not as tabs.
+		 */
+		settingTab?: number;
 	};
 	// New settings introduced in 2.x.x series
 	taskBoardFilesRegistry: taskBoardFilesRegistryType;
@@ -807,8 +829,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		experimentalFeatures: false,
 		safeGuardFeature: true,
 		lastViewHistory: {
-			boardFilePath:
-				"Meta/Task_Board/Boards/Time Based Workflow.taskboard",
+			boardFilePath: FRESH_INSTALL_BOARD[3103563481].filePath,
 			settingTab: 0,
 		},
 		boundTaskCompletionToChildTasks: false,
@@ -822,15 +843,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 			renderVisibleNodes: false,
 			edgeType: mapViewEdgeType.bezier,
 		},
-		taskBoardFilesRegistry: {
-			"3103563481": {
-				boardId: "board_3103563481",
-				filePath: "Meta/Task_Board/Boards/My Project Board.taskboard",
-				boardName: "Time Based Workflow",
-				boardDescription:
-					"This board contains dated type columns for managing time critical scheduled tasks.",
-			},
-		},
+		taskBoardFilesRegistry: FRESH_INSTALL_BOARD,
 		enableDragnDropTouch: false,
 		filtersWarehouse: [],
 		ribbonIconAction: RibbonIconActions.allBoardsMenu,
