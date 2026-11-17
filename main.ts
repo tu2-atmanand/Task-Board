@@ -1096,72 +1096,89 @@ export default class TaskBoard extends Plugin {
 		if (this.deleteQueue.length === 0) {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
+			this.deleteProcessingTimer = null;
 			return;
 		}
 
-		let allowedFiles = this.deleteQueue.filter(
-			(file: TFile) =>
-				fileTypeAllowedForScanning(this.settings.data, file) ||
-				file.extension === TASKBOARD_FILE_EXTENSION,
-		);
-		const totalFilesLength = allowedFiles.length;
+		const queuedFiles = this.deleteQueue.splice(0);
+		try {
+			let allowedFiles = queuedFiles.filter(
+				(file: TFile) =>
+					fileTypeAllowedForScanning(this.settings.data, file) ||
+					file.extension === TASKBOARD_FILE_EXTENSION,
+			);
+			const totalFilesLength = allowedFiles.length;
 
-		if (allowedFiles.length > 0) {
-			if (allowedFiles.length > 20) {
-				// Show progress notice
-				this.currentProgressNotice = new Notice(
-					`Processing deleted files: 0/${totalFilesLength}`,
-					0,
-				);
-			}
-
-			let processed = 0;
-			while (allowedFiles.length > 0) {
-				const file = allowedFiles.shift()!;
-
-				if (file.extension === TASKBOARD_FILE_EXTENSION) {
-					await this.taskBoardFileManager.onBoardFileDelete(
-						file.path,
+			if (allowedFiles.length > 0) {
+				if (allowedFiles.length > 20) {
+					// Show progress notice
+					this.currentProgressNotice = new Notice(
+						`Processing deleted files: 0/${totalFilesLength}`,
+						0,
 					);
-					continue;
 				}
 
-				try {
-					this.realTimeScanner.onFileDeleted(file);
-					processed++;
+				let processed = 0;
+				while (allowedFiles.length > 0) {
+					const file = allowedFiles.shift()!;
 
-					if (this.currentProgressNotice) {
-						// Update progress notice
-						this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFilesLength}`;
+					if (file.extension === TASKBOARD_FILE_EXTENSION) {
+						await this.taskBoardFileManager.onBoardFileDelete(
+							file.path,
+						);
+						continue;
 					}
-				} catch (error) {
-					this.currentProgressNotice?.hide();
-					// this.currentProgressNotice = null;
-					bugReporterManagerInsatance.addToLogs(
-						163,
-						String(error),
-						"main.ts/processDeleteQueue",
-					);
-				}
 
-				// Add delay between processing each file to prevent blocking UI
-				if (allowedFiles.length > 0) {
-					await new Promise((resolve) =>
-						window.setTimeout(resolve, this.PROCESSING_INTERVAL),
+					try {
+						this.realTimeScanner.onFileDeleted(file);
+						processed++;
+
+						if (this.currentProgressNotice) {
+							// Update progress notice
+							this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFilesLength}`;
+						}
+					} catch (error) {
+						this.currentProgressNotice?.hide();
+						// this.currentProgressNotice = null;
+						bugReporterManagerInsatance.addToLogs(
+							163,
+							String(error),
+							"main.ts/processDeleteQueue",
+						);
+					}
+
+					// Add delay between processing each file to prevent blocking UI
+					if (allowedFiles.length > 0) {
+						await new Promise((resolve) =>
+							window.setTimeout(
+								resolve,
+								this.PROCESSING_INTERVAL,
+							),
+						);
+					}
+				}
+				// Hide progress notice after completion
+				this.currentProgressNotice?.hide();
+				this.currentProgressNotice = null;
+
+				await this.vaultScanner.saveTasksToJsonCache();
+				eventEmitter.emit("SOFT_REFRESH");
+
+				if (processed > 20) {
+					new Notice(
+						`✓ Task Board : Finished processing ${totalFilesLength} deleted file(s)`,
 					);
 				}
 			}
-			// Hide progress notice after completion
-			this.currentProgressNotice?.hide();
-			this.currentProgressNotice = null;
-
-			await this.vaultScanner.saveTasksToJsonCache();
-			eventEmitter.emit("SOFT_REFRESH");
-
-			if (processed > 20) {
-				new Notice(
-					`✓ Task Board : Finished processing ${totalFilesLength} deleted file(s)`,
-				);
+		} finally {
+			if (this.deleteProcessingTimer) {
+				window.clearTimeout(this.deleteProcessingTimer);
+			}
+			this.deleteProcessingTimer = null;
+			if (this.deleteQueue.length > 0) {
+				this.deleteProcessingTimer = window.setTimeout(() => {
+					void this.processDeleteQueue();
+				}, this.QUEUE_DELAY);
 			}
 		}
 	}
@@ -1192,64 +1209,81 @@ export default class TaskBoard extends Plugin {
 		if (this.createQueue.length === 0) {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
+			this.createProcessingTimer = null;
 			return;
 		}
 
-		let allowedFiles = this.createQueue.filter((file: TFile) =>
-			fileTypeAllowedForScanning(this.settings.data, file),
-		);
-		// console.log(
-		// 	"Will be processing following created files : ",
-		// 	allowedFiles,
-		// );
-		const totalFilesLength = allowedFiles.length;
-
-		// this.plugin.vaultScanner.refreshTasksFromFiles(allowedFiles, false);
-
-		// Show progress notice only if the files are more than 10
-		if (totalFilesLength > 20) {
-			this.currentProgressNotice = new Notice(
-				`Task Board : Processing created files: 0/${totalFilesLength}`,
-				0,
+		const queuedFiles = this.createQueue.splice(0);
+		try {
+			let allowedFiles = queuedFiles.filter((file: TFile) =>
+				fileTypeAllowedForScanning(this.settings.data, file),
 			);
-		}
+			// console.log(
+			// 	"Will be processing following created files : ",
+			// 	allowedFiles,
+			// );
+			const totalFilesLength = allowedFiles.length;
 
-		let processed = 0;
-		while (allowedFiles.length > 0) {
-			const file = allowedFiles.shift()!;
+			// this.plugin.vaultScanner.refreshTasksFromFiles(allowedFiles, false);
 
-			try {
-				await this.realTimeScanner.processAllUpdatedFiles(file);
-				processed++;
-
-				// Update progress notice
-				if (this.currentProgressNotice)
-					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
-			} catch (error) {
-				this.currentProgressNotice?.hide();
-				// this.currentProgressNotice = null;
-				bugReporterManagerInsatance.addToLogs(
-					164,
-					String(error),
-					"main.ts/processCreateQueue",
+			// Show progress notice only if the files are more than 10
+			if (totalFilesLength > 20) {
+				this.currentProgressNotice = new Notice(
+					`Task Board : Processing created files: 0/${totalFilesLength}`,
+					0,
 				);
 			}
 
-			// Add delay between processing each file to prevent blocking UI
-			if (allowedFiles.length > 0) {
-				await new Promise((resolve) =>
-					window.setTimeout(resolve, this.PROCESSING_INTERVAL),
+			let processed = 0;
+			while (allowedFiles.length > 0) {
+				const file = allowedFiles.shift()!;
+
+				try {
+					await this.realTimeScanner.processAllUpdatedFiles(file);
+					processed++;
+
+					// Update progress notice
+					if (this.currentProgressNotice)
+						this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
+					bugReporterManagerInsatance.addToLogs(
+						164,
+						String(error),
+						"main.ts/processCreateQueue",
+					);
+				}
+
+				// Add delay between processing each file to prevent blocking UI
+				if (allowedFiles.length > 0) {
+					await new Promise((resolve) =>
+						window.setTimeout(
+							resolve,
+							this.PROCESSING_INTERVAL,
+						),
+					);
+				}
+			}
+
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			if (processed > 20) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
 				);
 			}
-		}
-
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-		if (processed > 20) {
-			new Notice(
-				`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
-			);
+		} finally {
+			if (this.createProcessingTimer) {
+				window.clearTimeout(this.createProcessingTimer);
+			}
+			this.createProcessingTimer = null;
+			if (this.createQueue.length > 0) {
+				this.createProcessingTimer = window.setTimeout(() => {
+					void this.processCreateQueue();
+				}, this.QUEUE_DELAY);
+			}
 		}
 	}
 
