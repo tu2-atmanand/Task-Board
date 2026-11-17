@@ -77,12 +77,12 @@
 .task-board-property-heading-left {
 	gap: 0.5em;
 	font-weight: var(--font-medium);
+	color: var(--text-muted);
 }
 
 .task-board-property-icon {
 	display: inline-flex;
 	align-items: center;
-	color: var(--text-muted);
 }
 
 .task-board-property-icon svg.svg-icon {
@@ -1251,6 +1251,51 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	align-items: flex-start;
 }
 
+.taskItemCustomStatusIcon {
+	display: flex;
+	align-content: center;
+	align-items: center;
+	justify-content: center;
+}
+
+.taskItemCheckboxIcon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.taskItemCheckboxIcon:hover:not([data-busy="true"]) {
+	border-color: var(--background-modifier-border-hover);
+	background-color: var(--background-modifier-hover);
+}
+
+.taskItemCheckboxIcon:hover:not([data-busy="true"]) .taskItemCustomStatusIcon {
+	filter: brightness(1.2) drop-shadow(0 0 2px currentColor);
+}
+
+.taskItemCheckboxIcon[data-busy="true"] {
+	cursor: wait;
+}
+
+.taskItemCustomStatusIcon svg.svg-icon {
+	width: 20px;
+	height: 20px;
+	transition: filter 120ms ease;
+}
+
+.taskItemCustomStatusSpinner {
+	width: 14px;
+	height: 14px;
+	border: 2px solid var(--background-modifier-border);
+	border-left-color: currentColor;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+
 .taskItemBodyContent {
 	display: flex;
 	flex-direction: column;
@@ -1880,7 +1925,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-    font-size: var(--font-smallest);
+	font-size: var(--font-smallest);
 	color: var(--text-muted);
 }
 
