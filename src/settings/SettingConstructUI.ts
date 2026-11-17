@@ -5,8 +5,6 @@ import {
 	Notice,
 	Platform,
 	Setting,
-	SettingDefinition,
-	SettingDefinitionItem,
 	getIcon,
 	normalizePath,
 	setIcon,
@@ -62,7 +60,6 @@ import {
 	exportConfigurations,
 } from "./SettingSynchronizer.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
-import { setSettingsScope } from "./ScopeSettings.js";
 import { showColorPicker } from "../ui/modals/color_picker/ColorPickerModal.js";
 
 export type SettingsTabPagesKey =
@@ -74,6 +71,19 @@ export type SettingsTabPagesKey =
 	| "automation"
 	| "formats";
 
+/**
+ * Manager to render all the plugin setting inside the Obsidians setting tab
+ * as well as in other custom modals and views. A complete manager to handle all
+ * operations on settings. Renders the settings in organized tabs.
+ *
+ * @deprecated - From version 2.0.0 onwards, Task Board will be using the new {@link getSettingDefinitions}
+ * provided by Obsidian in version 1.13.0+. This also introduces the setting search feature, hence all the
+ * setting has been migrated in {@file TaskBoardSettingTab.ts}. We are keeping this file for backup in case
+ * if we want to render the settings in other places.
+ *
+ * @note - But note that this manager is not actively updated and for now kept on hold. Will need to pull
+ * all the latest changes from the new settings.
+ */
 export class SettingsManager {
 	app: App;
 	plugin: TaskBoard;
@@ -228,7 +238,7 @@ export class SettingsManager {
 		// Set the last viewed tab
 		const defaultTab =
 			Object.keys(sections)[
-				this.plugin.settings.data.lastViewHistory.settingTab
+				this.plugin.settings.data.lastViewHistory.settingTab ?? 0
 			];
 		tabs[defaultTab].click();
 
@@ -281,7 +291,6 @@ export class SettingsManager {
 		// }
 
 		this.reloadNoticeAlreadyShown = false;
-
 	}
 
 	// Function to render the "Filters for scanning" tab content
@@ -1210,7 +1219,7 @@ export class SettingsManager {
 											});
 										},
 									);
-								})
+								});
 						})
 						.addText((colorInput) => {
 							colorInputRef = colorInput;
