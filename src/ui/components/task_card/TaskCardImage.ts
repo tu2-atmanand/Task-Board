@@ -48,55 +48,55 @@ export function createTaskCard(
 				plugin.settings,
 			);
 
-	const container = activeDocument.createDiv("div");
+	const container = createDiv("div");
 	container.className = "taskItemContainer";
 
-	const card = activeDocument.createDiv("div");
+	const card = createDiv("div");
 	card.className = `taskItem${isThisTaskCompleted ? " completed" : ""}`;
 	card.setAttribute("data-task-id", String(task[DEFAULT_TASK_CACHE_KEYS.ID]));
 
-	const colorIndicator = activeDocument.createDiv("div");
+	const colorIndicator = createDiv("div");
 	colorIndicator.className = "colorIndicator";
 	card.appendChild(colorIndicator);
 
-	const main = activeDocument.createDiv("div");
+	const main = createDiv("div");
 	main.className = "taskItemMainContent";
 
 	// Header
-	const header = activeDocument.createDiv("div");
+	const header = createDiv("div");
 	header.className = "taskItemHeader";
 
-	if (
-		propertiesVisibleInUI.includes(
-			DEFAULT_TASK_CACHE_KEYS.FilePathInHeader,
-		) &&
-		task[DEFAULT_TASK_CACHE_KEYS.FilePath]
-	) {
-		const topFile = activeDocument.createDiv("div");
-		topFile.className = "taskitemHeaderTopFilename";
-		topFile.setAttribute(
-			"aria-label",
-			task[DEFAULT_TASK_CACHE_KEYS.FilePath],
-		);
-		const val = activeDocument.createDiv("div");
-		val.className = "taskitemHeaderTopFilenameValue";
-		val.textContent =
-			task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/").pop() || "";
-		topFile.appendChild(val);
-		header.appendChild(topFile);
-	}
+	// if (
+	// 	propertiesVisibleInUI.includes(
+	// 		DEFAULT_TASK_CACHE_KEYS.FilePathInHeader,
+	// 	) &&
+	// 	task[DEFAULT_TASK_CACHE_KEYS.FilePath]
+	// ) {
+	// 	const topFile = createDiv("div");
+	// 	topFile.className = "taskitemHeaderTopFilename";
+	// 	topFile.setAttribute(
+	// 		"aria-label",
+	// 		task[DEFAULT_TASK_CACHE_KEYS.FilePath],
+	// 	);
+	// 	const val = createDiv("div");
+	// 	val.className = "taskitemHeaderTopFilenameValue";
+	// 	val.textContent =
+	// 		task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/").pop() || "";
+	// 	topFile.appendChild(val);
+	// 	header.appendChild(topFile);
+	// }
 
-	const headerBottom = activeDocument.createDiv("div");
+	const headerBottom = createDiv("div");
 	headerBottom.className = "taskItemHeaderBottom";
 
-	const headerLeft = activeDocument.createDiv("div");
+	const headerLeft = createDiv("div");
 	headerLeft.className = "taskItemHeaderLeft";
 
 	if (
 		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Priority) &&
 		task[DEFAULT_TASK_CACHE_KEYS.Priority] > 0
 	) {
-		const pr = activeDocument.createDiv("div");
+		const pr = createDiv("div");
 		pr.className = "taskItemPrio";
 		pr.textContent =
 			priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority]] || "";
@@ -108,11 +108,11 @@ export function createTaskCard(
 		(task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 ||
 			task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0)
 	) {
-		const tagsDiv = activeDocument.createDiv("div");
+		const tagsDiv = createDiv("div");
 		tagsDiv.className = "taskItemTags";
 
 		task[DEFAULT_TASK_CACHE_KEYS.Tags].forEach((tag) => {
-			const tagEl = activeDocument.createDiv("div");
+			const tagEl = createDiv("div");
 			tagEl.className = "taskItemTag";
 			const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
 			const isCardBg =
@@ -128,7 +128,7 @@ export function createTaskCard(
 			const dimmedTagColor = customTag
 				? updateRGBAOpacity(customTag.color, 0.1)
 				: undefined;
-			if (isTagBg && tagColor) tagEl.addClass("tb_color_white ");
+			if (isTagBg && tagColor) tagEl.addClass("tb_color_white");
 			if (isTagBg) tagEl.style.backgroundColor = tagColor ?? "";
 			else if (dimmedTagColor)
 				tagEl.style.backgroundColor = dimmedTagColor;
@@ -138,7 +138,7 @@ export function createTaskCard(
 		});
 
 		task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].forEach((tag) => {
-			const fm = activeDocument.createDiv("div");
+			const fm = createDiv("div");
 			fm.className = "taskItemTagFrontmatter";
 			fm.title = "Tag from note's frontmatter (read-only)";
 			fm.textContent = tag;
@@ -150,18 +150,18 @@ export function createTaskCard(
 
 	headerBottom.appendChild(headerLeft);
 
-	const headerRight = activeDocument.createDiv("div");
+	const headerRight = createDiv("div");
 	headerRight.className = "taskItemHeaderRight";
 	if (
 		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.ID) &&
 		task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
 	) {
-		const idCont = activeDocument.createDiv("div");
+		const idCont = createDiv("div");
 		idCont.className = "taskItemPropertyID";
-		const label = activeDocument.createDiv("div");
+		const label = createDiv("div");
 		label.className = "taskItemPropertyIDLabel";
 		label.textContent = "ID";
-		const value = activeDocument.createDiv("div");
+		const value = createDiv("div");
 		value.className = "taskItemPropertyIDValue";
 		value.textContent = String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]);
 		idCont.appendChild(label);
@@ -174,13 +174,13 @@ export function createTaskCard(
 	main.appendChild(header);
 
 	// Body (title)
-	const body = activeDocument.createDiv("div");
+	const body = createDiv("div");
 	body.className = "taskItemMainBody";
-	const titleWrap = activeDocument.createDiv("div");
+	const titleWrap = createDiv("div");
 	titleWrap.className = "taskItemMainBodyTitleNsubTasks";
 
 	if (propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox)) {
-		const cb = activeDocument.createEl("input");
+		const cb = createEl("input");
 		cb.type = "checkbox";
 		cb.checked =
 			task[DEFAULT_TASK_CACHE_KEYS.Status] === " " ? false : true;
@@ -192,9 +192,9 @@ export function createTaskCard(
 		titleWrap.appendChild(cb);
 	}
 
-	const bodyContent = activeDocument.createDiv("div");
+	const bodyContent = createDiv("div");
 	bodyContent.className = "taskItemBodyContent";
-	const title = activeDocument.createDiv("div");
+	const title = createDiv("div");
 	title.className = "taskItemTitle";
 	title.textContent = task[DEFAULT_TASK_CACHE_KEYS.Title] || "";
 	bodyContent.appendChild(title);
@@ -203,15 +203,15 @@ export function createTaskCard(
 	main.appendChild(body);
 
 	// Footer
-	const footer = activeDocument.createDiv("div");
+	const footer = createDiv("div");
 	footer.className = "taskItemFooter";
 	if (
 		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.Status) &&
 		task[DEFAULT_TASK_CACHE_KEYS.Status]
 	) {
-		const stat = activeDocument.createDiv("div");
+		const stat = createDiv("div");
 		stat.className = "taskItemFooterPropertyContainer_EmojiStyle";
-		const val = activeDocument.createDiv("div");
+		const val = createDiv("div");
 		val.className = "taskItemFooterPropertyContainerValue";
 		val.textContent = getStatusNameFromStatusSymbol(
 			task[DEFAULT_TASK_CACHE_KEYS.Status],
@@ -224,9 +224,9 @@ export function createTaskCard(
 		propertiesVisibleInUI.includes(DEFAULT_TASK_CACHE_KEYS.FilePath) &&
 		task[DEFAULT_TASK_CACHE_KEYS.FilePath]
 	) {
-		const fp = activeDocument.createDiv("div");
+		const fp = createDiv("div");
 		fp.className = "taskItemFooterPropertyContainer_EmojiStyle";
-		const val = activeDocument.createDiv("div");
+		const val = createDiv("div");
 		val.className = "taskItemFooterPropertyContainerValue";
 		val.setAttribute("aria-label", task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
 		val.textContent =
