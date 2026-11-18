@@ -31,8 +31,7 @@ export interface TaskCardProps {
 	swimlaneData?: swimlaneDataProp;
 }
 
-export interface TaskCardFooterComponent {
-	parentComponent: Component | View;
+export interface TaskCardFooterComponentOptions {
 	cardLoadingAnimation: boolean;
 	propertiesVisibleInUI: string[];
 }

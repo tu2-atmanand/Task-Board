@@ -29,9 +29,10 @@ import { updateRGBAOpacity } from '../../../utils/UIHelpers.js';
 import { handleEditTask, updateTaskItemStatus, updateTaskItemPriority, updateTaskItemDate, updateTaskItemReminder } from '../../../utils/UserTaskEvents.js';
 import { t } from '../../../utils/lang/helper.js';
 import type { TaskCardProps } from './index.js';
-import { renderBasesStyleFooter } from './BasesStyle.js';
-import { renderEmojiStyleFooter } from './EmojiStyle.js';
-import { renderIconStyleFooter } from './IconStyle.js';
+import { renderBasesStyleFooter, renderBasesStyleHeader } from './BasesStyle.js';
+import { renderEmojiStyleFooter, renderEmojiStyleHeader } from './EmojiStyle.js';
+import { renderIconStyleFooter, renderIconStyleHeader } from './IconStyle.js';
+import type { TaskCardHeaderOptions } from './TaskCardHeader.js';
 import { normalizeTaskIconValue } from '../../modals/icon_picker/index.js';
 
 const TaskCardParent: React.FC<TaskCardProps> = (props) => {
@@ -1031,93 +1032,41 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	};
 
 	const renderHeader = () => {
-		try {
-			return (
-				<div className="taskItemHeader">
-					{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader) && task[DEFAULT_TASK_CACHE_KEYS.FilePath] && (
-						<div className='taskitemHeaderTopFilename' aria-label={task[DEFAULT_TASK_CACHE_KEYS.FilePath]}>
-							<div className='taskitemHeaderTopFilenameValue'>{task[DEFAULT_TASK_CACHE_KEYS.FilePath].split('/').pop()}</div>
-						</div>
-					)}
+		const options: TaskCardHeaderOptions = {
+			task,
+			globalSettings,
+			propertiesVisibleInUI: propertiesVisibleInUIsafe,
+			activeViewType,
+			kanbanViewData,
+			columnData,
+		};
 
-					<div className='taskItemHeaderBottom'>
-						<div className="taskItemHeaderLeft">
-							{/* Render tags individually */}
-							{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.Tags) && (task[DEFAULT_TASK_CACHE_KEYS.Tags].length > 0 || task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].length > 0) && (
-								<div className="taskItemTags">
-									{/* Render line tags (editable) */}
-									{task[DEFAULT_TASK_CACHE_KEYS.Tags].map((tag: string, index: number) => {
-										const isTagBg = globalSettings.tagColorsType === TagColorType.TagBg;
-										const isCardBg = globalSettings.tagColorsType === TagColorType.CardBg;
-
-										const customTagColor = isCardBg ? undefined : plugin.settings.data.tagColors.find(t => compareTwoTags(t.name, tag));
-
-										const tagColor = customTagColor?.color;
-										const dimmedTagColor = customTagColor ? updateRGBAOpacity(customTagColor.color, 0.1) : undefined; // 10% opacity background
-										// const borderColor = customTag ? updateRGBAOpacity(customTag.color, 0.5) : `var(--tag-color-hover)`;
-
-										// If columnIndex is defined, proceed to get the column
-										if (
-											activeViewType === viewTypeNames.kanban &&
-											kanbanViewData &&
-											!kanbanViewData.showColumnTags &&
-											columnData &&
-											columnData?.colType === colTypeNames.namedTag &&
-											columnData?.coltag &&
-											compareTwoTags(columnData.coltag, tag)
-										) {
-											return null;
-										}
-
-										const tagKey = `${task[DEFAULT_TASK_CACHE_KEYS.ID]}-${tag}-${index}`;
-										// Render the remaining tags
-										return (
-											<div
-												key={tagKey}
-												className="taskItemTag"
-												style={{
-													color: isTagBg && tagColor ? 'white' : tagColor,
-													// border: `1px solid ${borderColor}`,
-													backgroundColor: isTagBg ? tagColor : dimmedTagColor
-												}}
-											>
-												{tag}
-											</div>
-										);
-									})}
-
-									{/* Render frontmatter tags (read-only) */}
-									{task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags] && task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags].map((tag: string) => {
-										const tagKey = `${task[DEFAULT_TASK_CACHE_KEYS.ID]}-fm-${tag}`;
-										// Render frontmatter tags with different styling
-										return (
-											<div
-												key={tagKey}
-												className="taskItemTagFrontmatter"
-												aria-label="Tag from note's frontmatter (read-only)"
-											>
-												{tag}
-											</div>
-										);
-									})}
-								</div>
-							)}
-						</div>
-						<div className='taskItemHeaderRight'>
-							{propertiesVisibleInUIsafe.includes(DEFAULT_TASK_CACHE_KEYS.ID) && task[DEFAULT_TASK_CACHE_KEYS.LegacyID] && (
-								<div className='taskItemPropertyID'>
-									<div className='taskItemPropertyIDLabel'>ID</div><div className='taskItemPropertyIDValue'>{task[DEFAULT_TASK_CACHE_KEYS.LegacyID]}</div>
-								</div>
-							)}
-						</div>
-					</div>
-
-				</div>
-			);
-		} catch (error) {
-			bugReporterManagerInsatance.addToLogs(7, error as string, "TaskCardParent.tsx/renderHeader");
-			return null;
-		}
+		return (
+			<div
+				className="taskItemHeader"
+				ref={(header) => {
+					if (!header) return;
+					try {
+						switch (globalSettings.taskCardStyle) {
+							case taskCardStyleNames.EMOJI:
+								renderEmojiStyleHeader(header, options);
+								break;
+							case taskCardStyleNames.ICONS:
+								renderIconStyleHeader(header, options);
+								break;
+							default:
+								renderBasesStyleHeader(header, options);
+						}
+					} catch (error) {
+						bugReporterManagerInsatance.addToLogs(
+							7,
+							String(error),
+							"TaskCardParent.tsx/renderHeader",
+						);
+					}
+				}}
+			/>
+		);
 	};
 
 	// Render sub-tasks and remaining body separately
@@ -1301,7 +1250,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	};
 
 	// Memoize the render functions to prevent unnecessary re-renders
-	const memoizedRenderHeader = useMemo(() => renderHeader(), [propertiesVisibleInUIsafe, task[DEFAULT_TASK_CACHE_KEYS.Priority], task[DEFAULT_TASK_CACHE_KEYS.Tags], columnData]);
+	const memoizedRenderHeader = useMemo(() => renderHeader(), [propertiesVisibleInUIsafe, task, globalSettings.taskCardStyle, globalSettings.taskProperties, globalSettings.tagColors, globalSettings.tagColorsType, activeViewType, kanbanViewData, columnData]);
 	const memoizedRenderSubTasks = useMemo(() => renderSubTasks(), [propertiesVisibleInUIsafe, task[DEFAULT_TASK_CACHE_KEYS.Body], showSubtasks]);
 	const memoizedRenderChildTasks = useMemo(() => renderChildTasks(), [task[DEFAULT_TASK_CACHE_KEYS.Dependencies], childTasksData]);
 	// const memoizedRenderFooter = useMemo(() => renderFooter(), [plugin.settings.data.showFooter, task.completion, universalDate, task.time]);

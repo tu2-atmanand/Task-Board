@@ -1,21 +1,38 @@
 import type { ReactNode } from "react";
 import type { globalSettingsData } from "../../../interfaces/GlobalSettings.js";
 import type { taskItem } from "../../../interfaces/TaskItem.js";
-import type { TaskCardFooterComponent } from "./index.js";
-import { getTaskCardFooterProperties, renderTaskCardFooter } from "./TaskCardFooter.js";
+import type {
+	TaskCardFooterComponentOptions,
+} from "./index.js";
+import {
+	getTaskCardFooterProperties,
+	renderTaskCardFooter,
+} from "./TaskCardFooter.js";
+import { taskCardStyleNames } from "../../../interfaces/Enums.js";
+import {
+	renderTaskCardHeader,
+	type TaskCardHeaderOptions,
+} from "./TaskCardHeader.js";
 
 export function renderBasesStyleFooter(
-	component: TaskCardFooterComponent,
+	options: TaskCardFooterComponentOptions,
 	taskItem: taskItem,
 	globalSetting: globalSettingsData,
 ): ReactNode {
 	return renderTaskCardFooter(
-		component,
+		options,
 		getTaskCardFooterProperties(
 			taskItem,
 			globalSetting,
-			component.propertiesVisibleInUI,
+			options.propertiesVisibleInUI,
 		),
-		"bases",
+		taskCardStyleNames.BASES,
 	);
+}
+
+export function renderBasesStyleHeader(
+	header: HTMLElement,
+	options: TaskCardHeaderOptions,
+): void {
+	renderTaskCardHeader(header, options, "bases");
 }

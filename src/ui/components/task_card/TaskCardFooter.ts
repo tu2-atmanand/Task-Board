@@ -1,15 +1,21 @@
 import { createElement, type ReactNode } from "react";
 import { setIcon } from "obsidian";
 import { t } from "../../../utils/lang/helper.js";
-import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
+} from "../../../interfaces/Enums.js";
 import type {
 	globalSettingsData,
 	SupportedPropertiesConfig,
 } from "../../../interfaces/GlobalSettings.js";
 import type { taskItem } from "../../../interfaces/TaskItem.js";
-import { priorityNames } from "../../../interfaces/Mapping.js";
-import { getStatusNameFromStatusSymbol } from "../../../utils/TaskItemUtils.js";
-import type { TaskCardFooterComponent, TaskCardFooterStyle } from "./index.js";
+import { getTaskPropertyValue } from "../../../utils/TaskItemUtils.js";
+import type {
+	TaskCardFooterComponentOptions,
+	TaskCardFooterStyle,
+} from "./index.js";
+import { getHumanReadableDateString } from "../../../utils/DateTimeCalculations.js";
 
 const NON_FOOTER_PROPERTIES = new Set<string>([
 	DEFAULT_TASK_CACHE_KEYS.ID,
@@ -30,44 +36,6 @@ export interface TaskCardFooterPropertyValue {
 	value: string;
 }
 
-function getTaskPropertyValue(
-	task: taskItem,
-	propertyKey: string,
-	globalSetting: globalSettingsData,
-): string | undefined {
-	if (propertyKey === String(DEFAULT_TASK_CACHE_KEYS.Status)) {
-		const status = task[DEFAULT_TASK_CACHE_KEYS.Status];
-		return status
-			? getStatusNameFromStatusSymbol(
-					status,
-					globalSetting.customStatuses ?? [],
-				)
-			: undefined;
-	}
-
-	if (propertyKey === String(DEFAULT_TASK_CACHE_KEYS.Priority)) {
-		const priority = task[DEFAULT_TASK_CACHE_KEYS.Priority];
-		return priority === undefined || priority <= 0
-			? undefined
-			: (priorityNames[priority] ?? String(priority));
-	}
-
-	const value = task[propertyKey];
-	if (value === undefined || value === null || value === "") return undefined;
-	if (
-		propertyKey === String(DEFAULT_TASK_CACHE_KEYS.FilePath) &&
-		typeof value === "string"
-	) {
-		return value.split("/").pop() || value;
-	}
-	if (Array.isArray(value))
-		return value.length > 0 ? value.join(", ") : undefined;
-	if (typeof value === "boolean" || typeof value === "number")
-		return String(value);
-	if (typeof value === "string") return value;
-	return undefined;
-}
-
 export function getTaskCardFooterProperties(
 	task: taskItem,
 	globalSetting: globalSettingsData,
@@ -86,29 +54,48 @@ export function getTaskCardFooterProperties(
 				first.index - second.index,
 		)
 		.flatMap(({ property }) => {
-			const value = getTaskPropertyValue(
+			const valueNtype = getTaskPropertyValue(
 				task,
 				property.key,
 				globalSetting,
+				true,
 			);
-			return value === undefined
-				? []
-				: [
+
+			if (valueNtype.propertyValue === undefined) return [];
+
+			if (
+				valueNtype.propertyType === PropertyTypeConfig.date ||
+				valueNtype.propertyType === PropertyTypeConfig.dateTime
+			) {
+				if (globalSetting.dateHumanReadable) {
+					return [
 						{
 							property,
-							value,
-							ariaLabel:
-								property.key ===
-								String(DEFAULT_TASK_CACHE_KEYS.FilePath)
-									? task[DEFAULT_TASK_CACHE_KEYS.FilePath]
-									: undefined,
+							value: getHumanReadableDateString(
+								String(valueNtype.propertyValue),
+							),
 						},
 					];
+				}
+			}
+			return [
+				{
+					property,
+					value: String(valueNtype.propertyValue),
+				},
+			];
 		});
 }
 
+function getPropertyLabel(
+	property: SupportedPropertiesConfig,
+	style: Exclude<TaskCardFooterStyle, "icons">,
+): string {
+	return style === "emoji" ? property.emoji : property.name;
+}
+
 export function renderTaskCardFooter(
-	component: TaskCardFooterComponent,
+	options: TaskCardFooterComponentOptions,
 	properties: TaskCardFooterPropertyValue[],
 	style: TaskCardFooterStyle,
 ): ReactNode {
@@ -118,7 +105,7 @@ export function renderTaskCardFooter(
 			: style === "icons"
 				? "taskItemFooterPropertiesContainer_IconStyle"
 				: "taskItemFooterPropertiesContainer_BasesStyle";
-	if (component.cardLoadingAnimation) {
+	if (options.cardLoadingAnimation) {
 		return createElement(
 			"div",
 			{ className: "taskItemFooterRefreshingMssg" },
@@ -162,7 +149,9 @@ export function renderTaskCardFooter(
 						setIcon(iconContainer, property.icon);
 					}
 				} else {
-					label.createSpan({ text: propertyLabel(property, style) });
+					label.createSpan({
+						text: getPropertyLabel(property, style),
+					});
 				}
 
 				const propertyValue = propertyContainer.createDiv({
@@ -173,11 +162,4 @@ export function renderTaskCardFooter(
 			}
 		},
 	});
-}
-
-function propertyLabel(
-	property: SupportedPropertiesConfig,
-	style: Exclude<TaskCardFooterStyle, "icons">,
-): string {
-	return style === "emoji" ? property.emoji : property.name;
 }
