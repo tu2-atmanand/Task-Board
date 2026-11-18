@@ -69,8 +69,14 @@ export function updateRGBAOpacity(rgba: string, newOpacity: number): string {
 		newRGBA = hexToRgba(rgba, newOpacity);
 	}
 
-	const regex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)$/;
-	const match = newRGBA.match(regex);
+	let match;
+	if (newRGBA.startsWith("rgba(")) {
+		const regex = /^rgba\((\d+),\s*(\d+),\s*(\d+),\s*[\d.]+\)$/;
+		match = newRGBA.match(regex);
+	} else if (newRGBA.startsWith("rgb(")) {
+		const regex = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)/;
+		match = newRGBA.match(regex);
+	}
 
 	if (match) {
 		return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${newOpacity})`;
@@ -96,7 +102,9 @@ export const createFragmentWithHTML = (html: string) => sanitizeHTMLToDom(html);
  * @param property - The task property name
  * @returns The corresponding CSS hide class name
  */
-export function getHideClassForProperty(property: DEFAULT_TASK_CACHE_KEYS): string {
+export function getHideClassForProperty(
+	property: DEFAULT_TASK_CACHE_KEYS,
+): string {
 	switch (property) {
 		case DEFAULT_TASK_CACHE_KEYS.ID:
 			return "hide-task-id";

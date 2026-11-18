@@ -1606,29 +1606,30 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemTags {
 	display: flex;
-	gap: 2px;
+	gap: 4px;
 	flex-wrap: wrap;
 }
 
 .taskItemTag {
-	font-size: 0.7rem;
-	/* font-weight: 500; */
-	/* line-height: 1; */
+	font-size: var(--font-smallest);
 	margin-right: 2px;
 	display: flex;
 	white-space: nowrap;
 	background-color: var(--tag-background);
-	border: var(--tag-border-width) solid var(--tag-border-color);
+	border: 1px solid var(--tag-background);
 	border-radius: var(--tag-radius);
 	color: var(--tag-color);
 	font-weight: var(--tag-weight);
 	text-decoration: var(--tag-decoration);
-	/* padding-top: 0.15em; */
-	/* padding-right: 0.65em; */
 	padding-block: 0.25em;
-	padding-inline: 0.65em;
+	padding-inline: 0.55em;
 	line-height: 1;
+	gap: 0.45em;
 	align-items: center;
+}
+
+.taskItemTagIconStyle {
+	border-radius: 4px;
 }
 
 .taskItemTagFrontmatter {
@@ -1656,7 +1657,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: row;
 	align-content: center;
 	align-items: center;
-	max-width: -webkit-fill-available;
+	max-width: stretch;
 }
 
 .taskItemFileNameSection {
@@ -1702,7 +1703,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskitemHeaderTopFilenameValue {
 	color: var(--tab-text-color-active);
-	font-size: 0.8rem;
+	font-size: var(--font-smallest);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -1731,6 +1732,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	color: var(--text-muted);
 }
 
+.taskItemPropertyID_iconStyle {
+	display: inline-flex;
+	gap: 0.4rem;
+	padding: 1px 4px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	align-items: flex-start;
+}
+
 .taskItemPropertyIDLabel {
 	background-color: var(--background-modifier-border-hover);
 	border-right: 1px solid var(--canvas-card-label-color);
@@ -1738,8 +1748,23 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border-radius: 5px 0 0 5px;
 }
 
+.taskItemPropertyIDLabel_iconStyle {
+	font-size: 0.65rem;
+	color: var(--canvas-card-label-color);
+	display: flex;
+}
+
+.taskItemPropertyIDLabel svg.svg-icon {
+	display: flex;
+}
+
 .taskItemPropertyIDValue {
-	padding-right: 5px;
+	font-style: italic;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: var(--font-smallest);
+	color: var(--text-muted);
 }
 
 .taskItemPriority {
@@ -1892,7 +1917,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	flex-direction: row;
 	gap: 1em;
 	align-items: center;
-	max-width: 100%;
+	max-width: stretch;
 }
 
 .taskItemFooterPropertyContainer_IconStyle {
@@ -1902,6 +1927,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	align-items: flex-start;
+	max-width: stretch;
 }
 
 .taskItemFooterPropertyContainerLabel {
@@ -1913,11 +1939,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskBoard_taskCard_iconStyle_icon {
 	display: inline-flex;
 	align-items: center;
-}
-
-.taskBoard_taskCard_iconStyle_icon .svg-icon {
-	width: 16px;
-	height: 16px;
 }
 
 .taskItemFooterPropertyContainerValue {
