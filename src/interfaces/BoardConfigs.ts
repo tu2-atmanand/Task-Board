@@ -30,7 +30,7 @@ export interface columnSortingCriteria {
 export interface FilterCriterion {
 	id: string;
 	property: string; // Built-in property or configured property id
-	propertyType?: PropertyTypeConfig;
+	// propertyType?: PropertyTypeConfig;
 	condition: string; // e.g., 'isSet', 'equals', 'contains'
 	value?: string;
 }

@@ -1333,7 +1333,7 @@ export class AdvancedFilterComponent extends Component {
 		let conditionOptions: { value: string; text: string }[] = [];
 		const configuredProperty = this.plugin.settings.data.taskProperties.find((item) => !item.default && item.id === property);
 		if (configuredProperty) {
-			filterData.propertyType = configuredProperty.type;
+			// filterData.propertyType = configuredProperty.type;
 			const propertyFilterConfig = getPropertyTypeFilterConfig(
 				configuredProperty.type,
 			);
@@ -1348,7 +1348,7 @@ export class AdvancedFilterComponent extends Component {
 				});
 			}
 		} else {
-			delete filterData.propertyType;
+			// delete filterData.propertyType;
 			switch (property) {
 			case "content":
 				valueInput.type = "text";
