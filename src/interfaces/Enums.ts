@@ -226,6 +226,18 @@ export enum HeaderTruncationOptions {
 	end = "end",
 }
 
+/**
+ * Enum of all types of values supported by Task Board for Task properties.
+ * 
+ * Current supported types are : 
+ * - Text (string)
+ * - Numeric
+ * - Boolean
+ * - Time (Format will be used from settings configured by user)
+ * - Date (Format will be used from settings configured by user)
+ * - Date-time (Date and time together. Format will be used from setting)
+ * - List (Only string value list. Example for tags and dependOn values list)
+ */
 export enum PropertyTypeConfig {
 	text = "text",
 	boolean = "boolean",

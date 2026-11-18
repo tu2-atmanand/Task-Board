@@ -13,12 +13,12 @@ export const priorityEmojis: { [key: number]: string } = {
 };
 
 export const priorityNames: { [key: number]: string } = {
-	0: t("none"),
-	1: t("highest"),
-	2: t("high"),
-	3: t("medium"),
-	4: t("low"),
-	5: t("lowest"),
+	0: "none",
+	1: "Highest",
+	2: "High",
+	3: "Medium",
+	4: "Low",
+	5: "Lowest",
 };
 
 export interface priorityDropDownOption {

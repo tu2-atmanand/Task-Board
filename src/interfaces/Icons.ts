@@ -90,6 +90,7 @@ export const TASK_PROPERTIES_TO_ICON_MAPPING: { [key: string]: string } = {
 
 	// Below properties are not user configurable but they are shown
 	// in UI, hence mapping here
-	[DEFAULT_TASK_CACHE_KEYS.ParentFolder]: "folder-input",
+	[DEFAULT_TASK_CACHE_KEYS.ParentFolder]: "folder-open",
+	[DEFAULT_TASK_CACHE_KEYS.FullPath]: "file-symlink",
 };
 

@@ -244,7 +244,7 @@ export interface PluginDataJson {
 	data: globalSettingsData;
 }
 
-const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
+const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
 	{
 		default: true,
 		key: DEFAULT_TASK_CACHE_KEYS.ID,
@@ -265,8 +265,8 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Title],
 		desc: "A short summary about the task.",
 		type: PropertyTypeConfig.text,
-		emoji: "",
-		icon: "",
+		emoji: "", // There is no emoji for title
+		icon: "", // There is no icon for title
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
 		rank: 2,
@@ -304,7 +304,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Tags],
 		desc: "To add context to the tasks, add multiple tags as list.",
 		type: PropertyTypeConfig.list,
-		emoji: "",
+		emoji: "", // There is no emoji for tags
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Tags],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
@@ -343,7 +343,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
 		desc: "A date-time value when the task was created.",
 		type: PropertyTypeConfig.dateTime,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.createdDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.CreatedDate
 		],
@@ -358,7 +358,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.StartDate],
 		desc: "A date-time value from when user should or can start working on the task.",
 		type: PropertyTypeConfig.dateTime,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.startDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.StartDate
 		],
@@ -373,7 +373,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
 		desc: "A date-time value when this task should be actually worked on.",
 		type: PropertyTypeConfig.dateTime,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.scheduledDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.ScheduledDate
 		],
@@ -388,7 +388,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.DueDate],
 		desc: "A date-time value which is the last date/time for this task to be completed.",
 		type: PropertyTypeConfig.dateTime,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.dueDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.DueDate],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
@@ -401,7 +401,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CompletionDate],
 		desc: "A date-time value when the task will be marked as finished/completed.",
 		type: PropertyTypeConfig.dateTime,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.doneDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.CompletionDate
 		],
@@ -416,7 +416,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
 		desc: "A date-time value when the task will be marked as cancelled.",
 		type: PropertyTypeConfig.dateTime,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.cancelledDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.CancelledDate
 		],
@@ -431,7 +431,7 @@ const DEFAULT_PROPERTY_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Dependencies],
 		desc: "A list of all the task ids on which the current task is dependent on. The current task is blocked-by these child-tasks.",
 		type: PropertyTypeConfig.list,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.Dependencies
 		],
@@ -568,7 +568,7 @@ export function migrateLegacyPropertySettings(
 ): void {
 	const oldFormatting = previousData?.frontmatterFormatting ?? [];
 	const builtInKeys = new Set(
-		DEFAULT_PROPERTY_PRESENTATION.map((property) => property.key),
+		DEFAULT_TASK_PROPERTIES_PRESENTATION.map((property) => property.key),
 	);
 	const hasUnifiedProperties =
 		(previousData?.taskProperties?.length ?? 0) > 0 ||
@@ -616,7 +616,7 @@ export function migrateLegacyPropertySettings(
 		Math.max(0, ...configuredProperties.map((property) => property.rank)) +
 		1;
 
-	const defaultProperties = DEFAULT_PROPERTY_PRESENTATION.map(
+	const defaultProperties = DEFAULT_TASK_PROPERTIES_PRESENTATION.map(
 		(defaultProperty, index) => {
 			const legacy = oldFormatting.find(
 				(item) => item.taskItemKey === defaultProperty.key,
@@ -847,7 +847,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		enableDragnDropTouch: false,
 		filtersWarehouse: [],
 		ribbonIconAction: RibbonIconActions.allBoardsMenu,
-		taskProperties: DEFAULT_PROPERTY_PRESENTATION,
+		taskProperties: DEFAULT_TASK_PROPERTIES_PRESENTATION,
 	},
 };
 
