@@ -6,6 +6,7 @@ import {
 import { priorityEmojis } from "../../../interfaces/Mapping.js";
 import { taskItem } from "../../../interfaces/TaskItem.js";
 import { isTaskCompleted } from "../../../utils/CheckBoxUtils.js";
+import { cleanTaskTitleLegacy } from "../../../utils/task_line/TaskContentFormatter.js";
 import { isTaskNotePresentInTags } from "../../../utils/task_note/TaskNoteUtils.js";
 import {
 	getStatusNameFromStatusSymbol,
@@ -196,7 +197,7 @@ export function createTaskCard(
 	bodyContent.className = "taskItemBodyContent";
 	const title = createDiv("div");
 	title.className = "taskItemTitle";
-	title.textContent = task[DEFAULT_TASK_CACHE_KEYS.Title] || "";
+	title.textContent = cleanTaskTitleLegacy(task) || "";
 	bodyContent.appendChild(title);
 	titleWrap.appendChild(bodyContent);
 	body.appendChild(titleWrap);

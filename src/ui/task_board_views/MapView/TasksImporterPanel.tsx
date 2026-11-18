@@ -11,7 +11,7 @@ import { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
 import { applyIdToTaskItem } from '../../../utils/TaskItemUtils.js';
-import Parent from '../../components/task_card/Parent.js';
+import TaskCardParent from '../../components/task_card/TaskCardParent.js';
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
 
@@ -230,7 +230,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 										onClick={() => { void handleImportTask(task); }}
 									>
 										{/* TODO : Replace this with the cardImage */}
-										<Parent
+										<TaskCardParent
 											key={task[DEFAULT_TASK_CACHE_KEYS.ID]}
 											dataAttributeIndex={0} // TODO : No need of this data in this case.
 											plugin={plugin}
