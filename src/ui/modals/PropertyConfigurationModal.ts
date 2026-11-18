@@ -121,17 +121,30 @@ export class PropertyConfigurationModal extends Modal {
 			true,
 		);
 
-		new Setting(contentEl)
-			.setName(t("value-type"))
-			.setDesc(t("value-type-info"))
-			.addDropdown((dropdown) => {
-				Object.values(PropertyTypeConfig).forEach((type) => {
-					dropdown.addOption(type, type);
+		const statusConfigurableForDefaultProperties = [
+			String(DEFAULT_TASK_CACHE_KEYS.CancelledDate),
+			DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+			DEFAULT_TASK_CACHE_KEYS.DueDate,
+			DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+			DEFAULT_TASK_CACHE_KEYS.StartDate,
+		];
+		if (
+			this.propertyGroup === "custom" ||
+			statusConfigurableForDefaultProperties.includes(this.draft.key)
+		) {
+			new Setting(contentEl)
+				.setName(t("value-type"))
+				.setDesc(t("value-type-info"))
+				.addDropdown((dropdown) => {
+					Object.values(PropertyTypeConfig).forEach((type) => {
+						dropdown.addOption(type, type);
+					});
+					dropdown.setValue(this.draft.type).onChange((value) => {
+						this.draft.type = value as PropertyTypeConfig;
+					});
 				});
-				dropdown.setValue(this.draft.type).onChange((value) => {
-					this.draft.type = value as PropertyTypeConfig;
-				});
-			});
+		}
 
 		addTextField(
 			t("emoji"),
