@@ -37,7 +37,10 @@ import {
 	isTaskCompleted,
 	extractCheckboxSymbol,
 } from "../../utils/CheckBoxUtils.js";
-import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
+import {
+	getCurrentLocalDateTimeString,
+	robustDateParser,
+} from "../../utils/DateTimeCalculations.js";
 import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
@@ -56,7 +59,6 @@ import { bugReporterManagerInsatance } from "./BugReporter.js";
 import type { VaultScannnerFilters } from "../../interfaces/GlobalSettings.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
-
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
  * @param app The Obsidian app instance
@@ -69,7 +71,6 @@ export default class VaultScanner {
 	tasksCache: jsonCacheData;
 	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
-	testDate: Date;
 	supportedChecklistSymbols: string[];
 
 	constructor(app: App, plugin: TaskBoard) {
@@ -85,7 +86,6 @@ export default class VaultScanner {
 
 		// Some recursively used constants
 		this.indentationString = getObsidianIndentationSetting(plugin);
-		this.testDate = new Date(2026, 1, 18); // Fixed reference date: Feb 18, 2026
 		this.supportedChecklistSymbols = [];
 		this.plugin.settings.data.customStatuses.forEach((status) => {
 			this.supportedChecklistSymbols.push(status.symbol);
@@ -117,6 +117,8 @@ export default class VaultScanner {
 		scanFilters: VaultScannnerFilters,
 	): Promise<string> {
 		try {
+			const userConfiguredDateFormat =
+				this.plugin.settings.data.dateFormat;
 			const fileNameWithPath = file.path;
 			const fileContent = await readDataOfVaultFile(
 				this.plugin,
@@ -377,15 +379,17 @@ export default class VaultScanner {
 							if (
 								this.plugin.settings.data.dailyNotesPluginComp
 							) {
-								const universalDateFormat =
-									this.plugin.settings.data.dateFormat;
 								const basename = file.basename;
 
 								// Check if the basename matches the date format
-								const parsed = parse(
+								// const parsed = parse(
+								// 	basename,
+								// 	universalDateFormat,
+								// 	this.testDate,
+								// );
+								const parsed = robustDateParser(
 									basename,
-									universalDateFormat,
-									this.testDate,
+									userConfiguredDateFormat,
 								);
 								if (isValid(parsed)) {
 									const universalDateConfig =
@@ -789,16 +793,16 @@ export function fileTypeAllowedForScanning(
 }
 
 /**
- * A single extraction function which can be used to extract default as well as custom 
+ * A single extraction function which can be used to extract default as well as custom
  * properties from an inline-task of a specific format.
  * This is specially designed to reduce the parsing time for long notes and huge number
  * of files. Makes use of the regular expressions to only scan the properties from the
- * inline-tasks for the format set by user in the setting. Following formats are 
- * supported so far : 
+ * inline-tasks for the format set by user in the setting. Following formats are
+ * supported so far :
  * - Tasks plugin Emoji
  * - Dataview
  * - Obsidian native
- * 
+ *
  * @param line - The inline-task line.
  * @param settings - All settings of this plugin.
  * @returns Extracted key value pair record.
@@ -883,12 +887,12 @@ export function extractTaskPropertiesOfSingleFormat(
 /**
  * Read custom inline fields in the active task-property syntax. Custom emoji values
  * are token-based (quoted values may contain spaces); Dataview/native forms are delimited.
- * 
+ *
  * This is a little expensive function as it scans the properties in any of the 3 types of formats.
  *
- * TODO : Remove all the extract* functions below this one, as this single function can be used 
+ * TODO : Remove all the extract* functions below this one, as this single function can be used
  * as a generalized version of all of them. Rename this one as extractTaskPropertiesOfAllFormats
- * 
+ *
  * TODO : Create a setting, where user can decide whether they want to make use of this function while scanning their tasks either for the first time or for the automatic scanning.
  * By default, {@link extractTaskPropertiesOfSingleFormat} will be the setting on plugin install.
  */
