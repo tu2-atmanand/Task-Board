@@ -1,6 +1,5 @@
 // src/utils/advancedFilterer.ts
 
-import { compareAsc } from "date-fns";
 import {
 	Filter,
 	FilterCriterionGroup,
@@ -10,12 +9,12 @@ import {
 import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
 import { PropertyTypeConfig } from "../../interfaces/Enums.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
-import { robustDateParser } from "../../utils/DateTimeCalculations.js";
-import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
-import { getFormattedTaskContentSync } from "../../utils/task_line/TaskContentFormatter.js";
+import {
+	compareDates,
+	compareTimePropertyValue,
+} from "../../utils/DateTimeCalculations.js";
+import { getTaskPropertyValue } from "../../utils/TaskItemUtils.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
-import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
-
 
 /**
  * Filters tasks based on the board's filter configuration
@@ -145,42 +144,47 @@ function evaluateFilterCriterionGroup(
 }
 
 /**
- * Evaluates a single {@link FilterCriterion} against a task
+ * Evaluates a single {@link FilterCriterion} against a task.
+ *
+ * @returns
+ * - True - If the task is allowed to pass through this filter.
+ * - False - If task does not satisfy the filter.
  */
 function evaluateFilterCriterion(
 	task: taskItem,
 	filter: FilterCriterion,
 	dateFormat: string,
 ): boolean {
-	const { property, condition, value, propertyType } = filter;
+	const { property, condition, value } = filter;
 
-	// Configured property ids are the keys stored on task cache objects.
-	let taskValue = getTaskPropertyValue(task, property, propertyType);
-	if (propertyType === PropertyTypeConfig.numeric && taskValue !== "" && taskValue != null) {
-		const numericValue = Number(taskValue);
-		taskValue = Number.isNaN(numericValue) ? undefined : numericValue;
-	} else if (propertyType === PropertyTypeConfig.boolean) {
-		if (typeof taskValue === "string" && taskValue !== "") {
-			taskValue = taskValue.toLowerCase() === "true";
-		}
-	}
-	const comparisonValue = propertyType === PropertyTypeConfig.boolean
-		? String(value).toLowerCase() === "true"
-		: value;
+	// OLD METHOD - Using feature specific getTaskPropertyValue function
+	// // Configured property ids are the keys stored on task cache objects.
+	// let taskValue = getTaskPropertyValue(task, property);
+	// if (propertyType === PropertyTypeConfig.numeric && taskValue !== "" && taskValue != null) {
+	// 	const numericValue = Number(taskValue);
+	// 	taskValue = Number.isNaN(numericValue) ? undefined : numericValue;
+	// } else if (propertyType === PropertyTypeConfig.boolean) {
+	// 	if (typeof taskValue === "string" && taskValue !== "") {
+	// 		taskValue = taskValue.toLowerCase() === "true";
+	// 	}
+	// }
 
-	// console.log(
-	// 	"task :",
-	// 	task,
-	// 	"\nfilter :",
-	// 	filter,
-	// 	"\ntaskValue :",
-	// 	taskValue
-	// );
+	// NEW MTHOD - Using a universal getTaskPropertyValue function
+	const valueNType = getTaskPropertyValue(task, property, globalSettings);
+
+	const taskValue = valueNType.propertyValue;
+	const propertyType = valueNType.propertyType;
+
+	const comparisonValue =
+		propertyType === PropertyTypeConfig.boolean
+			? String(value).toLowerCase() === "true"
+			: value;
 
 	// Evaluate based on condition
 	switch (condition) {
 		case "isNotEmpty":
-			if (typeof taskValue === "boolean" || typeof taskValue === "number") return true;
+			if (typeof taskValue === "boolean" || typeof taskValue === "number")
+				return true;
 			if (Array.isArray(taskValue) && taskValue.length > 0) return true;
 			else if (taskValue && taskValue !== "") return true;
 			else if (taskValue) return true;
@@ -193,7 +197,8 @@ function evaluateFilterCriterion(
 		// 	taskValue?.length > 0
 		// );
 		case "isEmpty":
-			if (typeof taskValue === "boolean" || typeof taskValue === "number") return false;
+			if (typeof taskValue === "boolean" || typeof taskValue === "number")
+				return false;
 			return (
 				taskValue === "" ||
 				taskValue === null ||
@@ -259,27 +264,35 @@ function evaluateFilterCriterion(
 		case "before":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return (propertyType === PropertyTypeConfig.time
-				? compareTimeValues(taskValue, value)
-				: compareDates(taskValue, value, dateFormat)) < 0;
+			return (
+				(propertyType === PropertyTypeConfig.time
+					? compareTimePropertyValue(taskValue, value, "asc")
+					: compareDates(taskValue, value, "asc")) < 0
+			);
 		case "after":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return (propertyType === PropertyTypeConfig.time
-				? compareTimeValues(taskValue, value)
-				: compareDates(taskValue, value, dateFormat)) > 0;
+			return (
+				(propertyType === PropertyTypeConfig.time
+					? compareTimePropertyValue(taskValue, value, "asc")
+					: compareDates(taskValue, value, "asc")) > 0
+			);
 		case "onOrBefore":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return (propertyType === PropertyTypeConfig.time
-				? compareTimeValues(taskValue, value)
-				: compareDates(taskValue, value, dateFormat)) <= 0;
+			return (
+				(propertyType === PropertyTypeConfig.time
+					? compareTimePropertyValue(taskValue, value, "asc")
+					: compareDates(taskValue, value, "asc")) <= 0
+			);
 		case "onOrAfter":
 			if (typeof taskValue !== "string" || typeof value !== "string")
 				return false;
-			return (propertyType === PropertyTypeConfig.time
-				? compareTimeValues(taskValue, value)
-				: compareDates(taskValue, value, dateFormat)) >= 0;
+			return (
+				(propertyType === PropertyTypeConfig.time
+					? compareTimePropertyValue(taskValue, value, "asc")
+					: compareDates(taskValue, value, "asc")) >= 0
+			);
 		case "hasTag":
 			if (Array.isArray(taskValue)) {
 				return (
@@ -302,117 +315,77 @@ function evaluateFilterCriterion(
 /**
  * Gets the property value from a task based on property name
  */
-function getTaskPropertyValue(
-	task: taskItem,
-	property: string,
-	propertyType?: PropertyTypeConfig,
-): unknown {
-	if (propertyType) {
-		return (task as unknown as Record<string, unknown>)[property];
-	}
-	switch (property) {
-		case "content":
-			return getFormattedTaskContentSync(task);
-		case "title":
-			return task[DEFAULT_TASK_CACHE_KEYS.Title] || "";
-		case "body":
-		case "description":
-			return task[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n") || "";
-		case "createdDate":
-		case "created":
-			return task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || "";
-		case "dueDate":
-		case "due":
-			return task[DEFAULT_TASK_CACHE_KEYS.DueDate] || "";
-		case "startDate":
-		case "start":
-			return task[DEFAULT_TASK_CACHE_KEYS.StartDate] || "";
-		case "scheduledDate":
-		case "scheduled":
-			return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "";
-		case "completion":
-		case "completedDate":
-		case "done":
-			return task?.[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || "";
-		case "cancelled":
-		case "cancelledDate":
-			return task?.[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || "";
-		case "priority":
-			return task[DEFAULT_TASK_CACHE_KEYS.Priority] || 0;
-		case "status":
-			return task[DEFAULT_TASK_CACHE_KEYS.Status] || " ";
-		case "tags":
-			return getAllTaskTags(task) || [];
-		case "frontmatterTags":
-			return task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags] || [];
-		case "filePath":
-		case "path":
-			return task[DEFAULT_TASK_CACHE_KEYS.FilePath] || "";
-		case "folderPath": {
-			const parts = task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/");
-			const folderPath = parts.slice(0, -1).join("/");
-			return folderPath + "/" || "";
-		}
-		case "startTime":
-			return task[DEFAULT_TASK_CACHE_KEYS.Time] ? task[DEFAULT_TASK_CACHE_KEYS.Time].split("-")[0].trim() : "";
-		case "reminder":
-			return task?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "";
-		case "dependsOn":
-		case "dependencies":
-			return task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] || [];
-		default:
-			// Handle tag properties like "tags.myTag"
-			if (property.startsWith("tags.")) {
-				const tagName = property.substring(5);
-				return (task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).some(
-					(tag) => tag.toLowerCase() === tagName.toLowerCase(),
-				);
-			}
-			return undefined;
-	}
-}
-
-/** Compare configured time values as clock times (HH:mm), not dates. */
-function compareTimeValues(value1: string, value2: string): number {
-	const toMinutes = (value: string): number => {
-		const [hours, minutes] = value.split(":").map(Number);
-		return Number.isFinite(hours) && Number.isFinite(minutes)
-			? hours * 60 + minutes
-			: Number.NaN;
-	};
-	const time1 = toMinutes(value1);
-	const time2 = toMinutes(value2);
-	if (Number.isNaN(time1) || Number.isNaN(time2)) return 0;
-	return time1 - time2;
-}
-
-/**
- * Compares two dates using robust parsing
- * Handles multiple date formats automatically
- * @returns -1 if date1 < date2, 0 if equal, 1 if date1 > date2
- */
-function compareDates(
-	date1: string | Date,
-	date2: string | Date,
-	dateFormat: string,
-): number {
-	if (!date1 || !date2) {
-		return 0;
-	}
-
-	// Use robust parser for both dates
-	const parsedDate1 = robustDateParser(String(date1), dateFormat);
-	const parsedDate2 = robustDateParser(String(date2), dateFormat);
-
-	// If either date is invalid, return 0
-	if (!parsedDate1 || !parsedDate2) {
-		return 0;
-	}
-
-	// Compare dates
-	const comparison = compareAsc(parsedDate1, parsedDate2);
-	return comparison;
-}
+// function getTaskPropertyValue(
+// 	task: taskItem,
+// 	property: string,
+// 	propertyType?: PropertyTypeConfig,
+// ): unknown {
+// 	if (propertyType) {
+// 		return (task as unknown as Record<string, unknown>)[property];
+// 	}
+// 	switch (property) {
+// 		case "content":
+// 			return getFormattedTaskContentSync(task);
+// 		case "title":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.Title] || "";
+// 		case "body":
+// 		case "description":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n") || "";
+// 		case "createdDate":
+// 		case "created":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || "";
+// 		case "dueDate":
+// 		case "due":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.DueDate] || "";
+// 		case "startDate":
+// 		case "start":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.StartDate] || "";
+// 		case "scheduledDate":
+// 		case "scheduled":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "";
+// 		case "completion":
+// 		case "completedDate":
+// 		case "done":
+// 			return task?.[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || "";
+// 		case "cancelled":
+// 		case "cancelledDate":
+// 			return task?.[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || "";
+// 		case "priority":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.Priority] || 0;
+// 		case "status":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.Status] || " ";
+// 		case "tags":
+// 			return getAllTaskTags(task) || [];
+// 		case "frontmatterTags":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags] || [];
+// 		case "filePath":
+// 		case "path":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.FilePath] || "";
+// 		case "folderPath": {
+// 			const parts = task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/");
+// 			const folderPath = parts.slice(0, -1).join("/");
+// 			return folderPath + "/" || "";
+// 		}
+// 		case "startTime":
+// 			return task[DEFAULT_TASK_CACHE_KEYS.Time]
+// 				? task[DEFAULT_TASK_CACHE_KEYS.Time].split("-")[0].trim()
+// 				: "";
+// 		case "reminder":
+// 			return task?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "";
+// 		case "dependsOn":
+// 		case "dependencies":
+// 			return task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] || [];
+// 		default:
+// 			// Handle tag properties like "tags.myTag"
+// 			if (property.startsWith("tags.")) {
+// 				const tagName = property.substring(5);
+// 				return (task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).some(
+// 					(tag) => tag.toLowerCase() === tagName.toLowerCase(),
+// 				);
+// 			}
+// 			return undefined;
+// 	}
+// }
 
 /**
  * Checks if the root filter state is empty (no filter groups or filters)

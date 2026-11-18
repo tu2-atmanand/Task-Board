@@ -4,7 +4,10 @@ import { columnSortingCriteria } from "../../interfaces/BoardConfigs.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { PropertyTypeConfig } from "../../interfaces/Enums.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
-
+import {
+	compareDates,
+	compareTimePropertyValue,
+} from "../../utils/DateTimeCalculations.js";
 
 /**
  * Gets the property value from a task based on the criteria name
@@ -72,88 +75,6 @@ function getTaskPropertyValue(
 }
 
 /**
- * Compares two dates
- * Returns: -1 if date1 < date2, 0 if equal, 1 if date1 > date2
- * Handles empty/null dates by placing them at the end for ascending order
- */
-function compareDates(
-	date1: string,
-	date2: string,
-	order: "asc" | "desc",
-): number {
-	// Handle empty/null values
-	const hasDate1 = date1 && date1 !== "";
-	const hasDate2 = date2 && date2 !== "";
-
-	if (!hasDate1 && !hasDate2) return 0;
-	if (!hasDate1) return order === "asc" ? 1 : -1; // Empty values go to end for asc, start for desc
-	if (!hasDate2) return order === "asc" ? -1 : 1;
-
-	const d1 = new Date(date1);
-	const d2 = new Date(date2);
-
-	if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
-		return 0;
-	}
-
-	if (d1 < d2) return -1;
-	if (d1 > d2) return 1;
-	return 0;
-}
-
-/**
- * Compares two time strings (e.g., "09:00", "9:00", or "09:00-10:00")
- * Returns: -1 if time1 < time2, 0 if equal, 1 if time1 > time2
- */
-function compareTimes(
-	time1: string,
-	time2: string,
-	order: "asc" | "desc",
-): number {
-	// Handle empty/null values
-	const hasTime1 = time1 && time1 !== "";
-	const hasTime2 = time2 && time2 !== "";
-
-	if (!hasTime1 && !hasTime2) return 0;
-	if (!hasTime1) return order === "asc" ? 1 : -1; // Empty values go to end for asc, start for desc
-	if (!hasTime2) return order === "asc" ? -1 : 1;
-
-	// Extract start time if it's a range (e.g., "09:00-10:00")
-	const extractStartTime = (timeStr: string): string => {
-		if (timeStr.includes("-")) {
-			return timeStr.split("-")[0].trim();
-		}
-		return timeStr.trim();
-	};
-
-	const t1 = extractStartTime(String(time1));
-	const t2 = extractStartTime(String(time2));
-
-	// Parse time to compare numerically (handles both "9:00" and "09:00")
-	const parseTime = (timeStr: string): number => {
-		const parts = timeStr.split(":");
-		if (parts.length !== 2) return -1; // Invalid format
-		const hours = parseInt(parts[0], 10);
-		const minutes = parseInt(parts[1], 10);
-		if (isNaN(hours) || isNaN(minutes)) return -1; // Invalid number
-		if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return -1; // Out of range
-		return hours * 60 + minutes; // Convert to minutes since midnight
-	};
-
-	const time1Minutes = parseTime(t1);
-	const time2Minutes = parseTime(t2);
-
-	// Treat invalid times as equal
-	if (time1Minutes < 0 && time2Minutes < 0) return 0;
-	if (time1Minutes < 0) return order === "asc" ? 1 : -1; // Invalid times go to end for asc
-	if (time2Minutes < 0) return order === "asc" ? -1 : 1;
-
-	if (time1Minutes < time2Minutes) return -1;
-	if (time1Minutes > time2Minutes) return 1;
-	return 0;
-}
-
-/**
  * Compares two values based on their type
  */
 function compareValues(
@@ -164,11 +85,18 @@ function compareValues(
 	propertyType?: PropertyTypeConfig,
 ): number {
 	// Apply configured custom-property semantics from shared property metadata.
-	if (propertyType === PropertyTypeConfig.date || propertyType === PropertyTypeConfig.dateTime) {
+	if (
+		propertyType === PropertyTypeConfig.date ||
+		propertyType === PropertyTypeConfig.dateTime
+	) {
 		return compareDates(String(value1 ?? ""), String(value2 ?? ""), order);
 	}
 	if (propertyType === PropertyTypeConfig.time) {
-		return compareTimes(String(value1 ?? ""), String(value2 ?? ""), order);
+		return compareTimePropertyValue(
+			String(value1 ?? ""),
+			String(value2 ?? ""),
+			order,
+		);
 	}
 	if (propertyType === PropertyTypeConfig.numeric) {
 		const number1 = Number(value1);
@@ -179,8 +107,10 @@ function compareValues(
 		return number1 - number2;
 	}
 	if (propertyType === PropertyTypeConfig.boolean) {
-		const bool1 = value1 === true || String(value1).toLowerCase() === "true";
-		const bool2 = value2 === true || String(value2).toLowerCase() === "true";
+		const bool1 =
+			value1 === true || String(value1).toLowerCase() === "true";
+		const bool2 =
+			value2 === true || String(value2).toLowerCase() === "true";
 		return Number(bool1) - Number(bool2);
 	}
 	// Built-in date/date-time type properties
@@ -205,7 +135,7 @@ function compareValues(
 		typeof value1 === "string" &&
 		typeof value2 === "string"
 	) {
-		return compareTimes(value1, value2, order);
+		return compareTimePropertyValue(value1, value2, order);
 	}
 
 	// Handle numeric properties - Specifically for task.priority property.
@@ -343,10 +273,25 @@ export function columnSortingAlgorithm<T extends taskItem>(
 				criterion.propertyType,
 			);
 
-			if (valueA == null || valueA === "" || valueB == null || valueB === "") {
-				if ((valueA == null || valueA === "") && (valueB == null || valueB === "")) return 0;
+			if (
+				valueA == null ||
+				valueA === "" ||
+				valueB == null ||
+				valueB === ""
+			) {
+				if (
+					(valueA == null || valueA === "") &&
+					(valueB == null || valueB === "")
+				)
+					return 0;
 				const emptyFirst = criterion.order === "desc";
-				return valueA == null || valueA === "" ? (emptyFirst ? -1 : 1) : (emptyFirst ? 1 : -1);
+				return valueA == null || valueA === ""
+					? emptyFirst
+						? -1
+						: 1
+					: emptyFirst
+						? 1
+						: -1;
 			}
 
 			// if (criterion.criteria === "time") {
