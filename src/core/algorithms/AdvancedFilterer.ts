@@ -9,6 +9,7 @@ import {
 import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
 import { PropertyTypeConfig } from "../../interfaces/Enums.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
+import type TaskBoard from "../../../main.js";
 import {
 	compareDates,
 	compareTimePropertyValue,
@@ -16,132 +17,106 @@ import {
 import { getTaskPropertyValue } from "../../utils/TaskItemUtils.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
 
-/**
- * Filters tasks based on the board's filter configuration
- * @param tasks - Array of tasks to filter
- * @param filters - All the filters
- * @param dateFormat - The date format string (e.g., DEFAULT_DATE_FORMAT)
- * @returns Filtered array of tasks
- */
-export function advancedFilterer<T extends taskItem>(
-	tasks: T[],
-	advancedFilter: AdvancedFilter | undefined,
-	dateFormat: string = DEFAULT_DATE_FORMAT,
-): T[] {
-	// TODO : This function runs more number of times than it should be running.
-	// Find only the filters which has been enabled by the user
-	if (!advancedFilter?.filters || !advancedFilter?.rootCondition)
-		return tasks;
+export class AdvancedFilterer {
+	constructor(private readonly plugin: TaskBoard) {}
 
-	const enabledFilters = advancedFilter.filters.filter(
-		(filter) => filter.status,
-	);
-	if (enabledFilters?.length === 0) return tasks;
+	filterTasks<T extends taskItem>(
+		tasks: T[],
+		advancedFilter: AdvancedFilter | undefined,
+		dateFormat: string = DEFAULT_DATE_FORMAT,
+	): T[] {
+		if (!advancedFilter?.filters || !advancedFilter?.rootCondition)
+			return tasks;
 
-	const filtersRootCondition = advancedFilter.rootCondition;
+		const enabledFilters = advancedFilter.filters.filter(
+			(filter) => filter.status,
+		);
+		if (enabledFilters.length === 0) return tasks;
 
-	return tasks.filter((task) => {
-		const allFiltersResults = enabledFilters.map((filter: Filter) =>
-			evaluateFilter(task, filter, dateFormat),
+		const filtersRootCondition = advancedFilter.rootCondition;
+
+		return tasks.filter((task) => {
+			const allFiltersResults = enabledFilters.map((filter: Filter) =>
+				this.evaluateFilter(task, filter, dateFormat),
+			);
+
+			switch (filtersRootCondition) {
+				case "all":
+					return allFiltersResults.every((result) => result);
+				case "any":
+					return allFiltersResults.some((result) => result);
+				case "none":
+					return !allFiltersResults.some((result) => result);
+				default:
+					return true;
+			}
+		});
+	}
+
+	private evaluateFilter(
+		task: taskItem,
+		filterState: Filter,
+		dateFormat: string,
+	): boolean {
+		if (
+			!filterState ||
+			!filterState.filterGroups ||
+			filterState.filterGroups.length === 0
+		) {
+			return true;
+		}
+
+		const rootCondition = filterState.rootCondition;
+		const filterGroups = filterState.filterGroups;
+		const validGroups = filterGroups.filter(
+			(group) =>
+				group && typeof group === "object" && group.groupCondition,
 		);
 
-		// Combine group results based on root condition
-		switch (filtersRootCondition) {
+		if (validGroups.length === 0) return true;
+
+		const groupResults = validGroups.map((group) =>
+			this.evaluateFilterCriterionGroup(task, group, dateFormat),
+		);
+
+		switch (rootCondition) {
 			case "all":
-				return allFiltersResults.every((result) => result);
+				return groupResults.every((result) => result);
 			case "any":
-				return allFiltersResults.some((result) => result);
+				return groupResults.some((result) => result);
 			case "none":
-				return !allFiltersResults.some((result) => result);
+				return !groupResults.some((result) => result);
 			default:
 				return true;
 		}
-	});
-}
-
-/**
- * Evaluates a single filter against a task
- */
-function evaluateFilter(
-	task: taskItem,
-	filterState: Filter,
-	dateFormat: string,
-): boolean {
-	// If no filter state or no filter groups, return all tasks
-	if (
-		!filterState ||
-		!filterState.filterGroups ||
-		filterState.filterGroups.length === 0
-	) {
-		return true;
 	}
 
-	// Apply filters based on root condition
-	const rootCondition = filterState.rootCondition;
-	const filterGroups = filterState.filterGroups;
+	private evaluateFilterCriterionGroup(
+		task: taskItem,
+		group: FilterCriterionGroup,
+		dateFormat: string,
+	): boolean {
+		if (!group || !group.groupCondition) return true;
 
-	// Filter out null/undefined/invalid filter groups before processing
-	const validGroups = filterGroups.filter(
-		(group) => group && typeof group === "object" && group.groupCondition,
-	);
+		const { groupCondition, filters } = group;
 
-	// If no valid groups after filtering, return true (no filtering applied)
-	if (validGroups.length === 0) {
-		return true;
+		if (!filters || filters.length === 0) return true;
+
+		const filterResults = filters.map((filter) =>
+			this.evaluateFilterCriterion(task, filter, dateFormat),
+		);
+
+		switch (groupCondition) {
+			case "all":
+				return filterResults.every((result) => result);
+			case "any":
+				return filterResults.some((result) => result);
+			case "none":
+				return !filterResults.some((result) => result);
+			default:
+				return true;
+		}
 	}
-
-	const groupResults = validGroups.map((group) =>
-		evaluateFilterCriterionGroup(task, group, dateFormat),
-	);
-
-	// Combine group results based on root condition
-	switch (rootCondition) {
-		case "all":
-			return groupResults.every((result) => result);
-		case "any":
-			return groupResults.some((result) => result);
-		case "none":
-			return !groupResults.some((result) => result);
-		default:
-			return true;
-	}
-}
-
-/**
- * Evaluates a single {@link FilterCriterionGroup} against a task
- */
-function evaluateFilterCriterionGroup(
-	task: taskItem,
-	group: FilterCriterionGroup,
-	dateFormat: string,
-): boolean {
-	// Safety check: validate group structure
-	if (!group || !group.groupCondition) {
-		return true; // Invalid group, skip it
-	}
-
-	const { groupCondition, filters } = group;
-
-	if (!filters || filters.length === 0) {
-		return true;
-	}
-
-	const filterResults = filters.map((filter) =>
-		evaluateFilterCriterion(task, filter, dateFormat),
-	);
-
-	// Combine filter results based on group condition
-	switch (groupCondition) {
-		case "all":
-			return filterResults.every((result) => result);
-		case "any":
-			return filterResults.some((result) => result);
-		case "none":
-			return !filterResults.some((result) => result);
-		default:
-			return true;
-	}
-}
 
 /**
  * Evaluates a single {@link FilterCriterion} against a task.
@@ -150,7 +125,7 @@ function evaluateFilterCriterionGroup(
  * - True - If the task is allowed to pass through this filter.
  * - False - If task does not satisfy the filter.
  */
-function evaluateFilterCriterion(
+	private evaluateFilterCriterion(
 	task: taskItem,
 	filter: FilterCriterion,
 	dateFormat: string,
@@ -170,7 +145,11 @@ function evaluateFilterCriterion(
 	// }
 
 	// NEW MTHOD - Using a universal getTaskPropertyValue function
-	const valueNType = getTaskPropertyValue(task, property, globalSettings);
+	const valueNType = getTaskPropertyValue(
+		task,
+		property,
+		this.plugin.settings.data,
+	);
 
 	const taskValue = valueNType.propertyValue;
 	const propertyType = valueNType.propertyType;
@@ -312,6 +291,28 @@ function evaluateFilterCriterion(
 	}
 }
 
+	static isRootFilterStateEmpty(filterState: Filter | undefined): boolean {
+		if (!filterState) return true;
+		if (!filterState.filterGroups || filterState.filterGroups.length === 0)
+			return true;
+
+		return !filterState.filterGroups.some(
+			(group) => group.filters && group.filters.length > 0,
+		);
+	}
+
+	static isAdvancedFilterEmpty(
+		advancedFilter: AdvancedFilter | undefined,
+	): boolean {
+		if (!advancedFilter?.filters?.length) return true;
+
+		return !advancedFilter.filters.some(
+			(filter: Filter) =>
+				filter.status && filter.filterGroups.length > 0,
+		);
+	}
+}
+
 /**
  * Gets the property value from a task based on property name
  */
@@ -386,50 +387,3 @@ function evaluateFilterCriterion(
 // 			return undefined;
 // 	}
 // }
-
-/**
- * Checks if the root filter state is empty (no filter groups or filters)
- * @param filterState - The root filter state to check
- * @returns true if empty, false otherwise
- *
- * @deprecated We are no longer using the older Advanced Filter. Use {@link isAdvancedFilterEmpty} instead
- */
-export function isRootFilterStateEmpty(
-	filterState: Filter | undefined,
-): boolean {
-	if (!filterState) return true;
-	if (!filterState.filterGroups || filterState.filterGroups.length === 0)
-		return true;
-
-	for (const group of filterState.filterGroups) {
-		if (group.filters && group.filters.length > 0) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-/**
- * Checks if the {@link AdvancedFilter} is empty (no "active" {@link Filter} are present)
- * @param advancedFilter - The complete advanced filter
- *
- * @returns true if empty, false otherwise
- */
-export function isAdvancedFilterEmpty(
-	advancedFilter: AdvancedFilter | undefined,
-): boolean {
-	if (!advancedFilter) return true;
-
-	if (!advancedFilter?.filters || advancedFilter.filters.length === 0)
-		return true;
-
-	if (
-		advancedFilter.filters.some(
-			(filter: Filter) => filter.status && filter.filterGroups.length > 0,
-		)
-	)
-		return false;
-
-	return true;
-}

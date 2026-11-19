@@ -89,6 +89,7 @@ import {
 import { migrateSettings } from "./src/settings/SettingSynchronizer.js";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
 import { TaskBoardApi } from "./src/core/taskboardAPIs.js";
+import { AdvancedFilterer } from "./src/core/algorithms/AdvancedFilterer.js";
 import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.js";
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
 import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
@@ -111,6 +112,7 @@ export default class TaskBoard extends Plugin {
 	// plugin: TaskBoard;
 	// view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
+	advancedFilterer: AdvancedFilterer;
 	vaultScanner: VaultScanner;
 	realTimeScanner: RealTimeScanner;
 	taskBoardFileManager: TaskBoardFileManager;
@@ -157,6 +159,7 @@ export default class TaskBoard extends Plugin {
 		// this.plugin.app = app;
 		// this.view = null;
 		this.settings = DEFAULT_SETTINGS;
+		this.advancedFilterer = new AdvancedFilterer(this);
 		this.vaultScanner = new VaultScanner(this.app, this);
 		this.realTimeScanner = new RealTimeScanner(
 			this.app,

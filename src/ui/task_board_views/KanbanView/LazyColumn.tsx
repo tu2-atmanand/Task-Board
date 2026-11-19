@@ -13,7 +13,7 @@ import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.
 import { dragDropTasksManagerInsatance } from '../../../core/managers/DragDropTasksManager.js';
 import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSortingModal.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
-import { isAdvancedFilterEmpty } from '../../../core/algorithms/AdvancedFilterer.js';
+import { AdvancedFilterer } from '../../../core/algorithms/AdvancedFilterer.js';
 import { matchTagsWithWildcards } from '../../../core/algorithms/ScanningFilterer.js';
 import { AdvancedFilterModal } from '../../components/advanced_filterer/index.js';
 import { AdvancedFilterPopover } from '../../components/advanced_filterer/Popover.js';
@@ -398,7 +398,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	}
 
 	// Determine whether an advanced filter is applied (used by header count UI)
-	const isAdvancedFilterApplied = !isAdvancedFilterEmpty(columnData.columnFilters);
+	const isAdvancedFilterApplied = !AdvancedFilterer.isAdvancedFilterEmpty(columnData.columnFilters);
 
 	async function handleMinimizeColumn() {
 		// const boardIndex = plugin.settings.data.boardConfigs.findIndex(

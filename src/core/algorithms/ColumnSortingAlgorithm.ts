@@ -1,86 +1,25 @@
 // /src/utils/ColumnSortingAlgorithm.ts
 
 import { columnSortingCriteria } from "../../interfaces/BoardConfigs.js";
-import { taskItem } from "../../interfaces/TaskItem.js";
-import { PropertyTypeConfig } from "../../interfaces/Enums.js";
-import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import { CustomTaskPropertyValueType, taskItem } from "../../interfaces/TaskItem.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
+} from "../../interfaces/Enums.js";
 import {
 	compareDates,
 	compareTimePropertyValue,
 } from "../../utils/DateTimeCalculations.js";
-
-/**
- * Gets the property value from a task based on the criteria name
- */
-function getTaskPropertyValue(
-	task: taskItem,
-	criteria: string,
-	startTimeConfig: string,
-	propertyType?: PropertyTypeConfig,
-): unknown {
-	if (propertyType) {
-		return (task as unknown as Record<string, unknown>)[criteria];
-	}
-	switch (criteria) {
-		case "content":
-			return task[DEFAULT_TASK_CACHE_KEYS.Title];
-		case "id":
-			return task[DEFAULT_TASK_CACHE_KEYS.ID];
-		case "status":
-			return task[DEFAULT_TASK_CACHE_KEYS.Status];
-		case "completed":
-		case "completedDate":
-			return task[DEFAULT_TASK_CACHE_KEYS.CompletionDate];
-		case "priority":
-			return task[DEFAULT_TASK_CACHE_KEYS.Priority];
-		case "dueDate":
-			return task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-		case "startDate":
-			return task[DEFAULT_TASK_CACHE_KEYS.StartDate];
-		case "scheduledDate":
-			return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
-		case "createdDate":
-			return task[DEFAULT_TASK_CACHE_KEYS.CreatedDate];
-		case "tags":
-			return task[DEFAULT_TASK_CACHE_KEYS.Tags];
-		case "project":
-			// Project is not yet implemented in taskItem
-			return "";
-		case "context":
-			// Context is not yet implemented in taskItem
-			return "";
-		case "time":
-			if (task[DEFAULT_TASK_CACHE_KEYS.Time]) {
-				return task[DEFAULT_TASK_CACHE_KEYS.Time];
-			}
-			if (startTimeConfig) {
-				return `${startTimeConfig} - ${
-					startTimeConfig.split(":")[0].trim() === "23"
-						? "00"
-						: Number(startTimeConfig.split(":")[0].trim()) + 1
-				}:${startTimeConfig.split(":")[1].trim()}`;
-			} else {
-				return "";
-			}
-		case "recurrence":
-			// Recurrence is not yet implemented in taskItem
-			return "";
-		case "filePath":
-			return task[DEFAULT_TASK_CACHE_KEYS.FilePath];
-		case "lineNumber":
-			return task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine;
-		default:
-			return undefined;
-	}
-}
+import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
+import { getTaskPropertyValue } from "../../utils/TaskItemUtils.js";
 
 /**
  * Compares two values based on their type
  */
 function compareValues(
-	value1: unknown,
-	value2: unknown,
-	criteria: string,
+	value1: CustomTaskPropertyValueType,
+	value2: CustomTaskPropertyValueType,
+	criteria: string | DEFAULT_TASK_CACHE_KEYS,
 	order: "asc" | "desc",
 	propertyType?: PropertyTypeConfig,
 ): number {
@@ -106,55 +45,51 @@ function compareValues(
 		if (!Number.isFinite(number2)) return -1;
 		return number1 - number2;
 	}
-	if (propertyType === PropertyTypeConfig.boolean) {
-		const bool1 =
-			value1 === true || String(value1).toLowerCase() === "true";
-		const bool2 =
-			value2 === true || String(value2).toLowerCase() === "true";
-		return Number(bool1) - Number(bool2);
-	}
+
+	// TODO : Need to add the logic to sort boolean values, all true will
+	// be on top and false on botttom or vice-versa based on the asc or desc.
+	// if (propertyType === PropertyTypeConfig.boolean) {
+	// 	const bool1 =
+	// 		value1 === true || String(value1).toLowerCase() === "true";
+	// 	const bool2 =
+	// 		value2 === true || String(value2).toLowerCase() === "true";
+	// 	return Number(bool1) - Number(bool2);
+	// }
 	// Built-in date/date-time type properties
-	if (
-		[
-			"dueDate",
-			"startDate",
-			"scheduledDate",
-			"createdDate",
-			"completedDate",
-			"completed",
-		].includes(criteria) &&
-		typeof value1 === "string" &&
-		typeof value2 === "string"
-	) {
-		return compareDates(value1, value2, order);
-	}
+	// if (
+	// 	[
+	// 		"dueDate",
+	// 		"startDate",
+	// 		"scheduledDate",
+	// 		"createdDate",
+	// 		"completedDate",
+	// 		"completed",
+	// 	].includes(criteria) &&
+	// 	typeof value1 === "string" &&
+	// 	typeof value2 === "string"
+	// ) {
+	// 	return compareDates(value1, value2, order);
+	// }
 
-	// Handle time properties
-	if (
-		criteria === "time" &&
-		typeof value1 === "string" &&
-		typeof value2 === "string"
-	) {
-		return compareTimePropertyValue(value1, value2, order);
-	}
+	// // Handle time properties
+	// if (
+	// 	criteria === "time" &&
+	// 	typeof value1 === "string" &&
+	// 	typeof value2 === "string"
+	// ) {
+	// 	return compareTimePropertyValue(value1, value2, order);
+	// }
 
-	// Handle numeric properties - Specifically for task.priority property.
+	// Legacy cached priority 0 values are still treated as "none".
 	if (
 		criteria === "priority" &&
 		typeof value1 === "number" &&
 		typeof value2 === "number"
 	) {
-		const hasValue1 = value1 !== undefined && value1 !== null;
-		const hasValue2 = value2 !== undefined && value2 !== null;
-
-		if (!hasValue1 && !hasValue2) return 0;
-
-		// Handle priority 0 (none) - should be treated as "no priority"
 		const isNone1 = value1 === 0;
 		const isNone2 = value2 === 0;
 
 		if (isNone1 && isNone2) return 0;
-		// None always goes to the end regardless of order
 		if (isNone1) return 1;
 		if (isNone2) return -1;
 
@@ -231,9 +166,9 @@ function compareValues(
  * @returns Sorted array of tasks
  */
 export function columnSortingAlgorithm<T extends taskItem>(
-	startTimeConfig: string,
 	tasksToDisplay: T[],
 	sortCriteria: columnSortingCriteria[],
+	globalSettings: globalSettingsData,
 ): T[] {
 	// Return empty array if no tasks
 	if (!tasksToDisplay || tasksToDisplay.length === 0) {
@@ -260,32 +195,35 @@ export function columnSortingAlgorithm<T extends taskItem>(
 		if (!criterion) continue;
 
 		sortedTasks = sortedTasks.sort((taskA, taskB) => {
-			const valueA = getTaskPropertyValue(
+			const valueNtypeofA = getTaskPropertyValue(
 				taskA,
 				criterion.criteria,
-				startTimeConfig,
-				criterion.propertyType,
+				globalSettings,
 			);
-			const valueB = getTaskPropertyValue(
+			const valueNtypeofB = getTaskPropertyValue(
 				taskB,
 				criterion.criteria,
-				startTimeConfig,
-				criterion.propertyType,
+				globalSettings,
 			);
 
 			if (
-				valueA == null ||
-				valueA === "" ||
-				valueB == null ||
-				valueB === ""
+				valueNtypeofA.propertyValue == null ||
+				valueNtypeofA.propertyValue === "" ||
+				valueNtypeofB.propertyValue == null ||
+				valueNtypeofB.propertyValue === ""
 			) {
 				if (
-					(valueA == null || valueA === "") &&
-					(valueB == null || valueB === "")
+					(valueNtypeofA.propertyValue == null ||
+						valueNtypeofA.propertyValue === "") &&
+					(valueNtypeofB.propertyValue == null ||
+						valueNtypeofB.propertyValue === "")
 				)
 					return 0;
-				const emptyFirst = criterion.order === "desc";
-				return valueA == null || valueA === ""
+				const emptyFirst =
+					criterion.criteria !== "priority" &&
+					criterion.order === "desc";
+				return valueNtypeofA.propertyValue == null ||
+					valueNtypeofA.propertyValue === ""
 					? emptyFirst
 						? -1
 						: 1
@@ -294,16 +232,13 @@ export function columnSortingAlgorithm<T extends taskItem>(
 						: -1;
 			}
 
-			// if (criterion.criteria === "time") {
-			// 	console.log("valueA :", valueA, "\nvalueB :", valueB);
-			// }
-
+			// TODO : Somehow need to handle
 			const comparison = compareValues(
-				valueA,
-				valueB,
+				valueNtypeofA.propertyValue,
+				valueNtypeofB.propertyValue,
 				criterion.criteria,
 				criterion.order,
-				criterion.propertyType,
+				valueNtypeofA.propertyType,
 			);
 
 			// For priority and other criteria that already handle order internally,

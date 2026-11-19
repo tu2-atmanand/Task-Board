@@ -13,7 +13,6 @@ import { taskJsonMerged } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
 import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '../modals/OpenModals.js';
-import { advancedFilterer } from '../../core/algorithms/AdvancedFilterer.js';
 import { loadTasksAndMerge } from '../../utils/JsonFileOperations.js';
 import { AdvancedFilterModal } from '../components/advanced_filterer/index.js';
 import { AdvancedFilterPopover } from '../components/advanced_filterer/Popover.js';
@@ -179,14 +178,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: advancedFilterer(allTasks.Pending, boardFilters, dateFormat),
-				Completed: advancedFilterer(allTasks.Completed, boardFilters, dateFormat),
+				Pending: plugin.advancedFilterer.filterTasks(allTasks.Pending, boardFilters, dateFormat),
+				Completed: plugin.advancedFilterer.filterTasks(allTasks.Completed, boardFilters, dateFormat),
 			};
 
 			const viewLevelFilterTasks = {
 				...allTasks,
-				Pending: advancedFilterer(boardFilteredTasks.Pending, viewFilter, dateFormat),
-				Completed: advancedFilterer(boardFilteredTasks.Completed, viewFilter, dateFormat),
+				Pending: plugin.advancedFilterer.filterTasks(boardFilteredTasks.Pending, viewFilter, dateFormat),
+				Completed: plugin.advancedFilterer.filterTasks(boardFilteredTasks.Completed, viewFilter, dateFormat),
 			};
 
 			// Create a new board data object immutably

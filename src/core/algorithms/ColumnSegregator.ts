@@ -15,11 +15,10 @@ import {
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { robustDateParser } from "../../utils/DateTimeCalculations.js";
 import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
-import { advancedFilterer } from "./AdvancedFilterer.js";
+import { AdvancedFilterer } from "./AdvancedFilterer.js";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
-
 
 /**
  * Segregates tasks into columns based on column configurations and then filters the tasks based on the advanced column filters configs. And then sorts the tasks within the particular column based on the sorting criteria.
@@ -33,6 +32,7 @@ import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
  */
 export const columnSegregator = (
 	settings: PluginDataJson,
+	advancedFilterer: AdvancedFilterer,
 	// setTasks: Dispatch<SetStateAction<taskItem[]>>,
 	activeViewData: TaskBoardViewType,
 	columnData: ColumnData,
@@ -84,7 +84,8 @@ export const columnSegregator = (
 				if (dateType === UniversalDateOptions.startDate) {
 					taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
 				} else if (dateType === UniversalDateOptions.scheduledDate) {
-					taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
+					taskUniversalDate =
+						task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 				}
 				if (!taskUniversalDate || taskUniversalDate === "")
 					return false;
@@ -224,7 +225,8 @@ export const columnSegregator = (
 							return false;
 						}
 
-						const lowerCasePath = task[DEFAULT_TASK_CACHE_KEYS.FilePath];
+						const lowerCasePath =
+							task[DEFAULT_TASK_CACHE_KEYS.FilePath];
 						const matchedPattern = pathPatterns.some(
 							(pattern: string) => {
 								if (allowedFileExtensionsRegEx.test(pattern)) {
@@ -278,13 +280,17 @@ export const columnSegregator = (
 			break;
 		case colTypeNames.taskPriority:
 			tasksToDisplay = pendingTasks.filter(
-				(task) => task[DEFAULT_TASK_CACHE_KEYS.Priority] === columnData.taskPriority,
+				(task) =>
+					task[DEFAULT_TASK_CACHE_KEYS.Priority] ===
+					columnData.taskPriority,
 			);
 			break;
 		case colTypeNames.taskStatus: {
 			const allTasks = [...pendingTasks, ...completedTasks];
 			tasksToDisplay = allTasks.filter(
-				(task) => task[DEFAULT_TASK_CACHE_KEYS.Status] === columnData.taskStatus,
+				(task) =>
+					task[DEFAULT_TASK_CACHE_KEYS.Status] ===
+					columnData.taskStatus,
 			);
 			break;
 		}
@@ -306,7 +312,7 @@ export const columnSegregator = (
 		columnData.columnFilters.filters.length > 0
 	) {
 		const dateFormat = settings.data.dateFormat || DEFAULT_DATE_FORMAT;
-		tasksToDisplay = advancedFilterer(
+		tasksToDisplay = advancedFilterer.filterTasks(
 			tasksToDisplay,
 			columnData.columnFilters,
 			dateFormat,
@@ -331,7 +337,9 @@ export const columnSegregator = (
 			}
 
 			// Add any new tasks (not present in manual order) to the TOP of the manual order array
-			const currentIds = tasksToDisplay.map((t) => t[DEFAULT_TASK_CACHE_KEYS.ID]);
+			const currentIds = tasksToDisplay.map(
+				(t) => t[DEFAULT_TASK_CACHE_KEYS.ID],
+			);
 			const missingIds = currentIds.filter(
 				(id) => !columnData.tasksIdManualOrder!.includes(id),
 			);
@@ -348,7 +356,9 @@ export const columnSegregator = (
 
 			let didTasksIdManualOrderChange = false;
 			// Build sorted list based on manual order
-			const idToTask = new Map(tasksToDisplay.map((t) => [t[DEFAULT_TASK_CACHE_KEYS.ID], t]));
+			const idToTask = new Map(
+				tasksToDisplay.map((t) => [t[DEFAULT_TASK_CACHE_KEYS.ID], t]),
+			);
 			const sorted: taskItemWithCustomProperties[] = [];
 			for (const id of columnData.tasksIdManualOrder) {
 				const task = idToTask.get(id);
@@ -377,9 +387,9 @@ export const columnSegregator = (
 		} else {
 			// Default algorithm for other criteria
 			tasksToDisplay = columnSortingAlgorithm(
-				settings.data.defaultStartTime,
 				tasksToDisplay,
 				columnData.sortCriteria,
+				settings.data,
 			);
 		}
 	}

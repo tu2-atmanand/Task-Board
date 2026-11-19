@@ -85,7 +85,7 @@ const InboxView: React.FC<InboxViewProps> = ({
 			return [...orderedTasks, ...allTasks.filter((task) => !orderedIds.has(task[DEFAULT_TASK_CACHE_KEYS.ID]))];
 		}
 
-		return columnSortingAlgorithm(plugin.settings.data.defaultStartTime, allTasks, sortCriteria);
+		return columnSortingAlgorithm(allTasks, sortCriteria, plugin.settings.data);
 	}, [filteredTasks, columnData?.sortCriteria, columnData?.tasksIdManualOrder, plugin.settings.data.defaultStartTime]);
 
 	const selectedTask = tasks.find((task) => task[DEFAULT_TASK_CACHE_KEYS.ID] === selectedTaskId);

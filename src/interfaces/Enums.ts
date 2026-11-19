@@ -61,6 +61,7 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	CancelledDate = "cancelledDate",
 	Dependencies = "dependsOn", // TODO : rename this to "childTasks"
 	FilePath = "filePath",
+	Duration = "duration", // duration in minutes - To show the task in Calendar view, etc. atleast there should be a startTime value or the startDate must be in date-time format to get the start time.
 
 	// Below 2 values are not user configurable, they will be stored for internal purposes.
 	TaskLocation = "taskLocation",
@@ -80,6 +81,8 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	FilePathInHeader = "filePathInHeader",
 	ParentFolder = "parentFolder",
 	FullPath = "fullPath",
+	StartTime = "startTime",
+	EndTime = "endTime",
 }
 
 export const getAllUIVisibleTaskProperties = (
@@ -228,8 +231,8 @@ export enum HeaderTruncationOptions {
 
 /**
  * Enum of all types of values supported by Task Board for Task properties.
- * 
- * Current supported types are : 
+ *
+ * Current supported types are :
  * - Text (string)
  * - Numeric
  * - Boolean

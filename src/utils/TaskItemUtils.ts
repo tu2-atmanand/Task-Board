@@ -2,6 +2,7 @@
 
 import TaskBoard from "../../main.js";
 import {
+	CustomTaskPropertyValueType,
 	taskItem,
 	taskItemWithCustomProperties,
 } from "../interfaces/TaskItem.js";
@@ -14,11 +15,13 @@ import {
 } from "./task_note/TaskNoteUtils.js";
 import {
 	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
 	statusTypeNames,
 } from "../interfaces/Enums.js";
 import {
 	CustomPriority,
 	CustomStatus,
+	globalSettingsData,
 	PluginDataJson,
 } from "../interfaces/GlobalSettings.js";
 import {
@@ -544,3 +547,173 @@ export const getCustomStatusOptionsForDropdown = (
 
 	return { type: "grouped", groups };
 };
+
+/**
+ * This function returns the task property value as it stored inside the
+ * cache based on the property type configured by the user in setting.
+ * Date, time values are stored as strings and will be returned as string.
+ *
+ * An optional {@link humanReadableString} can be used to get human readable value for
+ * dates. See example below.
+ *
+ * @param task The cached task item object
+ * @param propertyKey The key used to store the task property in cache
+ * @param globalSetting Plugin level global setting from plugin.settings
+ * @param humanReadableString Whether we want a raw value or human redable formatted value.
+ * Example for properties like statuses and priorities user has configured names to the
+ * symbols and in UI user will want to see the name rather than the symbol.
+ *
+ * @returns The value of the property and the property type, so user can cast
+ * it in that required format if needed. Example : string date value can be
+ * converted to Date object. If the value is null, undefined, 0 or empty
+ * then undefined will be returned.
+ */
+export function getTaskPropertyValue(
+	task: taskItem,
+	propertyKey: string | DEFAULT_TASK_CACHE_KEYS,
+	globalSetting: globalSettingsData,
+	humanReadableString?: boolean,
+): {
+	propertyValue: CustomTaskPropertyValueType | undefined;
+	propertyType: PropertyTypeConfig | undefined;
+} {
+	const property = globalSetting.taskProperties.find(
+		(item) => item.key === propertyKey,
+	);
+	if (!property)
+		return {
+			propertyValue: undefined,
+			propertyType: undefined,
+		};
+
+	// Step 1 - First handle all the known default properties for which some conversion
+	// or sanitization is required.
+	if (propertyKey === DEFAULT_TASK_CACHE_KEYS.Status) {
+		const status = task[DEFAULT_TASK_CACHE_KEYS.Status];
+		if (humanReadableString) {
+			const statusValue = status
+				? getStatusNameFromStatusSymbol(
+						status,
+						globalSetting.customStatuses ?? [],
+					)
+				: undefined;
+			return {
+				propertyValue: String(statusValue),
+				propertyType: property.type,
+			};
+		}
+
+		return {
+			propertyValue: status,
+			propertyType: property.type,
+		};
+	}
+
+	if (propertyKey === DEFAULT_TASK_CACHE_KEYS.Priority) {
+		const priorityValue = task[DEFAULT_TASK_CACHE_KEYS.Priority];
+		if (priorityValue === undefined || priorityValue <= 0)
+			return {
+				propertyValue: undefined,
+				propertyType: property.type,
+			};
+		if (humanReadableString) {
+			const priorityName = getPriorityNameUsingPriorityNumber(
+				priorityValue,
+				globalSetting.customPriorities,
+			);
+			return {
+				propertyValue: priorityName,
+				propertyType: property.type,
+			};
+		} else {
+			return {
+				propertyValue: priorityValue,
+				propertyType: property.type,
+			};
+		}
+	}
+
+	if (
+		propertyKey === DEFAULT_TASK_CACHE_KEYS.Time ||
+		propertyKey === DEFAULT_TASK_CACHE_KEYS.StartTime ||
+		propertyKey === DEFAULT_TASK_CACHE_KEYS.EndTime
+	) {
+		const timeValue = task[DEFAULT_TASK_CACHE_KEYS.Time];
+		if (timeValue && timeValue !== "") {
+			return {
+				propertyValue: String(timeValue),
+				propertyType: property.type,
+			};
+		} else {
+			return {
+				propertyValue: globalSetting.defaultStartTime,
+				propertyType: property.type,
+			};
+		}
+	}
+
+	// Step 2 - Return all other custom properties as per the format set by user
+	const value = task[propertyKey];
+	if (value === undefined || value === null || value === "")
+		return {
+			propertyValue: undefined,
+			propertyType: undefined,
+		};
+
+	if (
+		propertyKey === DEFAULT_TASK_CACHE_KEYS.FilePath &&
+		typeof value === "string"
+	) {
+		return {
+			propertyValue: value.split("/").pop() || value,
+			propertyType: property.type,
+		};
+	}
+
+	// Value is in ARRAY format.
+	if (Array.isArray(value)) {
+		return {
+			propertyValue: value.length > 0 ? value : undefined,
+			propertyType: property.type,
+		};
+	}
+	// Value is in BOOLEAN or NUMERIC format
+	if (typeof value === "boolean" || typeof value === "number") {
+		return {
+			propertyValue: value,
+			propertyType: property.type,
+		};
+	}
+
+	// Value is in STRING format
+	if (typeof value === "string") {
+		// We cannot do this here, as this function is used for UI as well as
+		// backend processing, hence the value needs to be converted at the receiver end.
+		// if (
+		// 	property.type === PropertyTypeConfig.date ||
+		// 	property.type === PropertyTypeConfig.dateTime
+		// ) {
+		// 	if (humanReadableString) {
+		// 		return {
+		// 			propertyValue: getHumanReadableDateString(value),
+		// 			propertyType: property.type,
+		// 		};
+		// 	} else {
+		// 		return {
+		// 			propertyValue: String(value),
+		// 			propertyType: property.type,
+		// 		};
+		// 	}
+		// }
+
+		return {
+			propertyValue: value,
+			propertyType: property.type,
+		};
+	}
+
+	return {
+		propertyValue: undefined,
+		propertyType: undefined,
+	};
+}

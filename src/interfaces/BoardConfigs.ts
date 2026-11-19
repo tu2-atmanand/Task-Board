@@ -6,14 +6,12 @@ import {
 	viewsPanelPropertiesToShow,
 	UniversalDateOptions,
 	HeaderTruncationOptions,
-	PropertyTypeConfig,
 	DEFAULT_TASK_CACHE_KEYS,
 } from "./Enums.js";
 import { defaultTaskStatuses } from "./Mapping.js";
 
 export interface columnSortingCriteria {
-	criteria: string; // Built-in criterion or configured property id
-	propertyType?: PropertyTypeConfig;
+	criteria: DEFAULT_TASK_CACHE_KEYS | string; // Built-in criterion or configured property id
 	order: "asc" | "desc"; // Sort order
 	priority: number;
 	uid: string;
@@ -30,7 +28,7 @@ export interface columnSortingCriteria {
 export interface FilterCriterion {
 	id: string;
 	property: string; // Built-in property or configured property id
-	// propertyType?: PropertyTypeConfig;
+	// propertyType?: PropertyTypeConfig; // Do not store it here, since if user change its custom property type or developer changed the property type of default property, the filter will fail.
 	condition: string; // e.g., 'isSet', 'equals', 'contains'
 	value?: string;
 }
