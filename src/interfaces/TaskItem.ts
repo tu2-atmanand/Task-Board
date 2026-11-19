@@ -8,13 +8,13 @@ export interface taskLocation {
 	endCharIndex: number; // The character position where the task ends
 }
 
-export type CustomTaskPropertyValue = string | number | boolean | string[];
+export type CustomTaskPropertyValueType = string | number | boolean | string[];
 
 /** Coerce a configured custom-property value without changing built-in task fields. */
 export function coerceCustomTaskPropertyValue(
 	value: unknown,
 	type: PropertyTypeConfig,
-): CustomTaskPropertyValue | undefined {
+): CustomTaskPropertyValueType | undefined {
 	if (value === undefined || value === null || value === "") return undefined;
 	switch (type) {
 		case PropertyTypeConfig.boolean:
@@ -86,14 +86,14 @@ export interface oldTaskItem {
  * rename back the {@link oldTaskItem} to taskItem and delete this interface.
  */
 export type taskItem = oldTaskItem &
-	Record<string, CustomTaskPropertyValue | taskLocation | undefined>;
+	Record<string, CustomTaskPropertyValueType | taskLocation | undefined>;
 
 /**
  * An interface to build a cache for a task object with default
  * properties as well as user's custom properties.
  */
 export type taskItemWithCustomProperties = oldTaskItem &
-	Record<string, CustomTaskPropertyValue | taskLocation | undefined>;
+	Record<string, CustomTaskPropertyValueType | taskLocation | undefined>;
 
 export interface customFrontmatterCache extends FrontMatterCache {
 	title?: string;

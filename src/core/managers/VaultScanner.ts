@@ -15,7 +15,7 @@ import {
 import { priorityEmojis } from "../../interfaces/Mapping.js";
 import {
 	coerceCustomTaskPropertyValue,
-	CustomTaskPropertyValue,
+	CustomTaskPropertyValueType,
 	jsonCacheData,
 	taskItem,
 	taskItemWithCustomProperties,
@@ -810,8 +810,8 @@ export function fileTypeAllowedForScanning(
 export function extractTaskPropertiesOfSingleFormat(
 	line: string,
 	settings: globalSettingsData,
-): Record<string, CustomTaskPropertyValue> {
-	const result: Record<string, CustomTaskPropertyValue> = {};
+): Record<string, CustomTaskPropertyValueType> {
+	const result: Record<string, CustomTaskPropertyValueType> = {};
 	const builtInKeys = new Set([
 		"id",
 		"legacyId",
@@ -899,8 +899,8 @@ export function extractTaskPropertiesOfSingleFormat(
 export function extractCustomTaskProperties(
 	line: string,
 	settings: globalSettingsData,
-): Record<string, CustomTaskPropertyValue> {
-	const result: Record<string, CustomTaskPropertyValue> = {};
+): Record<string, CustomTaskPropertyValueType> {
+	const result: Record<string, CustomTaskPropertyValueType> = {};
 	const builtInKeys = new Set([
 		"id",
 		"legacyId",
