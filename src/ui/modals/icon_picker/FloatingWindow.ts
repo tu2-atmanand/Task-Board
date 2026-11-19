@@ -1,7 +1,7 @@
 import { getIcon, getIconIds } from 'obsidian';
 import { t } from "i18next";
 import { searchLucideIcons } from './IconSearch.js';
-import { getOwnerWindow } from '../../../utils/dom-compat.js';
+import { getOwnerWindow } from '../../../utils/DomCompat.js';
 import { FloatingHostOptions, createFloatingPanel, createButton, focusFloatingInput } from '../../components/Common.js';
 
 interface IconPickerOptions extends FloatingHostOptions {

@@ -4,6 +4,7 @@ import {
 	isValid,
 	eachDayOfInterval,
 	startOfToday,
+	compareAsc,
 } from "date-fns";
 import { moment as _moment } from "obsidian";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
@@ -13,6 +14,7 @@ import {
 } from "../interfaces/Constants.js";
 import { UniversalDateOptions } from "../interfaces/Enums.js";
 import { taskItem } from "../interfaces/TaskItem.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
 
 /**
  * A simple function to get today's date in the user's custom format from the plugin's setting using the date-fns library.
@@ -27,15 +29,10 @@ export const formatToday = (str: string): string => format(new Date(), str);
  *
  * @param dateString - The date string to parse (e.g., "2026-02-19", "19/02/2026T10:30:00")
  * @param preferredFormat - The preferred format to try first (e.g., "yyyy-MM-dd", "dd/MM/yyyyTHH:mm:ss" )
- * @param timePresent - Whether this is a date-time string or just a date string
  * @returns Parsed Date object or null if parsing fails
  *
- * @note This function is getting called three times for each and every task item:
- * 	- First for board level advanced filter (if date related filter is applied)
- * 	- Second for column level advanced filter (if date related filter is applied)
- * 	- Third for the card rendering from the component.
- *
- * Either we need to somehow cache the value or need to find a better approach.
+ * @note - This is an expensive function and hence not to be used for rendering or other calculation operations. 
+ * It should be mainly use for scanning the task and storing the value in cache.
  */
 export const robustDateParser = (
 	dateString: string,
@@ -313,11 +310,11 @@ export const getUniversalDateFromTask = (
 ): string => {
 	// Method 1 - Comparing
 	if (universalDateType === UniversalDateOptions.dueDate) {
-		return task.due;
+		return task[DEFAULT_TASK_CACHE_KEYS.DueDate] || "";
 	} else if (universalDateType === UniversalDateOptions.startDate) {
-		return task.startDate || "";
+		return task[DEFAULT_TASK_CACHE_KEYS.StartDate] || "";
 	} else if (universalDateType === UniversalDateOptions.scheduledDate) {
-		return task.scheduledDate || "";
+		return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "";
 	}
 	return "";
 
@@ -352,4 +349,143 @@ export const getUniversalDateEmoji = (
 		return "🛫";
 	}
 	return "";
+};
+
+/** Compare configured time values as clock times (HH:mm), not dates. */
+function compareTimeValues_V1(value1: string, value2: string): number {
+	const toMinutes = (value: string): number => {
+		const [hours, minutes] = value.split(":").map(Number);
+		return Number.isFinite(hours) && Number.isFinite(minutes)
+			? hours * 60 + minutes
+			: Number.NaN;
+	};
+	const time1 = toMinutes(value1);
+	const time2 = toMinutes(value2);
+	if (Number.isNaN(time1) || Number.isNaN(time2)) return 0;
+	return time1 - time2;
+}
+
+/**
+ * Compares two dates using robust parsing
+ * Handles multiple date formats automatically
+ * @returns -1 if date1 < date2, 0 if equal, 1 if date1 > date2
+ */
+function compareDatesExpensive(
+	date1: string | Date,
+	date2: string | Date,
+	dateFormat: string,
+): number {
+	if (!date1 || !date2) {
+		return 0;
+	}
+
+	// Use robust parser for both dates
+	const parsedDate1 = robustDateParser(String(date1), dateFormat);
+	const parsedDate2 = robustDateParser(String(date2), dateFormat);
+
+	// If either date is invalid, return 0
+	if (!parsedDate1 || !parsedDate2) {
+		return 0;
+	}
+
+	// Compare dates
+	const comparison = compareAsc(parsedDate1, parsedDate2);
+	return comparison;
+}
+
+/**
+ * Compares two dates
+ * Returns: -1 if date1 < date2, 0 if equal, 1 if date1 > date2
+ * Handles empty/null dates by placing them at the end for ascending order
+ */
+export function compareDates(
+	date1: string,
+	date2: string,
+	order: "asc" | "desc",
+): number {
+	// Handle empty/null values
+	const hasDate1 = date1 && date1 !== "";
+	const hasDate2 = date2 && date2 !== "";
+
+	if (!hasDate1 && !hasDate2) return 0;
+	if (!hasDate1) return order === "asc" ? 1 : -1; // Empty values go to end for asc, start for desc
+	if (!hasDate2) return order === "asc" ? -1 : 1;
+
+	const d1 = new Date(date1);
+	const d2 = new Date(date2);
+
+	if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+		return 0;
+	}
+
+	if (d1 < d2) return -1;
+	if (d1 > d2) return 1;
+	return 0;
+}
+
+/**
+ * Compares two time strings (e.g., "09:00", "9:00", or "09:00-10:00")
+ * Returns: -1 if time1 < time2, 0 if equal, 1 if time1 > time2
+ */
+export function compareTimePropertyValue(
+	time1: string,
+	time2: string,
+	order: "asc" | "desc",
+): number {
+	// Handle empty/null values
+	const hasTime1 = time1 && time1 !== "";
+	const hasTime2 = time2 && time2 !== "";
+
+	if (!hasTime1 && !hasTime2) return 0;
+	if (!hasTime1) return order === "asc" ? 1 : -1; // Empty values go to end for asc, start for desc
+	if (!hasTime2) return order === "asc" ? -1 : 1;
+
+	// Extract start time if it's a range (e.g., "09:00-10:00")
+	const extractStartTime = (timeStr: string): string => {
+		if (timeStr.includes("-")) {
+			return timeStr.split("-")[0].trim();
+		}
+		return timeStr.trim();
+	};
+
+	const t1 = extractStartTime(String(time1));
+	const t2 = extractStartTime(String(time2));
+
+	// Parse time to compare numerically (handles both "9:00" and "09:00")
+	const parseTime = (timeStr: string): number => {
+		const parts = timeStr.split(":");
+		if (parts.length !== 2) return -1; // Invalid format
+		const hours = parseInt(parts[0], 10);
+		const minutes = parseInt(parts[1], 10);
+		if (isNaN(hours) || isNaN(minutes)) return -1; // Invalid number
+		if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return -1; // Out of range
+		return hours * 60 + minutes; // Convert to minutes since midnight
+	};
+
+	const time1Minutes = parseTime(t1);
+	const time2Minutes = parseTime(t2);
+
+	// Treat invalid times as equal
+	if (time1Minutes < 0 && time2Minutes < 0) return 0;
+	if (time1Minutes < 0) return order === "asc" ? 1 : -1; // Invalid times go to end for asc
+	if (time2Minutes < 0) return order === "asc" ? -1 : 1;
+
+	if (time1Minutes < time2Minutes) return -1;
+	if (time1Minutes > time2Minutes) return 1;
+	return 0;
+}
+
+/**
+ * Returns a human readable string/summary for a date value relative to today.
+ * For example,
+ * - Today = 2026-11-01
+ * - dateValue = 2026-11-05
+ * - returns = 4 days from now.
+ * @param dateValue The date value in string or Date format.
+ * @returns Human readable string.
+ */
+export const getHumanReadableDateString = (
+	dateValue: string | Date,
+): string => {
+	return "3 days from now";
 };

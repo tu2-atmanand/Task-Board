@@ -9,10 +9,11 @@ import { HeaderTruncationOptions, HeaderUITypeOptions } from '../../../interface
 import { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
-import { getAllTaskTags } from '../../../utils/TaskItemUtils.js';
+import { getAllTaskTags, getStatusNameFromStatusSymbol } from '../../../utils/TaskItemUtils.js';
 import LazyColumn from './LazyColumn.js';
-import { getStatusNameFromStatusSymbol } from '../../../utils/task_note/TaskNoteUtils.js';
 import { Component, View } from 'obsidian';
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 interface KanbanSwimlanesContainerProps {
 	plugin: TaskBoard;
@@ -463,7 +464,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 											<div className='swimlaneHeaderSwimlaneCount-vertical'>
 												{swimlane.tasks.flat().length ?? 0}
 											</div>
-											<div className="swimlaneHeaderName-vertical" title={swimlane.swimlaneName} style={!swimlane.minimized && swimlaneRowHeights[rowIndex] ? { width: `${Math.max(0, swimlaneRowHeights[rowIndex] - 80)}px` } : undefined}>
+											<div className="swimlaneHeaderName-vertical" aria-label={swimlane.swimlaneName} style={!swimlane.minimized && swimlaneRowHeights[rowIndex] ? { width: `${Math.max(0, swimlaneRowHeights[rowIndex] - 80)}px` } : undefined}>
 												<div className='swimlaneHeaderNameLable-vertical'>{property}:</div>
 												{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue-vertical')}
 											</div>
@@ -507,7 +508,7 @@ const KanbanSwimlanesContainer: React.FC<KanbanSwimlanesContainerProps> = ({
 												<div className='swimlaneHeaderContainerMinimizICon' onClick={() => handleSwimlaneMinimize(rowIndex)}>
 													{swimlane.minimized ? (<ChevronRight />) : (<ChevronDown />)}
 												</div>
-												<div className="swimlaneHeaderName" title={swimlane.swimlaneName}>
+												<div className="swimlaneHeaderName" aria-label={swimlane.swimlaneName}>
 													<div className='swimlaneHeaderNameLable'>{property}:</div>
 													{renderHeaderNameValue(swimlane.swimlaneName, 'swimlaneHeaderNameValue')}
 												</div>
@@ -598,24 +599,24 @@ function getPropertyValues(
 			}
 
 		case 'priority':
-			if (typeof task.priority === 'number') {
-				values = [String(task.priority)];
+			if (typeof task[DEFAULT_TASK_CACHE_KEYS.Priority] === 'number') {
+				values = [String(task[DEFAULT_TASK_CACHE_KEYS.Priority])];
 			}
 			break;
 
 		case 'status':
-			if (task.status) {
-				values = [task.status.trim()];
+			if (task[DEFAULT_TASK_CACHE_KEYS.Status]) {
+				values = [task[DEFAULT_TASK_CACHE_KEYS.Status].trim()];
 			}
 			break;
 
 		case 'filePath':
-			if (task?.filePath)
-				values = [task.filePath];
+			if (task?.[DEFAULT_TASK_CACHE_KEYS.FilePath])
+				values = [task[DEFAULT_TASK_CACHE_KEYS.FilePath]];
 			break;
 		case 'folderPath':
-			if (task?.filePath) {
-				const parts = task.filePath.split("/");
+			if (task?.[DEFAULT_TASK_CACHE_KEYS.FilePath]) {
+				const parts = task[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/");
 				const folderPath = parts.slice(0, -1).join("/");
 				values = [folderPath + "/" || ""];
 			}

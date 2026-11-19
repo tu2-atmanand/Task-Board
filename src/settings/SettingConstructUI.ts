@@ -5,24 +5,10 @@ import {
 	Notice,
 	Platform,
 	Setting,
-	SettingDefinition,
-	SettingDefinitionItem,
 	getIcon,
 	normalizePath,
 	setIcon,
 } from "obsidian";
-import PickrImport from "@simonwep/pickr";
-
-interface PickrColor {
-	toRGBA(): number[];
-}
-interface PickrInstance {
-	on(event: string, cb: (...args: unknown[]) => void): this;
-	destroy(): void;
-	hide(): void;
-}
-type PickrConstructor = new (options: Record<string, unknown>) => PickrInstance;
-const Pickr = PickrImport as unknown as PickrConstructor;
 import Sortable from "sortablejs";
 import { isValid, parse, format, differenceInHours } from "date-fns";
 import { t } from "i18next";
@@ -74,35 +60,39 @@ import {
 	exportConfigurations,
 } from "./SettingSynchronizer.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
-import { setSettingsScope } from "./ScopeSettings.js";
+import { showColorPicker } from "../ui/modals/color_picker/ColorPickerModal.js";
 
 export type SettingsTabPagesKey =
 	| "general"
 	| "all-ui"
-	| "default-properties"
-	| "custom-properties"
-	| "custom-statuses"
-	| "custom-priorities"
 	| "inline-tasks"
 	| "task-notes"
 	| "map-view"
 	| "automation"
-	| "formats"
-	| "support-development"
-	| "experimental-features";
+	| "formats";
 
+/**
+ * Manager to render all the plugin setting inside the Obsidians setting tab
+ * as well as in other custom modals and views. A complete manager to handle all
+ * operations on settings. Renders the settings in organized tabs.
+ *
+ * @deprecated - From version 2.0.0 onwards, Task Board will be using the new {@link getSettingDefinitions}
+ * provided by Obsidian in version 1.13.0+. This also introduces the setting search feature, hence all the
+ * setting has been migrated in {@file TaskBoardSettingTab.ts}. We are keeping this file for backup in case
+ * if we want to render the settings in other places.
+ *
+ * @note - But note that this manager is not actively updated and for now kept on hold. Will need to pull
+ * all the latest changes from the new settings.
+ */
 export class SettingsManager {
-	win: Window;
 	app: App;
 	plugin: TaskBoard;
 	globalSettings: globalSettingsData;
-	allPickrs: unknown[] = [];
 	reloadNoticeAlreadyShown: boolean = false;
 
 	constructor(plugin: TaskBoard) {
 		this.app = plugin.app;
 		this.plugin = plugin;
-		this.win = window;
 		this.globalSettings = this.plugin.settings.data;
 	}
 
@@ -184,7 +174,7 @@ export class SettingsManager {
 			},
 			{
 				key: t("properties"),
-				handler: () => this.renderCustomStatusesTab(tabContent),
+				handler: () => this.renderPropertiesTab(tabContent),
 			},
 			{
 				key: t("inline-tasks"),
@@ -248,7 +238,7 @@ export class SettingsManager {
 		// Set the last viewed tab
 		const defaultTab =
 			Object.keys(sections)[
-				this.plugin.settings.data.lastViewHistory.settingTab
+				this.plugin.settings.data.lastViewHistory.settingTab ?? 0
 			];
 		tabs[defaultTab].click();
 
@@ -276,9 +266,6 @@ export class SettingsManager {
 			case "all-ui":
 				this.renderAllUISettingsTab(contentEl);
 				break;
-			case "custom-statuses":
-				this.renderCustomStatusesTab(contentEl);
-				break;
 			case "inline-tasks":
 				this.renderInlineTasksSettingsTab(contentEl);
 				break;
@@ -294,12 +281,6 @@ export class SettingsManager {
 			case "formats":
 				this.renderFormatsSettingsTab(contentEl);
 				break;
-			case "experimental-features":
-				this.renderExperimentalSettingsTab(contentEl);
-				break;
-			case "support-development":
-				this.renderSupportDevelopmentSection(contentEl);
-				break;
 		}
 	}
 
@@ -310,17 +291,6 @@ export class SettingsManager {
 		// }
 
 		this.reloadNoticeAlreadyShown = false;
-
-		//Destroy all Pickr instances
-		this.allPickrs.forEach((pickr) => (pickr as PickrInstance).destroy());
-
-		//find all the div with calls picr-app using query-selector and remove them from the main window
-		const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
-		if (pickrApps) {
-			pickrApps.forEach((app) => {
-				app.remove();
-			});
-		}
 	}
 
 	// Function to render the "Filters for scanning" tab content
@@ -749,6 +719,39 @@ export class SettingsManager {
 
 					this.openReloadNoticeIfNeeded();
 				}),
+			);
+
+		new Setting(contentEl)
+			.setName(t("enable-experimental-features"))
+			.setDesc(
+				createFragmentWithHTML(
+					t("enable-experimental-features-info-1") +
+						"<br/>" +
+						"<br/>" +
+						"<br/>" +
+						t("enable-experimental-features-info-2") +
+						"<br/>" +
+						"<br/>" +
+						"<ul>" +
+						"<li>" +
+						"<b>" +
+						t("embed-task-boards") +
+						" : " +
+						"</b>" +
+						t("embed-task-boards-info") +
+						"</li>" +
+						"</ul>",
+				),
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.globalSettings.experimentalFeatures)
+					.onChange((value) => {
+						this.globalSettings.experimentalFeatures = value;
+						void this.saveSettings();
+
+						this.openReloadNoticeIfNeeded();
+					}),
 			);
 
 		// // Helper to add filter rows
@@ -1183,71 +1186,39 @@ export class SettingsManager {
 									"taskboard-setting-tag-color-row-element-color-picker",
 								)
 								.then(() => {
-									const colorMap =
-										this.plugin.settings.data.tagColors.map(
-											(tagColor) => ({
-												color:
-													this.plugin.settings.data
-														.tagColors[
-														tagColor.priority - 1
-													]?.color || "#ff0000",
-											}),
-										);
-
-									const pickr = new Pickr({
-										el: btn.buttonEl,
-										theme: "nano",
-										swatches: colorMap.map(
-											(item) => item.color,
-										),
-										defaultRepresentation: "HEXA",
-										default: tag.color || "#ff0000",
-										comparison: false,
-										components: {
-											preview: true,
-											opacity: true,
-											hue: true,
-											interaction: {
-												hex: true,
-												rgba: true,
-												hsla: false,
-												hsva: false,
-												cmyk: false,
-												input: true,
-												clear: true,
-												cancel: true,
-												save: false,
-											},
+									btn.buttonEl.addEventListener(
+										"click",
+										() => {
+											showColorPicker(btn.buttonEl, {
+												value: tag.color,
+												outputFormat: "rgb",
+												onSelect: (color) => {
+													tag.color = color;
+													(
+														colorInputRef as {
+															setValue: (
+																val: string,
+															) => void;
+														}
+													).setValue(tag.color);
+													renderTagColors();
+													void this.saveSettings();
+												},
+												onClear: () => {
+													tag.color = "";
+													(
+														colorInputRef as {
+															setValue: (
+																val: string,
+															) => void;
+														}
+													).setValue("");
+													renderTagColors();
+													void this.saveSettings();
+												},
+											});
 										},
-									});
-
-									this.allPickrs.push(pickr);
-
-									pickr
-										.on("change", (color: unknown) => {
-											const rgbaColor = `rgba(${(
-												color as PickrColor
-											)
-												.toRGBA()
-												.map((v: number, i: number) =>
-													i < 3 ? Math.round(v) : v,
-												)
-												.join(", ")})`;
-											tag.color = rgbaColor;
-											(
-												colorInputRef as {
-													setValue: (
-														val: string,
-													) => void;
-												}
-											).setValue(rgbaColor);
-										})
-										.on("hide", () => {
-											renderTagColors();
-											void this.saveSettings();
-										})
-										.on("cancel", () => pickr.destroy())
-										.on("clear", () => pickr.hide());
+									);
 								});
 						})
 						.addText((colorInput) => {
@@ -1328,7 +1299,7 @@ export class SettingsManager {
 	}
 
 	// Function to render "All properties" tab content
-	private renderCustomStatusesTab(contentEl: HTMLElement) {
+	private renderPropertiesTab(contentEl: HTMLElement) {
 		new Setting(contentEl)
 			// .setName(t("custom-statuses"))
 			.setDesc(t("custom-statuses-info"));
@@ -1379,6 +1350,7 @@ export class SettingsManager {
 					},
 				});
 				setIcon(iconButton, isIconAvailable ? iconId : "plus");
+				if (status.color) iconButton.style.color = status.color;
 				iconButton.onclick = () => {
 					const updateStatusIcon = (value: string) => {
 						const currentStatus =
@@ -1407,10 +1379,18 @@ export class SettingsManager {
 				const statusInfoName = statusItemHeading.createDiv({
 					cls: "custom-status-field-element-heading-name",
 				});
-				statusInfoName.createDiv({
+				const statusName = statusInfoName.createDiv({
 					cls: "custom-status-field-value",
 					text: status.name,
 				});
+				if (status.color) statusName.style.color = status.color;
+
+				if (status.desc?.trim()) {
+					statusInfoContainer.createDiv({
+						cls: "custom-status-field-value custom-status-description",
+						text: status.desc,
+					});
+				}
 
 				// Status Symbol
 				const statusInfoSymbol = statusInfoContainer.createDiv({
@@ -1472,6 +1452,8 @@ export class SettingsManager {
 									updatedStatus.availableAsCommand,
 								type: updatedStatus.type,
 								lucideIcon: status.lucideIcon ?? "",
+								color: updatedStatus.color,
+								desc: updatedStatus.desc,
 							};
 							this.plugin.settings.data.customStatuses[index] =
 								customStatus;
@@ -1553,6 +1535,8 @@ export class SettingsManager {
 										statusConfig.availableAsCommand,
 									type: statusConfig.type,
 									lucideIcon: "",
+									color: statusConfig.color,
+									desc: statusConfig.desc,
 								};
 								if (!this.globalSettings.customStatuses) {
 									this.globalSettings.customStatuses = [];
@@ -2616,85 +2600,6 @@ export class SettingsManager {
 		// 				void this.saveSettings();
 		// 			}),
 		// 	);
-	}
-
-	private renderExperimentalSettingsTab(contentEl: HTMLElement) {
-		new Setting(contentEl)
-			.setName(t("enable-experimental-features"))
-			.setDesc(
-				createFragmentWithHTML(
-					t("enable-experimental-features-info-1") +
-						"<br/>" +
-						"<br/>" +
-						"<br/>" +
-						t("enable-experimental-features-info-2") +
-						"<br/>" +
-						"<br/>" +
-						"<ul>" +
-						"<li>" +
-						"<b>" +
-						t("embed-task-boards") +
-						" : " +
-						"</b>" +
-						t("embed-task-boards-info") +
-						"</li>" +
-						"</ul>",
-				),
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.globalSettings.experimentalFeatures)
-					.onChange((value) => {
-						this.globalSettings.experimentalFeatures = value;
-						void this.saveSettings();
-
-						this.openReloadNoticeIfNeeded();
-					}),
-			);
-	}
-
-	private renderSupportDevelopmentSection(contentEl: HTMLElement) {
-		const footerSection = contentEl.createEl("div", {
-			cls: "settingTabFooterSection setting-item-name",
-		});
-
-		// footerSection
-		// 	.createEl("p", {
-		// 		text: t("this-plugin-is-created-by"),
-		// 	})
-		// 	.createEl("a", {
-		// 		text: t("author-name"),
-		// 		href: "https://www.github.com/tu2-atmanand",
-		// 	});
-
-		const footerText = createEl("p");
-		footerText.appendText(t("donation-message"));
-
-		footerSection.appendChild(footerText);
-
-		const parser = new DOMParser();
-
-		const donationSection = createEl("div", {
-			cls: "settingTabFooterDonationsSec",
-		});
-		donationSection.appendChild(
-			paypalButton("https://paypal.me/tu2atmanand"),
-		);
-		donationSection.appendChild(
-			buyMeACoffeeButton(
-				"https://www.buymeacoffee.com/tu2_atmanand",
-				parser.parseFromString(buyMeCoffeeSVGIcon, "text/xml")
-					.documentElement,
-			),
-		);
-		donationSection.appendChild(
-			kofiButton(
-				"https://ko-fi.com/atmanandgauns",
-				parser.parseFromString(kofiSVGIcon, "text/xml").documentElement,
-			),
-		);
-
-		footerSection.appendChild(donationSection);
 	}
 }
 

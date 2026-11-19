@@ -11,6 +11,8 @@ import {
 import { replaceOldTaskWithNewTask } from "../../utils/task_line/TaskLineUtils.js";
 import { eventEmitter } from "../EventEmitter.js";
 import { TasksPluginApi } from "./api.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 type TasksPluginStatusSettings = {
 	statusSettings?: {
@@ -157,8 +159,8 @@ export async function openTasksPluginEditModal(
 					await addIdToTaskContent(plugin, tasksPluginApiOutput);
 				const tasksPluginApiOutputWithId = formattedTaskContent;
 				newContent = `${tasksPluginApiOutputWithId}${
-					oldTask.body.length > 0
-						? `\n${oldTask.body.join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}`;
 				await replaceOldTaskWithNewTask(
@@ -169,12 +171,12 @@ export async function openTasksPluginEditModal(
 				);
 			} else if (twoTaskTitles.length === 2) {
 				newContent = `${twoTaskTitles[0]}${
-					oldTask.body.length > 0
-						? `\n${oldTask.body.join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}\n${twoTaskTitles[1]}${
-					oldTask.body.length > 0
-						? `\n${oldTask.body.join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}`;
 
@@ -195,7 +197,7 @@ export async function openTasksPluginEditModal(
 			}
 
 			plugin.realTimeScanner
-				.processAllUpdatedFiles(oldTask.filePath)
+				.processAllUpdatedFiles(oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath])
 				.catch((error) => {
 					bugReporterManagerInsatance.addToLogs(
 						217,
@@ -206,7 +208,7 @@ export async function openTasksPluginEditModal(
 			window.setTimeout(() => {
 				// This event emmitter will stop any loading animation of ongoing task-card.
 				eventEmitter.emit("UPDATE_TASK", {
-					taskID: oldTask.id,
+					taskID: oldTask[DEFAULT_TASK_CACHE_KEYS.ID],
 					state: false,
 				});
 			}, 500);

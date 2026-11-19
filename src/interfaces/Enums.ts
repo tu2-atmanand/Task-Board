@@ -1,3 +1,5 @@
+import { SupportedPropertiesConfig } from "./GlobalSettings.js";
+
 export enum taskPropertyFormatOptions {
 	default = "1",
 	tasksPlugin = "2",
@@ -41,6 +43,7 @@ export enum NotificationService {
  */
 export enum DEFAULT_TASK_CACHE_KEYS {
 	ID = "id",
+	LegacyID = "legacyId",
 	Title = "title",
 	Body = "body",
 	SubTasks = "subTasks",
@@ -56,23 +59,42 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	DueDate = "dueDate",
 	CompletionDate = "completionDate",
 	CancelledDate = "cancelledDate",
-	Dependencies = "dependsOn",
+	Dependencies = "dependsOn", // TODO : rename this to "childTasks"
 	FilePath = "filePath",
+	Duration = "duration", // duration in minutes - To show the task in Calendar view, etc. atleast there should be a startTime value or the startDate must be in date-time format to get the start time.
+
+	// Below 2 values are not user configurable, they will be stored for internal purposes.
+	TaskLocation = "taskLocation",
 	FrontMatterTags = "frontmatterTags",
 
-	// These two properties are not supported yet but will be implemented soon.
-	DateModified = "dateModified",
+	// Below 2 properties are not supported yet but will be implemented soon.
+	LastModified = "lastModified",
 	OnCompletion = "onCompletion",
-	Recurring = "recurring",
+	Recurrence = "recurrence",
 
 	// Below properties are not stored in cache, but this same enum is used at other places hence placing them here.
+	ParentTasks = "parentTasks",
 	Checkbox = "checkbox",
+	CheckboxIcon = "checkboxIcon",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",
 	FilePathInHeader = "filePathInHeader",
 	ParentFolder = "parentFolder",
 	FullPath = "fullPath",
+	StartTime = "startTime",
+	EndTime = "endTime",
 }
+
+export const getAllUIVisibleTaskProperties = (
+	supportedProperties: SupportedPropertiesConfig[],
+) => {
+	return [
+		DEFAULT_TASK_CACHE_KEYS.Checkbox,
+		DEFAULT_TASK_CACHE_KEYS.SubTasks,
+		DEFAULT_TASK_CACHE_KEYS.Description,
+		...supportedProperties.map((property) => property.key),
+	];
+};
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 	id = "id",
@@ -89,8 +111,7 @@ export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 	dependsOn = "depends-on",
 	cancelledDate = "cancelled-date",
 	completionDate = "completed-date",
-	dateCreated = "Created date",
-	dateModified = "Last modified",
+	dateModified = "last-modified",
 	filePath = "source-file",
 	taskLocation = "task-location",
 }
@@ -168,7 +189,6 @@ export enum taskCardStyleNames {
 	EMOJI = "emoji",
 	ICONS = "icons",
 	BASES = "bases",
-	DATAVIEW = "custom",
 }
 
 export enum onCompletionOptions {
@@ -209,16 +229,24 @@ export enum HeaderTruncationOptions {
 	end = "end",
 }
 
+/**
+ * Enum of all types of values supported by Task Board for Task properties.
+ *
+ * Current supported types are :
+ * - Text (string)
+ * - Numeric
+ * - Boolean
+ * - Time (Format will be used from settings configured by user)
+ * - Date (Format will be used from settings configured by user)
+ * - Date-time (Date and time together. Format will be used from setting)
+ * - List (Only string value list. Example for tags and dependOn values list)
+ */
 export enum PropertyTypeConfig {
 	text = "text",
 	boolean = "boolean",
 	numeric = "numeric",
-	time = "time",
-	date = "date",
-	dateTime = "date-time",
-	list = "list",
-}
-
-export enum DefaultLucideIconsForProperties {
-	id = "id",
+	time = "time", // Stored as string
+	date = "date", // Stored as string
+	dateTime = "date-time", // Stored as string
+	list = "list", // All values will be converted to string.
 }

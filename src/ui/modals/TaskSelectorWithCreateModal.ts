@@ -1,11 +1,15 @@
 import { t } from "i18next";
 import { SuggestModal, App, Notice } from "obsidian";
-import TaskBoard from "../../main.js";
-import createTaskCard from "../ui/components/task_card/TaskCardImage.js";
-import { taskItem } from "../interfaces/TaskItem.js";
-import { buildTaskFromRawContent } from "../core/managers/VaultScanner.js";
-import { createNewInlineTask } from "../utils/task_line/TaskItemEventHandlers.js";
-import { generateRandomStringId } from "../utils/TaskItemUtils.js";
+import TaskBoard from "../../../main.js";
+import createTaskCard from "../components/task_card/TaskCardImage.js";
+import { taskItem } from "../../interfaces/TaskItem.js";
+import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
+import { createNewInlineTask } from "../../utils/task_line/TaskItemEventHandlers.js";
+import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	getAllUIVisibleTaskProperties,
+} from "../../interfaces/Enums.js";
 
 export type TaskSelectorWithCreateResult =
 	| { type: "selected"; task: taskItem }
@@ -41,11 +45,23 @@ export function taskMatchesSelectorQuery(
 	task: taskItem,
 	lowerQuery: string,
 ): boolean {
-	if (searchableValueIncludes(task.title, lowerQuery)) return true;
-	if (searchableValueIncludes(task.due, lowerQuery)) return true;
 	if (
-		task.priority !== 0 &&
-		searchableValueIncludes(task.priority, lowerQuery)
+		searchableValueIncludes(task[DEFAULT_TASK_CACHE_KEYS.Title], lowerQuery)
+	)
+		return true;
+	if (
+		searchableValueIncludes(
+			task[DEFAULT_TASK_CACHE_KEYS.DueDate],
+			lowerQuery,
+		)
+	)
+		return true;
+	if (
+		task[DEFAULT_TASK_CACHE_KEYS.Priority] !== 0 &&
+		searchableValueIncludes(
+			task[DEFAULT_TASK_CACHE_KEYS.Priority],
+			lowerQuery,
+		)
 	) {
 		return true;
 	}
@@ -108,7 +124,10 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 		this.titleEl.setText(
 			options.title || t("Search an existing task or create a new one"),
 		);
-		this.titleEl.setAttribute("id", "task-selector-with-create-title");
+		this.titleEl.setAttribute(
+			DEFAULT_TASK_CACHE_KEYS.ID,
+			"task-selector-with-create-title",
+		);
 
 		// Set aria attributes on the modal
 		this.containerEl.setAttribute(
@@ -208,8 +227,13 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 
 		try {
 			// Build task creation data
-			let taskData = buildTaskFromRawContent(`- [ ] ${query}`, "", undefined, this.plugin.settings.data);
-			taskData["id"] = generateRandomStringId();
+			let taskData = buildTaskFromRawContent(
+				`- [ ] ${query}`,
+				"",
+				undefined,
+				this.plugin.settings.data,
+			);
+			taskData[DEFAULT_TASK_CACHE_KEYS.ID] = generateRandomStringId();
 			let completeTask: taskItem = taskData as taskItem;
 			// Create the task
 			await createNewInlineTask(this.plugin, completeTask);
@@ -247,10 +271,23 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 			})
 			.sort((a, b) => {
 				// Sort by due date second
-				if (a.due && !b.due) return -1;
-				if (!a.due && b.due) return 1;
-				if (a.due && b.due) {
-					const dateCompare = a.due.localeCompare(b.due);
+				if (
+					a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
+					!b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+				)
+					return -1;
+				if (
+					!a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
+					b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+				)
+					return 1;
+				if (
+					a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
+					b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+				) {
+					const dateCompare = a[
+						DEFAULT_TASK_CACHE_KEYS.DueDate
+					].localeCompare(b[DEFAULT_TASK_CACHE_KEYS.DueDate]);
 					if (dateCompare !== 0) return dateCompare;
 				}
 
@@ -260,18 +297,32 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 					normal: 1,
 					low: 2,
 				};
-				const aPriority = priorityOrder[a.priority] ?? 1;
-				const bPriority = priorityOrder[b.priority] ?? 1;
+				const aPriority =
+					priorityOrder[
+						String(a[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)
+					] ?? 1;
+				const bPriority =
+					priorityOrder[
+						String(b[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0)
+					] ?? 1;
 				if (aPriority !== bPriority) return aPriority - bPriority;
 
 				// Finally by title
-				return a.title.localeCompare(b.title);
+				return a[DEFAULT_TASK_CACHE_KEYS.Title].localeCompare(
+					b[DEFAULT_TASK_CACHE_KEYS.Title],
+				);
 			});
 	}
 
 	renderSuggestion(task: taskItem, el: HTMLElement): void {
 		// Use TaskCard component with default layout for full styling
-		const taskCard = createTaskCard(this.plugin, task);
+		const taskCard = createTaskCard(
+			this.plugin,
+			task,
+			getAllUIVisibleTaskProperties(
+				this.plugin.settings.data.taskProperties,
+			),
+		);
 
 		// Add modal-specific class for any additional styling
 		taskCard.classList.add("taskboard-task-selector-modal-taskitem");

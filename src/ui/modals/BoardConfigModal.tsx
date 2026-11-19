@@ -10,11 +10,10 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../../interfaces/BoardConfigs.js";
-import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions } from "../../interfaces/Enums.js";
-import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../interfaces/Mapping.js";
+import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions, getAllUIVisibleTaskProperties } from "../../interfaces/Enums.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../../services/MultiSuggest.js";
-import { generateRandomNumber, generateRandomStringId } from "../../utils/TaskItemUtils.js";
+import { generateRandomNumber, generateRandomStringId, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
 import { AddColumnModal } from "./AddColumnModal.js";
 import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
@@ -22,6 +21,7 @@ import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import { AdvancedFilterModal } from "../components/advanced_filterer/index.js";
+import { columnTypeAndNameMapping } from "../../interfaces/Mapping.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -344,6 +344,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			app,
 			boardWithCurrentEdits,
 			{
+				propertiesVisibleInUI: getAllUIVisibleTaskProperties(plugin.settings.data.taskProperties),
 				onCancel: () => {
 					// Do nothing on cancel
 				},
@@ -731,7 +732,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											String(error),
 											"BoardConfigModal.tsx/renderViewSettings/copy-view-id",
 										);
-										new Notice(t("copy-task-title-unsuccessful"));
+										new Notice(t("copy-view-id-unsuccessful"));
 									}
 								}} />
 							</div>
@@ -828,7 +829,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														)}
 													</div>
 													<div className="boardConfigModalColumnRowHeaderRightSec">
-														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
+														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} aria-label={t("delete-column")} />
 													</div>
 												</div>
 
@@ -974,7 +975,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																				<option
 																					key={`${opt.value}-${group.type}`}
 																					value={opt.value}
-																					title={opt.tooltip}
+																					aria-label={opt.tooltip}
 																				>
 																					{opt.label}
 																				</option>
@@ -1025,7 +1026,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																</div>
 																<select
 																	aria-label="Select priority"
-																	value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+																	value={column.taskPriority || getPriorityOptionsForDropdown(plugin.settings.data.customPriorities)[0].value}
 																	onChange={(e) =>
 																		handleColumnChange(
 																			viewIndex,
@@ -1036,7 +1037,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																	}
 																	className="boardConfigModalColumnRowContentPriorityDropdown"
 																>
-																	{getPriorityOptionsForDropdown().map((option) => (
+																	{getPriorityOptionsForDropdown(plugin.settings.data.customPriorities).map((option) => (
 																		<option key={option.value} value={option.value}>{option.text}</option>
 																	))}
 																</select>
@@ -1414,13 +1415,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							</div>
 						</div>
 
-						{/* <div className="boardConfigModalMainContent">
-							{selectedViewIndex === -2
-								? renderGlobalSettingsTab(selectedViewIndex)
-								: selectedViewIndex === -1
-									? renderBoardConfigTab()
-									: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
-						</div> */}
+						<div className="boardConfigModalMainContent">
+							{selectedViewIndex === -1
+								? renderBoardConfigTab()
+								: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
+						</div>
 					</>
 				)}
 			</div>

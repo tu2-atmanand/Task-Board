@@ -8,16 +8,14 @@ import { isTheContentDiffAreOnlySpaces_V2 } from "../../ui/modals/DiffContentCom
 import { allowedFileExtensionsRegEx } from "../regular_expressions/MiscelleneousRegExpr.js";
 import { openDiffContentCompareModal } from "../../ui/modals/OpenModals.js";
 import { TasksPluginApi } from "../../services/tasks_plugin/api.js";
-import {
-	readDataOfVaultFile,
-	writeDataToVaultFile,
-} from "../MarkdownFileOperations.js";
+import { writeDataToVaultFile } from "../MarkdownFileOperations.js";
 import {
 	getFormattedTaskContent,
 	addIdToTaskContent,
 } from "./TaskContentFormatter.js";
 import { createFolderRecursively } from "../../services/FileSystem.js";
 import { t } from "i18next";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
 /**
  * This function will simpy check if the task title contains the recurring tag:
@@ -50,9 +48,9 @@ export const addTaskInNote = async (
 	editorActive: boolean,
 	cursorPosition?: { line: number; ch: number },
 ): Promise<string | undefined> => {
-	const filePath = newTask.filePath.endsWith("md")
-		? newTask.filePath
-		: `${newTask.filePath}.md`;
+	const filePath = newTask[DEFAULT_TASK_CACHE_KEYS.FilePath].endsWith("md")
+		? newTask[DEFAULT_TASK_CACHE_KEYS.FilePath]
+		: `${newTask[DEFAULT_TASK_CACHE_KEYS.FilePath]}.md`;
 
 	try {
 		// Clean the task title to ensure it doesn't contain any special characters
@@ -291,13 +289,13 @@ export const useTasksPluginToUpdateInFile = async (
 		if (tasksPlugin.isTasksPluginEnabled()) {
 			const { formattedTaskContent, newId } = await addIdToTaskContent(
 				plugin,
-				oldTask.title,
+				oldTask[DEFAULT_TASK_CACHE_KEYS.Title],
 			);
 			const oldTaskTitleWithId = formattedTaskContent;
 			const tasksPluginApiOutput =
 				tasksPlugin.executeToggleTaskDoneCommand(
 					oldTaskTitleWithId,
-					oldTask.filePath,
+					oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 				);
 
 			// if (!tasksPluginApiOutput) {
@@ -334,8 +332,8 @@ export const useTasksPluginToUpdateInFile = async (
 					await addIdToTaskContent(plugin, tasksPluginApiOutput);
 				const tasksPluginApiOutputWithId = formattedTaskContent;
 				newContent = `${tasksPluginApiOutputWithId}${
-					oldTask.body.length > 0
-						? `\n${oldTask.body.join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}`;
 				await replaceOldTaskWithNewTask(
@@ -347,12 +345,12 @@ export const useTasksPluginToUpdateInFile = async (
 			} else if (twoTaskTitles.length === 2) {
 				// if (twoTaskTitles[1].trim().startsWith("- [x]")) {
 				newContent = `${twoTaskTitles[0]}${
-					oldTask.body.length > 0
-						? `\n${oldTask.body.join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}\n${twoTaskTitles[1]}${
-					oldTask.body.length > 0
-						? `\n${oldTask.body.join("\n")}`
+					(oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.length ?? 0) > 0
+						? `\n${oldTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n")}`
 						: ""
 				}`;
 
@@ -608,7 +606,7 @@ export const archiveTask = async (
 			const deletionSuccess = await deleteTaskFromFile(plugin, task);
 			if (deletionSuccess) {
 				void plugin.realTimeScanner.processAllUpdatedFiles(
-					task.filePath,
+					task[DEFAULT_TASK_CACHE_KEYS.FilePath],
 				);
 			} else {
 				// Archiving succeeded but deletion failed
@@ -660,7 +658,7 @@ export const archiveTask = async (
 
 			if (markSuccess) {
 				void plugin.realTimeScanner.processAllUpdatedFiles(
-					task.filePath,
+					task[DEFAULT_TASK_CACHE_KEYS.FilePath],
 				);
 			} else {
 				bugReporterManagerInsatance.showNotice(
@@ -724,9 +722,11 @@ export const replaceOldTaskWithNewTask = async (
 	oldTaskContent: string,
 	newTaskContent: string,
 ): Promise<boolean> => {
-	const filePath = allowedFileExtensionsRegEx.test(oldTask.filePath)
-		? oldTask.filePath
-		: `${oldTask.filePath}.md`;
+	const filePath = allowedFileExtensionsRegEx.test(
+		oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+	)
+		? oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath]
+		: `${oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath]}.md`;
 
 	try {
 		// Step 1: Read the file content
@@ -743,24 +743,28 @@ export const replaceOldTaskWithNewTask = async (
 			const lines = fileContent.split("\n");
 
 			const { startLine, startCharIndex, endLine, endCharIndex } =
-				oldTask.taskLocation;
+				oldTask[DEFAULT_TASK_CACHE_KEYS.TaskLocation];
 
 			// Step 2: Check that the starting line is a task checkbox line
 			const startLineText = lines[startLine - 1];
 			if (
 				!startLineText
 					.trim()
-					.startsWith(oldTask.title.trim().substring(0, 5))
+					.startsWith(
+						oldTask[DEFAULT_TASK_CACHE_KEYS.Title]
+							.trim()
+							.substring(0, 5),
+					)
 			) {
 				bugReporterManagerInsatance.showNotice(
 					62,
-					`Task board couldnt able to find the task which you are trying to edit inside the file ${oldTask.filePath} at the line number : ${oldTask.taskLocation.startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.\n\nThis was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.`,
+					`Task board couldnt able to find the task which you are trying to edit inside the file ${oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath]} at the line number : ${oldTask[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine} . Looks like the file must have been edited in the absence of Task Board and the task location was misplaced. Please scan the file again using the file menu option and see if that fixes this issue.\n\nThis was actually a normal bug, but recently few users were facing this specific issue and the developers are uncertain about the exact cause of this issue. Hence will request to kindly report this issue to the developer and please metion the steps in detail which led to this issue to occur, since its not possible to find the exact cause of it by simply reading this report.`,
 					`\n\nOldTask location :${JSON.stringify(
-						oldTask.taskLocation,
+						oldTask[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
 					)}\n\nOldTask content inside task-board-cache :${
-						oldTask.title
+						oldTask[DEFAULT_TASK_CACHE_KEYS.Title]
 					}\n\nAt present the content inside file at line number ${
-						oldTask.taskLocation.startLine
+						oldTask[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine
 					} is: ${startLineText}`,
 					"TaskItemUtils.ts/replaceOldTaskWithNewTask",
 				);

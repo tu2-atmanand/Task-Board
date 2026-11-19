@@ -13,6 +13,8 @@ import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/Misc
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
 import { generateTaskId } from "../../utils/TaskItemUtils.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 
 export class TaskEditorView extends ItemView {
@@ -58,7 +60,7 @@ export class TaskEditorView extends ItemView {
 	}
 
 	getDisplayText() {
-		return this.taskExists ? t("edit-task") + " - " + this.task.id : t("add-new-task");
+		return this.taskExists ? t("edit-task") + " - " + this.task[DEFAULT_TASK_CACHE_KEYS.ID] : t("add-new-task");
 	}
 
 	async onOpen() {
@@ -66,9 +68,9 @@ export class TaskEditorView extends ItemView {
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
-		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
-			this.task.id = generateTaskId(this.plugin);
-			this.task.legacyId = this.task.id;
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task[DEFAULT_TASK_CACHE_KEYS.ID])) {
+			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = generateTaskId(this.plugin);
+			this.task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = this.task[DEFAULT_TASK_CACHE_KEYS.ID];
 		}
 
 		// Some processing, if this is a Task-Note
@@ -80,21 +82,21 @@ export class TaskEditorView extends ItemView {
 				if (data == null) await this.onClose();
 				else noteContent = data;
 
-				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
+				if (!this.task[DEFAULT_TASK_CACHE_KEYS.Title]) this.task[DEFAULT_TASK_CACHE_KEYS.Title] = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
 				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
-				this.task.title = "";
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "";
 
 				// Sanitize filename
-				const noteName = this.task.title || getCurrentLocalDateTimeString();
+				const noteName = this.task[DEFAULT_TASK_CACHE_KEYS.Title] || getCurrentLocalDateTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
 		} else {
 			if (!this.taskExists)
-				this.task.title = "- [ ] ";
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "- [ ] ";
 		}
 
 		this.root = createRoot(container);

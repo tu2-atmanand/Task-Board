@@ -6,7 +6,7 @@ import {
 	DropdownComponent,
 } from "obsidian";
 import type TaskBoard from "../../../../main.js";
-import { PropertyTypeConfig } from "../../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "../../../interfaces/Enums.js";
 import type {
 	Filter,
 	FilterCriterionGroup,
@@ -15,14 +15,16 @@ import type {
 } from "../../../interfaces/BoardConfigs.js";
 import { generateIdForFilters } from "./Component.js";
 import {
-	getCustomStatusOptionsForDropdown,
-	getPriorityOptionsForDropdown,
-} from "../../../interfaces/Mapping.js";
-import {
 	MultiSuggest,
 	getTagSuggestions,
 	getFileSuggestions,
 } from "../../../services/MultiSuggest.js";
+import {
+	conditionRequiresValue,
+	getPropertyTypeFilterConfig,
+	isBooleanFilterProperty,
+} from "./Helpers.js";
+import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../../utils/TaskItemUtils.js";
 
 export class FiltersWarehouseModal extends Modal {
 	private plugin: TaskBoard;
@@ -51,24 +53,6 @@ export class FiltersWarehouseModal extends Modal {
 	>();
 
 	public isMultiSuggestDropdownActive = false;
-
-	public conditionsRequiringValue = [
-		"equals",
-		"contains",
-		"doesNotContain",
-		"startsWith",
-		"endsWith",
-		"is",
-		"isNot",
-		">",
-		"<",
-		">=",
-		"<=",
-		"before",
-		"onOrBefore",
-		"after",
-		"onOrAfter",
-	];
 
 	constructor(
 		plugin: TaskBoard,
@@ -808,7 +792,7 @@ export class FiltersWarehouseModal extends Modal {
 			propertyType: string,
 		) => {
 			let valueActuallyNeeded =
-				this.conditionsRequiringValue.includes(currentCond);
+				conditionRequiresValue(currentCond);
 
 			if (
 				propertyType === "completed" &&
@@ -821,7 +805,12 @@ export class FiltersWarehouseModal extends Modal {
 			}
 
 			const propertyValue = propertySelect.getValue();
-			if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.customProperties?.some((item) => item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
+			if (
+				isBooleanFilterProperty(
+					propertyValue,
+					this.plugin.settings.data.taskProperties,
+				)
+			) {
 				valueInput.hide();
 				if (valueActuallyNeeded) dropdownInputContainer.show();
 				else dropdownInputContainer.hide();
@@ -934,7 +923,7 @@ export class FiltersWarehouseModal extends Modal {
 				dependencies: t("dependencies"),
 				filePath: t("file-path"),
 			});
-			for (const configuredProperty of this.plugin.settings.data.customProperties ?? []) {
+			for (const configuredProperty of this.plugin.settings.data.taskProperties.filter((property) => !property.default)) {
 				propertySelect.addOption(configuredProperty.id, configuredProperty.name);
 			}
 		}
@@ -947,40 +936,25 @@ export class FiltersWarehouseModal extends Modal {
 		) => {
 			conditionOptions = options;
 		};
-		const configuredProperty = this.plugin.settings.data.customProperties?.find((item) => item.id === property);
+		const configuredProperty = this.plugin.settings.data.taskProperties.find((item) => !item.default && item.id === property);
 		if (configuredProperty) {
-			filterData.propertyType = configuredProperty.type;
-			switch (configuredProperty.type) {
-				case PropertyTypeConfig.numeric:
-					valueInput.type = "number";
-					setConditionOptions([{ value: "is", text: t("is") }, { value: "isNot", text: t("is-not") }, { value: ">", text: ">" }, { value: "<", text: "<" }, { value: ">=", text: ">=" }, { value: "<=", text: "<=" }, { value: "isEmpty", text: t("is-empty") }, { value: "isNotEmpty", text: t("is-not-empty") }]);
-					break;
-				case PropertyTypeConfig.date:
-				case PropertyTypeConfig.dateTime:
-					valueInput.type = configuredProperty.type === PropertyTypeConfig.date ? "date" : "datetime-local";
-					setConditionOptions([{ value: "is", text: t("is") }, { value: "isNot", text: t("is-not") }, { value: "before", text: t("before") }, { value: "onOrBefore", text: t("on-or-before") }, { value: "after", text: t("after") }, { value: "onOrAfter", text: t("on-or-after") }, { value: "isEmpty", text: t("is-empty") }, { value: "isNotEmpty", text: t("is-not-empty") }]);
-					break;
-				case PropertyTypeConfig.time:
-					valueInput.type = "time";
-					setConditionOptions([{ value: "is", text: t("is") }, { value: "isNot", text: t("is-not") }, { value: "before", text: t("before") }, { value: "onOrBefore", text: t("on-or-before") }, { value: "after", text: t("after") }, { value: "onOrAfter", text: t("on-or-after") }, { value: "isEmpty", text: t("is-empty") }, { value: "isNotEmpty", text: t("is-not-empty") }]);
-					break;
-				case PropertyTypeConfig.boolean:
-					valueInput.hide();
-					valueSelect.addOptions({ true: t("true"), false: t("false") });
-					valueSelect.setValue(filterData.value ?? "true");
-					valueSelect.onChange((newValue) => { filterData.value = newValue; this.markAsEdited(); });
-					setConditionOptions([{ value: "is", text: t("is") }, { value: "isNot", text: t("is-not") }, { value: "isEmpty", text: t("is-empty") }, { value: "isNotEmpty", text: t("is-not-empty") }]);
-					break;
-				case PropertyTypeConfig.list:
-					valueInput.type = "text";
-					setConditionOptions([{ value: "contains", text: t("contains") }, { value: "doesNotContain", text: t("does-not-contain") }, { value: "is", text: t("is") }, { value: "isNot", text: t("is-not") }, { value: "isEmpty", text: t("is-empty") }, { value: "isNotEmpty", text: t("is-not-empty") }]);
-					break;
-				default:
-					valueInput.type = "text";
-					setConditionOptions([{ value: "is", text: t("is") }, { value: "isNot", text: t("is-not") }, { value: "contains", text: t("contains") }, { value: "doesNotContain", text: t("does-not-contain") }, { value: "startsWith", text: t("starts-with") }, { value: "endsWith", text: t("ends-with") }, { value: "isEmpty", text: t("is-empty") }, { value: "isNotEmpty", text: t("is-not-empty") }]);
+			// filterData.propertyType = configuredProperty.type;
+			const propertyFilterConfig = getPropertyTypeFilterConfig(
+				configuredProperty.type,
+			);
+			valueInput.type = propertyFilterConfig.inputType;
+			setConditionOptions(propertyFilterConfig.conditionOptions);
+			if (configuredProperty.type === PropertyTypeConfig.boolean) {
+				valueInput.hide();
+				valueSelect.addOptions({ true: t("true"), false: t("false") });
+				valueSelect.setValue(filterData.value ?? "true");
+				valueSelect.onChange((newValue) => {
+					filterData.value = newValue;
+					this.markAsEdited();
+				});
 			}
 		} else {
-			delete filterData.propertyType;
+			// delete filterData.propertyType;
 			switch (property) {
 			case "content":
 				valueInput.type = "text";
@@ -1041,7 +1015,9 @@ export class FiltersWarehouseModal extends Modal {
 
 					valueSelect.setValue(
 						filterData.value ||
-							getPriorityOptionsForDropdown()[0].value.toString(),
+							getPriorityOptionsForDropdown(
+								this.plugin.settings.data.customPriorities,
+							)[0].value.toString(),
 					);
 					valueSelect.onChange((newValue) => {
 						filterData.value = newValue;
@@ -1057,7 +1033,9 @@ export class FiltersWarehouseModal extends Modal {
 				valueInput.hide();
 				{
 					valueSelect.addOptions(
-						getPriorityOptionsForDropdown().reduce(
+						getPriorityOptionsForDropdown(
+							this.plugin.settings.data.customPriorities,
+						).reduce(
 							(
 								acc: Record<number | string, string>,
 								opt: { value: number; text: string },
@@ -1070,36 +1048,28 @@ export class FiltersWarehouseModal extends Modal {
 					);
 					valueSelect.setValue(
 						filterData.value ||
-							getPriorityOptionsForDropdown()[0].value.toString(),
+							getPriorityOptionsForDropdown(
+								this.plugin.settings.data.customPriorities,
+							)[0].value.toString(),
 					);
 					valueSelect.onChange((newValue) => {
 						filterData.value = newValue;
 						this.markAsEdited();
 					});
 				}
-				setConditionOptions([
-					{ value: "is", text: t("is") },
-					{ value: "isNot", text: t("is-not") },
-					{ value: ">", text: ">" },
-					{ value: "<", text: "<" },
-					{ value: ">=", text: ">=" },
-					{ value: "<=", text: "<=" },
-					{ value: "isEmpty", text: t("is-empty") },
-					{ value: "isNotEmpty", text: t("is-not-empty") },
-				]);
+				setConditionOptions(
+					getPropertyTypeFilterConfig(
+						PropertyTypeConfig.numeric,
+					).conditionOptions,
+				);
 				break;
-			case "id":
+			case DEFAULT_TASK_CACHE_KEYS.ID:
 				valueInput.type = "text";
-				setConditionOptions([
-					{ value: "is", text: t("is") },
-					{ value: "isNot", text: t("is-not") },
-					{ value: ">", text: ">" },
-					{ value: "<", text: "<" },
-					{ value: ">=", text: ">=" },
-					{ value: "<=", text: "<=" },
-					{ value: "isEmpty", text: t("is-empty") },
-					{ value: "isNotEmpty", text: t("is-not-empty") },
-				]);
+				setConditionOptions(
+					getPropertyTypeFilterConfig(
+						PropertyTypeConfig.numeric,
+					).conditionOptions,
+				);
 				break;
 			case "createdDate":
 			case "due":
@@ -1108,29 +1078,19 @@ export class FiltersWarehouseModal extends Modal {
 			case "completedDate":
 			case "cancelledDate":
 				valueInput.type = "date";
-				setConditionOptions([
-					{ value: "is", text: t("is") },
-					{ value: "isNot", text: t("is-not") },
-					{ value: "before", text: t("before") },
-					{ value: "onOrBefore", text: t("on-or-before") },
-					{ value: "after", text: t("after") },
-					{ value: "onOrAfter", text: t("on-or-after") },
-					{ value: "isEmpty", text: t("is-empty") },
-					{ value: "isNotEmpty", text: t("is-not-empty") },
-				]);
+				setConditionOptions(
+					getPropertyTypeFilterConfig(
+						PropertyTypeConfig.date,
+					).conditionOptions,
+				);
 				break;
 			case "startTime":
 				valueInput.type = "time";
-				setConditionOptions([
-					{ value: "is", text: t("is") },
-					{ value: "isNot", text: t("is-not") },
-					{ value: "before", text: t("before") },
-					{ value: "onOrBefore", text: t("on-or-before") },
-					{ value: "after", text: t("after") },
-					{ value: "onOrAfter", text: t("on-or-after") },
-					{ value: "isEmpty", text: t("is-empty") },
-					{ value: "isNotEmpty", text: t("is-not-empty") },
-				]);
+				setConditionOptions(
+					getPropertyTypeFilterConfig(
+						PropertyTypeConfig.time,
+					).conditionOptions,
+				);
 				break;
 			case "tags":
 				valueInput.type = "text";
@@ -1176,7 +1136,7 @@ export class FiltersWarehouseModal extends Modal {
 
 		const finalConditionVal = conditionSelect.getValue();
 		let valueActuallyNeeded =
-			this.conditionsRequiringValue.includes(finalConditionVal);
+			conditionRequiresValue(finalConditionVal);
 		if (
 			finalConditionVal === "isEmpty" ||
 			finalConditionVal === "isNotEmpty"
@@ -1185,7 +1145,12 @@ export class FiltersWarehouseModal extends Modal {
 		}
 
 		const propertyValue = propertySelect.getValue();
-		if (propertyValue === "priority" || propertyValue === "status" || this.plugin.settings.data.customProperties?.some((item) => item.id === propertyValue && item.type === PropertyTypeConfig.boolean)) {
+		if (
+			isBooleanFilterProperty(
+				propertyValue,
+				this.plugin.settings.data.taskProperties,
+			)
+		) {
 			valueInput.hide();
 			if (valueActuallyNeeded) dropdownInputContainer.show();
 			else dropdownInputContainer.hide();

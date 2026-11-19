@@ -14,6 +14,8 @@ import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
 import { generateTaskId } from "../../utils/TaskItemUtils.js";
 import { getFormattedTaskContent } from "../../utils/task_line/TaskContentFormatter.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 
 // Class component extending Modal for Obsidian
@@ -54,15 +56,16 @@ export class TaskEditorModal extends Modal {
 
 		this.containerEl.setAttribute('modal-type', 'task-board-edit-task');
 		this.modalEl.setAttribute('modal-type', 'task-board-edit-task');
+		this.modalEl.addClass('task-board-task-editor-modal');
 		contentEl.setAttribute('modal-type', 'task-board-edit-task');
 
 		const root = ReactDOM.createRoot(this.contentEl);
 
 		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
-		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
-			this.task.id = generateTaskId(this.plugin);
-			this.task.legacyId = this.task.id;
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task[DEFAULT_TASK_CACHE_KEYS.ID])) {
+			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = generateTaskId(this.plugin);
+			this.task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = this.task[DEFAULT_TASK_CACHE_KEYS.ID];
 		}
 
 		// Some processing, if this is a Task-Note
@@ -74,21 +77,21 @@ export class TaskEditorModal extends Modal {
 				if (data == null) this.onClose();
 				else noteContent = data;
 
-				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
+				if (!this.task[DEFAULT_TASK_CACHE_KEYS.Title]) this.task[DEFAULT_TASK_CACHE_KEYS.Title] = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
 				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
-				this.task.title = "";
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "";
 
 				// Sanitize filename
-				const noteName = this.task.title || getCurrentLocalDateTimeString();
+				const noteName = this.task[DEFAULT_TASK_CACHE_KEYS.Title] || getCurrentLocalDateTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
 		} else {
 			if (!this.taskExists)
-				this.task.title = "- [ ] ";
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "- [ ] ";
 		}
 
 		root.render(<TaskEditorRC

@@ -7,13 +7,12 @@ import { t } from 'i18next';
 import TaskBoard from '../../../main.js';
 import { AdvancedFilter, Board, TaskBoardViewType } from '../../interfaces/BoardConfigs.js';
 import { DEFAULT_DATE_FORMAT } from '../../interfaces/Constants.js';
-import { DEFAULT_TASK_CACHE_KEYS, viewTypeNames, viewsPanelPropertiesToShow } from '../../interfaces/Enums.js';
-import { funnelIcon, ScanVaultIcon } from '../../interfaces/Icons.js';
+import { DEFAULT_TASK_CACHE_KEYS, getAllUIVisibleTaskProperties, viewTypeNames, viewsPanelPropertiesToShow } from '../../interfaces/Enums.js';
+import { funnelIcon, ScanVaultIcon, TASK_PROPERTIES_TO_ICON_MAPPING } from '../../interfaces/Icons.js';
 import { taskJsonMerged } from '../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../services/EventEmitter.js';
 import { openBoardConfigModal, openAddNewTaskModal, openScanVaultModal } from '../modals/OpenModals.js';
-import { advancedFilterer } from '../../core/algorithms/AdvancedFilterer.js';
 import { loadTasksAndMerge } from '../../utils/JsonFileOperations.js';
 import { AdvancedFilterModal } from '../components/advanced_filterer/index.js';
 import { AdvancedFilterPopover } from '../components/advanced_filterer/Popover.js';
@@ -179,14 +178,14 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			// Apply board filters to tasks
 			const boardFilteredTasks = {
 				...allTasks,
-				Pending: advancedFilterer(allTasks.Pending, boardFilters, dateFormat),
-				Completed: advancedFilterer(allTasks.Completed, boardFilters, dateFormat),
+				Pending: plugin.advancedFilterer.filterTasks(allTasks.Pending, boardFilters, dateFormat),
+				Completed: plugin.advancedFilterer.filterTasks(allTasks.Completed, boardFilters, dateFormat),
 			};
 
 			const viewLevelFilterTasks = {
 				...allTasks,
-				Pending: advancedFilterer(boardFilteredTasks.Pending, viewFilter, dateFormat),
-				Completed: advancedFilterer(boardFilteredTasks.Completed, viewFilter, dateFormat),
+				Pending: plugin.advancedFilterer.filterTasks(boardFilteredTasks.Pending, viewFilter, dateFormat),
+				Completed: plugin.advancedFilterer.filterTasks(boardFilteredTasks.Completed, viewFilter, dateFormat),
 			};
 
 			// Create a new board data object immutably
@@ -387,19 +386,19 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 			searchFilteredTasks = {
 				Pending: fileteredAllTasks.Pending.filter((task) => {
 					if (lowerQuery.startsWith("file:")) {
-						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+						return task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(lowerQuery.replace("file:", "").trim());
 					} else {
-						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
-						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						const titleMatch = task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(lowerQuery);
+						const bodyMatch = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? []).join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
 				}),
 				Completed: fileteredAllTasks.Completed.filter((task) => {
 					if (lowerQuery.startsWith("file:")) {
-						return task.filePath.toLowerCase().includes(lowerQuery.replace("file:", "").trim());
+						return task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(lowerQuery.replace("file:", "").trim());
 					} else {
-						const titleMatch = task.title.toLowerCase().includes(lowerQuery);
-						const bodyMatch = task.body.join("\n").toLowerCase().includes(lowerQuery);
+						const titleMatch = task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(lowerQuery);
+						const bodyMatch = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? []).join("\n").toLowerCase().includes(lowerQuery);
 						return titleMatch || bodyMatch;
 					}
 				})
@@ -515,44 +514,53 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		}
 	}
 
-	function togglePropertyNameInSettings(propertyName: DEFAULT_TASK_CACHE_KEYS) {
-		let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
+	function getVisibleProperties(): string[] {
+		return currentView?.propertiesVisibleInUI ?? getAllUIVisibleTaskProperties(plugin.settings.data.taskProperties);
+	}
 
-		if (visibleProperties.includes(propertyName)) {
-			visibleProperties.splice(visibleProperties.indexOf(propertyName), 1);
-			plugin.settings.data.propertiesVisibleInUI = visibleProperties;
+	function setVisibleProperties(visibleProperties: string[]): void {
+		if (!boardData?.views?.[currentViewIndex]) return;
 
-		} else {
-			let index = -1;
-			switch (propertyName) {
-				case DEFAULT_TASK_CACHE_KEYS.SubTasks:
-					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
-					if (index > -1)
-						visibleProperties.splice(index, 1);
-					break;
-				case DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized:
-					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasks);
-					if (index > -1)
-						visibleProperties.splice(index, 1);
-					break;
-				case DEFAULT_TASK_CACHE_KEYS.Description:
-					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized);
-					if (index > -1)
-						visibleProperties.splice(index, 1);
-					break;
-				case DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized:
-					index = visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Description);
-					if (index > -1)
-						visibleProperties.splice(index, 1);
-					break;
-			}
-			visibleProperties.push(propertyName);
+		const updatedViews = [...boardData.views];
+		const updatedView = {
+			...updatedViews[currentViewIndex],
+			propertiesVisibleInUI: visibleProperties,
+		};
+		updatedViews[currentViewIndex] = updatedView;
+		const updatedBoard = { ...boardData, views: updatedViews };
+		setCurrentBoardData(updatedBoard);
+		setCurrentView(updatedView);
+		void plugin.taskBoardFileManager.saveBoard(updatedBoard);
+		eventEmitter.emit("REFRESH_BOARD");
+	}
 
-			plugin.settings.data.propertiesVisibleInUI = visibleProperties;
+	function togglePropertyNameInSettings(propertyName: string): void {
+		const visibleProperties = getVisibleProperties();
+		const nextProperties = visibleProperties.includes(propertyName)
+			? visibleProperties.filter((property) => property !== propertyName)
+			: [...visibleProperties, propertyName];
+
+		if (propertyName === DEFAULT_TASK_CACHE_KEYS.SubTasks) {
+			const index = nextProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
+			if (index !== -1) nextProperties.splice(index, 1);
+		} else if (propertyName === DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized) {
+			const index = nextProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasks);
+			if (index !== -1) nextProperties.splice(index, 1);
+		} else if (propertyName === DEFAULT_TASK_CACHE_KEYS.Description) {
+			const index = nextProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized);
+			if (index !== -1) nextProperties.splice(index, 1);
+		} else if (propertyName === DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized) {
+			const index = nextProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Description);
+			if (index !== -1) nextProperties.splice(index, 1);
+		} else if (propertyName === DEFAULT_TASK_CACHE_KEYS.Checkbox) {
+			const index = nextProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.CheckboxIcon);
+			if (index !== -1) nextProperties.splice(index, 1);
+		} else if (propertyName === DEFAULT_TASK_CACHE_KEYS.CheckboxIcon) {
+			const index = nextProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Checkbox);
+			if (index !== -1) nextProperties.splice(index, 1);
 		}
 
-		void plugin.saveSettings();
-		eventEmitter.emit("REFRESH_BOARD");
+		setVisibleProperties(nextProperties);
 	}
 
 	function handlePropertiesBtnClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -561,159 +569,42 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 		const propertyMenu = new Menu();
 
 		propertyMenu.addItem((item) => {
-			item.setTitle(t("show-hide-properties"));
+			item.setTitle(t("components"));
 			item.setIsLabel(true);
-		});
-		propertyMenu.addSeparator();
-
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("id"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ID);
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ID))
 		});
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("checkbox"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Checkbox);
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Checkbox))
+			const subTasksMenu = item.setSubmenu()
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("normal"))
+				item.onClick(() => {
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Checkbox);
+
+				})
+				item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.Checkbox));
+			});
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("icon"))
+				item.onClick(() => {
+					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CheckboxIcon);
+
+				})
+				item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.CheckboxIcon));
+			});
+
+			subTasksMenu.addItem((item) => {
+				item.setTitle(t("hidden"))
+				item.onClick(() => {
+					setVisibleProperties(getVisibleProperties().filter((property) =>
+						property !== DEFAULT_TASK_CACHE_KEYS.Checkbox &&
+						property !== DEFAULT_TASK_CACHE_KEYS.CheckboxIcon));
+				})
+				item.setChecked(!getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.Checkbox) && !getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.CheckboxIcon));
+			});
 		});
-
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("status"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Status);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Status))
-		});
-
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("priority"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Priority);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Priority))
-		});
-
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("tags"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Tags);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Tags))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("time"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Time);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Time))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("reminder"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Reminder);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Reminder))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("created-date"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CreatedDate);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CreatedDate))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("start-date"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.StartDate);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.StartDate))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("scheduled-date"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ScheduledDate);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ScheduledDate))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("due-date"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.DueDate);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DueDate))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("completed-date"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CompletionDate);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CompletionDate))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("cancelled-date"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.CancelledDate);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.CancelledDate))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("dependencies"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.Dependencies);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Dependencies))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("file-name"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FilePath);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePath))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("file-name-in-header"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("parent-folder"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ParentFolder);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.ParentFolder))
-		});
-		propertyMenu.addItem((item) => {
-			item.setTitle(t("full-path"));
-			item.onClick(() => {
-				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FullPath);
-
-			})
-			item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.FullPath))
-		});
-
-		propertyMenu.addSeparator();
 
 		propertyMenu.addItem((item) => {
 			item.setTitle(t("sub-tasks"));
@@ -725,7 +616,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.SubTasks);
 
 				})
-				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
+				item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.SubTasks));
 			});
 
 			subTasksMenu.addItem((item) => {
@@ -734,27 +625,17 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized);
 
 				})
-				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
+				item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
 			});
 
 			subTasksMenu.addItem((item) => {
 				item.setTitle(t("hidden"))
 				item.onClick(() => {
-					let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
-
-					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks)) {
-						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasks), 1);
-					}
-
-					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized)) {
-						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized), 1);
-					}
-
-					plugin.settings.data.propertiesVisibleInUI = visibleProperties;
-					void plugin.saveSettings();
-					eventEmitter.emit("REFRESH_BOARD");
+					setVisibleProperties(getVisibleProperties().filter((property) =>
+						property !== DEFAULT_TASK_CACHE_KEYS.SubTasks &&
+						property !== DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
 				})
-				item.setChecked(!plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) && !plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
+				item.setChecked(!getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.SubTasks) && !getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized));
 			});
 		});
 
@@ -769,7 +650,7 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					void plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description));
+				item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.Description));
 			});
 
 			descriptionMenu.addItem((item) => {
@@ -779,29 +660,92 @@ const TaskBoardViewContainer: React.FC<{ plugin: TaskBoard, currentBoardData: Bo
 					void plugin.saveSettings();
 
 				})
-				item.setChecked(plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
+				item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
 			});
 
 			descriptionMenu.addItem((item) => {
 				item.setTitle(t("hidden"))
 				item.onClick(() => {
-					let visibleProperties = plugin.settings.data.propertiesVisibleInUI || [];
-
-					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.Description)) {
-						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.Description), 1);
-					}
-
-					if (visibleProperties.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized)) {
-						visibleProperties.splice(visibleProperties.indexOf(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized), 1);
-					}
-
-					plugin.settings.data.propertiesVisibleInUI = visibleProperties;
-					void plugin.saveSettings();
-					eventEmitter.emit("REFRESH_BOARD");
+					setVisibleProperties(getVisibleProperties().filter((property) =>
+						property !== DEFAULT_TASK_CACHE_KEYS.Description &&
+						property !== DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
 				})
-				item.setChecked(!plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.Description) && !plugin.settings.data.propertiesVisibleInUI?.includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
+				item.setChecked(!getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.Description) && !getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized));
 			});
 		});
+
+		propertyMenu.addSeparator();
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("properties"));
+			item.setIsLabel(true);
+		});
+
+		const menuExcludedProperties = new Set<string>([
+			DEFAULT_TASK_CACHE_KEYS.Title,
+			DEFAULT_TASK_CACHE_KEYS.SubTasks,
+			DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized,
+			DEFAULT_TASK_CACHE_KEYS.Description,
+			DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized,
+			DEFAULT_TASK_CACHE_KEYS.Checkbox,
+			DEFAULT_TASK_CACHE_KEYS.FilePathInHeader,
+			DEFAULT_TASK_CACHE_KEYS.ParentFolder,
+			DEFAULT_TASK_CACHE_KEYS.FullPath,
+		]);
+		plugin.settings.data.taskProperties
+			.filter((property) => !menuExcludedProperties.has(property.key))
+			.sort((first, second) => first.rank - second.rank)
+			.forEach((property) => {
+				propertyMenu.addItem((item) => {
+					item.setTitle(property.name || property.key);
+					if (property.icon) {
+						item.setIcon(property.icon);
+						if (property.color) {
+							item.titleEl.parentElement
+								?.querySelector<HTMLElement>(".menu-item-icon")
+								?.style.setProperty("color", property.color);
+						}
+					}
+					item.onClick(() => {
+						togglePropertyNameInSettings(property.key);
+					});
+					item.setChecked(getVisibleProperties().includes(property.key));
+				});
+			});
+
+		propertyMenu.addSeparator();
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("extras"));
+			item.setIsLabel(true);
+		});
+
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("file-name-in-header"));
+			item.setIcon('panel-top');
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader);
+
+			})
+			item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.FilePathInHeader))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("parent-folder"));
+			item.setIcon(TASK_PROPERTIES_TO_ICON_MAPPING.ParentFolder);
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.ParentFolder);
+
+			})
+			item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.ParentFolder))
+		});
+		propertyMenu.addItem((item) => {
+			item.setTitle(t("full-path"));
+			item.setIcon(TASK_PROPERTIES_TO_ICON_MAPPING.FullPath);
+			item.onClick(() => {
+				togglePropertyNameInSettings(DEFAULT_TASK_CACHE_KEYS.FullPath);
+
+			})
+			item.setChecked(getVisibleProperties().includes(DEFAULT_TASK_CACHE_KEYS.FullPath))
+		});
+
 
 		// Use native event if available (React event has nativeEvent property)
 		propertyMenu.showAtMouseEvent(

@@ -10,6 +10,7 @@ interface AddViewModalProps {
 	app?: App;
 	onCancel: () => void;
 	onSubmit: (updatedBoardData: Board) => void;
+	propertiesVisibleInUI: string[];
 }
 
 export class AddViewModal extends Modal {
@@ -18,11 +19,12 @@ export class AddViewModal extends Modal {
 	private viewType: viewTypeNames;
 	private viewName: string;
 	private boardData: Board;
+	private propertiesVisibleInUI: string[];
 
 	constructor(
 		app: App,
 		boardData: Board,
-		{ onCancel, onSubmit }: AddViewModalProps,
+		{ onCancel, onSubmit, propertiesVisibleInUI }: AddViewModalProps,
 	) {
 		super(app);
 		this.onCancel = onCancel;
@@ -30,6 +32,7 @@ export class AddViewModal extends Modal {
 		this.viewType = viewTypeNames.kanban;
 		this.viewName = "";
 		this.boardData = boardData;
+		this.propertiesVisibleInUI = propertiesVisibleInUI;
 	}
 
 	onOpen() {
@@ -95,6 +98,7 @@ export class AddViewModal extends Modal {
 				this.boardData,
 				this.viewType,
 				this.viewName,
+				this.propertiesVisibleInUI,
 			);
 
 			this.onSubmit(updatedBoard);

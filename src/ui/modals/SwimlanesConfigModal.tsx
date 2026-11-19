@@ -6,9 +6,10 @@ import Sortable from 'sortablejs';
 import { swimlaneConfigs } from '../../interfaces/BoardConfigs.js';
 import { HeaderTruncationOptions, HeaderUITypeOptions } from '../../interfaces/Enums.js';
 import { t } from '../../utils/lang/helper.js';
-import { getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, StatusDropdownOption } from '../../interfaces/Mapping.js';
 import TaskBoard from '../../../main.js';
 import { getFileSuggestions, getFolderSuggestions, getTagSuggestions, MultiSuggest } from '../../services/MultiSuggest.js';
+import { StatusDropdownOption } from '../../interfaces/Mapping.js';
+import { getPriorityOptionsForDropdown, getCustomStatusOptionsForDropdown } from '../../utils/TaskItemUtils.js';
 
 interface SwimlanesConfigModalProps {
 	plugin: TaskBoard;
@@ -335,7 +336,9 @@ export class SwimlanesConfigModal extends Modal {
 					cls: 'swimlanesConfigSortRowDropdown',
 					attr: { 'aria-label': t('priority') },
 				});
-				const priorityOptions = getPriorityOptionsForDropdown();
+				const priorityOptions = getPriorityOptionsForDropdown(
+					this.plugin.settings.data.customPriorities,
+				);
 
 				priorityOptions.forEach((option) => {
 					prioritySelect.createEl('option', {

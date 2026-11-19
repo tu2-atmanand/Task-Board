@@ -11,6 +11,7 @@ import {
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
 export class ConfigureColumnSortingModal extends Modal {
 	plugin: TaskBoard;
@@ -52,8 +53,10 @@ export class ConfigureColumnSortingModal extends Modal {
 					(criteria: columnSortingCriteria) => ({
 						...criteria,
 						uid: criteria.uid || generateRandomStringId("sort"),
-						propertyType: this.plugin.settings.data.customProperties?.find(
-							(property) => property.id === criteria.criteria,
+						propertyType: this.plugin.settings.data.taskProperties.find(
+							(property) =>
+								!property.default &&
+								property.id === criteria.criteria,
 						)?.type,
 					}),
 				);
@@ -155,20 +158,20 @@ export class ConfigureColumnSortingModal extends Modal {
 								t("manual-order"),
 							);
 							dropdown
-								.addOption("content", t("title"))
-								.addOption("id", t("id"))
-								.addOption("status", t("status"))
-								.addOption("priority", t("priority"))
-								.addOption("tags", t("tags"))
-								// .addOption("project", t("project")) // Will be implemented in future
-								.addOption("time", t("start-time"))
-								.addOption("createdDate", t("created-date"))
-								.addOption("startDate", t("start-date"))
-								.addOption("scheduledDate", t("scheduled-date"))
-								.addOption("dueDate", t("due-date"))
-								.addOption("completedDate", t("completed-date"))
-								.addOption("filePath", t("file-path"));
-								this.plugin.settings.data.customProperties?.forEach((property) => {
+								.addOption(DEFAULT_TASK_CACHE_KEYS.Title, t("title"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.ID, t("id"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.Status, t("status"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.Priority, t("priority"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.Tags, t("tags"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.Time, t("start-time"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.CreatedDate, t("created-date"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.StartDate, t("start-date"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.ScheduledDate, t("scheduled-date"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.DueDate, t("due-date"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.CompletionDate, t("completed-date"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.CancelledDate, t("cancelled-date"))
+								.addOption(DEFAULT_TASK_CACHE_KEYS.FilePath, t("file-path"));
+								this.plugin.settings.data.taskProperties.filter((property) => !property.default).forEach((property) => {
 									dropdown.addOption(property.id, property.name);
 								});
 								dropdown
@@ -204,12 +207,12 @@ export class ConfigureColumnSortingModal extends Modal {
 
 											if (foundCriteria) {
 												foundCriteria.criteria = value;
-												const configuredProperty = this.plugin.settings.data.customProperties?.find((property) => property.id === value);
-												if (configuredProperty) {
-													foundCriteria.propertyType = configuredProperty.type;
-												} else {
-													delete foundCriteria.propertyType;
-												}
+												// const configuredProperty = this.plugin.settings.data.taskProperties.find((property) => !property.default && property.id === value);
+												// if (configuredProperty) {
+												// 	foundCriteria.propertyType = configuredProperty.type;
+												// } else {
+												// 	delete foundCriteria.propertyType;
+												// }
 											} else {
 												bugReporterManagerInsatance.showNotice(
 													179,

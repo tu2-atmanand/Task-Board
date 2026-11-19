@@ -6,6 +6,8 @@ import { PENDING_SCAN_FILE_STACK } from "../../interfaces/Constants.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import VaultScanner from "./VaultScanner.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 export class RealTimeScanner {
 	app: App;
@@ -168,8 +170,8 @@ export class RealTimeScanner {
 						// This check helps to remove the file cache, when the task note is archived.
 						cache[file.path] = cache[oldPath];
 						cache[file.path].forEach((task) => {
-							if (task.filePath === oldPath) {
-								task.filePath = file.path; // Update the file path in the task
+							if (task[DEFAULT_TASK_CACHE_KEYS.FilePath] === oldPath) {
+								task[DEFAULT_TASK_CACHE_KEYS.FilePath] = file.path; // Update the file path in the task
 								foundFlag = true;
 							}
 						});
@@ -187,10 +189,10 @@ export class RealTimeScanner {
 							file.path + oldKey.substring(oldPath.length);
 						cache[newKey] = cache[oldKey];
 						cache[newKey].forEach((task) => {
-							if (task.filePath.startsWith(oldPath + "/")) {
-								task.filePath =
+							if (task[DEFAULT_TASK_CACHE_KEYS.FilePath].startsWith(oldPath + "/")) {
+								task[DEFAULT_TASK_CACHE_KEYS.FilePath] =
 									file.path +
-									task.filePath.substring(oldPath.length);
+									task[DEFAULT_TASK_CACHE_KEYS.FilePath].substring(oldPath.length);
 								foundFlag = true;
 							}
 						});

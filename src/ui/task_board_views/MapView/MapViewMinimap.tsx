@@ -3,6 +3,8 @@ import { MiniMap, Node } from "@xyflow/react";
 import { TagColor } from "../../../interfaces/GlobalSettings.js";
 import { taskItem } from "../../../interfaces/TaskItem.js";
 import { matchTagsWithWildcards } from "../../../core/algorithms/ScanningFilterer.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 export interface CustomNode extends Node {
 	data: { label: { props: { task: taskItem } } }
@@ -20,7 +22,7 @@ export const MapViewMinimap: React.FC<MapViewMinimapProps> = ({ tagColors }) => 
 			return "var(--xy-minimap-node-background-color, var(--xy-minimap-node-background-color-default))";
 		}
 
-		const nodeTags = (node as CustomNode).data.label.props.task.tags;
+		const nodeTags = (node as CustomNode).data.label.props.task[DEFAULT_TASK_CACHE_KEYS.Tags];
 		if (!Array.isArray(nodeTags)) return "var(--xy-minimap-node-background-color, var(--xy-minimap-node-background-color-default))";
 
 		// Prepare a map for faster lookup
