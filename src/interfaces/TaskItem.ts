@@ -10,7 +10,16 @@ export interface taskLocation {
 
 export type CustomTaskPropertyValueType = string | number | boolean | string[];
 
-/** Coerce a configured custom-property value without changing built-in task fields. */
+/**
+ * Coerce a configured custom-property value without changing built-in task fields.
+ * 
+ * This function will return undefined instead of returning empty string, null or 
+ * 0 for priority property. Which will help for value checking. It will also convert 
+ * date and date-time value into the UTC millisecond value.
+ * 
+ * @param value Any value you want to type check against its configured type.
+ * @param type The data-type in which format the value of the property should be stored.
+ */
 export function coerceCustomTaskPropertyValue(
 	value: unknown,
 	type: PropertyTypeConfig,
@@ -80,9 +89,9 @@ export interface oldTaskItem {
 /**
  * An interface to build a cache for a task object with default
  * properties as well as user's custom properties.
- * 
- * @note - This interface has been modified from the older interface {@link oldTaskItem} 
- * just for testing phase. If everything works fine, then we can keep it, else 
+ *
+ * @note - This interface has been modified from the older interface {@link oldTaskItem}
+ * just for testing phase. If everything works fine, then we can keep it, else
  * rename back the {@link oldTaskItem} to taskItem and delete this interface.
  */
 export type taskItem = oldTaskItem &
