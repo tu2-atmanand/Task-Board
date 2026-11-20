@@ -146,15 +146,17 @@ export class PropertyConfigurationModal extends Modal {
 				});
 		}
 
-		addTextField(
-			t("emoji"),
-			t("emoji-property-info"),
-			this.draft.emoji,
-			(value) => {
-				this.draft.emoji = value;
-			},
-			false,
-		);
+		if (this.draft.key !== DEFAULT_TASK_CACHE_KEYS.Status) {
+			addTextField(
+				t("emoji"),
+				t("emoji-property-info"),
+				this.draft.emoji,
+				(value) => {
+					this.draft.emoji = value;
+				},
+				false,
+			);
+		}
 		const iconSetting = new Setting(contentEl)
 			.setName(t("property-lucide-icon"))
 			.setDesc(t("property-lucide-icon-info"));
