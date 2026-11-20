@@ -4,7 +4,7 @@ import TaskBoard from "../../../main.js";
 import createTaskCard from "../components/task_card/TaskCardImage.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
-import { createNewInlineTask } from "../../utils/task_line/TaskItemEventHandlers.js";
+import { createNewInlineTask } from "../../utils/task_line/TaskLineEventHandlers.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import {
 	DEFAULT_TASK_CACHE_KEYS,

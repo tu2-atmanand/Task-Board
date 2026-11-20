@@ -22,7 +22,7 @@ import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitch
 import { getUniversalDateFromTask, robustDateParser } from '../../../utils/DateTimeCalculations.js';
 import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId, normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
 import { cleanTaskTitleLegacy, dedentTaskBodyLines, shouldExpandTaskDescription } from '../../../utils/task_line/TaskContentFormatter.js';
-import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskItemEventHandlers.js';
+import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskLineEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../../utils/task_note/TaskNoteEventHandlers.js';
 import { isTaskNotePresentInTags } from '../../../utils/task_note/TaskNoteUtils.js';
 import { updateRGBAOpacity } from '../../../utils/UIHelpers.js';
