@@ -77,12 +77,12 @@ export interface oldTaskItem {
 	[DEFAULT_TASK_CACHE_KEYS.StartDate]?: string;
 	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]?: string;
 	[DEFAULT_TASK_CACHE_KEYS.DueDate]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.FilePath]: string;
-	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: taskLocation;
-	[DEFAULT_TASK_CACHE_KEYS.Dependencies]?: string[]; // Array of task IDs that this task depends on
-	[DEFAULT_TASK_CACHE_KEYS.Reminder]?: string; // A date-time value.
 	[DEFAULT_TASK_CACHE_KEYS.CompletionDate]?: string;
 	[DEFAULT_TASK_CACHE_KEYS.CancelledDate]?: string;
+	[DEFAULT_TASK_CACHE_KEYS.Reminder]?: string; // A date-time value.
+	[DEFAULT_TASK_CACHE_KEYS.Dependencies]?: string[]; // Array of task IDs that this task depends on
+	[DEFAULT_TASK_CACHE_KEYS.FilePath]: string;
+	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: taskLocation; // Only for inline-task.
 	// onCompletion?: number;
 }
 

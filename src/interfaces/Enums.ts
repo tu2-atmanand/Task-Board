@@ -42,17 +42,16 @@ export enum NotificationService {
  * These are the main properties stored inside the cache with the exact key name.
  */
 export enum DEFAULT_TASK_CACHE_KEYS {
+	// Below properties are stored inside cache.
 	ID = "id",
 	LegacyID = "legacyId",
 	Title = "title",
 	Body = "body",
-	SubTasks = "subTasks",
-	Description = "description",
 	Status = "status",
 	Priority = "priority",
 	Tags = "tags",
+	FrontMatterTags = "frontmatterTags", // This value is not user configurable, they will be stored for internal purposes.
 	Time = "time",
-	Reminder = "reminder",
 	CreatedDate = "createdDate",
 	StartDate = "startDate",
 	ScheduledDate = "scheduledDate",
@@ -60,19 +59,19 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	CompletionDate = "completionDate",
 	CancelledDate = "cancelledDate",
 	Dependencies = "dependsOn", // TODO : rename this to "childTasks"
+	Reminder = "reminder",
 	FilePath = "filePath",
-	Duration = "duration", // duration in minutes - To show the task in Calendar view, etc. atleast there should be a startTime value or the startDate must be in date-time format to get the start time.
-
-	// Below 2 values are not user configurable, they will be stored for internal purposes.
-	TaskLocation = "taskLocation",
-	FrontMatterTags = "frontmatterTags",
-
-	// Below 2 properties are not supported yet but will be implemented soon.
+	TaskLocation = "taskLocation", // This value is not user configurable, they will be stored for internal purposes.
+	
+	// Below 4 properties are not supported yet but will be implemented soon.
 	LastModified = "lastModified",
 	OnCompletion = "onCompletion",
 	Recurrence = "recurrence",
-
-	// Below properties are not stored in cache, but this same enum is used at other places hence placing them here.
+	Duration = "duration", // duration in minutes - User can decide whether they want to enter end time or {startTime + Duration}. Also work for {startDate + Duration}, if startDate is stored as date-time.
+	
+	// ALl below properties are not stored in cache, but this same enum is used at other places hence placing them here.
+	SubTasks = "subTasks",
+	Description = "description",
 	ParentTasks = "parentTasks",
 	Checkbox = "checkbox",
 	CheckboxIcon = "checkboxIcon",
