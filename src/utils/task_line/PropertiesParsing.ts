@@ -28,6 +28,13 @@ import {
  * - Dataview
  * - Obsidian native
  *
+ * Please note that, below DEFAULT_TASK_PROPERTIES will not be scanned by
+ * this function and the dedicated functions can be used to extract these
+ * properties :
+ * - {@link DEFAULT_TASK_CACHE_KEYS.Body}
+ * - {@link DEFAULT_TASK_CACHE_KEYS.Status}
+ * - {@link DEFAULT_TASK_CACHE_KEYS.Tags}
+ *
  * @param line - The inline-task line.
  * @param settings - All settings of this plugin.
  * @returns Extracted key value pair record.
@@ -64,13 +71,6 @@ export function extractTaskPropertiesOfSingleFormat(
 	);
 	if (priorityValue !== undefined)
 		result[DEFAULT_TASK_CACHE_KEYS.Priority] = priorityValue;
-
-	// DEFAULT_TASK_CACHE_KEYS.Tags
-	const tags = coerceCustomTaskPropertyValue(
-		extractTags(line),
-		PropertyTypeConfig.list,
-	);
-	if (tags !== undefined) result[DEFAULT_TASK_CACHE_KEYS.Tags] = tags;
 
 	// Step 2 - Extract all the other properties default or custom, which can be extracted using a standard logic.
 	for (const property of settings.taskProperties.filter(
@@ -124,66 +124,86 @@ export function extractTaskPropertiesOfSingleFormat(
 }
 
 /**
- * Extract all configured task properties from inline-task.
- * Custom emoji values are token-based (quoted values may contain spaces);
- * Dataview/native forms are delimited.
+ * Extract all configured task properties from inline-task. This function
+ * works similar to the {@link extractTaskPropertiesOfSingleFormat}, but
+ * instead of scanning for single format, it will scan for all 3 supported
+ * formats.
  *
- * This is a little expensive function as it looks for properties which are in any of the 3 supported formats.
- *
- * @note Only use this function if user has enabled the setting {@link scanForAllFormat}
+ * @note This is a little expensive function as it looks for properties
+ * which are in any of the 3 supported formats. Only use this function
+ * if user has enabled the setting {@link scanForAllFormat}
  */
-export function extractCustomTaskProperties(
+export function extractTaskPropertiesAllTYpe(
 	line: string,
 	settings: globalSettingsData,
 ): Record<string, CustomTaskPropertyValueType> {
 	const result: Record<string, CustomTaskPropertyValueType> = {};
-	const builtInKeys = new Set([
-		"id",
-		"legacyId",
-		"title",
-		"body",
-		"status",
-		"priority",
-		"tags",
-		"frontmatterTags",
-		"time",
-		"createdDate",
-		"startDate",
-		"scheduledDate",
-		"due",
-		"filePath",
-		"taskLocation",
-		"dependsOn",
-		"reminder",
-		"completion",
-		"cancelledDate",
+	const specialHandledDefaultProperties = new Set([
+		String(DEFAULT_TASK_CACHE_KEYS.Title),
+		String(DEFAULT_TASK_CACHE_KEYS.Body),
+		String(DEFAULT_TASK_CACHE_KEYS.Status),
+		// String(DEFAULT_TASK_CACHE_KEYS.Priority),
+		String(DEFAULT_TASK_CACHE_KEYS.Tags),
+		String(DEFAULT_TASK_CACHE_KEYS.FilePath),
 	]);
 	const escapeRegExp = (value: string) =>
 		value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+	// Step 1 - Handle all the default properties for which special parsing methods are needed.
+	// DEFAULT_TASK_CACHE_KEYS.Time
+	const timeFromLineStart = coerceCustomTaskPropertyValue(
+		extractTimeFromLineStart(line)?.[0],
+		PropertyTypeConfig.time,
+	);
+	if (timeFromLineStart !== undefined) result[DEFAULT_TASK_CACHE_KEYS.Time];
+
+	// DEFAULT_TASK_CACHE_KEYS.Priority -- Only emoji format, for other formats the function will go below.
+	const priorityValue = coerceCustomTaskPropertyValue(
+		extractPriorityEmoji(line),
+		PropertyTypeConfig.numeric,
+	);
+	if (priorityValue !== undefined)
+		result[DEFAULT_TASK_CACHE_KEYS.Priority] = priorityValue;
+
+	// Step 2 - Extract all the other properties default or custom, which can be extracted using a standard logic.
 	for (const property of settings.taskProperties.filter(
-		(property) => !property.default,
+		(property) => !property.id,
 	)) {
-		if (!property.id || builtInKeys.has(property.id)) continue;
+		if (!property.id || specialHandledDefaultProperties.has(property.id))
+			continue;
 		let expression: RegExp | undefined;
 		switch (settings.taskPropertyFormat) {
 			case taskPropertyFormatOptions.dataviewPlugin:
-				expression = new RegExp(
-					`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`,
-				);
 				break;
 			case taskPropertyFormatOptions.obsidianNative:
-				expression = new RegExp(
-					`@${escapeRegExp(property.id)}\\(([^)]*)\\)`,
-				);
 				break;
 			default:
 				if (property.emoji) {
-					expression = new RegExp(
-						`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`,
-					);
 				}
 		}
-		const match = expression?.exec(line);
+
+		let match: RegExpExecArray | null = null;
+
+		// Try with DATAVIEW format
+		const dataViewFormatRegExp = (expression = new RegExp(
+			`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`,
+		));
+		match = dataViewFormatRegExp?.exec(line);
+		if (!match) {
+			// Try with EMOJI format
+			const emojiFormatRegExp = new RegExp(
+				`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`,
+			);
+			match = emojiFormatRegExp?.exec(line);
+			if (!match) {
+				// Try with KANBAN PLUGIN format
+				const kanbanPluginFormatRegExp = new RegExp(
+					`@${escapeRegExp(property.id)}\\(([^)]*)\\)`,
+				);
+				match = kanbanPluginFormatRegExp?.exec(line);
+			}
+		}
+
 		if (!match) continue;
 		let raw: unknown = match[1].trim();
 		if (
@@ -204,7 +224,7 @@ export function extractCustomTaskProperties(
 			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
 		}
 		const value = coerceCustomTaskPropertyValue(raw, property.type);
-		if (value !== undefined) result[property.id] = value;
+		if (value !== undefined) result[property.key] = value;
 	}
 	return result;
 }
@@ -237,7 +257,7 @@ export function buildTaskFromRawContent(
 	const body = extractBody(lines, 1, indentationString);
 
 	return {
-		...(settings ? extractCustomTaskProperties(firstLine, settings) : {}),
+		...(settings ? extractTaskPropertiesAllTYpe(firstLine, settings) : {}),
 		title: title,
 		status: taskStatus ?? " ",
 		body: body,
@@ -382,42 +402,14 @@ export function extractTags(text: string): string[] {
 //                         NOTE
 // For now keeping all the below functions active, but they need
 // to be replaced with a better solution or probably a globalized
-// function like {@link extractCustomTaskProperties}. Becuase the 
-// below functions have hard-coded property.id values and do not 
+// function like {@link extractTaskPropertiesAllTYpe}. Becuase the
+// below functions have hard-coded property.id values and do not
 // fetch it from the user configured ids from setting.
 // ================================================================
 
-// // Extract title from task line
-// export function extractTitle(text: string): string {
-// 	const timeAtStartMatch = text.match(
-// 		/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}/
-// 	);
-
-// 	if (timeAtStartMatch) {
-// 		// If time is at the start, extract title after the time and till the pipe symbol
-// 		return text
-// 			.replace(/^- \[.\]\s*\d{2}:\d{2} - \d{2}:\d{2}\s*/, "")
-// 			.split("|")[0]
-// 			.trim();
-// 	} else {
-// 		// Default case: no time at start, extract title till the pipe symbol
-// 		return text.includes("|")
-// 			? text
-// 					.split("|")[0]
-// 					.replace(/^- \[.\]\s*/, "")
-// 					.trim()
-// 			: text.replace(/^- \[.\]\s*/, "").trim();
-// 	}
-// }
-
-/**
- * Extracts the title from a task string by removing the time at the start (if exists).
- * @param {string} text - The task string.
- * @returns {string} The title of the task.
- */
-export function extractTitle(text: string): string {
-	return text.replace(/^- \[.\]\s*/, "");
-}
+// TODO : Update all the below function to accept the property configuration 
+// to update the regular expression as per the id and emoji set by the user 
+// in settings for that specific property.
 
 /**
  * Extracts the task id from a task string by matching the id regex.
