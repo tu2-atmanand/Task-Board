@@ -635,7 +635,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 															newPath;
 														void this.saveSettings();
 
-														this.renderTab();
+														this.update();
 														new Notice(
 															`Task Board cache file path changed to new location succussfully. New location : ${this.globalSettings.tasksCacheFilePath}`,
 														);
@@ -646,7 +646,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 														this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 														void this.saveSettings();
 
-														this.renderTab();
+														this.update();
 													}
 												}),
 										)
@@ -669,7 +669,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 															newPath;
 														void this.saveSettings();
 
-														this.renderTab();
+														this.update();
 														new Notice(
 															`Task board cache file path reset was succussfully.`,
 														);
@@ -680,10 +680,10 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 														this.globalSettings.tasksCacheFilePath = `${this.app.vault.configDir}/plugins/task-board/tasks.json`;
 														void this.saveSettings();
 
-														this.renderTab();
+														this.update();
 													}
 
-													this.renderTab();
+													this.update();
 												}),
 										);
 								},
@@ -1638,6 +1638,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					},
 					{
 						type: "group",
+						heading: t("format-and-scanning"),
 						items: [
 							{
 								name: t("supported-plugin-formats"),
@@ -1674,13 +1675,73 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 												this.globalSettings.taskPropertyFormat =
 													value as taskPropertyFormatOptions;
 												void this.saveSettings();
-												this.renderTab();
+												this.update();
 
 												this.openReloadNoticeIfNeeded();
 											});
 										});
 								},
 							},
+							{
+								name: t("scan-all-formats"),
+								desc: t("scan-all-formats-info"),
+								render: (setting) => {
+									setting
+										.setName(t("scan-all-formats"))
+										.setDesc(t("scan-all-formats-info"))
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.scanForAllFormat,
+												)
+												.onChange((value) => {
+													this.globalSettings.scanForAllFormat =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
+								name: t(
+									"show-note-frontmatter-tags-in-the-card-header",
+								),
+								desc: t(
+									"show-note-frontmatter-tags-in-the-card-header-info",
+								),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"show-note-frontmatter-tags-in-the-card-header",
+											),
+										)
+										.setDesc(
+											t(
+												"show-note-frontmatter-tags-in-the-card-header-info",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.showFrontmatterTagsOnCards,
+												)
+												.onChange((value) => {
+													this.globalSettings.showFrontmatterTagsOnCards =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("storage"),
+						items: [
 							{
 								name: t("default-note-for-adding-new-tasks"),
 								desc: t(
@@ -1779,39 +1840,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 												this.app,
 											);
 										});
-								},
-							},
-							{
-								name: t(
-									"show-note-frontmatter-tags-in-the-card-header",
-								),
-								desc: t(
-									"show-note-frontmatter-tags-in-the-card-header-info",
-								),
-								render: (setting) => {
-									setting
-										.setName(
-											t(
-												"show-note-frontmatter-tags-in-the-card-header",
-											),
-										)
-										.setDesc(
-											t(
-												"show-note-frontmatter-tags-in-the-card-header-info",
-											),
-										)
-										.addToggle((toggle) =>
-											toggle
-												.setValue(
-													this.globalSettings
-														.showFrontmatterTagsOnCards,
-												)
-												.onChange((value) => {
-													this.globalSettings.showFrontmatterTagsOnCards =
-														value;
-													void this.saveSettings();
-												}),
-										);
 								},
 							},
 						],
@@ -2856,9 +2884,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 									t("embed-task-boards-info"),
 								render: (setting) => {
 									setting
-										.setName(
-											t("enable-experimental-features"),
-										)
 										.setDesc(
 											createFragmentWithHTML(
 												t(
@@ -4129,7 +4154,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		_contentEl: HTMLElement,
 	): SettingDefinitionGroup {
 		const properties = this.globalSettings.taskProperties;
-		const pageTitle = t("task-properties");
 
 		return {
 			type: "group",
@@ -4368,25 +4392,32 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 	// ================================================
 
 	private renderInlineTasksPreviewContainer(contentEl: HTMLElement) {
+		contentEl.empty();
 		// Create the live preview element
 		const previewEl = contentEl.createDiv({
 			cls: "global-setting-tab-live-preview",
 		});
 
-		const readingPreviewLabel = previewEl.createDiv({
+		const readingPreviewDiv = previewEl.createDiv({
+			cls: "global-setting-tab-reading-mode-preview",
+		});
+		const readingPreviewLabel = readingPreviewDiv.createDiv({
 			cls: "global-setting-tab-reading-mode-preview-label",
 		});
 		readingPreviewLabel.setText(t("reading-mode-preview"));
 		// Render markdown preview above the raw preview
-		const markdownPreviewEl = previewEl.createDiv({
+		const markdownPreviewEl = readingPreviewDiv.createDiv({
 			cls: "global-setting-tab-reading-mode-preview-markdown",
 		});
 
-		const sourcePreviewLabel = previewEl.createDiv({
+		const sourcePreviewDiv = previewEl.createDiv({
+			cls: "global-setting-tab-source-mode-preview",
+		});
+		const sourcePreviewLabel = sourcePreviewDiv.createDiv({
 			cls: "global-setting-tab-source-mode-preview-label",
 		});
 		sourcePreviewLabel.setText(t("source-mode-preview"));
-		const previewData = previewEl.createDiv({
+		const previewData = sourcePreviewDiv.createDiv({
 			cls: "global-setting-tab-source-mode-preview-data",
 		});
 
@@ -4404,7 +4435,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			// 	this.plugin.view,
 			// );
 
-			void MarkdownUIRenderer.strictRender(
+			void MarkdownUIRenderer.safeRender(
 				this.app,
 				markdown,
 				markdownPreviewEl,

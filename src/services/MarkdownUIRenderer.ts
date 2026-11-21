@@ -111,7 +111,7 @@ export class MarkdownUIRenderer {
 
 	public static async safeRender(
 		app: App,
-		subtaskText: string,
+		markdownText: string,
 		el: HTMLElement,
 		path: string,
 		taskItemComponent: Component | null,
@@ -128,7 +128,7 @@ export class MarkdownUIRenderer {
 			// Call Obsidian's MarkdownRenderer to render the subtaskText as markdown
 			await MarkdownRenderer.render(
 				app,
-				subtaskText,
+				markdownText,
 				el,
 				path,
 				componentEl,
