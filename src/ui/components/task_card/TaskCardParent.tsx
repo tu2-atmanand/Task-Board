@@ -21,7 +21,7 @@ import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreC
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../../utils/CheckBoxUtils.js';
 import { getUniversalDateFromTask, robustDateParser } from '../../../utils/DateTimeCalculations.js';
 import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId, normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
-import { cleanTaskTitleLegacy, dedentTaskBodyLines, shouldExpandTaskDescription } from '../../../utils/task_line/TaskContentFormatter.js';
+import { cleanTaskTitleLegacy, dedentTaskBodyLines, isTaskTitleWithoutText } from '../../../utils/task_line/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskLineEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../../utils/task_note/TaskNoteEventHandlers.js';
 import { isTaskNotePresentInTags } from '../../../utils/task_note/TaskNoteUtils.js';
@@ -34,6 +34,29 @@ import { renderEmojiStyleFooter, renderEmojiStyleHeader } from './EmojiStyle.js'
 import { renderIconStyleFooter, renderIconStyleHeader } from './IconStyle.js';
 import type { TaskCardHeaderOptions } from './TaskCardHeader.js';
 import { normalizeTaskIconValue } from '../../modals/icon_picker/index.js';
+import { TASK_PROPERTIES_TO_ICON_MAPPING } from '../../../interfaces/Icons.js';
+
+/**
+ * Whether the description section of a task should start expanded on the board.
+ * A task whose title is empty or only a time is meaningless without its body,
+ * hence such descriptions are expanded by default to avoid showing only the time.
+ * 
+ * @deprecated - This functionality was implemented which I dont remember now. 
+ * This function calls the {@linkcleanTaskTitleLegacy} which is very expensive 
+ * function. Hence, for now disabling this functionality. A better approach is 
+ * required to implement this functionality. Or user can simply toggle the description 
+ * section to be enabled all the time.
+ * 
+ * @param task - The task item to check.
+ * @returns True when the task has description lines and no meaningful title.
+ */
+const shouldExpandTaskDescription = (task: taskItem, usePipeSymboltoSeparate: boolean): boolean => {
+	const hasDescriptionLines = task[DEFAULT_TASK_CACHE_KEYS.Body]?.some(
+		(line) => line.trim() !== "" && !isTaskLine(line),
+	);
+	return !!hasDescriptionLines && isTaskTitleWithoutText(task, usePipeSymboltoSeparate);
+};
+
 
 const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	const {
@@ -69,14 +92,15 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	}, [propertiesVisibleInUIsafe]);
 
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(
-		() => !showDescriptionSection && shouldExpandTaskDescription(task),
+		// () => !showDescriptionSection && shouldExpandTaskDescription(task),
+		showDescriptionSection
 	);
 	useEffect(() => {
 		if (showDescriptionSection) {
 			setIsDescriptionExpanded(false);
 			return;
 		}
-		if (shouldExpandTaskDescription(task)) setIsDescriptionExpanded(true);
+		// if (shouldExpandTaskDescription(task, globalSettings.usePipeToSeparateProperties)) setIsDescriptionExpanded(true);
 	}, [task[DEFAULT_TASK_CACHE_KEYS.ID], task[DEFAULT_TASK_CACHE_KEYS.Title], task[DEFAULT_TASK_CACHE_KEYS.Body]?.join("\n"), showDescriptionSection]);
 
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
