@@ -155,7 +155,11 @@ export const TaskEditorRC: React.FC<{
 	useEffect(() => {
 		if (isTaskNote) return;
 
-		const cleanedTaskTitle = cleanTaskTitleLegacy(modifiedTask);
+		const cleanedTaskTitle = cleanTaskTitleLegacy(
+			modifiedTask,
+			false,
+			globalSettings,
+		);
 		// setFormattedTaskContent(cleanedTaskTitle);
 		if (titleComponentRef.current && cleanedTaskTitle !== "") {
 			// Clear previous content before rendering new markdown

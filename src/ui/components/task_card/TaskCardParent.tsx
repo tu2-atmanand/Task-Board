@@ -7,6 +7,7 @@ import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from '../../../interfaces/Constants.js';
 import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames, taskCardStyleNames, getAllUIVisibleTaskProperties } from '../../../interfaces/Enums.js';
+import type { globalSettingsData } from '../../../interfaces/GlobalSettings.js';
 import { UpdateTaskEventData, taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { currentDragDataPayload, dragDropTasksManagerInsatance } from '../../../core/managers/DragDropTasksManager.js';
@@ -50,11 +51,22 @@ import { TASK_PROPERTIES_TO_ICON_MAPPING } from '../../../interfaces/Icons.js';
  * @param task - The task item to check.
  * @returns True when the task has description lines and no meaningful title.
  */
-const shouldExpandTaskDescription = (task: taskItem, usePipeSymboltoSeparate: boolean): boolean => {
+const shouldExpandTaskDescription = (
+	task: taskItem,
+	usePipeSymboltoSeparate: boolean,
+	globalSettings?: globalSettingsData,
+): boolean => {
 	const hasDescriptionLines = task[DEFAULT_TASK_CACHE_KEYS.Body]?.some(
 		(line) => line.trim() !== "" && !isTaskLine(line),
 	);
-	return !!hasDescriptionLines && isTaskTitleWithoutText(task, usePipeSymboltoSeparate);
+	return (
+		!!hasDescriptionLines &&
+		isTaskTitleWithoutText(
+			task,
+			usePipeSymboltoSeparate,
+			globalSettings,
+		)
+	);
 };
 
 
@@ -181,7 +193,13 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 		try {
 			if (task[DEFAULT_TASK_CACHE_KEYS.Title] === "") return;
 
-			const cleanedTitle = isTaskNote ? task[DEFAULT_TASK_CACHE_KEYS.Title] : cleanTaskTitleLegacy(task);
+			const cleanedTitle = isTaskNote
+				? task[DEFAULT_TASK_CACHE_KEYS.Title]
+				: cleanTaskTitleLegacy(
+						task,
+						globalSettings.usePipeToSeparateProperties,
+						globalSettings,
+					);
 
 			void MarkdownUIRenderer.strictRender(
 				plugin.app,
@@ -758,7 +776,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 
 		// Dates submenu
 		taskItemMenu.addItem((it) => {
-			it.setIcon("calendar-plus")
+			it.setIcon(TASK_PROPERTIES_TO_ICON_MAPPING.startDate)
 			it.setTitle(t("start-date"));
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("start"), (newDate: string) => {
@@ -809,7 +827,13 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			item.setTitle(t("copy-task-title"));
 			item.onClick(() => {
 				try {
-					void navigator.clipboard.writeText(cleanTaskTitleLegacy(task));
+					void navigator.clipboard.writeText(
+						cleanTaskTitleLegacy(
+							task,
+							globalSettings.usePipeToSeparateProperties,
+							globalSettings,
+						),
+					);
 					new Notice(t("copy-task-title-successful"));
 				} catch (error) {
 					bugReporterManagerInsatance.addToLogs(
@@ -1257,7 +1281,11 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 												className={`taskItemChildTaskTitleText${isChildTaskCompleted ? '-completed' : ''}`}
 												aria-label={depTaskTitle.slice(6)}
 											>
-												{cleanTaskTitleLegacy(childTask)}
+												{cleanTaskTitleLegacy(
+													childTask,
+													globalSettings.usePipeToSeparateProperties,
+													globalSettings,
+												)}
 											</span></div>
 									</div>
 								)

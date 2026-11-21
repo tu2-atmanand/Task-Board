@@ -131,12 +131,14 @@ export interface globalSettingsData {
 	// All UI Tab
 	taskCardStyle: taskCardStyleNames;
 	showTaskWithoutMetadata: boolean;
+	usePipeToSeparateProperties: boolean;
 	columnWidth: string;
 	showVerticalScroll: boolean;
 	editButtonAction: EditButtonMode;
 	cardDoubleClickAction: EditButtonMode;
 	tagColorsType: TagColorType;
 	tagColors: TagColor[];
+	dateHumanReadable: boolean;
 
 	// Properties Tab
 	taskProperties: SupportedPropertiesConfig[];
@@ -849,6 +851,9 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		filtersWarehouse: [],
 		ribbonIconAction: RibbonIconActions.allBoardsMenu,
 		taskProperties: DEFAULT_TASK_PROPERTIES_PRESENTATION,
+		dateHumanReadable: false,
+		scanForAllFormat: false,
+		usePipeToSeparateProperties: false,
 	},
 };
 

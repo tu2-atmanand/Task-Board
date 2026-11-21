@@ -791,6 +791,7 @@ export async function migrateVersion1_to_Version2(
 				...oldPluginSettings.data.globalSettings,
 				taskProperties: [],
 				customPriorities: [],
+				usePipeToSeparateProperties: false,
 			},
 		};
 		const registryResult = await updateRegistryAndSettings(

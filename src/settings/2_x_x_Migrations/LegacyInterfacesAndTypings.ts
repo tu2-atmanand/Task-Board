@@ -134,6 +134,8 @@ export interface globalSettingsDataLegacy {
 	enableDragnDropTouch: boolean;
 	filtersWarehouse: Filter[];
 	ribbonIconAction: RibbonIconActions;
+	dateHumanReadable: boolean;
+	scanForAllFormat: boolean;
 }
 
 export interface PluginDataJsonLegacy {

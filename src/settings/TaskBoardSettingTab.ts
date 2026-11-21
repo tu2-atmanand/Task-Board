@@ -860,6 +860,39 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 								},
 							},
 							{
+								name: t(
+									"use-pipe-symbol-to-separate-properties",
+								),
+								desc: t(
+									"use-pipe-symbol-to-separate-properties-info",
+								),
+								render: (setting) => {
+									setting
+										.setName(
+											t(
+												"use-pipe-symbol-to-separate-properties",
+											),
+										)
+										.setDesc(
+											t(
+												"use-pipe-symbol-to-separate-properties-info",
+											),
+										)
+										.addToggle((toggle) =>
+											toggle
+												.setValue(
+													this.globalSettings
+														.usePipeToSeparateProperties,
+												)
+												.onChange((value) => {
+													this.globalSettings.usePipeToSeparateProperties =
+														value;
+													void this.saveSettings();
+												}),
+										);
+								},
+							},
+							{
 								name: t("width-of-task-card"),
 								desc: t(
 									"enter-the-value-of-width-for-task-card",
@@ -1107,143 +1140,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 														setting.settingEl,
 													);
 												},
-											},
-										],
-									},
-								],
-							},
-						],
-					},
-				],
-			},
-			// Task properties page
-			{
-				type: "page",
-				name: t("task-properties"),
-				items: [
-					{
-						type: "group",
-						items: [
-							{
-								type: "page",
-								name: t("task-properties"),
-								desc: t("task-properties-info"),
-								items: [
-									{
-										type: "group",
-										heading: "",
-										items: [
-											{
-												name: "",
-												desc: createFragmentWithHTML(
-													"<ul>" +
-														"<li>" +
-														"<b>" +
-														t(
-															"default-properties",
-														) +
-														"</b>" +
-														" : " +
-														t(
-															"default-properties-info",
-														) +
-														"</li>" +
-														"<li>" +
-														"<b>" +
-														t("custom-properties") +
-														"</b>" +
-														" : " +
-														t(
-															"custom-properties-info",
-														) +
-														"</li>" +
-														"</ul>",
-												),
-												render: (setting) => {
-													setting.setDesc(
-														createFragmentWithHTML(
-															"<ul>" +
-																"<li>" +
-																"<b>" +
-																t(
-																	"default-properties",
-																) +
-																"</b>" +
-																" : " +
-																t(
-																	"default-properties-info",
-																) +
-																"</li>" +
-																"<li>" +
-																"<b>" +
-																t(
-																	"custom-properties",
-																) +
-																"</b>" +
-																" : " +
-																t(
-																	"custom-properties-info",
-																) +
-																"</li>" +
-																"</ul>",
-														),
-													);
-												},
-											},
-										],
-									},
-									this.renderPropertiesConfigurationSection(
-										this.containerEl,
-									),
-								],
-							},
-						],
-					},
-					{
-						type: "group",
-						heading: t("custom-values"),
-						items: [
-							{
-								type: "page",
-								name: t("statuses"),
-								desc: t("statuses-configuration-info"),
-								items: [
-									{
-										type: "group",
-										cls: "task-board-settings-custom-statuses-container",
-										items: [
-											{
-												name: "",
-												desc: t(
-													"statuses-configuration-info",
-												),
-												render: (setting) =>
-													this.renderCustomStatusesTab(
-														setting.settingEl,
-													),
-											},
-										],
-									},
-								],
-							},
-							{
-								type: "page",
-								name: t("priorities"),
-								desc: t("priorities-configuration-info"),
-								items: [
-									{
-										type: "group",
-										cls: "task-board-settings-custom-priorities-container",
-										items: [
-											{
-												name: "",
-												desc: t(
-													"priorities-configuration-info",
-												),
-												render: (setting) =>
-													this.renderCustomPrioritiesTab(
-														setting.settingEl,
-													),
 											},
 										],
 									},
@@ -1612,6 +1508,143 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 														}),
 												);
 										},
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			// Task properties page
+			{
+				type: "page",
+				name: t("task-properties"),
+				items: [
+					{
+						type: "group",
+						items: [
+							{
+								type: "page",
+								name: t("task-properties"),
+								desc: t("task-properties-info"),
+								items: [
+									{
+										type: "group",
+										heading: "",
+										items: [
+											{
+												name: "",
+												desc: createFragmentWithHTML(
+													"<ul>" +
+														"<li>" +
+														"<b>" +
+														t(
+															"default-properties",
+														) +
+														"</b>" +
+														" : " +
+														t(
+															"default-properties-info",
+														) +
+														"</li>" +
+														"<li>" +
+														"<b>" +
+														t("custom-properties") +
+														"</b>" +
+														" : " +
+														t(
+															"custom-properties-info",
+														) +
+														"</li>" +
+														"</ul>",
+												),
+												render: (setting) => {
+													setting.setDesc(
+														createFragmentWithHTML(
+															"<ul>" +
+																"<li>" +
+																"<b>" +
+																t(
+																	"default-properties",
+																) +
+																"</b>" +
+																" : " +
+																t(
+																	"default-properties-info",
+																) +
+																"</li>" +
+																"<li>" +
+																"<b>" +
+																t(
+																	"custom-properties",
+																) +
+																"</b>" +
+																" : " +
+																t(
+																	"custom-properties-info",
+																) +
+																"</li>" +
+																"</ul>",
+														),
+													);
+												},
+											},
+										],
+									},
+									this.renderPropertiesConfigurationSection(
+										this.containerEl,
+									),
+								],
+							},
+						],
+					},
+					{
+						type: "group",
+						heading: t("custom-values"),
+						items: [
+							{
+								type: "page",
+								name: t("statuses"),
+								desc: t("statuses-configuration-info"),
+								items: [
+									{
+										type: "group",
+										cls: "task-board-settings-custom-statuses-container",
+										items: [
+											{
+												name: "",
+												desc: t(
+													"statuses-configuration-info",
+												),
+												render: (setting) =>
+													this.renderCustomStatusesTab(
+														setting.settingEl,
+													),
+											},
+										],
+									},
+								],
+							},
+							{
+								type: "page",
+								name: t("priorities"),
+								desc: t("priorities-configuration-info"),
+								items: [
+									{
+										type: "group",
+										cls: "task-board-settings-custom-priorities-container",
+										items: [
+											{
+												name: "",
+												desc: t(
+													"priorities-configuration-info",
+												),
+												render: (setting) =>
+													this.renderCustomPrioritiesTab(
+														setting.settingEl,
+													),
+											},
+										],
 									},
 								],
 							},
@@ -2883,60 +2916,57 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 									t("embed-task-boards") +
 									t("embed-task-boards-info"),
 								render: (setting) => {
-									setting
-										.setDesc(
-											createFragmentWithHTML(
+									setting.setDesc(
+										createFragmentWithHTML(
+											t(
+												"enable-experimental-features-info-2",
+											) +
+												"<br/>" +
+												"<br/>" +
 												t(
-													"enable-experimental-features-info-2",
+													"enable-experimental-features-info-3",
 												) +
-													"<br/>" +
-													"<br/>" +
-													t(
-														"enable-experimental-features-info-3",
-													) +
-													"<br/>" +
-													"<br/>" +
-													"<ul>" +
-													"<li>" +
-													"<b>" +
-													t("embed-task-boards") +
-													" : " +
-													"</b>" +
-													t(
-														"embed-task-boards-info",
-													) +
-													"</li>" +
-													"<li>" +
-													"<b>" +
-													t("inbox-view") +
-													" : " +
-													"</b>" +
-													t("inbox-view-info") +
-													"</li>" +
-													"<li>" +
-													"<b>" +
-													t("calendar-view") +
-													" : " +
-													"</b>" +
-													t("calendar-view-info") +
-													"</li>" +
-													"<li>" +
-													"<b>" +
-													t("table-view") +
-													" : " +
-													"</b>" +
-													t("table-view-info") +
-													"</li>" +
-													"<li>" +
-													"<b>" +
-													t("list-view") +
-													" : " +
-													"</b>" +
-													t("list-view-info") +
-													"</li>" +
-													"</ul>",
-											),
-										);
+												"<br/>" +
+												"<br/>" +
+												"<ul>" +
+												"<li>" +
+												"<b>" +
+												t("embed-task-boards") +
+												" : " +
+												"</b>" +
+												t("embed-task-boards-info") +
+												"</li>" +
+												"<li>" +
+												"<b>" +
+												t("inbox-view") +
+												" : " +
+												"</b>" +
+												t("inbox-view-info") +
+												"</li>" +
+												"<li>" +
+												"<b>" +
+												t("calendar-view") +
+												" : " +
+												"</b>" +
+												t("calendar-view-info") +
+												"</li>" +
+												"<li>" +
+												"<b>" +
+												t("table-view") +
+												" : " +
+												"</b>" +
+												t("table-view-info") +
+												"</li>" +
+												"<li>" +
+												"<b>" +
+												t("list-view") +
+												" : " +
+												"</b>" +
+												t("list-view-info") +
+												"</li>" +
+												"</ul>",
+										),
+									);
 								},
 							},
 						],
