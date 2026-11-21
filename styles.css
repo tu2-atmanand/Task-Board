@@ -905,6 +905,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	/* New UI */
 	/* background-color: var(--background-modifier-message); */
 	border: var(--border-width) solid var(--background-modifier-border);
+	background-color: var(--background-secondary);
 }
 
 .swimlaneColumnsWrapper .TaskBoardColumnsSection {
@@ -1646,17 +1647,17 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskItemFooterPropertyContainer_EmojiStyle {
 	font-size: var(--font-ui-smaller);
-		display: flex;
-		background-color: var(--background-modifier-box-shadow);
-		padding-inline: 2px;
-		border: 1px solid var(--background-modifier-border-focus);
-		padding-block: 2px;
-		color: var(--icon-color) !important;
-		border-radius: 2px;
-		opacity: 75%;
-		flex-direction: row;
-		align-items: center;
-		max-width: stretch;
+	display: flex;
+	background-color: var(--background-modifier-box-shadow);
+	padding-inline: 2px;
+	border: 1px solid var(--background-modifier-border-focus);
+	padding-block: 2px;
+	color: var(--icon-color) !important;
+	border-radius: 2px;
+	opacity: 75%;
+	flex-direction: row;
+	align-items: center;
+	max-width: stretch;
 }
 
 .taskItemFileNameSection {
@@ -3855,10 +3856,7 @@ li:hover .taskboard-hidden-property {
 }
 
 .global-setting-tab-live-preview {
-	padding: 5px;
-	padding-block: 1em;
 	border-radius: var(--radius-m);
-	/* background-color: var(--background-primary-alt); */
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
@@ -3868,13 +3866,21 @@ li:hover .taskboard-hidden-property {
 .global-setting-tab-reading-mode-preview-label {
 	background-color: var(--background-primary);
 	text-align: center;
+	color: var(--setting-item-name-color);
+	font-size: var(--setting-item-name-size);
+	font-weight: var(--setting-item-name-weight);
+	line-height: var(--line-height-tight);
+	text-overflow: ellipsis;
+	overflow: hidden;
+	padding-block: 4px;
+	border-radius: var(--radius-m) var(--radius-m) 0px 0px;
 }
 
 .global-setting-tab-reading-mode-preview-markdown,
 .global-setting-tab-source-mode-preview-data {
 	background-color: var(--background-modifier-border);
 	padding: 10px;
-	border-radius: var(--radius-m);
+	border-radius: 0px 0px var(--radius-m) var(--radius-m);
 	font-family: monospace;
 	white-space: pre-wrap;
 	overflow-wrap: break-word;
