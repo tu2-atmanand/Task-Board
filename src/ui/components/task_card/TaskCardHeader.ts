@@ -148,8 +148,8 @@ export function renderTaskCardHeader(
 			label.addClass("taskItemPropertyIDLabel_iconStyle");
 			setIcon(label, idProperty.icon);
 		} else if (style === "emoji") {
-			idContainer.addClass("taskItemPropertyID");
-			label.addClass("taskItemPropertyIDLabel");
+			idContainer.addClass("taskItemPropertyID_emojiStyle");
+			label.addClass("taskItemPropertyIDLabel_emojiStyle");
 			label.textContent = idProperty?.emoji ?? "";
 		} else {
 			idContainer.addClass("taskItemPropertyID");

@@ -121,7 +121,6 @@ export interface globalSettingsData {
 	scanFilters: VaultScannnerFilters;
 	scanMode: scanModeOptions;
 	autoAddUniqueID: boolean;
-	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	openOnStartup: boolean;
 	showModifiedFilesNotice: boolean;
 	ribbonIconAction: RibbonIconActions;
@@ -159,6 +158,7 @@ export interface globalSettingsData {
 
 	// Inline Tasks Tab
 	taskPropertyFormat: taskPropertyFormatOptions;
+	scanForAllFormat: boolean;
 	preDefinedNote: string;
 	archivedTasksFilePath: string;
 	showFrontmatterTagsOnCards: boolean;
@@ -204,6 +204,7 @@ export interface globalSettingsData {
 	experimentalFeatures: boolean;
 
 	// Other Caching Settings
+	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	dragAutoScrollEdgePercent: number;
 	notificationService: NotificationService;
 	actions: TaskBoardAction[];

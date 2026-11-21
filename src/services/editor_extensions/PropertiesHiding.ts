@@ -52,15 +52,8 @@ export function getTaskPropertyRegexPatterns(
 	tasksPropertyFormat: string,
 ): RegExp {
 	if (typeof property !== "string") {
-		if (
-			Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
-				property.key as DEFAULT_TASK_CACHE_KEYS,
-			)
-		) {
-			return getTaskPropertyRegexPatterns(
-				property.key as DEFAULT_TASK_CACHE_KEYS,
-				tasksPropertyFormat,
-			);
+		if (property.key === String(DEFAULT_TASK_CACHE_KEYS.Tags)) {
+			return TaskRegularExpressions.hashTagsRegex;
 		}
 
 		const escapedId = property.id.replace(
@@ -81,7 +74,7 @@ export function getTaskPropertyRegexPatterns(
 				/[.*+?^${}()|[\]\\]/g,
 				"\\$&",
 			);
-			return new RegExp(`${escapedEmoji}\\s*[^\\s]+`, "g");
+			return new RegExp(`${escapedEmoji} ?[^\\s]+`, "g");
 		}
 		return /(?!)/g;
 	}

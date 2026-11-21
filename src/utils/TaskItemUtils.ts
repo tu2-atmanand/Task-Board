@@ -224,6 +224,8 @@ export const applyIdToTaskItem = async (
 	// Try to extract an ID from the title (legacy inline format)
 	const extractedTaskId = extractTaskId(
 		task[DEFAULT_TASK_CACHE_KEYS.Title],
+		plugin.settings.data.taskProperties,
+		plugin.settings.data.taskPropertyFormat,
 	)?.[1];
 	if (extractedTaskId) return extractedTaskId;
 

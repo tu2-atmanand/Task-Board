@@ -29,7 +29,16 @@ import {
 	formatDateTimeAsPerSettings,
 } from "../DateTimeCalculations.js";
 import { generateTaskId } from "../TaskItemUtils.js";
-import { extractTaskId, extractCreatedDate, extractStartDate, extractScheduledDate, extractDueDate, extractCancelledDate, extractPriority, extractDependsOn } from "./PropertiesParsing.js";
+import {
+	extractTaskId,
+	extractCreatedDate,
+	extractStartDate,
+	extractScheduledDate,
+	extractDueDate,
+	extractCancelledDate,
+	extractPriority,
+	extractDependsOn,
+} from "./PropertiesParsing.js";
 
 /**
  * Removes the common leading indentation shared by all non-blank lines of a task body.
@@ -66,46 +75,12 @@ export const dedentTaskBodyLines = (bodyLines: string[]): string[] => {
 };
 
 /**
- * Function to get the formatted task content. The content will look similar to how it goes into your notes.
- * @param task - The task item to format.
- * @returns The formatted task content as a string.
- */
-export const getFormattedTaskContent = async (
-	task: taskItem,
-): Promise<string> => {
-	if (!task || !task[DEFAULT_TASK_CACHE_KEYS.Title]) {
-		return "";
-	}
-
-	// const checkBoxStat = `- [${task.status}]`;
-	// let taskLine = `${checkBoxStat} ${task.title}`;
-
-	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
-	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(/\[(.)\]/, `[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`);
-
-	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
-	const bodyLines = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? [])
-		.map((line: string) => {
-			// if (line.startsWith("\t")) {
-			// 	return line;
-			// } else {
-			// 	return `\t${line}`;
-			// }
-			return line;
-		})
-		.join("\n");
-
-	const completeTask = `${taskLine}${
-		bodyLines.trim() ? `\n${bodyLines}` : ""
-	}`;
-
-	return completeTask;
-};
-
-/**
  * Add a unique ID to the task content if it doesn't already have one.
- * This function will check if the task content already has an ID. If it does, it will return the same formatted task content.
- * If it doesn't, it will generate a new ID and add it to the task content based on the task format user has configured and return the new formatted task content.
+ * This function will check if the task content already has an ID. If it does, 
+ * it will return the same formatted task content.
+ * If it doesn't, it will generate a new ID and add it to the task content 
+ * based on the task format user has configured and return the new formatted task content.
+ * 
  * @param Plugin - The Taskboard plugin instance.
  * @param formattedTaskContent - The formatted task content to add the ID to.
  * @param forceAddId - If true, force the addition of a new ID even if the task content already has one.
@@ -116,7 +91,11 @@ export const addIdToTaskContent = async (
 	formattedTaskContent: string,
 	forcefullyAddId?: boolean,
 ): Promise<{ formattedTaskContent: string; newId: string | undefined }> => {
-	const taskId = extractTaskId(formattedTaskContent);
+	const taskId = extractTaskId(
+		formattedTaskContent,
+		Plugin.settings.data.taskProperties,
+		Plugin.settings.data.taskPropertyFormat,
+	);
 	let newId = taskId?.[1];
 	if (
 		(taskId === null && Plugin.settings.data.autoAddUniqueID) ||
@@ -175,7 +154,50 @@ export const getFormattedTaskContentSync = (task: taskItem): string => {
 	// let taskLine = `${checkBoxStat} ${task.title}`;
 
 	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
-	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(/\[(.)\]/, `[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`);
+	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(
+		/\[(.)\]/,
+		`[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`,
+	);
+
+	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
+	const bodyLines = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? [])
+		.map((line: string) => {
+			// if (line.startsWith("\t")) {
+			// 	return line;
+			// } else {
+			// 	return `\t${line}`;
+			// }
+			return line;
+		})
+		.join("\n");
+
+	const completeTask = `${taskLine}${
+		bodyLines.trim() ? `\n${bodyLines}` : ""
+	}`;
+
+	return completeTask;
+};
+
+/**
+ * Function to get the formatted task content. The content will look similar to how it goes into your notes.
+ * @param task - The task item to format.
+ * @returns The formatted task content as a string.
+ */
+export const getFormattedTaskContent = async (
+	task: taskItem,
+): Promise<string> => {
+	if (!task || !task[DEFAULT_TASK_CACHE_KEYS.Title]) {
+		return "";
+	}
+
+	// const checkBoxStat = `- [${task.status}]`;
+	// let taskLine = `${checkBoxStat} ${task.title}`;
+
+	// Replace the status checkbox in the title with the current status. But only the first occurrence of the /\[(.)\]/ pattern.
+	let taskLine = task[DEFAULT_TASK_CACHE_KEYS.Title].replace(
+		/\[(.)\]/,
+		`[${task[DEFAULT_TASK_CACHE_KEYS.Status]}]`,
+	);
 
 	// Add the body content, indent each line with a tab (or 4 spaces) for proper formatting
 	const bodyLines = (task[DEFAULT_TASK_CACHE_KEYS.Body] ?? [])
@@ -226,7 +248,11 @@ export const getSanitizedTaskContent = (
 		updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0,
 	);
 
-	updatedTitle = sanitizeTime(globalSettings, updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ?? "");
+	updatedTitle = sanitizeTime(
+		globalSettings,
+		updatedTitle,
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ?? "",
+	);
 
 	updatedTitle = sanitizeCreatedDate(
 		globalSettings,
@@ -252,7 +278,10 @@ export const getSanitizedTaskContent = (
 		updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] ?? "",
 	);
 
-	updatedTitle = sanitizeTags(updatedTitle, updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []);
+	updatedTitle = sanitizeTags(
+		updatedTitle,
+		updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
+	);
 
 	updatedTitle = sanitizeReminder(
 		globalSettings,
@@ -368,7 +397,11 @@ export const sanitizeCreatedDate = (
 	// const createdDateRegex =
 	// 	/➕\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[created::\s*?\d{4}-\d{2}-\d{2}\]|@created\(\d{4}-\d{2}-\d{2}\)/;
 	// const extractedCreatedDateMatch = title.match(createdDateRegex);
-	const extractedCreatedDateMatch = extractCreatedDate(title);
+	const extractedCreatedDateMatch = extractCreatedDate(
+		title,
+		globalSettings.taskProperties,
+		globalSettings.taskPropertyFormat,
+	);
 
 	// If user has removed the created date, remove it from the title inside the note.
 	if (!createdDate) {
@@ -443,7 +476,11 @@ export const sanitizeStartDate = (
 	// const startDateRegex =
 	// 	/🛫\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[start::\s*?\d{4}-\d{2}-\d{2}\]|@start\(\d{4}-\d{2}-\d{2}\)/;
 	// const extractedStartDateMatch = title.match(startDateRegex);
-	const extractedStartDateMatch = extractStartDate(title);
+	const extractedStartDateMatch = extractStartDate(
+		title,
+		globalSettings.taskProperties,
+		globalSettings.taskPropertyFormat,
+	);
 
 	// If user has removed the created date, remove it from the title inside the note.
 	if (!startDate) {
@@ -521,7 +558,11 @@ export const sanitizeScheduledDate = (
 	// const scheduledDateRegex =
 	// 	/⏳\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[scheduled::\s*?\d{4}-\d{2}-\d{2}\]|@scheduled\(\d{4}-\d{2}-\d{2}\)/;
 	// const extractedScheduledDateMatch = title.match(scheduledDateRegex);
-	const extractedScheduledDateMatch = extractScheduledDate(title);
+	const extractedScheduledDateMatch = extractScheduledDate(
+		title,
+		globalSettings.taskProperties,
+		globalSettings.taskPropertyFormat,
+	);
 
 	// If user has removed the scheduled date, remove it from the title inside the note.
 	if (!scheduledDate) {
@@ -600,7 +641,11 @@ export const sanitizeDueDate = (
 	// const dueDateRegex =
 	// 	/📅\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[due::\s*?\d{4}-\d{2}-\d{2}\]|@due\(\d{4}-\d{2}-\d{2}\)/;
 	// const extractedDueDateMatch = title.match(dueDateRegex);
-	const extractedDueDateMatch = extractDueDate(title);
+	const extractedDueDateMatch = extractDueDate(
+		title,
+		globalSettings.taskProperties,
+		globalSettings.taskPropertyFormat,
+	);
 
 	// If user has removed the due date, remove it from the title inside the note.
 	if (!dueDate) {
@@ -752,7 +797,11 @@ export const sanitizeCancelledDate = (
 	// const cancellationDateRegex =
 	// 	/❌\s*(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})|\[cancelled::\s*?\d{4}-\d{2}-\d{2}\]|@cancelled\(\d{4}-\d{2}-\d{2}\)/;
 	// const extractedCancellationDateMatch = title.match(cancellationDateRegex);
-	const extractedCancellationDateMatch = extractCancelledDate(title);
+	const extractedCancellationDateMatch = extractCancelledDate(
+		title,
+		globalSettings.taskProperties,
+		globalSettings.taskPropertyFormat,
+	);
 
 	// If cancellation date is empty, remove any existing cancellation date
 	if (!cancelledDate) {
@@ -998,7 +1047,11 @@ export const sanitizePriority = (
 	// 	)
 	// 	.trim();
 
-	const extractedPriorityMatch = extractPriority(title);
+	const extractedPriorityMatch = extractPriority(
+		title,
+		globalSettings.taskProperties,
+		globalSettings.customPriorities,
+	);
 
 	if (extractedPriorityMatch.value === 0) {
 		if (newPriority > 0) {
@@ -1010,11 +1063,14 @@ export const sanitizePriority = (
 				priorityWithFormat = `[priority:: ${newPriority}]`;
 			} else if (
 				globalSettings?.taskPropertyFormat ===
-				taskPropertyFormatOptions.tasksPlugin
+				taskPropertyFormatOptions.obsidianNative
 			) {
 				priorityWithFormat = `@priority(${newPriority})`;
 			} else {
-				priorityWithFormat = priorityEmojis[newPriority];
+				priorityWithFormat =
+					globalSettings.customPriorities.find(
+						(priority) => priority.rank === newPriority,
+					)?.emoji ?? priorityEmojis[newPriority];
 			}
 
 			if (cursorLocation?.lineNumber === 1) {
@@ -1065,9 +1121,13 @@ export const sanitizePriority = (
 	if (extractedPriorityMatch.value === newPriority) {
 		return title;
 	} else {
+		const newPriorityEmoji =
+			globalSettings.customPriorities.find(
+				(priority) => priority.rank === newPriority,
+			)?.emoji ?? priorityEmojis[newPriority];
 		return title.replace(
-			priorityEmojis[extractedPriorityMatch.value],
-			priorityEmojis[newPriority],
+			extractedPriorityMatch.parsedString,
+			newPriorityEmoji,
 		);
 	}
 };
@@ -1245,7 +1305,10 @@ export const sanitizeDependsOn = (
 	dependesOnIds: string[],
 	cursorLocation?: cursorLocationInterface,
 ): string => {
-	const extractedDependsOnMatch = extractDependsOn(title);
+	const extractedDependsOnMatch = extractDependsOn(
+		title,
+		globalSettings.taskProperties,
+	);
 
 	if (!dependesOnIds || dependesOnIds.length === 0) {
 		if (extractedDependsOnMatch) {
@@ -1523,7 +1586,10 @@ export const cleanTaskTitle = (plugin: TaskBoard, task: taskItem): string => {
 						cleanedTitle = cleanedTitle.replace(match[0], "");
 					}
 
-					const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0];
+					const priorityIcon =
+						priorityEmojis[
+							task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0
+						];
 
 					if (priorityIcon) {
 						// Create a regex pattern to match any priority emoji in text
@@ -1672,7 +1738,8 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 			cleanedTitle = cleanedTitle.replace(match[0], "");
 		}
 
-		const priorityIcon = priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0];
+		const priorityIcon =
+			priorityEmojis[task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0];
 
 		if (priorityIcon) {
 			// Create a regex pattern to match any priority emoji in text
@@ -1691,7 +1758,10 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	}
 
 	// Remove dependsOn in various formats
-	if (task[DEFAULT_TASK_CACHE_KEYS.Dependencies] && task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0) {
+	if (
+		task[DEFAULT_TASK_CACHE_KEYS.Dependencies] &&
+		task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0
+	) {
 		const combinedDependsOnRegex = new RegExp(
 			`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dependsOnRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dependsOnRegex.source})`,
 			"g", // add the 'g' flag if you want to match all occurrences
@@ -1732,14 +1802,12 @@ export const cleanTaskTitleLegacy = (task: taskItem): string => {
 	return cleanedTitle.trim();
 };
 
-
 /**
  * Matches titles that contain nothing but a time (optionally a time range),
  * e.g. "09:54" or "09:54 - 10:30". Such titles are common in journal/daily notes
  * where the actual task text lives in the indented body lines.
  */
-const timeOnlyTitleRegex =
-	/^\d{1,2}:\d{2}(\s*[-–~]\s*\d{1,2}:\d{2})?$/;
+const timeOnlyTitleRegex = /^\d{1,2}:\d{2}(\s*[-–~]\s*\d{1,2}:\d{2})?$/;
 
 /**
  * Checks whether the task title carries no text besides a time.

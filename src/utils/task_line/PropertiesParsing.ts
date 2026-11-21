@@ -1,9 +1,12 @@
 import {
 	DEFAULT_TASK_CACHE_KEYS,
-	PropertyTypeConfig,
 	taskPropertyFormatOptions,
 } from "../../interfaces/Enums.js";
-import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
+import {
+	globalSettingsData,
+	type CustomPriority,
+	type SupportedPropertiesConfig,
+} from "../../interfaces/GlobalSettings.js";
 import { priorityEmojis } from "../../interfaces/Mapping.js";
 import {
 	CustomTaskPropertyValueType,
@@ -42,85 +45,8 @@ import {
 export function extractTaskPropertiesOfSingleFormat(
 	line: string,
 	settings: globalSettingsData,
-	// propertyKeys?: string[],
 ): Record<string, CustomTaskPropertyValueType> {
-	const result: Record<string, CustomTaskPropertyValueType> = {};
-	const specialHandledDefaultProperties = new Set([
-		String(DEFAULT_TASK_CACHE_KEYS.Title),
-		String(DEFAULT_TASK_CACHE_KEYS.Body),
-		String(DEFAULT_TASK_CACHE_KEYS.Status),
-		// String(DEFAULT_TASK_CACHE_KEYS.Priority),
-		String(DEFAULT_TASK_CACHE_KEYS.Tags),
-		String(DEFAULT_TASK_CACHE_KEYS.FilePath),
-	]);
-	const escapeRegExp = (value: string) =>
-		value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-	// Step 1 - Handle all the default properties for which special parsing methods are needed.
-	// DEFAULT_TASK_CACHE_KEYS.Time
-	const timeFromLineStart = coerceCustomTaskPropertyValue(
-		extractTimeFromLineStart(line)?.[0],
-		PropertyTypeConfig.time,
-	);
-	if (timeFromLineStart !== undefined) result[DEFAULT_TASK_CACHE_KEYS.Time];
-
-	// DEFAULT_TASK_CACHE_KEYS.Priority -- Only emoji format, for other formats the function will go below.
-	const priorityValue = coerceCustomTaskPropertyValue(
-		extractPriorityEmoji(line),
-		PropertyTypeConfig.numeric,
-	);
-	if (priorityValue !== undefined)
-		result[DEFAULT_TASK_CACHE_KEYS.Priority] = priorityValue;
-
-	// Step 2 - Extract all the other properties default or custom, which can be extracted using a standard logic.
-	for (const property of settings.taskProperties.filter(
-		(property) => !property.id,
-	)) {
-		if (!property.id || specialHandledDefaultProperties.has(property.id))
-			continue;
-		let expression: RegExp | undefined;
-		switch (settings.taskPropertyFormat) {
-			case taskPropertyFormatOptions.dataviewPlugin:
-				expression = new RegExp(
-					`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`,
-				);
-				break;
-			case taskPropertyFormatOptions.obsidianNative:
-				expression = new RegExp(
-					`@${escapeRegExp(property.id)}\\(([^)]*)\\)`,
-				);
-				break;
-			default:
-				if (property.emoji) {
-					expression = new RegExp(
-						`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`,
-					);
-				}
-		}
-		const match = expression?.exec(line);
-		if (!match) continue;
-		let raw: unknown = match[1].trim();
-		if (
-			typeof raw === "string" &&
-			raw.startsWith('"') &&
-			raw.endsWith('"')
-		) {
-			try {
-				raw = JSON.parse(raw) as string;
-			} catch {
-				raw = match[1].trim().slice(1, -1);
-			}
-		} else if (
-			typeof raw === "string" &&
-			raw.startsWith("'") &&
-			raw.endsWith("'")
-		) {
-			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
-		}
-		const value = coerceCustomTaskPropertyValue(raw, property.type);
-		if (value !== undefined) result[property.key] = value;
-	}
-	return result;
+	return extractConfiguredTaskProperties(line, settings, false);
 }
 
 /**
@@ -137,96 +63,145 @@ export function extractTaskPropertiesAllTYpe(
 	line: string,
 	settings: globalSettingsData,
 ): Record<string, CustomTaskPropertyValueType> {
+	return extractConfiguredTaskProperties(line, settings, true);
+}
+
+const SPECIAL_TASK_PROPERTY_KEYS = new Set<string>([
+	DEFAULT_TASK_CACHE_KEYS.Title,
+	DEFAULT_TASK_CACHE_KEYS.Body,
+	DEFAULT_TASK_CACHE_KEYS.Status,
+	DEFAULT_TASK_CACHE_KEYS.Tags,
+	DEFAULT_TASK_CACHE_KEYS.FilePath,
+	DEFAULT_TASK_CACHE_KEYS.Priority,
+	DEFAULT_TASK_CACHE_KEYS.Time,
+]);
+
+function extractConfiguredTaskProperties(
+	line: string,
+	settings: globalSettingsData,
+	allFormats: boolean,
+): Record<string, CustomTaskPropertyValueType> {
 	const result: Record<string, CustomTaskPropertyValueType> = {};
-	const specialHandledDefaultProperties = new Set([
-		String(DEFAULT_TASK_CACHE_KEYS.Title),
-		String(DEFAULT_TASK_CACHE_KEYS.Body),
-		String(DEFAULT_TASK_CACHE_KEYS.Status),
-		// String(DEFAULT_TASK_CACHE_KEYS.Priority),
-		String(DEFAULT_TASK_CACHE_KEYS.Tags),
-		String(DEFAULT_TASK_CACHE_KEYS.FilePath),
-	]);
-	const escapeRegExp = (value: string) =>
-		value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-	// Step 1 - Handle all the default properties for which special parsing methods are needed.
-	// DEFAULT_TASK_CACHE_KEYS.Time
-	const timeFromLineStart = coerceCustomTaskPropertyValue(
-		extractTimeFromLineStart(line)?.[0],
-		PropertyTypeConfig.time,
+	const timeProperty = settings.taskProperties.find(
+		(property) => property.key === String(DEFAULT_TASK_CACHE_KEYS.Time),
 	);
-	if (timeFromLineStart !== undefined) result[DEFAULT_TASK_CACHE_KEYS.Time];
+	if (timeProperty) {
+		const match = extractTime(
+			line,
+			settings.taskProperties,
+			allFormats ? undefined : settings.taskPropertyFormat,
+		);
+		const value = coerceCustomTaskPropertyValue(
+			match?.[1],
+			timeProperty.type,
+		);
+		if (value !== undefined) result[timeProperty.key] = value;
+	}
 
-	// DEFAULT_TASK_CACHE_KEYS.Priority -- Only emoji format, for other formats the function will go below.
-	const priorityValue = coerceCustomTaskPropertyValue(
-		extractPriorityEmoji(line),
-		PropertyTypeConfig.numeric,
+	const priorityProperty = settings.taskProperties.find(
+		(property) => property.key === String(DEFAULT_TASK_CACHE_KEYS.Priority),
 	);
-	if (priorityValue !== undefined)
-		result[DEFAULT_TASK_CACHE_KEYS.Priority] = priorityValue;
+	if (priorityProperty) {
+		const priority = extractPriority(
+			line,
+			settings.taskProperties,
+			settings.customPriorities,
+			allFormats ? undefined : settings.taskPropertyFormat,
+		);
+		if (priority.value > 0) result[priorityProperty.key] = priority.value;
+	}
 
-	// Step 2 - Extract all the other properties default or custom, which can be extracted using a standard logic.
-	for (const property of settings.taskProperties.filter(
-		(property) => !property.id,
-	)) {
-		if (!property.id || specialHandledDefaultProperties.has(property.id))
+	for (const property of settings.taskProperties) {
+		if (!property.id || SPECIAL_TASK_PROPERTY_KEYS.has(property.key)) {
 			continue;
-		let expression: RegExp | undefined;
-		switch (settings.taskPropertyFormat) {
-			case taskPropertyFormatOptions.dataviewPlugin:
-				break;
-			case taskPropertyFormatOptions.obsidianNative:
-				break;
-			default:
-				if (property.emoji) {
-				}
 		}
+		const match = matchTaskProperty(
+			line,
+			property,
+			allFormats ? undefined : settings.taskPropertyFormat,
+		);
+		if (!match?.[1]) continue;
 
-		let match: RegExpExecArray | null = null;
-
-		// Try with DATAVIEW format
-		const dataViewFormatRegExp = (expression = new RegExp(
-			`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`,
-		));
-		match = dataViewFormatRegExp?.exec(line);
-		if (!match) {
-			// Try with EMOJI format
-			const emojiFormatRegExp = new RegExp(
-				`(?:^|\\s)${escapeRegExp(property.emoji)}\\s+("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`,
-			);
-			match = emojiFormatRegExp?.exec(line);
-			if (!match) {
-				// Try with KANBAN PLUGIN format
-				const kanbanPluginFormatRegExp = new RegExp(
-					`@${escapeRegExp(property.id)}\\(([^)]*)\\)`,
-				);
-				match = kanbanPluginFormatRegExp?.exec(line);
-			}
-		}
-
-		if (!match) continue;
-		let raw: unknown = match[1].trim();
-		if (
-			typeof raw === "string" &&
-			raw.startsWith('"') &&
-			raw.endsWith('"')
-		) {
+		let raw = match[1].trim();
+		if (raw.startsWith('"') && raw.endsWith('"')) {
 			try {
 				raw = JSON.parse(raw) as string;
 			} catch {
-				raw = match[1].trim().slice(1, -1);
+				raw = raw.slice(1, -1);
 			}
-		} else if (
-			typeof raw === "string" &&
-			raw.startsWith("'") &&
-			raw.endsWith("'")
-		) {
+		} else if (raw.startsWith("'") && raw.endsWith("'")) {
 			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
 		}
 		const value = coerceCustomTaskPropertyValue(raw, property.type);
 		if (value !== undefined) result[property.key] = value;
 	}
 	return result;
+}
+
+function escapeRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getPropertyFormatOrder(
+	format?: taskPropertyFormatOptions,
+): taskPropertyFormatOptions[] {
+	if (format === taskPropertyFormatOptions.dataviewPlugin) return [format];
+	if (format === taskPropertyFormatOptions.obsidianNative) return [format];
+	if (
+		format === taskPropertyFormatOptions.default ||
+		format === taskPropertyFormatOptions.tasksPlugin
+	) {
+		return [format];
+	}
+	return [
+		taskPropertyFormatOptions.dataviewPlugin,
+		taskPropertyFormatOptions.tasksPlugin,
+		taskPropertyFormatOptions.obsidianNative,
+	];
+}
+
+function matchTaskProperty(
+	text: string,
+	property: SupportedPropertiesConfig,
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	if (!property.id) return null;
+	for (const currentFormat of getPropertyFormatOrder(format)) {
+		let expression: RegExp | undefined;
+		switch (currentFormat) {
+			case taskPropertyFormatOptions.dataviewPlugin:
+				expression = new RegExp(
+					`\\[${escapeRegExp(property.id)}::\\s*([^\\]]*)\\]`,
+				);
+				break;
+			case taskPropertyFormatOptions.obsidianNative:
+				expression = new RegExp(
+					`@${escapeRegExp(property.id)}\\(([^)]*)\\)`,
+				);
+				break;
+			default:
+				if (property.emoji) {
+					// expression = new RegExp(
+					// 	`(?:^|\\s)${escapeRegExp(property.emoji)} ?([^\\s]+)`,
+					// );
+					expression = RegExp(
+						`(?<=^|\\s)${escapeRegExp(property.emoji)} ([^\\s]+)`,
+						"u",
+					);
+				}
+		}
+		const match = expression?.exec(text);
+		if (match) return match;
+	}
+	return null;
+}
+
+function getTaskProperty(
+	taskProperties: SupportedPropertiesConfig[] | undefined,
+	key: DEFAULT_TASK_CACHE_KEYS,
+): SupportedPropertiesConfig | undefined {
+	return taskProperties?.find((property) => property.key === String(key));
 }
 
 /**
@@ -245,15 +220,20 @@ export function buildTaskFromRawContent(
 	const taskStatus = extractCheckboxSymbol(lines[0]);
 	const firstLine = lines[0] || "";
 	const title = firstLine; // extractTitle(lines[0]);
-	const time = extractTime(firstLine);
-	const createdDate = extractCreatedDate(firstLine);
-	const startDate = extractStartDate(firstLine);
-	const scheduledDate = extractScheduledDate(firstLine);
-	const due = extractDueDate(firstLine);
-	const priority = extractPriority(firstLine);
+	const taskProperties = settings?.taskProperties;
+	const time = extractTime(firstLine, taskProperties);
+	const createdDate = extractCreatedDate(firstLine, taskProperties);
+	const startDate = extractStartDate(firstLine, taskProperties);
+	const scheduledDate = extractScheduledDate(firstLine, taskProperties);
+	const due = extractDueDate(firstLine, taskProperties);
+	const priority = extractPriority(
+		firstLine,
+		taskProperties,
+		settings?.customPriorities,
+	);
 	const tags = extractTags(firstLine);
-	const completionDate = extractCompletionDate(firstLine);
-	const cancelledDate = extractCancelledDate(firstLine);
+	const completionDate = extractCompletionDate(firstLine, taskProperties);
+	const cancelledDate = extractCancelledDate(firstLine, taskProperties);
 	const body = extractBody(lines, 1, indentationString);
 
 	return {
@@ -374,21 +354,36 @@ export function extractTimeFromLineStart(
 }
 
 // Extract priority from task title using RegEx
-export function extractPriorityEmoji(text: string): string {
-	// Execute the regex to find all priority emoji matches
-	const matches =
-		text.match(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-				.priorityRegex,
-		) || [];
-
-	// Filter out any empty or incorrect values
-	const validMatches = matches
-		.map((match) => match.trim()) // Trim spaces
-		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
-
-	// Default priority if no emoji is found
-	return validMatches[0];
+export function extractPriorityEmoji(
+	text: string,
+	customPriorities?: CustomPriority[],
+): number | undefined {
+	const priorities =
+		customPriorities ??
+		Object.entries(priorityEmojis).map(([rank, emoji]) => ({
+			rank: Number(rank),
+			emoji,
+		}));
+	const matches = priorities
+		.filter((priority) => priority.emoji)
+		.map((priority) => {
+			const match = new RegExp(
+				`(?:^|\\s)${escapeRegExp(priority.emoji)}(?=\\s|$)`,
+			).exec(text);
+			return match
+				? {
+						rank: priority.rank,
+						emoji: priority.emoji,
+						index: match.index,
+					}
+				: undefined;
+		})
+		.filter(
+			(match): match is { rank: number; emoji: string; index: number } =>
+				match !== undefined,
+		)
+		.sort((left, right) => left.index - right.index);
+	return matches[0]?.rank;
 }
 
 // Extract tags from task title
@@ -398,56 +393,31 @@ export function extractTags(text: string): string[] {
 	return matches ? matches.map((tag) => tag.trim().replace("#", "")) : [];
 }
 
-// ================================================================
-//                         NOTE
-// For now keeping all the below functions active, but they need
-// to be replaced with a better solution or probably a globalized
-// function like {@link extractTaskPropertiesAllTYpe}. Becuase the
-// below functions have hard-coded property.id values and do not
-// fetch it from the user configured ids from setting.
-// ================================================================
-
-// TODO : Update all the below function to accept the property configuration 
-// to update the regular expression as per the id and emoji set by the user 
-// in settings for that specific property.
-
 /**
  * Extracts the task id from a task string by matching the id regex.
  * Supports both Task's plugin and Dataview plugin id formats.
  * @param {string} text - The task string.
  * @returns {RegExpMatchArray} A regular expression array, where [0] is the extracted string and [1] is the value of the id.
  */
-export function extractTaskId(text: string): RegExpMatchArray | null {
-	// const combinedIdRegex = new RegExp(
-	// 	`(?:${TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex.source})|(?:${DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex.source})`,
-	// 	"g" // add the 'g' flag if you want to match all occurrences
-	// );
-	// let idMatch = text.match(combinedIdRegex);
-	// console.log("ID match while scanning :", idMatch);
-	// if (idMatch && idMatch[1]) {
-	// 	return idMatch;
-	// }
-
-	let idMatch = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex,
+export function extractTaskId(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.ID,
 	);
-	if (idMatch && idMatch[1]) {
-		return idMatch;
-	}
-
-	idMatch = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex,
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.idRegex,
+		) ??
+		text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.idRegex,
+		) ??
+		text.match(/@id\(\s*(.*?)\)/)
 	);
-	if (idMatch && idMatch[1]) {
-		return idMatch;
-	}
-
-	idMatch = text.match(/@id\(\s*(.*?)\)/);
-	if (idMatch && idMatch[1]) {
-		return idMatch;
-	}
-
-	return null;
 }
 
 /**
@@ -457,177 +427,181 @@ export function extractTaskId(text: string): RegExpMatchArray | null {
  * @param {string} text - The task string.
  * @returns {string} The extracted time string, or an empty string if no match.
  */
-export function extractTime(text: string): RegExpMatchArray | null {
-	let match = text.match(/\[time::\s*(.*?)\]/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.durationRegex,
+export function extractTime(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const timeAtStartMatch = extractTimeFromLineStart(text);
+	if (timeAtStartMatch) return timeAtStartMatch;
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.Time,
 	);
-	if (match && match[1]) {
-		return match;
+	const configuredMatch = property
+		? matchTaskProperty(text, property, format)
+		: null;
+	if (configuredMatch) return configuredMatch;
+	if (
+		format === taskPropertyFormatOptions.dataviewPlugin ||
+		format === taskPropertyFormatOptions.obsidianNative
+	) {
+		return null;
 	}
-
-	match = text.match(/@time\((.*?)\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	// Check if time is at the start of the task
-	const timeAtStartMatch = text
-		.trim()
-		.match(/^- \[.\]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/);
-
-	if (timeAtStartMatch && timeAtStartMatch[1]) {
-		// If time is at the start, extract it
-		return timeAtStartMatch;
-	}
-
-	return null;
+	return (
+		text.match(/\[time::\s*(.*?)\]/) ??
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.durationRegex,
+		) ??
+		text.match(/@time\((.*?)\)/)
+	);
 }
 
 // Extract Created date from task title
-export function extractCreatedDate(text: string): RegExpMatchArray | null {
-	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-			.createdDateRegex,
+export function extractCreatedDate(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.CreatedDate,
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.createdDateRegex,
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.createdDateRegex,
+		) ??
+		text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.createdDateRegex,
+		) ??
+		text.match(/@created\(\s*([^ ]+)\)/)
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/@created\(\s*([^ ]+)\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	return null;
 }
 
 // Extract Start date from task title
-export function extractStartDate(text: string): RegExpMatchArray | null {
-	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-			.startDateRegex,
+export function extractStartDate(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.StartDate,
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.startDateRegex,
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.startDateRegex,
+		) ??
+		text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.startDateRegex,
+		) ??
+		text.match(/@start\(\s*([^ ]+)\)/)
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/@start\(\s*([^ ]+)\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	return null;
 }
 
 // Extract Scheduled date from task title
-export function extractScheduledDate(text: string): RegExpMatchArray | null {
-	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-			.scheduledDateRegex,
+export function extractScheduledDate(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-			.scheduledDateRegex,
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.scheduledDateRegex,
+		) ??
+		text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.scheduledDateRegex,
+		) ??
+		text.match(/@scheduled\(\s*([^ ]+)\)/)
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/@scheduled\(\s*([^ ]+)\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	return null;
 }
 
 // Extract Due date from task title
-export function extractDueDate(text: string): RegExpMatchArray | null {
-	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.dueDateRegex,
+export function extractDueDate(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.DueDate,
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex,
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.dueDateRegex,
+		) ??
+		text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.dueDateRegex,
+		) ??
+		text.match(/@due\(\s*([^ ]+)\)/)
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/@due\(\s*([^ ]+)\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	return null;
 }
 
 // Extract priority from task title using RegEx
-export function extractPriority(text: string): {
-	parsedString: string;
-	value: number;
-} {
-	// Execute the regex to find all priority emoji matches
-	const matches =
-		text.match(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-				.priorityRegex,
-		) || [];
+export function extractPriority(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	customPriorities?: CustomPriority[],
+	format?: taskPropertyFormatOptions,
+): { parsedString: string; value: number } {
+	const isEmojiFormat =
+		format === undefined ||
+		format === taskPropertyFormatOptions.default ||
+		format === taskPropertyFormatOptions.tasksPlugin;
+	const emojiRank = isEmojiFormat
+		? extractPriorityEmoji(text, customPriorities)
+		: undefined;
+	if (emojiRank !== undefined) {
+		const emoji =
+			customPriorities?.find((priority) => priority.rank === emojiRank)
+				?.emoji ?? priorityEmojis[emojiRank];
+		if (emoji) return { parsedString: emoji, value: emojiRank };
+	}
 
-	// Filter out any empty or incorrect values
-	const validMatches = matches
-		.map((match) => match.trim()) // Trim spaces
-		.filter((match) => match.length > 0 && match !== "0"); // Remove empty or zero values
-
-	// Find the first match in the priorityEmojis mapping
-	for (const emoji of validMatches) {
-		const priorityMatch = Object.entries(priorityEmojis).find(
-			([, value]) => value === emoji,
-		);
-		if (priorityMatch) {
-			return { parsedString: emoji, value: parseInt(priorityMatch[0]) }; // Return the first matching priority
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.Priority,
+	);
+	if (property) {
+		for (const currentFormat of getPropertyFormatOrder(format)) {
+			if (
+				currentFormat === taskPropertyFormatOptions.default ||
+				currentFormat === taskPropertyFormatOptions.tasksPlugin
+			) {
+				continue;
+			}
+			const match = matchTaskProperty(text, property, currentFormat);
+			const value = Number(match?.[1]);
+			if (match && Number.isFinite(value)) {
+				return { parsedString: match[0], value };
+			}
+		}
+	} else {
+		const match =
+			text.match(
+				DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+					.priorityRegex,
+			) ?? text.match(/@priority\(\s*(\d{1,2})\s*\)/);
+		if (match) {
+			return { parsedString: match[0], value: Number(match[1].trim()) };
 		}
 	}
-
-	let match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.priorityRegex,
-	);
-	if (match) {
-		return { parsedString: match[0], value: parseInt(match[1].trim()) };
-	}
-
-	match = text.match(/@priority\(\s*(\d{1,2})\s*\)/);
-	if (match) {
-		return { parsedString: match[0], value: parseInt(match[1].trim()) };
-	}
-
-	// Default priority if no emoji is found
 	return { parsedString: "", value: 0 };
 }
 
@@ -636,16 +610,20 @@ export function extractReminder(
 	startDate?: string,
 	scheduledDate?: string,
 	dueDate?: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
 ): {
 	parsedString: string;
 	value: string;
 } {
-	let match = text.match(/\[reminder::\s*(.*?)\]/);
-	if (match) {
-		return { parsedString: match[0], value: match[1].trim() };
-	}
-
-	match = text.match(/@reminder\(\s*(.*?)\s*\)/);
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.Reminder,
+	);
+	let match = property
+		? matchTaskProperty(text, property, format)
+		: (text.match(/\[reminder::\s*(.*?)\]/) ??
+			text.match(/@reminder\(\s*(.*?)\s*\)/));
 	if (match) {
 		return { parsedString: match[0], value: match[1].trim() };
 	}
@@ -688,73 +666,68 @@ export function extractReminder(
  * @param {string} text - The task title from which to extract the dependsOn value.
  * @returns {RegExpMatchArray | null} - The extracted dependsOn value, or null if not found.
  */
-export function extractDependsOn(text: string): RegExpMatchArray | null {
-	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-			.dependsOnRegex,
+export function extractDependsOn(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.Dependencies,
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/\[dependsOn::\s*(.*?)\]/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/@dependsOn\(\s*(.*?)\s*\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	return null;
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.dependsOnRegex,
+		) ??
+		text.match(/\[dependsOn::\s*(.*?)\]/) ??
+		text.match(/@dependsOn\(\s*(.*?)\s*\)/)
+	);
 }
 
 // Extract completion date-time value
-export function extractCompletionDate(text: string): RegExpMatchArray | null {
-	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions.doneDateRegex,
+export function extractCompletionDate(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.CompletionDate,
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex,
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.doneDateRegex,
+		) ??
+		text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr.doneDateRegex,
+		) ??
+		text.match(/@completion\(\s*([^ ]+)\)/)
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/@completion\(\s*([^ ]+)\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	return null;
 }
 
-export function extractCancelledDate(text: string): RegExpMatchArray | null {
-	let match = text.match(
-		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-			.cancelledDateRegex,
+export function extractCancelledDate(
+	text: string,
+	taskProperties?: SupportedPropertiesConfig[],
+	format?: taskPropertyFormatOptions,
+): RegExpMatchArray | null {
+	const property = getTaskProperty(
+		taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.CancelledDate,
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(
-		DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
-			.cancelledDateRegex,
+	if (property) return matchTaskProperty(text, property, format);
+	return (
+		text.match(
+			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+				.cancelledDateRegex,
+		) ??
+		text.match(
+			DATAVIEW_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpr
+				.cancelledDateRegex,
+		) ??
+		text.match(/@cancelled\(\s*([^ ]+)\)/)
 	);
-	if (match && match[1]) {
-		return match;
-	}
-
-	match = text.match(/@cancelled\(\s*([^ ]+)\)/);
-	if (match && match[1]) {
-		return match;
-	}
-
-	return null;
 }

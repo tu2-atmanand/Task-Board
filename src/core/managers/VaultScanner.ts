@@ -1,31 +1,17 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
-import { isValid, parse } from "date-fns";
+import { isValid } from "date-fns";
 import { t } from "i18next";
 import type TaskBoard from "../../../main.js";
+import { UniversalDateOptions } from "../../interfaces/Enums.js";
+import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
 import {
-	taskPropertyFormatOptions,
-	UniversalDateOptions,
-} from "../../interfaces/Enums.js";
-import {
-	globalSettingsData,
-	SupportedPropertiesConfig,
-} from "../../interfaces/GlobalSettings.js";
-import { priorityEmojis } from "../../interfaces/Mapping.js";
-import {
-	coerceCustomTaskPropertyValue,
-	CustomTaskPropertyValueType,
 	jsonCacheData,
 	taskItem,
 	taskItemWithCustomProperties,
 } from "../../interfaces/TaskItem.js";
-import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../../utils/regular_expressions/DataviewPluginRegularExpr.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
-import {
-	TASKS_PLUGIN_DEFAULT_SYMBOLS,
-	TaskRegularExpressions,
-} from "../../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import {
 	scanFilterForTags,
@@ -62,6 +48,7 @@ import {
 	extractBody,
 	extractTags,
 	extractTaskId,
+	extractTaskPropertiesAllTYpe,
 	extractTaskPropertiesOfSingleFormat,
 } from "../../utils/task_line/PropertiesParsing.js";
 
@@ -74,7 +61,7 @@ import {
 export default class VaultScanner {
 	app: App;
 	plugin: TaskBoard;
-	tasksCache: jsonCacheData;
+	public tasksCache: jsonCacheData;
 	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
 	supportedChecklistSymbols: string[];
@@ -98,6 +85,10 @@ export default class VaultScanner {
 		});
 	}
 
+	private get globalSettings(): globalSettingsData {
+		return this.plugin.settings.data;
+	}
+
 	async initializeTasksCache() {
 		try {
 			// Load existing tasks from JSON cache
@@ -117,7 +108,18 @@ export default class VaultScanner {
 		}
 	}
 
-	// Extract tasks from a specific file
+	/**
+	 * Scans a single file to extract inline-tasks or if its a task-note.
+	 * The scanned tasks will be stored inside memory of the VaultScanner.
+	 * You will need to call the function {@link saveTasksToJsonCache}
+	 * to save the updated cache to disk.
+	 *
+	 * @param file A single file of type TFile
+	 * @param scanFilters The scanning filters configured by user.
+	 * @returns A string error or success code :
+	 * - "true" - If the operation was successful.
+	 * - "false" - If the file is empty or there was error encountered during scanning the file.
+	 */
 	async extractTasksFromFile(
 		file: TFile,
 		scanFilters: VaultScannnerFilters,
@@ -203,7 +205,8 @@ export default class VaultScanner {
 				);
 				if (
 					scanFilterForTags(
-						taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Tags] || [],
+						taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Tags] ||
+							[],
 						scanFilters,
 					)
 				) {
@@ -236,21 +239,53 @@ export default class VaultScanner {
 						id: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.ID]
 							? taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.ID]
 							: generateRandomStringId(),
-						legacyId: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.ID]
+						legacyId: taskNoteProperties?.[
+							DEFAULT_TASK_CACHE_KEYS.ID
+						]
 							? taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.ID]
 							: "", // Storing the legacyId for backward compatibility
-						title: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Title] || file.basename,
+						title:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Title
+							] || file.basename,
 						body: subTasks, // Store sub-tasks in body
-						createdDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || "",
-						startDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.StartDate] || "",
-						scheduledDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "",
-						dueDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.DueDate] || "",
-						tags: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Tags] || [],
+						createdDate:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.CreatedDate
+							] || "",
+						startDate:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.StartDate
+							] || "",
+						scheduledDate:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+							] || "",
+						dueDate:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.DueDate
+							] || "",
+						tags:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Tags
+							] || [],
 						frontmatterTags: [],
-						time: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Time] || "",
-						priority: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Priority] || 0,
-						dependsOn: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] || [],
-						status: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Status] || " ", // Default to unchecked
+						time:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Time
+							] || "",
+						priority:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Priority
+							] || 0,
+						dependsOn:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Dependencies
+							] || [],
+						status:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Status
+							] || " ", // Default to unchecked
 						filePath: fileNameWithPath,
 						taskLocation: {
 							startLine: 1,
@@ -258,14 +293,24 @@ export default class VaultScanner {
 							endLine: lines.length,
 							endCharIndex: lines[lines.length - 1]?.length || 0,
 						},
-						completionDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || "",
-						cancelledDate: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || "",
-						reminder: taskNoteProperties?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "",
+						completionDate:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.CompletionDate
+							] || "",
+						cancelledDate:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.CancelledDate
+							] || "",
+						reminder:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Reminder
+							] || "",
 					};
 
 					// Add to appropriate cache based on completion status
 					const isTaskNoteCompleted = isTaskCompleted(
-						taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.Status] || " ",
+						taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.Status] ||
+							" ",
 						true,
 						this.plugin.settings,
 					);
@@ -300,11 +345,11 @@ export default class VaultScanner {
 							delete this.tasksCache.Completed[fileNameWithPath];
 					}
 
-					const pendingCacheCompare = await compareFileCache(
+					const pendingCacheCompare = await this.compareFileCache(
 						this.tasksCache.Pending[fileNameWithPath],
 						oldPendingFileCache,
 					);
-					const completedCacheCompare = await compareFileCache(
+					const completedCacheCompare = await this.compareFileCache(
 						this.tasksCache.Completed[fileNameWithPath],
 						oldCompletedFileCache,
 					);
@@ -328,16 +373,16 @@ export default class VaultScanner {
 					const line = lines[lineIndex];
 					if (isTaskLine(line)) {
 						const taskStatus = extractCheckboxSymbol(line);
+						const bodyLines = extractBody(
+							lines,
+							lineIndex + 1,
+							this.indentationString,
+						);
 
 						// Since v1.10.0 - Read this ticket : https://github.com/tu2-atmanand/Task-Board/issues/737
 						if (
 							!this.supportedChecklistSymbols.includes(taskStatus)
 						) {
-							const bodyLines = extractBody(
-								lines,
-								lineIndex + 1,
-								this.indentationString,
-							);
 							lineIndex = lineIndex + bodyLines.length;
 							continue; // We will going to skip storing this task inside the cache.
 						}
@@ -345,42 +390,30 @@ export default class VaultScanner {
 						const tags = extractTags(line);
 						if (scanFilterForTags(tags, scanFilters)) {
 							this.tasksDetectedOrUpdated = true;
-							const legacyId = extractTaskId(line);
+							const legacyId = extractTaskId(
+								line,
+								this.globalSettings.taskProperties,
+								this.globalSettings.scanForAllFormat
+									? undefined
+									: this.globalSettings.taskPropertyFormat,
+							);
 							const isThisCompletedTask = isTaskCompleted(
 								line,
 								false,
 								this.plugin.settings,
 							);
 							const title = line.trimEnd(); // we will be storing the taskLine as it is inside the title property
-							const time = extractTime(line);
-							const createdDate =
-								extractCreatedDate(line)?.[1] ?? "";
-							let startDate: RegExpMatchArray | null | string =
-								extractStartDate(line)?.[1] ?? "";
-							let scheduledDate:
-								| RegExpMatchArray
-								| null
-								| string =
-								extractScheduledDate(line)?.[1] ?? "";
-							let dueDate: RegExpMatchArray | null | string =
-								extractDueDate(line)?.[1] ?? "";
-							const priority = extractPriority(line);
-							const dependsOn = extractDependsOn(line);
-							const reminder = extractReminder(
-								line,
-								startDate ? startDate[1] : "",
-								scheduledDate ? scheduledDate[1] : "",
-								dueDate ? dueDate[1] : "",
-							);
-							const completionDate =
-								extractCompletionDate(line)?.[1] ?? "";
-							const cancelledDate =
-								extractCancelledDate(line)?.[1] ?? "";
-							const bodyLines = extractBody(
-								lines,
-								lineIndex + 1,
-								this.indentationString,
-							);
+
+							const allExtractedProperties: Partial<taskItem> =
+								this.globalSettings.scanForAllFormat
+									? extractTaskPropertiesAllTYpe(
+											line,
+											this.globalSettings,
+										)
+									: extractTaskPropertiesOfSingleFormat(
+											line,
+											this.globalSettings,
+										);
 
 							if (
 								this.plugin.settings.data.dailyNotesPluginComp
@@ -404,21 +437,34 @@ export default class VaultScanner {
 									if (
 										universalDateConfig ===
 											UniversalDateOptions.dueDate &&
-										!dueDate
+										!allExtractedProperties[
+											DEFAULT_TASK_CACHE_KEYS.DueDate
+										]
 									) {
-										dueDate = basename; // If the basename matches the dueFormat, assign it to due
+										allExtractedProperties[
+											DEFAULT_TASK_CACHE_KEYS.DueDate
+										] = basename; // If the basename matches the dueFormat, assign it to due
 									} else if (
 										universalDateConfig ===
 											UniversalDateOptions.startDate &&
-										!startDate
+										!allExtractedProperties[
+											DEFAULT_TASK_CACHE_KEYS.StartDate
+										]
 									) {
-										startDate = basename; // If the basename matches the dueFormat, assign it to startDate
+										allExtractedProperties[
+											DEFAULT_TASK_CACHE_KEYS.StartDate
+										] = basename; // If the basename matches the dueFormat, assign it to startDate
 									} else if (
 										universalDateConfig ===
 											UniversalDateOptions.scheduledDate &&
-										!scheduledDate
+										!allExtractedProperties[
+											DEFAULT_TASK_CACHE_KEYS
+												.ScheduledDate
+										]
 									) {
-										scheduledDate = basename; // If the basename matches the dueFormat, assign it to scheduledDate
+										allExtractedProperties[
+											DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+										] = basename; // If the basename matches the dueFormat, assign it to scheduledDate
 									}
 								}
 							}
@@ -434,10 +480,7 @@ export default class VaultScanner {
 							}
 
 							const task: taskItemWithCustomProperties = {
-								...extractCustomTaskProperties(
-									line,
-									this.plugin.settings.data,
-								),
+								...allExtractedProperties,
 								id: legacyId
 									? (legacyId[1] ?? "")
 									: generateRandomStringId(),
@@ -445,21 +488,8 @@ export default class VaultScanner {
 								status: taskStatus,
 								title: title,
 								body: bodyLines,
-								time: time ? time[1] : "",
-								createdDate: createdDate ? createdDate : "",
-								startDate: startDate ? startDate : "",
-								scheduledDate: scheduledDate
-									? scheduledDate
-									: "",
-								dueDate: dueDate ? dueDate : "",
 								tags: tags,
 								frontmatterTags: frontmatterTags,
-								priority: priority.value,
-								dependsOn: dependsOn
-									? dependsOn[1]
-											.split(",")
-											.map((id) => id.trim())
-									: [],
 								filePath: fileNameWithPath,
 								taskLocation: {
 									startLine: lineIndex + 1,
@@ -471,13 +501,6 @@ export default class VaultScanner {
 													.length
 											: line.length,
 								},
-								completionDate: completionDate
-									? completionDate
-									: "",
-								cancelledDate: cancelledDate
-									? cancelledDate
-									: "",
-								reminder: reminder.value,
 							};
 
 							if (isThisCompletedTask) {
@@ -496,11 +519,11 @@ export default class VaultScanner {
 					}
 				}
 
-				const pendingCacheCompare = await compareFileCache(
+				const pendingCacheCompare = await this.compareFileCache(
 					this.tasksCache.Pending[fileNameWithPath],
 					oldPendingFileCache,
 				);
-				const completedCacheCompare = await compareFileCache(
+				const completedCacheCompare = await this.compareFileCache(
 					this.tasksCache.Completed[fileNameWithPath],
 					oldCompletedFileCache,
 				);
@@ -589,7 +612,14 @@ export default class VaultScanner {
 		}
 	}
 
-	// Update tasks for an array of files (overwrite existing tasks for each file)
+	/**
+	 * Scans all the files and extracts inline-tasks or if the file itself is a task-note. This function will pass the files and inline-tasks through the scanning filters.
+	 *
+	 * @param files - List of TFile objects to be scanned.
+	 * @param showNotice Whether to show notice for successful or failed operations. If this function is invoked by user, then notice will be shown as an feedback.
+	 * @returns - True - If the operation was successful and all files were scanned without any issues.
+	 * - False - If there was some issue while scanning the files.
+	 */
 	async refreshTasksFromFiles(
 		files: (TFile | null)[],
 		showNotice: boolean,
@@ -669,6 +699,43 @@ export default class VaultScanner {
 		this.tasksCache.Completed = Completed;
 	}
 
+	/**
+	 * Compares two file cache arrays (taskItem[]) to determine if they are identical
+	 * @param newCache - The newly scanned cache array for a specific file
+	 * @param oldCache - The previous cache array for the same file
+	 * @returns Promise<boolean> - Returns true if caches are identical, false if different or if oldCache is undefined
+	 * @description This function performs a fast comparison of task arrays using JSON serialization
+	 */
+	async compareFileCache(
+		newCache: taskItem[] | undefined,
+		oldCache: taskItem[] | undefined,
+	): Promise<boolean> {
+		try {
+			// Quick null/undefined checks
+			if (!oldCache && !newCache) return true;
+			// if (!oldCache && newCache?.length === 0) return true;
+			if (oldCache && !newCache) return oldCache.length === 0;
+			if (newCache && !oldCache) return newCache.length === 0;
+
+			// Quick length check before expensive serialization
+			if (newCache && oldCache && newCache.length !== oldCache.length)
+				return false;
+			if (newCache && newCache.length === 0) return true;
+
+			// Fast JSON string comparison - significantly faster than property-by-property comparison
+			// This approach is optimal for most use cases as task arrays are typically small to medium sized
+			return JSON.stringify(newCache) === JSON.stringify(oldCache);
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				147,
+				String(error),
+				"VaultScanner.ts/compareFileCache",
+			);
+			// In case of error, assume they're different to trigger a refresh
+			return false;
+		}
+	}
+
 	// Debounced saveTasksToJsonCache function
 	// private saveTasksToJsonCacheDebounced = debounce(
 	// 	async (): Promise<boolean> => {
@@ -736,7 +803,9 @@ export default class VaultScanner {
 			for (const tasks of Object.values(pendingTasksObj)) {
 				if (id) {
 					foundTask = tasks.find(
-						(task) => task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id || task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
+						(task) =>
+							task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id ||
+							task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
 					);
 				}
 				if (foundTask) return foundTask;
@@ -747,7 +816,9 @@ export default class VaultScanner {
 			for (const tasks of Object.values(completedTasksObj)) {
 				if (id) {
 					foundTask = tasks.find(
-						(task) => task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id || task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
+						(task) =>
+							task[DEFAULT_TASK_CACHE_KEYS.LegacyID] === id ||
+							task[DEFAULT_TASK_CACHE_KEYS.ID] === id,
 					);
 				}
 				if (foundTask) return foundTask;
