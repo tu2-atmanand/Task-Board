@@ -18,7 +18,6 @@ import {
 	cursorLocationInterface,
 } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
-import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { CommunityPlugins } from "../../services/CommunityPlugins.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
@@ -37,6 +36,7 @@ import { handleEditTask } from "../../utils/UserTaskEvents.js";
 import { t } from "../../utils/lang/helper.js";
 import { openTaskSelector } from "../modals/TaskSelectorWithCreateModal.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import { buildTaskFromRawContent } from "../../utils/task_line/PropertiesParsing.js";
 
 
 const BUILT_IN_TASK_ITEM_KEYS = new Set([

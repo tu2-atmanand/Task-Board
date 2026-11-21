@@ -17,16 +17,6 @@ import {
 	taskItem,
 } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
-import {
-	extractTaskId,
-	extractCreatedDate,
-	extractStartDate,
-	extractScheduledDate,
-	extractDueDate,
-	extractCancelledDate,
-	extractPriority,
-	extractDependsOn,
-} from "../../core/managers/VaultScanner.js";
 import { DATAVIEW_PLUGIN_DEFAULT_SYMBOLS } from "../regular_expressions/DataviewPluginRegularExpr.js";
 import {
 	TaskRegularExpressions,
@@ -39,6 +29,7 @@ import {
 	formatDateTimeAsPerSettings,
 } from "../DateTimeCalculations.js";
 import { generateTaskId } from "../TaskItemUtils.js";
+import { extractTaskId, extractCreatedDate, extractStartDate, extractScheduledDate, extractDueDate, extractCancelledDate, extractPriority, extractDependsOn } from "./PropertiesParsing.js";
 
 /**
  * Removes the common leading indentation shared by all non-blank lines of a task body.

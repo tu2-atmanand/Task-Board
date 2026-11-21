@@ -7,7 +7,6 @@ import {
 	taskItemWithCustomProperties,
 } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
-import { extractTaskId } from "../core/managers/VaultScanner.js";
 import { updateTaskInFile } from "./task_line/TaskLineUtils.js";
 import {
 	isTaskNotePresentInTags,
@@ -35,6 +34,7 @@ import {
 	StatusDropdownOutput,
 } from "../interfaces/Mapping.js";
 import { t } from "i18next";
+import { extractTaskId } from "./task_line/PropertiesParsing.js";
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.

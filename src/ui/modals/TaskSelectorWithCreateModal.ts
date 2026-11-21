@@ -3,13 +3,13 @@ import { SuggestModal, App, Notice } from "obsidian";
 import TaskBoard from "../../../main.js";
 import createTaskCard from "../components/task_card/TaskCardImage.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
-import { buildTaskFromRawContent } from "../../core/managers/VaultScanner.js";
 import { createNewInlineTask } from "../../utils/task_line/TaskLineEventHandlers.js";
 import { generateRandomStringId } from "../../utils/TaskItemUtils.js";
 import {
 	DEFAULT_TASK_CACHE_KEYS,
 	getAllUIVisibleTaskProperties,
 } from "../../interfaces/Enums.js";
+import { buildTaskFromRawContent } from "../../utils/task_line/PropertiesParsing.js";
 
 export type TaskSelectorWithCreateResult =
 	| { type: "selected"; task: taskItem }
