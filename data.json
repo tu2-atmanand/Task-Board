@@ -6,31 +6,22 @@
     "scanFilters": {
       "files": {
         "polarity": 3,
-        "values": [
-          "A new file added.md",
-          "Task_board_note.md"
-        ]
+        "values": []
       },
       "folders": {
         "polarity": 3,
-        "values": [
-          "Daily_Notes/"
-        ]
+        "values": []
       },
       "frontmatter": {
         "polarity": 3,
-        "values": [
-          "[\"publish\": true]"
-        ]
+        "values": []
       },
       "tags": {
         "polarity": 3,
-        "values": [
-          "#placeholder"
-        ]
+        "values": []
       }
     },
-    "firstDayOfWeek": "1",
+    "firstDayOfWeek": "Mon",
     "showTaskWithoutMetadata": true,
     "ignoreFileNameDates": false,
     "taskPropertyFormat": "2",
@@ -41,64 +32,41 @@
     "taskCompletionInLocalTime": true,
     "taskCompletionShowUtcOffset": false,
     "autoAddUniversalDate": true,
-    "autoAddCreatedDate": true,
-    "autoAddCompletedDate": true,
+    "autoAddCreatedDate": false,
+    "autoAddCompletedDate": false,
     "autoAddCancelledDate": false,
     "showModifiedFilesNotice": true,
-    "scanMode": "realtime",
-    "columnWidth": "340px",
-    "propertiesVisibleInUI": [
-      "checkbox",
-      "id",
-      "title",
-      "status",
-      "tags",
-      "time",
-      "reminder",
-      "priority",
-      "createdDate",
-      "startDate",
-      "scheduledDate",
-      "dueDate",
-      "completionDate",
-      "cancelledDate",
-      "dependsOn",
-      "filePath"
-    ],
+    "scanMode": "automatic",
+    "columnWidth": "300px",
     "taskCardStyle": "bases",
-    "showVerticalScroll": true,
-    "dragAutoScrollEdgePercent": 15,
+    "showVerticalScroll": false,
+    "dragAutoScrollEdgePercent": 20,
     "tagColors": [
       {
         "name": "bug",
-        "color": "rgba(216, 29, 37, 0.62)",
+        "color": "rgba(255, 0, 0, 0.36)",
         "priority": 1
       },
       {
         "name": "important",
-        "color": "rgba(161, 167, 9, 0.79)",
+        "color": "rgba(246, 255, 0, 0.41)",
         "priority": 2
       },
       {
         "name": "wip",
-        "color": "rgba(8, 149, 8, 0.78)",
-        "priority": 2
-      },
-      {
-        "name": "review",
-        "color": "rgba(22, 22, 181, 0.84)",
+        "color": "rgba(0, 255, 0, 0.41)",
         "priority": 3
       },
       {
-        "name": "feat",
-        "color": "rgba(140, 82, 239, 0.6)",
-        "priority": 5
+        "name": "review",
+        "color": "rgba(0, 0, 255, 0.34)",
+        "priority": 4
       }
     ],
     "editButtonAction": "popUp",
     "cardDoubleClickAction": "none",
     "universalDate": "due",
-    "tagColorsType": "tagBg",
+    "tagColorsType": "text",
     "customStatuses": [
       {
         "symbol": " ",
@@ -106,9 +74,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": "circle",
-        "color": "rgb(161, 98, 7)",
-        "desc": ""
+        "lucideIcon": ""
       },
       {
         "symbol": "<",
@@ -116,9 +82,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": "alarm-check",
-        "color": "",
-        "desc": ""
+        "lucideIcon": ""
       },
       {
         "symbol": "?",
@@ -126,9 +90,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": false,
         "type": "TODO",
-        "lucideIcon": "scan-search",
-        "color": "rgb(196, 136, 249)",
-        "desc": ""
+        "lucideIcon": ""
       },
       {
         "symbol": "/",
@@ -136,7 +98,7 @@
         "nextStatusSymbol": "x",
         "availableAsCommand": true,
         "type": "IN_PROGRESS",
-        "lucideIcon": "hammer"
+        "lucideIcon": ""
       },
       {
         "symbol": "x",
@@ -144,7 +106,7 @@
         "nextStatusSymbol": " ",
         "availableAsCommand": true,
         "type": "DONE",
-        "lucideIcon": "circle-check-big"
+        "lucideIcon": ""
       },
       {
         "symbol": "X",
@@ -161,24 +123,48 @@
         "availableAsCommand": true,
         "type": "CANCELLED",
         "lucideIcon": ""
-      },
-      {
-        "symbol": "u",
-        "name": "Just temporary",
-        "nextStatusSymbol": "y",
-        "availableAsCommand": false,
-        "type": "IN_PROGRESS",
-        "lucideIcon": "airplay"
       }
     ],
     "customPriorities": [
       {
-        "name": "Highest",
         "rank": 1,
+        "name": "Highest",
         "emoji": "🔺",
-        "lucideIcon": "chevrons-up",
-        "color": "rgb(220, 38, 38)",
-        "desc": "This is the hight priority and tasks with this priority should be complete before all other tasks."
+        "lucideIcon": "",
+        "color": "rgb(220,38,38)",
+        "desc": "This is the highest priority. Tasks with this priority should be complete before all other tasks."
+      },
+      {
+        "rank": 2,
+        "name": "High",
+        "emoji": "⏫",
+        "lucideIcon": "",
+        "color": "rgb(213, 31, 174)",
+        "desc": "A high priority, but not the highest."
+      },
+      {
+        "rank": 3,
+        "name": "Medium",
+        "emoji": "🔼",
+        "lucideIcon": "",
+        "color": "rgb(220, 217, 43)",
+        "desc": "A medium priority for tasks which needs an attention."
+      },
+      {
+        "rank": 4,
+        "name": "Low",
+        "emoji": "🔽",
+        "lucideIcon": "",
+        "color": "rgb(12, 161, 187)",
+        "desc": "Tasks with this priority can be completed the last."
+      },
+      {
+        "rank": 5,
+        "name": "Lowest",
+        "emoji": "⏬",
+        "lucideIcon": "",
+        "color": "rgb(22, 88, 187)",
+        "desc": "Tasks with this priority are least important tasks."
       }
     ],
     "compatiblePlugins": {
@@ -205,202 +191,47 @@
         "targetColumn": "Completed"
       }
     ],
-    "autoAddUniqueID": true,
-    "uniqueIdCounter": 2307,
+    "autoAddUniqueID": false,
+    "uniqueIdCounter": 2314,
     "experimentalFeatures": false,
     "safeGuardFeature": true,
     "lastViewHistory": {
-      "viewedType": "kanban",
-      "boardIndex": 1,
-      "settingTab": 2,
-      "taskId": "",
-      "boardFilePath": "Meta/Task_Board/Boards/Time Based Workflow.taskboard"
+      "boardFilePath": "Meta/Task_Board/Boards/My Project Board.taskboard",
+      "settingTab": 0
     },
-    "boundTaskCompletionToChildTasks": true,
+    "boundTaskCompletionToChildTasks": false,
     "mapView": {
       "background": "none",
       "mapOrientation": "hor",
-      "optimizedRender": false,
       "arrowDirection": "c2p",
-      "animatedEdges": false,
-      "scrollAction": "pan",
+      "animatedEdges": true,
+      "scrollAction": "zoom",
       "showMinimap": true,
       "renderVisibleNodes": false,
       "edgeType": "default"
     },
     "taskBoardFilesRegistry": {
+      "3103563481": {
+        "boardId": "3103563481",
+        "filePath": "Meta/Task_Board/Boards/My Project Board.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
+      "board_241148547": {
+        "boardId": "board_241148547",
+        "filePath": "Meta/Task_Board/Boards/My Project Board.taskboard",
+        "boardName": "My Project",
+        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
+      },
       "board_329394": {
         "boardId": "board_329394",
         "filePath": "My Project.taskboard",
         "boardName": "My Project",
         "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_2553700948": {
-        "boardId": "board_2553700948",
-        "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1774097758616.taskboard",
-        "boardName": "My Project",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_762849833": {
-        "boardId": "board_762849833",
-        "filePath": "Meta/Task_Board/Backup Boards/TaskBoard-Template-1778856605183.taskboard",
-        "boardName": "My Project",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_1039059216": {
-        "boardId": "board_1039059216",
-        "filePath": "TaskBoard/A Test Board (copy).taskboard",
-        "boardName": "A Test Board (copy)",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
-      },
-      "board_3907751366": {
-        "boardId": "board_3907751366",
-        "filePath": "TaskBoard/A Test Board.taskboard",
-        "boardName": "A Test Board",
-        "boardDescription": "This is my personal project. This is a default board created by Task Board for you to kick start your journey with Task Board. Feel free to edit or create new boards."
       }
     },
     "enableDragnDropTouch": false,
-    "filtersWarehouse": [
-      {
-        "id": "filter_1780231276075_3763997378",
-        "status": true,
-        "name": "All tasks which are scheduled for June 2026 OR with tag \"#exam\"",
-        "rootCondition": "any",
-        "filterGroups": [
-          {
-            "id": "filter_1780231376283_4023786723",
-            "groupCondition": "all",
-            "filters": [
-              {
-                "id": "filter_1780231376285_2284389149",
-                "property": "scheduledDate",
-                "condition": "onOrAfter",
-                "value": "2026-06-01"
-              },
-              {
-                "id": "filter_1780231395923_372442592",
-                "property": "scheduledDate",
-                "condition": "onOrBefore",
-                "value": "2026-06-30"
-              }
-            ]
-          },
-          {
-            "id": "filter_1780231412787_3757740130",
-            "groupCondition": "all",
-            "filters": [
-              {
-                "id": "filter_1780231412787_3192844088",
-                "property": "tags",
-                "condition": "contains",
-                "value": "#exam"
-              }
-            ]
-          }
-        ],
-        "description": "All these tasks will be related to the upcoming semester exam."
-      },
-      {
-        "id": "filter_1780231530571_991496113",
-        "status": true,
-        "name": "All bugs",
-        "rootCondition": "all",
-        "filterGroups": [
-          {
-            "id": "filter_1780231555819_1683267699",
-            "groupCondition": "all",
-            "filters": [
-              {
-                "id": "filter_1780231555820_3912249243",
-                "property": "tags",
-                "condition": "contains",
-                "value": "bug"
-              },
-              {
-                "id": "filter_1780231562595_2824401141",
-                "property": "tags",
-                "condition": "contains",
-                "value": "vulnerability"
-              }
-            ]
-          }
-        ],
-        "description": "Task with the tag \"#bug\" or \"#vulnerability\""
-      },
-      {
-        "id": "filter_1780231583083_3304968090",
-        "status": true,
-        "name": "All feature requests for next three months",
-        "rootCondition": "all",
-        "filterGroups": [
-          {
-            "id": "filter_1780231607403_1025520177",
-            "groupCondition": "any",
-            "filters": [
-              {
-                "id": "filter_1780231607404_1444374694",
-                "property": "tags",
-                "condition": "contains",
-                "value": "feature"
-              },
-              {
-                "id": "filter_1780231616731_1371082266",
-                "property": "tags",
-                "condition": "contains",
-                "value": "feat"
-              }
-            ]
-          },
-          {
-            "id": "filter_1780231629523_1177040614",
-            "groupCondition": "all",
-            "filters": [
-              {
-                "id": "filter_1780231629524_3575847735",
-                "property": "scheduledDate",
-                "condition": "onOrAfter",
-                "value": "2026-05-31"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "filter_1780231678539_1044622487",
-        "status": true,
-        "name": "All tasks with the tag \"#learn\" OR \"#topic\"",
-        "rootCondition": "all",
-        "filterGroups": [
-          {
-            "id": "filter_1780231731139_691616165",
-            "groupCondition": "any",
-            "filters": [
-              {
-                "id": "filter_1780231731140_3855211575",
-                "property": "tags",
-                "condition": "contains",
-                "value": "topic"
-              },
-              {
-                "id": "filter_1780231740531_3523041867",
-                "property": "tags",
-                "condition": "contains",
-                "value": "learn"
-              },
-              {
-                "id": "filter_1794675492181_2703558727",
-                "property": "custom-property-2",
-                "condition": "is",
-                "value": "",
-                "propertyType": "time"
-              }
-            ]
-          }
-        ],
-        "description": "These are the tasks I created when I found a new topic which I want to learn."
-      }
-    ],
+    "filtersWarehouse": [],
     "ribbonIconAction": "menu",
     "taskProperties": [
       {
@@ -408,8 +239,8 @@
         "key": "id",
         "id": "id",
         "name": "ID",
-        "desc": "Property to uniquely identify a task across the vault.",
-        "type": "text",
+        "desc": "An incremental numeric id to uniquely identify a task across the vault.",
+        "type": "numeric",
         "emoji": "🆔",
         "icon": "fingerprint-pattern",
         "hidePropertyInNotesForInlineTasks": false,
@@ -421,117 +252,118 @@
         "key": "title",
         "id": "title",
         "name": "Title",
-        "desc": "",
+        "desc": "A short summary about the task.",
         "type": "text",
         "emoji": "",
         "icon": "",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 6
+        "rank": 2
       },
       {
         "default": true,
         "key": "status",
         "id": "status",
         "name": "Status",
-        "desc": "",
+        "desc": "The current state of the task, whether is pending, in-progress or completed.",
         "type": "text",
         "emoji": "",
         "icon": "info",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 8
+        "rank": 3
       },
       {
         "default": true,
         "key": "priority",
         "id": "priority",
         "name": "Priority",
-        "desc": "",
-        "type": "numeric",
-        "emoji": "",
-        "icon": "signal-high",
+        "desc": "To rank different tasks in your queue based on their urgency.",
+        "type": "text",
+        "emoji": "🔼",
+        "icon": "flag-triangle-right",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 10
+        "rank": 4
       },
       {
         "default": true,
         "key": "tags",
         "id": "tags",
         "name": "Tags",
-        "desc": "",
+        "desc": "To add context to the tasks, add multiple tags as list.",
         "type": "list",
         "emoji": "",
         "icon": "tag",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 11
+        "rank": 5
       },
       {
         "default": true,
         "key": "time",
         "id": "time",
         "name": "Time",
-        "desc": "",
+        "desc": "Add a start and end time seperated by hyphen(-).",
         "type": "time",
         "emoji": "",
         "icon": "clock",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 12
+        "rank": 6
       },
       {
         "default": true,
         "key": "reminder",
         "id": "reminder",
         "name": "Reminder",
-        "desc": "",
-        "type": "text",
+        "desc": "A date-time value when a reminder notification should be sent.",
+        "type": "date-time",
         "emoji": "",
         "icon": "bell-ring",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 13
+        "rank": 7
       },
       {
         "default": true,
         "key": "createdDate",
-        "id": "created-date",
+        "id": "createdDate",
         "name": "Created date",
-        "desc": "",
+        "desc": "A date-time value when the task was created.",
         "type": "date",
-        "emoji": "",
+        "emoji": "➕",
         "icon": "calendar-plus",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 14
+        "rank": 8
       },
       {
         "default": true,
         "key": "startDate",
-        "id": "start-date",
+        "id": "startDate",
         "name": "Start date",
-        "desc": "",
+        "desc": "A date-time value from when user should or can start working on the task.",
         "type": "date",
-        "emoji": "",
-        "icon": "calendar-plus-2",
+        "emoji": "🛫",
+        "icon": "calendar-1",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 15
+        "rank": 9
       },
       {
         "default": true,
         "key": "scheduledDate",
-        "id": "scheduled-date",
+        "id": "scheduled",
         "name": "Scheduled date",
-        "desc": "",
+        "desc": "A date-time value when this task should be actually worked on.",
         "type": "date",
-        "emoji": "",
-        "icon": "calendar-1",
+        "emoji": "⏳",
+        "icon": "calendar-range",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 16
+        "rank": 10,
+        "color": "rgb(8, 145, 178)"
       },
       {
         "default": true,
@@ -539,51 +371,51 @@
         "id": "dueDate",
         "name": "Due date",
         "desc": "A date-time value which is the last date/time for this task to be completed.",
-        "type": "date-time",
-        "emoji": "",
+        "type": "date",
+        "emoji": "📅",
         "icon": "calendar-clock",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 2
+        "rank": 11
       },
       {
         "default": true,
         "key": "completionDate",
-        "id": "completed-date",
+        "id": "completionDate",
         "name": "Completed date",
-        "desc": "",
+        "desc": "A date-time value when the task will be marked as finished/completed.",
         "type": "date",
-        "emoji": "",
-        "icon": "calendar-x",
+        "emoji": "✅",
+        "icon": "calendar-check",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 19
+        "rank": 12
       },
       {
         "default": true,
         "key": "cancelledDate",
-        "id": "cancelled-date",
-        "name": "Completed date",
-        "desc": "",
+        "id": "cancelledDate",
+        "name": "Cancelled date",
+        "desc": "A date-time value when the task will be marked as cancelled.",
         "type": "date",
-        "emoji": "",
-        "icon": "calendar-check",
+        "emoji": "❌",
+        "icon": "calendar-x",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 18
+        "rank": 13
       },
       {
         "default": true,
         "key": "dependsOn",
-        "id": "depends-on",
+        "id": "dependsOn",
         "name": "Depends on",
-        "desc": "",
+        "desc": "A list of all the task ids on which the current task is dependent on. The current task is blocked-by these child-tasks.",
         "type": "list",
-        "emoji": "",
+        "emoji": "⛔",
         "icon": "list-tree",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 17
+        "rank": 14
       },
       {
         "default": true,
@@ -596,62 +428,26 @@
         "icon": "file-input",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 4
+        "rank": 15
       },
       {
+        "default": false,
         "key": "assignee",
         "id": "assignee",
         "name": "Assignee",
-        "desc": "To whome the task is assigned to.",
+        "desc": "Who will work on this task.",
         "type": "text",
         "emoji": "🧑",
         "icon": "user-round",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 5,
-        "default": false
-      },
-      {
-        "key": "custom-property-2",
-        "id": "custom-property-2",
-        "name": "Custom property 2",
-        "desc": "This is a test",
-        "type": "time",
-        "emoji": "⏰",
-        "icon": "discord",
-        "hidePropertyInNotesForInlineTasks": true,
-        "defaultValue": "",
-        "rank": 7,
-        "default": false
-      },
-      {
-        "key": "reminders",
-        "id": "reminders",
-        "name": "Reminder",
-        "desc": "This property will add date-time value for Reminder plugin integration.",
-        "type": "date-time",
-        "emoji": "⏰",
-        "icon": "bell-ring",
-        "hidePropertyInNotesForInlineTasks": false,
-        "defaultValue": "",
-        "rank": 9,
-        "default": false
+        "rank": 16,
+        "color": "rgb(202, 138, 4)"
       }
     ],
-    "visiblePropertiesList": [
-      "checkbox",
-      "id",
-      "title",
-      "status",
-      "priority",
-      "filePath",
-      "tags",
-      "dependsOn",
-      "subTasks",
-      "description"
-    ],
-    "doubleClickCardToEdit": "noteInTab",
-    "hiddenTaskProperties": [],
+    "dateHumanReadable": false,
+    "scanForAllFormat": false,
+    "usePipeToSeparateProperties": false,
     "searchQuery": ""
   }
 }

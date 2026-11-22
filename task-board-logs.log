@@ -18,215 +18,7 @@
 
 ## Recent Bug Reports
 
-Timestamp : undefined
-ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 131
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 185
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : 2026-11-12T20:38:04
-ID : 103
-Message : 
-Context : MultiSuggest.ts/getQuickAddPluginChoices
-Version : 2.0.0-beta-6
-
-#### Bug Content
-```log
-Error: QuickAdd plugin object is undefined.
-```
-
--------------
-
-Timestamp : 2026-11-12T22:38:26
-ID : 103
-Message : 
-Context : MultiSuggest.ts/getQuickAddPluginChoices
-Version : 2.0.0-beta-6
-
-#### Bug Content
-```log
-Error: QuickAdd plugin object is undefined.
-```
-
--------------
-
-Timestamp : 2026-11-12T23:44:36
-ID : 103
-Message : 
-Context : MultiSuggest.ts/getQuickAddPluginChoices
-Version : 2.0.0-beta-6
-
-#### Bug Content
-```log
-Error: QuickAdd plugin object is undefined.
-```
-
--------------
-
-Timestamp : 2026-11-12T23:46:43
-ID : 17
-Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
-Context : MapView.tsx/initialNodes
-Version : 2.0.0-beta-6
-
-#### Bug Content
-```log
-ERROR: Same id is present on two tasks
-```
-
--------------
-
-Timestamp : 2026-11-13T22:41:46
-ID : 103
-Message : 
-Context : MultiSuggest.ts/getQuickAddPluginChoices
-Version : 2.0.0-beta-6
-
-#### Bug Content
-```log
-Error: QuickAdd plugin object is undefined.
-```
-
--------------
-
-Timestamp : 2026-11-14T22:35:14
+Timestamp : 2026-11-21T16:04:29
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -239,7 +31,7 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-11-14T23:04:09
+Timestamp : 2026-11-21T16:31:36
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -252,7 +44,7 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-11-14T23:32:39
+Timestamp : 2026-11-21T16:41:48
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -265,7 +57,7 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-11-15T21:54:29
+Timestamp : 2026-11-21T17:22:46
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
@@ -274,4 +66,212 @@ Version : 2.0.0-beta-6
 #### Bug Content
 ```log
 No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-21T17:34:16
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-21T17:38:33
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-21T18:01:05
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-21T20:09:29
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-22T00:53:41
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-22T00:54:25
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-22T17:43:26
+ID : 103
+Message : 
+Context : MultiSuggest.ts/getQuickAddPluginChoices
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+Error: QuickAdd plugin object is undefined.
+```
+
+-------------
+
+Timestamp : 2026-11-22T18:16:27
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-23T00:42:03
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-23T01:18:55
+ID : 126
+Message : 
+Context : TaskCardParent.tsx/handleDragStart
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+HierarchyRequestError: Failed to execute 'appendChild' on 'Node': Only one element on document allowed.
+```
+
+-------------
+
+Timestamp : 2026-11-23T01:22:31
+ID : 126
+Message : 
+Context : TaskCardParent.tsx/handleDragStart
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+HierarchyRequestError: Failed to execute 'appendChild' on 'Node': Only one element on document allowed.
+```
+
+-------------
+
+Timestamp : 2026-11-23T01:23:21
+ID : 126
+Message : 
+Context : TaskCardParent.tsx/handleDragStart
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+HierarchyRequestError: Failed to execute 'appendChild' on 'Node': Only one element on document allowed.
+```
+
+-------------
+
+Timestamp : 2026-11-23T01:25:38
+ID : 126
+Message : 
+Context : TaskCardParent.tsx/handleDragStart
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+HierarchyRequestError: Failed to execute 'appendChild' on 'Node': Only one element on document allowed.
+```
+
+-------------
+
+Timestamp : 2026-11-23T01:27:13
+ID : 126
+Message : 
+Context : TaskCardParent.tsx/handleDragStart
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+HierarchyRequestError: Failed to execute 'appendChild' on 'Node': Only one element on document allowed.
+```
+
+-------------
+
+Timestamp : 2026-11-23T01:28:32
+ID : 126
+Message : 
+Context : TaskCardParent.tsx/handleDragStart
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+HierarchyRequestError: Failed to execute 'appendChild' on 'Node': Only one element on document allowed.
+```
+
+-------------
+
+Timestamp : 2026-11-23T01:31:13
+ID : 126
+Message : 
+Context : TaskCardParent.tsx/handleDragStart
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+HierarchyRequestError: Failed to execute 'appendChild' on 'Node': Only one element on document allowed.
 ```
