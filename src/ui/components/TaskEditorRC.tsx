@@ -43,6 +43,7 @@ import { t } from "../../utils/lang/helper.js";
 import { openTaskSelector } from "../modals/TaskSelectorWithCreateModal.js";
 import { DatePickerModal } from "../modals/date_picker/DatePickerModal.js";
 import { DateTimePickerModal } from "../modals/date_time_picker/DateTimePickerModal.js";
+import { TimePickerModal, formatTimeForDisplay, is12HourTimeFormat } from "../modals/time_picker/index.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 import { SupportedPropertiesConfig } from "../../interfaces/GlobalSettings.js";
 import { buildTaskFromRawContent } from "../../utils/task_line/PropertiesParsing.js";
@@ -152,6 +153,25 @@ export const TaskEditorRC: React.FC<{
 		);
 		modal.onDateTimeSelected = (dateTime) =>
 			onSelect(toPickerDateTime(dateTime));
+		modal.open();
+	};
+
+	const use24HourTime = !is12HourTimeFormat(globalSettings.dateTimeFormat);
+	const formatTimeValue = (value: string): string =>
+		formatTimeForDisplay(value || null, use24HourTime);
+
+	const openTimePicker = (
+		propertyName: string,
+		currentValue: string,
+		onSelect: (value: string) => void,
+	) => {
+		const modal = new TimePickerModal(
+			plugin,
+			propertyName,
+			currentValue,
+			use24HourTime,
+		);
+		modal.onTimeSelected = onSelect;
 		modal.open();
 	};
 
@@ -1354,9 +1374,10 @@ export const TaskEditorRC: React.FC<{
 		label: string,
 		displayValue: string,
 		onOpenPicker: () => void,
+		onClear?: () => void,
 	) => (
 		<div className="EditTaskModalHomeField" key={key}>
-			<div className="EditTaskModalHomeFieldTitleContainer">
+			<div className="TaskEditorModalHomeFieldLabelContainer">
 				<label className="EditTaskModalHomeFieldTitle">{label}</label>
 				{!displayValue && (
 					<Plus
@@ -1370,6 +1391,21 @@ export const TaskEditorRC: React.FC<{
 							if (event.key === "Enter" || event.key === " ") {
 								event.preventDefault();
 								onOpenPicker();
+							}
+						}}
+					/>
+				)}
+				{displayValue && onClear && (
+					<FaTrash
+						size={12}
+						role="button"
+						tabIndex={0}
+						aria-label={`${label} - clear`}
+						onClick={onClear}
+						onKeyDown={(event) => {
+							if (event.key === "Enter" || event.key === " ") {
+								event.preventDefault();
+								onClear();
 							}
 						}}
 					/>
@@ -1592,17 +1628,27 @@ export const TaskEditorRC: React.FC<{
 						</div>
 
 						{/* Task Time Input */}
-						<div className="EditTaskModalHomeField">
-							<div className="EditTaskModalHomeFieldTitleContainer">
-								<label className="EditTaskModalHomeFieldTitle">{t("start-time")}</label>
-								<FaTrash onClick={() => handleCompleteTimeChange("", "")} size={12} />
-							</div>
-							<input className="EditTaskModalHomeTimeInput" type="time" value={startTime} onChange={(e) => handleStartTimeChange(e.target.value)} />
-						</div>
-						<div className="EditTaskModalHomeField">
-							<label className="EditTaskModalHomeFieldTitle">{t("end-time")}</label>
-							<input className="EditTaskModalHomeTimeInput" type="time" value={endTime} onChange={(e) => handleEndTimeChange(e.target.value)} />
-						</div>
+						{renderPickerField(
+							"start-time",
+							t("start-time"),
+							formatTimeValue(startTime),
+							() => openTimePicker(
+								t("start-time"),
+								startTime,
+								handleStartTimeChange,
+							),
+							() => handleCompleteTimeChange("", ""),
+						)}
+						{renderPickerField(
+							"end-time",
+							t("end-time"),
+							formatTimeValue(endTime),
+							() => openTimePicker(
+								t("end-time"),
+								endTime,
+								handleEndTimeChange,
+							),
+						)}
 
 						{/* Remaining default properties and custom properties */}
 						{globalSettings.taskProperties.filter(isGenericTaskProperty).map((property) => {

@@ -2159,10 +2159,10 @@ body.taskboard-touch-dragging {
 	/* text-align: center; */
 	/* font-weight: 400; */
 	margin-bottom: 5px;
-	color: var(--text-muted);
+	color: var(--text-faint);
 }
 
-.EditTaskModalHomeFieldTitleContainer {
+.TaskEditorModalHomeFieldLabelContainer {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
@@ -2487,7 +2487,7 @@ body.taskboard-touch-dragging {
 	display: flex;
 	flex-direction: column;
 	border: var(--border-width) solid;
-	border-color: var(--background-modifier-border-focus);
+	border-color: transparent;
 	border-radius: 5px;
 	background: var(--background-primary-alt);
 	padding: 0.5em;
@@ -2533,7 +2533,7 @@ body.taskboard-touch-dragging {
 
 .EditTaskModalHomeFieldAddIcon {
 	cursor: pointer;
-	color: var(--text-muted);
+	color: var(--text-faint);
 }
 
 .EditTaskModalHomeFieldAddIcon:hover {
@@ -2650,10 +2650,17 @@ body.taskboard-touch-dragging {
 	.EditTaskModalHomeRightSec.visible {
 		transform: translateX(0);
 
-		border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
-		background: var(--color-base-30);
 		backdrop-filter: blur(10px);
 		box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
+
+		border: var(--border-width) solid;
+		border-color: transparent;
+		border-radius: 5px;
+		background: var(--background-primary-alt);
+		padding: 0.5em;
+		box-sizing: border-box;
+		transition: transform 0.3s ease-in-out;
+		overflow: auto;
 	}
 
 	/* Button to toggle right section */
@@ -2665,7 +2672,6 @@ body.taskboard-touch-dragging {
 	}
 
 	.EditTaskModalHomeSaveBtn {
-		background-color: green !important;
 		color: white !important;
 		font-weight: 600;
 		/* width: 100%; */
@@ -7879,13 +7885,14 @@ Date picker modal styles
 
 .date-time-picker-root-container .date-time-picker-left-panel {
 	flex: 1;
-		min-width: 120px;
-		width: 120px;
-		max-width: 140px;
-		border-right: 1px solid var(--background-modifier-border);
-		display: flex;
-		flex-direction: column;
+	min-width: 120px;
+	width: 120px;
+	max-width: 140px;
+	border-right: 1px solid var(--background-modifier-border);
+	display: flex;
+	flex-direction: column;
 	padding-inline: var(--size-4-2);
+	justify-content: space-between;
 }
 
 .date-time-picker-root-container .date-time-picker-right-panel {
@@ -7946,7 +7953,7 @@ Date picker modal styles
 	font-size: var(--font-ui-small);
 	font-weight: var(--font-medium);
 	border-top: 1px solid var(--background-modifier-border);
-		padding-block: var(--size-4-2);
+	padding-block: var(--size-4-2);
 }
 
 .date-time-picker-root-container .quick-time-option.clear-time:hover {
@@ -7984,8 +7991,8 @@ Date picker modal styles
 .date-time-picker-root-container .cancel-btn {
 	background: var(--background-secondary);
 	color: var(--text-normal);
-		font-size: var(--font-ui-small);
-			font-weight: var(--font-medium);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
 }
 
 .date-time-picker-root-container .cancel-btn:hover {
@@ -7995,12 +8002,331 @@ Date picker modal styles
 .date-time-picker-root-container .apply-btn {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
-		font-size: var(--font-ui-small);
-			font-weight: var(--font-medium);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
 }
 
 .date-time-picker-root-container .apply-btn:hover {
 	background: var(--interactive-accent-hover);
+}
+
+
+/* -----------------------------------------------------
+	Time Picker Component Styles
+-------------------------------------------------------*/
+
+.time-picker-root-container {
+	max-width: 100%;
+	font-size: var(--font-ui-small);
+}
+
+.time-picker-root-container .time-picker-dialog {
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+	overflow: hidden;
+}
+
+.time-picker-root-container .time-picker-preview {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--size-4-2);
+	padding: var(--size-4-2);
+	background: var(--background-secondary);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.time-picker-root-container .time-picker-preview-main {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.time-picker-root-container .time-picker-preview-time {
+	font-size: 1.65rem;
+	line-height: 1.1;
+	font-weight: var(--font-bold);
+	font-variant-numeric: tabular-nums;
+	color: var(--text-normal);
+}
+
+.time-picker-root-container .time-picker-preview-caption {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.time-picker-root-container .time-picker-preview-period {
+	min-width: 42px;
+	padding: var(--size-2-1) var(--size-2-2);
+	border-radius: var(--radius-s);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-bold);
+	text-align: center;
+}
+
+.time-picker-root-container .time-picker-body {
+	display: grid;
+	grid-template-columns: 130px 1fr;
+	gap: var(--size-4-2);
+	padding: var(--size-4-2);
+}
+
+.time-picker-root-container .time-picker-section-title {
+	margin-bottom: var(--size-2-2);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-bold);
+	color: var(--text-normal);
+}
+
+.time-picker-root-container .time-picker-section-spaced {
+	margin-top: var(--size-4-2);
+}
+
+.time-picker-root-container .time-picker-quick-list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-1);
+}
+
+.quick-time-options .time-picker-quick-option,
+.time-picker-root-container .time-picker-quick-option {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--size-2-2);
+	padding: var(--size-2-1) var(--size-2-2);
+	border: 1px solid transparent;
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	cursor: pointer;
+}
+
+.quick-time-options .time-picker-quick-option:hover,
+.time-picker-root-container .time-picker-quick-option:hover {
+	background: var(--background-modifier-hover);
+}
+
+.quick-time-options .time-picker-quick-option.selected,
+.time-picker-root-container .time-picker-quick-option.selected {
+	border-color: var(--interactive-accent);
+	background: var(--background-modifier-hover);
+}
+
+.quick-time-options .time-picker-quick-label,
+.time-picker-root-container .time-picker-quick-label {
+	font-size: var(--font-ui-small);
+	color: var(--text-normal);
+}
+
+.quick-time-options .time-picker-quick-value,
+.time-picker-root-container .time-picker-quick-value {
+	font-size: var(--font-ui-smaller);
+	font-variant-numeric: tabular-nums;
+	color: var(--text-muted);
+}
+
+.time-picker-root-container .time-picker-add-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--size-2-1);
+}
+
+.time-picker-root-container .time-picker-add-btn,
+.time-picker-root-container .time-picker-utility-btn,
+.time-picker-root-container .time-picker-period-btn,
+.time-picker-root-container .time-picker-cell,
+.time-picker-root-container .time-picker-btn {
+	cursor: pointer;
+	font-family: inherit;
+}
+
+.time-picker-root-container .time-picker-add-btn {
+	padding: var(--size-2-1);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-medium);
+}
+
+.time-picker-root-container .time-picker-add-btn:hover {
+	border-color: var(--interactive-accent);
+	background: var(--background-modifier-hover);
+}
+
+.time-picker-root-container .time-picker-utility-row {
+	display: flex;
+	gap: var(--size-2-1);
+	margin-top: var(--size-2-2);
+}
+
+.time-picker-root-container .time-picker-utility-btn {
+	flex: 1;
+	padding: var(--size-2-1);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-smaller);
+}
+
+.time-picker-root-container .time-picker-utility-btn:hover {
+	background: var(--background-modifier-hover);
+}
+
+.time-picker-root-container .time-picker-utility-btn.clear {
+	color: var(--text-error);
+	background: var(--background-modifier-error-bg);
+}
+
+.time-picker-root-container .time-picker-period-toggle {
+	display: flex;
+	gap: var(--size-2-1);
+	margin-bottom: var(--size-2-2);
+}
+
+.time-picker-root-container .time-picker-period-btn {
+	flex: 1;
+	padding: var(--size-2-1);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-bold);
+}
+
+.time-picker-root-container .time-picker-period-btn.active {
+	border-color: var(--interactive-accent);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.time-picker-root-container .time-picker-grid-section+.time-picker-grid-section {
+	margin-top: var(--size-2-3);
+}
+
+.time-picker-root-container .time-picker-grid-label {
+	margin-bottom: var(--size-2-1);
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.time-picker-root-container .time-picker-grid {
+	display: grid;
+	gap: 3px;
+}
+
+.time-picker-root-container .time-picker-hour-grid {
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.time-picker-root-container .time-picker-minute-grid {
+	grid-template-columns: repeat(10, minmax(0, 1fr));
+	max-height: 116px;
+	padding-right: 2px;
+	overflow-y: auto;
+}
+
+.time-picker-root-container .time-picker-cell {
+	padding: var(--size-2-1) 0;
+	border: 1px solid transparent;
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	color: var(--text-normal);
+	font-size: var(--font-ui-smaller);
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+}
+
+.time-picker-root-container .time-picker-cell:hover {
+	background: var(--background-modifier-hover);
+}
+
+.time-picker-root-container .time-picker-cell.selected {
+	border-color: var(--interactive-accent);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.time-picker-root-container .time-picker-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--size-2-2);
+	padding: var(--size-2-3) var(--size-4-2);
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.time-picker-root-container .time-picker-btn {
+	min-width: 72px;
+	padding: var(--size-2-1) var(--size-2-3);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
+}
+
+.time-picker-root-container .time-picker-btn.cancel {
+	background: var(--background-secondary);
+	color: var(--text-normal);
+}
+
+.time-picker-root-container .time-picker-btn.cancel:hover {
+	background: var(--background-modifier-hover);
+}
+
+.time-picker-root-container .time-picker-btn.apply {
+	border-color: var(--interactive-accent);
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.time-picker-root-container .time-picker-btn.apply:hover {
+	background: var(--interactive-accent-hover);
+}
+
+/* Clickable time trigger reused by the task editor and date-time picker */
+.time-picker-trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--size-2-2);
+	width: 100%;
+	min-height: 2em;
+	padding: 4px 6px;
+	box-sizing: border-box;
+	border: 1px solid var(--table-border-color, var(--background-modifier-border));
+	border-radius: var(--radius-s);
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	cursor: pointer;
+	font-size: 0.8rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.time-picker-trigger:hover,
+.time-picker-trigger:focus-visible {
+	background-color: var(--background-modifier-hover);
+	border-color: var(--interactive-accent);
+}
+
+.time-picker-trigger.empty {
+	color: var(--text-faint);
+}
+
+@media (max-width: 420px) {
+	.time-picker-root-container {
+		width: 100%;
+	}
+
+	.time-picker-root-container .time-picker-body {
+		grid-template-columns: 1fr;
+	}
 }
 
 

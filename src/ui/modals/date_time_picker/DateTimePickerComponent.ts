@@ -2,6 +2,12 @@ import { t } from "i18next";
 import { App } from "obsidian";
 import TaskBoard from "../../../../main.js";
 import { DatePickerComponent } from "../date_picker/DatePickerComponent.js";
+import {
+	TimePickerModal,
+	formatTimeForDisplay,
+	is12HourTimeFormat,
+	normalizeTimeValue,
+} from "../time_picker/index.js";
 
 export class DateTimePickerComponent {
 	private hostEl: HTMLElement;
@@ -13,6 +19,9 @@ export class DateTimePickerComponent {
 
 	private selectedDate: string | null = null;
 	private selectedTime: string | null = null;
+	private use24HourFormat: boolean;
+	private timeTriggerEl?: HTMLElement;
+	private timeDisplayEl?: HTMLElement;
 
 	private onApply?: (dateTime: string) => void;
 	private onCancel?: () => void;
@@ -28,14 +37,17 @@ export class DateTimePickerComponent {
 		this.app = plugin.app;
 		this.dateTimeName = dateTimeName;
 		this.initialValue = initialValue;
+		this.use24HourFormat = !is12HourTimeFormat(
+			plugin.settings.data.dateTimeFormat,
+		);
 
 		if (initialValue) {
 			if (initialValue.includes("T")) {
 				const parts = initialValue.split("T");
-				this.selectedDate = parts[0];
-				this.selectedTime = parts[1];
+				this.selectedDate = parts[0] || null;
+				this.selectedTime = normalizeTimeValue(parts[1]);
 			} else if (initialValue.includes(":")) {
-				this.selectedTime = initialValue;
+				this.selectedTime = normalizeTimeValue(initialValue);
 			}
 		}
 	}
@@ -111,17 +123,37 @@ export class DateTimePickerComponent {
 			text: t("select-time"),
 		});
 
-		const timeInput = timePickerContainer.createEl("input", {
-			cls: "time-input",
-			type: "time",
+		const trigger = timePickerContainer.createDiv({
+			cls: "time-picker-trigger",
 		});
+		trigger.setAttribute("role", "button");
+		trigger.tabIndex = 0;
+		this.timeTriggerEl = trigger;
+		this.timeDisplayEl = trigger.createSpan({
+			cls: "time-picker-trigger-value",
+		});
+		trigger.createSpan({ cls: "time-picker-trigger-icon", text: "🕒" });
 
-		if (this.selectedTime) {
-			timeInput.value = this.selectedTime;
-		}
+		const openTimePicker = () => {
+			const modal = new TimePickerModal(
+				this.plugin,
+				this.dateTimeName,
+				this.selectedTime ?? undefined,
+				this.use24HourFormat,
+			);
+			modal.onTimeSelected = (time: string) => {
+				this.selectedTime = normalizeTimeValue(time);
+				this.updateTimeDisplay();
+			};
+			modal.open();
+		};
 
-		timeInput.addEventListener("input", () => {
-			this.selectedTime = timeInput.value || null;
+		trigger.addEventListener("click", openTimePicker);
+		trigger.addEventListener("keydown", (event) => {
+			if (event.key === "Enter" || event.key === " ") {
+				event.preventDefault();
+				openTimePicker();
+			}
 		});
 
 		const quickTimeOptions = timePickerContainer.createDiv({
@@ -138,12 +170,20 @@ export class DateTimePickerComponent {
 
 		quickTimes.forEach((option) => {
 			const optionEl = quickTimeOptions.createDiv({
-				cls: "quick-time-option",
+				cls: "time-picker-quick-option",
 			});
-			optionEl.textContent = option.label;
+			optionEl.createSpan({
+				cls: "time-picker-quick-label",
+				text: option.label,
+			});
+			optionEl.createSpan({
+				cls: "time-picker-quick-value",
+				text: formatTimeForDisplay(option.time, this.use24HourFormat),
+			});
+			optionEl.setAttribute("title", option.label);
 			optionEl.addEventListener("click", () => {
 				this.selectedTime = option.time;
-				timeInput.value = option.time;
+				this.updateTimeDisplay();
 			});
 		});
 
@@ -153,8 +193,20 @@ export class DateTimePickerComponent {
 		clearTimeBtn.textContent = t("clear-time");
 		clearTimeBtn.addEventListener("click", () => {
 			this.selectedTime = null;
-			timeInput.value = "";
+			this.updateTimeDisplay();
 		});
+
+		this.updateTimeDisplay();
+	}
+
+	private updateTimeDisplay(): void {
+		if (!this.timeDisplayEl || !this.timeTriggerEl) return;
+		const display = formatTimeForDisplay(
+			this.selectedTime,
+			this.use24HourFormat,
+		);
+		this.timeDisplayEl.textContent = display || t("select-time");
+		this.timeTriggerEl.toggleClass("empty", !display);
 	}
 
 	private renderDatePicker(container: HTMLElement): void {
