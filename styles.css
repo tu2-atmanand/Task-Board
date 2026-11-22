@@ -2486,8 +2486,10 @@ body.taskboard-touch-dragging {
 .EditTaskModalHomeRightSec {
 	display: flex;
 	flex-direction: column;
-	border: var(--border-width) solid hsl(calc(var(--accent-h) - 1), calc(var(--accent-s) * 0.7), calc(var(--accent-l) * 0.8));
+	border: var(--border-width) solid;
+	border-color: var(--background-modifier-border-focus);
 	border-radius: 5px;
+	background: var(--background-primary-alt);
 	padding: 0.5em;
 	min-width: 14vw;
 	max-width: 15vw;
@@ -7877,10 +7879,13 @@ Date picker modal styles
 
 .date-time-picker-root-container .date-time-picker-left-panel {
 	flex: 1;
-	min-width: 180px;
-	border-right: 1px solid var(--background-modifier-border);
-	display: flex;
-	flex-direction: column;
+		min-width: 120px;
+		width: 120px;
+		max-width: 140px;
+		border-right: 1px solid var(--background-modifier-border);
+		display: flex;
+		flex-direction: column;
+	padding-inline: var(--size-4-2);
 }
 
 .date-time-picker-root-container .date-time-picker-right-panel {
@@ -7905,7 +7910,7 @@ Date picker modal styles
 .date-time-picker-root-container .time-input {
 	width: 100%;
 	padding: var(--size-2-2);
-	font-size: var(--font-ui-medium);
+	font-size: var(--font-ui-small);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: var(--radius-s);
 	background: var(--background-secondary);
@@ -7927,6 +7932,8 @@ Date picker modal styles
 	cursor: pointer;
 	text-align: center;
 	color: var(--text-normal);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
 }
 
 .date-time-picker-root-container .quick-time-option:hover {
@@ -7936,6 +7943,10 @@ Date picker modal styles
 .date-time-picker-root-container .quick-time-option.clear-time {
 	color: var(--text-error);
 	background: var(--background-modifier-error-bg);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
+	border-top: 1px solid var(--background-modifier-border);
+		padding-block: var(--size-4-2);
 }
 
 .date-time-picker-root-container .quick-time-option.clear-time:hover {
@@ -7961,12 +7972,11 @@ Date picker modal styles
 	gap: var(--size-2-2);
 	padding: var(--size-2-3);
 	border-top: 1px solid var(--background-modifier-border);
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
 }
 
 .date-time-picker-root-container .date-time-picker-btn {
-	padding: var(--size-2-2) var(--size-2-4);
-	border-radius: var(--radius-s);
-	font-size: var(--font-ui-medium);
 	cursor: pointer;
 	border: none;
 }
@@ -7974,6 +7984,8 @@ Date picker modal styles
 .date-time-picker-root-container .cancel-btn {
 	background: var(--background-secondary);
 	color: var(--text-normal);
+		font-size: var(--font-ui-small);
+			font-weight: var(--font-medium);
 }
 
 .date-time-picker-root-container .cancel-btn:hover {
@@ -7983,6 +7995,8 @@ Date picker modal styles
 .date-time-picker-root-container .apply-btn {
 	background: var(--interactive-accent);
 	color: var(--text-on-accent);
+		font-size: var(--font-ui-small);
+			font-weight: var(--font-medium);
 }
 
 .date-time-picker-root-container .apply-btn:hover {

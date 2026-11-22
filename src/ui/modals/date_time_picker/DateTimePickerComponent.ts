@@ -147,7 +147,7 @@ export class DateTimePickerComponent {
 			});
 		});
 
-		const clearTimeBtn = quickTimeOptions.createDiv({
+		const clearTimeBtn = container.createDiv({
 			cls: "quick-time-option clear-time",
 		});
 		clearTimeBtn.textContent = t("clear-time");
