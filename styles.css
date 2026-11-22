@@ -1920,6 +1920,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskItemFooterPropertiesContainer_BasesStyle {
+	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	align-items: center;
@@ -1929,9 +1930,13 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 .taskItemFooterPropertyContainer {
 	display: flex;
 	flex-direction: row;
-	gap: 1em;
-	align-items: center;
+	gap: 0.2em;
+	align-items: stretch;
 	max-width: stretch;
+	border: 1px solid var(--background-modifier-border);
+	/* padding-inline: 4px; */
+	border-radius: 3px;
+	margin-right: 4px;
 }
 
 .taskItemFooterPropertyContainer_IconStyle {
@@ -1948,6 +1953,9 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	font-size: 0.65rem;
 	color: var(--canvas-card-label-color);
 	display: flex;
+	background: var(--background-secondary);
+	padding-inline: 3px;
+	align-items: center;
 }
 
 .taskBoard_taskCard_iconStyle_icon {
@@ -1966,18 +1974,21 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 
-/* Custom drag image for desktop drag and drop */
+/* Custom fully opaque drag ghost for desktop drag and drop */
 .taskboard-drag-image {
-	border: 1px solid var(--interactive-accent);
-	border-radius: 6px;
+	position: fixed;
+	z-index: 10000;
+	margin: 0 !important;
+	box-sizing: border-box;
+	border: 2px dashed #4f8cff !important;
+	border-radius: 8px;
 	background: var(--background-primary);
-	box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(var(--interactive-accent-rgb), 0.18);
-	position: absolute;
-	left: -10000px;
-	top: -10000px;
-	margin: 0;
-	pointer-events: none;
-	opacity: 0.92;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22), 0 0 0 3px rgba(79, 140, 255, 0.18);
+	pointer-events: none !important;
+	opacity: 1 !important;
+	transform: rotate(-3deg);
+	transform-origin: center center;
+	will-change: transform;
 }
 
 /* Touch drag ghost element (shown on mobile/long-press) */
