@@ -7,7 +7,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon } from "lucide-react";
 import { ViewUpdate } from "@codemirror/view";
-import { format } from "date-fns";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import TaskBoard from "../../../main.js";
 import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService, PropertyTypeConfig } from "../../interfaces/Enums.js";
@@ -34,6 +33,7 @@ import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sani
 import {
 	formatDateStringAsPerSettings,
 	formatDateTimeAsPerSettings,
+	getCurrentLocalDateString,
 } from "../../utils/DateTimeCalculations.js";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "../../utils/task_note/TaskNoteUtils.js";
 import { updateRGBAOpacity } from "../../utils/UIHelpers.js";
@@ -613,20 +613,20 @@ export const TaskEditorRC: React.FC<{
 		if (plugin.settings.data.autoAddUniversalDate && !taskExists) {
 			const universalDateType = plugin.settings.data.universalDate;
 			if (universalDateType === UniversalDateOptions.dueDate && !due) {
-				newDueDate = new Date().toISOString().split('T')[0];
+				newDueDate = getCurrentLocalDateString(globalSettings.dateFormat);
 				newTitle = sanitizeDueDate(globalSettings, newTitle, newDueDate);
 			} else if (universalDateType === UniversalDateOptions.startDate && !startDate) {
-				newStartDate = new Date().toISOString().split('T')[0];
+				newStartDate = getCurrentLocalDateString(globalSettings.dateFormat);
 				newTitle = sanitizeStartDate(globalSettings, newTitle, newStartDate);
 			} else if (universalDateType === UniversalDateOptions.scheduledDate && !scheduledDate) {
-				newScheduledDate = new Date().toISOString().split('T')[0];
+				newScheduledDate = getCurrentLocalDateString(globalSettings.dateFormat);
 				newTitle = sanitizeScheduledDate(globalSettings, newTitle, newScheduledDate);
 			}
 		}
 
 		let newCreatedDate = createdDate;
 		if (globalSettings.autoAddCreatedDate && !taskExists) {
-			newCreatedDate = new Date().toISOString().split('T')[0];
+			newCreatedDate = getCurrentLocalDateString(globalSettings.dateFormat);
 			newTitle = sanitizeCreatedDate(globalSettings, newTitle, newCreatedDate);
 		}
 
@@ -683,17 +683,17 @@ export const TaskEditorRC: React.FC<{
 		if (globalSettings.autoAddUniversalDate && !taskExists) {
 			const universalDateType = globalSettings.universalDate;
 			if (universalDateType === UniversalDateOptions.dueDate && !due) {
-				newDue = new Date().toISOString().split('T')[0];
+				newDue = getCurrentLocalDateString(globalSettings.dateFormat);
 			} else if (universalDateType === UniversalDateOptions.startDate && !startDate) {
-				newStartDate = new Date().toISOString().split('T')[0];
+				newStartDate = getCurrentLocalDateString(globalSettings.dateFormat);
 			} else if (universalDateType === UniversalDateOptions.scheduledDate && !scheduledDate) {
-				newScheduledDate = new Date().toISOString().split('T')[0];
+				newScheduledDate = getCurrentLocalDateString(globalSettings.dateFormat);
 			}
 		}
 
 		let newCreatedDate = createdDate;
 		if (globalSettings.autoAddCreatedDate && !taskExists) {
-			newCreatedDate = new Date().toISOString().split('T')[0];
+			newCreatedDate = getCurrentLocalDateString(globalSettings.dateFormat);
 		}
 
 		// Determine file path for task note
@@ -1643,10 +1643,10 @@ export const TaskEditorRC: React.FC<{
 									? ""
 									: typeof value === "number" &&
 											property.type === PropertyTypeConfig.date
-										? format(new Date(value), "yyyy-MM-dd")
+										? formatDateStringAsPerSettings(value, "yyyy-MM-dd")
 										: typeof value === "number" &&
 												property.type === PropertyTypeConfig.dateTime
-											? format(new Date(value), "yyyy-MM-dd'T'HH:mm")
+											? formatDateTimeAsPerSettings(value, "yyyy-MM-dd'T'HH:mm")
 											: String(value);
 							return <div className="EditTaskModalHomeField" key={property.id}>
 								<label className="EditTaskModalHomeFieldTitle">{property.name}</label>

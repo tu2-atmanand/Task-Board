@@ -1,7 +1,6 @@
 // /src/utils/ScanningVaults.ts
 
 import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
-import { isValid } from "date-fns";
 import { t } from "i18next";
 import type TaskBoard from "../../../main.js";
 import { UniversalDateOptions } from "../../interfaces/Enums.js";
@@ -28,7 +27,7 @@ import {
 } from "../../utils/CheckBoxUtils.js";
 import {
 	getCurrentLocalDateTimeString,
-	robustDateParser,
+	parseDateOnlyValue,
 } from "../../utils/DateTimeCalculations.js";
 import {
 	loadJsonCacheDataFromDisk,
@@ -54,6 +53,7 @@ import {
 	extractTaskPropertiesAllTYpe,
 	extractTaskPropertiesOfSingleFormat,
 } from "../../utils/task_line/PropertiesParsing.js";
+import { defaultTaskStatuses } from "../../interfaces/Mapping.js";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -128,6 +128,7 @@ export default class VaultScanner {
 		scanFilters: VaultScannnerFilters,
 	): Promise<string> {
 		try {
+			debugger;
 			const userConfiguredDateFormat =
 				this.plugin.settings.data.dateFormat;
 			const fileNameWithPath = file.path;
@@ -250,7 +251,7 @@ export default class VaultScanner {
 						status:
 							taskNoteProperties?.[
 								DEFAULT_TASK_CACHE_KEYS.Status
-							] || DEFAULT_SETTINGS.data.customStatuses[0].name,
+							] || defaultTaskStatuses.unchecked,
 						title:
 							taskNoteProperties?.[
 								DEFAULT_TASK_CACHE_KEYS.Title
@@ -384,11 +385,11 @@ export default class VaultScanner {
 								// 	universalDateFormat,
 								// 	this.testDate,
 								// );
-								const parsed = robustDateParser(
+								const parsed = parseDateOnlyValue(
 									basename,
 									userConfiguredDateFormat,
 								);
-								if (parsed && isValid(parsed)) {
+								if (parsed) {
 									const universalDateConfig =
 										this.plugin.settings.data.universalDate;
 

@@ -1,18 +1,23 @@
 // src/utils/RenderColumns.ts
 
-import { differenceInDays } from "date-fns";
+import { differenceInCalendarDays } from "date-fns";
 import {
 	TaskBoardViewType,
 	ColumnData,
 } from "../../interfaces/BoardConfigs.js";
 import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
-import { colTypeNames, UniversalDateOptions } from "../../interfaces/Enums.js";
+import {
+	colTypeNames,
+	PropertyTypeConfig,
+	UniversalDateOptions,
+} from "../../interfaces/Enums.js";
 import { PluginDataJson } from "../../interfaces/GlobalSettings.js";
 import {
 	taskJsonMerged,
 	taskItemWithCustomProperties,
 } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
+import { getLocalDateFromDateOnlyEpoch } from "../../utils/DateTimeCalculations.js";
 import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
 import { AdvancedFilterer } from "./AdvancedFilterer.js";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm.js";
@@ -77,6 +82,22 @@ export const columnSegregator = (
 				from: 0,
 				to: 0,
 			};
+			const universalDatePropertyKey =
+				dateType === UniversalDateOptions.dueDate
+					? DEFAULT_TASK_CACHE_KEYS.DueDate
+					: dateType === UniversalDateOptions.startDate
+						? DEFAULT_TASK_CACHE_KEYS.StartDate
+						: dateType === UniversalDateOptions.scheduledDate
+							? DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+							: undefined;
+			const universalDateProperty = universalDatePropertyKey
+				? settings.data.taskProperties.find(
+						(property) =>
+							property.key === String(universalDatePropertyKey),
+					)
+				: undefined;
+			const isDateOnlyProperty =
+				universalDateProperty?.type === PropertyTypeConfig.date;
 
 			tasksToDisplay = pendingTasks.filter((task) => {
 				let taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
@@ -86,8 +107,7 @@ export const columnSegregator = (
 					taskUniversalDate =
 						task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 				}
-				if (taskUniversalDate === undefined)
-					return false;
+				if (typeof taskUniversalDate !== "number") return false;
 
 				// ---------- METHOD 1 -------------
 
@@ -156,18 +176,20 @@ export const columnSegregator = (
 				// );
 
 				//  ---------- METHOD 4 -------------
-				// Parse the task's universal date using robust parser
-				const parsedTaskDate = new Date(taskUniversalDate);
+				// Date-only values are stored as UTC noon; convert them back to a
+				// local calendar date before comparing with today.
+				const parsedTaskDate = isDateOnlyProperty
+					? getLocalDateFromDateOnlyEpoch(taskUniversalDate)
+					: new Date(taskUniversalDate);
 
 				if (Number.isNaN(parsedTaskDate.getTime())) {
 					return false;
 				}
 
-				const today = new Date();
-				today.setHours(0, 0, 0, 0);
-				parsedTaskDate.setHours(0, 0, 0, 0);
-
-				const diffDays = differenceInDays(parsedTaskDate, today);
+				const diffDays = differenceInCalendarDays(
+					parsedTaskDate,
+					new Date(),
+				);
 
 				// console.log(
 				// 	"diffDays",

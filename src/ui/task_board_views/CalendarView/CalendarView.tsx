@@ -17,12 +17,16 @@ import { taskItemEmpty } from "../../../interfaces/Mapping.js";
 import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { eventEmitter } from "../../../services/EventEmitter.js";
 import { openAddNewTaskModal } from "../../modals/OpenModals.js";
-import { formatDateStringAsPerSettings } from "../../../utils/DateTimeCalculations.js";
+import {
+	formatDateStringAsPerSettings,
+	getDateOnlyEpochFromLocalDate,
+} from "../../../utils/DateTimeCalculations.js";
 import { sanitizeStartDate, sanitizeTime } from "../../../utils/task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "../../../utils/task_line/TaskLineUtils.js";
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/task_note/TaskNoteUtils.js";
 import {
 	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
 } from "../../../interfaces/Enums.js";
 
 
@@ -120,23 +124,49 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 	const calendarTasks = useMemo(() => {
 		const allTasks = [...tasks.Pending, ...tasks.Completed];
 		return allTasks.reduce<CalendarTask[]>((scheduledTasks, task) => {
-			const dateValue = task[DEFAULT_TASK_CACHE_KEYS.StartDate] || task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-			const parsedDate =
-				typeof dateValue === "number" ? new Date(dateValue) : null;
-			if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
+			const startDate = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
+			const scheduledDate = task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
+			const dueDate = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
+			const dateKeyProperty =
+				startDate !== undefined
+					? DEFAULT_TASK_CACHE_KEYS.StartDate
+					: scheduledDate !== undefined
+						? DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+						: DEFAULT_TASK_CACHE_KEYS.DueDate;
+			const dateValue =
+				dateKeyProperty === DEFAULT_TASK_CACHE_KEYS.StartDate
+					? startDate
+					: dateKeyProperty === DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+						? scheduledDate
+						: dueDate;
+
+			if (typeof dateValue !== "number") {
 				return scheduledTasks;
 			}
+
+			const parsedDate = new Date(dateValue);
+			if (Number.isNaN(parsedDate.getTime())) {
+				return scheduledTasks;
+			}
+
+			const dateProperty = plugin.settings.data.taskProperties.find(
+				(property) => property.key === String(dateKeyProperty),
+			);
+			const dateKey =
+				dateProperty?.type === PropertyTypeConfig.date
+					? formatDateStringAsPerSettings(dateValue, "yyyy-MM-dd")
+					: format(parsedDate, "yyyy-MM-dd");
 
 			const timeRange = getTaskTimeRange(task[DEFAULT_TASK_CACHE_KEYS.Time] || "");
 			scheduledTasks.push({
 				task,
-				dateKey: format(parsedDate, "yyyy-MM-dd"),
+				dateKey,
 				startMinutes: timeRange?.start ?? null,
 				endMinutes: timeRange?.end ?? null,
 			});
 			return scheduledTasks;
 		}, []);
-	}, [tasks, dateFormat]);
+	}, [tasks, dateFormat, plugin]);
 
 	const tasksByDate = useMemo(() => {
 		const grouped = new Map<string, CalendarTask[]>();
@@ -230,9 +260,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 		startMinutes: number,
 		endMinutes: number,
 	) => {
-		const dateValue = formatDateStringAsPerSettings(format(day, "yyyy-MM-dd"), dateFormat);
+		const startDate = getDateOnlyEpochFromLocalDate(day);
+		const dateValue = formatDateStringAsPerSettings(startDate, dateFormat);
 		const timeValue = `${formatClockTime(startMinutes)} - ${formatClockTime(endMinutes)}`;
-		const startDate = day.getTime();
 		const updatedTask = { ...task, startDate, time: timeValue };
 
 		eventEmitter.emit("UPDATE_TASK", { taskID: task[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
@@ -337,7 +367,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 					body: [],
 					tags: [],
 					frontmatterTags: [],
-					startDate: selectedDay.getTime(),
+					startDate: getDateOnlyEpochFromLocalDate(selectedDay),
 					time: `${formatClockTime(startMinutes)} - ${formatClockTime(endMinutes)}`,
 				};
 				openAddNewTaskModal(plugin, undefined, initialTask);

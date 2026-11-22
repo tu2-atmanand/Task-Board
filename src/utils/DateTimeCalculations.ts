@@ -1,4 +1,5 @@
 import {
+	addDays,
 	format,
 	parse,
 	isValid,
@@ -12,9 +13,12 @@ import {
 	DEFAULT_DATE_FORMAT,
 	DEFAULT_DATE_TIME_FORMAT,
 } from "../interfaces/Constants.js";
-import { UniversalDateOptions } from "../interfaces/Enums.js";
-import { taskItem } from "../interfaces/TaskItem.js";
-import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
+import {
+	PropertyTypeConfig,
+	UniversalDateOptions,
+	DEFAULT_TASK_CACHE_KEYS,
+} from "../interfaces/Enums.js";
+import type { taskItem } from "../interfaces/TaskItem.js";
 
 /**
  * A simple function to get today's date in the user's custom format from the plugin's setting using the date-fns library.
@@ -23,9 +27,249 @@ import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
  */
 export const formatToday = (str: string): string => format(new Date(), str);
 
+const TIME_COMPONENT_REGEX = /\d{1,2}:\d{2}/;
+const TIME_ONLY_REGEX = /^\d{1,2}:\d{2}(?::\d{2})?(?:\s*(?:AM|PM))?$/i;
+const DATE_TIME_SEPARATOR_REGEX = /(?:T|\s)\s*\d{1,2}:\d{2}/i;
+
+function hasTimeComponent(value: string): boolean {
+	return TIME_COMPONENT_REGEX.test(value);
+}
+
+function formatHasTimeComponent(dateFormat: string): boolean {
+	return /[Hhms]/.test(dateFormat);
+}
+
+/** Removes a trailing time component so only the calendar date remains. */
+function getDateOnlyPart(value: string): string {
+	return value.split(DATE_TIME_SEPARATOR_REGEX)[0].trim();
+}
+
+/** Best-effort date format derived from a date-time format string. */
+function getDateFormatFromDateTimeFormat(dateTimeFormat: string): string {
+	const timeTokenIndex = dateTimeFormat.search(/[Hhms]/);
+	if (timeTokenIndex <= 0) return DEFAULT_DATE_FORMAT;
+
+	return dateTimeFormat
+		.slice(0, timeTokenIndex)
+		.replace(/['"][^'"]*['"]\s*$/, "")
+		.replace(/[T\s]+$/, "")
+		.trim();
+}
+
+/**
+ * Builds the timezone-independent epoch for a date-only cache value.
+ *
+ * Date-only values are stored as 12:00 UTC on the intended calendar day. The
+ * original local/date-fns date is used to identify the calendar day so that
+ * callers which already produced a local date keep the same day.
+ */
+export function getDateOnlyEpochFromDateValue(date: Date): number {
+	const isCanonicalUtcNoon =
+		date.getUTCHours() === 12 &&
+		date.getUTCMinutes() === 0 &&
+		date.getUTCSeconds() === 0 &&
+		date.getUTCMilliseconds() === 0;
+
+	const year = isCanonicalUtcNoon
+		? date.getUTCFullYear()
+		: date.getFullYear();
+	const month = isCanonicalUtcNoon ? date.getUTCMonth() : date.getMonth();
+	const day = isCanonicalUtcNoon ? date.getUTCDate() : date.getDate();
+
+	return Date.UTC(year, month, day, 12, 0, 0, 0);
+}
+
+/**
+ * Converts a date-only epoch back to a local Date that still shows the same
+ * calendar day. Useful for date-fns UI operations such as calendar grids.
+ */
+export function getLocalDateFromDateOnlyEpoch(epoch: number): Date {
+	const date = new Date(epoch);
+	return new Date(
+		date.getUTCFullYear(),
+		date.getUTCMonth(),
+		date.getUTCDate(),
+		12,
+		0,
+		0,
+		0,
+	);
+}
+
+/** Returns the canonical UTC-noon epoch for a local calendar date. */
+export function getDateOnlyEpochFromLocalDate(date: Date): number {
+	return Date.UTC(
+		date.getFullYear(),
+		date.getMonth(),
+		date.getDate(),
+		12,
+		0,
+		0,
+		0,
+	);
+}
+
+/** True when an epoch is the canonical UTC-noon sentinel used for date-only values. */
+export function isDateOnlyEpoch(epoch: number): boolean {
+	if (!Number.isFinite(epoch)) return false;
+	const date = new Date(epoch);
+	return (
+		date.getUTCHours() === 12 &&
+		date.getUTCMinutes() === 0 &&
+		date.getUTCSeconds() === 0 &&
+		date.getUTCMilliseconds() === 0
+	);
+}
+
+function isLocalMidnight(date: Date): boolean {
+	return (
+		date.getHours() === 0 &&
+		date.getMinutes() === 0 &&
+		date.getSeconds() === 0 &&
+		date.getMilliseconds() === 0
+	);
+}
+
+/**
+ * A local midnight means the user supplied only a date (or explicitly chose
+ * midnight). Normalize it to the UTC-noon date-only sentinel so whole-day
+ * values stay timezone-independent and distinguishable from real times.
+ */
+function normalizeDateTimeValue(date: Date): Date {
+	return isValid(date) && isLocalMidnight(date)
+		? new Date(getDateOnlyEpochFromDateValue(date))
+		: date;
+}
+
+/** Returns the cached epoch for a date-time value, normalizing local midnight. */
+export function getDateTimeEpochFromDateValue(date: Date): number {
+	return normalizeDateTimeValue(date).getTime();
+}
+
+/**
+ * Parses a date-only value and returns the canonical UTC-noon epoch.
+ *
+ * If a value contains both a date and a time, only the date portion is parsed.
+ * Time-only values are rejected.
+ */
+export function parseDateOnlyValue(
+	value: string,
+	dateFormat: string = DEFAULT_DATE_FORMAT,
+): Date | null {
+	if (!value || typeof value !== "string") return null;
+
+	const trimmed = value.trim();
+	if (!trimmed || TIME_ONLY_REGEX.test(trimmed)) return null;
+
+	const datePart = getDateOnlyPart(trimmed);
+	if (!datePart) return null;
+
+	const preferredDateFormat = formatHasTimeComponent(dateFormat)
+		? getDateFormatFromDateTimeFormat(dateFormat)
+		: dateFormat || DEFAULT_DATE_FORMAT;
+
+	for (const formatString of new Set([
+		preferredDateFormat,
+		DEFAULT_DATE_FORMAT,
+	])) {
+		try {
+			const parsed = parse(datePart, formatString, new Date());
+			if (isValid(parsed)) {
+				return new Date(getDateOnlyEpochFromDateValue(parsed));
+			}
+		} catch (error) {
+			bugReporterManagerInsatance.addToLogs(
+				187,
+				`${JSON.stringify(error)}\n\nDate string : ${datePart}\nDate format : ${formatString}\n`,
+				"DateTimeCalculations.ts/parseDateOnlyValue",
+			);
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Parses a date-time value.
+ *
+ * Time-only values are rejected. If only a date is supplied, or the supplied
+ * time is local midnight, the value is normalized to the UTC-noon date-only
+ * sentinel so whole-day values can be identified and stay timezone-safe.
+ */
+export function parseDateTimeValue(
+	value: string,
+	dateTimeFormat: string = DEFAULT_DATE_TIME_FORMAT,
+	dateFormat: string = DEFAULT_DATE_FORMAT,
+): Date | null {
+	if (!value || typeof value !== "string") return null;
+
+	const trimmed = value.trim();
+	if (!trimmed || TIME_ONLY_REGEX.test(trimmed)) return null;
+
+	if (!hasTimeComponent(trimmed)) {
+		const formats = [
+			dateFormat || DEFAULT_DATE_FORMAT,
+			getDateFormatFromDateTimeFormat(dateTimeFormat),
+			DEFAULT_DATE_FORMAT,
+		].filter(Boolean);
+
+		for (const formatString of new Set(formats)) {
+			const dateOnlyValue = parseDateOnlyValue(trimmed, formatString);
+			if (dateOnlyValue) return dateOnlyValue;
+		}
+		return null;
+	}
+
+	try {
+		const parsed = parse(trimmed, dateTimeFormat, new Date());
+		if (isValid(parsed)) {
+			return normalizeDateTimeValue(parsed);
+		}
+	} catch (error) {
+		bugReporterManagerInsatance.addToLogs(
+			187,
+			`${JSON.stringify(error)}\n\nDate string : ${trimmed}\nDate format : ${dateTimeFormat}\n`,
+			"DateTimeCalculations.ts/parseDateTimeValue",
+		);
+	}
+
+	try {
+		const nativeDate = new Date(trimmed);
+		return isValid(nativeDate) ? normalizeDateTimeValue(nativeDate) : null;
+	} catch {
+		return null;
+	}
+}
+
+/** Formats a canonical date-only epoch without timezone drift. */
+function formatDateOnlyEpoch(epoch: number, dateFormat: string): string {
+	return format(getLocalDateFromDateOnlyEpoch(epoch), dateFormat);
+}
+
+/** Formats a canonical date-only epoch as local midnight in a date-time format. */
+function formatDateOnlyEpochAsMidnight(
+	epoch: number,
+	dateTimeFormat: string,
+): string {
+	const dateOnlyDate = getLocalDateFromDateOnlyEpoch(epoch);
+	const midnight = new Date(
+		dateOnlyDate.getFullYear(),
+		dateOnlyDate.getMonth(),
+		dateOnlyDate.getDate(),
+		0,
+		0,
+		0,
+		0,
+	);
+	return format(midnight, dateTimeFormat);
+}
+
 /**
  * Robust date parser that detects date format and parses accordingly.
- * Prioritizes ISO format (YYYY-MM-DD) and common date formats.
+ *
+ * Date formats only parse the date portion of a value, while date-time formats
+ * fall back to UTC 12:00 when a value contains only a date. Time-only values
+ * are rejected for both.
  *
  * @param dateString - The date string to parse (e.g., "2026-02-19", "19/02/2026T10:30:00")
  * @param preferredFormat - The preferred format to try first (e.g., "yyyy-MM-dd", "dd/MM/yyyyTHH:mm:ss" )
@@ -43,87 +287,11 @@ export const robustDateParser = (
 	}
 
 	const trimmed = dateString.trim();
+	if (!trimmed) return null;
 
-	// // Try ISO format first (YYYY-MM-DD) since Tasks plugin uses this
-	// if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-	// 	try {
-	// 		const parsed = parseISO(trimmed);
-	// 		if (isValid(parsed)) {
-	// 			return parsed;
-	// 		}
-	// 	} catch (error) {
-	// 		// Fall through to other formats
-	// 	}
-	// }
-
-	// // Detect separator in the input string
-	// const separatorMatch = trimmed.match(/[-/\\.\s]/);
-	// const inputSeparator = separatorMatch ? separatorMatch[0] : "-";
-
-	// // Build format list based on detected separator and preferred format
-	// const formatsToTry: string[] = [];
-
-	// // Add preferred format first (if it uses the correct separator)
-	// const preferredSeparator = preferredFormat.match(/[-/\\.\s]/)?.[0] || "-";
-	// if (preferredSeparator === inputSeparator) {
-	// 	formatsToTry.push(preferredFormat);
-	// }
-
-	// // Add common formats with matching separator
-	// const commonFormats = {
-	// 	"-": [
-	// 		"yyyy-MM-dd",
-	// 		"yyyy-MM-dd HH:mm:ss",
-	// 		"yyyy-MM-dd'T'HH:mm:ss",
-	// 		"dd-MM-yyyy",
-	// 		"MM-dd-yyyy",
-	// 	],
-	// 	"/": [
-	// 		"dd/MM/yyyy",
-	// 		"MM/dd/yyyy",
-	// 		"yyyy/MM/dd",
-	// 		"dd/MM/yyyy HH:mm:ss",
-	// 		"MM/dd/yyyy HH:mm:ss",
-	// 	],
-	// 	".": ["dd.MM.yyyy", "yyyy.MM.dd", "dd.MM.yyyy HH:mm:ss"],
-	// };
-
-	// formatsToTry.push(
-	// 	...(commonFormats[inputSeparator as keyof typeof commonFormats] || []),
-	// );
-
-	try {
-		const parsed = parse(trimmed, preferredFormat, new Date());
-		if (isValid(parsed)) {
-			return parsed;
-		}
-
-		// If no format worked, try native Date parsing
-		const nativeDate = new Date(dateString);
-		if (isValid(nativeDate)) {
-			return nativeDate;
-		}
-	} catch (error) {
-		bugReporterManagerInsatance.addToLogs(
-			187,
-			`${JSON.stringify(error)}\n\nDate string : ${trimmed}\nDate format : ${preferredFormat}\n`,
-			"DateTimeCalculations.ts/robustDateParser",
-		);
-		return null;
-	}
-	// }
-
-	// Last resort: try native Date parsing for ISO strings and other formats
-	try {
-		const nativeDate = new Date(trimmed);
-		if (isValid(nativeDate) && !isNaN(nativeDate.getTime())) {
-			return nativeDate;
-		}
-	} catch (error) {
-		// Fall through
-	}
-
-	return null;
+	return formatHasTimeComponent(preferredFormat)
+		? parseDateTimeValue(trimmed, preferredFormat)
+		: parseDateOnlyValue(trimmed, preferredFormat);
 };
 
 /**
@@ -217,16 +385,18 @@ export const formatDateStringAsPerSettings = (
 	}
 
 	try {
-		const parsedDate =
-			dateString instanceof Date
-				? dateString
-				: typeof dateString === "number"
-					? new Date(dateString)
-					: robustDateParser(dateString, dateFormat);
+		let epoch: number | undefined;
 
-		// If we have a valid date, format it
-		if (parsedDate && isValid(parsedDate)) {
-			return format(parsedDate, dateFormat);
+		if (typeof dateString === "number") {
+			epoch = dateString;
+		} else if (dateString instanceof Date) {
+			epoch = getDateOnlyEpochFromDateValue(dateString);
+		} else {
+			epoch = parseDateOnlyValue(dateString, dateFormat)?.getTime();
+		}
+
+		if (epoch !== undefined && Number.isFinite(epoch)) {
+			return formatDateOnlyEpoch(epoch, dateFormat);
 		}
 
 		return String(dateString);
@@ -238,6 +408,9 @@ export const formatDateStringAsPerSettings = (
 /**
  * Accepts a date-time value in any format and converts it into the format set by user in the settings.
  * Uses date-fns for robust date-time parsing and formatting.
+ *
+ * Canonical date-only values are rendered as local midnight instead of their
+ * UTC-noon cache instant, so whole-day tasks do not appear shifted.
  * @param dateTimeString The date-time value to be formatted (e.g., "2024-04-05 14:30:00")
  * @param dateTimeFormat The target date-time format string (e.g., "yyyy-MM-dd HH:mm:ss")
  *
@@ -252,16 +425,38 @@ export const formatDateTimeAsPerSettings = (
 	}
 
 	try {
+		if (
+			typeof dateTimeString === "number" &&
+			isDateOnlyEpoch(dateTimeString)
+		) {
+			return formatDateOnlyEpochAsMidnight(dateTimeString, dateTimeFormat);
+		}
+
+		if (
+			dateTimeString instanceof Date &&
+			isDateOnlyEpoch(dateTimeString.getTime())
+		) {
+			return formatDateOnlyEpochAsMidnight(
+				dateTimeString.getTime(),
+				dateTimeFormat,
+			);
+		}
+
 		const parsedDate =
 			dateTimeString instanceof Date
 				? dateTimeString
 				: typeof dateTimeString === "number"
 					? new Date(dateTimeString)
-					: robustDateParser(dateTimeString, dateTimeFormat);
+					: parseDateTimeValue(dateTimeString, dateTimeFormat);
 
 		// If we have a valid date, format it
 		if (parsedDate && isValid(parsedDate)) {
-			return format(parsedDate, dateTimeFormat);
+			return isDateOnlyEpoch(parsedDate.getTime())
+				? formatDateOnlyEpochAsMidnight(
+						parsedDate.getTime(),
+						dateTimeFormat,
+					)
+				: format(parsedDate, dateTimeFormat);
 		}
 
 		return String(dateTimeString);
@@ -284,10 +479,8 @@ export function getAllDatesInRelativeRange(
 ): string[] {
 	try {
 		const now = startOfToday();
-		const startDate = new Date(
-			now.getTime() + fromDate * 24 * 60 * 60 * 1000,
-		);
-		const endDate = new Date(now.getTime() + toDate * 24 * 60 * 60 * 1000);
+		const startDate = addDays(now, fromDate);
+		const endDate = addDays(now, toDate);
 
 		// Use date-fns eachDayOfInterval for efficient date generation
 		const interval = eachDayOfInterval(
@@ -410,6 +603,8 @@ export function compareDates(
 	date2: string | number | Date,
 	order: "asc" | "desc",
 	dateFormat: string = DEFAULT_DATE_FORMAT,
+	valueType?: PropertyTypeConfig,
+	dateTimeFormat: string = DEFAULT_DATE_TIME_FORMAT,
 ): number {
 	// Handle empty/null values
 	const hasDate1 =
@@ -425,18 +620,28 @@ export function compareDates(
 	if (!hasDate1) return order === "asc" ? 1 : -1; // Empty values go to end for asc, start for desc
 	if (!hasDate2) return order === "asc" ? -1 : 1;
 
-	const d1 =
-		typeof date1 === "number"
-			? new Date(date1)
-			: date1 instanceof Date
-				? date1
-				: robustDateParser(date1, dateFormat);
-	const d2 =
-		typeof date2 === "number"
-			? new Date(date2)
-			: date2 instanceof Date
-				? date2
-				: robustDateParser(date2, dateFormat);
+	const isDateOnly = valueType === PropertyTypeConfig.date;
+	const isDateTime = valueType === PropertyTypeConfig.dateTime;
+
+	const parseValue = (value: string | number | Date): Date | null => {
+		if (typeof value === "number") {
+			const date = new Date(value);
+			if (isDateOnly && Number.isFinite(date.getTime())) {
+				return new Date(getDateOnlyEpochFromDateValue(date));
+			}
+			return isDateTime ? normalizeDateTimeValue(date) : date;
+		}
+		if (value instanceof Date) {
+			if (isDateOnly) return new Date(getDateOnlyEpochFromDateValue(value));
+			return isDateTime ? normalizeDateTimeValue(value) : value;
+		}
+		if (isDateOnly) return parseDateOnlyValue(value, dateFormat);
+		if (isDateTime) return parseDateTimeValue(value, dateTimeFormat, dateFormat);
+		return robustDateParser(value, dateFormat);
+	};
+
+	const d1 = parseValue(date1);
+	const d2 = parseValue(date2);
 
 	if (!d1 || !d2 || isNaN(d1.getTime()) || isNaN(d2.getTime())) {
 		return 0;

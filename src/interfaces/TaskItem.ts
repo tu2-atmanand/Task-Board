@@ -1,6 +1,11 @@
 import { FrontMatterCache } from "obsidian";
 import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "./Enums.js";
-import { robustDateParser } from "../utils/DateTimeCalculations.js";
+import {
+	getDateOnlyEpochFromDateValue,
+	getDateTimeEpochFromDateValue,
+	parseDateOnlyValue,
+	parseDateTimeValue,
+} from "../utils/DateTimeCalculations.js";
 import {
 	DEFAULT_DATE_FORMAT,
 	DEFAULT_DATE_TIME_FORMAT,
@@ -58,42 +63,54 @@ export function coerceCustomTaskPropertyValue(
 			return typeof value === "string" ? value : JSON.stringify(value);
 		case PropertyTypeConfig.date:
 		case PropertyTypeConfig.dateTime: {
+			if (type === PropertyTypeConfig.date) {
+				if (value instanceof Date) {
+					return Number.isFinite(value.getTime())
+						? getDateOnlyEpochFromDateValue(value)
+						: undefined;
+				}
+				if (typeof value === "number") {
+					return Number.isFinite(value) &&
+						Number.isFinite(new Date(value).getTime())
+						? getDateOnlyEpochFromDateValue(new Date(value))
+						: undefined;
+				}
+				if (typeof value !== "string") return undefined;
+				const dateOnlyValue = parseDateOnlyValue(
+					value,
+					preferredDateFormat ?? fallbackDateFormat ?? DEFAULT_DATE_FORMAT,
+				);
+				return dateOnlyValue && Number.isFinite(dateOnlyValue.getTime())
+					? dateOnlyValue.getTime()
+					: undefined;
+			}
+
 			if (value instanceof Date) {
 				return Number.isFinite(value.getTime())
-					? value.getTime()
+					? getDateTimeEpochFromDateValue(value)
 					: undefined;
 			}
 			if (typeof value === "number") {
-				return Number.isFinite(value) &&
-					Number.isFinite(new Date(value).getTime())
-					? value
-					: undefined;
+				if (
+					!Number.isFinite(value) ||
+					!Number.isFinite(new Date(value).getTime())
+				) {
+					return undefined;
+				}
+				return getDateTimeEpochFromDateValue(new Date(value));
 			}
-			if (typeof value !== "string" || value.trim() === "") {
-				return undefined;
-			}
+			if (typeof value !== "string") return undefined;
 
-			const includesTime = /(?:T|\s)\d{1,2}:\d{2}/.test(value);
-			const formatsToTry =
-				type === PropertyTypeConfig.dateTime && !includesTime
-					? [
-							fallbackDateFormat ?? DEFAULT_DATE_FORMAT,
-							preferredDateFormat ?? DEFAULT_DATE_TIME_FORMAT,
-						]
-					: [
-							preferredDateFormat ??
-								(type === PropertyTypeConfig.date
-									? DEFAULT_DATE_FORMAT
-									: DEFAULT_DATE_TIME_FORMAT),
-							fallbackDateFormat ?? DEFAULT_DATE_FORMAT,
-						];
-			let date: Date | null = null;
-			for (const dateFormat of new Set(formatsToTry)) {
-				date = robustDateParser(value, dateFormat);
-				if (date) break;
-			}
-			return date && Number.isFinite(date.getTime())
-				? date.getTime()
+			// Date-only values are accepted for date-time properties and are
+			// stored with UTC 12:00 as the default time. Time-only values are
+			// rejected by parseDateTimeValue.
+			const dateTimeValue = parseDateTimeValue(
+				value,
+				preferredDateFormat ?? DEFAULT_DATE_TIME_FORMAT,
+				fallbackDateFormat ?? DEFAULT_DATE_FORMAT,
+			);
+			return dateTimeValue && Number.isFinite(dateTimeValue.getTime())
+				? dateTimeValue.getTime()
 				: undefined;
 		}
 		default:

@@ -6,7 +6,7 @@ import { Component, Notice, Platform, Menu, TFile, MenuItem, setIcon } from 'obs
 import { ChevronDown, EllipsisVertical, Grip } from 'lucide-react';
 import { isToday, isBefore, isAfter, startOfDay, compareAsc } from 'date-fns';
 import { DEFAULT_DATE_FORMAT } from '../../../interfaces/Constants.js';
-import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, viewTypeNames, colTypeNames, taskCardStyleNames, getAllUIVisibleTaskProperties } from '../../../interfaces/Enums.js';
+import { DEFAULT_TASK_CACHE_KEYS, TagColorType, EditButtonMode, UniversalDateOptions, PropertyTypeConfig, viewTypeNames, colTypeNames, taskCardStyleNames, getAllUIVisibleTaskProperties } from '../../../interfaces/Enums.js';
 import type { globalSettingsData } from '../../../interfaces/GlobalSettings.js';
 import { UpdateTaskEventData, taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
@@ -20,7 +20,7 @@ import { MarkdownUIRenderer } from '../../../services/MarkdownUIRenderer.js';
 import { openDateInputModal } from '../../modals/OpenModals.js';
 import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../../core/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../../utils/CheckBoxUtils.js';
-import { formatDateStringAsPerSettings, formatDateTimeAsPerSettings, getUniversalDateFromTask } from '../../../utils/DateTimeCalculations.js';
+import { formatDateStringAsPerSettings, formatDateTimeAsPerSettings, getLocalDateFromDateOnlyEpoch, getUniversalDateFromTask } from '../../../utils/DateTimeCalculations.js';
 import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId, normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
 import { cleanTaskTitleLegacy, dedentTaskBodyLines, isTaskTitleWithoutText } from '../../../utils/task_line/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskLineEventHandlers.js';
@@ -408,11 +408,27 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			return 'grey';
 		}
 
-		// Use robust date parser for reliable parsing
-		const parsedTaskDate =
-			universalDate === undefined ? null : new Date(universalDate);
+		const universalDatePropertyKey =
+			globalSettings.universalDate === UniversalDateOptions.dueDate
+				? DEFAULT_TASK_CACHE_KEYS.DueDate
+				: globalSettings.universalDate === UniversalDateOptions.startDate
+					? DEFAULT_TASK_CACHE_KEYS.StartDate
+					: globalSettings.universalDate === UniversalDateOptions.scheduledDate
+						? DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+						: undefined;
+		const universalDateProperty = universalDatePropertyKey
+			? globalSettings.taskProperties.find(
+					(property) => property.key === String(universalDatePropertyKey),
+				)
+			: undefined;
+		const isDateOnlyProperty =
+			universalDateProperty?.type === PropertyTypeConfig.date;
 
-		if (!parsedTaskDate || Number.isNaN(parsedTaskDate.getTime())) {
+		const parsedTaskDate = isDateOnlyProperty
+			? getLocalDateFromDateOnlyEpoch(universalDate)
+			: new Date(universalDate);
+
+		if (Number.isNaN(parsedTaskDate.getTime())) {
 			return 'grey'; // Invalid date, return grey
 		}
 
@@ -469,7 +485,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 		} else {
 			return 'grey'; // No due date or comparison failed
 		}
-	}, [universalDate, task[DEFAULT_TASK_CACHE_KEYS.Time], plugin.settings.data.dateFormat]);
+	}, [universalDate, task[DEFAULT_TASK_CACHE_KEYS.Time], plugin.settings.data.dateFormat, globalSettings.universalDate, globalSettings.taskProperties]);
 
 	// Function to get the card background color based on tags
 	function getCardBgBasedOnTag(): string | undefined {

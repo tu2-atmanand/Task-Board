@@ -6,9 +6,15 @@ import {
 	FilterCriterion,
 	AdvancedFilter,
 } from "../../interfaces/BoardConfigs.js";
-import { DEFAULT_DATE_FORMAT } from "../../interfaces/Constants.js";
+import {
+	DEFAULT_DATE_FORMAT,
+	DEFAULT_DATE_TIME_FORMAT,
+} from "../../interfaces/Constants.js";
 import { PropertyTypeConfig } from "../../interfaces/Enums.js";
-import { taskItem } from "../../interfaces/TaskItem.js";
+import {
+	coerceCustomTaskPropertyValue,
+	taskItem,
+} from "../../interfaces/TaskItem.js";
 import type TaskBoard from "../../../main.js";
 import {
 	compareDates,
@@ -16,9 +22,38 @@ import {
 } from "../../utils/DateTimeCalculations.js";
 import { getTaskPropertyValue } from "../../utils/TaskItemUtils.js";
 import { matchTagsWithWildcards } from "./ScanningFilterer.js";
+import { differenceInCalendarDays } from "date-fns";
 
 export class AdvancedFilterer {
 	constructor(private readonly plugin: TaskBoard) {}
+
+	/** Coerces a filter input into the same cached representation as task values. */
+	private getDateFilterValue(
+		propertyType: PropertyTypeConfig,
+		filterValue: unknown,
+		dateFormat: string,
+	): number | undefined {
+		if (
+			propertyType !== PropertyTypeConfig.date &&
+			propertyType !== PropertyTypeConfig.dateTime
+		) {
+			return undefined;
+		}
+
+		const preferredFormat =
+			propertyType === PropertyTypeConfig.date
+				? dateFormat || DEFAULT_DATE_FORMAT
+				: this.plugin.settings.data.dateTimeFormat ||
+					DEFAULT_DATE_TIME_FORMAT;
+
+		const coerced = coerceCustomTaskPropertyValue(
+			filterValue,
+			propertyType,
+			preferredFormat,
+			dateFormat || DEFAULT_DATE_FORMAT,
+		);
+		return typeof coerced === "number" ? coerced : undefined;
+	}
 
 	filterTasks<T extends taskItem>(
 		tasks: T[],
@@ -186,9 +221,43 @@ export class AdvancedFilterer {
 			);
 		case "equals":
 		case "is":
+			if (
+				propertyType === PropertyTypeConfig.date ||
+				propertyType === PropertyTypeConfig.dateTime
+			) {
+				if (typeof taskValue !== "number") return false;
+				const dateFilterValue = this.getDateFilterValue(
+					propertyType,
+					value,
+					dateFormat,
+				);
+				return (
+					dateFilterValue !== undefined &&
+					value !== undefined &&
+					// taskValue === dateFilterValue
+					differenceInCalendarDays(taskValue, value) === 0 // This will remove time and will do the comparison.
+				);
+			}
 			return taskValue == comparisonValue;
 		case "notEquals":
 		case "isNot":
+			if (
+				propertyType === PropertyTypeConfig.date ||
+				propertyType === PropertyTypeConfig.dateTime
+			) {
+				if (typeof taskValue !== "number") return false;
+				const dateFilterValue = this.getDateFilterValue(
+					propertyType,
+					value,
+					dateFormat,
+				);
+				return (
+					dateFilterValue !== undefined &&
+					value !== undefined &&
+					// taskValue === dateFilterValue
+					differenceInCalendarDays(taskValue, value) !== 0 // This will remove time and will do the comparison.
+				);
+			}
 			return taskValue != comparisonValue;
 		case "contains":
 			if (typeof taskValue === "string") {
@@ -252,7 +321,14 @@ export class AdvancedFilterer {
 					? typeof taskValue === "string"
 						? compareTimePropertyValue(taskValue, value, "asc")
 						: 0
-					: compareDates(taskValue, value, "asc", dateFormat)) < 0
+					: compareDates(
+						taskValue,
+						value,
+						"asc",
+						dateFormat,
+						propertyType,
+						this.plugin.settings.data.dateTimeFormat || DEFAULT_DATE_TIME_FORMAT,
+					)) < 0
 			);
 		case "after":
 			if (
@@ -266,7 +342,14 @@ export class AdvancedFilterer {
 					? typeof taskValue === "string"
 						? compareTimePropertyValue(taskValue, value, "asc")
 						: 0
-					: compareDates(taskValue, value, "asc", dateFormat)) > 0
+					: compareDates(
+						taskValue,
+						value,
+						"asc",
+						dateFormat,
+						propertyType,
+						this.plugin.settings.data.dateTimeFormat || DEFAULT_DATE_TIME_FORMAT,
+					)) > 0
 			);
 		case "onOrBefore":
 			if (
@@ -280,7 +363,14 @@ export class AdvancedFilterer {
 					? typeof taskValue === "string"
 						? compareTimePropertyValue(taskValue, value, "asc")
 						: 0
-					: compareDates(taskValue, value, "asc", dateFormat)) <= 0
+					: compareDates(
+						taskValue,
+						value,
+						"asc",
+						dateFormat,
+						propertyType,
+						this.plugin.settings.data.dateTimeFormat || DEFAULT_DATE_TIME_FORMAT,
+					)) <= 0
 			);
 		case "onOrAfter":
 			if (
@@ -294,7 +384,14 @@ export class AdvancedFilterer {
 					? typeof taskValue === "string"
 						? compareTimePropertyValue(taskValue, value, "asc")
 						: 0
-					: compareDates(taskValue, value, "asc", dateFormat)) >= 0
+					: compareDates(
+						taskValue,
+						value,
+						"asc",
+						dateFormat,
+						propertyType,
+						this.plugin.settings.data.dateTimeFormat || DEFAULT_DATE_TIME_FORMAT,
+					)) >= 0
 			);
 		case "hasTag":
 			if (Array.isArray(taskValue)) {
