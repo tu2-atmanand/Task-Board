@@ -1,5 +1,6 @@
 import {
 	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
 	taskPropertyFormatOptions,
 } from "../../interfaces/Enums.js";
 import {
@@ -95,6 +96,7 @@ function extractConfiguredTaskProperties(
 		const value = coerceCustomTaskPropertyValue(
 			match?.[1],
 			timeProperty.type,
+			settings.dateTimeFormat,
 		);
 		if (value !== undefined) result[timeProperty.key] = value;
 	}
@@ -133,7 +135,14 @@ function extractConfiguredTaskProperties(
 		} else if (raw.startsWith("'") && raw.endsWith("'")) {
 			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
 		}
-		const value = coerceCustomTaskPropertyValue(raw, property.type);
+		const value = coerceCustomTaskPropertyValue(
+			raw,
+			property.type,
+			property.type === PropertyTypeConfig.date
+				? settings.dateFormat
+				: settings.dateTimeFormat,
+			settings.dateFormat,
+		);
 		if (value !== undefined) result[property.key] = value;
 	}
 	return result;
@@ -235,6 +244,32 @@ export function buildTaskFromRawContent(
 	const completionDate = extractCompletionDate(firstLine, taskProperties);
 	const cancelledDate = extractCancelledDate(firstLine, taskProperties);
 	const body = extractBody(lines, 1, indentationString);
+	const parseDateProperty = (
+		value: string | undefined,
+		key: DEFAULT_TASK_CACHE_KEYS,
+	): number | undefined => {
+		if (!value) return undefined;
+		const property = settings?.taskProperties.find(
+			(candidate) => candidate.key === key,
+		);
+		const type = property?.type ?? PropertyTypeConfig.dateTime;
+		if (
+			type !== PropertyTypeConfig.date &&
+			type !== PropertyTypeConfig.dateTime
+		) {
+			return undefined;
+		}
+		const convertedValue = coerceCustomTaskPropertyValue(
+			value,
+			type,
+			type === PropertyTypeConfig.date
+				? settings?.dateFormat
+				: settings?.dateTimeFormat,
+		);
+		return typeof convertedValue === "number"
+			? convertedValue
+			: undefined;
+	};
 
 	return {
 		...(settings ? extractTaskPropertiesAllTYpe(firstLine, settings) : {}),
@@ -242,14 +277,32 @@ export function buildTaskFromRawContent(
 		status: taskStatus ?? " ",
 		body: body,
 		time: time?.[1] ?? "",
-		createdDate: createdDate?.[1] ?? "",
-		startDate: startDate?.[1] ?? "",
-		scheduledDate: scheduledDate?.[1] ?? "",
-		dueDate: due?.[1] ?? "",
+		createdDate: parseDateProperty(
+			createdDate?.[1],
+			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+		),
+		startDate: parseDateProperty(
+			startDate?.[1],
+			DEFAULT_TASK_CACHE_KEYS.StartDate,
+		),
+		scheduledDate: parseDateProperty(
+			scheduledDate?.[1],
+			DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+		),
+		dueDate: parseDateProperty(
+			due?.[1],
+			DEFAULT_TASK_CACHE_KEYS.DueDate,
+		),
 		tags: tags,
 		priority: priority.value,
-		completionDate: completionDate?.[1] ?? "",
-		cancelledDate: cancelledDate?.[1] ?? "",
+		completionDate: parseDateProperty(
+			completionDate?.[1],
+			DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+		),
+		cancelledDate: parseDateProperty(
+			cancelledDate?.[1],
+			DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+		),
 		filePath: filePath || "",
 	};
 }

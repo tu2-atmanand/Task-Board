@@ -8,9 +8,14 @@ import {
 	EditButtonMode,
 	statusTypeNames,
 	UniversalDateOptions,
+	PropertyTypeConfig,
 } from "../interfaces/Enums.js";
 import { globalSettingsData } from "../interfaces/GlobalSettings.js";
-import { taskItem, UpdateTaskEventData } from "../interfaces/TaskItem.js";
+import {
+	coerceCustomTaskPropertyValue,
+	taskItem,
+	UpdateTaskEventData,
+} from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { eventEmitter } from "../services/EventEmitter.js";
 import {
@@ -35,6 +40,26 @@ import {
 	updateFrontmatterInMarkdownFile,
 } from "./task_note/TaskNoteUtils.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../interfaces/Enums.js";
+
+function coerceTaskDateValue(
+	globalSettings: globalSettingsData,
+	propertyKey: string,
+	value: unknown,
+): number | undefined {
+	const property = globalSettings.taskProperties.find(
+		(candidate) => candidate.key === propertyKey,
+	);
+	if (!property) return undefined;
+	const convertedValue = coerceCustomTaskPropertyValue(
+		value,
+		property.type,
+		property.type === PropertyTypeConfig.date
+			? globalSettings.dateFormat
+			: globalSettings.dateTimeFormat,
+		globalSettings.dateFormat,
+	);
+	return typeof convertedValue === "number" ? convertedValue : undefined;
+}
 
 
 /**
@@ -375,13 +400,25 @@ export const updateTaskItemDate = (
 	let newTask = { ...taskUpdated };
 	switch (dateType) {
 		case UniversalDateOptions.startDate:
-			newTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = newDate;
+			newTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = coerceTaskDateValue(
+				plugin.settings.data,
+				DEFAULT_TASK_CACHE_KEYS.StartDate,
+				newDate,
+			);
 			break;
 		case UniversalDateOptions.scheduledDate:
-			newTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = newDate;
+			newTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = coerceTaskDateValue(
+				plugin.settings.data,
+				DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+				newDate,
+			);
 			break;
 		case UniversalDateOptions.dueDate:
-			newTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = newDate;
+			newTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = coerceTaskDateValue(
+				plugin.settings.data,
+				DEFAULT_TASK_CACHE_KEYS.DueDate,
+				newDate,
+			);
 			break;
 		default:
 			bugReporterManagerInsatance.addToLogs(
@@ -475,7 +512,11 @@ export const updateTaskItemReminder = (
 	newReminder: string,
 ) => {
 	const newTask = { ...taskUpdated };
-	newTask[DEFAULT_TASK_CACHE_KEYS.Reminder] = newReminder;
+	newTask[DEFAULT_TASK_CACHE_KEYS.Reminder] = coerceTaskDateValue(
+		plugin.settings.data,
+		DEFAULT_TASK_CACHE_KEYS.Reminder,
+		newReminder,
+	);
 
 	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
 
@@ -621,22 +662,46 @@ export const updateTaskItemProperty = async (
 			}
 			break;
 		case "reminder":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] = newValue as string;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] = coerceTaskDateValue(
+				globalSettings,
+				DEFAULT_TASK_CACHE_KEYS.Reminder,
+				newValue,
+			);
 			break;
 		case "startDate":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = newValue as string;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = coerceTaskDateValue(
+				globalSettings,
+				DEFAULT_TASK_CACHE_KEYS.StartDate,
+				newValue,
+			);
 			break;
 		case "scheduledDate":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = newValue as string;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = coerceTaskDateValue(
+				globalSettings,
+				DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+				newValue,
+			);
 			break;
 		case "due":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = newValue as string;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = coerceTaskDateValue(
+				globalSettings,
+				DEFAULT_TASK_CACHE_KEYS.DueDate,
+				newValue,
+			);
 			break;
 		case "completion":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = newValue as string;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = coerceTaskDateValue(
+				globalSettings,
+				DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+				newValue,
+			);
 			break;
 		case "cancelledDate":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = newValue as string;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = coerceTaskDateValue(
+				globalSettings,
+				DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+				newValue,
+			);
 			break;
 		case "time":
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] = newValue as string;

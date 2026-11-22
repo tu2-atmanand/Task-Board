@@ -3,11 +3,9 @@ import { ArrowDownUp, ListTodo } from "lucide-react";
 import { Component, View } from "obsidian";
 import TaskBoard from "../../../../main.js";
 import type { Board, TaskBoardViewType } from "../../../interfaces/BoardConfigs.js";
-import { DEFAULT_DATE_FORMAT } from "../../../interfaces/Constants.js";
 import { viewTypeNames } from "../../../interfaces/Enums.js";
 import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
 import TaskCardParent from "../../components/task_card/TaskCardParent.js";
-import { robustDateParser } from "../../../utils/DateTimeCalculations.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
 
@@ -38,8 +36,6 @@ const ListView: React.FC<ListViewProps> = ({
 	const [taskSort, setTaskSort] = useState<TaskSort>("default");
 	const [visibleTaskCount, setVisibleTaskCount] = useState(INITIAL_TASK_COUNT);
 	const taskCardComponent = TaskCardParent;
-	const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
-
 	const sortedTasks = useMemo(() => {
 		const tasksToShow = taskFilter === "open"
 			? tasks.Pending
@@ -60,8 +56,8 @@ const ListView: React.FC<ListViewProps> = ({
 						(first[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0) -
 						(second[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0);
 				} else {
-					const firstDate = first[DEFAULT_TASK_CACHE_KEYS.DueDate] ? robustDateParser(first[DEFAULT_TASK_CACHE_KEYS.DueDate], dateFormat)?.getTime() : undefined;
-					const secondDate = second[DEFAULT_TASK_CACHE_KEYS.DueDate] ? robustDateParser(second[DEFAULT_TASK_CACHE_KEYS.DueDate], dateFormat)?.getTime() : undefined;
+					const firstDate = first[DEFAULT_TASK_CACHE_KEYS.DueDate];
+					const secondDate = second[DEFAULT_TASK_CACHE_KEYS.DueDate];
 					if (firstDate === undefined && secondDate !== undefined) return 1;
 					if (secondDate === undefined && firstDate !== undefined) return -1;
 					comparison = (firstDate ?? 0) - (secondDate ?? 0);
@@ -69,7 +65,7 @@ const ListView: React.FC<ListViewProps> = ({
 				return comparison || firstIndex - secondIndex;
 			})
 			.map(({ task }) => task);
-	}, [dateFormat, taskFilter, taskSort, tasks]);
+	}, [taskFilter, taskSort, tasks]);
 
 	const visibleTasks = sortedTasks.slice(0, visibleTaskCount);
 	const filters: { value: TaskFilter; label: string; count: number }[] = [

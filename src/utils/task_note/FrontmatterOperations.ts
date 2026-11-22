@@ -14,7 +14,11 @@ import {
 	taskItem,
 } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
-import { formatToday } from "../DateTimeCalculations.js";
+import {
+	formatDateStringAsPerSettings,
+	formatDateTimeAsPerSettings,
+	formatToday,
+} from "../DateTimeCalculations.js";
 import {
 	generateTaskId,
 	getPriorityNameUsingPriorityNumber,
@@ -22,6 +26,44 @@ import {
 } from "../TaskItemUtils.js";
 import type { SupportedPropertiesConfig } from "../../interfaces/GlobalSettings.js";
 import { compareTwoTags } from "../../core/algorithms/ScanningFilterer.js";
+
+function getTaskPropertyDateFormat(
+	plugin: TaskBoard,
+	property: SupportedPropertiesConfig,
+): string {
+	return property.type === PropertyTypeConfig.date
+		? plugin.settings.data.dateFormat
+		: plugin.settings.data.dateTimeFormat;
+}
+
+function getTaskPropertyMarkdownValue(
+	plugin: TaskBoard,
+	property: SupportedPropertiesConfig,
+	value: unknown,
+): unknown {
+	const convertedValue = coerceCustomTaskPropertyValue(
+		value,
+		property.type,
+		getTaskPropertyDateFormat(plugin, property),
+		plugin.settings.data.dateFormat,
+	);
+	if (convertedValue === undefined) return undefined;
+	if (property.type === PropertyTypeConfig.date) {
+		if (typeof convertedValue !== "number") return undefined;
+		return formatDateStringAsPerSettings(
+			convertedValue,
+			plugin.settings.data.dateFormat,
+		);
+	}
+	if (property.type === PropertyTypeConfig.dateTime) {
+		if (typeof convertedValue !== "number") return undefined;
+		return formatDateTimeAsPerSettings(
+			convertedValue,
+			plugin.settings.data.dateTimeFormat,
+		);
+	}
+	return convertedValue;
+}
 
 /**
  * Extract frontmatter from file content
@@ -214,7 +256,7 @@ export function createFrontmatterFromTask(
 	task: taskItem,
 ): string {
 	const frontmatterObj: Record<string, unknown> = {};
-	const taskValues = task as taskItem & Record<string, unknown>;
+	const taskValues = task;
 	for (const property of plugin.settings.data.taskProperties) {
 		if (!property.id || !property.key) continue;
 		const value = taskValues[property.key];
@@ -280,10 +322,11 @@ export function createFrontmatterFromTask(
 							String(DEFAULT_TASK_CACHE_KEYS.Dependencies) &&
 						Array.isArray(value)
 							? value
-							: (coerceCustomTaskPropertyValue(
+							: getTaskPropertyMarkdownValue(
+									plugin,
+									property,
 									value,
-									property.type,
-								) ?? value);
+								);
 				}
 		}
 	}
@@ -311,7 +354,7 @@ export function updateFrontmatterProperties(
 	forceId?: boolean,
 ): Partial<customFrontmatterCache> {
 	const taskProperties = plugin.settings.data.taskProperties;
-	const taskValues = task as taskItem & Record<string, unknown>;
+	const taskValues = task;
 	const tempUpdates: Record<string, unknown> = {};
 	const statusConfig = plugin.settings.data.customStatuses.find(
 		(status) => status.symbol === task[DEFAULT_TASK_CACHE_KEYS.Status],
@@ -348,11 +391,11 @@ export function updateFrontmatterProperties(
 			continue;
 		}
 
-		const convertedValue = coerceCustomTaskPropertyValue(
+		tempUpdates[property.id] = getTaskPropertyMarkdownValue(
+			plugin,
+			property,
 			value,
-			property.type,
 		);
-		tempUpdates[property.id] = convertedValue ?? value;
 	}
 
 	const tagsProperty = taskProperties.find(
@@ -460,8 +503,12 @@ export function updateFrontmatterProperties(
 	if (cancelledDateProperty?.id) {
 		if (statusType === statusTypeNames.CANCELLED) {
 			tempUpdates[cancelledDateProperty.id] =
-				task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] ||
-				formatToday(plugin.settings.data.dateFormat);
+				getTaskPropertyMarkdownValue(
+					plugin,
+					cancelledDateProperty,
+					task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] ??
+						formatToday(plugin.settings.data.dateFormat),
+				);
 		} else {
 			delete tempUpdates[cancelledDateProperty.id];
 			if (existingFrontmatter)
@@ -477,8 +524,12 @@ export function updateFrontmatterProperties(
 	if (completionDateProperty?.id) {
 		if (statusType === statusTypeNames.DONE) {
 			tempUpdates[completionDateProperty.id] =
-				task[DEFAULT_TASK_CACHE_KEYS.CompletionDate] ||
-				formatToday(plugin.settings.data.dateFormat);
+				getTaskPropertyMarkdownValue(
+					plugin,
+					completionDateProperty,
+					task[DEFAULT_TASK_CACHE_KEYS.CompletionDate] ??
+						formatToday(plugin.settings.data.dateFormat),
+				);
 		} else {
 			delete tempUpdates[completionDateProperty.id];
 			if (existingFrontmatter)

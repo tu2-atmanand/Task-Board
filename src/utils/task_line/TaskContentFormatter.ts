@@ -1161,27 +1161,24 @@ function formatTaskPropertyValue(
 	property: SupportedPropertiesConfig,
 	value: unknown,
 ): string {
-	if (value instanceof Date) {
-		value =
-			property.type === PropertyTypeConfig.date
-				? formatDateStringAsPerSettings(
-						value.toISOString(),
-						globalSettings.dateFormat,
-					)
-				: formatDateTimeAsPerSettings(
-						value.toISOString(),
-						globalSettings.dateTimeFormat,
-					);
-	} else if (property.type === PropertyTypeConfig.date) {
+	if (property.type === PropertyTypeConfig.date) {
 		value =
 			formatDateStringAsPerSettings(
-				String(value),
+				value instanceof Date ||
+					typeof value === "number" ||
+					typeof value === "string"
+					? value
+					: String(value),
 				globalSettings.dateFormat,
 			) || value;
 	} else if (property.type === PropertyTypeConfig.dateTime) {
 		value =
 			formatDateTimeAsPerSettings(
-				String(value),
+				value instanceof Date ||
+					typeof value === "number" ||
+					typeof value === "string"
+					? value
+					: String(value),
 				globalSettings.dateTimeFormat,
 			) || value;
 	}
@@ -1291,7 +1288,7 @@ export const sanitizeTaskProperty = (
 export const sanitizeCreatedDate = (
 	globalSettings: globalSettingsData,
 	title: string,
-	createdDate: string,
+	createdDate: string | number,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
 	return sanitizeTaskProperty(
@@ -1314,7 +1311,7 @@ export const sanitizeCreatedDate = (
 export const sanitizeStartDate = (
 	globalSettings: globalSettingsData,
 	title: string,
-	startDate: string,
+	startDate: string | number,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
 	return sanitizeTaskProperty(
@@ -1337,7 +1334,7 @@ export const sanitizeStartDate = (
 export const sanitizeScheduledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
-	scheduledDate: string,
+	scheduledDate: string | number,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
 	return sanitizeTaskProperty(
@@ -1360,7 +1357,7 @@ export const sanitizeScheduledDate = (
 export const sanitizeDueDate = (
 	globalSettings: globalSettingsData,
 	title: string,
-	dueDate: string,
+	dueDate: string | number,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
 	return sanitizeTaskProperty(
@@ -1383,7 +1380,7 @@ export const sanitizeDueDate = (
 export const sanitizeCompletionDate = (
 	globalSettings: globalSettingsData,
 	title: string,
-	completionDate: string,
+	completionDate: string | number,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
 	return sanitizeTaskProperty(
@@ -1406,7 +1403,7 @@ export const sanitizeCompletionDate = (
 export const sanitizeCancelledDate = (
 	globalSettings: globalSettingsData,
 	title: string,
-	cancelledDate: string,
+	cancelledDate: string | number,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
 	return sanitizeTaskProperty(
@@ -1430,10 +1427,10 @@ export const sanitizeCancelledDate = (
 export const sanitizeReminder = (
 	globalSettings: globalSettingsData,
 	title: string,
-	newReminder: string,
+	newReminder: string | number,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
-	const formatReminder = (reminder: string) => {
+	const formatReminder = (reminder: string | number) => {
 		const date = new Date(reminder);
 		if (
 			globalSettings.notificationService ===

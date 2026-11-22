@@ -13,7 +13,6 @@ import {
 	taskItemWithCustomProperties,
 } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
-import { robustDateParser } from "../../utils/DateTimeCalculations.js";
 import { getAllTaskTags } from "../../utils/TaskItemUtils.js";
 import { AdvancedFilterer } from "./AdvancedFilterer.js";
 import { columnSortingAlgorithm } from "./ColumnSortingAlgorithm.js";
@@ -87,7 +86,7 @@ export const columnSegregator = (
 					taskUniversalDate =
 						task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 				}
-				if (!taskUniversalDate || taskUniversalDate === "")
+				if (taskUniversalDate === undefined)
 					return false;
 
 				// ---------- METHOD 1 -------------
@@ -158,15 +157,9 @@ export const columnSegregator = (
 
 				//  ---------- METHOD 4 -------------
 				// Parse the task's universal date using robust parser
-				const universalDateFormat =
-					settings.data.dateFormat || DEFAULT_DATE_FORMAT;
+				const parsedTaskDate = new Date(taskUniversalDate);
 
-				let parsedTaskDate = robustDateParser(
-					taskUniversalDate,
-					universalDateFormat,
-				);
-
-				if (!parsedTaskDate) {
+				if (Number.isNaN(parsedTaskDate.getTime())) {
 					return false;
 				}
 

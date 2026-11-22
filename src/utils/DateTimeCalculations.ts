@@ -209,24 +209,29 @@ export const getCurrentLocalDateTimeStringLegacy = (
  * @returns Formatted date string if successful, otherwise returns the original dateString.
  */
 export const formatDateStringAsPerSettings = (
-	dateString: string,
+	dateString: string | number | Date,
 	dateFormat: string = DEFAULT_DATE_FORMAT,
 ): string => {
-	if (!dateString) {
-		return dateString;
+	if (dateString === "") {
+		return String(dateString);
 	}
 
 	try {
-		let parsedDate: Date | null = robustDateParser(dateString, dateFormat);
+		const parsedDate =
+			dateString instanceof Date
+				? dateString
+				: typeof dateString === "number"
+					? new Date(dateString)
+					: robustDateParser(dateString, dateFormat);
 
 		// If we have a valid date, format it
-		if (parsedDate) {
+		if (parsedDate && isValid(parsedDate)) {
 			return format(parsedDate, dateFormat);
 		}
 
-		return dateString;
+		return String(dateString);
 	} catch (error) {
-		return dateString;
+		return String(dateString);
 	}
 };
 
@@ -239,27 +244,29 @@ export const formatDateStringAsPerSettings = (
  * @returns Formatted date-time string if successful, otherwise returns the original dateTimeString.
  */
 export const formatDateTimeAsPerSettings = (
-	dateTimeString: string,
+	dateTimeString: string | number | Date,
 	dateTimeFormat: string = DEFAULT_DATE_TIME_FORMAT,
 ): string => {
-	if (!dateTimeString) {
-		return dateTimeString;
+	if (dateTimeString === "") {
+		return String(dateTimeString);
 	}
 
 	try {
-		let parsedDate: Date | null = robustDateParser(
-			dateTimeString,
-			dateTimeFormat,
-		);
+		const parsedDate =
+			dateTimeString instanceof Date
+				? dateTimeString
+				: typeof dateTimeString === "number"
+					? new Date(dateTimeString)
+					: robustDateParser(dateTimeString, dateTimeFormat);
 
 		// If we have a valid date, format it
-		if (parsedDate) {
+		if (parsedDate && isValid(parsedDate)) {
 			return format(parsedDate, dateTimeFormat);
 		}
 
-		return dateTimeString;
+		return String(dateTimeString);
 	} catch (error) {
-		return dateTimeString;
+		return String(dateTimeString);
 	}
 };
 
@@ -299,24 +306,24 @@ export function getAllDatesInRelativeRange(
 }
 
 /**
- * Returns the universal date of a task based on the plugin's global settings.
- * If the universal date is not set or the task does not have a value for the universal date, an empty string is returned.
+ * Returns the universal date in epoch milliseconds, or undefined if not set.
  * @param task - The task object containing the universal date values.
  * @param universalDateType - The type of the universal date which user has set inside plugin.settings.universalDate.
- * @returns The universal date of the task as a string, or an empty string if not set. */
+ * @returns The universal date in epoch milliseconds, or undefined if not set.
+ */
 export const getUniversalDateFromTask = (
 	task: taskItem,
 	universalDateType: UniversalDateOptions,
-): string => {
+): number | undefined => {
 	// Method 1 - Comparing
 	if (universalDateType === UniversalDateOptions.dueDate) {
-		return task[DEFAULT_TASK_CACHE_KEYS.DueDate] || "";
+		return task[DEFAULT_TASK_CACHE_KEYS.DueDate];
 	} else if (universalDateType === UniversalDateOptions.startDate) {
-		return task[DEFAULT_TASK_CACHE_KEYS.StartDate] || "";
+		return task[DEFAULT_TASK_CACHE_KEYS.StartDate];
 	} else if (universalDateType === UniversalDateOptions.scheduledDate) {
-		return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || "";
+		return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
 	}
-	return "";
+	return undefined;
 
 	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.universalDate
 	// const universalDateChoice =
@@ -399,22 +406,39 @@ function compareDatesExpensive(
  * Handles empty/null dates by placing them at the end for ascending order
  */
 export function compareDates(
-	date1: string,
-	date2: string,
+	date1: string | number | Date,
+	date2: string | number | Date,
 	order: "asc" | "desc",
+	dateFormat: string = DEFAULT_DATE_FORMAT,
 ): number {
 	// Handle empty/null values
-	const hasDate1 = date1 && date1 !== "";
-	const hasDate2 = date2 && date2 !== "";
+	const hasDate1 =
+		typeof date1 === "number" || date1 instanceof Date
+			? true
+			: date1 !== "";
+	const hasDate2 =
+		typeof date2 === "number" || date2 instanceof Date
+			? true
+			: date2 !== "";
 
 	if (!hasDate1 && !hasDate2) return 0;
 	if (!hasDate1) return order === "asc" ? 1 : -1; // Empty values go to end for asc, start for desc
 	if (!hasDate2) return order === "asc" ? -1 : 1;
 
-	const d1 = new Date(date1);
-	const d2 = new Date(date2);
+	const d1 =
+		typeof date1 === "number"
+			? new Date(date1)
+			: date1 instanceof Date
+				? date1
+				: robustDateParser(date1, dateFormat);
+	const d2 =
+		typeof date2 === "number"
+			? new Date(date2)
+			: date2 instanceof Date
+				? date2
+				: robustDateParser(date2, dateFormat);
 
-	if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+	if (!d1 || !d2 || isNaN(d1.getTime()) || isNaN(d2.getTime())) {
 		return 0;
 	}
 

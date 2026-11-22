@@ -66,22 +66,22 @@ export function normalizeTaskItem(
 		[DEFAULT_TASK_CACHE_KEYS.Time]:
 			task[DEFAULT_TASK_CACHE_KEYS.Time] ?? "",
 		[DEFAULT_TASK_CACHE_KEYS.CreatedDate]:
-			task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] ?? "",
+			task[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
 		[DEFAULT_TASK_CACHE_KEYS.StartDate]:
-			task[DEFAULT_TASK_CACHE_KEYS.StartDate] ?? "",
+			task[DEFAULT_TASK_CACHE_KEYS.StartDate],
 		[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]:
-			task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] ?? "",
+			task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
 		[DEFAULT_TASK_CACHE_KEYS.DueDate]:
-			task[DEFAULT_TASK_CACHE_KEYS.DueDate] ?? "",
+			task[DEFAULT_TASK_CACHE_KEYS.DueDate],
 		[DEFAULT_TASK_CACHE_KEYS.Dependencies]:
 			task[DEFAULT_TASK_CACHE_KEYS.Dependencies] ??
 			EMPTY_TASK_STRING_ARRAY,
 		[DEFAULT_TASK_CACHE_KEYS.Reminder]:
-			task[DEFAULT_TASK_CACHE_KEYS.Reminder] ?? "",
+			task[DEFAULT_TASK_CACHE_KEYS.Reminder],
 		[DEFAULT_TASK_CACHE_KEYS.CompletionDate]:
-			task[DEFAULT_TASK_CACHE_KEYS.CompletionDate] ?? "",
+			task[DEFAULT_TASK_CACHE_KEYS.CompletionDate],
 		[DEFAULT_TASK_CACHE_KEYS.CancelledDate]:
-			task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] ?? "",
+			task[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
 	} as Required<taskItemWithCustomProperties>;
 }
 

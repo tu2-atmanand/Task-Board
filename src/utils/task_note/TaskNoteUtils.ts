@@ -20,7 +20,10 @@ import {
 	createYamlFromObject,
 	extractFrontmatterTags,
 } from "./FrontmatterOperations.js";
-import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
+} from "../../interfaces/Enums.js";
 import {
 	getPriorityNumberUsingPriorityName,
 	getStatusSymbolFromStatusName,
@@ -132,7 +135,14 @@ export function extractTaskNoteProperties(
 				break;
 			case DEFAULT_TASK_CACHE_KEYS.Dependencies:
 				taskPropertiesByKey[property.key] =
-					coerceCustomTaskPropertyValue(rawValue, property.type) ??
+					coerceCustomTaskPropertyValue(
+						rawValue,
+						property.type,
+						property.type === PropertyTypeConfig.date
+							? settings.data.dateFormat
+							: settings.data.dateTimeFormat,
+						settings.data.dateFormat,
+					) ??
 					(typeof rawValue === "string" && rawValue.trim()
 						? rawValue.split(",").map((item) => item.trim())
 						: undefined);
@@ -141,6 +151,10 @@ export function extractTaskNoteProperties(
 				const value = coerceCustomTaskPropertyValue(
 					rawValue,
 					property.type,
+					property.type === PropertyTypeConfig.date
+						? settings.data.dateFormat
+						: settings.data.dateTimeFormat,
+					settings.data.dateFormat,
 				);
 				if (value !== undefined)
 					taskPropertiesByKey[property.key] = value;

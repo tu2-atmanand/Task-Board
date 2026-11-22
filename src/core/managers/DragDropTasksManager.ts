@@ -812,8 +812,8 @@ class DragDropTasksManager {
 		let newTask: taskItem = {
 			...task,
 			status: " ",
-			completionDate: "",
-			cancelledDate: "",
+			completionDate: undefined,
+			cancelledDate: undefined,
 		};
 		if (
 			!isTaskNotePresentInTags(

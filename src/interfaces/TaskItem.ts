@@ -1,5 +1,10 @@
 import { FrontMatterCache } from "obsidian";
 import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "./Enums.js";
+import { robustDateParser } from "../utils/DateTimeCalculations.js";
+import {
+	DEFAULT_DATE_FORMAT,
+	DEFAULT_DATE_TIME_FORMAT,
+} from "./Constants.js";
 
 export interface taskLocation {
 	startLine: number; // The line number where the task starts
@@ -12,17 +17,18 @@ export type CustomTaskPropertyValueType = string | number | boolean | string[];
 
 /**
  * Coerce a configured custom-property value without changing built-in task fields.
- * 
- * This function will return undefined instead of returning empty string, null or 
- * 0 for priority property. Which will help for value checking. It will also convert 
- * date and date-time value into the UTC millisecond value.
- * 
+ *
+ * Date and date-time values are stored as epoch milliseconds. Unparseable
+ * dates return undefined so invalid source values do not enter the task cache.
+ *
  * @param value Any value you want to type check against its configured type.
  * @param type The data-type in which format the value of the property should be stored.
  */
 export function coerceCustomTaskPropertyValue(
 	value: unknown,
 	type: PropertyTypeConfig,
+	preferredDateFormat?: string,
+	fallbackDateFormat?: string,
 ): CustomTaskPropertyValueType | undefined {
 	if (value === undefined || value === null || value === "") return undefined;
 	switch (type) {
@@ -49,15 +55,47 @@ export function coerceCustomTaskPropertyValue(
 					: undefined;
 		case PropertyTypeConfig.text:
 		case PropertyTypeConfig.time:
-		case PropertyTypeConfig.date:
-		case PropertyTypeConfig.dateTime:
-			if (value instanceof Date && Number.isFinite(value.getTime())) {
-				const isoValue = value.toISOString();
-				return type === PropertyTypeConfig.date
-					? isoValue.slice(0, 10)
-					: isoValue;
-			}
 			return typeof value === "string" ? value : JSON.stringify(value);
+		case PropertyTypeConfig.date:
+		case PropertyTypeConfig.dateTime: {
+			if (value instanceof Date) {
+				return Number.isFinite(value.getTime())
+					? value.getTime()
+					: undefined;
+			}
+			if (typeof value === "number") {
+				return Number.isFinite(value) &&
+					Number.isFinite(new Date(value).getTime())
+					? value
+					: undefined;
+			}
+			if (typeof value !== "string" || value.trim() === "") {
+				return undefined;
+			}
+
+			const includesTime = /(?:T|\s)\d{1,2}:\d{2}/.test(value);
+			const formatsToTry =
+				type === PropertyTypeConfig.dateTime && !includesTime
+					? [
+							fallbackDateFormat ?? DEFAULT_DATE_FORMAT,
+							preferredDateFormat ?? DEFAULT_DATE_TIME_FORMAT,
+						]
+					: [
+							preferredDateFormat ??
+								(type === PropertyTypeConfig.date
+									? DEFAULT_DATE_FORMAT
+									: DEFAULT_DATE_TIME_FORMAT),
+							fallbackDateFormat ?? DEFAULT_DATE_FORMAT,
+						];
+			let date: Date | null = null;
+			for (const dateFormat of new Set(formatsToTry)) {
+				date = robustDateParser(value, dateFormat);
+				if (date) break;
+			}
+			return date && Number.isFinite(date.getTime())
+				? date.getTime()
+				: undefined;
+		}
 		default:
 			return undefined;
 	}
@@ -73,13 +111,13 @@ export interface oldTaskItem {
 	[DEFAULT_TASK_CACHE_KEYS.Tags]?: string[];
 	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]?: string[]; // Tags extracted from frontmatter
 	[DEFAULT_TASK_CACHE_KEYS.Time]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.StartDate]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.DueDate]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.CompletionDate]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.CancelledDate]?: string;
-	[DEFAULT_TASK_CACHE_KEYS.Reminder]?: string; // A date-time value.
+	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]?: number;
+	[DEFAULT_TASK_CACHE_KEYS.StartDate]?: number;
+	[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]?: number;
+	[DEFAULT_TASK_CACHE_KEYS.DueDate]?: number;
+	[DEFAULT_TASK_CACHE_KEYS.CompletionDate]?: number;
+	[DEFAULT_TASK_CACHE_KEYS.CancelledDate]?: number;
+	[DEFAULT_TASK_CACHE_KEYS.Reminder]?: number; // Epoch milliseconds.
 	[DEFAULT_TASK_CACHE_KEYS.Dependencies]?: string[]; // Array of task IDs that this task depends on
 	[DEFAULT_TASK_CACHE_KEYS.FilePath]: string;
 	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: taskLocation; // Only for inline-task.
@@ -90,9 +128,7 @@ export interface oldTaskItem {
  * An interface to build a cache for a task object with default
  * properties as well as user's custom properties.
  *
- * @note - This interface has been modified from the older interface {@link oldTaskItem}
- * just for testing phase. If everything works fine, then we can keep it, else
- * rename back the {@link oldTaskItem} to taskItem and delete this interface.
+ * Date and date-time cache fields use epoch milliseconds.
  */
 export type taskItem = oldTaskItem &
 	Record<string, CustomTaskPropertyValueType | taskLocation | undefined>;
@@ -109,13 +145,13 @@ export interface customFrontmatterCache extends FrontMatterCache {
 	status?: string;
 	priority?: string | number;
 	tags?: string[] | string;
-	"created-date"?: string;
-	"start-date"?: string;
-	"schedule-date"?: string;
-	"due-date"?: string;
-	"cancelled-date"?: string;
-	"completion-date"?: string;
-	reminder?: string;
+	"created-date"?: string | number | Date;
+	"start-date"?: string | number | Date;
+	"schedule-date"?: string | number | Date;
+	"due-date"?: string | number | Date;
+	"cancelled-date"?: string | number | Date;
+	"completion-date"?: string | number | Date;
+	reminder?: string | number | Date;
 }
 
 export interface noteItem {

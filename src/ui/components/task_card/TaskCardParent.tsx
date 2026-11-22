@@ -20,7 +20,7 @@ import { MarkdownUIRenderer } from '../../../services/MarkdownUIRenderer.js';
 import { openDateInputModal } from '../../modals/OpenModals.js';
 import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../../core/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../../utils/CheckBoxUtils.js';
-import { getUniversalDateFromTask, robustDateParser } from '../../../utils/DateTimeCalculations.js';
+import { formatDateStringAsPerSettings, formatDateTimeAsPerSettings, getUniversalDateFromTask } from '../../../utils/DateTimeCalculations.js';
 import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId, normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
 import { cleanTaskTitleLegacy, dedentTaskBodyLines, isTaskTitleWithoutText } from '../../../utils/task_line/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskLineEventHandlers.js';
@@ -404,15 +404,15 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 
 	const getColorIndicator = useCallback(() => {
 		// Return grey if there's no universal date
-		if (!universalDate) {
+		if (universalDate === undefined) {
 			return 'grey';
 		}
 
 		// Use robust date parser for reliable parsing
-		const dateFormatToUse = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
-		const parsedTaskDate = robustDateParser(universalDate, dateFormatToUse);
+		const parsedTaskDate =
+			universalDate === undefined ? null : new Date(universalDate);
 
-		if (!parsedTaskDate) {
+		if (!parsedTaskDate || Number.isNaN(parsedTaskDate.getTime())) {
 			return 'grey'; // Invalid date, return grey
 		}
 
@@ -781,7 +781,14 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("start"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
-				}, task[DEFAULT_TASK_CACHE_KEYS.StartDate])
+				},
+				task[DEFAULT_TASK_CACHE_KEYS.StartDate] === undefined
+					? ""
+					: formatDateStringAsPerSettings(
+							task[DEFAULT_TASK_CACHE_KEYS.StartDate],
+							globalSettings.dateFormat,
+						),
+				)
 			});
 		});
 		taskItemMenu.addItem((it) => {
@@ -790,7 +797,14 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
-				}, task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate])
+				},
+				task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] === undefined
+					? ""
+					: formatDateStringAsPerSettings(
+							task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
+							globalSettings.dateFormat,
+						),
+				)
 			});
 		});
 		taskItemMenu.addItem((it) => {
@@ -799,7 +813,14 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("due"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
-				}, task[DEFAULT_TASK_CACHE_KEYS.DueDate])
+				},
+				task[DEFAULT_TASK_CACHE_KEYS.DueDate] === undefined
+					? ""
+					: formatDateStringAsPerSettings(
+							task[DEFAULT_TASK_CACHE_KEYS.DueDate],
+							globalSettings.dateFormat,
+						),
+				)
 			});
 		});
 
@@ -808,7 +829,17 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			item.setIcon("clock");
 			item.setTitle(t("reminder"));
 			item.onClick(() => {
-				const modal = new DateTimePickerModal(plugin, t("reminder"), task[DEFAULT_TASK_CACHE_KEYS.Reminder]);
+				const reminder = task[DEFAULT_TASK_CACHE_KEYS.Reminder];
+				const modal = new DateTimePickerModal(
+					plugin,
+					t("reminder"),
+					reminder === undefined
+						? ""
+						: formatDateTimeAsPerSettings(
+								reminder,
+								globalSettings.dateTimeFormat,
+							),
+				);
 				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
 					updateTaskItemReminder(plugin, task, task, dateTime);
 				};

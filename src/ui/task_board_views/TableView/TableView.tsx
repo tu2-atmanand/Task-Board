@@ -4,15 +4,19 @@ import Sortable from "sortablejs";
 import { GripVertical } from "lucide-react";
 import TaskBoard from "../../../../main.js";
 import { Board, TaskBoardViewType, TableView as TableViewConfig } from "../../../interfaces/BoardConfigs.js";
-import { DEFAULT_TASK_CACHE_KEYS, getAllUIVisibleTaskProperties, statusTypeNames } from "../../../interfaces/Enums.js";
+import { DEFAULT_TASK_CACHE_KEYS, getAllUIVisibleTaskProperties, PropertyTypeConfig, statusTypeNames } from "../../../interfaces/Enums.js";
 import { taskItemKeyToNameMapping } from "../../../interfaces/Mapping.js";
-import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
+import { coerceCustomTaskPropertyValue, taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { sanitizeTags, sanitizeStatus, sanitizePriority, sanitizeTime, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizeCompletionDate, sanitizeCancelledDate, sanitizeDependsOn } from "../../../utils/task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "../../../utils/task_line/TaskLineUtils.js";
 import { handleTaskNoteBodyChange } from "../../../utils/task_note/TaskNoteEventHandlers.js";
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/task_note/TaskNoteUtils.js";
 import { getPriorityOptionsForDropdown } from "../../../utils/TaskItemUtils.js";
+import {
+	formatDateStringAsPerSettings,
+	formatDateTimeAsPerSettings,
+} from "../../../utils/DateTimeCalculations.js";
 
 interface TableViewProps {
 	plugin: TaskBoard;
@@ -293,6 +297,21 @@ const TableView: React.FC<TableViewProps> = ({
 		if (column === "dateModified" && typeof value === "number") {
 			return new Date(value).toLocaleString();
 		}
+		const dateProperty = plugin.settings.data.taskProperties.find(
+			(property) => property.key === column,
+		);
+		if (typeof value === "number" && dateProperty?.type === PropertyTypeConfig.date) {
+			return formatDateStringAsPerSettings(
+				value,
+				plugin.settings.data.dateFormat,
+			);
+		}
+		if (typeof value === "number" && dateProperty?.type === PropertyTypeConfig.dateTime) {
+			return formatDateTimeAsPerSettings(
+				value,
+				plugin.settings.data.dateTimeFormat,
+			);
+		}
 		return String(value);
 	};
 
@@ -310,6 +329,23 @@ const TableView: React.FC<TableViewProps> = ({
 		try {
 			const isTaskNote = isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []);
 			const updatedTask: taskItem = { ...task };
+			const coerceDateValue = (propertyKey: DEFAULT_TASK_CACHE_KEYS) => {
+				const property = plugin.settings.data.taskProperties.find(
+					(candidate) => candidate.key === propertyKey,
+				);
+				if (!property) return undefined;
+				const convertedValue = coerceCustomTaskPropertyValue(
+					value,
+					property.type,
+					property.type === PropertyTypeConfig.date
+						? plugin.settings.data.dateFormat
+						: plugin.settings.data.dateTimeFormat,
+					plugin.settings.data.dateFormat,
+				);
+				return typeof convertedValue === "number"
+					? convertedValue
+					: undefined;
+			};
 
 			switch (column) {
 				case "title":
@@ -332,28 +368,28 @@ const TableView: React.FC<TableViewProps> = ({
 					updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] = value;
 					break;
 				case "reminder":
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] = coerceDateValue(DEFAULT_TASK_CACHE_KEYS.Reminder);
 					break;
 				case "createdDate":
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate] = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate] = coerceDateValue(DEFAULT_TASK_CACHE_KEYS.CreatedDate);
 					break;
 				case "startDate":
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = coerceDateValue(DEFAULT_TASK_CACHE_KEYS.StartDate);
 					break;
 				case "scheduledDate":
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = coerceDateValue(DEFAULT_TASK_CACHE_KEYS.ScheduledDate);
 					break;
 				case "dueDate":
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = coerceDateValue(DEFAULT_TASK_CACHE_KEYS.DueDate);
 					break;
 				case "dependsOn":
 					updatedTask[DEFAULT_TASK_CACHE_KEYS.Dependencies] = value.split(",").map((id) => id.trim()).filter(Boolean);
 					break;
 				case "completionDate":
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = coerceDateValue(DEFAULT_TASK_CACHE_KEYS.CompletionDate);
 					break;
 				case "cancelledDate":
-					updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = value;
+					updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = coerceDateValue(DEFAULT_TASK_CACHE_KEYS.CancelledDate);
 					break;
 				default:
 					throw new Error(`Editing ${column} is not supported.`);

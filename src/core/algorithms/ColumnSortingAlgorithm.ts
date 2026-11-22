@@ -28,7 +28,15 @@ function compareValues(
 		propertyType === PropertyTypeConfig.date ||
 		propertyType === PropertyTypeConfig.dateTime
 	) {
-		return compareDates(String(value1 ?? ""), String(value2 ?? ""), order);
+		const dateValue1 =
+			typeof value1 === "number" || typeof value1 === "string"
+				? value1
+				: "";
+		const dateValue2 =
+			typeof value2 === "number" || typeof value2 === "string"
+				? value2
+				: "";
+		return compareDates(dateValue1, dateValue2, order);
 	}
 	if (propertyType === PropertyTypeConfig.time) {
 		return compareTimePropertyValue(

@@ -7,9 +7,10 @@ import React, { useEffect, useRef, useState } from "react";
 import Sortable from "sortablejs";
 import { DeleteIcon, EditIcon, FileInput, Network, PanelRightOpenIcon } from "lucide-react";
 import { ViewUpdate } from "@codemirror/view";
+import { format } from "date-fns";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import TaskBoard from "../../../main.js";
-import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService, PropertyTypeConfig, taskPropertyFormatOptions } from "../../interfaces/Enums.js";
+import { statusTypeNames, UniversalDateOptions, EditButtonMode, NotificationService, PropertyTypeConfig } from "../../interfaces/Enums.js";
 import { taskItemEmpty } from "../../interfaces/Mapping.js";
 import {
 	coerceCustomTaskPropertyValue,
@@ -29,7 +30,11 @@ import { openEditTaskView } from "../modals/OpenModals.js";
 import { compareTwoTags, verifySubtasksAndChildtasksAreComplete } from "../../core/algorithms/ScanningFilterer.js";
 import { getObsidianIndentationSetting, isTaskLine } from "../../utils/CheckBoxUtils.js";
 import { applyIdToTaskItem, getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
-import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn } from "../../utils/task_line/TaskContentFormatter.js";
+import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizeReminder, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn, sanitizeTaskProperty } from "../../utils/task_line/TaskContentFormatter.js";
+import {
+	formatDateStringAsPerSettings,
+	formatDateTimeAsPerSettings,
+} from "../../utils/DateTimeCalculations.js";
 import { formatTaskNoteContent, isTaskNotePresentInTags } from "../../utils/task_note/TaskNoteUtils.js";
 import { updateRGBAOpacity } from "../../utils/UIHelpers.js";
 import { handleEditTask } from "../../utils/UserTaskEvents.js";
@@ -68,6 +73,28 @@ export const TaskEditorRC: React.FC<{
 	const globalSettings = plugin.settings.data;
 	const taskWithCustomProperties =
 		task as taskItemWithCustomProperties;
+	const formatDateInput = (value: number | undefined): string =>
+		value === undefined
+			? ""
+			: formatDateStringAsPerSettings(value, globalSettings.dateFormat);
+	const coerceDateProperty = (
+		propertyKey: string,
+		value: unknown,
+	): number | undefined => {
+		const property = globalSettings.taskProperties.find(
+			(candidate) => candidate.key === propertyKey,
+		);
+		if (!property) return undefined;
+		const coerced = coerceCustomTaskPropertyValue(
+			value,
+			property.type,
+			property.type === PropertyTypeConfig.date
+				? globalSettings.dateFormat
+				: globalSettings.dateTimeFormat,
+			globalSettings.dateFormat,
+		);
+		return typeof coerced === "number" ? coerced : undefined;
+	};
 
 	// All useState
 	const [title, setTitle] = useState(
@@ -76,25 +103,53 @@ export const TaskEditorRC: React.FC<{
 			: isTaskNote ? "" : "- [ ] "
 	);
 	const [bodyContent, setBodyContent] = useState(isTaskNote ? noteContent : task[DEFAULT_TASK_CACHE_KEYS.Body]?.join('\n') || '');
-	const [createdDate, setCreatedDate] = useState(task[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || '');
-	const [startDate, setStartDate] = useState(task[DEFAULT_TASK_CACHE_KEYS.StartDate] || '');
-	const [scheduledDate, setScheduledDate] = useState(task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || '');
-	const [due, setDue] = useState(task[DEFAULT_TASK_CACHE_KEYS.DueDate] || '');
+	const [createdDate, setCreatedDate] = useState(formatDateInput(task[DEFAULT_TASK_CACHE_KEYS.CreatedDate]));
+	const [startDate, setStartDate] = useState(formatDateInput(task[DEFAULT_TASK_CACHE_KEYS.StartDate]));
+	const [scheduledDate, setScheduledDate] = useState(formatDateInput(task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]));
+	const [due, setDue] = useState(formatDateInput(task[DEFAULT_TASK_CACHE_KEYS.DueDate]));
 	const [tags, setTags] = useState<string[]>(task[DEFAULT_TASK_CACHE_KEYS.Tags] || []);
 	const [startTime, setStartTime] = useState(task[DEFAULT_TASK_CACHE_KEYS.Time] ? task?.[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[0]?.trim() || '' : "");
 	const [endTime, setEndTime] = useState(task[DEFAULT_TASK_CACHE_KEYS.Time] ? task?.[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[1]?.trim() || '' : "");
 	const [newTime, setNewTime] = useState(task[DEFAULT_TASK_CACHE_KEYS.Time] || '');
 	const [priority, setPriority] = useState(task[DEFAULT_TASK_CACHE_KEYS.Priority] || 0);
 	const [status, setStatus] = useState(task[DEFAULT_TASK_CACHE_KEYS.Status] || ' ');
-	const [reminder, setReminder] = useState(task?.[DEFAULT_TASK_CACHE_KEYS.Reminder] || "");
+	const [reminder, setReminder] = useState(
+		task[DEFAULT_TASK_CACHE_KEYS.Reminder] === undefined
+			? ""
+			: formatDateTimeAsPerSettings(
+					task[DEFAULT_TASK_CACHE_KEYS.Reminder],
+					globalSettings.dateTimeFormat,
+				),
+	);
 	const [dependsOn, setDependsOn] = useState<string[]>(task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] || []);
 	const [customPropertyValues, setCustomPropertyValues] = useState<Record<string, unknown>>(() =>
-		Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [
+		Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && property.key && !BUILT_IN_TASK_ITEM_KEYS.has(property.key)).map((property) => [
 			property.id,
-			taskWithCustomProperties[property.id] !== undefined
-				? taskWithCustomProperties[property.id]
-				: coerceCustomTaskPropertyValue(property.defaultValue, property.type),
+			taskWithCustomProperties[property.key] !== undefined
+				? taskWithCustomProperties[property.key]
+				: coerceCustomTaskPropertyValue(
+						property.defaultValue,
+						property.type,
+						property.type === PropertyTypeConfig.date
+							? globalSettings.dateFormat
+							: globalSettings.dateTimeFormat,
+						globalSettings.dateFormat,
+					),
 		])));
+	const getCustomPropertyValuesByKey = () =>
+		Object.fromEntries(
+			globalSettings.taskProperties
+				.filter(
+					(property) =>
+						!property.default &&
+						property.key &&
+						!BUILT_IN_TASK_ITEM_KEYS.has(property.key),
+				)
+				.map((property) => [
+					property.key,
+					customPropertyValues[property.id],
+				]),
+		);
 	const [childTasks, setChildTasks] = useState<taskItem[]>([]);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -517,7 +572,17 @@ export const TaskEditorRC: React.FC<{
 	const handleCustomPropertyChange = (id: string, value: unknown, type: PropertyTypeConfig) => {
 		setCustomPropertyValues((previous) => ({
 			...previous,
-			[id]: value === "" ? "" : coerceCustomTaskPropertyValue(value, type),
+			[id]:
+				value === ""
+					? ""
+					: coerceCustomTaskPropertyValue(
+							value,
+							type,
+							type === PropertyTypeConfig.date
+								? globalSettings.dateFormat
+								: globalSettings.dateTimeFormat,
+							globalSettings.dateFormat,
+						),
 		}));
 		setIsEdited(true);
 		setIsEditorContentChanged(true);
@@ -526,26 +591,15 @@ export const TaskEditorRC: React.FC<{
 	const withCustomInlineProperties = (rawTitle: string): string => {
 		let result = rawTitle;
 		for (const property of globalSettings.taskProperties.filter((property) => !property.default)) {
-			if (!property.id || BUILT_IN_TASK_ITEM_KEYS.has(property.id)) continue;
-			const escaped = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-			let existing: RegExp | undefined;
-			let serialized = "";
-			const value = customPropertyValues[property.id];
-			if (globalSettings.taskPropertyFormat === taskPropertyFormatOptions.dataviewPlugin) {
-				existing = new RegExp(`\\[${escaped(property.id)}::\\s*([^\\]]*)\\]`);
-				if (value !== undefined && value !== null && value !== "") serialized = `[${property.id}:: ${Array.isArray(value) ? value.join(", ") : String(value)}]`;
-			} else if (globalSettings.taskPropertyFormat === taskPropertyFormatOptions.obsidianNative) {
-				existing = new RegExp(`@${escaped(property.id)}\\(([^)]*)\\)`);
-				if (value !== undefined && value !== null && value !== "") serialized = `@${property.id}(${Array.isArray(value) ? value.join(",") : String(value)})`;
-			} else if (property.emoji) {
-				existing = new RegExp(`(?:^|\\s)${escaped(property.emoji)}\\s+(?:"(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|[^\\s]+)`);
-				if (value !== undefined && value !== null && value !== "") {
-					const text = Array.isArray(value) ? value.join(",") : String(value);
-					serialized = `${property.emoji} ${/\s/.test(text) ? JSON.stringify(text) : text}`;
-				}
+			if (!property.key || BUILT_IN_TASK_ITEM_KEYS.has(property.key)) {
+				continue;
 			}
-			if (existing) result = result.replace(existing, " ").replace(/\s{2,}/g, " ").trimEnd();
-			if (serialized) result = `${result} ${serialized}`;
+			result = sanitizeTaskProperty(
+				globalSettings,
+				result,
+				property.key,
+				customPropertyValues[property.id],
+			);
 		}
 		return result;
 	};
@@ -581,23 +635,38 @@ export const TaskEditorRC: React.FC<{
 
 		const updatedTask = {
 			...task,
-			...customPropertyValues,
+			...getCustomPropertyValuesByKey(),
 			title: withCustomInlineProperties(newTitle),
 			body: [
 				...bodyContent.split('\n'),
 			],
-			createdDate: newCreatedDate,
-			startDate: newStartDate,
-			scheduledDate: newScheduledDate,
-			due: newDueDate,
+			createdDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+				newCreatedDate,
+			),
+			startDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.StartDate,
+				newStartDate,
+			),
+			scheduledDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+				newScheduledDate,
+			),
+			dueDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.DueDate,
+				newDueDate,
+			),
 			tags,
 			time: newTime,
 			priority,
 			filePath: editedFilePath,
 			taskLocation: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
-			cancelledDate: task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || '',
+			cancelledDate: task[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
 			status,
-			reminder,
+			reminder: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.Reminder,
+				reminder,
+			),
 		};
 
 		await onSave(updatedTask, quickAddPluginChoice);
@@ -635,18 +704,33 @@ export const TaskEditorRC: React.FC<{
 			...modifiedTask,
 			title: title === "" ? taskNoteFilePath.split('/').pop() ?? "No title" : title,
 			body: formattedTaskContent ? formattedTaskContent.split('\n').filter(line => isTaskLine(line)) : [],
-			createdDate: newCreatedDate,
-			startDate: newStartDate,
-			scheduledDate: newScheduledDate,
-			dueDate: newDue,
+			createdDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+				newCreatedDate,
+			),
+			startDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.StartDate,
+				newStartDate,
+			),
+			scheduledDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+				newScheduledDate,
+			),
+			dueDate: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.DueDate,
+				newDue,
+			),
 			tags: [...tags, '#taskNote'], // Add taskNote tag
 			time: newTime,
 			priority: modifiedTask[DEFAULT_TASK_CACHE_KEYS.Priority],
 			filePath: taskNoteFilePath,
 			taskLocation: modifiedTask[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
-			cancelledDate: modifiedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || '',
+			cancelledDate: modifiedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
 			status: modifiedTask[DEFAULT_TASK_CACHE_KEYS.Status],
-			reminder: modifiedTask[DEFAULT_TASK_CACHE_KEYS.Reminder],
+			reminder: coerceDateProperty(
+				DEFAULT_TASK_CACHE_KEYS.Reminder,
+				reminder,
+			),
 			dependsOn: dependsOn,
 		};
 
@@ -663,21 +747,36 @@ export const TaskEditorRC: React.FC<{
 		body: [
 			...bodyContent.split('\n'),
 		],
-		createdDate: createdDate,
-		startDate: startDate,
-		scheduledDate: scheduledDate,
-		dueDate: due,
+		createdDate: coerceDateProperty(
+			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+			createdDate,
+		),
+		startDate: coerceDateProperty(
+			DEFAULT_TASK_CACHE_KEYS.StartDate,
+			startDate,
+		),
+		scheduledDate: coerceDateProperty(
+			DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+			scheduledDate,
+		),
+		dueDate: coerceDateProperty(
+			DEFAULT_TASK_CACHE_KEYS.DueDate,
+			due,
+		),
 		tags: tags,
 		time: newTime,
 		priority: priority,
 		filePath: newFilePath,
 		status: status,
-		reminder: reminder,
+		reminder: coerceDateProperty(
+			DEFAULT_TASK_CACHE_KEYS.Reminder,
+			reminder,
+		),
 		taskLocation: task?.[DEFAULT_TASK_CACHE_KEYS.TaskLocation] || taskItemEmpty[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
 		dependsOn: dependsOn,
-		...customPropertyValues,
-		completionDate: task[DEFAULT_TASK_CACHE_KEYS.CompletionDate] || '',
-		cancelledDate: task[DEFAULT_TASK_CACHE_KEYS.CancelledDate] || '',
+		...getCustomPropertyValuesByKey(),
+		completionDate: task[DEFAULT_TASK_CACHE_KEYS.CompletionDate],
+		cancelledDate: task[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
 	};
 
 
@@ -820,17 +919,24 @@ export const TaskEditorRC: React.FC<{
 
 		setTitle(updatedTask[DEFAULT_TASK_CACHE_KEYS.Title] || '');
 		setBodyContent(updatedTask[DEFAULT_TASK_CACHE_KEYS.Body]?.join('\n') || '');
-		setCreatedDate(updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate] || '');
-		setStartDate(updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] || '');
-		setScheduledDate(updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || '');
-		setDue(updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] || '');
+		setCreatedDate(formatDateInput(updatedTask[DEFAULT_TASK_CACHE_KEYS.CreatedDate]));
+		setStartDate(formatDateInput(updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate]));
+		setScheduledDate(formatDateInput(updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]));
+		setDue(formatDateInput(updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate]));
 		setTags(updatedTask[DEFAULT_TASK_CACHE_KEYS.Tags] || []);
 		setStartTime(updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ? updatedTask[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[0].trim() || '' : "");
 		setEndTime(updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ? updatedTask[DEFAULT_TASK_CACHE_KEYS.Time]?.split('-')[1]?.trim() || '' : "");
 		setNewTime(updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] ? updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] : "");
 		setPriority(updatedTask[DEFAULT_TASK_CACHE_KEYS.Priority] || 0);
 		setStatus(updatedTask[DEFAULT_TASK_CACHE_KEYS.Status] || ' ');
-		setReminder(updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] || '');
+		setReminder(
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder] === undefined
+				? ""
+				: formatDateTimeAsPerSettings(
+						updatedTask[DEFAULT_TASK_CACHE_KEYS.Reminder],
+						globalSettings.dateTimeFormat,
+					),
+		);
 		setCustomPropertyValues(Object.fromEntries(globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => [property.id, updatedTask[property.id]])));
 	}, 50);
 
@@ -1531,7 +1637,17 @@ export const TaskEditorRC: React.FC<{
 
 						{globalSettings.taskProperties.filter(property => !property.default && !BUILT_IN_TASK_ITEM_KEYS.has(property.id)).map((property) => {
 							const value = customPropertyValues[property.id];
-							const displayValue = Array.isArray(value) ? value.join(", ") : value === undefined || value === null ? "" : String(value);
+							const displayValue = Array.isArray(value)
+								? value.join(", ")
+								: value === undefined || value === null
+									? ""
+									: typeof value === "number" &&
+											property.type === PropertyTypeConfig.date
+										? format(new Date(value), "yyyy-MM-dd")
+										: typeof value === "number" &&
+												property.type === PropertyTypeConfig.dateTime
+											? format(new Date(value), "yyyy-MM-dd'T'HH:mm")
+											: String(value);
 							return <div className="EditTaskModalHomeField" key={property.id}>
 								<label className="EditTaskModalHomeFieldTitle">{property.name}</label>
 								{property.type === PropertyTypeConfig.boolean ? (

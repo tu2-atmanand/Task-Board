@@ -6,7 +6,6 @@ import { statusTypeNames } from "../../interfaces/Enums.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { checkboxStateSwitcher } from "../CheckBoxUtils.js";
-import { formatToday } from "../DateTimeCalculations.js";
 import { updateFrontmatterInMarkdownFile } from "./TaskNoteUtils.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 import { getStatusNameFromStatusSymbol } from "../TaskItemUtils.js";
@@ -31,7 +30,7 @@ export const handleTaskNoteStatusChange = async (
 		// const currentDateValue = moment().format(
 		// 	globalSettings?.dateTimeFormat,
 		// );
-		const currentDateValue = formatToday(globalSettings.dateFormat);
+		const currentDateValue = Date.now();
 
 		const updatedTask = {
 			...task,
@@ -43,17 +42,17 @@ export const handleTaskNoteStatusChange = async (
 		) {
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] =
 				currentDateValue;
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = "";
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = undefined;
 		} else if (
 			globalSettings.autoAddCancelledDate &&
 			newStatus.newSymbolType === statusTypeNames.CANCELLED
 		) {
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] =
 				currentDateValue;
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = "";
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = undefined;
 		} else {
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = "";
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = "";
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = undefined;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = undefined;
 		}
 		const newStatusName = getStatusNameFromStatusSymbol(
 			newStatus.newSymbol,

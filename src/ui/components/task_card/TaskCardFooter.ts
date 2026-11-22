@@ -15,7 +15,11 @@ import type {
 	TaskCardFooterComponentOptions,
 	TaskCardFooterStyle,
 } from "./index.js";
-import { getHumanReadableDateString } from "../../../utils/DateTimeCalculations.js";
+import {
+	formatDateStringAsPerSettings,
+	formatDateTimeAsPerSettings,
+	getHumanReadableDateString,
+} from "../../../utils/DateTimeCalculations.js";
 
 const NON_FOOTER_PROPERTIES = new Set<string>([
 	DEFAULT_TASK_CACHE_KEYS.ID,
@@ -67,16 +71,34 @@ export function getTaskCardFooterProperties(
 				valueNtype.propertyType === PropertyTypeConfig.date ||
 				valueNtype.propertyType === PropertyTypeConfig.dateTime
 			) {
+				const dateValue = valueNtype.propertyValue;
+				if (typeof dateValue !== "number") return [];
 				if (globalSetting.dateHumanReadable) {
 					return [
 						{
 							property,
 							value: getHumanReadableDateString(
-								String(valueNtype.propertyValue),
+								new Date(dateValue),
 							),
 						},
 					];
 				}
+				return [
+					{
+						property,
+						value:
+							valueNtype.propertyType ===
+							PropertyTypeConfig.date
+								? formatDateStringAsPerSettings(
+										dateValue,
+										globalSetting.dateFormat,
+									)
+								: formatDateTimeAsPerSettings(
+										dateValue,
+										globalSetting.dateTimeFormat,
+									),
+					},
+				];
 			}
 			return [
 				{

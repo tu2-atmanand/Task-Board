@@ -272,22 +272,22 @@ export class TaskSelectorWithCreateModal extends SuggestModal<taskItem> {
 			.sort((a, b) => {
 				// Sort by due date second
 				if (
-					a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
-					!b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+					a[DEFAULT_TASK_CACHE_KEYS.DueDate] !== undefined &&
+					b[DEFAULT_TASK_CACHE_KEYS.DueDate] === undefined
 				)
 					return -1;
 				if (
-					!a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
-					b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+					a[DEFAULT_TASK_CACHE_KEYS.DueDate] === undefined &&
+					b[DEFAULT_TASK_CACHE_KEYS.DueDate] !== undefined
 				)
 					return 1;
 				if (
-					a[DEFAULT_TASK_CACHE_KEYS.DueDate] &&
-					b[DEFAULT_TASK_CACHE_KEYS.DueDate]
+					a[DEFAULT_TASK_CACHE_KEYS.DueDate] !== undefined &&
+					b[DEFAULT_TASK_CACHE_KEYS.DueDate] !== undefined
 				) {
 					const dateCompare = a[
 						DEFAULT_TASK_CACHE_KEYS.DueDate
-					].localeCompare(b[DEFAULT_TASK_CACHE_KEYS.DueDate]);
+					] - b[DEFAULT_TASK_CACHE_KEYS.DueDate];
 					if (dateCompare !== 0) return dateCompare;
 				}
 

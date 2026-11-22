@@ -241,36 +241,60 @@ export class AdvancedFilterer {
 		case "<=":
 			return Number(taskValue) <= Number(value);
 		case "before":
-			if (typeof taskValue !== "string" || typeof value !== "string")
+			if (
+				(typeof taskValue !== "string" &&
+					typeof taskValue !== "number") ||
+				typeof value !== "string"
+			)
 				return false;
 			return (
 				(propertyType === PropertyTypeConfig.time
-					? compareTimePropertyValue(taskValue, value, "asc")
-					: compareDates(taskValue, value, "asc")) < 0
+					? typeof taskValue === "string"
+						? compareTimePropertyValue(taskValue, value, "asc")
+						: 0
+					: compareDates(taskValue, value, "asc", dateFormat)) < 0
 			);
 		case "after":
-			if (typeof taskValue !== "string" || typeof value !== "string")
+			if (
+				(typeof taskValue !== "string" &&
+					typeof taskValue !== "number") ||
+				typeof value !== "string"
+			)
 				return false;
 			return (
 				(propertyType === PropertyTypeConfig.time
-					? compareTimePropertyValue(taskValue, value, "asc")
-					: compareDates(taskValue, value, "asc")) > 0
+					? typeof taskValue === "string"
+						? compareTimePropertyValue(taskValue, value, "asc")
+						: 0
+					: compareDates(taskValue, value, "asc", dateFormat)) > 0
 			);
 		case "onOrBefore":
-			if (typeof taskValue !== "string" || typeof value !== "string")
+			if (
+				(typeof taskValue !== "string" &&
+					typeof taskValue !== "number") ||
+				typeof value !== "string"
+			)
 				return false;
 			return (
 				(propertyType === PropertyTypeConfig.time
-					? compareTimePropertyValue(taskValue, value, "asc")
-					: compareDates(taskValue, value, "asc")) <= 0
+					? typeof taskValue === "string"
+						? compareTimePropertyValue(taskValue, value, "asc")
+						: 0
+					: compareDates(taskValue, value, "asc", dateFormat)) <= 0
 			);
 		case "onOrAfter":
-			if (typeof taskValue !== "string" || typeof value !== "string")
+			if (
+				(typeof taskValue !== "string" &&
+					typeof taskValue !== "number") ||
+				typeof value !== "string"
+			)
 				return false;
 			return (
 				(propertyType === PropertyTypeConfig.time
-					? compareTimePropertyValue(taskValue, value, "asc")
-					: compareDates(taskValue, value, "asc")) >= 0
+					? typeof taskValue === "string"
+						? compareTimePropertyValue(taskValue, value, "asc")
+						: 0
+					: compareDates(taskValue, value, "asc", dateFormat)) >= 0
 			);
 		case "hasTag":
 			if (Array.isArray(taskValue)) {

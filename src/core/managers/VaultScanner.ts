@@ -5,7 +5,10 @@ import { isValid } from "date-fns";
 import { t } from "i18next";
 import type TaskBoard from "../../../main.js";
 import { UniversalDateOptions } from "../../interfaces/Enums.js";
-import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
+import {
+	DEFAULT_SETTINGS,
+	globalSettingsData,
+} from "../../interfaces/GlobalSettings.js";
 import {
 	jsonCacheData,
 	taskItem,
@@ -244,48 +247,15 @@ export default class VaultScanner {
 						]
 							? taskNoteProperties[DEFAULT_TASK_CACHE_KEYS.ID]
 							: "", // Storing the legacyId for backward compatibility
+						status:
+							taskNoteProperties?.[
+								DEFAULT_TASK_CACHE_KEYS.Status
+							] || DEFAULT_SETTINGS.data.customStatuses[0].name,
 						title:
 							taskNoteProperties?.[
 								DEFAULT_TASK_CACHE_KEYS.Title
 							] || file.basename,
 						body: subTasks, // Store sub-tasks in body
-						createdDate:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.CreatedDate
-							] || "",
-						startDate:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.StartDate
-							] || "",
-						scheduledDate:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.ScheduledDate
-							] || "",
-						dueDate:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.DueDate
-							] || "",
-						tags:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.Tags
-							] || [],
-						frontmatterTags: [],
-						time:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.Time
-							] || "",
-						priority:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.Priority
-							] || 0,
-						dependsOn:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.Dependencies
-							] || [],
-						status:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.Status
-							] || " ", // Default to unchecked
 						filePath: fileNameWithPath,
 						taskLocation: {
 							startLine: 1,
@@ -293,18 +263,6 @@ export default class VaultScanner {
 							endLine: lines.length,
 							endCharIndex: lines[lines.length - 1]?.length || 0,
 						},
-						completionDate:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.CompletionDate
-							] || "",
-						cancelledDate:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.CancelledDate
-							] || "",
-						reminder:
-							taskNoteProperties?.[
-								DEFAULT_TASK_CACHE_KEYS.Reminder
-							] || "",
 					};
 
 					// Add to appropriate cache based on completion status
@@ -430,7 +388,7 @@ export default class VaultScanner {
 									basename,
 									userConfiguredDateFormat,
 								);
-								if (isValid(parsed)) {
+								if (parsed && isValid(parsed)) {
 									const universalDateConfig =
 										this.plugin.settings.data.universalDate;
 
@@ -443,7 +401,7 @@ export default class VaultScanner {
 									) {
 										allExtractedProperties[
 											DEFAULT_TASK_CACHE_KEYS.DueDate
-										] = basename; // If the basename matches the dueFormat, assign it to due
+										] = parsed.getTime();
 									} else if (
 										universalDateConfig ===
 											UniversalDateOptions.startDate &&
@@ -453,7 +411,7 @@ export default class VaultScanner {
 									) {
 										allExtractedProperties[
 											DEFAULT_TASK_CACHE_KEYS.StartDate
-										] = basename; // If the basename matches the dueFormat, assign it to startDate
+										] = parsed.getTime();
 									} else if (
 										universalDateConfig ===
 											UniversalDateOptions.scheduledDate &&
@@ -464,7 +422,7 @@ export default class VaultScanner {
 									) {
 										allExtractedProperties[
 											DEFAULT_TASK_CACHE_KEYS.ScheduledDate
-										] = basename; // If the basename matches the dueFormat, assign it to scheduledDate
+										] = parsed.getTime();
 									}
 								}
 							}

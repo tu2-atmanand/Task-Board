@@ -17,11 +17,13 @@ import { taskItemEmpty } from "../../../interfaces/Mapping.js";
 import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { eventEmitter } from "../../../services/EventEmitter.js";
 import { openAddNewTaskModal } from "../../modals/OpenModals.js";
-import { robustDateParser, formatDateStringAsPerSettings } from "../../../utils/DateTimeCalculations.js";
+import { formatDateStringAsPerSettings } from "../../../utils/DateTimeCalculations.js";
 import { sanitizeStartDate, sanitizeTime } from "../../../utils/task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "../../../utils/task_line/TaskLineUtils.js";
 import { isTaskNotePresentInTags, updateFrontmatterInMarkdownFile } from "../../../utils/task_note/TaskNoteUtils.js";
-import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+} from "../../../interfaces/Enums.js";
 
 
 type CalendarMode = "day" | "week" | "month";
@@ -119,8 +121,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 		const allTasks = [...tasks.Pending, ...tasks.Completed];
 		return allTasks.reduce<CalendarTask[]>((scheduledTasks, task) => {
 			const dateValue = task[DEFAULT_TASK_CACHE_KEYS.StartDate] || task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] || task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-			const parsedDate = dateValue ? robustDateParser(dateValue, dateFormat) : null;
-			if (!parsedDate) return scheduledTasks;
+			const parsedDate =
+				typeof dateValue === "number" ? new Date(dateValue) : null;
+			if (!parsedDate || Number.isNaN(parsedDate.getTime())) {
+				return scheduledTasks;
+			}
 
 			const timeRange = getTaskTimeRange(task[DEFAULT_TASK_CACHE_KEYS.Time] || "");
 			scheduledTasks.push({
@@ -227,7 +232,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 	) => {
 		const dateValue = formatDateStringAsPerSettings(format(day, "yyyy-MM-dd"), dateFormat);
 		const timeValue = `${formatClockTime(startMinutes)} - ${formatClockTime(endMinutes)}`;
-		const updatedTask = { ...task, startDate: dateValue, time: timeValue };
+		const startDate = day.getTime();
+		const updatedTask = { ...task, startDate, time: timeValue };
 
 		eventEmitter.emit("UPDATE_TASK", { taskID: task[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
 		if (isTaskNotePresentInTags(plugin.settings.data.taskNoteIdentifierTag, task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [])) {
@@ -331,7 +337,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 					body: [],
 					tags: [],
 					frontmatterTags: [],
-					startDate: formatDateStringAsPerSettings(format(selectedDay, "yyyy-MM-dd"), dateFormat),
+					startDate: selectedDay.getTime(),
 					time: `${formatClockTime(startMinutes)} - ${formatClockTime(endMinutes)}`,
 				};
 				openAddNewTaskModal(plugin, undefined, initialTask);
