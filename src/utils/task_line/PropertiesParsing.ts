@@ -487,6 +487,8 @@ export function extractTime(
 ): RegExpMatchArray | null {
 	const timeAtStartMatch = extractTimeFromLineStart(text);
 	if (timeAtStartMatch) return timeAtStartMatch;
+
+	// If time is not present at the start try parsing using the three formats.
 	const property = getTaskProperty(
 		taskProperties,
 		DEFAULT_TASK_CACHE_KEYS.Time,
@@ -495,6 +497,7 @@ export function extractTime(
 		? matchTaskProperty(text, property, format)
 		: null;
 	if (configuredMatch) return configuredMatch;
+
 	if (
 		format === taskPropertyFormatOptions.dataviewPlugin ||
 		format === taskPropertyFormatOptions.obsidianNative
