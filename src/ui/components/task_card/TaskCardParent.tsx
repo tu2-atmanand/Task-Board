@@ -1377,17 +1377,6 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 
 					{memoizedRenderHeader}
 
-					{/* Drag Handle and Task Menu button */}
-					{
-						Platform.isDesktop && activeViewType !== viewTypeNames.map ? (
-							<div className="taskItemDragBtn">
-								<Grip size={18} enableBackground={0} opacity={0.4} />
-							</div>
-						) : (
-							<div className="taskItemMenuBtn" aria-label={t("open-task-menu")}><EllipsisVertical size={18} enableBackground={0} opacity={0.4} onClick={handleMenuButtonClicked} /></div>
-						)
-					}
-
 					{/* Task Content */}
 					<div className="taskItemMainBody">
 						<div className="taskItemMainBodyTitleNsubTasks">
