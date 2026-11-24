@@ -294,7 +294,7 @@ const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Priority],
 		desc: "To rank different tasks in your queue based on their urgency.",
 		type: PropertyTypeConfig.text,
-		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.prioritySymbols.Medium,
+		emoji: "", // There is no emoji for priority, each value will have its own emoji
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Priority],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
@@ -320,7 +320,7 @@ const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Time],
 		desc: "Add a start and end time seperated by hyphen(-).",
 		type: PropertyTypeConfig.time,
-		emoji: "",
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.duration,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Time],
 		hidePropertyInNotesForInlineTasks: false,
 		defaultValue: "",
