@@ -3682,7 +3682,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 					const editButton = buttons.createEl("span", {
 						cls: "edit-btn",
 						text: t("edit"),
-						title: t("edit"),
 					});
 					setIcon(editButton, "pencil");
 					editButton.addEventListener("click", () => {
@@ -4026,7 +4025,14 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 		const values = footer.createDiv("task-board-property-values");
 		// this.createPropertyValuePill(values, "ID", current.id);
 		this.createPropertyValuePill(values, t("id"), current.id);
-		if (current.key !== DEFAULT_TASK_CACHE_KEYS.Title)
+		if (
+			![
+				String(DEFAULT_TASK_CACHE_KEYS.Title),
+				String(DEFAULT_TASK_CACHE_KEYS.Status),
+				String(DEFAULT_TASK_CACHE_KEYS.Priority),
+				String(DEFAULT_TASK_CACHE_KEYS.Tags),
+			].includes(current.key)
+		)
 			this.createPropertyValuePill(values, t("emoji"), current.emoji);
 
 		const actions = footer.createDiv("task-board-property-actions");
@@ -4084,7 +4090,6 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 			cls: `task-board-property-action ${className}`,
 			attr: {
 				type: "button",
-				title: label,
 				"aria-label": label,
 			},
 		});
