@@ -68,7 +68,7 @@ export const TASK_PROPERTIES_TO_ICON_MAPPING: { [key: string]: string } = {
 	[DEFAULT_TASK_CACHE_KEYS.SubTasks]: "list-todo",
 	[DEFAULT_TASK_CACHE_KEYS.Status]: "info",
 	[DEFAULT_TASK_CACHE_KEYS.Priority]: "flag-triangle-right",
-	[DEFAULT_TASK_CACHE_KEYS.Tags]: "tag",
+	[DEFAULT_TASK_CACHE_KEYS.Tags]: "hash",
 	[DEFAULT_TASK_CACHE_KEYS.Time]: "clock",
 	[DEFAULT_TASK_CACHE_KEYS.Reminder]: "bell-ring",
 	[DEFAULT_TASK_CACHE_KEYS.CreatedDate]: "calendar-plus",
