@@ -54,7 +54,7 @@ import { TASK_PROPERTIES_TO_ICON_MAPPING } from '../../../interfaces/Icons.js';
 const shouldExpandTaskDescription = (
 	task: taskItem,
 	usePipeSymboltoSeparate: boolean,
-	globalSettings?: globalSettingsData,
+	globalSettings: globalSettingsData,
 ): boolean => {
 	const hasDescriptionLines = task[DEFAULT_TASK_CACHE_KEYS.Body]?.some(
 		(line) => line.trim() !== "" && !isTaskLine(line),

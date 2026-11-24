@@ -1307,7 +1307,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	padding: 0;
 	padding-inline-start: 0.4em;
 	/* font-weight: 500; */
-	font-size: 0.88rem;
+	font-size: var(--font-preferred-size);
 	word-wrap: break-word;
 	word-break: break-word;
 	white-space: normal;
@@ -1612,52 +1612,52 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskItemTag {
-	font-size: var(--font-ui-smaller);
+	font-size: 0.8rem;
 	margin-right: 2px;
 	display: flex;
 	white-space: nowrap;
 	background-color: var(--tag-background);
-	border: 1px solid var(--tag-background);
-	border-radius: var(--tag-radius);
+	border-radius: 4px;
 	color: var(--tag-color);
+	border: 1px solid var(--checkbox-border-color);
 	font-weight: var(--tag-weight);
 	text-decoration: var(--tag-decoration);
-	padding-block: 0.25em;
-	padding-inline: 0.55em;
-	line-height: 1;
-	gap: 0.45em;
+	line-height: 0.8;
 	align-items: center;
 }
 
-.taskItemTagIconStyle {
-	border-radius: 4px;
-}
-
 .taskItemTagFrontmatter {
-	font-size: 0.7rem;
-	text-decoration: var(--tag-decoration);
-	background-color: var(--tag-background) !important;
 	border: var(--pill-border-width) solid var(--pill-border-color) !important;
 	border-radius: var(--pill-radius) !important;
 	color: var(--pill-color) !important;
-	cursor: var(--cursor);
 	font-weight: var(--pill-weight);
 	padding: 0 var(--pill-padding-x) !important;
 }
 
-.taskItemFooterPropertyContainer_EmojiStyle {
-	font-size: var(--font-ui-smaller);
+.taskItemTagIconStyle {}
+
+.taskItemTagHashIcon {
 	display: flex;
-	background-color: var(--background-modifier-box-shadow);
-	padding-inline: 2px;
-	border: 1px solid var(--background-modifier-border-focus);
-	padding-block: 2px;
-	color: var(--icon-color) !important;
-	border-radius: 2px;
-	opacity: 75%;
-	flex-direction: row;
 	align-items: center;
-	max-width: stretch;
+	padding-inline: 0.1em;
+	background-color: var(--background-primary);
+	border-radius: 4px 0 0 4px;
+	padding-block: 0.1em;
+}
+
+.taskItemTagHashIcon svg.svg-icon {
+	height: var(--icon-xs);
+	width: var(--icon-xs);
+	stroke-width: var(--icon-stroke);
+}
+
+.taskItemTagText {
+	padding-top: 0.25em;
+	padding-bottom: 0.35em;
+	padding-inline-end: 0.25em;
+	display: flex;
+	/* align-content: flex-start; */
+	align-items: center;
 }
 
 .taskItemFileNameSection {
@@ -1703,7 +1703,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 
 .taskitemHeaderTopFilenameValue {
 	color: var(--tab-text-color-active);
-	font-size: var(--font-ui-smaller);
+	font-size: 0.8rem;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -1745,12 +1745,14 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskItemPropertyID_iconStyle {
-	display: inline-flex;
 	gap: 0.4rem;
-	padding: 1px 4px;
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
-	align-items: flex-start;
+		padding: 1px 4px;
+		border: 1px solid var(--background-modifier-border);
+		border-radius: 4px;
+		align-items: flex-start;
+		font-size: 0.65rem;
+		display: flex;
+		align-items: center;
 }
 
 .taskItemPropertyIDLabel {
@@ -1760,11 +1762,15 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	border-radius: 5px 0 0 5px;
 }
 
-.taskItemPropertyIDLabel_emojiStyle,
+.taskItemPropertyIDLabel_emojiStyle {
+	font-size: 0.8rem;
+}
+
 .taskItemPropertyIDLabel_iconStyle {
 	font-size: 0.65rem;
-	color: var(--canvas-card-label-color);
-	display: flex;
+		display: flex;
+		align-items: center;
+		color: var(--text-muted);
 }
 
 .taskItemPropertyIDLabel svg.svg-icon {
@@ -1776,7 +1782,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	font-size: var(--font-ui-smaller);
+	font-size: 0.75rem;
 	color: var(--text-muted);
 	padding-right: 2px;
 }
@@ -1914,7 +1920,7 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
-	margin-top: 0.7rem;
+	margin-top: 0.5rem;
 	gap: 0.4rem;
 	flex-wrap: wrap;
 }
@@ -1927,7 +1933,8 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	gap: 0.4rem;
 }
 
-.taskItemFooterPropertyContainer {
+.taskItemFooterPropertyContainer_BasesStyle {
+	font-size: 0.8rem;
 	display: flex;
 	flex-direction: row;
 	gap: 0.2em;
@@ -1940,27 +1947,66 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 }
 
 .taskItemFooterPropertyContainer_IconStyle {
-	display: inline-flex;
+	font-size: 0.8rem;
 	gap: 0.2rem;
 	padding: 1px 4px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
-	align-items: flex-start;
+	max-width: stretch;
+	display: flex;
+	align-items: center;
+}
+
+.taskItemFooterPropertyContainer_EmojiStyle {
+	font-size: 0.8rem;
+	display: flex;
+	background-color: var(--background-modifier-box-shadow);
+	padding-inline: 2px;
+	border: 1px solid var(--background-modifier-border-focus);
+	padding-block: 2px;
+	color: var(--icon-color) !important;
+	border-radius: 4px;
+	opacity: 75%;
+	flex-direction: row;
+	align-items: center;
 	max-width: stretch;
 }
 
-.taskItemFooterPropertyContainerLabel {
+.taskItemFooterPropertyContainerLabel_BasesStyle {
 	font-size: 0.65rem;
-	color: var(--canvas-card-label-color);
+	color: var(--text-muted);
 	display: flex;
 	background: var(--background-secondary);
 	padding-inline: 3px;
 	align-items: center;
 }
 
-.taskBoard_taskCard_iconStyle_icon {
+.taskItemFooterPropertyContainerLabel_EmojiStyle {
+	font-size: 0.65rem;
+	display: flex;
+	padding-inline: 3px;
+	align-items: center;
+}
+
+.taskItemFooterPropertyContainerLabel_IconStyle {
+	font-size: 0.65rem;
+	display: flex;
+	align-items: center;
+	color: var(--text-muted);
+}
+
+.taskItemFooterPropertyContainerLabel_IconStyleIcon {
 	display: inline-flex;
 	align-items: center;
+}
+
+.taskItemPropertyIDLabel_iconStyle svg.svg-icon,
+.taskItemFooterPropertyContainerLabel_IconStyleIcon svg.svg-icon {
+	height: 0.9rem;
+	width: 0.9rem;
+	display: flex;
+	align-items: center;
+	align-content: center;
 }
 
 .taskItemFooterPropertyContainerValue {
@@ -1968,7 +2014,6 @@ button.clickable-icon.view-action.taskboardScanVaultBtn.highlight {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	font-size: var(--font-ui-smaller);
 	color: var(--text-muted);
 	padding-inline: 2px;
 }

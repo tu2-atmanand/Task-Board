@@ -306,7 +306,7 @@ export const TaskEditorRC: React.FC<{
 
 		const cleanedTaskTitle = cleanTaskTitleLegacy(
 			modifiedTask,
-			false,
+			globalSettings.usePipeToSeparateProperties,
 			globalSettings,
 		);
 		// setFormattedTaskContent(cleanedTaskTitle);

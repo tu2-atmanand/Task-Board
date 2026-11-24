@@ -87,8 +87,7 @@ export function getTaskCardFooterProperties(
 					{
 						property,
 						value:
-							valueNtype.propertyType ===
-							PropertyTypeConfig.date
+							valueNtype.propertyType === PropertyTypeConfig.date
 								? formatDateStringAsPerSettings(
 										dateValue,
 										globalSetting.dateFormat,
@@ -148,7 +147,7 @@ export function renderTaskCardFooter(
 							? "taskItemFooterPropertyContainer_EmojiStyle"
 							: style === "icons"
 								? "taskItemFooterPropertyContainer_IconStyle"
-								: "taskItemFooterPropertyContainer",
+								: "taskItemFooterPropertyContainer_BasesStyle",
 				});
 				if (style === "icons" && property.color) {
 					propertyContainer.style.borderColor = property.color;
@@ -156,14 +155,16 @@ export function renderTaskCardFooter(
 				const label = propertyContainer.createDiv({
 					cls:
 						style === "emoji"
-							? "taskItemFooterPropertyContainerEmojiLabel"
-							: "taskItemFooterPropertyContainerLabel",
+							? "taskItemFooterPropertyContainerLabel_EmojiStyle"
+							: style === "icons"
+								? "taskItemFooterPropertyContainerLabel_IconStyle"
+								: "taskItemFooterPropertyContainerLabel_BasesStyle",
 				});
 
 				if (style === "icons") {
 					if (property.icon) {
 						const iconContainer = label.createSpan({
-							cls: "taskBoard_taskCard_iconStyle_icon",
+							cls: "taskItemFooterPropertyContainerLabel_IconStyleIcon",
 						});
 						if (property.color) {
 							iconContainer.style.color = property.color;
@@ -176,11 +177,15 @@ export function renderTaskCardFooter(
 					});
 				}
 
-				const propertyValue = propertyContainer.createDiv({
+				propertyContainer.createDiv({
 					cls: "taskItemFooterPropertyContainerValue",
 					text: value,
 				});
-				propertyValue.setAttribute("aria-label", value);
+
+				propertyContainer.setAttribute(
+					"aria-label",
+					`${property.name}: ${value}`,
+				);
 			}
 		},
 	});

@@ -198,7 +198,7 @@ export function createTaskCard(
 	const title = createDiv("div");
 	title.className = "taskItemTitle";
 	title.textContent =
-		cleanTaskTitleLegacy(task, false, globalSettings) || "";
+		cleanTaskTitleLegacy(task, globalSettings.usePipeToSeparateProperties, globalSettings) || "";
 	bodyContent.appendChild(title);
 	titleWrap.appendChild(bodyContent);
 	body.appendChild(titleWrap);

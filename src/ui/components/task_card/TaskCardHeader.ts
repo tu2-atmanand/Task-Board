@@ -86,20 +86,24 @@ export function renderTaskCardHeader(
 				return;
 			}
 
+			const tagElement = createDiv({ cls: "taskItemTag" });
+			if (style === taskCardStyleNames.ICONS)
+				tagElement.addClass("taskItemTagIconStyle");
+
+			// Style handling based on user preference
 			const customTagColor = isCardBg
 				? undefined
 				: globalSettings.tagColors.find((item) =>
 						compareTwoTags(item.name, tag),
 					);
-			const tagElement = createDiv({ cls: "taskItemTag" });
-			if (style === taskCardStyleNames.ICONS)
-				tagElement.addClass("taskItemTagIconStyle");
 			const tagColor = customTagColor?.color;
 			if (isTagBg && tagColor) {
-				tagElement.addClass("tb_color_white");
-				tagElement.style.color = "white";
+				tagElement.style.color = "var(--caret-color)";
 			} else if (tagColor) {
 				tagElement.style.color = tagColor;
+			} else if (isCardBg) {
+				tagElement.style.backgroundColor =
+					"var(--background-primary-alt)";
 			}
 			if (isTagBg) {
 				tagElement.style.backgroundColor = tagColor ?? "";
@@ -108,24 +112,26 @@ export function renderTaskCardHeader(
 					customTagColor.color,
 					0.1,
 				);
+				tagElement.style.border = "1px solid";
 				tagElement.style.borderColor = updateRGBAOpacity(
 					customTagColor.color,
 					0.5,
 				);
 			}
 
-			// if (style === "icons" && tagsProperty?.icon) {
-			// 	const iconElement = createSpan();
-			// 	setIcon(iconElement, tagsProperty.icon);
-			// 	tagElement.appendChild(iconElement);
-			// }
-			tagElement.appendText(tag);
+			if (tagsProperty?.icon) {
+				const iconElement = createSpan({ cls: "taskItemTagHashIcon" });
+				setIcon(iconElement, tagsProperty.icon);
+				tagElement.appendChild(iconElement);
+			}
+			const tagText = createSpan({ cls: "taskItemTagText", text: tag });
+			tagElement.appendChild(tagText);
 			tagsContainer.appendChild(tagElement);
 		});
 
 		frontmatterTags.forEach((tag) => {
 			const tagElement = createDiv({
-				cls: "taskItemTagFrontmatter",
+				cls: ["taskItemTag", "taskItemTagFrontmatter"],
 				attr: {
 					"aria-label": "Tag from note's frontmatter (read-only)",
 				},
@@ -152,8 +158,8 @@ export function renderTaskCardHeader(
 			label.addClass("taskItemPropertyIDLabel_emojiStyle");
 			label.textContent = idProperty?.emoji ?? "";
 		} else {
-			idContainer.addClass("taskItemPropertyID");
-			label.addClass("taskItemPropertyIDLabel");
+			idContainer.addClass("taskItemFooterPropertyContainer_BasesStyle");
+			label.addClass("taskItemFooterPropertyContainerLabel_BasesStyle");
 			label.textContent = idProperty?.name ?? "ID";
 		}
 		const value = createDiv({
