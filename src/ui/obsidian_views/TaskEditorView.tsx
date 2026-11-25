@@ -53,6 +53,7 @@ export class TaskEditorView extends ItemView {
 		this.isEdited = false;
 		this.isTaskNote = isTaskNote;
 		this.activeNote = activeNote;
+		this.icon = 'edit';
 	}
 
 	getViewType() {
