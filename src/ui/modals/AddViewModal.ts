@@ -4,7 +4,7 @@ import { t } from "i18next";
 import { App, Modal, Setting } from "obsidian";
 import { Board } from "../../interfaces/BoardConfigs.js";
 import { viewTypeNames } from "../../interfaces/Enums.js";
-import { addViewToBoard } from "../../utils/ViewUtils.js";
+import { addViewToBoard } from "../../utils/TaskBoardViewUtils.js";
 
 interface AddViewModalProps {
 	app?: App;
