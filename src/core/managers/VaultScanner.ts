@@ -128,7 +128,6 @@ export default class VaultScanner {
 		scanFilters: VaultScannnerFilters,
 	): Promise<string> {
 		try {
-			debugger;
 			const userConfiguredDateFormat =
 				this.plugin.settings.data.dateFormat;
 			const fileNameWithPath = file.path;

@@ -20,7 +20,7 @@ import {
 	FilterCriterion,
 	AdvancedFilter,
 } from "../../../interfaces/BoardConfigs.js";
-import { DEFAULT_TASK_CACHE_KEYS, PropertyTypeConfig } from "../../../interfaces/Enums.js";
+import { PropertyTypeConfig } from "../../../interfaces/Enums.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
 import { FiltersWarehouseModal } from "./FiltersWarehouse.js";
 import {
@@ -29,7 +29,7 @@ import {
 	getFileSuggestions,
 	getFolderSuggestions,
 } from "../../../services/MultiSuggest.js";
-import { generateRandomStringId, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../../utils/TaskItemUtils.js";
+import { generateRandomStringId } from "../../../utils/TaskItemUtils.js";
 import {
 	conditionRequiresValue,
 	getPropertyTypeFilterConfig,
@@ -1185,8 +1185,7 @@ export class AdvancedFilterComponent extends Component {
 			currentCond: string,
 			propertyType: string,
 		) => {
-			let valueActuallyNeeded =
-				conditionRequiresValue(currentCond);
+			let valueActuallyNeeded = conditionRequiresValue(currentCond);
 
 			if (
 				propertyType === "completed" &&
@@ -1305,34 +1304,32 @@ export class AdvancedFilterComponent extends Component {
 		const property = filterData.property;
 
 		if (propertySelect.selectEl.options.length === 0) {
+			for (const configuredProperty of this.plugin.settings.data.taskProperties.filter(
+				(property) => property?.id && property.id !== "",
+			)) {
+				propertySelect.addOption(
+					configuredProperty.id,
+					configuredProperty.name,
+				);
+			}
+
+			// Few additional properties
 			propertySelect.addOptions({
 				content: t("content"),
-				id: t("id"),
-				status: t("status"),
-				priority: t("priority"),
-				tags: t("tags"),
-				createdDate: t("created-date"),
-				startDate: t("start-date"),
-				scheduledDate: t("scheduled-date"),
-				due: t("due-date"),
-				completedDate: t("completed-date"),
-				cancelledDate: t("cancelled-date"),
 				startTime: t("start-time"),
-				reminder: t("reminder"),
-				dependencies: t("dependencies"),
-				filePath: t("file-path"),
-				folderPath: t("folder-path"),
 			});
-			for (const configuredProperty of this.plugin.settings.data.taskProperties.filter((property) => !property.default)) {
-				propertySelect.addOption(configuredProperty.id, configuredProperty.name);
-			}
 		}
 		propertySelect.setValue(property);
 		valueSelect.selectEl.empty();
 
 		let conditionOptions: { value: string; text: string }[] = [];
-		const configuredProperty = this.plugin.settings.data.taskProperties.find((item) => !item.default && item.id === property);
+		const configuredProperty =
+			this.plugin.settings.data.taskProperties.find(
+				(item) => item.id === property,
+			);
+
 		if (configuredProperty) {
+			// Add drop-down options for configured task properties based on their data type.
 			// filterData.propertyType = configuredProperty.type;
 			const propertyFilterConfig = getPropertyTypeFilterConfig(
 				configuredProperty.type,
@@ -1348,251 +1345,27 @@ export class AdvancedFilterComponent extends Component {
 				});
 			}
 		} else {
+			// Drop-down options for few custom options in Advanced Filter.
 			// delete filterData.propertyType;
 			switch (property) {
-			case "content":
-				valueInput.type = "text";
-				conditionOptions = [
-					{
-						value: "contains",
-						text: t("contains"),
-					},
-					{
-						value: "doesNotContain",
-						text: t("does-not-contain"),
-					},
-					{ value: "is", text: t("is") },
-					{
-						value: "isNot",
-						text: t("is-not"),
-					},
-					{
-						value: "startsWith",
-						text: t("starts-with"),
-					},
-					{
-						value: "endsWith",
-						text: t("ends-with"),
-					},
-				];
-				break;
-			case "filePath":
-			case "folderPath":
-				valueInput.type = "text";
-				conditionOptions = [
-					{
-						value: "contains",
-						text: t("contains"),
-					},
-					{
-						value: "doesNotContain",
-						text: t("does-not-contain"),
-					},
-					{ value: "is", text: t("is") },
-					{
-						value: "isNot",
-						text: t("is-not"),
-					},
-					{
-						value: "startsWith",
-						text: t("starts-with"),
-					},
-					{
-						value: "endsWith",
-						text: t("ends-with"),
-					},
-				];
-				break;
-			case "status": {
-				valueInput.hide();
-				const statusOptions = getCustomStatusOptionsForDropdown(
-					this.plugin.settings.data.customStatuses,
-					{ mode: "grouped" },
-				);
-				const optionsRecord: Record<string, string> = {};
-				if (statusOptions.type === "grouped") {
-					statusOptions.groups.forEach((group) => {
-						optionsRecord[`__group_${group.type}__`] =
-							`── ${group.label} ──`;
-						group.options.forEach((opt) => {
-							optionsRecord[opt.value] = opt.label;
-						});
-					});
-				} else {
-					statusOptions.options.forEach((opt) => {
-						optionsRecord[opt.value] = opt.label;
-					});
-				}
-				valueSelect.addOptions(optionsRecord);
-				window.setTimeout(() => {
-					Array.from(valueSelect.selectEl.options).forEach(
-						(option) => {
-							if (option.value.startsWith("__group_")) {
-								option.disabled = true;
-								option.addClass(
-									"taskboard_customstatus_dropdown_option",
-								);
-							}
-						},
-					);
-				}, 0);
-
-				valueSelect.setValue(
-					filterData.value ||
-						getPriorityOptionsForDropdown(
-							this.plugin.settings.data.customPriorities,
-						)[0].value.toString(),
-				);
-				valueSelect.onChange((newValue) => {
-					filterData.value = newValue;
-				});
-
-				conditionOptions = [
-					{ value: "is", text: t("is") },
-					{
-						value: "isNot",
-						text: t("is-not"),
-					},
-				];
-				break;
+				case "content":
+					valueInput.type = "text";
+					conditionOptions = getPropertyTypeFilterConfig(
+						PropertyTypeConfig.time,
+					).conditionOptions;
+					break;
+				case "startTime":
+					valueInput.type = "time";
+					conditionOptions = getPropertyTypeFilterConfig(
+						PropertyTypeConfig.time,
+					).conditionOptions;
+					break;
+				default:
+					valueInput.type = "text";
+					conditionOptions = getPropertyTypeFilterConfig(
+						PropertyTypeConfig.time,
+					).conditionOptions;
 			}
-			case "project":
-				valueInput.type = "text";
-				conditionOptions = [
-					{
-						value: "contains",
-						text: t("contains"),
-					},
-					{
-						value: "doesNotContain",
-						text: t("does-not-contain"),
-					},
-					{ value: "is", text: t("is") },
-					{
-						value: "isNot",
-						text: t("is-not"),
-					},
-					{
-						value: "startsWith",
-						text: t("starts-with"),
-					},
-					{
-						value: "endsWith",
-						text: t("ends-with"),
-					},
-					{
-						value: "isEmpty",
-						text: t("is-empty"),
-					},
-					{
-						value: "isNotEmpty",
-						text: t("is-not-empty"),
-					},
-				];
-				break;
-			case "priority":
-				valueInput.hide();
-				valueSelect.addOptions(
-					getPriorityOptionsForDropdown(
-						this.plugin.settings.data.customPriorities,
-					).reduce(
-						(
-							acc: Record<number | string, string>,
-							opt: priorityDropDownOption,
-						) => {
-							acc[opt.value] = opt.text;
-							return acc;
-						},
-						{},
-					),
-				);
-				valueSelect.setValue(
-					filterData.value ||
-						getPriorityOptionsForDropdown(
-							this.plugin.settings.data.customPriorities,
-						)[0].value.toString(),
-				);
-				valueSelect.onChange((newValue) => {
-					filterData.value = newValue;
-				});
-				conditionOptions = getPropertyTypeFilterConfig(
-					PropertyTypeConfig.numeric,
-				).conditionOptions;
-				break;
-			case DEFAULT_TASK_CACHE_KEYS.ID:
-				valueInput.type = "text";
-				conditionOptions = getPropertyTypeFilterConfig(
-					PropertyTypeConfig.numeric,
-				).conditionOptions;
-				break;
-			case "createdDate":
-			case "due":
-			case "startDate":
-			case "scheduledDate":
-			case "completedDate":
-			case "cancelledDate":
-				valueInput.type = "date";
-				conditionOptions = getPropertyTypeFilterConfig(
-					PropertyTypeConfig.date,
-				).conditionOptions;
-				break;
-			case "startTime":
-				valueInput.type = "time";
-				conditionOptions = getPropertyTypeFilterConfig(
-					PropertyTypeConfig.time,
-				).conditionOptions;
-				break;
-			case "tags":
-				valueInput.type = "text";
-				conditionOptions = [
-					{
-						value: "contains",
-						text: t("contains-string"),
-					},
-					{
-						value: "doesNotContain",
-						text: t("does-not-contains-string"),
-					},
-					{
-						value: "isEmpty",
-						text: t("are-empty"),
-					},
-					{
-						value: "isNotEmpty",
-						text: t("are-not-empty"),
-					},
-				];
-				break;
-			default:
-				valueInput.type = "text";
-				conditionOptions = [
-					{
-						value: "is",
-						text: t("is"),
-					},
-					{
-						value: "isNot",
-						text: t("is-not"),
-					},
-					{
-						value: "contains",
-						text: t("contains"),
-					},
-					{
-						value: "doesNotContain",
-						text: t("does-not-contains"),
-					},
-					{
-						value: "isEmpty",
-						text: t("is-empty"),
-					},
-					{
-						value: "isNotEmpty",
-						text: t("is-not-empty"),
-					},
-				];
-		}
-
 		}
 		conditionSelect.selectEl.empty();
 		conditionOptions.forEach(
@@ -1612,8 +1385,7 @@ export class AdvancedFilterComponent extends Component {
 		}
 
 		const finalConditionVal = conditionSelect.getValue();
-		let valueActuallyNeeded =
-			conditionRequiresValue(finalConditionVal);
+		let valueActuallyNeeded = conditionRequiresValue(finalConditionVal);
 		if (
 			finalConditionVal === "isEmpty" ||
 			finalConditionVal === "isNotEmpty"

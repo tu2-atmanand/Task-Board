@@ -70,6 +70,7 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	Duration = "duration", // duration in minutes - User can decide whether they want to enter end time or {startTime + Duration}. Also work for {startDate + Duration}, if startDate is stored as date-time.
 	
 	// ALl below properties are not stored in cache, but this same enum is used at other places hence placing them here.
+	Content = "content",
 	SubTasks = "subTasks",
 	Description = "description",
 	ParentTasks = "parentTasks",

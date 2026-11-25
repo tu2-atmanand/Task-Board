@@ -35,6 +35,7 @@ import {
 } from "../interfaces/Mapping.js";
 import { t } from "i18next";
 import { extractTaskId } from "./task_line/PropertiesParsing.js";
+import { getFormattedTaskContentSync } from "./task_line/TaskContentFormatter.js";
 
 /**
  * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
@@ -579,6 +580,17 @@ export function getTaskPropertyValue(
 	propertyValue: CustomTaskPropertyValueType | undefined;
 	propertyType: PropertyTypeConfig | undefined;
 } {
+	// There are few properties which are not present in Task Cache.
+	// These are requested by advanced filterer or other features.
+	// From this function will simply format and return them.
+	if (propertyKey === DEFAULT_TASK_CACHE_KEYS.Content) {
+		const content = getFormattedTaskContentSync(task);
+		return {
+			propertyValue: content,
+			propertyType: PropertyTypeConfig.text,
+		};
+	}
+
 	const property = globalSetting.taskProperties.find(
 		(item) => item.key === propertyKey,
 	);
