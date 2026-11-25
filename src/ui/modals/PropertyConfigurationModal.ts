@@ -146,7 +146,14 @@ export class PropertyConfigurationModal extends Modal {
 				});
 		}
 
-		if (this.draft.key !== DEFAULT_TASK_CACHE_KEYS.Status) {
+		if (
+			![
+				String(DEFAULT_TASK_CACHE_KEYS.Title),
+				String(DEFAULT_TASK_CACHE_KEYS.Status),
+				String(DEFAULT_TASK_CACHE_KEYS.Priority),
+				String(DEFAULT_TASK_CACHE_KEYS.Tags),
+			].includes(this.draft.key)
+		) {
 			addTextField(
 				t("emoji"),
 				t("emoji-property-info"),
