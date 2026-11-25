@@ -16,6 +16,18 @@ import {
 import { createFolderRecursively } from "../../services/FileSystem.js";
 import { t } from "i18next";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import { priorityEmojis } from "../../interfaces/Mapping.js";
+
+/**
+ * @deprecated - 2.0.0 - User can now configure their own custom 
+ * priorities in setting. Either use 
+ * 
+ * @param priority The value of the priority or its rank.
+ * @returns The emoji for inline-task specific Tasks plugin format.
+ */
+export const getPriorityEmoji = (priority: number): string => {
+	return priorityEmojis[priority] || "";
+};
 
 /**
  * This function will simpy check if the task title contains the recurring tag:

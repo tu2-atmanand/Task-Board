@@ -38,7 +38,9 @@ import { extractTaskId } from "./task_line/PropertiesParsing.js";
 import { getFormattedTaskContentSync } from "./task_line/TaskContentFormatter.js";
 
 /**
- * Combines both the normal task.tags and frontmatter tags of a taskItem and return it as a single array.
+ * Combines both the normal task.tags and frontmatter tags of 
+ * a taskItem and return it as a single array. This is specifically 
+ * for inline-task.
  * @param task - Task item with updated properties
  * @returns string[] - Array of tags
  */
@@ -300,11 +302,6 @@ export function getPriorityNameUsingPriorityNumber(
 	};
 	return priorityNames[priority] || "URGENT";
 }
-
-// Helper function to get priority emoji
-export const getPriorityEmoji = (priority: number): string => {
-	return priorityEmojis[priority] || "";
-};
 
 // Include configured priorities while retaining defaults for legacy callers.
 export const getPriorityOptionsForDropdown = (
@@ -568,8 +565,8 @@ export const getCustomStatusOptionsForDropdown = (
  *
  * @returns The value of the property and the property type, so user can cast
  * it in that required format if needed. Example : string date value can be
- * converted to Date object. If the value is null, undefined, 0 or empty
- * then undefined will be returned.
+ * converted to Date object. 
+ * If the value is null, undefined, 0 or empty then undefined will be returned.
  */
 export function getTaskPropertyValue(
 	task: taskItem,

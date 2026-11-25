@@ -33,6 +33,8 @@ import { generateTaskId } from "../TaskItemUtils.js";
 import {
 	extractTaskId,
 	extractPriority,
+	escapeRegExp,
+	getTaskProperty,
 } from "./PropertiesParsing.js";
 
 /**
@@ -50,7 +52,7 @@ const timeOnlyTitleRegex = /^\d{1,2}:\d{2}(\s*[-–~]\s*\d{1,2}:\d{2})?$/;
 export const isTaskTitleWithoutText = (
 	task: taskItem,
 	usePipeSymboltoSeparate: boolean,
-	globalSettings?: globalSettingsData,
+	globalSettings: globalSettingsData,
 ): boolean => {
 	const title = cleanTaskTitleLegacy(
 		task,
@@ -250,11 +252,12 @@ export const cleanTaskTitleSelectively = (
  */
 export const cleanTaskTitleLegacy = (
 	task: taskItem,
-	usePipeSymboltoSeparate = false,
-	globalSettings?: globalSettingsData,
+	usePipeSymboltoSeparate: boolean = false,
+	globalSettings: globalSettingsData,
 ): string => {
 	let cleanedTitle = task[DEFAULT_TASK_CACHE_KEYS.Title];
 
+	// Remove the indentation and the status checkbox
 	cleanedTitle = cleanedTitle
 		.replace(
 			new RegExp(TaskRegularExpressions.indentationAndCheckboxRegex, "u"),
@@ -262,20 +265,20 @@ export const cleanTaskTitleLegacy = (
 		)
 		.trim();
 
+	// A new feature for better performance.
 	if (usePipeSymboltoSeparate && cleanedTitle.contains(" | ")) {
-		cleanedTitle = cleanedTitle.slice(0, cleanedTitle.indexOf(" | "));
+		return cleanedTitle.slice(0, cleanedTitle.indexOf(" | ")).trim();
 	}
 
-	// Remove tags
-	(task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).forEach((tag) => {
-		const tagRegex = new RegExp(`\\s*#${tag}\\s*`, "g");
-		const tagsMatch = cleanedTitle.match(tagRegex);
-		if (tagsMatch) {
-			cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");
-		}
-	});
-
+	// First remove all the user configured properties.
+	// Rest of the special default properties are handled below.
 	if (globalSettings) {
+		// Remove time property
+		cleanedTitle = removeTimeProperty(
+			cleanedTitle,
+			globalSettings.taskProperties,
+		);
+
 		for (const property of globalSettings.taskProperties) {
 			if (
 				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Title) ||
@@ -283,9 +286,7 @@ export const cleanTaskTitleLegacy = (
 				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Status) ||
 				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Tags) ||
 				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.FilePath) ||
-				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Time) ||
-				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Priority) ||
-				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Reminder)
+				isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Time)
 			) {
 				continue;
 			}
@@ -297,38 +298,17 @@ export const cleanTaskTitleLegacy = (
 		}
 	}
 
-	// Task Board's default time syntax and priority are handled as special properties.
-	const timeProperty = globalSettings?.taskProperties.find(
-		(property) =>
-			isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Time),
-	);
-	if (timeProperty) {
-		const timeMatch = findTaskPropertyMatch(cleanedTitle, timeProperty);
-		if (timeMatch) {
-			cleanedTitle = removeTaskPropertyMatch(cleanedTitle, timeMatch);
+	// Remove tags
+	(task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).forEach((tag) => {
+		const tagRegex = new RegExp(`\\s*#${tag}\\s*`, "g");
+		const tagsMatch = cleanedTitle.match(tagRegex);
+		if (tagsMatch) {
+			cleanedTitle = cleanedTitle.replace(tagsMatch[0], " ");
 		}
-	} else if (task[DEFAULT_TASK_CACHE_KEYS.Time]) {
-		cleanedTitle = cleanedTitle
-			.replace(
-				/\s*(⏰\s*(\[.*?\]|\d{2}:\d{2}\s*-\s*\d{2}:\d{2})|\[time::.*?\]|@time\(.*?\))/,
-				"",
-			)
-			.trimEnd();
-	}
+	});
 
-	const priorityProperty = globalSettings?.taskProperties.find(
-		(property) =>
-			isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Priority),
-	);
-	if (priorityProperty) {
-		const priorityMatch = findTaskPropertyMatch(
-			cleanedTitle,
-			priorityProperty,
-		);
-		if (priorityMatch) {
-			cleanedTitle = removeTaskPropertyMatch(cleanedTitle, priorityMatch);
-		}
-	} else if ((task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0) > 0) {
+	// Remove Priority emoji format
+	if ((task[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0) > 0) {
 		const legacyPriority = extractPriority(cleanedTitle);
 		if (legacyPriority.parsedString) {
 			cleanedTitle = cleanedTitle.replace(
@@ -338,21 +318,8 @@ export const cleanTaskTitleLegacy = (
 		}
 	}
 
-	// Remove reminder if it exists
-	const reminderProperty = globalSettings?.taskProperties.find(
-		(property) =>
-			isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.Reminder),
-	);
-	const configuredReminderMatch = findTaskPropertyMatch(
-		cleanedTitle,
-		reminderProperty,
-	);
-	if (configuredReminderMatch) {
-		cleanedTitle = removeTaskPropertyMatch(
-			cleanedTitle,
-			configuredReminderMatch,
-		);
-	}
+	// A special format of reminder property from compatible notification apps.
+	// TODO : Remove this once Task Board supports the notification feature.
 	const reminderMatch = cleanedTitle.match(
 		/\(@(\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?|\d{2}:\d{2})\)/,
 	);
@@ -360,21 +327,22 @@ export const cleanTaskTitleLegacy = (
 		cleanedTitle = cleanedTitle.replace(reminderMatch[0], "").trim();
 	}
 
-	// Remove recurring tag and onCompletion tag
-	cleanedTitle = cleanedTitle
-		.replace(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-				.recurrenceRegex,
-			"",
-		)
-		.trim();
-	cleanedTitle = cleanedTitle
-		.replace(
-			TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
-				.onCompletionRegex,
-			"",
-		)
-		.trim();
+	// These properties are not supported by Task Board, hence cannot remove
+	// them from the title.
+	// cleanedTitle = cleanedTitle
+	// 	.replace(
+	// 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+	// 			.recurrenceRegex,
+	// 		"",
+	// 	)
+	// 	.trim();
+	// cleanedTitle = cleanedTitle
+	// 	.replace(
+	// 		TASKS_PLUGIN_DEFAULT_SYMBOLS.TaskFormatRegularExpressions
+	// 			.onCompletionRegex,
+	// 		"",
+	// 	)
+	// 	.trim();
 
 	// Trim extra spaces and return the cleaned title
 	return cleanedTitle.trim();
@@ -607,10 +575,9 @@ export const getSanitizedTaskContent = (
 		) {
 			continue;
 		}
-		const value =
-			isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.ID)
-				? updatedTask[DEFAULT_TASK_CACHE_KEYS.LegacyID]
-				: updatedTask[property.key];
+		const value = isTaskPropertyKey(property, DEFAULT_TASK_CACHE_KEYS.ID)
+			? updatedTask[DEFAULT_TASK_CACHE_KEYS.LegacyID]
+			: updatedTask[property.key];
 		updatedTitle = sanitizeTaskProperty(
 			globalSettings,
 			updatedTitle,
@@ -965,9 +932,23 @@ export const sanitizeTime = (
 	newTime: string,
 	cursorLocation?: cursorLocationInterface,
 ): string => {
+	const timePropertyConfig = getTaskProperty(
+		globalSettings.taskProperties,
+		DEFAULT_TASK_CACHE_KEYS.Time,
+	);
+	let timePropertyId = "time";
+	let timePropertyEmoji = TASKS_PLUGIN_DEFAULT_SYMBOLS.duration;
+	if (timePropertyConfig) {
+		timePropertyId = timePropertyConfig.id;
+		timePropertyEmoji = timePropertyConfig.emoji;
+	}
+
 	const timeAtStartRegex = /]\s*(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})/;
-	const timeFormatsRegex =
-		/\s*(⏰\s*(\[.*?\]|(\d{2}:\d{2}\s*-\s*\d{2}:\d{2}))|\[time::(.*?)\]|@time\((.*?)\))/g; // Match all three formats
+	const timeFormatsRegex = new RegExp(
+		`\\s*(${escapeRegExp(timePropertyEmoji)}\\s*(\\[.*?\\]|(\\d{2}:\\d{2}\\s*-\\s*\\d{2}:\\d{2}))|\\[${escapeRegExp(timePropertyId)}::(.*?)\\]|@${escapeRegExp(timePropertyId)}\\((.*?)\\))`,
+		"g",
+	);
+	// Match all three formats
 
 	// Match both the time formats
 	const timeAtStartMatch = title.match(timeAtStartRegex);
@@ -1017,19 +998,19 @@ export const sanitizeTime = (
 			globalSettings.taskPropertyFormat ===
 			taskPropertyFormatOptions.default
 		) {
-			newTimeWithFormat = `⏰[${newTime}]`;
+			newTimeWithFormat = `${timePropertyEmoji}[${newTime}]`;
 		} else if (
 			globalSettings.taskPropertyFormat ===
 			taskPropertyFormatOptions.tasksPlugin
 		) {
-			newTimeWithFormat = `⏰ ${newTime}`;
+			newTimeWithFormat = `${timePropertyEmoji} ${newTime}`;
 		} else if (
 			globalSettings.taskPropertyFormat ===
 			taskPropertyFormatOptions.dataviewPlugin
 		) {
-			newTimeWithFormat = `[time:: ${newTime}]`;
+			newTimeWithFormat = `[${timePropertyId}:: ${newTime}]`;
 		} else {
-			newTimeWithFormat = `@time(${newTime})`;
+			newTimeWithFormat = `@${timePropertyId}(${newTime})`;
 		}
 
 		// Remove the time from the beginning of the title
@@ -1058,6 +1039,47 @@ export const sanitizeTime = (
 		// If no time is present, append it at the end
 		return `${title} ${newTimeWithFormat} `;
 	}
+};
+
+export const removeTimeProperty = (
+	title: string,
+	taskPropertiesConfig: SupportedPropertiesConfig[],
+): string => {
+	const timePropertyConfig = getTaskProperty(
+		taskPropertiesConfig,
+		DEFAULT_TASK_CACHE_KEYS.Time,
+	);
+	let timePropertyId = "time";
+	let timePropertyEmoji = TASKS_PLUGIN_DEFAULT_SYMBOLS.duration;
+	if (timePropertyConfig) {
+		timePropertyId = timePropertyConfig.id;
+		timePropertyEmoji = timePropertyConfig.emoji;
+	}
+
+	const timeAtStartRegex = /^(\d{2}:\d{2}\s*-\s*\d{2}:\d{2})\s+/;
+	const timeAtStartMatch = title.match(timeAtStartRegex);
+	if (timeAtStartMatch) {
+		return title.replace(timeAtStartMatch[1], "").trimEnd();
+	}
+
+	// Match all three formats
+	const timeFormatsRegex = new RegExp(
+		`\\s*(${escapeRegExp(timePropertyEmoji)}\\s*(\\[.*?\\]|(\\d{2}:\\d{2}\\s*-\\s*\\d{2}:\\d{2}))|\\[${escapeRegExp(timePropertyId)}::(.*?)\\]|@${escapeRegExp(timePropertyId)}\\((.*?)\\))`,
+		"g",
+	);
+	let timeFormatMatch: string[] | null = null;
+	let match = timeFormatsRegex.exec(title);
+	if (match) {
+		timeFormatMatch = [];
+		timeFormatMatch.push(match[0].trim()); // original match
+		timeFormatMatch.push(match[3] || match[4] || match[5]); // extracted time range
+	}
+
+	if (timeFormatMatch) {
+		return title.replace(timeFormatMatch[0], "").trimEnd();
+	}
+
+	return title;
 };
 
 // ==========================================================================================
@@ -1214,13 +1236,9 @@ function formatTaskProperty(
 		case taskPropertyFormatOptions.obsidianNative:
 			return `@${property.id}(${formattedValue})`;
 		case taskPropertyFormatOptions.tasksPlugin:
-			return property.emoji
-				? `${property.emoji} ${formattedValue}`
-				: "";
+			return property.emoji ? `${property.emoji} ${formattedValue}` : "";
 		default:
-			return property.emoji
-				? `${property.emoji}${formattedValue}`
-				: "";
+			return property.emoji ? `${property.emoji}${formattedValue}` : "";
 	}
 }
 
@@ -1269,14 +1287,15 @@ export const sanitizeTaskProperty = (
 		);
 		const before = taskTitle.slice(0, insertionIndex).trimEnd();
 		const after = taskTitle.slice(insertionIndex).trim();
-		return [before, formattedProperty, after]
-			.filter(Boolean)
-			.join(" ");
+		return [before, formattedProperty, after].filter(Boolean).join(" ");
 	}
 
 	return `${taskTitle.trimEnd()} ${formattedProperty}`;
 };
 
+// ==========================================================
+//                 ALL DEPRECATED FUNCTIONS
+// ==========================================================
 /**
  * @deprecated Use {@link sanitizeTaskProperty} with the CreatedDate property key.
  * @param globalSettings - The global settings data.

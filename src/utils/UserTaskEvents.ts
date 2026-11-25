@@ -61,7 +61,6 @@ function coerceTaskDateValue(
 	return typeof convertedValue === "number" ? convertedValue : undefined;
 }
 
-
 /**
  * Handle edit task event when user click on the edit task button. Depends on the configurations, it will either open the edit task modal, edit task view, directly open the inline-task in note and highlight the task or also open the edit task modal of tasks plugin.
  * @param plugin - Taskboard plugin instance
@@ -153,7 +152,9 @@ export const openFileAndHighlightTask = async (
 	task: taskItem,
 	mode: EditButtonMode,
 ) => {
-	const file = plugin.app.vault.getAbstractFileByPath(task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
+	const file = plugin.app.vault.getAbstractFileByPath(
+		task[DEFAULT_TASK_CACHE_KEYS.FilePath],
+	);
 	let leaf: WorkspaceLeaf | null = null;
 
 	switch (mode) {
@@ -184,7 +185,9 @@ export const openFileAndHighlightTask = async (
 
 	if (file && file instanceof TFile && leaf) {
 		await leaf.openFile(file, {
-			eState: { line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine - 1 },
+			eState: {
+				line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine - 1,
+			},
 		});
 	} else {
 		bugReporterManagerInsatance.showNotice(
@@ -281,7 +284,10 @@ export const updateTaskItemStatus = async (
 					// TODO : Is 1 sec really required ?
 					// This is required to rescan the updated file and refresh the board.
 					plugin.realTimeScanner
-						.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+						.processAllUpdatedFiles(
+							taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+							taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+						)
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -301,7 +307,10 @@ export const updateTaskItemStatus = async (
 		);
 		void updateTaskInFile(plugin, newTask, taskOld).then((newId) => {
 			plugin.realTimeScanner
-				.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+				.processAllUpdatedFiles(
+					taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+					taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+				)
 				.catch((error) => {
 					bugReporterManagerInsatance.addToLogs(
 						217,
@@ -348,7 +357,10 @@ export const updateTaskItemPriority = (
 		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			window.setTimeout(() => {
 				plugin.realTimeScanner
-					.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+					.processAllUpdatedFiles(
+						taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+						taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+					)
 					.catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -366,7 +378,10 @@ export const updateTaskItemPriority = (
 		);
 		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner
-				.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+				.processAllUpdatedFiles(
+					taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+					taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+				)
 				.catch((error) => {
 					bugReporterManagerInsatance.addToLogs(
 						217,
@@ -407,11 +422,12 @@ export const updateTaskItemDate = (
 			);
 			break;
 		case UniversalDateOptions.scheduledDate:
-			newTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = coerceTaskDateValue(
-				plugin.settings.data,
-				DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
-				newDate,
-			);
+			newTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] =
+				coerceTaskDateValue(
+					plugin.settings.data,
+					DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+					newDate,
+				);
 			break;
 		case UniversalDateOptions.dueDate:
 			newTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = coerceTaskDateValue(
@@ -428,7 +444,10 @@ export const updateTaskItemDate = (
 			);
 	}
 
-	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
+	eventEmitter.emit("UPDATE_TASK", {
+		taskID: taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+		state: true,
+	});
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
@@ -439,7 +458,10 @@ export const updateTaskItemDate = (
 		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			window.setTimeout(() => {
 				plugin.realTimeScanner
-					.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+					.processAllUpdatedFiles(
+						taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+						taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+					)
 					.catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -482,7 +504,10 @@ export const updateTaskItemDate = (
 
 		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner
-				.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+				.processAllUpdatedFiles(
+					taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+					taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+				)
 				.catch((error) => {
 					bugReporterManagerInsatance.addToLogs(
 						217,
@@ -518,7 +543,10 @@ export const updateTaskItemReminder = (
 		newReminder,
 	);
 
-	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
+	eventEmitter.emit("UPDATE_TASK", {
+		taskID: taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+		state: true,
+	});
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
@@ -529,7 +557,10 @@ export const updateTaskItemReminder = (
 		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			window.setTimeout(() => {
 				plugin.realTimeScanner
-					.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+					.processAllUpdatedFiles(
+						taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+						taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+					)
 					.catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -547,7 +578,10 @@ export const updateTaskItemReminder = (
 		);
 		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner
-				.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+				.processAllUpdatedFiles(
+					taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+					taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+				)
 				.catch((error) => {
 					bugReporterManagerInsatance.addToLogs(
 						217,
@@ -578,7 +612,10 @@ export const updateTaskItemTags = (
 	let newTask = { ...taskUpdated };
 	newTask[DEFAULT_TASK_CACHE_KEYS.Tags] = newTags;
 
-	eventEmitter.emit("UPDATE_TASK", { taskID: taskOld[DEFAULT_TASK_CACHE_KEYS.ID], state: true });
+	eventEmitter.emit("UPDATE_TASK", {
+		taskID: taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+		state: true,
+	});
 
 	const isThisTaskNote = isTaskNotePresentInTags(
 		plugin.settings.data.taskNoteIdentifierTag,
@@ -589,7 +626,10 @@ export const updateTaskItemTags = (
 		void updateFrontmatterInMarkdownFile(plugin, newTask).then(() => {
 			window.setTimeout(() => {
 				plugin.realTimeScanner
-					.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+					.processAllUpdatedFiles(
+						taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+						taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+					)
 					.catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -600,10 +640,16 @@ export const updateTaskItemTags = (
 			}, 1000);
 		});
 	} else {
-		newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeTags(newTask[DEFAULT_TASK_CACHE_KEYS.Title], newTags);
+		newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeTags(
+			newTask[DEFAULT_TASK_CACHE_KEYS.Title],
+			newTags,
+		);
 		void updateTaskInFile(plugin, newTask, taskOld).then(() => {
 			plugin.realTimeScanner
-				.processAllUpdatedFiles(taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath], taskOld[DEFAULT_TASK_CACHE_KEYS.ID])
+				.processAllUpdatedFiles(
+					taskOld[DEFAULT_TASK_CACHE_KEYS.FilePath],
+					taskOld[DEFAULT_TASK_CACHE_KEYS.ID],
+				)
 				.catch((error) => {
 					bugReporterManagerInsatance.addToLogs(
 						217,
@@ -669,18 +715,20 @@ export const updateTaskItemProperty = async (
 			);
 			break;
 		case "startDate":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = coerceTaskDateValue(
-				globalSettings,
-				DEFAULT_TASK_CACHE_KEYS.StartDate,
-				newValue,
-			);
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.StartDate] =
+				coerceTaskDateValue(
+					globalSettings,
+					DEFAULT_TASK_CACHE_KEYS.StartDate,
+					newValue,
+				);
 			break;
 		case "scheduledDate":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] = coerceTaskDateValue(
-				globalSettings,
-				DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
-				newValue,
-			);
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] =
+				coerceTaskDateValue(
+					globalSettings,
+					DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+					newValue,
+				);
 			break;
 		case "due":
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = coerceTaskDateValue(
@@ -690,24 +738,27 @@ export const updateTaskItemProperty = async (
 			);
 			break;
 		case "completion":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] = coerceTaskDateValue(
-				globalSettings,
-				DEFAULT_TASK_CACHE_KEYS.CompletionDate,
-				newValue,
-			);
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CompletionDate] =
+				coerceTaskDateValue(
+					globalSettings,
+					DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+					newValue,
+				);
 			break;
 		case "cancelledDate":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] = coerceTaskDateValue(
-				globalSettings,
-				DEFAULT_TASK_CACHE_KEYS.CancelledDate,
-				newValue,
-			);
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.CancelledDate] =
+				coerceTaskDateValue(
+					globalSettings,
+					DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+					newValue,
+				);
 			break;
 		case "time":
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.Time] = newValue as string;
 			break;
 		case "dependsOn":
-			updatedTask[DEFAULT_TASK_CACHE_KEYS.Dependencies] = newValue as string[];
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.Dependencies] =
+				newValue as string[];
 			break;
 		case "filePath":
 			updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath] = newValue as string;
