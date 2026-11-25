@@ -411,7 +411,7 @@ export const useTasksPluginToUpdateInFile = async (
 			// const scannVault = new vaultScanner(plugin.app, plugin);
 			// const file = plugin.app.vault.getAbstractFileByPath(filePath);
 			// if (file && file instanceof TFile)
-			// 	scannVault.refreshTasksFromFiles([file]);
+			// 	scannVault.extractTasksFromFiles([file]);
 			// eventEmitter.emit("SOFT_REFRESH");
 		} else {
 			//fallback to normal function

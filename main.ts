@@ -1229,7 +1229,7 @@ export default class TaskBoard extends Plugin {
 			// );
 			const totalFilesLength = allowedFiles.length;
 
-			// this.plugin.vaultScanner.refreshTasksFromFiles(allowedFiles, false);
+			// this.plugin.vaultScanner.extractTasksFromFiles(allowedFiles, false);
 
 			// Show progress notice only if the files are more than 10
 			if (totalFilesLength > 20) {
@@ -1357,7 +1357,7 @@ export default class TaskBoard extends Plugin {
 			if (totalFilesLength > 0) {
 				const scanAllModifiedFiles = () => {
 					void this.vaultScanner
-						.refreshTasksFromFiles(changed_files, false)
+						.extractTasksFromFiles(changed_files, false)
 						.then(async () => {
 							if (deletedFilesList.length > 0) {
 								await this.vaultScanner.deleteCacheForFiles(
@@ -1483,7 +1483,7 @@ export default class TaskBoard extends Plugin {
 							this.settings.data.scanMode ===
 							scanModeOptions.REAL_TIME
 						) {
-							void this.vaultScanner.refreshTasksFromFiles(
+							void this.vaultScanner.extractTasksFromFiles(
 								[file],
 								false,
 							);
@@ -1592,7 +1592,7 @@ export default class TaskBoard extends Plugin {
 										file,
 									)
 								) {
-									void this.vaultScanner.refreshTasksFromFiles(
+									void this.vaultScanner.extractTasksFromFiles(
 										[file],
 										true,
 									);

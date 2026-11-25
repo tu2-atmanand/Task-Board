@@ -571,14 +571,16 @@ export default class VaultScanner {
 	}
 
 	/**
-	 * Scans all the files and extracts inline-tasks or if the file itself is a task-note. This function will pass the files and inline-tasks through the scanning filters.
+	 * Scans all the files and extracts inline-tasks or if the file itself is a task-note. 
+	 * This function will pass the files and inline-tasks through the scanning filters.
 	 *
 	 * @param files - List of TFile objects to be scanned.
-	 * @param showNotice Whether to show notice for successful or failed operations. If this function is invoked by user, then notice will be shown as an feedback.
+	 * @param showNotice Whether to show notice for successful or failed operations. 
+	 * If this function is invoked by user, then notice will be shown as an feedback.
 	 * @returns - True - If the operation was successful and all files were scanned without any issues.
 	 * - False - If there was some issue while scanning the files.
 	 */
-	async refreshTasksFromFiles(
+	async extractTasksFromFiles(
 		files: (TFile | null)[],
 		showNotice: boolean,
 	): Promise<boolean> {
@@ -635,7 +637,7 @@ export default class VaultScanner {
 					.map((f) => f?.path)
 					.join("\n")}`,
 				error as string,
-				"VaultScanner.tsx/refreshTasksFromFiles",
+				"VaultScanner.tsx/extractTasksFromFiles",
 			);
 			return false;
 		}

@@ -94,7 +94,7 @@ export class RealTimeScanner {
 			let result = false;
 			if (filesToProcess.length > 0) {
 				// Send all files for scanning and updating tasks
-				result = await this.vaultScanner.refreshTasksFromFiles(
+				result = await this.vaultScanner.extractTasksFromFiles(
 					files,
 					false,
 				);
