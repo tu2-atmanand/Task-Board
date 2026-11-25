@@ -660,7 +660,7 @@ export function getTaskPropertyValue(
 			};
 		} else {
 			return {
-				propertyValue: globalSetting.defaultStartTime,
+				propertyValue: undefined,
 				propertyType: property.type,
 			};
 		}
