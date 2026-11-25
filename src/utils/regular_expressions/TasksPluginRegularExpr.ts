@@ -100,6 +100,7 @@ export interface DefaultTaskSerializerSymbols {
 		Lowest: string;
 		None: string;
 	};
+	readonly reminder: string;
 	readonly duration: string;
 	readonly startDateSymbol: string;
 	readonly createdDateSymbol: string;
@@ -114,7 +115,6 @@ export interface DefaultTaskSerializerSymbols {
 	readonly dependsOnCompletedSymbol: string;
 	readonly TaskFormatRegularExpressions: {
 		priorityRegex: RegExp;
-		durationRegex: RegExp;
 		startDateRegex: RegExp;
 		createdDateRegex: RegExp;
 		scheduledDateRegex: RegExp;
@@ -176,6 +176,7 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 		None: "",
 	},
 	duration: "⏰",
+	reminder: "🔔",
 	startDateSymbol: "🛫",
 	createdDateSymbol: "➕",
 	scheduledDateSymbol: "⏳",
@@ -189,7 +190,6 @@ export const TASKS_PLUGIN_DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
 	idSymbol: "🆔",
 	TaskFormatRegularExpressions: {
 		priorityRegex: fieldRegex("(🔺|⏫|🔼|🔽|⏬)", "", ""),
-		durationRegex: dateFieldRegex("⏰", ""),
 		startDateRegex: dateFieldRegex("🛫", ""),
 		createdDateRegex: dateFieldRegex("➕", ""),
 		scheduledDateRegex: dateFieldRegex("(?:⏳|⌛)", ""),
