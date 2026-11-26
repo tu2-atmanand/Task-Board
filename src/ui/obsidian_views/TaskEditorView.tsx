@@ -12,7 +12,6 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
-import { generateTaskId } from "../../utils/TaskItemUtils.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
 
@@ -70,7 +69,7 @@ export class TaskEditorView extends ItemView {
 		container.setAttribute('data-type', 'task-board-view');
 
 		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task[DEFAULT_TASK_CACHE_KEYS.ID])) {
-			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = generateTaskId(this.plugin);
+			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = this.plugin.vaultScanner.generateTaskId();
 			this.task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = this.task[DEFAULT_TASK_CACHE_KEYS.ID];
 		}
 

@@ -43,6 +43,8 @@ import {
 import {
 	isTaskNotePresentInFrontmatter,
 	extractTaskNoteProperties,
+	isTaskNotePresentInTags,
+	updateFrontmatterInMarkdownFile,
 } from "../../utils/task_note/TaskNoteUtils.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import type {
@@ -58,6 +60,7 @@ import {
 	extractTaskPropertiesOfSingleFormat,
 } from "../../utils/task_line/PropertiesParsing.js";
 import { defaultTaskStatuses } from "../../interfaces/Mapping.js";
+import { updateTaskInFile } from "../../utils/task_line/TaskLineUtils.js";
 
 /**
  * Creates a vault scanner mechanism and holds the latest tasksCache inside RAM.
@@ -843,6 +846,74 @@ export default class VaultScanner {
 			);
 			return;
 		}
+	}
+
+	/**
+	 * Generates a unique ID for a task based on the plugin's settings.
+	 * It increments the plugin's settings data globalSettings.uniqueIdCounter by 1 and then saves the updated settings.
+	 * The current counter value is returned as a string and will be used as the ID for the next task.
+	 * If the uniqueIdCounter is not set, it will be set to 0 before incrementing.
+	 * @param plugin - The TaskBoard plugin instance
+	 * @returns A string representing the unique ID for the task
+	 */
+	generateTaskId(): string {
+		this.globalSettings.uniqueIdCounter =
+			this.globalSettings.uniqueIdCounter + 1 || 0;
+
+		// Save the updated uniqueIdCounter back to settings
+		void this.plugin.saveSettings();
+		// Return the current counter value and then increment it for the next ID
+		return String(this.globalSettings.uniqueIdCounter);
+	}
+
+	/**
+	 * Applies a new id to the task in a file if it does not have one already. This function will force an id to be added to the task.
+	 * @param plugin - The TaskBoard plugin instance.
+	 * @param task - The taskItem object representing the task to which an id needs to be applied.
+	 * @returns A promise that resolves to the new id if applied, or undefined if the task already has an id or if an error occurs.
+	 */
+	async applyIdToTaskItem(task: taskItem): Promise<string | undefined> {
+		// If the task already has an ID, return it and avoid assigning a new one.
+		if (
+			task[DEFAULT_TASK_CACHE_KEYS.LegacyID] &&
+			String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]).trim() !== ""
+		) {
+			return String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]);
+		}
+
+		// If it's a task note, ensure frontmatter has an ID and return it.
+		if (
+			isTaskNotePresentInTags(
+				this.globalSettings.taskNoteIdentifierTag,
+				task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
+			)
+		) {
+			let newId = task[DEFAULT_TASK_CACHE_KEYS.LegacyID];
+			if (!newId || String(newId).trim() === "") {
+				newId = this.generateTaskId();
+				task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = newId;
+			}
+			void updateFrontmatterInMarkdownFile(this.plugin, task, true);
+
+			return newId;
+		}
+
+		// Try to extract an ID from the title (legacy inline format)
+		const extractedTaskId = extractTaskId(
+			task[DEFAULT_TASK_CACHE_KEYS.Title],
+			this.globalSettings.taskProperties,
+			this.globalSettings.taskPropertyFormat,
+		)?.[1];
+		if (extractedTaskId) return extractedTaskId;
+
+		// Otherwise, update the task line in the file which should return a new ID
+		const newIdToReturn = await updateTaskInFile(
+			this.plugin,
+			task,
+			task,
+			true,
+		);
+		return newIdToReturn;
 	}
 }
 

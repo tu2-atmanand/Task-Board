@@ -70,7 +70,6 @@ export const openBoardsExplorerModal = (plugin: TaskBoard) => {
 };
 
 export const openAddNewTaskInCurrentFileModal = (
-	app: App,
 	plugin: TaskBoard,
 	activeFile: TFile,
 	cursorPosition?: { line: number; ch: number },
@@ -180,7 +179,7 @@ export const openAddNewTaskModal = (
 	AddTaskModal.open();
 };
 
-export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
+export const openAddNewTaskNoteModal = (plugin: TaskBoard) => {
 	const AddTaskModal = new TaskEditorModal(
 		plugin,
 		async (

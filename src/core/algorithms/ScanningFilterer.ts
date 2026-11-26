@@ -3,7 +3,6 @@ import TaskBoard from "../../../main.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../managers/BugReporter.js";
 import { isTaskLine, isTaskCompleted } from "../../utils/CheckBoxUtils.js";
-import { getTaskFromId } from "../../utils/TaskItemUtils.js";
 import { extractFrontmatterFromFile } from "../../utils/task_note/FrontmatterOperations.js";
 import { VaultScannnerFilters } from "../../interfaces/GlobalSettings.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
@@ -379,7 +378,7 @@ export async function verifySubtasksAndChildtasksAreComplete(
 	// Check if all child-tasks (dependsOn) are completed
 	if (task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] && (task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies]?.length ?? 0) > 0) {
 		for (const childId of task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] ?? []) {
-			const childTask = await getTaskFromId(plugin, childId);
+			const childTask = await plugin.vaultScanner.getTaskFromID(childId);
 			if (
 				!childTask ||
 				!(childTask[DEFAULT_TASK_CACHE_KEYS.Status] === "X" || childTask[DEFAULT_TASK_CACHE_KEYS.Status] === "x")

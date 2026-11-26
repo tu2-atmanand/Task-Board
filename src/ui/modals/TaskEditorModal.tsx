@@ -11,7 +11,6 @@ import { taskItem } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
-import { generateTaskId } from "../../utils/TaskItemUtils.js";
 import { getFormattedTaskContent } from "../../utils/task_line/TaskContentFormatter.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
@@ -64,7 +63,7 @@ export class TaskEditorModal extends Modal {
 		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
 		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task[DEFAULT_TASK_CACHE_KEYS.ID])) {
-			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = generateTaskId(this.plugin);
+			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = this.plugin.vaultScanner.generateTaskId();
 			this.task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = this.task[DEFAULT_TASK_CACHE_KEYS.ID];
 		}
 

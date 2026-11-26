@@ -28,7 +28,7 @@ import { getTagSuggestions, MultiSuggest, getQuickAddPluginChoices, getFileSugge
 import { openEditTaskView } from "../modals/OpenModals.js";
 import { compareTwoTags, verifySubtasksAndChildtasksAreComplete } from "../../core/algorithms/ScanningFilterer.js";
 import { getObsidianIndentationSetting, isTaskLine } from "../../utils/CheckBoxUtils.js";
-import { applyIdToTaskItem, getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
+import { getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
 import { getFormattedTaskContentSync, cleanTaskTitleLegacy, sanitizeStatus, sanitizeCreatedDate, sanitizeStartDate, sanitizeScheduledDate, sanitizeDueDate, sanitizePriority, sanitizeTime, sanitizeTags, sanitizeDependsOn, sanitizeTaskProperty } from "../../utils/task_line/TaskContentFormatter.js";
 import {
 	formatDateStringAsPerSettings,
@@ -801,7 +801,7 @@ export const TaskEditorRC: React.FC<{
 		// 	return;
 		// }
 
-		await applyIdToTaskItem(plugin, task).then((newId) => {
+		await plugin.vaultScanner.applyIdToTaskItem(task).then((newId) => {
 			plugin.settings.data.lastViewHistory.taskId = newId ? String(newId) : (task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : String(globalSettings.uniqueIdCounter));
 
 			// console.log("Preparing to open task in kanban view. Current file path:", newFilePath, "\nTask ID:", task.id, "\nLegacy ID:", task.legacyId, "\nnewId:", newId);
@@ -1143,7 +1143,7 @@ export const TaskEditorRC: React.FC<{
 			const handleOnChooseTask = async (selected: taskItem | null) => {
 				if (!selected) return;
 
-				const newId = await applyIdToTaskItem(plugin, selected);
+				const newId = await plugin.vaultScanner.applyIdToTaskItem(selected);
 
 				if (newId) {
 					await plugin.realTimeScanner.processAllUpdatedFiles(selected[DEFAULT_TASK_CACHE_KEYS.FilePath], selected[DEFAULT_TASK_CACHE_KEYS.ID]);

@@ -29,7 +29,6 @@ import {
 	formatDateStringAsPerSettings,
 	formatDateTimeAsPerSettings,
 } from "../DateTimeCalculations.js";
-import { generateTaskId } from "../TaskItemUtils.js";
 import {
 	extractTaskId,
 	extractPriority,
@@ -395,22 +394,22 @@ export const dedentTaskBodyLines = (bodyLines: string[]): string[] => {
  * @returns A promise that resolves with an object containing the formatted task content and the new ID.
  */
 export const addIdToTaskContent = async (
-	Plugin: TaskBoard,
+	plugin: TaskBoard,
 	formattedTaskContent: string,
 	forcefullyAddId?: boolean,
 ): Promise<{ formattedTaskContent: string; newId: string | undefined }> => {
 	const taskId = extractTaskId(
 		formattedTaskContent,
-		Plugin.settings.data.taskProperties,
-		Plugin.settings.data.taskPropertyFormat,
+		plugin.settings.data.taskProperties,
+		plugin.settings.data.taskPropertyFormat,
 	);
 	let newId = taskId?.[1];
 	if (
-		(taskId === null && Plugin.settings.data.autoAddUniqueID) ||
+		(taskId === null && plugin.settings.data.autoAddUniqueID) ||
 		forcefullyAddId
 	) {
-		newId = generateTaskId(Plugin);
-		const format = Plugin.settings.data.taskPropertyFormat;
+		newId = plugin.vaultScanner.generateTaskId();
+		const format = plugin.settings.data.taskPropertyFormat;
 		switch (format) {
 			case taskPropertyFormatOptions.tasksPlugin:
 			case taskPropertyFormatOptions.default:

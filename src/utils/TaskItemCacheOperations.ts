@@ -19,7 +19,6 @@ import {
 	loadJsonCacheDataFromDisk,
 	writeJsonCacheDataToDisk,
 } from "./JsonFileOperations.js";
-import { generateTaskId } from "./TaskItemUtils.js";
 import {
 	extractFrontmatterFromFile,
 	extractFrontmatterTags,
@@ -125,7 +124,7 @@ export const addTaskInJson = async (plugin: TaskBoard, newTask: taskItem) => {
 
 	const newTaskWithId = {
 		...newTask,
-		id: generateTaskId(plugin),
+		id: plugin.vaultScanner.generateTaskId(),
 		filePath: newTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 		completed: "",
 		frontmatterTags: frontmatterTags,

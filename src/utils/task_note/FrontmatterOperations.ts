@@ -20,7 +20,6 @@ import {
 	formatToday,
 } from "../DateTimeCalculations.js";
 import {
-	generateTaskId,
 	getPriorityNameUsingPriorityNumber,
 	getStatusNameFromStatusSymbol,
 } from "../TaskItemUtils.js";
@@ -459,7 +458,7 @@ export function updateFrontmatterProperties(
 		} else if (forceId || plugin.settings.data.autoAddUniqueID) {
 			tempUpdates[idProperty.id] =
 				task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ||
-				generateTaskId(plugin);
+				plugin.vaultScanner.generateTaskId();
 		}
 	}
 

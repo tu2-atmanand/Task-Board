@@ -10,7 +10,6 @@ import { viewTypeNames } from '../../../interfaces/Enums.js';
 import { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
-import { applyIdToTaskItem } from '../../../utils/TaskItemUtils.js';
 import TaskCardParent from '../../components/task_card/TaskCardParent.js';
 import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
 
@@ -76,7 +75,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 
 	const handleImportTask = async (task: taskItem) => {
 		try {
-			const newId = await applyIdToTaskItem(plugin, task);
+			const newId = await plugin.vaultScanner.applyIdToTaskItem(task);
 			if (newId !== undefined) {
 				// Add to imported set
 				setImportedTaskIds(prev => new Set(prev).add(task[DEFAULT_TASK_CACHE_KEYS.ID]));

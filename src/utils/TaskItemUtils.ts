@@ -89,6 +89,8 @@ export function normalizeTaskItem(
 }
 
 /**
+ * @deprecated - 2.0.0 - Use this same function from VaultScanner.
+ * 
  * Retrieves a task from the TaskBoard plugin's task cache using its ID.
  * @param plugin - The TaskBoard plugin instance.
  * @param id - The ID of the task to retrieve. Can be a string (legacyId) or a number (id).
@@ -149,6 +151,7 @@ export const getTaskFromId = async (
 
 /**
  * Generates a random unique ID using the Web Crypto API.
+ * Additionally prefixes a string for more context.
  *
  * For example : '1851955511'.
  * @return {string} a random unique ID for a task
@@ -170,72 +173,6 @@ export function generateRandomNumber(): number {
 	crypto.getRandomValues(array);
 	return array[0];
 }
-
-/**
- * Generates a unique ID for a task based on the plugin's settings.
- * It increments the plugin's settings data globalSettings.uniqueIdCounter by 1 and then saves the updated settings.
- * The current counter value is returned as a string and will be used as the ID for the next task.
- * If the uniqueIdCounter is not set, it will be set to 0 before incrementing.
- * @param plugin - The TaskBoard plugin instance
- * @returns A string representing the unique ID for the task
- */
-export function generateTaskId(plugin: TaskBoard): string {
-	plugin.settings.data.uniqueIdCounter =
-		plugin.settings.data.uniqueIdCounter + 1 || 0;
-
-	// Save the updated uniqueIdCounter back to settings
-	void plugin.saveSettings();
-	// Return the current counter value and then increment it for the next ID
-	return String(plugin.settings.data.uniqueIdCounter);
-}
-
-/**
- * Applies a new id to the task in a file if it does not have one already. This function will force an id to be added to the task.
- * @param plugin - The TaskBoard plugin instance.
- * @param task - The taskItem object representing the task to which an id needs to be applied.
- * @returns A promise that resolves to the new id if applied, or undefined if the task already has an id or if an error occurs.
- */
-export const applyIdToTaskItem = async (
-	plugin: TaskBoard,
-	task: taskItem,
-): Promise<string | undefined> => {
-	// If the task already has an ID, return it and avoid assigning a new one.
-	if (
-		task[DEFAULT_TASK_CACHE_KEYS.LegacyID] &&
-		String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]).trim() !== ""
-	) {
-		return String(task[DEFAULT_TASK_CACHE_KEYS.LegacyID]);
-	}
-
-	// If it's a task note, ensure frontmatter has an ID and return it.
-	if (
-		isTaskNotePresentInTags(
-			plugin.settings.data.taskNoteIdentifierTag,
-			task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
-		)
-	) {
-		let newId = task[DEFAULT_TASK_CACHE_KEYS.LegacyID];
-		if (!newId || String(newId).trim() === "") {
-			newId = generateTaskId(plugin);
-			task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = newId;
-		}
-		void updateFrontmatterInMarkdownFile(plugin, task, true);
-
-		return newId;
-	}
-
-	// Try to extract an ID from the title (legacy inline format)
-	const extractedTaskId = extractTaskId(
-		task[DEFAULT_TASK_CACHE_KEYS.Title],
-		plugin.settings.data.taskProperties,
-		plugin.settings.data.taskPropertyFormat,
-	)?.[1];
-	if (extractedTaskId) return extractedTaskId;
-
-	// Otherwise, update the task line in the file which should return a new ID
-	const newIdToReturn = await updateTaskInFile(plugin, task, task, true);
-	return newIdToReturn;
-};
 
 /**
  * Map a priority name from frontmatter to its configured numeric rank.
@@ -565,7 +502,7 @@ export const getCustomStatusOptionsForDropdown = (
  *
  * @returns The value of the property and the property type, so user can cast
  * it in that required format if needed. Example : string date value can be
- * converted to Date object. 
+ * converted to Date object.
  * If the value is null, undefined, 0 or empty then undefined will be returned.
  */
 export function getTaskPropertyValue(

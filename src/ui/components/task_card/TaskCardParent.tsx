@@ -21,7 +21,7 @@ import { openDateInputModal } from '../../modals/OpenModals.js';
 import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../../core/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../../utils/CheckBoxUtils.js';
 import { formatDateStringAsPerSettings, formatDateTimeAsPerSettings, getLocalDateFromDateOnlyEpoch, getUniversalDateFromTask } from '../../../utils/DateTimeCalculations.js';
-import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, getTaskFromId, normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
+import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol,  normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
 import { cleanTaskTitleLegacy, dedentTaskBodyLines, isTaskTitleWithoutText } from '../../../utils/task_line/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskLineEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../../utils/task_note/TaskNoteEventHandlers.js';
@@ -684,7 +684,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	const handleOpenChildTaskModal = async (event: React.MouseEvent, childTaskId: string) => {
 		event.stopPropagation();
 		try {
-			const childTask = await getTaskFromId(plugin, childTaskId);
+			const childTask = await plugin.vaultScanner.getTaskFromID(childTaskId);
 			if (!childTask) {
 				bugReporterManagerInsatance.showNotice(5, `Task with ID ${childTaskId} not found in the cache. Please try to search for the task in its source note and try scanning that single note again using the file menu option. If issue still persists after refreshing the board, kindly report this bug to the developer.`, "ERROR : Child task not found in the cache", "TaskCardParent.tsx/handleOpenChildTaskModal");
 				return;
@@ -1279,7 +1279,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			const loadChildTasks = () => {
 				const childTasksMap: Record<string, taskItem | null> = {};
 				void Promise.all((task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] ?? []).map(async (dependsOnId) => {
-					const childTask = await getTaskFromId(plugin, dependsOnId);
+					const childTask = await plugin.vaultScanner.getTaskFromID(dependsOnId);
 					childTasksMap[dependsOnId] = childTask;
 				}));
 				setChildTasksData(childTasksMap);
