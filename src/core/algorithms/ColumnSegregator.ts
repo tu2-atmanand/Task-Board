@@ -58,21 +58,25 @@ export const columnSegregator = (
 	switch (columnData.colType) {
 		case colTypeNames.undated:
 			tasksToDisplay = pendingTasks.filter((task) => {
-				if (
-					columnData.datedBasedColumn?.dateType ===
-					UniversalDateOptions.dueDate
-				) {
-					return !task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-				} else if (
-					columnData.datedBasedColumn?.dateType ===
-					UniversalDateOptions.startDate
-				) {
-					return !task[DEFAULT_TASK_CACHE_KEYS.StartDate];
-				} else if (
-					columnData.datedBasedColumn?.dateType ===
-					UniversalDateOptions.scheduledDate
-				) {
-					return !task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
+				// if (
+				// 	columnData.datedBasedColumn?.dateType ===
+				// 	UniversalDateOptions.dueDate
+				// ) {
+				// 	return !task[DEFAULT_TASK_CACHE_KEYS.DueDate];
+				// } else if (
+				// 	columnData.datedBasedColumn?.dateType ===
+				// 	UniversalDateOptions.startDate
+				// ) {
+				// 	return !task[DEFAULT_TASK_CACHE_KEYS.StartDate];
+				// } else if (
+				// 	columnData.datedBasedColumn?.dateType ===
+				// 	UniversalDateOptions.scheduledDate
+				// ) {
+				// 	return !task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
+				// }
+
+				if (columnData.datedBasedColumn?.dateType) {
+					return !task[columnData.datedBasedColumn?.dateType];
 				}
 			});
 			break;
@@ -82,31 +86,32 @@ export const columnSegregator = (
 				from: 0,
 				to: 0,
 			};
-			const universalDatePropertyKey =
-				dateType === UniversalDateOptions.dueDate
-					? DEFAULT_TASK_CACHE_KEYS.DueDate
-					: dateType === UniversalDateOptions.startDate
-						? DEFAULT_TASK_CACHE_KEYS.StartDate
-						: dateType === UniversalDateOptions.scheduledDate
-							? DEFAULT_TASK_CACHE_KEYS.ScheduledDate
-							: undefined;
-			const universalDateProperty = universalDatePropertyKey
+			// const universalDatePropertyKey =
+			// 	dateType === UniversalDateOptions.dueDate
+			// 		? DEFAULT_TASK_CACHE_KEYS.DueDate
+			// 		: dateType === UniversalDateOptions.startDate
+			// 			? DEFAULT_TASK_CACHE_KEYS.StartDate
+			// 			: dateType === UniversalDateOptions.scheduledDate
+			// 				? DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+			// 				: undefined;
+			const universalDateProperty = dateType
 				? settings.data.taskProperties.find(
-						(property) =>
-							property.key === String(universalDatePropertyKey),
+						(property) => property.key === String(dateType),
 					)
 				: undefined;
 			const isDateOnlyProperty =
 				universalDateProperty?.type === PropertyTypeConfig.date;
 
 			tasksToDisplay = pendingTasks.filter((task) => {
-				let taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-				if (dateType === UniversalDateOptions.startDate) {
-					taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
-				} else if (dateType === UniversalDateOptions.scheduledDate) {
-					taskUniversalDate =
-						task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
-				}
+				let taskUniversalDate: unknown = "";
+				// if (dateType === UniversalDateOptions.startDate) {
+				// 	taskUniversalDate = task[DEFAULT_TASK_CACHE_KEYS.StartDate];
+				// } else if (dateType === UniversalDateOptions.scheduledDate) {
+				// 	taskUniversalDate =
+				// 		task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
+				// }
+				if (dateType) taskUniversalDate = task[dateType];
+
 				if (typeof taskUniversalDate !== "number") return false;
 
 				// ---------- METHOD 1 -------------

@@ -92,7 +92,7 @@ export type ColumnData = {
 	coltag?: string;
 	filePaths?: string;
 	datedBasedColumn?: {
-		dateType: UniversalDateOptions; // e.g., "due", "created", "scheduled"
+		dateType: string; // e.g., "due", "created", "scheduled"
 		from: number;
 		to: number;
 	};
@@ -328,7 +328,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Undated Tasks",
 						index: 1,
 						datedBasedColumn: {
-							dateType: UniversalDateOptions.dueDate,
+							dateType: DEFAULT_TASK_CACHE_KEYS.DueDate,
 							from: 0,
 							to: 0,
 						},
@@ -341,7 +341,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Over Due",
 						index: 2,
 						datedBasedColumn: {
-							dateType: UniversalDateOptions.dueDate,
+							dateType: DEFAULT_TASK_CACHE_KEYS.DueDate,
 							from: -300,
 							to: -1,
 						},
@@ -354,7 +354,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Today",
 						index: 3,
 						datedBasedColumn: {
-							dateType: UniversalDateOptions.dueDate,
+							dateType: DEFAULT_TASK_CACHE_KEYS.DueDate,
 							from: 0,
 							to: 0,
 						},
@@ -367,7 +367,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Tomorrow",
 						index: 4,
 						datedBasedColumn: {
-							dateType: UniversalDateOptions.dueDate,
+							dateType: DEFAULT_TASK_CACHE_KEYS.DueDate,
 							from: 1,
 							to: 1,
 						},
@@ -380,7 +380,7 @@ export const DEFAULT_BOARD: Board = {
 						name: "Future",
 						index: 5,
 						datedBasedColumn: {
-							dateType: UniversalDateOptions.dueDate,
+							dateType: DEFAULT_TASK_CACHE_KEYS.DueDate,
 							from: 2,
 							to: 300,
 						},

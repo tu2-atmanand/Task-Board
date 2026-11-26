@@ -161,10 +161,7 @@ export default class TaskBoard extends Plugin {
 		this.settings = DEFAULT_SETTINGS;
 		this.advancedFilterer = new AdvancedFilterer(this);
 		this.vaultScanner = new VaultScanner(this);
-		this.realTimeScanner = new RealTimeScanner(
-			this,
-			this.vaultScanner,
-		);
+		this.realTimeScanner = new RealTimeScanner(this, this.vaultScanner);
 		this.taskBoardFileManager = new TaskBoardFileManager(this);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
@@ -197,7 +194,9 @@ export default class TaskBoard extends Plugin {
 		if (!this.v2MigrationsRequired) await this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
+		// Need to initialize few setting after the complete settings has been loaded
 		await this.vaultScanner.initializeTasksCache();
+		await this.taskBoardFileManager.initializeFileRegistry();
 
 		// Register the Kanban view
 		this.registerTaskBoardView();

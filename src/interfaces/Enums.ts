@@ -19,12 +19,6 @@ export enum EditButtonMode {
 	NoteInHover = "noteInHover",
 }
 
-export enum UniversalDateOptions {
-	startDate = "startDate",
-	scheduledDate = "scheduledDate",
-	dueDate = "due",
-}
-
 export enum TagColorType {
 	TagText = "text",
 	TagBg = "tagBg",
@@ -249,4 +243,13 @@ export enum PropertyTypeConfig {
 	date = "date", // Stored as string
 	dateTime = "date-time", // Stored as string
 	list = "list", // All values will be converted to string.
+}
+
+/**
+ * @deprecated - 2.0.0 - User can now select any date or date-time type task property as the universal date.
+ */
+export enum UniversalDateOptions {
+	startDate = "startDate",
+	scheduledDate = "scheduledDate",
+	dueDate = "due",
 }

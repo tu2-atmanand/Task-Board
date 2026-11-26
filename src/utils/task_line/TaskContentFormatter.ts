@@ -531,19 +531,17 @@ export const getFormattedTaskContent = async (
  * This function will format the task content based on the latest properties of the task.
  * It will also ensure that the task content is in the correct format and does not contain any old or invalid properties.
  * Do not use this function in batches. It does a lot of regex operations and can be slow for large number of tasks at once.
- * @param plugin - The TaskBoard plugin instance.
+ * @param globalSettings - Plugin level settings.
  * @param updatedTask - The updated task item.
  * @return The sanitized task content as a string.
  */
 export const getSanitizedTaskContent = (
-	plugin: TaskBoard,
+	globalSettings: globalSettingsData,
 	updatedTask: taskItem,
 ): string => {
 	// if (updatedTask.title === "") {
 	// 	return "";
 	// }
-
-	const globalSettings = plugin.settings.data;
 	const checkBoxStat = `- [${updatedTask[DEFAULT_TASK_CACHE_KEYS.Status]}]`;
 
 	// TODO : Sanitizations not only correcting the format and replacing the old content with the latest one, but also very important is to clean if any old properties are there.
@@ -998,7 +996,7 @@ export const sanitizeTime = (
 			globalSettings.taskPropertyFormat ===
 			taskPropertyFormatOptions.default
 		) {
-			newTimeWithFormat = `${timePropertyEmoji}[${newTime}]`;
+			newTimeWithFormat = `${timePropertyEmoji}${newTime.replaceAll(" ", "")}`;
 		} else if (
 			globalSettings.taskPropertyFormat ===
 			taskPropertyFormatOptions.tasksPlugin

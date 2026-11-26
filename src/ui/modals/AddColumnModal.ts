@@ -3,7 +3,7 @@
 import { t } from "i18next";
 import { App, Modal } from "obsidian";
 import { ColumnData } from "../../interfaces/BoardConfigs.js";
-import { colTypeNames, UniversalDateOptions } from "../../interfaces/Enums.js";
+import { colTypeNames, DEFAULT_TASK_CACHE_KEYS, UniversalDateOptions } from "../../interfaces/Enums.js";
 import { columnTypeAndNameMapping } from "../../interfaces/Mapping.js";
 import { generateRandomNumber } from "../../utils/TaskItemUtils.js";
 
@@ -139,7 +139,7 @@ export class AddColumnModal extends Modal {
 					colType: this.colType,
 					name: this.name,
 					datedBasedColumn: {
-						dateType: UniversalDateOptions.dueDate,
+						dateType: DEFAULT_TASK_CACHE_KEYS.DueDate,
 						from: 0,
 						to: 0,
 					},

@@ -61,6 +61,8 @@ import {
 } from "./SettingSynchronizer.js";
 import { MarkdownUIRenderer } from "../services/MarkdownUIRenderer.js";
 import { showColorPicker } from "../ui/modals/color_picker/ColorPickerModal.js";
+import { getSanitizedTaskContent } from "../utils/task_line/TaskContentFormatter.js";
+import { taskItem } from "../interfaces/TaskItem.js";
 
 export type SettingsTabPagesKey =
 	| "general"
@@ -1614,87 +1616,32 @@ export class SettingsManager {
 			);
 		};
 		const updatePreview = () => {
-			let taskTitle = t("dummy-task-title");
-			let priority = "⏫";
-			let time = "10:00 - 11:00";
-			let universalDateEmoji = "";
-			let universalDateString = "";
-			if (
-				this.globalSettings?.universalDate ===
-				UniversalDateOptions.startDate
-			) {
-				universalDateEmoji =
-					TASKS_PLUGIN_DEFAULT_SYMBOLS.startDateSymbol;
-				universalDateString = "start";
-			} else if (
-				this.globalSettings?.universalDate ===
-				UniversalDateOptions.scheduledDate
-			) {
-				universalDateEmoji =
-					TASKS_PLUGIN_DEFAULT_SYMBOLS.scheduledDateSymbol;
-				universalDateString = "scheduled";
-			} else if (
-				this.globalSettings?.universalDate ===
-				UniversalDateOptions.dueDate
-			) {
-				universalDateEmoji = TASKS_PLUGIN_DEFAULT_SYMBOLS.dueDateSymbol;
-				universalDateString = "due";
-			}
-			let date = "2024-09-21";
-			let tags = `#tag #test`;
-			let completionDate = "2024-09-21/12:20:33";
+			const dummyTask: taskItem = {
+				id: "221",
+				legacyId: "221",
+				title: t("dummy-task-title"),
+				status: ">",
+				priority: 3,
+				time: "10:00 - 11:00",
+				tags: ["task", "important"],
+				filePath: "",
+				completionDate: 1726901433000,
+				taskLocation: {
+					startLine: 1,
+					startCharIndex: 1,
+					endLine: 1,
+					endCharIndex: 1,
+				},
+			};
 
-			let preview = "";
-			switch (this.globalSettings.taskPropertyFormat) {
-				// Default
-				case taskPropertyFormatOptions.default: {
-					if (
-						this.globalSettings.compatiblePlugins.dayPlannerPlugin
-					) {
-						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
-					} else {
-						preview = `- [>] ${taskTitle} ${priority} ⏰[${time}] ${universalDateEmoji}${date} ${tags} ✅${completionDate}`;
-					}
-					break;
-				}
-				// Tasks Plugin
-				case taskPropertyFormatOptions.tasksPlugin: {
-					if (
-						this.globalSettings.compatiblePlugins.dayPlannerPlugin
-					) {
-						preview = `- [>] ${time} ${taskTitle} ${priority} ${universalDateEmoji} ${date} ${tags} ✅ ${
-							completionDate.split("/")[0]
-						}`;
-					} else {
-						preview = `- [>] ${taskTitle} ${priority} ⏰ ${time} ${universalDateEmoji} ${date} ${tags} ✅${
-							completionDate.split("/")[0]
-						}`;
-					}
-					break;
-				}
-				// Dataview Plugin
-				case taskPropertyFormatOptions.dataviewPlugin: {
-					if (
-						this.globalSettings.compatiblePlugins.dayPlannerPlugin
-					) {
-						preview = `- [>] ${time} ${taskTitle} [priority:: 2] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
-					} else {
-						preview = `- [>] ${taskTitle} [priority:: 2] [time:: ${time}] [${universalDateString}:: ${date}] ${tags} [completion:: ${completionDate}]`;
-					}
-					break;
-				}
-				// Obsidian Native
-				case taskPropertyFormatOptions.obsidianNative: {
-					if (
-						this.globalSettings.compatiblePlugins.dayPlannerPlugin
-					) {
-						preview = `- [>] ${time} ${taskTitle} @priority(2) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
-					} else {
-						preview = `- [>] ${taskTitle} @priority(2) @time(${time}) @${universalDateString}(${date}) ${tags} @completion(${completionDate})`;
-					}
-					break;
-				}
+			if (this.globalSettings?.universalDate) {
+				dummyTask[this.globalSettings.universalDate] = 1768046400000;
 			}
+
+			let preview = getSanitizedTaskContent(
+				this.globalSettings,
+				dummyTask,
+			);
 			renderMarkdownPreview(preview);
 			previewData.setText(preview);
 		};

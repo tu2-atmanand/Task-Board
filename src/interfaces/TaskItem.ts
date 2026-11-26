@@ -119,11 +119,16 @@ export function coerceCustomTaskPropertyValue(
 }
 
 export interface oldTaskItem {
+	// Essential properties
 	[DEFAULT_TASK_CACHE_KEYS.ID]: string;
 	[DEFAULT_TASK_CACHE_KEYS.LegacyID]: string; // Legacy ID to support Tasks plugin id property
 	[DEFAULT_TASK_CACHE_KEYS.Title]: string;
-	[DEFAULT_TASK_CACHE_KEYS.Body]?: string[];
+	[DEFAULT_TASK_CACHE_KEYS.FilePath]: string;
 	[DEFAULT_TASK_CACHE_KEYS.Status]: string;
+	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: taskLocation; // Only for inline-task.
+
+	// Optional properties
+	[DEFAULT_TASK_CACHE_KEYS.Body]?: string[];
 	[DEFAULT_TASK_CACHE_KEYS.Priority]?: number;
 	[DEFAULT_TASK_CACHE_KEYS.Tags]?: string[];
 	[DEFAULT_TASK_CACHE_KEYS.FrontMatterTags]?: string[]; // Tags extracted from frontmatter
@@ -136,8 +141,6 @@ export interface oldTaskItem {
 	[DEFAULT_TASK_CACHE_KEYS.CancelledDate]?: number;
 	[DEFAULT_TASK_CACHE_KEYS.Reminder]?: number; // Epoch milliseconds.
 	[DEFAULT_TASK_CACHE_KEYS.Dependencies]?: string[]; // Array of task IDs that this task depends on
-	[DEFAULT_TASK_CACHE_KEYS.FilePath]: string;
-	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: taskLocation; // Only for inline-task.
 	// onCompletion?: number;
 }
 

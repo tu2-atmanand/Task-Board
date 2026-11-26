@@ -28,11 +28,9 @@ import { verifySubtasksAndChildtasksAreComplete } from "../core/algorithms/Scann
 import {
 	sanitizeStatus,
 	sanitizePriority,
-	sanitizeStartDate,
-	sanitizeScheduledDate,
-	sanitizeDueDate,
 	sanitizeReminder,
 	sanitizeTags,
+	sanitizeTaskProperty,
 } from "./task_line/TaskContentFormatter.js";
 import { updateTaskInFile } from "./task_line/TaskLineUtils.js";
 import {
@@ -186,7 +184,9 @@ export const openFileAndHighlightTask = async (
 	if (file && file instanceof TFile && leaf) {
 		await leaf.openFile(file, {
 			eState: {
-				line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine - 1,
+				line:
+					task[DEFAULT_TASK_CACHE_KEYS.TaskLocation]?.startLine ??
+					1 - 1,
 			},
 		});
 	} else {
@@ -409,39 +409,53 @@ export const updateTaskItemDate = (
 	plugin: TaskBoard,
 	taskOld: taskItem,
 	taskUpdated: taskItem,
-	dateType: UniversalDateOptions,
+	dateType: string,
 	newDate: string,
 ): void => {
 	let newTask = { ...taskUpdated };
-	switch (dateType) {
-		case UniversalDateOptions.startDate:
-			newTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = coerceTaskDateValue(
-				plugin.settings.data,
-				DEFAULT_TASK_CACHE_KEYS.StartDate,
-				newDate,
-			);
-			break;
-		case UniversalDateOptions.scheduledDate:
-			newTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] =
-				coerceTaskDateValue(
-					plugin.settings.data,
-					DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
-					newDate,
-				);
-			break;
-		case UniversalDateOptions.dueDate:
-			newTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = coerceTaskDateValue(
-				plugin.settings.data,
-				DEFAULT_TASK_CACHE_KEYS.DueDate,
-				newDate,
-			);
-			break;
-		default:
-			bugReporterManagerInsatance.addToLogs(
-				166,
-				"error while updating the date value. Date type unknown.",
-				`dateType = ${String(dateType)}`,
-			);
+	// switch (dateType) {
+	// 	case UniversalDateOptions.startDate:
+	// 		newTask[DEFAULT_TASK_CACHE_KEYS.StartDate] = coerceTaskDateValue(
+	// 			plugin.settings.data,
+	// 			DEFAULT_TASK_CACHE_KEYS.StartDate,
+	// 			newDate,
+	// 		);
+	// 		break;
+	// 	case UniversalDateOptions.scheduledDate:
+	// 		newTask[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] =
+	// 			coerceTaskDateValue(
+	// 				plugin.settings.data,
+	// 				DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+	// 				newDate,
+	// 			);
+	// 		break;
+	// 	case UniversalDateOptions.dueDate:
+	// 		newTask[DEFAULT_TASK_CACHE_KEYS.DueDate] = coerceTaskDateValue(
+	// 			plugin.settings.data,
+	// 			DEFAULT_TASK_CACHE_KEYS.DueDate,
+	// 			newDate,
+	// 		);
+	// 		break;
+	// 	default:
+	// 		bugReporterManagerInsatance.addToLogs(
+	// 			166,
+	// 			"error while updating the date value. Date type unknown.",
+	// 			`dateType = ${String(dateType)}`,
+	// 		);
+	// }
+
+	if (dateType) {
+		newTask[dateType] = coerceTaskDateValue(
+			plugin.settings.data,
+			dateType,
+			newDate,
+		);
+	} else {
+		bugReporterManagerInsatance.addToLogs(
+			166,
+			"error while updating the date value. Date type unknown.",
+			`dateType = ${String(dateType)}`,
+		);
 	}
 
 	eventEmitter.emit("UPDATE_TASK", {
@@ -472,34 +486,49 @@ export const updateTaskItemDate = (
 			}, 1000);
 		});
 	} else {
-		switch (dateType) {
-			case UniversalDateOptions.startDate:
-				newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStartDate(
-					plugin.settings.data,
-					newTask[DEFAULT_TASK_CACHE_KEYS.Title],
-					newDate,
-				);
-				break;
-			case UniversalDateOptions.scheduledDate:
-				newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeScheduledDate(
-					plugin.settings.data,
-					newTask[DEFAULT_TASK_CACHE_KEYS.Title],
-					newDate,
-				);
-				break;
-			case UniversalDateOptions.dueDate:
-				newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeDueDate(
-					plugin.settings.data,
-					newTask[DEFAULT_TASK_CACHE_KEYS.Title],
-					newDate,
-				);
-				break;
-			default:
-				bugReporterManagerInsatance.addToLogs(
-					167,
-					"error while updating the date value. Date type unknown.",
-					`dateType = ${String(dateType)}`,
-				);
+		// switch (dateType) {
+		// 	case UniversalDateOptions.startDate:
+		// 		newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStartDate(
+		// 			plugin.settings.data,
+		// 			newTask[DEFAULT_TASK_CACHE_KEYS.Title],
+		// 			newDate,
+		// 		);
+		// 		break;
+		// 	case UniversalDateOptions.scheduledDate:
+		// 		newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeScheduledDate(
+		// 			plugin.settings.data,
+		// 			newTask[DEFAULT_TASK_CACHE_KEYS.Title],
+		// 			newDate,
+		// 		);
+		// 		break;
+		// 	case UniversalDateOptions.dueDate:
+		// 		newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeDueDate(
+		// 			plugin.settings.data,
+		// 			newTask[DEFAULT_TASK_CACHE_KEYS.Title],
+		// 			newDate,
+		// 		);
+		// 		break;
+		// 	default:
+		// 		bugReporterManagerInsatance.addToLogs(
+		// 			167,
+		// 			"error while updating the date value. Date type unknown.",
+		// 			`dateType = ${String(dateType)}`,
+		// 		);
+		// }
+
+		if (dateType) {
+			newTask[dateType] = sanitizeTaskProperty(
+				plugin.settings.data,
+				newTask[DEFAULT_TASK_CACHE_KEYS.Title],
+				dateType,
+				newDate,
+			);
+		} else {
+			bugReporterManagerInsatance.addToLogs(
+				167,
+				"error while updating the date value. Date type unknown.",
+				`dateType = ${String(dateType)}`,
+			);
 		}
 
 		void updateTaskInFile(plugin, newTask, taskOld).then(() => {

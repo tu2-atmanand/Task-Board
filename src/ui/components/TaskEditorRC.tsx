@@ -651,14 +651,7 @@ export const TaskEditorRC: React.FC<{
 		if (!plugin.settings.data.autoAddUniversalDate || taskExists) return "";
 		if (getGenericPropertyString(universalDateKey)) return "";
 		const universalDateType = plugin.settings.data.universalDate;
-		if (
-			(universalDateType === UniversalDateOptions.dueDate &&
-				universalDateKey === String(DEFAULT_TASK_CACHE_KEYS.DueDate)) ||
-			(universalDateType === UniversalDateOptions.startDate &&
-				universalDateKey === String(DEFAULT_TASK_CACHE_KEYS.StartDate)) ||
-			(universalDateType === UniversalDateOptions.scheduledDate &&
-				universalDateKey === String(DEFAULT_TASK_CACHE_KEYS.ScheduledDate))
-		) {
+		if (universalDateType === universalDateKey) {
 			return getCurrentLocalDateString(globalSettings.dateFormat);
 		}
 		return "";
@@ -865,7 +858,7 @@ export const TaskEditorRC: React.FC<{
 			const leaf = plugin.app.workspace.getLeaf('window');
 			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
 			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine - 1 } });
+				await leaf.openFile(file, { eState: { line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation]?.startLine ?? 1 - 1 } });
 			} else {
 				bugReporterManagerInsatance.showNotice(21, "File not found", `The file at path ${newFilePath} could not be found.`, "TaskEditorModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 			}
@@ -882,7 +875,7 @@ export const TaskEditorRC: React.FC<{
 			const file = plugin.app.vault.getAbstractFileByPath(newFilePath);
 
 			if (file && file instanceof TFile) {
-				await leaf.openFile(file, { eState: { line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation].startLine - 1 } });
+				await leaf.openFile(file, { eState: { line: task[DEFAULT_TASK_CACHE_KEYS.TaskLocation]?.startLine ?? 1 - 1 } });
 			} else {
 				// bugReporterManagerInsatance.showNotice(22, "File not found", `The file at path ${newFilePath} could not be found.`, "TaskEditorModal.tsx/EditTaskContent/onOpenFilBtnClicked");
 				new Notice(`The file at path ${newFilePath} could not be found. Maybe after you click on the save button, this file will be automatically created with the task you have entered.`, 7000);

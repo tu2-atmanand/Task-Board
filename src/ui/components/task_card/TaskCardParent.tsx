@@ -118,7 +118,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	const [universalDate, setUniversalDate] = useState(() => getUniversalDateFromTask(task, globalSettings.universalDate));
 	useEffect(() => {
 		setUniversalDate(getUniversalDateFromTask(task, globalSettings.universalDate));
-	}, [task[DEFAULT_TASK_CACHE_KEYS.DueDate], task[DEFAULT_TASK_CACHE_KEYS.StartDate], task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate]]);
+	}, [task]);
 
 
 	// const handleTaskInteraction = useCallback(
@@ -408,32 +408,20 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			return 'grey';
 		}
 
-		const universalDatePropertyKey =
-			globalSettings.universalDate === UniversalDateOptions.dueDate
-				? DEFAULT_TASK_CACHE_KEYS.DueDate
-				: globalSettings.universalDate === UniversalDateOptions.startDate
-					? DEFAULT_TASK_CACHE_KEYS.StartDate
-					: globalSettings.universalDate === UniversalDateOptions.scheduledDate
-						? DEFAULT_TASK_CACHE_KEYS.ScheduledDate
-						: undefined;
-		const universalDateProperty = universalDatePropertyKey
-			? globalSettings.taskProperties.find(
-					(property) => property.key === String(universalDatePropertyKey),
-				)
-			: undefined;
-		const isDateOnlyProperty =
-			universalDateProperty?.type === PropertyTypeConfig.date;
+		const universalDateProperty = plugin.vaultScanner.universalDatePropertyConfig;
+		// const isDateOnlyProperty =
+		// 	universalDateProperty?.type === PropertyTypeConfig.date;
 
-		const parsedTaskDate = isDateOnlyProperty
-			? getLocalDateFromDateOnlyEpoch(universalDate)
-			: new Date(universalDate);
+		// const parsedTaskDate = isDateOnlyProperty
+		// 	? getLocalDateFromDateOnlyEpoch(universalDate)
+		// 	: new Date(universalDate);
 
-		if (Number.isNaN(parsedTaskDate.getTime())) {
+		if (Number.isNaN(universalDate)) {
 			return 'grey'; // Invalid date, return grey
 		}
 
 		// Set to start of day for accurate date comparison
-		const taskDateAtStartOfDay = startOfDay(parsedTaskDate);
+		const taskDateAtStartOfDay = startOfDay(universalDate);
 		const today = startOfDay(new Date());
 
 		// Check if the task date is today
@@ -796,7 +784,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			it.setTitle(t("start-date"));
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("start"), (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
+					updateTaskItemDate(plugin, task, task, DEFAULT_TASK_CACHE_KEYS.StartDate, newDate);
 				},
 					task[DEFAULT_TASK_CACHE_KEYS.StartDate] === undefined
 						? ""
@@ -812,7 +800,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			it.setTitle(t("scheduled-date"));
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
+					updateTaskItemDate(plugin, task, task, DEFAULT_TASK_CACHE_KEYS.ScheduledDate, newDate);
 				},
 					task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] === undefined
 						? ""
@@ -828,7 +816,7 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			it.setTitle(t("due-date"));
 			it.onClick(() => {
 				void openDateInputModal(plugin, t("due"), (newDate: string) => {
-					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
+					updateTaskItemDate(plugin, task, task, DEFAULT_TASK_CACHE_KEYS.DueDate, newDate);
 				},
 					task[DEFAULT_TASK_CACHE_KEYS.DueDate] === undefined
 						? ""

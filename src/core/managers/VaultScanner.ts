@@ -3,11 +3,11 @@
 import { App, Notice, TAbstractFile, TFile, TFolder } from "obsidian";
 import { t } from "i18next";
 import type TaskBoard from "../../../main.js";
-import { UniversalDateOptions } from "../../interfaces/Enums.js";
 import {
-	DEFAULT_SETTINGS,
-	globalSettingsData,
-} from "../../interfaces/GlobalSettings.js";
+	PropertyTypeConfig,
+	UniversalDateOptions,
+} from "../../interfaces/Enums.js";
+import { globalSettingsData } from "../../interfaces/GlobalSettings.js";
 import {
 	jsonCacheData,
 	taskItem,
@@ -28,6 +28,7 @@ import {
 import {
 	getCurrentLocalDateTimeString,
 	parseDateOnlyValue,
+	parseDateTimeValue,
 } from "../../utils/DateTimeCalculations.js";
 import {
 	loadJsonCacheDataFromDisk,
@@ -44,7 +45,10 @@ import {
 	extractTaskNoteProperties,
 } from "../../utils/task_note/TaskNoteUtils.js";
 import { bugReporterManagerInsatance } from "./BugReporter.js";
-import type { VaultScannnerFilters } from "../../interfaces/GlobalSettings.js";
+import type {
+	SupportedPropertiesConfig,
+	VaultScannnerFilters,
+} from "../../interfaces/GlobalSettings.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 import {
 	extractBody,
@@ -68,6 +72,7 @@ export default class VaultScanner {
 	tasksDetectedOrUpdated: boolean;
 	indentationString: string;
 	supportedChecklistSymbols: string[];
+	universalDatePropertyConfig: SupportedPropertiesConfig | undefined;
 
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
@@ -96,6 +101,26 @@ export default class VaultScanner {
 		try {
 			// Load existing tasks from JSON cache
 			this.tasksCache = await loadJsonCacheDataFromDisk(this.plugin);
+
+			// Find the universal date and keep in cache. User will need to restart the
+			// vault after changing this setting.
+			this.universalDatePropertyConfig =
+				this.plugin.settings.data.taskProperties.find(
+					(property) =>
+						property.key ===
+						this.plugin.settings.data.universalDate,
+				);
+			if (!this.universalDatePropertyConfig) {
+				// If the setting got corrupted due to some reason, maybe user selected
+				// a custom date property and that property key got updated or the property
+				// itself got deleted. Then show a message for awereness, so user can update it.
+				window.setTimeout(() => {
+					new Notice(
+						"The universal setting has been corrupted. Please update it for other features to work.",
+						0,
+					);
+				}, 5000);
+			}
 		} catch (error) {
 			bugReporterManagerInsatance.addToLogs(
 				145,
@@ -136,7 +161,7 @@ export default class VaultScanner {
 				fileNameWithPath,
 				false,
 			);
-			if (fileContent == null) return "false";
+			if (fileContent === null || fileContent === "") return "false";
 
 			const lines = fileContent.split("\n");
 
@@ -153,10 +178,17 @@ export default class VaultScanner {
 
 			/**
 			 * @deprecated v1.9.0
-			 * @note - Below feature has been removed now, since users can simply convert any note into a task-note. So, it doesnt make sense to store simply the note name inside the cache seperately. Also, this note, to which user has added a 'reminder' will not appear on the Task Board. Hence this feature will not be used anymore.
+			 * @note - Below feature has been removed now, since users can simply convert
+			 * any note into a task-note. So, it doesnt make sense to store simply the note
+			 * name inside the cache seperately. Also, this note, to which user has added a
+			 * 'reminder' will not appear on the Task Board. Hence this feature will not be
+			 * used anymore.
 			 *
 			 */
-			// Below code is to detect if the reminder property is present in the frontmatter. If present, then add this file in the tasks.Notes list. This is specifically for Notifian integration and for other plugins which might want to use this reminder property for notes.
+			// Below code is to detect if the reminder property is present in the frontmatter.
+			// If present, then add this file in the tasks.Notes list. This is specifically for
+			// Notifian integration and for other plugins which might want to use this reminder
+			// property for notes.
 			// if (
 			// 	this.plugin.settings.data
 			// 		.frontmatterPropertyForReminder &&
@@ -374,7 +406,12 @@ export default class VaultScanner {
 										);
 
 							if (
-								this.plugin.settings.data.dailyNotesPluginComp
+								this.plugin.settings.data
+									.dailyNotesPluginComp &&
+								this.universalDatePropertyConfig &&
+								!allExtractedProperties[
+									this.universalDatePropertyConfig?.key
+								]
 							) {
 								const basename = file.basename;
 
@@ -384,46 +421,58 @@ export default class VaultScanner {
 								// 	universalDateFormat,
 								// 	this.testDate,
 								// );
-								const parsed = parseDateOnlyValue(
-									basename,
-									userConfiguredDateFormat,
-								);
-								if (parsed) {
-									const universalDateConfig =
-										this.plugin.settings.data.universalDate;
 
-									if (
-										universalDateConfig ===
-											UniversalDateOptions.dueDate &&
-										!allExtractedProperties[
-											DEFAULT_TASK_CACHE_KEYS.DueDate
-										]
-									) {
-										allExtractedProperties[
-											DEFAULT_TASK_CACHE_KEYS.DueDate
-										] = parsed.getTime();
-									} else if (
-										universalDateConfig ===
-											UniversalDateOptions.startDate &&
-										!allExtractedProperties[
-											DEFAULT_TASK_CACHE_KEYS.StartDate
-										]
-									) {
-										allExtractedProperties[
-											DEFAULT_TASK_CACHE_KEYS.StartDate
-										] = parsed.getTime();
-									} else if (
-										universalDateConfig ===
-											UniversalDateOptions.scheduledDate &&
-										!allExtractedProperties[
-											DEFAULT_TASK_CACHE_KEYS
-												.ScheduledDate
-										]
-									) {
-										allExtractedProperties[
-											DEFAULT_TASK_CACHE_KEYS.ScheduledDate
-										] = parsed.getTime();
-									}
+								const parsed =
+									this.universalDatePropertyConfig.type ===
+									PropertyTypeConfig.date
+										? parseDateOnlyValue(
+												basename,
+												userConfiguredDateFormat,
+											)
+										: parseDateTimeValue(
+												basename,
+												userConfiguredDateFormat,
+											);
+								if (parsed) {
+									allExtractedProperties[
+										this.universalDatePropertyConfig.key
+									] = parsed.getTime();
+
+									// const universalDateConfig =
+									// 	this.plugin.settings.data.universalDate;
+
+									// if (
+									// 	universalDateConfig ===
+									// 		UniversalDateOptions.dueDate &&
+									// 	!allExtractedProperties[
+									// 		DEFAULT_TASK_CACHE_KEYS.DueDate
+									// 	]
+									// ) {
+									// 	allExtractedProperties[
+									// 		DEFAULT_TASK_CACHE_KEYS.DueDate
+									// 	] = parsed.getTime();
+									// } else if (
+									// 	universalDateConfig ===
+									// 		UniversalDateOptions.startDate &&
+									// 	!allExtractedProperties[
+									// 		DEFAULT_TASK_CACHE_KEYS.StartDate
+									// 	]
+									// ) {
+									// 	allExtractedProperties[
+									// 		DEFAULT_TASK_CACHE_KEYS.StartDate
+									// 	] = parsed.getTime();
+									// } else if (
+									// 	universalDateConfig ===
+									// 		UniversalDateOptions.scheduledDate &&
+									// 	!allExtractedProperties[
+									// 		DEFAULT_TASK_CACHE_KEYS
+									// 			.ScheduledDate
+									// 	]
+									// ) {
+									// 	allExtractedProperties[
+									// 		DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+									// 	] = parsed.getTime();
+									// }
 								}
 							}
 
@@ -571,11 +620,11 @@ export default class VaultScanner {
 	}
 
 	/**
-	 * Scans all the files and extracts inline-tasks or if the file itself is a task-note. 
+	 * Scans all the files and extracts inline-tasks or if the file itself is a task-note.
 	 * This function will pass the files and inline-tasks through the scanning filters.
 	 *
 	 * @param files - List of TFile objects to be scanned.
-	 * @param showNotice Whether to show notice for successful or failed operations. 
+	 * @param showNotice Whether to show notice for successful or failed operations.
 	 * If this function is invoked by user, then notice will be shown as an feedback.
 	 * @returns - True - If the operation was successful and all files were scanned without any issues.
 	 * - False - If there was some issue while scanning the files.

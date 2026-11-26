@@ -192,7 +192,7 @@ export interface globalSettingsData {
 	quickAddPluginDefaultChoice: string;
 
 	// Formats
-	universalDate: UniversalDateOptions;
+	universalDate: string;
 	dateFormat: string;
 	dateTimeFormat: string;
 	defaultStartTime: string;
@@ -345,7 +345,7 @@ const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
 		id: DEFAULT_TASK_CACHE_KEYS.CreatedDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
 		desc: "A date-time value when the task was created.",
-		type: PropertyTypeConfig.dateTime,
+		type: PropertyTypeConfig.date,
 		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.createdDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.CreatedDate
@@ -360,7 +360,7 @@ const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
 		id: DEFAULT_TASK_CACHE_KEYS.StartDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.StartDate],
 		desc: "A date-time value from when user should or can start working on the task.",
-		type: PropertyTypeConfig.dateTime,
+		type: PropertyTypeConfig.date,
 		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.startDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.StartDate
@@ -375,7 +375,7 @@ const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
 		id: DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
 		desc: "A date-time value when this task should be actually worked on.",
-		type: PropertyTypeConfig.dateTime,
+		type: PropertyTypeConfig.date,
 		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.scheduledDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
 			DEFAULT_TASK_CACHE_KEYS.ScheduledDate
@@ -390,7 +390,7 @@ const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
 		id: DEFAULT_TASK_CACHE_KEYS.DueDate,
 		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.DueDate],
 		desc: "A date-time value which is the last date/time for this task to be completed.",
-		type: PropertyTypeConfig.dateTime,
+		type: PropertyTypeConfig.date,
 		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.dueDateSymbol,
 		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.DueDate],
 		hidePropertyInNotesForInlineTasks: false,
@@ -799,7 +799,7 @@ export const DEFAULT_SETTINGS: PluginDataJson = {
 		],
 		editButtonAction: EditButtonMode.Modal,
 		cardDoubleClickAction: EditButtonMode.None,
-		universalDate: UniversalDateOptions.dueDate,
+		universalDate: DEFAULT_TASK_CACHE_KEYS.DueDate,
 		tagColorsType: TagColorType.TagText,
 		customStatuses: DEFAULT_CUSTOM_STATUSES_PRESENTATION,
 		customPriorities: DEFAULT_CUSTOM_PRIORITIES_PRESENTATION,

@@ -53,6 +53,9 @@ export default class TaskBoardFileManager {
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
 		this.app = plugin.app;
+	}
+
+	async initializeFileRegistry(): Promise<void> {
 		this.taskBoardFilesRegistry =
 			this.plugin.settings.data.taskBoardFilesRegistry;
 	}

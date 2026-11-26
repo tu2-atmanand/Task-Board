@@ -13,11 +13,7 @@ import {
 	DEFAULT_DATE_FORMAT,
 	DEFAULT_DATE_TIME_FORMAT,
 } from "../interfaces/Constants.js";
-import {
-	PropertyTypeConfig,
-	UniversalDateOptions,
-	DEFAULT_TASK_CACHE_KEYS,
-} from "../interfaces/Enums.js";
+import { PropertyTypeConfig } from "../interfaces/Enums.js";
 import type { taskItem } from "../interfaces/TaskItem.js";
 
 /**
@@ -509,49 +505,17 @@ export function getAllDatesInRelativeRange(
  */
 export const getUniversalDateFromTask = (
 	task: taskItem,
-	universalDateType: UniversalDateOptions,
+	universalDateKey: string,
 ): number | undefined => {
-	// Method 1 - Comparing
-	if (universalDateType === UniversalDateOptions.dueDate) {
-		return task[DEFAULT_TASK_CACHE_KEYS.DueDate];
-	} else if (universalDateType === UniversalDateOptions.startDate) {
-		return task[DEFAULT_TASK_CACHE_KEYS.StartDate];
-	} else if (universalDateType === UniversalDateOptions.scheduledDate) {
-		return task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate];
+	if (
+		!universalDateKey ||
+		!task[universalDateKey] ||
+		task[universalDateKey] === ""
+	) {
+		return undefined;
 	}
-	return undefined;
-
-	// Method 2 - directly fetching the key of the task object which is same as that saved as string inside plugin.settings.data.universalDate
-	// const universalDateChoice =
-	// 	plugin.settings.data.universalDate;
-	// if (
-	// 	!universalDateChoice ||
-	// 	!task[universalDateChoice] ||
-	// 	task[universalDateChoice] === ""
-	// ) {
-	// 	return "";
-	// }
-	// // Return the value of the universal date key from the task object
-	// return task[universalDateChoice] || "";
-};
-
-/**
- * Returns an emoji based on the universal date type set in the plugin's global settings.
- * If the universal date is not set, an empty string is returned.
- * @param plugin - The TaskBoard plugin object.
- * @returns An emoji representing the universal date type, or an empty string if not set.
- */
-export const getUniversalDateEmoji = (
-	universalDateSetting: UniversalDateOptions,
-): string => {
-	if (universalDateSetting === UniversalDateOptions.dueDate) {
-		return "📅";
-	} else if (universalDateSetting === UniversalDateOptions.scheduledDate) {
-		return "⏳";
-	} else if (universalDateSetting === UniversalDateOptions.startDate) {
-		return "🛫";
-	}
-	return "";
+	// Return the value of the universal date key from the task object
+	return Number(task[universalDateKey]) || undefined;
 };
 
 /** Compare configured time values as clock times (HH:mm), not dates. */

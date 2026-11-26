@@ -1,3 +1,4 @@
+import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import {
 	DEFAULT_TASK_CACHE_KEYS,
 	PropertyTypeConfig,
@@ -89,17 +90,26 @@ function extractConfiguredTaskProperties(
 		(property) => property.key === String(DEFAULT_TASK_CACHE_KEYS.Time),
 	);
 	if (timeProperty) {
-		const match = extractTime(
-			line,
-			settings.taskProperties,
-			allFormats ? undefined : settings.taskPropertyFormat,
-		);
-		const value = coerceCustomTaskPropertyValue(
-			match?.[2],
-			timeProperty.type,
-			settings.dateTimeFormat,
-		);
-		if (value !== undefined) result[timeProperty.key] = value;
+		try {
+			const match = extractTime(
+				line,
+				settings.taskProperties,
+				allFormats ? undefined : settings.taskPropertyFormat,
+			);
+			const value = coerceCustomTaskPropertyValue(
+				match?.[2],
+				timeProperty.type,
+				settings.dateTimeFormat,
+			);
+			if (value !== undefined) result[timeProperty.key] = value;
+		} catch (error) {
+			// If there is any issue extracting a single propert, continue with the rest of the properties.
+			bugReporterManagerInsatance.addToLogs(
+				222,
+				String(error),
+				"PropertiesParsing.ts/extractConfiguredTaskProperties",
+			);
+		}
 	}
 
 	// Manually handling the defalt property "Priority" as it requires a special parsing.
@@ -107,45 +117,67 @@ function extractConfiguredTaskProperties(
 		(property) => property.key === String(DEFAULT_TASK_CACHE_KEYS.Priority),
 	);
 	if (priorityProperty) {
-		const priority = extractPriority(
-			line,
-			settings.taskProperties,
-			settings.customPriorities,
-			allFormats ? undefined : settings.taskPropertyFormat,
-		);
-		if (priority.value > 0) result[priorityProperty.key] = priority.value;
+		try {
+			const priority = extractPriority(
+				line,
+				settings.taskProperties,
+				settings.customPriorities,
+				allFormats ? undefined : settings.taskPropertyFormat,
+			);
+			if (priority.value > 0)
+				result[priorityProperty.key] = priority.value;
+		} catch (error) {
+			// If there is any issue extracting a single propert, continue with the rest of the properties.
+			bugReporterManagerInsatance.addToLogs(
+				222,
+				String(error),
+				"PropertiesParsing.ts/extractConfiguredTaskProperties",
+			);
+		}
 	}
 
 	for (const property of settings.taskProperties) {
 		if (!property.id || SPECIAL_TASK_PROPERTY_KEYS.has(property.key)) {
 			continue;
 		}
-		const match = matchTaskProperty(
-			line,
-			property,
-			allFormats ? undefined : settings.taskPropertyFormat,
-		);
-		if (!match?.[1]) continue;
+		try {
+			const match = matchTaskProperty(
+				line,
+				property,
+				allFormats ? undefined : settings.taskPropertyFormat,
+			);
+			if (!match?.[1]) continue;
 
-		let raw = match[1].trim();
-		if (raw.startsWith('"') && raw.endsWith('"')) {
-			try {
-				raw = JSON.parse(raw) as string;
-			} catch {
-				raw = raw.slice(1, -1);
+			let raw = match[1].trim();
+			if (raw.startsWith('"') && raw.endsWith('"')) {
+				try {
+					raw = JSON.parse(raw) as string;
+				} catch {
+					raw = raw.slice(1, -1);
+				}
+			} else if (raw.startsWith("'") && raw.endsWith("'")) {
+				raw = raw
+					.slice(1, -1)
+					.replace(/\\'/g, "'")
+					.replace(/\\\\/g, "\\");
 			}
-		} else if (raw.startsWith("'") && raw.endsWith("'")) {
-			raw = raw.slice(1, -1).replace(/\\'/g, "'").replace(/\\\\/g, "\\");
+			const value = coerceCustomTaskPropertyValue(
+				raw,
+				property.type,
+				property.type === PropertyTypeConfig.date
+					? settings.dateFormat
+					: settings.dateTimeFormat,
+				settings.dateFormat,
+			);
+			if (value !== undefined) result[property.key] = value;
+		} catch (error) {
+			// If there is any issue extracting a single propert, continue with the rest of the properties.
+			bugReporterManagerInsatance.addToLogs(
+				222,
+				String(error),
+				"PropertiesParsing.ts/extractConfiguredTaskProperties",
+			);
 		}
-		const value = coerceCustomTaskPropertyValue(
-			raw,
-			property.type,
-			property.type === PropertyTypeConfig.date
-				? settings.dateFormat
-				: settings.dateTimeFormat,
-			settings.dateFormat,
-		);
-		if (value !== undefined) result[property.key] = value;
 	}
 	return result;
 }
@@ -216,10 +248,10 @@ export function getTaskProperty(
 }
 
 /**
- * @todo - Move this function inside VaultScanner manager and avoid 
- * calling individual extract functions for the default properties 
+ * @todo - Move this function inside VaultScanner manager and avoid
+ * calling individual extract functions for the default properties
  * other than the special default properties.
- * 
+ *
  * Function to build a task from raw content
  * @param rawTaskContent - The raw content of the task ONLY.
  * @param filePath - Optional file path where the task is located
@@ -490,7 +522,7 @@ export function extractTime(
 			`\\[${escapeRegExp(property?.id ?? "time")}::\\s*(.*?)\\]`,
 		) ??
 		text.match(
-			`\\s*(${property?.emoji ?? TASKS_PLUGIN_DEFAULT_SYMBOLS.duration}\\s*(\\[.*?\\]|(\\d{2}:\\d{2}\\s*-\\s*\\d{2}:\\d{2}))`,
+			`\\s*(${property?.emoji ?? TASKS_PLUGIN_DEFAULT_SYMBOLS.duration}\\s*(\\[.*?\\]|(\\d{2}:\\d{2}\\s*-\\s*\\d{2}:\\d{2})))`,
 		) ??
 		text.match(`@${escapeRegExp(property?.id ?? "time")}\\(([^)]*)\\)`)
 	);
@@ -549,7 +581,7 @@ export function extractPriority(
 }
 
 // ------------------------------------------------------------------
-// TODO : Below functions are not required, as this same operation 
+// TODO : Below functions are not required, as this same operation
 // can be done using the universal function matchTaskProperty()
 // ------------------------------------------------------------------
 
@@ -557,7 +589,7 @@ export function extractPriority(
  * Extracts the task id from a task string by matching the id regex.
  * Supports both Task's plugin and Dataview plugin id formats.
  * @param {string} text - The task string.
- * @returns {RegExpMatchArray} A regular expression array, where [0] 
+ * @returns {RegExpMatchArray} A regular expression array, where [0]
  * is the extracted string and [1] is the value of the id.
  */
 export function extractTaskId(
