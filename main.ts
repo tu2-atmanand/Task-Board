@@ -160,9 +160,8 @@ export default class TaskBoard extends Plugin {
 		// this.view = null;
 		this.settings = DEFAULT_SETTINGS;
 		this.advancedFilterer = new AdvancedFilterer(this);
-		this.vaultScanner = new VaultScanner(this.app, this);
+		this.vaultScanner = new VaultScanner(this);
 		this.realTimeScanner = new RealTimeScanner(
-			this.app,
 			this,
 			this.vaultScanner,
 		);
@@ -177,7 +176,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	get api(): ReturnType<typeof TaskBoardApi.GetApi> {
-		return TaskBoardApi.GetApi(this.app, this);
+		return TaskBoardApi.GetApi(this);
 	}
 
 	async onload() {

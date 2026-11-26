@@ -69,9 +69,9 @@ export default class VaultScanner {
 	indentationString: string;
 	supportedChecklistSymbols: string[];
 
-	constructor(app: App, plugin: TaskBoard) {
-		this.app = app;
+	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
+		this.app = plugin.app;
 		this.tasksCache = {
 			VaultName: this.plugin.app?.vault.getName(),
 			Modified_at: getCurrentLocalDateTimeString(),

@@ -15,9 +15,9 @@ export class RealTimeScanner {
 	taskBoardFileStack: string[] = [];
 	vaultScanner: VaultScanner;
 
-	constructor(app: App, plugin: TaskBoard, vaultScanner: VaultScanner) {
-		this.app = app;
+	constructor(plugin: TaskBoard, vaultScanner: VaultScanner) {
 		this.plugin = plugin;
+		this.app = plugin.app;
 		this.vaultScanner = vaultScanner;
 	}
 
