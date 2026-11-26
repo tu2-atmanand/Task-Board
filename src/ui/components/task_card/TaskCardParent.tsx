@@ -196,10 +196,10 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 			const cleanedTitle = isTaskNote
 				? task[DEFAULT_TASK_CACHE_KEYS.Title]
 				: cleanTaskTitleLegacy(
-						task,
-						globalSettings.usePipeToSeparateProperties,
-						globalSettings,
-					);
+					task,
+					globalSettings.usePipeToSeparateProperties,
+					globalSettings,
+				);
 
 			void MarkdownUIRenderer.strictRender(
 				plugin.app,
@@ -798,9 +798,9 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 				void openDateInputModal(plugin, t("start"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.startDate, newDate);
 				},
-				task[DEFAULT_TASK_CACHE_KEYS.StartDate] === undefined
-					? ""
-					: formatDateStringAsPerSettings(
+					task[DEFAULT_TASK_CACHE_KEYS.StartDate] === undefined
+						? ""
+						: formatDateStringAsPerSettings(
 							task[DEFAULT_TASK_CACHE_KEYS.StartDate],
 							globalSettings.dateFormat,
 						),
@@ -814,9 +814,9 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 				void openDateInputModal(plugin, t("scheduled"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.scheduledDate, newDate);
 				},
-				task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] === undefined
-					? ""
-					: formatDateStringAsPerSettings(
+					task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate] === undefined
+						? ""
+						: formatDateStringAsPerSettings(
 							task[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
 							globalSettings.dateFormat,
 						),
@@ -830,9 +830,9 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 				void openDateInputModal(plugin, t("due"), (newDate: string) => {
 					updateTaskItemDate(plugin, task, task, UniversalDateOptions.dueDate, newDate);
 				},
-				task[DEFAULT_TASK_CACHE_KEYS.DueDate] === undefined
-					? ""
-					: formatDateStringAsPerSettings(
+					task[DEFAULT_TASK_CACHE_KEYS.DueDate] === undefined
+						? ""
+						: formatDateStringAsPerSettings(
 							task[DEFAULT_TASK_CACHE_KEYS.DueDate],
 							globalSettings.dateFormat,
 						),
@@ -852,9 +852,9 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 					reminder === undefined
 						? ""
 						: formatDateTimeAsPerSettings(
-								reminder,
-								globalSettings.dateTimeFormat,
-							),
+							reminder,
+							globalSettings.dateTimeFormat,
+						),
 				);
 				modal.onDateTimeSelected = (dateTime) => { // e.g., "2024-01-15T14:30" or "14:30"
 					updateTaskItemReminder(plugin, task, task, dateTime);

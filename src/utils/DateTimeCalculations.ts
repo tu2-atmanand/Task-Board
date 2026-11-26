@@ -275,7 +275,7 @@ function formatDateOnlyEpochAsMidnight(
  * @param preferredFormat - The preferred format to try first (e.g., "yyyy-MM-dd", "dd/MM/yyyyTHH:mm:ss" )
  * @returns Parsed Date object or null if parsing fails
  *
- * @note - This is an expensive function and hence not to be used for rendering or other calculation operations. 
+ * @note - This is an expensive function and hence not to be used for rendering or other calculation operations.
  * It should be mainly use for scanning the task and storing the value in cache.
  */
 export const robustDateParser = (
@@ -429,7 +429,10 @@ export const formatDateTimeAsPerSettings = (
 			typeof dateTimeString === "number" &&
 			isDateOnlyEpoch(dateTimeString)
 		) {
-			return formatDateOnlyEpochAsMidnight(dateTimeString, dateTimeFormat);
+			return formatDateOnlyEpochAsMidnight(
+				dateTimeString,
+				dateTimeFormat,
+			);
 		}
 
 		if (
@@ -632,11 +635,13 @@ export function compareDates(
 			return isDateTime ? normalizeDateTimeValue(date) : date;
 		}
 		if (value instanceof Date) {
-			if (isDateOnly) return new Date(getDateOnlyEpochFromDateValue(value));
+			if (isDateOnly)
+				return new Date(getDateOnlyEpochFromDateValue(value));
 			return isDateTime ? normalizeDateTimeValue(value) : value;
 		}
 		if (isDateOnly) return parseDateOnlyValue(value, dateFormat);
-		if (isDateTime) return parseDateTimeValue(value, dateTimeFormat, dateFormat);
+		if (isDateTime)
+			return parseDateTimeValue(value, dateTimeFormat, dateFormat);
 		return robustDateParser(value, dateFormat);
 	};
 

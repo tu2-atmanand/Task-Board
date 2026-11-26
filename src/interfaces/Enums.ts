@@ -62,13 +62,13 @@ export enum DEFAULT_TASK_CACHE_KEYS {
 	Reminder = "reminder",
 	FilePath = "filePath",
 	TaskLocation = "taskLocation", // This value is not user configurable, they will be stored for internal purposes.
-	
+
 	// Below 4 properties are not supported yet but will be implemented soon.
 	LastModified = "lastModified",
 	OnCompletion = "onCompletion",
 	Recurrence = "recurrence",
 	Duration = "duration", // duration in minutes - User can decide whether they want to enter end time or {startTime + Duration}. Also work for {startDate + Duration}, if startDate is stored as date-time.
-	
+
 	// ALl below properties are not stored in cache, but this same enum is used at other places hence placing them here.
 	Content = "content",
 	SubTasks = "subTasks",
