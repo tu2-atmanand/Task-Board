@@ -102,7 +102,7 @@ export const defaultTaskStatuses = {
 	secret: "s",
 };
 
-export const taskItemEmpty: taskItem = {
+export const EMPTY_TASK_ITEM: taskItem = {
 	id: "",
 	legacyId: "",
 	title: "",

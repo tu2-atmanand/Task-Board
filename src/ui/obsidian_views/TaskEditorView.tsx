@@ -7,7 +7,7 @@ import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
-import { taskItemEmpty } from "../../interfaces/Mapping.js";
+import { EMPTY_TASK_ITEM } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
@@ -20,7 +20,7 @@ export class TaskEditorView extends ItemView {
 	plugin: TaskBoard;
 	root: Root | null = null;
 	viewTypeId: string = "";
-	task: taskItem = taskItemEmpty;
+	task: taskItem = EMPTY_TASK_ITEM;
 	filePath: string;
 	taskExists: boolean;
 	isEdited: boolean;

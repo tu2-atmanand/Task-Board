@@ -6,7 +6,7 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "../../../main.js";
 import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
-import { taskItemEmpty } from "../../interfaces/Mapping.js";
+import { EMPTY_TASK_ITEM } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
@@ -20,7 +20,7 @@ import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 // Class component extending Modal for Obsidian
 export class TaskEditorModal extends Modal {
 	plugin: TaskBoard;
-	task: taskItem = { ...taskItemEmpty };
+	task: taskItem = { ...EMPTY_TASK_ITEM };
 	filePath: string;
 	taskExists: boolean;
 	isEdited: boolean;
@@ -38,7 +38,7 @@ export class TaskEditorModal extends Modal {
 		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;
 		this.saveTask = saveTask;
-		this.task = task ? { ...task } : { ...taskItemEmpty };
+		this.task = task ? { ...task } : { ...EMPTY_TASK_ITEM };
 		this.isEdited = false;
 		this.isTaskNote = isTaskNote;
 		this.activeNote = activeNote;

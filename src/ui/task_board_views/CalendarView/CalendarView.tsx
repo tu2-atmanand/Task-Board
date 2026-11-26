@@ -13,7 +13,7 @@ import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Notice } from "obsidian";
 import TaskBoard from "../../../../main.js";
 import { bugReporterManagerInsatance } from "../../../core/managers/BugReporter.js";
-import { taskItemEmpty } from "../../../interfaces/Mapping.js";
+import { EMPTY_TASK_ITEM } from "../../../interfaces/Mapping.js";
 import { taskJsonMerged, taskItem } from "../../../interfaces/TaskItem.js";
 import { eventEmitter } from "../../../services/EventEmitter.js";
 import { openAddNewTaskModal } from "../../modals/OpenModals.js";
@@ -363,7 +363,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ plugin, tasks, dateFormat }
 				const startMinutes = interaction.startSlot * HALF_HOUR_MINUTES;
 				const endMinutes = Math.max(interaction.startSlot + 1, interaction.endSlot) * HALF_HOUR_MINUTES;
 				const initialTask: taskItem = {
-					...taskItemEmpty,
+					...EMPTY_TASK_ITEM,
 					body: [],
 					tags: [],
 					frontmatterTags: [],

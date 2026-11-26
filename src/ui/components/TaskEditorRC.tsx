@@ -10,7 +10,7 @@ import { ViewUpdate } from "@codemirror/view";
 import { RxDragHandleHorizontal } from "react-icons/rx";
 import TaskBoard from "../../../main.js";
 import { statusTypeNames, UniversalDateOptions, EditButtonMode, PropertyTypeConfig } from "../../interfaces/Enums.js";
-import { taskItemEmpty } from "../../interfaces/Mapping.js";
+import { EMPTY_TASK_ITEM } from "../../interfaces/Mapping.js";
 import {
 	coerceCustomTaskPropertyValue,
 	taskItem,
@@ -94,7 +94,7 @@ export const TaskEditorRC: React.FC<{
 	onSave: (updatedTask: taskItem, quickAddPluginChoice: string, updatedNoteContent?: string) => Promise<void>;
 	onClose: () => void;
 	setIsEdited: (value: boolean) => void;
-}> = ({ plugin, root, isTaskNote, noteContent, task = taskItemEmpty, taskExists, inboxView = false, activeNote, filePath, onSave, onClose, setIsEdited: reportEdited }) => {
+}> = ({ plugin, root, isTaskNote, noteContent, task = EMPTY_TASK_ITEM, taskExists, inboxView = false, activeNote, filePath, onSave, onClose, setIsEdited: reportEdited }) => {
 	const globalSettings = plugin.settings.data;
 	const taskWithCustomProperties =
 		task as taskItemWithCustomProperties;
@@ -755,7 +755,7 @@ export const TaskEditorRC: React.FC<{
 		priority: priority,
 		filePath: newFilePath,
 		status: status,
-		taskLocation: task?.[DEFAULT_TASK_CACHE_KEYS.TaskLocation] || taskItemEmpty[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
+		taskLocation: task?.[DEFAULT_TASK_CACHE_KEYS.TaskLocation] || EMPTY_TASK_ITEM[DEFAULT_TASK_CACHE_KEYS.TaskLocation],
 		dependsOn: dependsOn,
 		...getGenericPropertyValuesByKey(),
 		completionDate: task[DEFAULT_TASK_CACHE_KEYS.CompletionDate],

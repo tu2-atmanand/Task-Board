@@ -811,7 +811,7 @@ export default class TaskBoard extends Plugin {
 			id: "add-new-task-note",
 			name: t("add-new-task-note"),
 			callback: () => {
-				openAddNewTaskNoteModal(this.app, this);
+				openAddNewTaskNoteModal(this);
 			},
 		});
 		this.addCommand({
@@ -823,7 +823,6 @@ export default class TaskBoard extends Plugin {
 
 				if (activeEditor && activeFile) {
 					openAddNewTaskInCurrentFileModal(
-						this.app,
 						this,
 						activeFile,
 						activeEditor?.getCursor(),
