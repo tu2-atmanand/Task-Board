@@ -37,35 +37,35 @@
     "autoAddCancelledDate": false,
     "showModifiedFilesNotice": true,
     "scanMode": "automatic",
-    "columnWidth": "300px",
-    "taskCardStyle": "bases",
+    "columnWidth": "320px",
+    "taskCardStyle": "icons",
     "showVerticalScroll": false,
     "dragAutoScrollEdgePercent": 20,
     "tagColors": [
       {
         "name": "bug",
-        "color": "rgba(255, 0, 0, 0.36)",
+        "color": "rgb(219, 39, 39)",
         "priority": 1
       },
       {
         "name": "important",
-        "color": "rgba(246, 255, 0, 0.41)",
+        "color": "rgb(211, 216, 43)",
         "priority": 2
       },
       {
         "name": "wip",
-        "color": "rgba(0, 255, 0, 0.41)",
+        "color": "rgba(50, 231, 50, 0.89)",
         "priority": 3
       },
       {
         "name": "review",
-        "color": "rgba(0, 0, 255, 0.34)",
+        "color": "rgba(88, 88, 219, 0.89)",
         "priority": 4
       }
     ],
     "editButtonAction": "popUp",
     "cardDoubleClickAction": "none",
-    "universalDate": "due",
+    "universalDate": "dueDate",
     "tagColorsType": "text",
     "customStatuses": [
       {
@@ -197,7 +197,8 @@
     "safeGuardFeature": true,
     "lastViewHistory": {
       "boardFilePath": "Meta/Task_Board/Boards/My Project Board.taskboard",
-      "settingTab": 0
+      "settingTab": 0,
+      "taskId": ""
     },
     "boundTaskCompletionToChildTasks": false,
     "mapView": {
@@ -294,7 +295,7 @@
         "desc": "To add context to the tasks, add multiple tags as list.",
         "type": "list",
         "emoji": "",
-        "icon": "tag",
+        "icon": "hash",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
         "rank": 5
@@ -306,7 +307,7 @@
         "name": "Time",
         "desc": "Add a start and end time seperated by hyphen(-).",
         "type": "time",
-        "emoji": "",
+        "emoji": "⏰",
         "icon": "clock",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
@@ -319,7 +320,7 @@
         "name": "Reminder",
         "desc": "A date-time value when a reminder notification should be sent.",
         "type": "date-time",
-        "emoji": "",
+        "emoji": "🔔",
         "icon": "bell-ring",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
@@ -341,7 +342,7 @@
       {
         "default": true,
         "key": "startDate",
-        "id": "startDate",
+        "id": "start",
         "name": "Start date",
         "desc": "A date-time value from when user should or can start working on the task.",
         "type": "date",
@@ -446,7 +447,7 @@
       }
     ],
     "dateHumanReadable": false,
-    "scanForAllFormat": false,
+    "scanForAllFormat": true,
     "usePipeToSeparateProperties": false,
     "searchQuery": ""
   }
