@@ -21,7 +21,7 @@ import { openDateInputModal } from '../../modals/OpenModals.js';
 import { compareTwoTags, matchTagsWithWildcards, verifySubtasksAndChildtasksAreComplete } from '../../../core/algorithms/ScanningFilterer.js';
 import { isTaskCompleted, isTaskLine, extractCheckboxSymbol, checkboxStateSwitcher, getObsidianIndentationSetting } from '../../../utils/CheckBoxUtils.js';
 import { formatDateStringAsPerSettings, formatDateTimeAsPerSettings, getLocalDateFromDateOnlyEpoch, getUniversalDateFromTask } from '../../../utils/DateTimeCalculations.js';
-import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol,  normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
+import { getAllTaskTags, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown, getStatusNameFromStatusSymbol, normalizeTaskItem } from '../../../utils/TaskItemUtils.js';
 import { cleanTaskTitleLegacy, dedentTaskBodyLines, isTaskTitleWithoutText } from '../../../utils/task_line/TaskContentFormatter.js';
 import { handleCheckboxChange, handleDeleteTask, handleSubTasksChange } from '../../../utils/task_line/TaskLineEventHandlers.js';
 import { handleTaskNoteStatusChange, handleTaskNoteBodyChange } from '../../../utils/task_note/TaskNoteEventHandlers.js';
@@ -1271,13 +1271,13 @@ const TaskCardParent: React.FC<TaskCardProps> = (props) => {
 	};
 
 	// State to hold child tasks data
-	const [childTasksData, setChildTasksData] = useState<Record<string, taskItem | null>>({});
+	const [childTasksData, setChildTasksData] = useState<Record<string, taskItem | undefined>>({});
 
 	// Effect to load child tasks asynchronously
 	useEffect(() => {
 		if (task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] && task[DEFAULT_TASK_CACHE_KEYS.Dependencies].length > 0) {
 			const loadChildTasks = () => {
-				const childTasksMap: Record<string, taskItem | null> = {};
+				const childTasksMap: Record<string, taskItem | undefined> = {};
 				void Promise.all((task?.[DEFAULT_TASK_CACHE_KEYS.Dependencies] ?? []).map(async (dependsOnId) => {
 					const childTask = await plugin.vaultScanner.getTaskFromID(dependsOnId);
 					childTasksMap[dependsOnId] = childTask;

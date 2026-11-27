@@ -31,6 +31,7 @@ import {
 	priorityNames,
 	taskItemKeyToNameMapping,
 } from "./Mapping.js";
+import { CustomTaskPropertyValueType } from "./TaskItem.js";
 
 export type VaultScannnerFilters = {
 	files: {
@@ -71,7 +72,7 @@ export interface SupportedPropertiesConfig {
 	emoji: string; // Specifically if user is using Tasks plugin format for their inline-tasks.
 	icon: string; // Lucide icon id for the specific property
 	hidePropertyInNotesForInlineTasks: boolean; // Specifically used for inline-tasks to hide properties inside notes. This setting will going to replace this.plugin.settings.data.propertiesHiddenInNotes.
-	defaultValue: string | number | string[]; // This can be an exact value or a template text which will be resolved during execution.
+	defaultValue: CustomTaskPropertyValueType; // This can be an exact value or a template text which will be resolved during execution.
 	rank: number; // This will mostly be used for task-notes to format the frontmatter, so the properties stays in a defined order.
 	color?: string;
 }

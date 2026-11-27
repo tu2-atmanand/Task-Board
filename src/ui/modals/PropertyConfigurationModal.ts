@@ -12,25 +12,53 @@ import {
 	DEFAULT_TASK_CACHE_KEYS,
 	PropertyTypeConfig,
 } from "../../interfaces/Enums.js";
-import { SupportedPropertiesConfig } from "../../interfaces/GlobalSettings.js";
+import {
+	globalSettingsData,
+	SupportedPropertiesConfig,
+} from "../../interfaces/GlobalSettings.js";
 import {
 	normalizeTaskIconValue,
 	openIconPickerModal,
 	showIconPicker,
 } from "./icon_picker/index.js";
 import { showColorPicker } from "./color_picker/ColorPickerModal.js";
+import {
+	getCustomStatusOptionsForDropdown,
+	getPriorityOptionsForDropdown,
+} from "../../utils/TaskItemUtils.js";
+import { StatusDropdownOption } from "../../interfaces/Mapping.js";
+import { MultiSuggest } from "../../services/MultiSuggest.js";
+
+const SUPPORTED_TEMPLATE_CODES = [
+	"{{date}}",
+	"{{date + 1}}",
+	"{{time}}",
+	"{{time + 1m}}",
+	"{{time + 1h}}",
+	"{{time}} - {{time + 1h}}",
+	"{{date}}T{{time}}",
+	"{{filename}}",
+	"{{parentFolder}}",
+];
+
+export function getTemplateCodeSuggestions(): string[] {
+	return SUPPORTED_TEMPLATE_CODES;
+}
 
 export class PropertyConfigurationModal extends Modal {
 	private draft: SupportedPropertiesConfig;
+	private globalSettings: globalSettingsData;
 
 	constructor(
 		app: App,
+		globalSettings: globalSettingsData,
 		property: SupportedPropertiesConfig,
 		private propertyGroup: "default" | "custom",
 		private onSave: (property: SupportedPropertiesConfig) => Promise<void>,
 		private isNew = false,
 	) {
 		super(app);
+		this.globalSettings = globalSettings;
 		this.draft = {
 			...property,
 			defaultValue: Array.isArray(property.defaultValue)
@@ -83,6 +111,17 @@ export class PropertyConfigurationModal extends Modal {
 			}
 		};
 
+		if (this.propertyGroup === "custom") {
+			addTextField(
+				t("property-name"),
+				t("property-name-info"),
+				this.draft.name,
+				(value) => (this.draft.name = value),
+				false,
+				"e.g. Project",
+			);
+		}
+
 		addTextField(
 			t("property-id"),
 			t("property-id-info"),
@@ -95,21 +134,10 @@ export class PropertyConfigurationModal extends Modal {
 			false,
 		);
 
-		if (this.propertyGroup === "custom") {
-			addTextField(
-				t("property-name"),
-				t("property-name-info"),
-				this.draft.name,
-				(value) => (this.draft.name = value),
-				false,
-				"e.g. Project",
-			);
-		}
-
-		if (isTitleProperty) {
-			this.renderFooter(contentEl);
-			return;
-		}
+		// if (isTitleProperty) {
+		// 	this.renderFooter(contentEl);
+		// 	return;
+		// }
 
 		addTextField(
 			t("description"),
@@ -121,7 +149,8 @@ export class PropertyConfigurationModal extends Modal {
 			true,
 		);
 
-		const statusConfigurableForDefaultProperties = [
+		// Select value data-type for the property
+		const valueTypeConfigurableForDefaultProperties = [
 			String(DEFAULT_TASK_CACHE_KEYS.CancelledDate),
 			DEFAULT_TASK_CACHE_KEYS.CompletionDate,
 			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
@@ -131,7 +160,7 @@ export class PropertyConfigurationModal extends Modal {
 		];
 		if (
 			this.propertyGroup === "custom" ||
-			statusConfigurableForDefaultProperties.includes(this.draft.key)
+			valueTypeConfigurableForDefaultProperties.includes(this.draft.key)
 		) {
 			new Setting(contentEl)
 				.setName(t("value-type"))
@@ -146,6 +175,7 @@ export class PropertyConfigurationModal extends Modal {
 				});
 		}
 
+		// Select Emoji for the property
 		if (
 			![
 				String(DEFAULT_TASK_CACHE_KEYS.Title),
@@ -164,110 +194,209 @@ export class PropertyConfigurationModal extends Modal {
 				false,
 			);
 		}
-		const iconSetting = new Setting(contentEl)
-			.setName(t("property-lucide-icon"))
-			.setDesc(t("property-lucide-icon-info"));
-		const iconControl = iconSetting.controlEl.createDiv(
-			"task-board-property-icon-control",
-		);
-		const iconButton = iconControl.createEl("button", {
-			cls: `custom-status-icon-button${this.draft.icon ? "" : " faint"}`,
-			attr: {
-				type: "button",
-				title: t("select-icon"),
-				"aria-label": t("select-icon"),
-			},
-		});
-		let iconValue = normalizeTaskIconValue(this.draft.icon);
-		setIcon(
-			iconButton,
-			iconValue && getIcon(iconValue) ? iconValue : "plus",
-		);
-		const iconName = iconControl.createSpan({
-			cls: "task-board-property-icon-name",
-			text: iconValue || t("select-icon"),
-		});
-		iconButton.addEventListener("click", () => {
-			const updateIcon = (value: string) => {
-				iconValue = normalizeTaskIconValue(value);
-				this.draft.icon = iconValue;
-				const hasIcon = Boolean(iconValue && getIcon(iconValue));
-				iconButton.toggleClass("faint", !hasIcon);
-				setIcon(iconButton, hasIcon ? iconValue : "plus");
-				iconName.setText(hasIcon ? iconValue : t("select-icon"));
-			};
-			const pickerOptions = {
-				value: iconValue,
-				title: "Select property icon",
-				onSelect: updateIcon,
-				onClear: () => updateIcon(""),
-			};
-			if (Platform.isMobile) openIconPickerModal(this.app, pickerOptions);
-			else showIconPicker(iconButton, pickerOptions);
-		});
 
-		const colorSetting = new Setting(contentEl).setName(t("status-color"));
-		const colorButton = colorSetting.controlEl.createEl("button", {
-			cls: "task-board-custom-status-color-button",
-			attr: {
-				type: "button",
-				"aria-label": t("status-color"),
-			},
-		});
-		colorButton.textContent = this.draft.color || t("choose-color");
-		if (this.draft.color)
-			colorButton.style.backgroundColor = this.draft.color;
-		colorButton.addEventListener("click", () => {
-			showColorPicker(colorButton, {
-				value: this.draft.color ?? "",
-				outputFormat: "rgb",
-				onSelect: (value) => {
-					this.draft.color = value;
-					colorButton.textContent = value;
-					colorButton.style.backgroundColor = value;
-				},
-				onClear: () => {
-					this.draft.color = "";
-					colorButton.textContent = t("choose-color");
-					colorButton.style.removeProperty("background-color");
+		if (this.draft.key !== String(DEFAULT_TASK_CACHE_KEYS.Title)) {
+			// Select Lucide icon for the property
+			const iconSetting = new Setting(contentEl)
+				.setName(t("property-lucide-icon"))
+				.setDesc(t("property-lucide-icon-info"));
+			const iconControl = iconSetting.controlEl.createDiv(
+				"task-board-property-icon-control",
+			);
+			const iconButton = iconControl.createEl("button", {
+				cls: `custom-status-icon-button${this.draft.icon ? "" : " faint"}`,
+				attr: {
+					type: "button",
+					title: t("select-icon"),
+					"aria-label": t("select-icon"),
 				},
 			});
-		});
-
-		new Setting(contentEl)
-			.setName(t("hide-property-in-notes-for-inline-tasks"))
-			.setDesc(t("hide-property-in-notes-setting-info"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.draft.hidePropertyInNotesForInlineTasks)
-					.onChange((value) => {
-						this.draft.hidePropertyInNotesForInlineTasks = value;
-					}),
+			let iconValue = normalizeTaskIconValue(this.draft.icon);
+			setIcon(
+				iconButton,
+				iconValue && getIcon(iconValue) ? iconValue : "plus",
 			);
+			const iconName = iconControl.createSpan({
+				cls: "task-board-property-icon-name",
+				text: iconValue || t("select-icon"),
+			});
+			iconButton.addEventListener("click", () => {
+				const updateIcon = (value: string) => {
+					iconValue = normalizeTaskIconValue(value);
+					this.draft.icon = iconValue;
+					const hasIcon = Boolean(iconValue && getIcon(iconValue));
+					iconButton.toggleClass("faint", !hasIcon);
+					setIcon(iconButton, hasIcon ? iconValue : "plus");
+					iconName.setText(hasIcon ? iconValue : t("select-icon"));
+				};
+				const pickerOptions = {
+					value: iconValue,
+					title: "Select property icon",
+					onSelect: updateIcon,
+					onClear: () => updateIcon(""),
+				};
+				if (Platform.isMobile)
+					openIconPickerModal(this.app, pickerOptions);
+				else showIconPicker(iconButton, pickerOptions);
+			});
 
-		addTextField(
-			t("property-initial-value"),
-			t("property-initial-value-info"),
-			Array.isArray(this.draft.defaultValue)
-				? this.draft.defaultValue.join(", ")
-				: String(this.draft.defaultValue),
-			(value) => {
-				if (this.draft.type === PropertyTypeConfig.list) {
-					this.draft.defaultValue = value
-						.split(",")
-						.map((item) => item.trim())
-						.filter(Boolean);
-				} else if (this.draft.type === PropertyTypeConfig.numeric) {
-					const numberValue = Number(value);
-					if (value.trim() !== "" && Number.isFinite(numberValue))
-						this.draft.defaultValue = numberValue;
-					else this.draft.defaultValue = value;
-				} else {
-					this.draft.defaultValue = value;
-				}
-			},
-			false,
-		);
+			// Select color for the property
+			const colorSetting = new Setting(contentEl).setName(
+				t("status-color"),
+			);
+			const colorButton = colorSetting.controlEl.createEl("button", {
+				cls: "task-board-custom-status-color-button",
+				attr: {
+					type: "button",
+					"aria-label": t("status-color"),
+				},
+			});
+			colorButton.textContent = this.draft.color || t("choose-color");
+			if (this.draft.color)
+				colorButton.style.backgroundColor = this.draft.color;
+			colorButton.addEventListener("click", () => {
+				showColorPicker(colorButton, {
+					value: this.draft.color ?? "",
+					outputFormat: "rgb",
+					onSelect: (value) => {
+						this.draft.color = value;
+						colorButton.textContent = value;
+						colorButton.style.backgroundColor = value;
+					},
+					onClear: () => {
+						this.draft.color = "";
+						colorButton.textContent = t("choose-color");
+						colorButton.style.removeProperty("background-color");
+					},
+				});
+			});
+		}
+
+		// Select whether to hide this property in notes for inline-task
+		if (
+			![
+				String(DEFAULT_TASK_CACHE_KEYS.Title),
+				String(DEFAULT_TASK_CACHE_KEYS.Status),
+			].includes(this.draft.key)
+		) {
+			new Setting(contentEl)
+				.setName(t("hide-property-in-notes-for-inline-tasks"))
+				.setDesc(t("hide-property-in-notes-setting-info"))
+				.addToggle((toggle) =>
+					toggle
+						.setValue(this.draft.hidePropertyInNotesForInlineTasks)
+						.onChange((value) => {
+							this.draft.hidePropertyInNotesForInlineTasks =
+								value;
+						}),
+				);
+		}
+
+		// Select a TemplateCode of simple initial value to populate while creating a new task
+		if (
+			![
+				String(DEFAULT_TASK_CACHE_KEYS.ID),
+				String(DEFAULT_TASK_CACHE_KEYS.Status),
+				String(DEFAULT_TASK_CACHE_KEYS.Priority),
+			].includes(this.draft.key)
+		) {
+			new Setting(contentEl)
+				.setName(t("property-initial-value"))
+				.setDesc(t("property-initial-value-info"))
+				.addText((text) => {
+					const applyDefaultValueInput = (value: string) => {
+						if (this.draft.type === PropertyTypeConfig.list) {
+							this.draft.defaultValue = value
+								.split(",")
+								.map((item) => item.trim())
+								.filter(Boolean);
+						} else if (
+							this.draft.type === PropertyTypeConfig.numeric
+						) {
+							const numberValue = Number(value);
+							if (
+								value.trim() !== "" &&
+								Number.isFinite(numberValue)
+							)
+								this.draft.defaultValue = numberValue;
+							else this.draft.defaultValue = value;
+						} else {
+							this.draft.defaultValue = value;
+						}
+					};
+
+					text.setValue(
+						Array.isArray(this.draft.defaultValue)
+							? this.draft.defaultValue.join(", ")
+							: String(this.draft.defaultValue),
+					)
+						.onChange(applyDefaultValueInput)
+						.setPlaceholder("Enter value or TemplateCode.");
+
+					const inputEl = text.inputEl;
+					const suggestionContent = getTemplateCodeSuggestions();
+					const onSelectCallback = (selectedTemplateCode: string) => {
+						// MultiSuggest writes directly to the input element, so the
+						// TextComponent change handler needs to be triggered manually.
+						applyDefaultValueInput(selectedTemplateCode);
+						text.setValue(selectedTemplateCode);
+					};
+
+					new MultiSuggest(
+						inputEl,
+						new Set(suggestionContent),
+						onSelectCallback,
+						this.app,
+					);
+				});
+		} else if (this.draft.key === String(DEFAULT_TASK_CACHE_KEYS.Status)) {
+			new Setting(contentEl)
+				.setName(t("property-initial-value"))
+				.setDesc(t("property-initial-value-info"))
+				.addDropdown((dropdown) => {
+					const statusOptions = getCustomStatusOptionsForDropdown(
+						this.globalSettings.customStatuses,
+						{ mode: "flat" },
+					);
+					if (statusOptions.type === "flat") {
+						statusOptions.options.forEach(
+							(status: StatusDropdownOption) => {
+								dropdown.addOption(
+									String(status.value),
+									status.label,
+								);
+							},
+						);
+					}
+					dropdown
+						.setValue(String(this.draft.defaultValue))
+						.onChange((value) => {
+							this.draft.defaultValue = value;
+						});
+				});
+		} else if (
+			this.draft.key === String(DEFAULT_TASK_CACHE_KEYS.Priority)
+		) {
+			new Setting(contentEl)
+				.setName(t("property-initial-value"))
+				.setDesc(t("property-initial-value-info"))
+				.addDropdown((dropdown) => {
+					const priorityOptions = getPriorityOptionsForDropdown(
+						this.globalSettings.customPriorities,
+					);
+					Object.values(priorityOptions).forEach((priority) => {
+						dropdown.addOption(
+							String(priority.value),
+							priority.text,
+						);
+					});
+					dropdown
+						.setValue(String(this.draft.defaultValue))
+						.onChange((value) => {
+							this.draft.defaultValue = Number(value);
+						});
+				});
+		}
 
 		this.renderFooter(contentEl);
 	}

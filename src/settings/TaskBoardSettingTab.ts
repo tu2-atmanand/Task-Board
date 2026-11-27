@@ -4285,6 +4285,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 									() => {
 										new PropertyConfigurationModal(
 											this.app,
+											this.globalSettings,
 											property,
 											propertyGroup,
 											async (updatedProperty) => {
@@ -4398,6 +4399,7 @@ export class TaskBoardSettingTab extends PluginSettingTab {
 										this.createNewCustomProperty();
 									new PropertyConfigurationModal(
 										this.app,
+										this.globalSettings,
 										newProperty,
 										"custom",
 										async (updatedProperty) => {

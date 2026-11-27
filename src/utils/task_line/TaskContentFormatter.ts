@@ -526,6 +526,9 @@ export const getFormattedTaskContent = async (
 };
 
 /**
+ * @note - This is an expensive function which sanitizes all the task properties. 
+ * Do not use it for batch operations or during rendering.
+ * 
  * Function to get the sanitized task content.
  * This function will format the task content based on the latest properties of the task.
  * It will also ensure that the task content is in the correct format and does not contain any old or invalid properties.

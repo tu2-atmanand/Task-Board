@@ -2,16 +2,12 @@
 
 import TaskBoard from "../../main.js";
 import {
+	coerceCustomTaskPropertyValue,
 	CustomTaskPropertyValueType,
 	taskItem,
 	taskItemWithCustomProperties,
 } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
-import { updateTaskInFile } from "./task_line/TaskLineUtils.js";
-import {
-	isTaskNotePresentInTags,
-	updateFrontmatterInMarkdownFile,
-} from "./task_note/TaskNoteUtils.js";
 import {
 	DEFAULT_TASK_CACHE_KEYS,
 	PropertyTypeConfig,
@@ -22,6 +18,7 @@ import {
 	CustomStatus,
 	globalSettingsData,
 	PluginDataJson,
+	SupportedPropertiesConfig,
 } from "../interfaces/GlobalSettings.js";
 import {
 	defaultTaskStatuses,
@@ -34,12 +31,18 @@ import {
 	StatusDropdownOutput,
 } from "../interfaces/Mapping.js";
 import { t } from "i18next";
+import { addDays, addHours, addMinutes, addSeconds } from "date-fns";
 import { extractTaskId } from "./task_line/PropertiesParsing.js";
 import { getFormattedTaskContentSync } from "./task_line/TaskContentFormatter.js";
+import {
+	formatDateStringAsPerSettings,
+	formatTimeAsPerSettings,
+	getTimeFormatFromDateTimeFormat,
+} from "./DateTimeCalculations.js";
 
 /**
- * Combines both the normal task.tags and frontmatter tags of 
- * a taskItem and return it as a single array. This is specifically 
+ * Combines both the normal task.tags and frontmatter tags of
+ * a taskItem and return it as a single array. This is specifically
  * for inline-task.
  * @param task - Task item with updated properties
  * @returns string[] - Array of tags
@@ -664,4 +667,157 @@ export function getTaskPropertyValue(
 		propertyValue: undefined,
 		propertyType: undefined,
 	};
+}
+
+const DEFAULT_VALUE_TEMPLATE_REGEX =
+	/\{\{\s*(date|time|filename|parentFolder)\s*(?:([+-])\s*(\d+)\s*(d|h|m|s)?\s*)?\}\}/gi;
+
+/**
+ * Replaces template codes in a configured default value while preserving any
+ * plain text around them (e.g. "My Project {{date}}" -> "My Project 2026-11-14").
+ */
+export function resolveTaskPropertyTemplateCodes(
+	value: string,
+	globalSettings: globalSettingsData,
+	context: { now?: Date; filePath?: string } = {},
+): string {
+	const now = context.now ?? new Date();
+	const filePath = (context.filePath ?? "").replace(/\\/g, "/");
+	const fileParts = filePath.split("/").filter(Boolean);
+	const fileName = fileParts.pop() ?? "";
+	const filename = fileName.replace(/\.[^.]+$/, "");
+	const parentFolder = fileParts.join("/");
+
+	return value.replace(
+		DEFAULT_VALUE_TEMPLATE_REGEX,
+		(match, rawCode, rawSign, rawAmount, rawUnit) => {
+			const code = String(rawCode).toLowerCase();
+			if (code === "filename") return filename || match;
+			if (code === "parentfolder") return parentFolder || match;
+
+			const amount = rawAmount ? Number(rawAmount) : 0;
+			const signedAmount = rawSign === "-" ? -amount : amount;
+			const unit = String(rawUnit || (code === "date" ? "d" : "m")).toLowerCase();
+
+			let target = new Date(now);
+			if (signedAmount !== 0) {
+				switch (unit) {
+					case "d":
+						target = addDays(target, signedAmount);
+						break;
+					case "h":
+						target = addHours(target, signedAmount);
+						break;
+					case "m":
+						target = addMinutes(target, signedAmount);
+						break;
+					case "s":
+						target = addSeconds(target, signedAmount);
+						break;
+					default:
+						return match;
+				}
+			}
+
+			return code === "date"
+				? formatDateStringAsPerSettings(target, globalSettings.dateFormat)
+				: formatTimeAsPerSettings(
+					target,
+					getTimeFormatFromDateTimeFormat(globalSettings.dateTimeFormat),
+				);
+		},
+	);
+}
+
+function resolveConfiguredDefaultValue(
+	property: SupportedPropertiesConfig,
+	globalSettings: globalSettingsData,
+	context: { now: Date; filePath: string },
+): CustomTaskPropertyValueType | undefined {
+	const { defaultValue, type } = property;
+	if (
+		defaultValue === undefined ||
+		defaultValue === null ||
+		defaultValue === ""
+	) {
+		return undefined;
+	}
+
+	const resolved = Array.isArray(defaultValue)
+		? defaultValue.map((item) =>
+			resolveTaskPropertyTemplateCodes(String(item), globalSettings, context),
+		)
+		: typeof defaultValue === "string"
+			? resolveTaskPropertyTemplateCodes(defaultValue, globalSettings, context)
+			: defaultValue;
+
+	return coerceCustomTaskPropertyValue(
+		resolved,
+		type,
+		type === PropertyTypeConfig.date
+			? globalSettings.dateFormat
+			: globalSettings.dateTimeFormat,
+		globalSettings.dateFormat,
+	);
+}
+
+/**
+ * Builds the initial values of a new task from the defaults configured for
+ * each task property. The incoming task is preserved so values already set by
+ * the caller (generated ID, title, note path, status, priority, etc.) are kept.
+ */
+export function populateInitialValues(
+	plugin: TaskBoard,
+	task: taskItem,
+	filePath: string = task[DEFAULT_TASK_CACHE_KEYS.FilePath],
+): taskItem {
+	const globalSettings = plugin.settings.data;
+	const context = {
+		now: new Date(),
+		filePath: filePath || plugin.app.workspace.getActiveFile()?.path || "",
+	};
+	const populated: taskItem = { ...task };
+
+	for (const property of globalSettings.taskProperties ?? []) {
+		const key = property?.key;
+		if (
+			!key ||
+			key === DEFAULT_TASK_CACHE_KEYS.ID ||
+			key === DEFAULT_TASK_CACHE_KEYS.LegacyID ||
+			property.defaultValue === undefined ||
+			property.defaultValue === null ||
+			property.defaultValue === ""
+		) {
+			continue;
+		}
+
+		// Status and priority are chosen from dropdowns in the settings, so their
+		// configured values are already in the exact format the task cache needs.
+		if (key === DEFAULT_TASK_CACHE_KEYS.Status) {
+			populated.status = String(property.defaultValue);
+			continue;
+		}
+		if (key === DEFAULT_TASK_CACHE_KEYS.Priority) {
+			const priority = Number(property.defaultValue);
+			if (Number.isFinite(priority)) populated.priority = priority;
+			continue;
+		}
+
+		const currentValue = populated[key];
+		const hasValue =
+			currentValue !== undefined &&
+			currentValue !== null &&
+			currentValue !== "" &&
+			(!Array.isArray(currentValue) || currentValue.length > 0);
+		if (hasValue) continue;
+
+		const value = resolveConfiguredDefaultValue(
+			property,
+			globalSettings,
+			context,
+		);
+		if (value !== undefined) populated[key] = value;
+	}
+
+	return populated;
 }

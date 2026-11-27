@@ -13,6 +13,8 @@ import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/Misc
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
 import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import { populateInitialValues } from "../../utils/TaskItemUtils.js";
+import { getSanitizedTaskContent } from "../../utils/task_line/TaskContentFormatter.js";
 
 
 
@@ -68,9 +70,16 @@ export class TaskEditorView extends ItemView {
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
+		// If adding a new task (taskExists = false) OR editing a task and the task dont have an id 
+		// Then, check if user has allowed to auto add ID and assign a new id.
 		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task[DEFAULT_TASK_CACHE_KEYS.ID])) {
 			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = this.plugin.vaultScanner.generateTaskId();
 			this.task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = this.task[DEFAULT_TASK_CACHE_KEYS.ID];
+		}
+
+		// If adding a new task, populate the initial values configured by user.
+		if (!this.taskExists) {
+			this.task = populateInitialValues(this.plugin, this.task, this.filePath);
 		}
 
 		// Some processing, if this is a Task-Note
@@ -95,7 +104,9 @@ export class TaskEditorView extends ItemView {
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
 		} else {
-			if (!this.taskExists)
+			this.task[DEFAULT_TASK_CACHE_KEYS.Title] = getSanitizedTaskContent(this.plugin.settings.data, this.task).split("\n")[0];
+
+			if (!this.task[DEFAULT_TASK_CACHE_KEYS.Title])
 				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "- [ ] ";
 		}
 

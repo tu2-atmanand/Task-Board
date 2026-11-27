@@ -12,6 +12,7 @@ import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import {
 	DEFAULT_DATE_FORMAT,
 	DEFAULT_DATE_TIME_FORMAT,
+	DEFAULT_TIME_FORMAT,
 } from "../interfaces/Constants.js";
 import { PropertyTypeConfig } from "../interfaces/Enums.js";
 import type { taskItem } from "../interfaces/TaskItem.js";
@@ -51,6 +52,31 @@ function getDateFormatFromDateTimeFormat(dateTimeFormat: string): string {
 		.replace(/[T\s]+$/, "")
 		.trim();
 }
+
+/**
+ * Extracts the time portion of a date-time format (e.g. "HH:mm:ss" from
+ * "yyyy-MM-dd'T'HH:mm:ss"), so template codes like {{time + 1h}} can be
+ * formatted the same way the user has configured.
+ */
+export const getTimeFormatFromDateTimeFormat = (
+	dateTimeFormat: string = DEFAULT_DATE_TIME_FORMAT,
+): string => {
+	const timeTokenIndex = dateTimeFormat.search(/[Hhms]/);
+	if (timeTokenIndex < 0) return DEFAULT_TIME_FORMAT;
+	return dateTimeFormat.slice(timeTokenIndex).trim();
+};
+
+/** Formats a time-only value using the time portion of the user's date-time format. */
+export const formatTimeAsPerSettings = (
+	date: Date,
+	timeFormat: string = DEFAULT_TIME_FORMAT,
+): string => {
+	try {
+		return format(date, timeFormat);
+	} catch {
+		return format(date, DEFAULT_TIME_FORMAT);
+	}
+};
 
 /**
  * Builds the timezone-independent epoch for a date-only cache value.

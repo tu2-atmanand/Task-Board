@@ -103,29 +103,17 @@ export const defaultTaskStatuses = {
 };
 
 export const EMPTY_TASK_ITEM: taskItem = {
-	id: "",
-	legacyId: "",
-	title: "",
-	body: [],
-	createdDate: undefined,
-	startDate: undefined,
-	scheduledDate: undefined,
-	dueDate: undefined,
-	tags: [],
-	frontmatterTags: [],
-	time: "",
-	priority: 0,
-	reminder: undefined,
-	completionDate: undefined,
-	cancelledDate: undefined,
-	filePath: "",
-	taskLocation: {
+	[DEFAULT_TASK_CACHE_KEYS.ID]: "",
+	[DEFAULT_TASK_CACHE_KEYS.LegacyID]: "",
+	[DEFAULT_TASK_CACHE_KEYS.Status]: defaultTaskStatuses.unchecked,
+	[DEFAULT_TASK_CACHE_KEYS.Title]: "",
+	[DEFAULT_TASK_CACHE_KEYS.FilePath]: "",
+	[DEFAULT_TASK_CACHE_KEYS.TaskLocation]: {
 		startLine: 0,
 		startCharIndex: 0,
 		endLine: 0,
 		endCharIndex: 0,
 	},
-	status: defaultTaskStatuses.unchecked,
 };
 
 /**
