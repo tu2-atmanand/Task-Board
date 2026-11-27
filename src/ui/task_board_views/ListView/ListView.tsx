@@ -3,12 +3,11 @@ import { ArrowDownUp, ListTodo } from "lucide-react";
 import { Component, View } from "obsidian";
 import TaskBoard from "../../../../main.js";
 import type { Board, TaskBoardViewType } from "../../../interfaces/BoardConfigs.js";
-import { DEFAULT_DATE_FORMAT } from "../../../interfaces/Constants.js";
-import { taskCardStyleNames, viewTypeNames } from "../../../interfaces/Enums.js";
+import { viewTypeNames } from "../../../interfaces/Enums.js";
 import type { taskItem, taskJsonMerged } from "../../../interfaces/TaskItem.js";
-import TaskItem from "../../components/task_card/EmojiStyle.js";
-import BasesStyle from "../../components/task_card/BasesStyle.js";
-import { robustDateParser } from "../../../utils/DateTimeCalculations.js";
+import TaskCardParent from "../../components/task_card/TaskCardParent.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 interface ListViewProps {
 	plugin: TaskBoard;
@@ -36,11 +35,7 @@ const ListView: React.FC<ListViewProps> = ({
 	const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
 	const [taskSort, setTaskSort] = useState<TaskSort>("default");
 	const [visibleTaskCount, setVisibleTaskCount] = useState(INITIAL_TASK_COUNT);
-	const taskCardComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI
-		? TaskItem
-		: BasesStyle;
-	const dateFormat = plugin.settings.data.dateFormat || DEFAULT_DATE_FORMAT;
-
+	const taskCardComponent = TaskCardParent;
 	const sortedTasks = useMemo(() => {
 		const tasksToShow = taskFilter === "open"
 			? tasks.Pending
@@ -55,12 +50,14 @@ const ListView: React.FC<ListViewProps> = ({
 			.sort(({ task: first, index: firstIndex }, { task: second, index: secondIndex }) => {
 				let comparison = 0;
 				if (taskSort === "title") {
-					comparison = first.title.localeCompare(second.title, undefined, { numeric: true, sensitivity: "base" });
+					comparison = first[DEFAULT_TASK_CACHE_KEYS.Title].localeCompare(second[DEFAULT_TASK_CACHE_KEYS.Title], undefined, { numeric: true, sensitivity: "base" });
 				} else if (taskSort === "priority") {
-					comparison = first.priority - second.priority;
+					comparison =
+						(first[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0) -
+						(second[DEFAULT_TASK_CACHE_KEYS.Priority] ?? 0);
 				} else {
-					const firstDate = first.due ? robustDateParser(first.due, dateFormat)?.getTime() : undefined;
-					const secondDate = second.due ? robustDateParser(second.due, dateFormat)?.getTime() : undefined;
+					const firstDate = first[DEFAULT_TASK_CACHE_KEYS.DueDate];
+					const secondDate = second[DEFAULT_TASK_CACHE_KEYS.DueDate];
 					if (firstDate === undefined && secondDate !== undefined) return 1;
 					if (secondDate === undefined && firstDate !== undefined) return -1;
 					comparison = (firstDate ?? 0) - (secondDate ?? 0);
@@ -68,7 +65,7 @@ const ListView: React.FC<ListViewProps> = ({
 				return comparison || firstIndex - secondIndex;
 			})
 			.map(({ task }) => task);
-	}, [dateFormat, taskFilter, taskSort, tasks]);
+	}, [taskFilter, taskSort, tasks]);
 
 	const visibleTasks = sortedTasks.slice(0, visibleTaskCount);
 	const filters: { value: TaskFilter; label: string; count: number }[] = [
@@ -88,7 +85,7 @@ const ListView: React.FC<ListViewProps> = ({
 	};
 
 	const renderTask = (task: taskItem, index: number) => React.createElement(taskCardComponent, {
-		key: task.id,
+		key: task[DEFAULT_TASK_CACHE_KEYS.ID],
 		dataAttributeIndex: index,
 		plugin,
 		task,
@@ -96,6 +93,7 @@ const ListView: React.FC<ListViewProps> = ({
 		activeBoardID: currentBoardData.id,
 		activeViewIndex: currentViewIndex,
 		activeViewType: viewTypeNames.list,
+		propertiesVisibleInUI: currentView.propertiesVisibleInUI,
 	});
 
 	return (

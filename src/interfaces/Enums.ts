@@ -1,3 +1,5 @@
+import { SupportedPropertiesConfig } from "./GlobalSettings.js";
+
 export enum taskPropertyFormatOptions {
 	default = "1",
 	tasksPlugin = "2",
@@ -17,12 +19,6 @@ export enum EditButtonMode {
 	NoteInHover = "noteInHover",
 }
 
-export enum UniversalDateOptions {
-	startDate = "startDate",
-	scheduledDate = "scheduledDate",
-	dueDate = "due",
-}
-
 export enum TagColorType {
 	TagText = "text",
 	TagBg = "tagBg",
@@ -40,39 +36,59 @@ export enum NotificationService {
  * These are the main properties stored inside the cache with the exact key name.
  */
 export enum DEFAULT_TASK_CACHE_KEYS {
+	// Below properties are stored inside cache.
 	ID = "id",
+	LegacyID = "legacyId",
 	Title = "title",
 	Body = "body",
-	SubTasks = "subTasks",
-	Description = "description",
 	Status = "status",
 	Priority = "priority",
 	Tags = "tags",
+	FrontMatterTags = "frontmatterTags", // This value is not user configurable, they will be stored for internal purposes.
 	Time = "time",
-	Reminder = "reminder",
 	CreatedDate = "createdDate",
 	StartDate = "startDate",
 	ScheduledDate = "scheduledDate",
 	DueDate = "dueDate",
 	CompletionDate = "completionDate",
 	CancelledDate = "cancelledDate",
-	Dependencies = "dependsOn",
+	Dependencies = "dependsOn", // TODO : rename this to "childTasks"
+	Reminder = "reminder",
 	FilePath = "filePath",
-	FrontMatterTags = "frontmatterTags",
+	TaskLocation = "taskLocation", // This value is not user configurable, they will be stored for internal purposes.
 
-	// These two properties are not supported yet but will be implemented soon.
-	DateModified = "dateModified",
+	// Below 4 properties are not supported yet but will be implemented soon.
+	LastModified = "lastModified",
 	OnCompletion = "onCompletion",
-	Recurring = "recurring",
+	Recurrence = "recurrence",
+	Duration = "duration", // duration in minutes - User can decide whether they want to enter end time or {startTime + Duration}. Also work for {startDate + Duration}, if startDate is stored as date-time.
 
-	// Below properties are not stored in cache, but this same enum is used at other places hence placing them here.
+	// ALl below properties are not stored in cache, but this same enum is used at other places hence placing them here.
+	Content = "content",
+	SubTasks = "subTasks",
+	Description = "description",
+	ParentTasks = "parentTasks",
 	Checkbox = "checkbox",
+	CheckboxIcon = "checkboxIcon",
 	SubTasksMinimized = "subTasksMinimized",
 	DescriptionMinimized = "descriptionMinimized",
 	FilePathInHeader = "filePathInHeader",
 	ParentFolder = "parentFolder",
 	FullPath = "fullPath",
+	StartTime = "startTime",
+	EndTime = "endTime",
 }
+
+export const getAllUIVisibleTaskProperties = (
+	supportedProperties: SupportedPropertiesConfig[],
+) => {
+	return [
+		DEFAULT_TASK_CACHE_KEYS.Checkbox,
+		DEFAULT_TASK_CACHE_KEYS.SubTasks,
+		DEFAULT_TASK_CACHE_KEYS.Description,
+		...supportedProperties.map((property) => property.key),
+	];
+};
 
 export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 	id = "id",
@@ -89,8 +105,7 @@ export enum DEFAULT_TASK_NOTE_FRONTMATTER_KEYS {
 	dependsOn = "depends-on",
 	cancelledDate = "cancelled-date",
 	completionDate = "completed-date",
-	dateCreated = "Created date",
-	dateModified = "Last modified",
+	dateModified = "last-modified",
 	filePath = "source-file",
 	taskLocation = "task-location",
 }
@@ -168,7 +183,6 @@ export enum taskCardStyleNames {
 	EMOJI = "emoji",
 	ICONS = "icons",
 	BASES = "bases",
-	DATAVIEW = "custom",
 }
 
 export enum onCompletionOptions {
@@ -209,16 +223,33 @@ export enum HeaderTruncationOptions {
 	end = "end",
 }
 
+/**
+ * Enum of all types of values supported by Task Board for Task properties.
+ *
+ * Current supported types are :
+ * - Text (string)
+ * - Numeric
+ * - Boolean
+ * - Time (Format will be used from settings configured by user)
+ * - Date (Format will be used from settings configured by user)
+ * - Date-time (Date and time together. Format will be used from setting)
+ * - List (Only string value list. Example for tags and dependOn values list)
+ */
 export enum PropertyTypeConfig {
 	text = "text",
 	boolean = "boolean",
 	numeric = "numeric",
-	time = "time",
-	date = "date",
-	dateTime = "date-time",
-	list = "list",
+	time = "time", // Stored as string
+	date = "date", // Stored as string
+	dateTime = "date-time", // Stored as string
+	list = "list", // All values will be converted to string.
 }
 
-export enum DefaultLucideIconsForProperties {
-	id = "id",
+/**
+ * @deprecated - 2.0.0 - User can now select any date or date-time type task property as the universal date.
+ */
+export enum UniversalDateOptions {
+	startDate = "startDate",
+	scheduledDate = "scheduledDate",
+	dueDate = "due",
 }

@@ -31,7 +31,7 @@ export class TaskBoardApi {
 	 * const result = await api.addNewTask(true);
 	 * ```
 	 */
-	public static GetApi(app: App, plugin: TaskBoard) {
+	public static GetApi(plugin: TaskBoard) {
 		return {
 			/**
 			 * Opens a modal to create or view a new task.
@@ -68,7 +68,7 @@ export class TaskBoardApi {
 			 */
 			addNewTask: (isTaskNote: boolean, filePath?: string) => {
 				return this.openAddNewTaskModal(
-					app,
+					plugin.app,
 					plugin,
 					isTaskNote,
 					filePath,

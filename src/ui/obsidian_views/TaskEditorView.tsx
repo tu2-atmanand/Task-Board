@@ -7,19 +7,22 @@ import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
-import { taskItemEmpty } from "../../interfaces/Mapping.js";
+import { EMPTY_TASK_ITEM } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
-import { generateTaskId } from "../../utils/TaskItemUtils.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import { populateInitialValues } from "../../utils/TaskItemUtils.js";
+import { getSanitizedTaskContent } from "../../utils/task_line/TaskContentFormatter.js";
+
 
 
 export class TaskEditorView extends ItemView {
 	plugin: TaskBoard;
 	root: Root | null = null;
 	viewTypeId: string = "";
-	task: taskItem = taskItemEmpty;
+	task: taskItem = EMPTY_TASK_ITEM;
 	filePath: string;
 	taskExists: boolean;
 	isEdited: boolean;
@@ -51,6 +54,7 @@ export class TaskEditorView extends ItemView {
 		this.isEdited = false;
 		this.isTaskNote = isTaskNote;
 		this.activeNote = activeNote;
+		this.icon = 'edit';
 	}
 
 	getViewType() {
@@ -58,7 +62,7 @@ export class TaskEditorView extends ItemView {
 	}
 
 	getDisplayText() {
-		return this.taskExists ? t("edit-task") + " - " + this.task.id : t("add-new-task");
+		return this.taskExists ? t("edit-task") + " - " + this.task[DEFAULT_TASK_CACHE_KEYS.ID] : t("add-new-task");
 	}
 
 	async onOpen() {
@@ -66,9 +70,16 @@ export class TaskEditorView extends ItemView {
 		// container.empty();
 		container.setAttribute('data-type', 'task-board-view');
 
-		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
-			this.task.id = generateTaskId(this.plugin);
-			this.task.legacyId = this.task.id;
+		// If adding a new task (taskExists = false) OR editing a task and the task dont have an id 
+		// Then, check if user has allowed to auto add ID and assign a new id.
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task[DEFAULT_TASK_CACHE_KEYS.ID])) {
+			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = this.plugin.vaultScanner.generateTaskId();
+			this.task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = this.task[DEFAULT_TASK_CACHE_KEYS.ID];
+		}
+
+		// If adding a new task, populate the initial values configured by user.
+		if (!this.taskExists) {
+			this.task = populateInitialValues(this.plugin, this.task, this.filePath);
 		}
 
 		// Some processing, if this is a Task-Note
@@ -80,21 +91,23 @@ export class TaskEditorView extends ItemView {
 				if (data == null) await this.onClose();
 				else noteContent = data;
 
-				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
+				if (!this.task[DEFAULT_TASK_CACHE_KEYS.Title]) this.task[DEFAULT_TASK_CACHE_KEYS.Title] = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
 				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
-				this.task.title = "";
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "";
 
 				// Sanitize filename
-				const noteName = this.task.title || getCurrentLocalDateTimeString();
+				const noteName = this.task[DEFAULT_TASK_CACHE_KEYS.Title] || getCurrentLocalDateTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
 		} else {
-			if (!this.taskExists)
-				this.task.title = "- [ ] ";
+			this.task[DEFAULT_TASK_CACHE_KEYS.Title] = getSanitizedTaskContent(this.plugin.settings.data, this.task).split("\n")[0];
+
+			if (!this.task[DEFAULT_TASK_CACHE_KEYS.Title])
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "- [ ] ";
 		}
 
 		this.root = createRoot(container);

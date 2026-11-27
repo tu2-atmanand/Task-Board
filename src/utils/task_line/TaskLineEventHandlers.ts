@@ -23,6 +23,8 @@ import {
 	addTaskInNote,
 } from "./TaskLineUtils.js";
 import { CommunityPlugins } from "../../services/CommunityPlugins.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 /**
  * Handle the checkbox change event for the inline-tasks and update the task in the file.
@@ -35,15 +37,15 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 	const tasksPlugin = new TasksPluginApi(plugin);
 	const globalSettings = plugin.settings.data;
 
-	if (!isTaskRecurring(task.title)) {
+	if (!isTaskRecurring(task[DEFAULT_TASK_CACHE_KEYS.Title])) {
 		// Check if the task is completed
 		const newStatus = checkboxStateSwitcher(
 			globalSettings.customStatuses,
-			task.status,
+			task[DEFAULT_TASK_CACHE_KEYS.Status],
 		);
 		const newTitle = sanitizeStatus(
 			globalSettings,
-			task.title,
+			task[DEFAULT_TASK_CACHE_KEYS.Title],
 			newStatus.newSymbol,
 			newStatus.newSymbolType,
 		);
@@ -56,7 +58,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 		void updateTaskInFile(plugin, taskWithUpdatedStatus, task).then(
 			(newId) => {
 				plugin.realTimeScanner
-					.processAllUpdatedFiles(task.filePath, task.legacyId)
+					.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.LegacyID])
 					.catch((error) => {
 						bugReporterManagerInsatance.addToLogs(
 							217,
@@ -138,7 +140,7 @@ export const handleCheckboxChange = (plugin: TaskBoard, task: taskItem) => {
 			useTasksPluginToUpdateInFile(plugin, tasksPlugin, task)
 				.then(() => {
 					plugin.realTimeScanner
-						.processAllUpdatedFiles(task.filePath, task.legacyId)
+						.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath], task[DEFAULT_TASK_CACHE_KEYS.LegacyID])
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -182,7 +184,7 @@ export const handleSubTasksChange = (
 ) => {
 	void updateTaskInFile(plugin, updatedTask, oldTask).then((newId) => {
 		plugin.realTimeScanner
-			.processAllUpdatedFiles(updatedTask.filePath, oldTask.id)
+			.processAllUpdatedFiles(updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath], oldTask[DEFAULT_TASK_CACHE_KEYS.ID])
 			.catch((error) => {
 				bugReporterManagerInsatance.addToLogs(
 					217,
@@ -211,11 +213,11 @@ export const handleDeleteTask = (
 		mssg,
 		onConfirm: () => {
 			if (isTaskNote) {
-				void deleteTaskNote(plugin, task.filePath);
+				void deleteTaskNote(plugin, task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
 			} else {
 				void deleteTaskFromFile(plugin, task).then(() => {
 					plugin.realTimeScanner
-						.processAllUpdatedFiles(task.filePath)
+						.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath])
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -236,7 +238,7 @@ export const handleDeleteTask = (
 		},
 		onArchive: () => {
 			if (isTaskNote) {
-				void archiveTaskNote(plugin, task.filePath).then(() => {
+				void archiveTaskNote(plugin, task[DEFAULT_TASK_CACHE_KEYS.FilePath]).then(() => {
 					eventEmitter.emit("SOFT_REFRESH");
 				});
 			} else {
@@ -269,7 +271,7 @@ export const createNewInlineTask = async (
 		);
 	} else {
 		await addTaskInNote(plugin, task, false).then((newId) => {
-			void plugin.realTimeScanner.processAllUpdatedFiles(task.filePath);
+			void plugin.realTimeScanner.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath]);
 		});
 	}
 };

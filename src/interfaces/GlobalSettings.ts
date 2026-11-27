@@ -1,6 +1,10 @@
 import { TASKS_PLUGIN_DEFAULT_SYMBOLS } from "../utils/regular_expressions/TasksPluginRegularExpr.js";
 import { Filter } from "./BoardConfigs.js";
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_TIME_FORMAT } from "./Constants.js";
+import {
+	DEFAULT_DATE_FORMAT,
+	DEFAULT_DATE_TIME_FORMAT,
+	FRESH_INSTALL_BOARD,
+} from "./Constants.js";
 import {
 	EditButtonMode,
 	TagColorType,
@@ -19,9 +23,15 @@ import {
 	statusTypeNames,
 	PropertyTypeConfig,
 	DEFAULT_TASK_NOTE_FRONTMATTER_KEYS,
-	DefaultLucideIconsForProperties,
 } from "./Enums.js";
-import { defaultTaskStatuses, taskItemKeyToNameMapping } from "./Mapping.js";
+import { TASK_PROPERTIES_TO_ICON_MAPPING } from "./Icons.js";
+import {
+	defaultTaskStatuses,
+	priorityEmojis,
+	priorityNames,
+	taskItemKeyToNameMapping,
+} from "./Mapping.js";
+import { CustomTaskPropertyValueType } from "./TaskItem.js";
 
 export type VaultScannnerFilters = {
 	files: {
@@ -53,7 +63,8 @@ export interface TagColor {
  * This can be default ones or custom properties added by user.
  */
 export interface SupportedPropertiesConfig {
-	key: string; // This is the value used to store this property in task cache. For customProperties, this will be same as id below. User cannot change this.
+	default: boolean;
+	key: string; // This is the value used to store this property in task cache. For custom properties, it matches id below.
 	id: string; // for frontmatter, dataview format inline-tasks and other use-cases
 	name: string; // which will be visible in UI
 	desc: string; // If user wants to explain something about the property.
@@ -61,8 +72,9 @@ export interface SupportedPropertiesConfig {
 	emoji: string; // Specifically if user is using Tasks plugin format for their inline-tasks.
 	icon: string; // Lucide icon id for the specific property
 	hidePropertyInNotesForInlineTasks: boolean; // Specifically used for inline-tasks to hide properties inside notes. This setting will going to replace this.plugin.settings.data.propertiesHiddenInNotes.
-	defaultValue: string | number | string[]; // This can be an exact value or a template text which will be resolved during execution.
+	defaultValue: CustomTaskPropertyValueType; // This can be an exact value or a template text which will be resolved during execution.
 	rank: number; // This will mostly be used for task-notes to format the frontmatter, so the properties stays in a defined order.
+	color?: string;
 }
 
 export interface CustomStatus {
@@ -72,6 +84,17 @@ export interface CustomStatus {
 	availableAsCommand: boolean; // Whether this status is available as a command in Obsidian
 	type: statusTypeNames; // The type/category of the status (e.g., "IN_PROGRESS", "CANCELLED")
 	lucideIcon: string; // Lucide icon id
+	color?: string; // This will be used to color the icon.
+	desc?: string;
+}
+
+export interface CustomPriority {
+	name: string;
+	rank: number;
+	emoji: string;
+	lucideIcon: string;
+	color?: string;
+	desc?: string;
 }
 
 export interface RecurrenceConfigs {
@@ -83,22 +106,6 @@ export interface TaskBoardAction {
 	trigger: "Complete" | "Incomplete";
 	type: "move" | "copy";
 	targetColumn: string;
-}
-/**
- * Interface for storing the mapping of default supported task properties and their key.
- * The key will be used in the frontmatter for creating task-notes. And the index will
- * be used to keep a fixed order when a specific task properties are added to the task-
- * note.
- * 
- * @deprecated - This complete setting has been deprecated in 2.0.0. 
- * Use {@link SupportedPropertiesConfig} for both the 
- * {@link globalSettingsData.defaultProperties} and {@link globalSettingsData.customProperties}.
- */
-export interface FrontmatterFormattingInterface {
-	index: number;
-	property: string;
-	key: string;
-	taskItemKey: string;
 }
 
 export interface taskBoardFilesRegistryType {
@@ -115,7 +122,6 @@ export interface globalSettingsData {
 	scanFilters: VaultScannnerFilters;
 	scanMode: scanModeOptions;
 	autoAddUniqueID: boolean;
-	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	openOnStartup: boolean;
 	showModifiedFilesNotice: boolean;
 	ribbonIconAction: RibbonIconActions;
@@ -126,17 +132,19 @@ export interface globalSettingsData {
 	// All UI Tab
 	taskCardStyle: taskCardStyleNames;
 	showTaskWithoutMetadata: boolean;
+	usePipeToSeparateProperties: boolean;
 	columnWidth: string;
 	showVerticalScroll: boolean;
 	editButtonAction: EditButtonMode;
 	cardDoubleClickAction: EditButtonMode;
 	tagColorsType: TagColorType;
 	tagColors: TagColor[];
+	dateHumanReadable: boolean;
 
 	// Properties Tab
-	defaultProperties: SupportedPropertiesConfig[];
-	customProperties: SupportedPropertiesConfig[];
+	taskProperties: SupportedPropertiesConfig[];
 	customStatuses: CustomStatus[];
+	customPriorities: CustomPriority[];
 
 	// Views
 	//     Map View
@@ -153,6 +161,7 @@ export interface globalSettingsData {
 
 	// Inline Tasks Tab
 	taskPropertyFormat: taskPropertyFormatOptions;
+	scanForAllFormat: boolean;
 	preDefinedNote: string;
 	archivedTasksFilePath: string;
 	showFrontmatterTagsOnCards: boolean;
@@ -163,7 +172,7 @@ export interface globalSettingsData {
 	taskNoteIdentifierTag: string;
 	taskNoteDefaultLocation: string;
 	archivedTBNotesFolderPath: string;
-	/** @deprecated Migrate to defaultProperties. */
+	/** @deprecated Migrate to taskProperties. */
 	frontmatterFormatting?: FrontmatterFormattingInterface[];
 
 	// Automations
@@ -184,7 +193,7 @@ export interface globalSettingsData {
 	quickAddPluginDefaultChoice: string;
 
 	// Formats
-	universalDate: UniversalDateOptions;
+	universalDate: string;
 	dateFormat: string;
 	dateTimeFormat: string;
 	defaultStartTime: string;
@@ -198,15 +207,28 @@ export interface globalSettingsData {
 	experimentalFeatures: boolean;
 
 	// Other Caching Settings
-	propertiesVisibleInUI: DEFAULT_TASK_CACHE_KEYS[]; // TODO : Need to move this setting to view specific.
+	uniqueIdCounter: number; // Counter to generate unique IDs for tasks. This will keep track of the last used ID.
 	dragAutoScrollEdgePercent: number;
 	notificationService: NotificationService;
 	actions: TaskBoardAction[];
 	searchQuery?: string;
 	lastViewHistory: {
-		boardFilePath: string;
-		settingTab: number;
 		taskId?: string;
+		/**
+		 * To store the .taskboard file path which was viewed last time.
+		 *
+		 * @deprecated - This is no longer required as we can directly update the {@link taskBoardFilesRegistry}.
+		 * And from the {@file TaskBoardFileManager.ts} there are helper functions which can get and set the
+		 * last viewed board file object.
+		 */
+		boardFilePath?: string;
+		/**
+		 * To open the same tab which user viwed last time.
+		 *
+		 * @deprecated - The setting tab has been modified to use the new {@link getSettingDefinitions}.
+		 * The section will be now rendered as pages and not as tabs.
+		 */
+		settingTab?: number;
 	};
 	// New settings introduced in 2.x.x series
 	taskBoardFilesRegistry: taskBoardFilesRegistryType;
@@ -215,12 +237,636 @@ export interface globalSettingsData {
 	// scanVaultAtStartup: boolean; - @deprecated v1.9.0 - A better approach has been used using showModifiedFilesNotice feature.
 }
 
+export interface LegacyTaskPropertySettings {
+	defaultProperties?: SupportedPropertiesConfig[];
+	customProperties?: SupportedPropertiesConfig[];
+}
+
 // Define the interface for GlobalSettings based on your JSON structure
 export interface PluginDataJson {
 	version: string;
 	data: globalSettingsData;
 }
 
+const DEFAULT_TASK_PROPERTIES_PRESENTATION: SupportedPropertiesConfig[] = [
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.ID,
+		id: DEFAULT_TASK_CACHE_KEYS.ID,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ID],
+		desc: "An incremental numeric id to uniquely identify a task across the vault.",
+		type: PropertyTypeConfig.numeric,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.idSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.ID],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 1,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.Title,
+		id: DEFAULT_TASK_CACHE_KEYS.Title,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Title],
+		desc: "A short summary about the task.",
+		type: PropertyTypeConfig.text,
+		emoji: "", // There is no emoji for title
+		icon: "", // There is no icon for title
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 2,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.Status,
+		id: DEFAULT_TASK_CACHE_KEYS.Status,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Status],
+		desc: "The current state of the task, whether is pending, in-progress or completed.",
+		type: PropertyTypeConfig.text,
+		emoji: "", // There is no emoji for status
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Status],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 3,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.Priority,
+		id: DEFAULT_TASK_CACHE_KEYS.Priority,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Priority],
+		desc: "To rank different tasks in your queue based on their urgency.",
+		type: PropertyTypeConfig.text,
+		emoji: "", // There is no emoji for priority, each value will have its own emoji
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Priority],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 4,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.Tags,
+		id: DEFAULT_TASK_CACHE_KEYS.Tags,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Tags],
+		desc: "To add context to the tasks, add multiple tags as list.",
+		type: PropertyTypeConfig.list,
+		emoji: "", // There is no emoji for tags
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Tags],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 5,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.Time,
+		id: DEFAULT_TASK_CACHE_KEYS.Time,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Time],
+		desc: "Add a start and end time seperated by hyphen(-).",
+		type: PropertyTypeConfig.time,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.duration,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Time],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 6,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.Reminder,
+		id: DEFAULT_TASK_CACHE_KEYS.Reminder,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Reminder],
+		desc: "A date-time value when a reminder notification should be sent.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.Reminder],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 7,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+		id: DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CreatedDate],
+		desc: "A date-time value when the task was created.",
+		type: PropertyTypeConfig.date,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.createdDateSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.CreatedDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 8,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.StartDate,
+		id: DEFAULT_TASK_CACHE_KEYS.StartDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.StartDate],
+		desc: "A date-time value from when user should or can start working on the task.",
+		type: PropertyTypeConfig.date,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.startDateSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.StartDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 9,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+		id: DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.ScheduledDate],
+		desc: "A date-time value when this task should be actually worked on.",
+		type: PropertyTypeConfig.date,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.scheduledDateSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.ScheduledDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 10,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.DueDate,
+		id: DEFAULT_TASK_CACHE_KEYS.DueDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.DueDate],
+		desc: "A date-time value which is the last date/time for this task to be completed.",
+		type: PropertyTypeConfig.date,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.dueDateSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.DueDate],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 11,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+		id: DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CompletionDate],
+		desc: "A date-time value when the task will be marked as finished/completed.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.doneDateSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.CompletionDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 12,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+		id: DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.CancelledDate],
+		desc: "A date-time value when the task will be marked as cancelled.",
+		type: PropertyTypeConfig.dateTime,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.cancelledDateSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.CancelledDate
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 13,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.Dependencies,
+		id: DEFAULT_TASK_CACHE_KEYS.Dependencies,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.Dependencies],
+		desc: "A list of all the task ids on which the current task is dependent on. The current task is blocked-by these child-tasks.",
+		type: PropertyTypeConfig.list,
+		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.dependsOnSymbol,
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[
+			DEFAULT_TASK_CACHE_KEYS.Dependencies
+		],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 14,
+	},
+	{
+		default: true,
+		key: DEFAULT_TASK_CACHE_KEYS.FilePath,
+		id: DEFAULT_TASK_CACHE_KEYS.FilePath,
+		name: taskItemKeyToNameMapping[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		desc: "Incase of inline-task, this will be the filepath from where the task-note was created. Only applicable for inline-task to task-note conversion.",
+		type: PropertyTypeConfig.text,
+		emoji: "",
+		icon: TASK_PROPERTIES_TO_ICON_MAPPING[DEFAULT_TASK_CACHE_KEYS.FilePath],
+		hidePropertyInNotesForInlineTasks: false,
+		defaultValue: "",
+		rank: 15,
+	},
+];
+
+const DEFAULT_CUSTOM_STATUSES_PRESENTATION: CustomStatus[] = [
+	{
+		symbol: defaultTaskStatuses.todo,
+		name: "Todo",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: false,
+		type: statusTypeNames.TODO,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.scheduled,
+		name: "Ready to start",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: false,
+		type: statusTypeNames.TODO,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.question,
+		name: "In Review",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: false,
+		type: statusTypeNames.TODO,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.inprogress,
+		name: "In Progress",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: true,
+		type: statusTypeNames.IN_PROGRESS,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.done,
+		name: "Done",
+		nextStatusSymbol: defaultTaskStatuses.todo,
+		availableAsCommand: true,
+		type: statusTypeNames.DONE,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.checked,
+		name: "Completed",
+		nextStatusSymbol: defaultTaskStatuses.todo,
+		availableAsCommand: true,
+		type: statusTypeNames.DONE,
+		lucideIcon: "",
+	},
+	{
+		symbol: defaultTaskStatuses.dropped,
+		name: "Cancelled",
+		nextStatusSymbol: defaultTaskStatuses.done,
+		availableAsCommand: true,
+		type: statusTypeNames.CANCELLED,
+		lucideIcon: "",
+	},
+];
+
+const DEFAULT_CUSTOM_PRIORITIES_PRESENTATION: CustomPriority[] = [
+	{
+		rank: 1,
+		name: priorityNames[1],
+		emoji: priorityEmojis[1],
+		lucideIcon: "",
+		color: "rgb(220,38,38)",
+		desc: "This is the highest priority. Tasks with this priority should be complete before all other tasks.",
+	},
+	{
+		rank: 2,
+		name: priorityNames[2],
+		emoji: priorityEmojis[2],
+		lucideIcon: "",
+		color: "rgb(213, 31, 174)",
+		desc: "A high priority, but not the highest.",
+	},
+	{
+		rank: 3,
+		name: priorityNames[3],
+		emoji: priorityEmojis[3],
+		lucideIcon: "",
+		color: "rgb(220, 217, 43)",
+		desc: "A medium priority for tasks which needs an attention.",
+	},
+	{
+		rank: 4,
+		name: priorityNames[4],
+		emoji: priorityEmojis[4],
+		lucideIcon: "",
+		color: "rgb(12, 161, 187)",
+		desc: "Tasks with this priority can be completed the last.",
+	},
+	{
+		rank: 5,
+		name: priorityNames[5],
+		emoji: priorityEmojis[5],
+		lucideIcon: "",
+		color: "rgb(22, 88, 187)",
+		desc: "Tasks with this priority are least important tasks.",
+	},
+];
+
+/**
+ * Converts settings from before the supported-properties configuration was
+ * introduced, preserving customized frontmatter keys, order, and hidden fields.
+ */
+export function migrateLegacyPropertySettings(
+	settings: globalSettingsData,
+	previousData:
+		| (Partial<globalSettingsData> & LegacyTaskPropertySettings)
+		| undefined,
+): void {
+	const oldFormatting = previousData?.frontmatterFormatting ?? [];
+	const builtInKeys = new Set(
+		DEFAULT_TASK_PROPERTIES_PRESENTATION.map((property) => property.key),
+	);
+	const hasUnifiedProperties =
+		(previousData?.taskProperties?.length ?? 0) > 0 ||
+		(!previousData?.defaultProperties?.length &&
+			!previousData?.customProperties?.length);
+	const savedProperties = hasUnifiedProperties
+		? [...(previousData?.taskProperties ?? [])]
+		: [
+				...(previousData?.defaultProperties ?? []).map((property) => ({
+					...property,
+					default: true,
+				})),
+				...(previousData?.customProperties ?? []).map((property) => ({
+					...property,
+					default: false,
+				})),
+			];
+	if (hasUnifiedProperties) {
+		const existingKeys = new Set(
+			savedProperties.flatMap((property) => [property.key, property.id]),
+		);
+		let rank =
+			Math.max(0, ...savedProperties.map((property) => property.rank)) +
+			1;
+		for (const property of previousData?.customProperties ?? []) {
+			if (existingKeys.has(property.key) || existingKeys.has(property.id))
+				continue;
+			savedProperties.push({
+				...property,
+				default: false,
+				rank: rank++,
+			});
+			existingKeys.add(property.key);
+			existingKeys.add(property.id);
+		}
+	}
+	const configuredProperties = savedProperties.map((property) => ({
+		...property,
+		default: property.default ?? builtInKeys.has(property.key),
+	}));
+	const savedByKey = new Map(
+		configuredProperties.map((property) => [property.key, property]),
+	);
+	const nextRank =
+		Math.max(0, ...configuredProperties.map((property) => property.rank)) +
+		1;
+
+	const defaultProperties = DEFAULT_TASK_PROPERTIES_PRESENTATION.map(
+		(defaultProperty, index) => {
+			const legacy = oldFormatting.find(
+				(item) => item.taskItemKey === defaultProperty.key,
+			);
+			const configured = savedByKey.get(defaultProperty.key);
+			return {
+				...defaultProperty,
+				...(legacy && {
+					id: legacy.key,
+					rank: legacy.index + 1,
+					name: legacy.property || defaultProperty.name,
+				}),
+				...configured,
+				default: true,
+				...(!configured &&
+					hasUnifiedProperties && {
+						rank: nextRank + index,
+					}),
+			};
+		},
+	);
+	const customProperties = configuredProperties
+		.filter(
+			(property) => !property.default && !builtInKeys.has(property.key),
+		)
+		.sort((a, b) => a.rank - b.rank);
+
+	settings.taskProperties = [...defaultProperties, ...customProperties];
+	if (!hasUnifiedProperties) {
+		settings.taskProperties
+			.slice()
+			.sort((a, b) => a.rank - b.rank)
+			.forEach((property, index) => {
+				property.rank = index + 1;
+			});
+	}
+
+	for (const property of [...settings.taskProperties]) {
+		if (
+			previousData?.propertiesHiddenInNotes?.includes(
+				property.key as DEFAULT_TASK_CACHE_KEYS,
+			)
+		) {
+			property.hidePropertyInNotesForInlineTasks = true;
+		}
+	}
+
+	delete settings.frontmatterFormatting;
+	delete settings.propertiesHiddenInNotes;
+	const legacySettings = settings as globalSettingsData &
+		LegacyTaskPropertySettings;
+	delete legacySettings.defaultProperties;
+	delete legacySettings.customProperties;
+}
+
+export function getPropertiesHiddenInNotes(
+	taskProperties: SupportedPropertiesConfig[],
+): DEFAULT_TASK_CACHE_KEYS[] {
+	const knownKeys = new Set<string>(Object.values(DEFAULT_TASK_CACHE_KEYS));
+	return Array.from(
+		new Set(
+			taskProperties
+				.filter(
+					(property) =>
+						property.hidePropertyInNotesForInlineTasks &&
+						knownKeys.has(property.key),
+				)
+				.map((property) => property.key as DEFAULT_TASK_CACHE_KEYS),
+		),
+	);
+}
+
+export function getHiddenPropertyConfigs(
+	taskProperties: SupportedPropertiesConfig[],
+): SupportedPropertiesConfig[] {
+	return taskProperties.filter(
+		(property) => property.hidePropertyInNotesForInlineTasks,
+	);
+}
+
+export const langCodes: { [key: string]: string } = {
+	en: "English",
+	ar: "العربية",
+	cs: "čeština",
+	da: "Dansk",
+	de: "Deutsch",
+	es: "Español",
+	fr: "français",
+	hi: "हिन्दी",
+	id: "Bahasa Indonesia",
+	it: "Italiano",
+	ja: "日本語",
+	ko: "한국어",
+	nl: "Nederlands",
+	no: "Norsk",
+	pl: "język polski",
+	pt: "Português",
+	ro: "Română",
+	ru: "Русский",
+	sq: "Shqip",
+	tr: "Türkçe",
+	uk: "Українська",
+	"pt-BR": "Portugues do Brasil",
+	zh: "简体中文",
+	"zh-TW": "繁體中文",
+};
+
+/**
+ * @note There are hardcoded ids present in this data
+ * If you are changing the below configs, make sure the ids of
+ * two different objects are different.
+ */
+export const DEFAULT_SETTINGS: PluginDataJson = {
+	version: "", // Keep this empty only. Change the version number in the runOnPluginUpdate function inside main.ts file whenever you will going to release a new version.
+	data: {
+		lang: "en",
+		openOnStartup: false,
+		scanFilters: {
+			files: {
+				polarity: 3,
+				values: [],
+			},
+			folders: {
+				polarity: 3,
+				values: [],
+			},
+			frontmatter: {
+				polarity: 3,
+				values: [],
+			},
+			tags: {
+				polarity: 3,
+				values: [],
+			},
+		},
+		firstDayOfWeek: "Mon",
+		showTaskWithoutMetadata: true,
+		ignoreFileNameDates: false,
+		taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
+		dailyNotesPluginComp: false,
+		dateFormat: DEFAULT_DATE_FORMAT,
+		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
+		defaultStartTime: "",
+		taskCompletionInLocalTime: true,
+		taskCompletionShowUtcOffset: false,
+		autoAddUniversalDate: true,
+		autoAddCreatedDate: false,
+		autoAddCompletedDate: false,
+		autoAddCancelledDate: false,
+		showModifiedFilesNotice: false,
+		scanMode: scanModeOptions.AUTOMATIC,
+		columnWidth: "300px",
+		taskCardStyle: taskCardStyleNames.EMOJI,
+		showVerticalScroll: true,
+		dragAutoScrollEdgePercent: 20,
+		tagColors: [
+			{
+				name: "bug",
+				color: "rgba(255, 0, 0, 0.55)",
+				priority: 1,
+			},
+			{
+				name: "important",
+				color: "rgba(246, 255, 0, 0.53)",
+				priority: 2,
+			},
+			{
+				name: "wip",
+				color: "rgba(0, 255, 0, 0.53)",
+				priority: 3,
+			},
+			{
+				name: "review",
+				color: "rgba(0, 0, 255, 0.49)",
+				priority: 4,
+			},
+		],
+		editButtonAction: EditButtonMode.Modal,
+		cardDoubleClickAction: EditButtonMode.None,
+		universalDate: DEFAULT_TASK_CACHE_KEYS.DueDate,
+		tagColorsType: TagColorType.TagText,
+		customStatuses: DEFAULT_CUSTOM_STATUSES_PRESENTATION,
+		customPriorities: DEFAULT_CUSTOM_PRIORITIES_PRESENTATION,
+		compatiblePlugins: {
+			dailyNotesPlugin: false,
+			dayPlannerPlugin: false,
+			tasksPlugin: false,
+			reminderPlugin: false,
+			quickAddPlugin: false,
+		},
+		taskNoteIdentifierTag: "taskNote",
+		preDefinedNote: "Meta/Task_Board/New_Tasks.md",
+		archivedTasksFilePath: "",
+		taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
+		archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",
+		quickAddPluginDefaultChoice: "",
+		showFrontmatterTagsOnCards: false,
+		tasksCacheFilePath: "",
+		notificationService: NotificationService.None,
+		actions: [
+			{
+				enabled: true,
+				trigger: "Complete",
+				type: "move",
+				targetColumn: "Completed",
+			},
+		],
+		autoAddUniqueID: false,
+		uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
+		experimentalFeatures: false,
+		safeGuardFeature: true,
+		lastViewHistory: {
+			boardFilePath: FRESH_INSTALL_BOARD[3103563481].filePath,
+			settingTab: 0,
+		},
+		boundTaskCompletionToChildTasks: false,
+		mapView: {
+			background: mapViewBackgrounVariantTypes.none,
+			mapOrientation: mapViewNodeMapOrientation.horizontal,
+			arrowDirection: mapViewArrowDirection.childToParent,
+			animatedEdges: true,
+			scrollAction: mapViewScrollAction.zoom,
+			showMinimap: true,
+			renderVisibleNodes: false,
+			edgeType: mapViewEdgeType.bezier,
+		},
+		taskBoardFilesRegistry: FRESH_INSTALL_BOARD,
+		enableDragnDropTouch: false,
+		filtersWarehouse: [],
+		ribbonIconAction: RibbonIconActions.allBoardsMenu,
+		taskProperties: DEFAULT_TASK_PROPERTIES_PRESENTATION,
+		dateHumanReadable: false,
+		scanForAllFormat: false,
+		usePipeToSeparateProperties: false,
+	},
+};
+
+// -----------------------------------------
+//        DEPRECATED
+// -----------------------------------------
+
+/**
+ * Default task properties and their frontmatter key mapping.
+ *
+ * @deprecated - Do not use this, as the {@link FrontmatterFormattingInterface} has been deprecated.
+ */
 const DEFAULT_FRONTMATTER_FORMATTING: FrontmatterFormattingInterface[] = [
 	{
 		index: 0,
@@ -308,382 +954,39 @@ const DEFAULT_FRONTMATTER_FORMATTING: FrontmatterFormattingInterface[] = [
 	},
 ];
 
-const DEFAULT_PROPERTY_TYPES: Partial<Record<string, PropertyTypeConfig>> = {
-	priority: PropertyTypeConfig.numeric,
-	tags: PropertyTypeConfig.list,
-	dependsOn: PropertyTypeConfig.list,
-	time: PropertyTypeConfig.time,
-	createdDate: PropertyTypeConfig.date,
-	startDate: PropertyTypeConfig.date,
-	scheduledDate: PropertyTypeConfig.date,
-	due: PropertyTypeConfig.date,
-	cancelledDate: PropertyTypeConfig.date,
-	completionDate: PropertyTypeConfig.date,
-};
-
-const DEFAULT_PROPERTY_PRESENTATION: Partial<
-	Record<string, Pick<SupportedPropertiesConfig, "desc" | "emoji" | "icon">>
-> = {
-	id: {
-		desc: "Property to uniquely identify a task across the vault.",
-		emoji: TASKS_PLUGIN_DEFAULT_SYMBOLS.idSymbol,
-		icon: DefaultLucideIconsForProperties.id,
-	},
-};
-
-function createDefaultSupportedProperties(): SupportedPropertiesConfig[] {
-	return DEFAULT_FRONTMATTER_FORMATTING.map((formatting, index) => ({
-		key: formatting.taskItemKey,
-		id: formatting.key,
-		name: formatting.property,
-		desc:
-			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.desc ?? "",
-		type:
-			DEFAULT_PROPERTY_TYPES[formatting.taskItemKey] ??
-			PropertyTypeConfig.text,
-		emoji:
-			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.emoji ?? "",
-		icon:
-			DEFAULT_PROPERTY_PRESENTATION[formatting.taskItemKey]?.icon ?? "",
-		hidePropertyInNotesForInlineTasks: false,
-		defaultValue: "",
-		rank: index + 1,
-	}));
+/**
+ * Interface for storing the mapping of default supported task properties and their key.
+ * The key will be used in the frontmatter for creating task-notes. And the index will
+ * be used to keep a fixed order when a specific task properties are added to the task-
+ * note.
+ *
+ * @deprecated - This complete setting has been deprecated in 2.0.0.
+ * Use {@link SupportedPropertiesConfig} for the
+ * {@link globalSettingsData.taskProperties}.
+ */
+export interface FrontmatterFormattingInterface {
+	index: number;
+	property: string;
+	key: string;
+	taskItemKey: string;
 }
 
 /**
- * Converts settings from before the supported-properties configuration was
- * introduced, preserving customized frontmatter keys, order, and hidden fields.
+ *
+ * @param taskProperties
+ * @returns
+ *
+ * @deprecated - This is no longer required as the FrontmatterFormattingInterface has been deprecated.
  */
-export function migrateLegacyPropertySettings(
-	settings: globalSettingsData,
-	previousData: Partial<globalSettingsData> | undefined,
-): void {
-	const oldFormatting = previousData?.frontmatterFormatting ?? [];
-	const configuredProperties = previousData?.defaultProperties ?? [];
-	const propertyKeys = new Set<string>();
-
-	settings.defaultProperties = createDefaultSupportedProperties().map(
-		(defaultProperty) => {
-			propertyKeys.add(defaultProperty.key);
-			const legacy = oldFormatting.find(
-				(item) => item.taskItemKey === defaultProperty.key,
-			);
-			const configured = configuredProperties.find(
-				(item) => item.key === defaultProperty.key,
-			);
-			return {
-				...defaultProperty,
-				...(legacy && {
-					id: legacy.key,
-					rank: legacy.index + 1,
-					name: legacy.property || defaultProperty.name,
-				}),
-				...configured,
-			};
-		},
-	);
-	settings.defaultProperties.push(
-		...configuredProperties.filter(
-			(property) => !propertyKeys.has(property.key),
-		),
-	);
-
-	for (const property of [
-		...settings.defaultProperties,
-		...settings.customProperties,
-	]) {
-		if (
-			previousData?.propertiesHiddenInNotes?.includes(
-				property.key as DEFAULT_TASK_CACHE_KEYS,
-			)
-		) {
-			property.hidePropertyInNotesForInlineTasks = true;
-		}
-	}
-
-	delete settings.frontmatterFormatting;
-	delete settings.propertiesHiddenInNotes;
-}
-
-export function getPropertiesHiddenInNotes(
-	defaultProperties: SupportedPropertiesConfig[],
-	customProperties: SupportedPropertiesConfig[],
-): DEFAULT_TASK_CACHE_KEYS[] {
-	const knownKeys = new Set<string>(Object.values(DEFAULT_TASK_CACHE_KEYS));
-	return Array.from(
-		new Set(
-			[...defaultProperties, ...customProperties]
-				.filter(
-					(property) =>
-						property.hidePropertyInNotesForInlineTasks &&
-						knownKeys.has(property.key),
-				)
-				.map(
-					(property) =>
-						property.key as DEFAULT_TASK_CACHE_KEYS,
-				),
-		),
-	);
-}
-
-export function getHiddenPropertyConfigs(
-	defaultProperties: SupportedPropertiesConfig[],
-	customProperties: SupportedPropertiesConfig[],
-): SupportedPropertiesConfig[] {
-	return [...defaultProperties, ...customProperties].filter(
-		(property) => property.hidePropertyInNotesForInlineTasks,
-	);
-}
-
 export function getDefaultPropertyFrontmatterFormatting(
-	defaultProperties: SupportedPropertiesConfig[],
+	taskProperties: SupportedPropertiesConfig[],
 ): FrontmatterFormattingInterface[] {
-	return defaultProperties.map((property) => ({
-		index: property.rank,
-		property: property.name,
-		key: property.id,
-		taskItemKey: property.key,
-	}));
+	return taskProperties
+		.filter((property) => property.default)
+		.map((property) => ({
+			index: property.rank,
+			property: property.name,
+			key: property.id,
+			taskItemKey: property.key,
+		}));
 }
-
-/**
- * @note There are hardcoded ids present in this data
- * If you are changing the below configs, make sure the ids of
- * two different objects are different.
- */
-export const DEFAULT_SETTINGS: PluginDataJson = {
-	version: "", // Keep this empty only. Change the version number in the runOnPluginUpdate function inside main.ts file whenever you will going to release a new version.
-	data: {
-		lang: "en",
-		openOnStartup: false,
-		scanFilters: {
-			files: {
-				polarity: 3,
-				values: [],
-			},
-			folders: {
-				polarity: 3,
-				values: [],
-			},
-			frontmatter: {
-				polarity: 3,
-				values: [],
-			},
-			tags: {
-				polarity: 3,
-				values: [],
-			},
-		},
-		firstDayOfWeek: "Mon",
-		showTaskWithoutMetadata: true,
-		ignoreFileNameDates: false,
-		taskPropertyFormat: taskPropertyFormatOptions.tasksPlugin,
-		dailyNotesPluginComp: false,
-		dateFormat: DEFAULT_DATE_FORMAT,
-		dateTimeFormat: DEFAULT_DATE_TIME_FORMAT,
-		defaultStartTime: "",
-		taskCompletionInLocalTime: true,
-		taskCompletionShowUtcOffset: false,
-		autoAddUniversalDate: true,
-		autoAddCreatedDate: false,
-		autoAddCompletedDate: false,
-		autoAddCancelledDate: false,
-		showModifiedFilesNotice: false,
-		scanMode: scanModeOptions.AUTOMATIC,
-		columnWidth: "300px",
-		propertiesVisibleInUI: [
-			DEFAULT_TASK_CACHE_KEYS.Checkbox,
-			DEFAULT_TASK_CACHE_KEYS.ID,
-			DEFAULT_TASK_CACHE_KEYS.Title,
-			DEFAULT_TASK_CACHE_KEYS.SubTasksMinimized,
-			DEFAULT_TASK_CACHE_KEYS.DescriptionMinimized,
-			DEFAULT_TASK_CACHE_KEYS.Status,
-			DEFAULT_TASK_CACHE_KEYS.Tags,
-			DEFAULT_TASK_CACHE_KEYS.Time,
-			DEFAULT_TASK_CACHE_KEYS.Reminder,
-			DEFAULT_TASK_CACHE_KEYS.Priority,
-			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
-			DEFAULT_TASK_CACHE_KEYS.StartDate,
-			DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
-			DEFAULT_TASK_CACHE_KEYS.DueDate,
-			DEFAULT_TASK_CACHE_KEYS.CompletionDate,
-			DEFAULT_TASK_CACHE_KEYS.CancelledDate,
-			DEFAULT_TASK_CACHE_KEYS.Dependencies,
-			DEFAULT_TASK_CACHE_KEYS.FilePath,
-		],
-		taskCardStyle: taskCardStyleNames.EMOJI,
-		showVerticalScroll: true,
-		dragAutoScrollEdgePercent: 20,
-		tagColors: [
-			{
-				name: "bug",
-				color: "rgba(255, 0, 0, 0.55)",
-				priority: 1,
-			},
-			{
-				name: "important",
-				color: "rgba(246, 255, 0, 0.53)",
-				priority: 2,
-			},
-			{
-				name: "wip",
-				color: "rgba(0, 255, 0, 0.53)",
-				priority: 3,
-			},
-			{
-				name: "review",
-				color: "rgba(0, 0, 255, 0.49)",
-				priority: 4,
-			},
-		],
-		editButtonAction: EditButtonMode.Modal,
-		cardDoubleClickAction: EditButtonMode.None,
-		universalDate: UniversalDateOptions.dueDate,
-		tagColorsType: TagColorType.TagText,
-		customStatuses: [
-			{
-				symbol: defaultTaskStatuses.todo,
-				name: "Todo",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: false,
-				type: statusTypeNames.TODO,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.scheduled,
-				name: "Ready to start",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: false,
-				type: statusTypeNames.TODO,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.question,
-				name: "In Review",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: false,
-				type: statusTypeNames.TODO,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.inprogress,
-				name: "In Progress",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: true,
-				type: statusTypeNames.IN_PROGRESS,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.done,
-				name: "Done",
-				nextStatusSymbol: defaultTaskStatuses.todo,
-				availableAsCommand: true,
-				type: statusTypeNames.DONE,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.checked,
-				name: "Completed",
-				nextStatusSymbol: defaultTaskStatuses.todo,
-				availableAsCommand: true,
-				type: statusTypeNames.DONE,
-				lucideIcon: "",
-			},
-			{
-				symbol: defaultTaskStatuses.dropped,
-				name: "Cancelled",
-				nextStatusSymbol: defaultTaskStatuses.done,
-				availableAsCommand: true,
-				type: statusTypeNames.CANCELLED,
-				lucideIcon: "",
-			},
-		],
-		compatiblePlugins: {
-			dailyNotesPlugin: false,
-			dayPlannerPlugin: false,
-			tasksPlugin: false,
-			reminderPlugin: false,
-			quickAddPlugin: false,
-		},
-		taskNoteIdentifierTag: "taskNote",
-		preDefinedNote: "Meta/Task_Board/New_Tasks.md",
-		archivedTasksFilePath: "",
-		taskNoteDefaultLocation: "Meta/Task_Board/Task_Notes",
-		archivedTBNotesFolderPath: "Meta/Task_Board/Archived_Task_Notes",
-		quickAddPluginDefaultChoice: "",
-		showFrontmatterTagsOnCards: false,
-		tasksCacheFilePath: "",
-		notificationService: NotificationService.None,
-		actions: [
-			{
-				enabled: true,
-				trigger: "Complete",
-				type: "move",
-				targetColumn: "Completed",
-			},
-		],
-		autoAddUniqueID: false,
-		uniqueIdCounter: 0, // Counter to generate unique IDs for tasks. This will keep track of the last used ID. --- IGNORE ---
-		experimentalFeatures: false,
-		safeGuardFeature: true,
-		lastViewHistory: {
-			boardFilePath:
-				"Meta/Task_Board/Boards/Time Based Workflow.taskboard",
-			settingTab: 0,
-		},
-		boundTaskCompletionToChildTasks: false,
-		mapView: {
-			background: mapViewBackgrounVariantTypes.none,
-			mapOrientation: mapViewNodeMapOrientation.horizontal,
-			arrowDirection: mapViewArrowDirection.childToParent,
-			animatedEdges: true,
-			scrollAction: mapViewScrollAction.zoom,
-			showMinimap: true,
-			renderVisibleNodes: false,
-			edgeType: mapViewEdgeType.bezier,
-		},
-		taskBoardFilesRegistry: {
-			"3103563481": {
-				boardId: "board_3103563481",
-				filePath: "Meta/Task_Board/Boards/My Project Board.taskboard",
-				boardName: "Time Based Workflow",
-				boardDescription:
-					"This board contains dated type columns for managing time critical scheduled tasks.",
-			},
-		},
-		enableDragnDropTouch: false,
-		filtersWarehouse: [],
-		ribbonIconAction: RibbonIconActions.allBoardsMenu,
-		defaultProperties: createDefaultSupportedProperties(),
-		customProperties: [],
-	},
-};
-
-export const langCodes: { [key: string]: string } = {
-	en: "English",
-	ar: "العربية",
-	cs: "čeština",
-	da: "Dansk",
-	de: "Deutsch",
-	es: "Español",
-	fr: "français",
-	hi: "हिन्दी",
-	id: "Bahasa Indonesia",
-	it: "Italiano",
-	ja: "日本語",
-	ko: "한국어",
-	nl: "Nederlands",
-	no: "Norsk",
-	pl: "język polski",
-	pt: "Português",
-	ro: "Română",
-	ru: "Русский",
-	sq: "Shqip",
-	tr: "Türkçe",
-	uk: "Українська",
-	"pt-BR": "Portugues do Brasil",
-	zh: "简体中文",
-	"zh-TW": "繁體中文",
-};
-export { taskCardStyleNames };

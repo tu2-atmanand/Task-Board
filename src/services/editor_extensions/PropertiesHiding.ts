@@ -52,15 +52,8 @@ export function getTaskPropertyRegexPatterns(
 	tasksPropertyFormat: string,
 ): RegExp {
 	if (typeof property !== "string") {
-		if (
-			Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
-				property.key as DEFAULT_TASK_CACHE_KEYS,
-			)
-		) {
-			return getTaskPropertyRegexPatterns(
-				property.key as DEFAULT_TASK_CACHE_KEYS,
-				tasksPropertyFormat,
-			);
+		if (property.key === String(DEFAULT_TASK_CACHE_KEYS.Tags)) {
+			return TaskRegularExpressions.hashTagsRegex;
 		}
 
 		const escapedId = property.id.replace(
@@ -81,7 +74,7 @@ export function getTaskPropertyRegexPatterns(
 				/[.*+?^${}()|[\]\\]/g,
 				"\\$&",
 			);
-			return new RegExp(`${escapedEmoji}\\s*[^\\s]+`, "g");
+			return new RegExp(`${escapedEmoji} ?[^\\s]+`, "g");
 		}
 		return /(?!)/g;
 	}
@@ -127,7 +120,7 @@ export function getTaskPropertyRegexPatterns(
 			case DEFAULT_TASK_CACHE_KEYS.Time:
 				return /⏰\s*\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/g;
 
-			case DEFAULT_TASK_CACHE_KEYS.Recurring:
+			case DEFAULT_TASK_CACHE_KEYS.Recurrence:
 				return TASKS_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExpWithGlobal.recurrenceRegex;
 
@@ -187,7 +180,7 @@ export function getTaskPropertyRegexPatterns(
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.timeRegex;
 
-			case DEFAULT_TASK_CACHE_KEYS.Recurring:
+			case DEFAULT_TASK_CACHE_KEYS.Recurrence:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.recurrenceRegex;
 
@@ -248,7 +241,7 @@ export function getTaskPropertyRegexPatterns(
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.timeRegex;
 
-			case DEFAULT_TASK_CACHE_KEYS.Recurring:
+			case DEFAULT_TASK_CACHE_KEYS.Recurrence:
 				return DATAVIEW_PLUGIN_DEFAULT_SYMBOLS
 					.TaskFormatRegularExprGlobal.recurrenceRegex;
 
@@ -279,8 +272,7 @@ function createPropertyDecorations(
 ): DecorationSet {
 	const decorations: Range<Decoration>[] = [];
 	const hiddenProperties = getHiddenPropertyConfigs(
-		plugin.settings.data.defaultProperties,
-		plugin.settings.data.customProperties,
+		plugin.settings.data.taskProperties,
 	);
 
 	const cursorPos = view.state.selection.main.head;

@@ -6,20 +6,22 @@ import ReactDOM from "react-dom/client";
 import TaskBoard from "../../../main.js";
 import { TaskEditorRC } from "../components/TaskEditorRC.js";
 import { DEFAULT_SETTINGS } from "../../interfaces/GlobalSettings.js";
-import { taskItemEmpty } from "../../interfaces/Mapping.js";
+import { EMPTY_TASK_ITEM } from "../../interfaces/Mapping.js";
 import { taskItem } from "../../interfaces/TaskItem.js";
 import { allowedFileExtensionsRegEx } from "../../utils/regular_expressions/MiscelleneousRegExpr.js";
 import { getCurrentLocalDateTimeString } from "../../utils/DateTimeCalculations.js";
 import { readDataOfVaultFile } from "../../utils/MarkdownFileOperations.js";
-import { generateTaskId } from "../../utils/TaskItemUtils.js";
-import { getFormattedTaskContent } from "../../utils/task_line/TaskContentFormatter.js";
+import { getFormattedTaskContent, getSanitizedTaskContent } from "../../utils/task_line/TaskContentFormatter.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+import { populateInitialValues } from "../../utils/TaskItemUtils.js";
+
 
 
 // Class component extending Modal for Obsidian
 export class TaskEditorModal extends Modal {
 	plugin: TaskBoard;
-	task: taskItem = { ...taskItemEmpty };
+	task: taskItem = { ...EMPTY_TASK_ITEM };
 	filePath: string;
 	taskExists: boolean;
 	isEdited: boolean;
@@ -37,7 +39,7 @@ export class TaskEditorModal extends Modal {
 		this.filePath = filePath ? filePath : "";
 		this.taskExists = taskExists;
 		this.saveTask = saveTask;
-		this.task = task ? { ...task } : { ...taskItemEmpty };
+		this.task = task ? { ...task } : { ...EMPTY_TASK_ITEM };
 		this.isEdited = false;
 		this.isTaskNote = isTaskNote;
 		this.activeNote = activeNote;
@@ -54,15 +56,23 @@ export class TaskEditorModal extends Modal {
 
 		this.containerEl.setAttribute('modal-type', 'task-board-edit-task');
 		this.modalEl.setAttribute('modal-type', 'task-board-edit-task');
+		this.modalEl.addClass('task-board-task-editor-modal');
 		contentEl.setAttribute('modal-type', 'task-board-edit-task');
 
 		const root = ReactDOM.createRoot(this.contentEl);
 
 		this.setTitle(this.taskExists ? t("edit-task") : t("add-new-task"));
 
-		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task.id)) {
-			this.task.id = generateTaskId(this.plugin);
-			this.task.legacyId = this.task.id;
+		// If adding a new task (taskExists = false) OR editing a task and the task dont have an id 
+		// Then, check if user has allowed to auto add ID and assign a new id.
+		if (this.plugin.settings.data.autoAddUniqueID && (!this.taskExists || !this.task[DEFAULT_TASK_CACHE_KEYS.ID])) {
+			this.task[DEFAULT_TASK_CACHE_KEYS.ID] = this.plugin.vaultScanner.generateTaskId();
+			this.task[DEFAULT_TASK_CACHE_KEYS.LegacyID] = this.task[DEFAULT_TASK_CACHE_KEYS.ID];
+		}
+
+		// If adding a new task, populate the initial values configured by user.
+		if (!this.taskExists) {
+			this.task = populateInitialValues(this.plugin, this.task, this.filePath);
 		}
 
 		// Some processing, if this is a Task-Note
@@ -74,21 +84,23 @@ export class TaskEditorModal extends Modal {
 				if (data == null) this.onClose();
 				else noteContent = data;
 
-				if (!this.task.title) this.task.title = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
+				if (!this.task[DEFAULT_TASK_CACHE_KEYS.Title]) this.task[DEFAULT_TASK_CACHE_KEYS.Title] = this.filePath.split('/').pop()?.replace(allowedFileExtensionsRegEx, "") ?? "";
 			} else {
 				noteContent = "---\ntitle: \n---\n";
 
 				const defaultLocation = normalizePath(this.plugin.settings.data.taskNoteDefaultLocation || DEFAULT_SETTINGS.data.taskNoteDefaultLocation);
-				this.task.title = "";
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "";
 
 				// Sanitize filename
-				const noteName = this.task.title || getCurrentLocalDateTimeString();
+				const noteName = this.task[DEFAULT_TASK_CACHE_KEYS.Title] || getCurrentLocalDateTimeString();
 				const sanitizedName = noteName.replace(/[<>:"/\\|?*]/g, '_');
 				this.filePath = normalizePath(`${defaultLocation}/${sanitizedName}.md`);
 			}
 		} else {
-			if (!this.taskExists)
-				this.task.title = "- [ ] ";
+			this.task[DEFAULT_TASK_CACHE_KEYS.Title] = getSanitizedTaskContent(this.plugin.settings.data, this.task).split("\n")[0];
+
+			if (!this.task[DEFAULT_TASK_CACHE_KEYS.Title])
+				this.task[DEFAULT_TASK_CACHE_KEYS.Title] = "- [ ] ";
 		}
 
 		root.render(<TaskEditorRC

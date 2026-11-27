@@ -4,6 +4,7 @@ import type { Plugin } from "obsidian";
 import { statusTypeNames } from "../../interfaces/Enums.js";
 import { CustomStatus } from "../../interfaces/GlobalSettings.js";
 import { StatusConfiguration } from "../../interfaces/StatusConfiguration.js";
+import { showColorPicker } from "./color_picker/ColorPickerModal.js";
 
 export class CustomStatusModal extends Modal {
 	statusSymbol: string;
@@ -11,6 +12,8 @@ export class CustomStatusModal extends Modal {
 	statusNextSymbol: string;
 	statusAvailableAsCommand: boolean;
 	type: statusTypeNames;
+	desc: string;
+	color: string;
 
 	saved: boolean = false;
 	error: boolean = false;
@@ -26,6 +29,8 @@ export class CustomStatusModal extends Modal {
 		this.statusName = status.name;
 		this.statusNextSymbol = status.nextStatusSymbol;
 		this.statusAvailableAsCommand = status.availableAsCommand;
+		this.desc = "desc" in status ? (status.desc ?? "") : "";
+		this.color = "color" in status ? (status.color ?? "") : "";
 		// Ensure type is a valid statusTypeNames enum value
 		if (typeof status.type === "string") {
 			this.type = status.type;
@@ -39,14 +44,16 @@ export class CustomStatusModal extends Modal {
 	/**
 	 * Return a {@link StatusConfiguration} from the modal's contents
 	 */
-	public statusConfiguration() {
-		return new StatusConfiguration(
-			this.statusSymbol,
-			this.statusName,
-			this.statusNextSymbol,
-			this.statusAvailableAsCommand,
-			this.type,
-		);
+	public statusConfiguration(): Omit<CustomStatus, "lucideIcon"> {
+		return {
+			symbol: this.statusSymbol,
+			name: this.statusName,
+			nextStatusSymbol: this.statusNextSymbol,
+			availableAsCommand: this.statusAvailableAsCommand,
+			type: this.type,
+			desc: this.desc,
+			color: this.color,
+		};
 	}
 
 	async display() {
@@ -56,6 +63,52 @@ export class CustomStatusModal extends Modal {
 
 		const settingDiv = contentEl.createDiv();
 		//const title = this.title ?? '...';
+
+		new Setting(settingDiv)
+			.setName(t("task-status-name"))
+			.setDesc(t("task-status-name-info"))
+			.addText((text) => {
+				text.setValue(this.statusName).onChange((v) => {
+					this.statusName = v;
+				});
+			})
+			.then((_setting) => {});
+
+		new Setting(settingDiv)
+			.setName(t("status-description"))
+			.addTextArea((text) => {
+				text.setValue(this.desc).onChange((value) => {
+					this.desc = value;
+				});
+				text.inputEl.rows = 3;
+			});
+
+		const colorSetting = new Setting(settingDiv).setName(t("status-color"));
+		const colorButton = colorSetting.controlEl.createEl("button", {
+			cls: "task-board-custom-status-color-button",
+			attr: {
+				type: "button",
+				"aria-label": t("status-color"),
+			},
+		});
+		colorButton.textContent = this.color || t("choose-color");
+		if (this.color) colorButton.style.backgroundColor = this.color;
+		colorButton.addEventListener("click", () => {
+			showColorPicker(colorButton, {
+				value: this.color,
+				outputFormat: "rgb",
+				onSelect: (value) => {
+					this.color = value;
+					colorButton.textContent = value;
+					colorButton.style.backgroundColor = value;
+				},
+				onClear: () => {
+					this.color = "";
+					colorButton.textContent = t("choose-color");
+					colorButton.style.removeProperty("background-color");
+				},
+			});
+		});
 
 		new Setting(settingDiv)
 			.setName(t("task-status-symbol"))
@@ -69,16 +122,6 @@ export class CustomStatusModal extends Modal {
 			.then((_setting) => {
 				// Show any error if the initial value loaded is incorrect.
 			});
-
-		new Setting(settingDiv)
-			.setName(t("task-status-name"))
-			.setDesc(t("task-status-name-info"))
-			.addText((text) => {
-				text.setValue(this.statusName).onChange((v) => {
-					this.statusName = v;
-				});
-			})
-			.then((_setting) => {});
 
 		new Setting(settingDiv)
 			.setName(t("task-status-type"))

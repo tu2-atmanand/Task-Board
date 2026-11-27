@@ -7,18 +7,21 @@ import { t } from 'i18next';
 import { AlertOctagon, EllipsisVertical } from 'lucide-react';
 import TaskBoard from '../../../../main.js';
 import type { Board, KanbanView, ColumnData, AdvancedFilter } from '../../../interfaces/BoardConfigs.js';
-import { taskCardStyleNames, viewTypeNames } from '../../../interfaces/Enums.js';
+import { viewTypeNames } from '../../../interfaces/Enums.js';
 import type { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { dragDropTasksManagerInsatance } from '../../../core/managers/DragDropTasksManager.js';
 import { ConfigureColumnSortingModal } from '../../modals/ConfigureColumnSortingModal.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
-import { isAdvancedFilterEmpty } from '../../../core/algorithms/AdvancedFilterer.js';
+import { AdvancedFilterer } from '../../../core/algorithms/AdvancedFilterer.js';
 import { matchTagsWithWildcards } from '../../../core/algorithms/ScanningFilterer.js';
 import { AdvancedFilterModal } from '../../components/advanced_filterer/index.js';
 import { AdvancedFilterPopover } from '../../components/advanced_filterer/Popover.js';
 import { DEFAULT_SETTINGS } from '../../../interfaces/GlobalSettings.js';
-import { BasesStyle, EmojiStyle, swimlaneDataProp } from '../../components/task_card/index.js';
+import TaskCardParent from '../../components/task_card/TaskCardParent.js';
+import type { swimlaneDataProp } from '../../components/task_card/index.js';
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 type CustomCSSProperties = CSSProperties & {
 	'--task-board-column-width': string;
@@ -231,7 +234,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 				const hoveredElement = e.currentTarget;
 				const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
 				const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
-				const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+				const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task[DEFAULT_TASK_CACHE_KEYS.ID];
 
 				if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
 					const clientY = e.clientY;
@@ -335,7 +338,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 			const hoveredElement = e.currentTarget;
 			const draggedOverItemIndex = hoveredElement.getAttribute('data-taskitem-index');
 			const draggedOverItemKey = hoveredElement.getAttribute('data-taskitem-id');
-			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task.id;
+			const draggedItemKey = dragDropTasksManagerInsatance.getCurrentDragData()?.task[DEFAULT_TASK_CACHE_KEYS.ID];
 			// console.log('handleTaskItemDragOver... \ndataAttribute', draggedOverItemIndex, "\ndraggedItemIndex", draggedItemIndex);
 			if (draggedOverItemKey && draggedOverItemIndex && draggedOverItemKey !== draggedItemKey) {
 				const clientY = e.clientY;
@@ -395,7 +398,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 	}
 
 	// Determine whether an advanced filter is applied (used by header count UI)
-	const isAdvancedFilterApplied = !isAdvancedFilterEmpty(columnData.columnFilters);
+	const isAdvancedFilterApplied = !AdvancedFilterer.isAdvancedFilterEmpty(columnData.columnFilters);
 
 	async function handleMinimizeColumn() {
 		// const boardIndex = plugin.settings.data.boardConfigs.findIndex(
@@ -686,7 +689,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 		);
 	}
 
-	const taskItemComponent = plugin.settings.data.taskCardStyle === taskCardStyleNames.EMOJI ? EmojiStyle : BasesStyle;
+	const taskItemComponent = TaskCardParent;
 
 	try {
 		return (
@@ -759,13 +762,13 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 														);
 													}
 													const task = visibleTasks[i];
-													const isSelected = selectedTaskId === task.id;
+													const isSelected = selectedTaskId === task[DEFAULT_TASK_CACHE_KEYS.ID];
 													elements.push(
 														<div
-															key={task.id}
+															key={task[DEFAULT_TASK_CACHE_KEYS.ID]}
 															className={`taskItemFadeIn${isSelected ? ' inboxTaskSelected' : ''}`}
 															data-taskitem-index={i}
-															data-taskitem-id={task.id}
+															data-taskitem-id={task[DEFAULT_TASK_CACHE_KEYS.ID]}
 															onClick={onTaskSelect ? () => onTaskSelect(task) : undefined}
 															aria-selected={onTaskSelect ? isSelected : undefined}
 															role={onTaskSelect ? "option" : undefined}
@@ -780,7 +783,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 															onDrop={activeViewType === viewTypeNames.kanban ? (e) => handleDrop(e) : undefined}
 														>
 															{React.createElement(taskItemComponent, {
-																key: task.id,
+																key: task[DEFAULT_TASK_CACHE_KEYS.ID],
 																dataAttributeIndex: i,
 																plugin: plugin,
 																task: task,
@@ -788,6 +791,7 @@ const LazyColumn: React.FC<LazyColumnProps> = ({
 																activeBoardID: activeBoardData.id,
 																activeViewIndex: currentViewIndex,
 																activeViewType: activeViewType,
+																propertiesVisibleInUI: activeBoardData.views[currentViewIndex].propertiesVisibleInUI,
 																kanbanViewData: kanbanViewData,
 																columnIndex: columnData.index,
 																swimlaneData: swimlaneData

@@ -13,7 +13,10 @@ import {
 	CURRENT_REVISION,
 	NODE_POSITIONS_STORAGE_KEY,
 } from "../../interfaces/Constants.js";
-import { viewTypeNames } from "../../interfaces/Enums.js";
+import {
+	getAllUIVisibleTaskProperties,
+	viewTypeNames,
+} from "../../interfaces/Enums.js";
 import {
 	DEFAULT_SETTINGS,
 	PluginDataJson,
@@ -392,6 +395,10 @@ export async function createBoardFiles(
 								pending: 0,
 								completed: 0,
 							},
+							propertiesVisibleInUI:
+								getAllUIVisibleTaskProperties(
+									plugin.settings.data.taskProperties,
+								),
 							kanbanView: {
 								columns: board.columns,
 								hideEmptyColumns: board.hideEmptyColumns,
@@ -590,6 +597,10 @@ export async function migrateMapViewData(
 							viewIndex: viewsLength,
 							viewName: "Map View",
 							viewType: viewTypeNames.map,
+							propertiesVisibleInUI:
+								getAllUIVisibleTaskProperties(
+									plugin.settings.data.taskProperties,
+								),
 							mapView: newMapViewData,
 							showFilteredTags: true,
 							viewFilters: {
@@ -778,8 +789,9 @@ export async function migrateVersion1_to_Version2(
 			version: oldPluginSettings.version,
 			data: {
 				...oldPluginSettings.data.globalSettings,
-				defaultProperties: [],
-				customProperties: [],
+				taskProperties: [],
+				customPriorities: [],
+				usePipeToSeparateProperties: false,
 			},
 		};
 		const registryResult = await updateRegistryAndSettings(

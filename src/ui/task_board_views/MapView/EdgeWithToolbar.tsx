@@ -20,6 +20,7 @@ import {
 	useReactFlow,
 } from '@xyflow/react';
 import { Trash2, Palette, Sparkles } from 'lucide-react';
+import { t } from 'i18next';
 
 // interface EdgeWithToolbarProps extends EdgeProps {
 // 	plugin: TaskBoard;
@@ -131,24 +132,21 @@ export function EdgeWithToolbar(props: EdgeProps) {
 					<button
 						className="edge-toolbar-button edge-toolbar-delete"
 						onClick={() => { void deleteEdge(); }}
-						title="Delete connection"
-						aria-label="Delete edge"
+						aria-label={t("delete-connection")}
 					>
 						<Trash2 size={16} />
 					</button>
 					<button
 						className="edge-toolbar-button edge-toolbar-color"
 						onClick={handleColorChange}
-						title="Change color (coming soon)"
-						aria-label="Change edge color"
+						aria-label={t("change-connection-color")}
 					>
 						<Palette size={16} />
 					</button>
 					<button
 						className="edge-toolbar-button edge-toolbar-animation"
 						onClick={handleAnimationToggle}
-						title="Toggle animation (coming soon)"
-						aria-label="Toggle edge animation"
+						aria-label={t("toggle-animation")}
 					>
 						<Sparkles size={16} />
 					</button>

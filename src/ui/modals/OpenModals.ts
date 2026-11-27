@@ -31,6 +31,8 @@ import { DiffContentCompareModal } from "./DiffContentCompareModal.js";
 import { ScanFilterModal } from "./ScanFilterModal.js";
 import { ScanVaultModal } from "./ScanVaultModal.js";
 import { TaskEditorModal } from "./TaskEditorModal.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
+
 
 // Function to open the BoardConfigModal
 export const openBoardConfigModal = (
@@ -68,7 +70,6 @@ export const openBoardsExplorerModal = (plugin: TaskBoard) => {
 };
 
 export const openAddNewTaskInCurrentFileModal = (
-	app: App,
 	plugin: TaskBoard,
 	activeFile: TFile,
 	cursorPosition?: { line: number; ch: number },
@@ -79,7 +80,7 @@ export const openAddNewTaskInCurrentFileModal = (
 			void addTaskInNote(plugin, newTask, true, cursorPosition).then(
 				(newId) => {
 					plugin.realTimeScanner
-						.processAllUpdatedFiles(newTask.filePath)
+						.processAllUpdatedFiles(newTask[DEFAULT_TASK_CACHE_KEYS.FilePath])
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -144,7 +145,7 @@ export const openAddNewTaskModal = (
 			} else {
 				await addTaskInNote(plugin, newTask, false).then((newId) => {
 					plugin.realTimeScanner
-						.processAllUpdatedFiles(newTask.filePath)
+						.processAllUpdatedFiles(newTask[DEFAULT_TASK_CACHE_KEYS.FilePath])
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -178,7 +179,7 @@ export const openAddNewTaskModal = (
 	AddTaskModal.open();
 };
 
-export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
+export const openAddNewTaskNoteModal = (plugin: TaskBoard) => {
 	const AddTaskModal = new TaskEditorModal(
 		plugin,
 		async (
@@ -199,11 +200,11 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 				try {
 					// Create or update the file
 					const existingFile = plugin.app.vault.getFileByPath(
-						newTask.filePath,
+						newTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 					);
 					if (!existingFile) {
 						// Check if the directory exists, create if not
-						const parts = newTask.filePath.split("/");
+						const parts = newTask[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/");
 						if (parts.length > 1) {
 							const dirPath = parts.slice(0, -1).join("/").trim();
 							if (
@@ -222,11 +223,11 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 						}
 
 						await plugin.app.vault
-							.create(newTask.filePath, noteContent)
+							.create(newTask[DEFAULT_TASK_CACHE_KEYS.FilePath], noteContent)
 							.then(() => {
 								// This is required to rescan the updated file and refresh the board.
 								plugin.realTimeScanner.onFileModified(
-									newTask.filePath,
+									newTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 								);
 								window.setTimeout(() => {
 									// TODO : Is 1 seconds really required ?
@@ -243,7 +244,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							});
 					} else {
 						const newName = getCurrentLocalDateTimeString();
-						const parts = newTask.filePath.split("/");
+						const parts = newTask[DEFAULT_TASK_CACHE_KEYS.FilePath].split("/");
 						const dirPath = parts.slice(0, -1).join("/").trim();
 						const newPath = normalizePath(
 							`${dirPath}/${newName}.md`,
@@ -261,7 +262,7 @@ export const openAddNewTaskNoteModal = (app: App, plugin: TaskBoard) => {
 							.then(() => {
 								// This is required to rescan the updated file and refresh the board.
 								plugin.realTimeScanner.onFileModified(
-									`Copy-${newTask.filePath}`,
+									`Copy-${newTask[DEFAULT_TASK_CACHE_KEYS.FilePath]}`,
 								);
 
 								window.setTimeout(() => {
@@ -307,19 +308,19 @@ export const openEditTaskModal = (
 		plugin,
 		async (updatedTask: taskItem) => {
 			let eventData: UpdateTaskEventData = {
-				taskID: existingTask.id,
+				taskID: existingTask[DEFAULT_TASK_CACHE_KEYS.ID],
 				state: true,
 			};
 			eventEmitter.emit("UPDATE_TASK", eventData);
 
-			updatedTask.filePath = existingTask.filePath;
+			updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath] = existingTask[DEFAULT_TASK_CACHE_KEYS.FilePath];
 			// Update the task in the file and JSON
 			updateTaskInFile(plugin, updatedTask, existingTask)
 				.then((newId) => {
 					plugin.realTimeScanner
 						.processAllUpdatedFiles(
-							updatedTask.filePath,
-							existingTask.id,
+							updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+							existingTask[DEFAULT_TASK_CACHE_KEYS.ID],
 						)
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
@@ -347,7 +348,7 @@ export const openEditTaskModal = (
 		false,
 		true,
 		existingTask,
-		existingTask.filePath,
+		existingTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 	);
 	EditTaskModal.open();
 };
@@ -364,7 +365,7 @@ export const openEditTaskNoteModal = (
 			newTaskContent: string | undefined,
 		) => {
 			let eventData: UpdateTaskEventData = {
-				taskID: existingTask.id,
+				taskID: existingTask[DEFAULT_TASK_CACHE_KEYS.ID],
 				state: true,
 			};
 			eventEmitter.emit("UPDATE_TASK", eventData);
@@ -380,8 +381,8 @@ export const openEditTaskNoteModal = (
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanner
 								.processAllUpdatedFiles(
-									updatedTask.filePath,
-									existingTask.id,
+									updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+									existingTask[DEFAULT_TASK_CACHE_KEYS.ID],
 								)
 								.catch((error) => {
 									bugReporterManagerInsatance.addToLogs(
@@ -395,7 +396,7 @@ export const openEditTaskNoteModal = (
 				} else {
 					await writeDataToVaultFile(
 						plugin,
-						updatedTask.filePath,
+						updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 						newTaskContent,
 					).then(() => {
 						window.setTimeout(() => {
@@ -403,8 +404,8 @@ export const openEditTaskNoteModal = (
 							// This is required to rescan the updated file and refresh the board.
 							plugin.realTimeScanner
 								.processAllUpdatedFiles(
-									updatedTask.filePath,
-									existingTask.id,
+									updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+									existingTask[DEFAULT_TASK_CACHE_KEYS.ID],
 								)
 								.catch((error) => {
 									bugReporterManagerInsatance.addToLogs(
@@ -435,7 +436,7 @@ export const openEditTaskNoteModal = (
 		false,
 		true,
 		existingTask,
-		existingTask.filePath,
+		existingTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 	);
 	EditTaskModal.open();
 };
@@ -682,20 +683,20 @@ export const openEditTaskView = async (
 ): Promise<WorkspaceLeaf | null> => {
 	const { workspace } = plugin.app;
 
-	const viewTypeId = task.legacyId
-		? `${VIEW_TYPE_ADD_OR_EDIT_TASK}-${task.legacyId}`
-		: `${VIEW_TYPE_ADD_OR_EDIT_TASK}-${task.id}`;
+	const viewTypeId = task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
+		? `${VIEW_TYPE_ADD_OR_EDIT_TASK}-${task[DEFAULT_TASK_CACHE_KEYS.LegacyID]}`
+		: `${VIEW_TYPE_ADD_OR_EDIT_TASK}-${task[DEFAULT_TASK_CACHE_KEYS.ID]}`;
 
-	const taskId = task.legacyId ? task.legacyId : task.id;
+	const taskId = task[DEFAULT_TASK_CACHE_KEYS.LegacyID] ? task[DEFAULT_TASK_CACHE_KEYS.LegacyID] : task[DEFAULT_TASK_CACHE_KEYS.ID];
 	const leaves = workspace.getLeavesOfType(viewTypeId);
 	const matchLeaf = leaves.find((leaf) => {
 		// const viewEphemeralState = leaf.getEphemeralState();
 		// console.log("empheral states of : ", viewEphemeralState);
 
 		const customView = leaf.view as TaskEditorView;
-		const leafTaskId = customView?.task.legacyId
-			? customView.task.legacyId
-			: customView?.task.id;
+		const leafTaskId = customView?.task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
+			? customView.task[DEFAULT_TASK_CACHE_KEYS.LegacyID]
+			: customView?.task[DEFAULT_TASK_CACHE_KEYS.ID];
 
 		return taskId === leafTaskId;
 	});
@@ -761,7 +762,7 @@ export const openEditTaskView = async (
 								).then((newId) => {
 									plugin.realTimeScanner
 										.processAllUpdatedFiles(
-											updatedTask.filePath,
+											updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 										)
 										.catch((error) => {
 											bugReporterManagerInsatance.addToLogs(
@@ -783,7 +784,7 @@ export const openEditTaskView = async (
 											// This is required to rescan the updated file and refresh the board.
 											plugin.realTimeScanner
 												.processAllUpdatedFiles(
-													updatedTask.filePath,
+													updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 												)
 												.catch((error) => {
 													bugReporterManagerInsatance.addToLogs(
@@ -797,7 +798,7 @@ export const openEditTaskView = async (
 								} else {
 									await writeDataToVaultFile(
 										plugin,
-										updatedTask.filePath,
+										updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 										updatedNoteContent,
 									).then(() => {
 										window.setTimeout(() => {
@@ -805,7 +806,7 @@ export const openEditTaskView = async (
 											// This is required to rescan the updated file and refresh the board.
 											plugin.realTimeScanner
 												.processAllUpdatedFiles(
-													updatedTask.filePath,
+													updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 												)
 												.catch((error) => {
 													bugReporterManagerInsatance.addToLogs(
@@ -845,7 +846,7 @@ export const openEditTaskView = async (
 							).then((newId) => {
 								plugin.realTimeScanner
 									.processAllUpdatedFiles(
-										updatedTask.filePath,
+										updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 									)
 									.catch((error) => {
 										bugReporterManagerInsatance.addToLogs(
@@ -866,7 +867,7 @@ export const openEditTaskView = async (
 										// This delay is required to rescan the updated file and refresh the board.
 										plugin.realTimeScanner
 											.processAllUpdatedFiles(
-												updatedTask.filePath,
+												updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 											)
 											.catch((error) => {
 												bugReporterManagerInsatance.addToLogs(
@@ -880,14 +881,14 @@ export const openEditTaskView = async (
 							} else {
 								void writeDataToVaultFile(
 									plugin,
-									updatedTask.filePath,
+									updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 									updatedNoteContent,
 								).then(() => {
 									window.setTimeout(() => {
 										// This delay is required to rescan the updated file and refresh the board.
 										plugin.realTimeScanner
 											.processAllUpdatedFiles(
-												updatedTask.filePath,
+												updatedTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
 											)
 											.catch((error) => {
 												bugReporterManagerInsatance.addToLogs(

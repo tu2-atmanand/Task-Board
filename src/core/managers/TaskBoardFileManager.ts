@@ -53,6 +53,9 @@ export default class TaskBoardFileManager {
 	constructor(plugin: TaskBoard) {
 		this.plugin = plugin;
 		this.app = plugin.app;
+	}
+
+	async initializeFileRegistry(): Promise<void> {
 		this.taskBoardFilesRegistry =
 			this.plugin.settings.data.taskBoardFilesRegistry;
 	}
@@ -728,7 +731,7 @@ export default class TaskBoardFileManager {
 				new Notice(
 					`Task Board : The board file already exists at the path : ${normalizePath(filePath)}`,
 				);
-				return false;
+				return true;
 			}
 
 			const normalizedFilePath = normalizePath(filePath);

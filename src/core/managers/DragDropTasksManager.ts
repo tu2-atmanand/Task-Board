@@ -23,23 +23,11 @@ import {
 import { bugReporterManagerInsatance } from "./BugReporter.js";
 import { compareTwoTags } from "../algorithms/ScanningFilterer.js";
 import { swimlaneDataProp } from "../../ui/components/task_card/index.js";
+import { DEFAULT_TASK_CACHE_KEYS } from "../../interfaces/Enums.js";
 
-type RectLike = Pick<DOMRect, "left" | "top" | "width" | "height">;
-type DragImageOffset = { x: number; y: number };
 
 function clamp(value: number, min: number, max: number): number {
 	return Math.min(Math.max(value, min), max);
-}
-
-function calculateDragImageOffset(
-	rect: RectLike,
-	clientX: number,
-	clientY: number,
-): DragImageOffset {
-	return {
-		x: clamp(clientX - rect.left, 0, Math.max(0, rect.width)),
-		y: clamp(clientY - rect.top, 0, Math.max(0, rect.height)),
-	};
 }
 
 export interface currentDragDataPayload {
@@ -72,6 +60,14 @@ class DragDropTasksManager {
 	private autoScrollActive: boolean = false;
 	private isAutoScrolling: boolean = false;
 	private autoScrollDragOverHandler: ((e: DragEvent) => void) | null = null;
+
+	// Desktop drag ghost. Browsers always render native drag feedback translucent,
+	// so we hide that image and draw our own fully opaque ghost instead.
+	private desktopDragGhost: HTMLElement | null = null;
+	private desktopDragGhostXOffset: number = 0;
+	private desktopDragGhostYOffset: number = 0;
+	private desktopDragGhostMoveHandler: ((e: DragEvent) => void) | null = null;
+	private desktopDragHasMoved: boolean = false;
 
 	// Touch drag state
 	private touchDragActive: boolean = false;
@@ -153,9 +149,12 @@ class DragDropTasksManager {
 	}
 
 	/**
-	 * Creates an improved drag image by cloning the source element and setting
-	 * it as the native drag image. This produces a full-card preview instead of
-	 * the browser's default thumbnail.
+	 * Creates a fully opaque drag ghost from the source element.
+	 *
+	 * Browsers wrap native drag feedback in a translucent layer, so no amount of
+	 * CSS on the element passed to `setDragImage()` can make it fully opaque.
+	 * We therefore suppress the native image with a transparent 1x1 canvas and
+	 * draw our own clone that follows the cursor through `drag`/`dragover` events.
 	 */
 	setElementDragImage(
 		event: DragEvent,
@@ -168,30 +167,77 @@ class DragDropTasksManager {
 		}
 
 		const doc = sourceElement.ownerDocument;
-		const body = doc.body;
+		const body = doc.body ?? doc.documentElement;
 		if (!body) return null;
 
 		const rect = sourceElement.getBoundingClientRect();
-		const dragImage = sourceElement.cloneNode(true) as HTMLElement;
-		dragImage.classList.add("taskboard-drag-image");
-		if (className) dragImage.classList.add(className);
-		dragImage.style.width = `${Math.max(0, rect.width)}px`;
-		dragImage.style.height = `${Math.max(0, rect.height)}px`;
+		if (rect.width === 0 || rect.height === 0) return null;
 
-		body.appendChild(dragImage);
-
-		const offset = calculateDragImageOffset(
-			rect,
-			event.clientX,
-			event.clientY,
+		this.removeDesktopDragGhost();
+		this.desktopDragGhostXOffset = clamp(
+			event.clientX - rect.left,
+			0,
+			rect.width,
 		);
-		dataTransfer.setDragImage(dragImage, offset.x, offset.y);
+		this.desktopDragGhostYOffset = clamp(
+			event.clientY - rect.top,
+			0,
+			rect.height,
+		);
+		this.desktopDragHasMoved = false;
 
-		(doc.defaultView ?? window).setTimeout(() => {
-			dragImage.remove();
-		}, 0);
+		const ghost = sourceElement.cloneNode(true) as HTMLElement;
+		ghost.classList.add("taskboard-drag-image");
+		if (className) ghost.classList.add(className);
+		ghost.classList.remove(
+			"task-item-dragging",
+			"task-item-dragging-dimmed",
+		);
+		ghost.style.width = `${rect.width}px`;
+		ghost.style.height = `${rect.height}px`;
+		ghost.style.left = `${rect.left}px`;
+		ghost.style.top = `${rect.top}px`;
+		body.appendChild(ghost);
+		this.desktopDragGhost = ghost;
 
-		return dragImage;
+		// Hide the browser's translucent drag image. A transparent canvas keeps
+		// the native drag operation alive without showing any feedback of its own.
+		const blankDragImage = doc.createElement("canvas");
+		blankDragImage.width = 1;
+		blankDragImage.height = 1;
+		blankDragImage.style.cssText =
+			"position:fixed;left:0;top:0;width:1px;height:1px;pointer-events:none;";
+		body.appendChild(blankDragImage);
+		try {
+			dataTransfer.setDragImage(blankDragImage, 0, 0);
+		} catch {
+			// Native drag should still work even if hiding its image fails.
+		}
+		blankDragImage.remove();
+
+		return ghost;
+	}
+
+	/** Moves the custom opaque ghost so it stays under the cursor. */
+	private updateDesktopDragGhost(x: number, y: number): void {
+		const ghost = this.desktopDragGhost;
+		if (!ghost) return;
+
+		// Chromium emits a final (0, 0) drag event; ignore it to avoid a jump.
+		if (x === 0 && y === 0 && this.desktopDragHasMoved) return;
+		if (x !== 0 || y !== 0) this.desktopDragHasMoved = true;
+
+		ghost.style.left = `${x - this.desktopDragGhostXOffset}px`;
+		ghost.style.top = `${y - this.desktopDragGhostYOffset}px`;
+	}
+
+	/** Removes the custom desktop ghost and resets its tracking state. */
+	private removeDesktopDragGhost(): void {
+		if (this.desktopDragGhost) {
+			this.desktopDragGhost.remove();
+			this.desktopDragGhost = null;
+		}
+		this.desktopDragHasMoved = false;
 	}
 
 	/**
@@ -232,6 +278,7 @@ class DragDropTasksManager {
 		const trackPosition = (e: DragEvent) => {
 			this.autoScrollLastX = e.clientX;
 			this.autoScrollLastY = e.clientY;
+			this.updateDesktopDragGhost(e.clientX, e.clientY);
 		};
 		this.autoScrollDragOverHandler = trackPosition;
 		activeDocument.addEventListener(
@@ -239,6 +286,15 @@ class DragDropTasksManager {
 			trackPosition as EventListener,
 			true,
 		);
+
+		// `drag` gives the most reliable cursor position while the native image is hidden.
+		const trackGhost = (e: DragEvent) => {
+			this.autoScrollLastX = e.clientX;
+			this.autoScrollLastY = e.clientY;
+			this.updateDesktopDragGhost(e.clientX, e.clientY);
+		};
+		this.desktopDragGhostMoveHandler = trackGhost;
+		activeDocument.addEventListener("drag", trackGhost as EventListener, true);
 
 		// Auto-cleanup on drag end
 		activeDocument.addEventListener(
@@ -266,6 +322,15 @@ class DragDropTasksManager {
 			);
 			this.autoScrollDragOverHandler = null;
 		}
+		if (this.desktopDragGhostMoveHandler) {
+			activeDocument.removeEventListener(
+				"drag",
+				this.desktopDragGhostMoveHandler as EventListener,
+				true,
+			);
+			this.desktopDragGhostMoveHandler = null;
+		}
+		this.removeDesktopDragGhost();
 		this.stopAutoScrollLoop();
 	}
 
@@ -433,13 +498,13 @@ class DragDropTasksManager {
 				plugin.settings.data,
 			);
 			eventEmitter.emit("UPDATE_TASK", {
-				taskID: oldTask.id,
+				taskID: oldTask[DEFAULT_TASK_CACHE_KEYS.ID],
 				state: true,
 			});
 
 			const isThisTaskNote = isTaskNotePresentInTags(
 				plugin.settings.data.taskNoteIdentifierTag,
-				oldTask.tags,
+				oldTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 			);
 
 			if (isThisTaskNote) {
@@ -448,8 +513,8 @@ class DragDropTasksManager {
 						window.setTimeout(() => {
 							plugin.realTimeScanner
 								.processAllUpdatedFiles(
-									oldTask.filePath,
-									oldTask.id,
+									oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath],
+									oldTask[DEFAULT_TASK_CACHE_KEYS.ID],
 								)
 								.catch((error) => {
 									bugReporterManagerInsatance.addToLogs(
@@ -464,7 +529,7 @@ class DragDropTasksManager {
 			} else {
 				void updateTaskInFile(plugin, newTask, oldTask).then(() => {
 					plugin.realTimeScanner
-						.processAllUpdatedFiles(oldTask.filePath, oldTask.id)
+						.processAllUpdatedFiles(oldTask[DEFAULT_TASK_CACHE_KEYS.FilePath], oldTask[DEFAULT_TASK_CACHE_KEYS.ID])
 						.catch((error) => {
 							bugReporterManagerInsatance.addToLogs(
 								217,
@@ -541,7 +606,7 @@ class DragDropTasksManager {
 
 		// Remove the source column tag if it exists
 		const sourceTag = sourceColumn?.coltag ?? "";
-		let newTags = newTask.tags.filter(
+		let newTags = (newTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).filter(
 			(tag: string) => !compareTwoTags(sourceTag, tag),
 		);
 
@@ -810,18 +875,18 @@ class DragDropTasksManager {
 		let newTask: taskItem = {
 			...task,
 			status: " ",
-			completion: "",
-			cancelledDate: "",
+			completionDate: undefined,
+			cancelledDate: undefined,
 		};
 		if (
 			!isTaskNotePresentInTags(
 				plugin.settings.data.taskNoteIdentifierTag,
-				task.tags,
+				task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [],
 			)
 		) {
-			newTask.title = sanitizeStatus(
+			newTask[DEFAULT_TASK_CACHE_KEYS.Title] = sanitizeStatus(
 				plugin.settings.data,
-				task.title,
+				task[DEFAULT_TASK_CACHE_KEYS.Title],
 				" ",
 				statusTypeNames.TODO,
 			);
@@ -991,7 +1056,7 @@ class DragDropTasksManager {
 		}
 
 		// STEP 3 - Add the target column tag if it doesn't already exist
-		let newTags = newTask.tags ?? [];
+		let newTags = newTask[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [];
 		if (targetColumn.coltag) {
 			const columnTag = targetColumn.coltag;
 
@@ -1196,7 +1261,7 @@ class DragDropTasksManager {
 		// Remove any existing occurrence of the task id
 		updatedTargetColumnData.tasksIdManualOrder =
 			updatedTargetColumnData.tasksIdManualOrder!.filter(
-				(id) => id !== task.id,
+				(id) => id !== task[DEFAULT_TASK_CACHE_KEYS.ID],
 			);
 
 		// Insert at desired index or push to end
@@ -1208,10 +1273,10 @@ class DragDropTasksManager {
 			updatedTargetColumnData.tasksIdManualOrder.splice(
 				desiredIndex,
 				0,
-				task.id,
+				task[DEFAULT_TASK_CACHE_KEYS.ID],
 			);
 		} else {
-			updatedTargetColumnData.tasksIdManualOrder.push(task.id);
+			updatedTargetColumnData.tasksIdManualOrder.push(task[DEFAULT_TASK_CACHE_KEYS.ID]);
 		}
 
 		let newBoardData =
@@ -1250,7 +1315,7 @@ class DragDropTasksManager {
 		let newTask: taskItem = { ...task };
 
 		if (property === "tags") {
-			const oldTags = task.tags ?? [];
+			const oldTags = task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? [];
 			let newTags: string[] = oldTags;
 			// Remove old tag of source swimlane
 			if (sourceColumnSwimlaneData) {
@@ -1350,9 +1415,10 @@ class DragDropTasksManager {
 	dimDraggedTaskItem(draggedTaskItem: HTMLDivElement): void {
 		// draggedTaskItem.classList.add("task-item-dragging-dimmed");
 
-		// Add dragging class after a small delay to not affect the drag image
-		window.requestAnimationFrame(() => {
-			// e.dataTransfer?.setDragImage(draggedTaskItem, 0, 0);
+		// Add the faint state after the drag image snapshot, using the card's own window
+		// so popout views dim correctly too.
+		const view = draggedTaskItem.ownerDocument.defaultView ?? activeWindow;
+		view.requestAnimationFrame(() => {
 			draggedTaskItem.classList.add("task-item-dragging");
 		});
 	}
@@ -1441,14 +1507,19 @@ class DragDropTasksManager {
 		// 	this.dropIndicator.parentElement.removeChild(this.dropIndicator);
 		// }
 
-		// TODO : This feels like overkill, because I am only dimming the single .taskItem which I will be dragging. Optimize this later.
-		// Also clear dimming from all task items
-		// const allTaskItems = Array.from(
-		// 	document.querySelectorAll(".taskItem")
-		// ) as HTMLDivElement[];
-		// allTaskItems.forEach((item) => {
-		// 	item.classList.remove("task-item-dragging-dimmed");
-		// });
+		// Also clear the dimmed/dragging state from the source card.
+		activeDocument
+			.querySelectorAll(
+				".taskItem.task-item-dragging, .taskItem.task-item-dragging-dimmed",
+			)
+			.forEach((item) => {
+				item.classList.remove(
+					"task-item-dragging",
+					"task-item-dragging-dimmed",
+				);
+			});
+
+		this.removeDesktopDragGhost();
 	}
 
 	/**
@@ -1856,8 +1927,8 @@ class DragDropTasksManager {
 		// 	} catch {}
 		// }
 
-		// Visual dim / dragging class
-		// this.dimDraggedTaskItem(draggedTaskItem);
+		// Dim the real card only after the drag image has been snapshotted.
+		this.dimDraggedTaskItem(draggedTaskItem);
 	}
 
 	/**
@@ -1888,7 +1959,7 @@ class DragDropTasksManager {
 		if (
 			this.currentDragData &&
 			cardEl.getAttribute("data-taskitem-id") ===
-				this.currentDragData.task.id
+				this.currentDragData.task[DEFAULT_TASK_CACHE_KEYS.ID]
 		) {
 			return;
 		}

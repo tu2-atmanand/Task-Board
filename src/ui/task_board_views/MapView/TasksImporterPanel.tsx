@@ -10,8 +10,9 @@ import { viewTypeNames } from '../../../interfaces/Enums.js';
 import { taskItem } from '../../../interfaces/TaskItem.js';
 import { bugReporterManagerInsatance } from '../../../core/managers/BugReporter.js';
 import { eventEmitter } from '../../../services/EventEmitter.js';
-import { applyIdToTaskItem } from '../../../utils/TaskItemUtils.js';
-import BasesStyle from '../../components/task_card/BasesStyle.js';
+import TaskCardParent from '../../components/task_card/TaskCardParent.js';
+import { DEFAULT_TASK_CACHE_KEYS } from "../../../interfaces/Enums.js";
+
 
 interface TasksImporterPanelProps {
 	plugin: TaskBoard;
@@ -50,7 +51,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 	// Get all tasks without an ID (legacyId is empty)
 	const tasksWithoutId = useMemo(() => {
 		const flatTasks = allTasksArranged.flat();
-		return flatTasks.filter(task => !task.legacyId && !importedTaskIds.has(task.id));
+		return flatTasks.filter(task => !task[DEFAULT_TASK_CACHE_KEYS.LegacyID] && !importedTaskIds.has(task[DEFAULT_TASK_CACHE_KEYS.ID]));
 	}, [allTasksArranged, importedTaskIds]);
 
 	// Filter tasks based on search query
@@ -60,9 +61,9 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 		}
 		const query = searchQuery.toLowerCase();
 		return tasksWithoutId.filter(task =>
-			task.title.toLowerCase().includes(query) ||
-			task.filePath.toLowerCase().includes(query) ||
-			task.tags.some(tag => tag.toLowerCase().includes(query))
+			task[DEFAULT_TASK_CACHE_KEYS.Title].toLowerCase().includes(query) ||
+			task[DEFAULT_TASK_CACHE_KEYS.FilePath].toLowerCase().includes(query) ||
+			(task[DEFAULT_TASK_CACHE_KEYS.Tags] ?? []).some(tag => tag.toLowerCase().includes(query))
 		);
 	}, [tasksWithoutId, searchQuery]);
 
@@ -74,13 +75,13 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 
 	const handleImportTask = async (task: taskItem) => {
 		try {
-			const newId = await applyIdToTaskItem(plugin, task);
+			const newId = await plugin.vaultScanner.applyIdToTaskItem(task);
 			if (newId !== undefined) {
 				// Add to imported set
-				setImportedTaskIds(prev => new Set(prev).add(task.id));
+				setImportedTaskIds(prev => new Set(prev).add(task[DEFAULT_TASK_CACHE_KEYS.ID]));
 				// Trigger re-scan to update the map view, adding delay for task-note
 				window.setTimeout(() => {
-					plugin.realTimeScanner.processAllUpdatedFiles(task.filePath).then(() => {
+					plugin.realTimeScanner.processAllUpdatedFiles(task[DEFAULT_TASK_CACHE_KEYS.FilePath]).then(() => {
 						// Emit event to refresh the board and notify about the newly imported task
 						eventEmitter.emit('TASK_IMPORTED_TO_MAP', newId);
 						eventEmitter.emit('REFRESH_BOARD'); // TODO : Will this work with SOFT_REFRESH only.
@@ -223,13 +224,13 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 							<div className="tasksImporterPanelTaskList">
 								{visibleTasks.map((task, index) => (
 									<div
-										key={task.id}
+										key={task[DEFAULT_TASK_CACHE_KEYS.ID]}
 										className="tasksImporterPanelTaskItemWrapper"
 										onClick={() => { void handleImportTask(task); }}
 									>
 										{/* TODO : Replace this with the cardImage */}
-										<BasesStyle
-											key={task.id}
+										<TaskCardParent
+											key={task[DEFAULT_TASK_CACHE_KEYS.ID]}
 											dataAttributeIndex={0} // TODO : No need of this data in this case.
 											plugin={plugin}
 											parentComponent={dummyComponent}
@@ -237,6 +238,7 @@ export const TasksImporterPanel: React.FC<TasksImporterPanelProps> = ({
 											activeViewIndex={activeViewIndex}
 											activeViewType={viewTypeNames.map}
 											activeBoardID={activeBoardSettings.id}
+											propertiesVisibleInUI={activeViewData.propertiesVisibleInUI}
 										/>
 									</div>
 								))}

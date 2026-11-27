@@ -10,11 +10,10 @@ import { RxDragHandleDots2 } from "react-icons/rx";
 import { t } from "i18next";
 import TaskBoard from "../../../main.js";
 import { Board, TaskBoardViewType, ColumnData, swimlaneConfigs } from "../../interfaces/BoardConfigs.js";
-import { viewTypeNames, colTypeNames, UniversalDateOptions, HeaderTruncationOptions } from "../../interfaces/Enums.js";
-import { columnTypeAndNameMapping, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../interfaces/Mapping.js";
+import { viewTypeNames, colTypeNames, DEFAULT_TASK_CACHE_KEYS, HeaderTruncationOptions, getAllUIVisibleTaskProperties, PropertyTypeConfig } from "../../interfaces/Enums.js";
 import { bugReporterManagerInsatance } from "../../core/managers/BugReporter.js";
 import { getFileSuggestions, MultiSuggest, getTagSuggestions, getFolderSuggestions } from "../../services/MultiSuggest.js";
-import { generateRandomNumber, generateRandomStringId } from "../../utils/TaskItemUtils.js";
+import { generateRandomNumber, generateRandomStringId, getCustomStatusOptionsForDropdown, getPriorityOptionsForDropdown } from "../../utils/TaskItemUtils.js";
 import { AddColumnModal } from "./AddColumnModal.js";
 import { AddViewModal } from "./AddViewModal.js";
 import { ClosePopupConfrimationModal } from "./ClosePopupConfrimationModal.js";
@@ -22,6 +21,7 @@ import { DeleteConfirmationModal } from "./DeleteConfirmationModal.js";
 import { SwimlanesConfigModal } from "./SwimlanesConfigModal.js";
 import { eventEmitter } from "../../services/EventEmitter.js";
 import { AdvancedFilterModal } from "../components/advanced_filterer/index.js";
+import { columnTypeAndNameMapping } from "../../interfaces/Mapping.js";
 
 interface ConfigModalProps {
 	plugin: TaskBoard;
@@ -344,6 +344,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 			app,
 			boardWithCurrentEdits,
 			{
+				propertiesVisibleInUI: getAllUIVisibleTaskProperties(plugin.settings.data.taskProperties),
 				onCancel: () => {
 					// Do nothing on cancel
 				},
@@ -677,6 +678,63 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 		);
 	}
 
+	// Renders a dropdown of all date/date-time task properties configured in the plugin settings.
+	// The column's own date type takes precedence, falling back to the configured universal date.
+	const renderDateTypeDropdown = (
+		column: ColumnData,
+		columnIndex: number,
+		viewIndex: number,
+		resetDateRange = false
+	) => {
+		const selectedDateType =
+			column.datedBasedColumn?.dateType ||
+			plugin.settings.data.universalDate ||
+			DEFAULT_TASK_CACHE_KEYS.DueDate;
+
+		const dateTypeOptions = plugin.settings.data.taskProperties
+			.filter(
+				(property) =>
+					property.type === PropertyTypeConfig.date ||
+					property.type === PropertyTypeConfig.dateTime
+			)
+			.sort((first, second) => first.rank - second.rank)
+			.map((property) => ({ key: property.key, name: property.name }));
+
+		// Keep a stored value selectable if its property is no longer present in the settings.
+		if (!dateTypeOptions.some((option) => option.key === selectedDateType)) {
+			dateTypeOptions.unshift({
+				key: selectedDateType,
+				name: selectedDateType,
+			});
+		}
+
+		return (
+			<select
+				aria-label="Select date type"
+				value={selectedDateType}
+				onChange={(event) =>
+					handleColumnChange(
+						viewIndex,
+						columnIndex,
+						"datedBasedColumn",
+						{
+							from: resetDateRange ? 0 : (column.datedBasedColumn?.from ?? 0),
+							to: resetDateRange ? 0 : (column.datedBasedColumn?.to ?? 0),
+							dateType: event.target.value,
+						}
+					)
+				}
+				className="boardConfigModalColumnRowContentColName"
+			>
+				{dateTypeOptions.map((option) => (
+					<option key={option.key} value={option.key}>
+						{option.name}
+					</option>
+				))}
+			</select>
+		);
+	};
+
 	// Function to render the view specific settings UI in the board configuration modal when a specific view is selected and to clean up the global settings UI when switching to a different tab or when the component unmounts. This function also handles rendering the UI for configuring the settings of a Kanban specific view and for configuring the columns in a Kanban specific view.
 	const renderViewSettings = (viewIndex: number) => {
 		// if (globalSettingsHTMLSection.current) {
@@ -731,7 +789,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 											String(error),
 											"BoardConfigModal.tsx/renderViewSettings/copy-view-id",
 										);
-										new Notice(t("copy-task-title-unsuccessful"));
+										new Notice(t("copy-view-id-unsuccessful"));
 									}
 								}} />
 							</div>
@@ -828,7 +886,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 														)}
 													</div>
 													<div className="boardConfigModalColumnRowHeaderRightSec">
-														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} title={t("delete-column")} />
+														<FaTrash className="boardConfigModalColumnRowDeleteButton" size={13} enableBackground={0} opacity={0.7} onClick={() => handleDeleteColumnFromBoard(viewIndex, columnIndex)} aria-label={t("delete-column")} />
 													</div>
 												</div>
 
@@ -974,7 +1032,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																				<option
 																					key={`${opt.value}-${group.type}`}
 																					value={opt.value}
-																					title={opt.tooltip}
+																					aria-label={opt.tooltip}
 																				>
 																					{opt.label}
 																				</option>
@@ -1025,7 +1083,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																</div>
 																<select
 																	aria-label="Select priority"
-																	value={column.taskPriority || getPriorityOptionsForDropdown()[0].value}
+																	value={column.taskPriority || getPriorityOptionsForDropdown(plugin.settings.data.customPriorities)[0].value}
 																	onChange={(e) =>
 																		handleColumnChange(
 																			viewIndex,
@@ -1036,7 +1094,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																	}
 																	className="boardConfigModalColumnRowContentPriorityDropdown"
 																>
-																	{getPriorityOptionsForDropdown().map((option) => (
+																	{getPriorityOptionsForDropdown(plugin.settings.data.customPriorities).map((option) => (
 																		<option key={option.value} value={option.value}>{option.text}</option>
 																	))}
 																</select>
@@ -1142,26 +1200,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																<div className="boardConfigModalColumnRowContentPropertyLabel">
 																	{t("date-type")} :
 																</div>
-																<select
-																	aria-label="Select date type"
-																	value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
-																	onChange={(e) =>
-																		handleColumnChange(
-																			viewIndex,
-																			columnIndex,
-																			"datedBasedColumn",
-																			{
-																				...column.datedBasedColumn,
-																				dateType: e.target.value,
-																			}
-																		)
-																	}
-																	className="boardConfigModalColumnRowContentColName"
-																>
-																	<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
-																	<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
-																	<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
-																</select>
+																{renderDateTypeDropdown(column, columnIndex, viewIndex)}
 															</div>
 															<div className="boardConfigModalColumnRowContentProperty">
 																<div className="boardConfigModalColumnRowContentPropertyLabel">
@@ -1288,27 +1327,7 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 																<div className="boardConfigModalColumnRowContentPropertyLabel">
 																	{t("date-type")} :
 																</div>
-																<select
-																	aria-label="Select date type"
-																	value={column.datedBasedColumn?.dateType || plugin.settings.data.universalDate || UniversalDateOptions.dueDate}
-																	onChange={(e) =>
-																		handleColumnChange(
-																			viewIndex,
-																			columnIndex,
-																			"datedBasedColumn",
-																			{
-																				from: 0,
-																				to: 0,
-																				dateType: e.target.value,
-																			}
-																		)
-																	}
-																	className="boardConfigModalColumnRowContentColName"
-																>
-																	<option value={UniversalDateOptions.startDate}>{t("start-date")}</option>
-																	<option value={UniversalDateOptions.scheduledDate}>{t("scheduled-date")}</option>
-																	<option value={UniversalDateOptions.dueDate}>{t("due-date")}</option>
-																</select>
+																{renderDateTypeDropdown(column, columnIndex, viewIndex, true)}
 															</div>
 														</>
 													)}
@@ -1414,13 +1433,11 @@ const ConfigModalContent: React.FC<ConfigModalProps> = ({
 							</div>
 						</div>
 
-						{/* <div className="boardConfigModalMainContent">
-							{selectedViewIndex === -2
-								? renderGlobalSettingsTab(selectedViewIndex)
-								: selectedViewIndex === -1
-									? renderBoardConfigTab()
-									: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
-						</div> */}
+						<div className="boardConfigModalMainContent">
+							{selectedViewIndex === -1
+								? renderBoardConfigTab()
+								: <div className="boardConfigModalMainContentBoardSettingTab">{renderViewSettings(selectedViewIndex)}</div>}
+						</div>
 					</>
 				)}
 			</div>

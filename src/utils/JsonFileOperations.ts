@@ -3,12 +3,18 @@
 import { App } from "obsidian";
 import TaskBoard from "../../main.js";
 import {
+	coerceCustomTaskPropertyValue,
 	jsonCacheData,
 	taskJsonMerged,
 	taskItem,
+	taskItemWithCustomProperties,
 } from "../interfaces/TaskItem.js";
 import { bugReporterManagerInsatance } from "../core/managers/BugReporter.js";
 import { createFolderRecursively } from "../services/FileSystem.js";
+import {
+	DEFAULT_TASK_CACHE_KEYS,
+	PropertyTypeConfig,
+} from "../interfaces/Enums.js";
 
 // --------------- Operations with data.json ---------------
 
@@ -125,6 +131,43 @@ export const loadJsonCacheDataFromDisk = async (
 		// before we cast to the known cache structure used by the plugin.
 		const parsedData: unknown = JSON.parse(data);
 		const cacheData = parsedData as jsonCacheData;
+		const dateProperties = plugin.settings.data.taskProperties.filter(
+			(property) =>
+				property.type === PropertyTypeConfig.date ||
+				property.type === PropertyTypeConfig.dateTime,
+		);
+		const normalizeCachedTasks = (
+			section: Record<string, taskItemWithCustomProperties[]>,
+		): Record<string, taskItemWithCustomProperties[]> =>
+			Object.fromEntries(
+				Object.entries(section ?? {}).map(([filePath, tasks]) => [
+					filePath,
+					tasks.map((task) => {
+						for (const property of dateProperties) {
+							if (!property.key || task[property.key] == null) {
+								continue;
+							}
+							const convertedValue =
+								coerceCustomTaskPropertyValue(
+									task[property.key],
+									property.type,
+									property.type === PropertyTypeConfig.date
+										? plugin.settings.data.dateFormat
+										: plugin.settings.data.dateTimeFormat,
+									plugin.settings.data.dateFormat,
+								);
+							if (typeof convertedValue === "number") {
+								task[property.key] = convertedValue;
+							} else {
+								delete task[property.key];
+							}
+						}
+						return task;
+					}),
+				]),
+			);
+		cacheData.Pending = normalizeCachedTasks(cacheData.Pending);
+		cacheData.Completed = normalizeCachedTasks(cacheData.Completed);
 		// const allTasks = {
 		// 	Pending: cacheData.Pending,
 		// 	Completed: cacheData.Completed,
@@ -223,10 +266,64 @@ export const writeJsonCacheDataToDisk = async (
 
 		// const cleanedTasksData = tasksData; //await dataCleanup(tasksData);
 
+		const optionalTaskKeys = new Set<string>([
+			DEFAULT_TASK_CACHE_KEYS.Body,
+			DEFAULT_TASK_CACHE_KEYS.Priority,
+			DEFAULT_TASK_CACHE_KEYS.Tags,
+			DEFAULT_TASK_CACHE_KEYS.FrontMatterTags,
+			DEFAULT_TASK_CACHE_KEYS.Time,
+			DEFAULT_TASK_CACHE_KEYS.CreatedDate,
+			DEFAULT_TASK_CACHE_KEYS.StartDate,
+			DEFAULT_TASK_CACHE_KEYS.ScheduledDate,
+			DEFAULT_TASK_CACHE_KEYS.DueDate,
+			DEFAULT_TASK_CACHE_KEYS.Dependencies,
+			DEFAULT_TASK_CACHE_KEYS.Reminder,
+			DEFAULT_TASK_CACHE_KEYS.CompletionDate,
+			DEFAULT_TASK_CACHE_KEYS.CancelledDate,
+			...plugin.settings.data.taskProperties
+				.filter((property) => !property.default)
+				.map((property) => property.id),
+		]);
+		const stripEmptyProperties = (
+			task: taskItemWithCustomProperties,
+		): taskItemWithCustomProperties => {
+			const compactTask = { ...task };
+			for (const [key, value] of Object.entries(compactTask)) {
+				const isEmpty =
+					value === undefined ||
+					value === null ||
+					(typeof value === "string" && value.trim() === "") ||
+					(key === DEFAULT_TASK_CACHE_KEYS.Priority &&
+						value === 0) ||
+					(Array.isArray(value) && value.length === 0);
+				if (optionalTaskKeys.has(key) && isEmpty) {
+					delete compactTask[key];
+				}
+			}
+			return compactTask;
+		};
+		const compactTasksData: jsonCacheData = {
+			...tasksData,
+			Pending: Object.fromEntries(
+				Object.entries(tasksData.Pending).map(([filePath, tasks]) => [
+					filePath,
+					tasks.map(stripEmptyProperties),
+				]),
+			),
+			Completed: Object.fromEntries(
+				Object.entries(tasksData.Completed).map(
+					([filePath, tasks]) => [
+						filePath,
+						tasks.map(stripEmptyProperties),
+					],
+				),
+			),
+		};
+
 		await writeFileWithRetry(
 			plugin,
 			path,
-			JSON.stringify(tasksData, null, 4),
+			JSON.stringify(compactTasksData, null, 4),
 		);
 
 		return true;

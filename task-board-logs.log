@@ -18,181 +18,24 @@
 
 ## Recent Bug Reports
 
-Timestamp : undefined
+Timestamp : 2026-11-26T13:03:09
 ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
+Message : Following duplicate IDs has been found for tasks with IDs: "2". This may cause unexpected behavior. Please consider changing the IDs of these tasks.
+Context : MapView.tsx/initialNodes
+Version : 2.0.0-beta-6
 
 #### Bug Content
 ```log
-undefined
+ERROR: Same id is present on two tasks
 ```
 
 -------------
 
-Timestamp : undefined
-ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 17
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : undefined
-ID : 197
-Message : undefined
-Context : undefined
-Version : Older than 1.9.3
-
-#### Bug Content
-```log
-undefined
-```
-
--------------
-
-Timestamp : 2026-11-03T22:38:27
-ID : 131
-Message : 
-Context : TaskBoardViewContent.tsx/loading boards and tasks useEffect
-Version : 1.10.12
-
-#### Bug Content
-```log
-No need to worry about this bug, if its appearing on the fresh install.
-TypeError: Cannot read properties of undefined (reading 'tasksCacheFilePath')
-```
-
--------------
-
-Timestamp : 2026-11-04T21:35:28
-ID : 185
-Message : 
-Context : TaskBoardView.tsx/onOpen
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-There was an issue with opening the last viewed board. lastViewedBoardData is undefined
-```
-
--------------
-
-Timestamp : 2026-11-04T21:38:35
+Timestamp : 2026-11-27T11:39:25
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-5
+Version : 2.0.0-beta-6
 
 #### Bug Content
 ```log
@@ -201,72 +44,7 @@ No valid statuses after filtering
 
 -------------
 
-Timestamp : 2026-11-04T22:00:20
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
-
-Timestamp : 2026-11-04T23:21:36
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
-
-Timestamp : 2026-11-04T23:30:10
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
-
-Timestamp : 2026-11-06T09:43:03
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
-
-Timestamp : 2026-11-06T10:41:50
-ID : 197
-Message : 
-Context : Mapping.ts/getCustomStatusOptionsForDropdown
-Version : 2.0.0-beta-5
-
-#### Bug Content
-```log
-No valid statuses after filtering
-```
-
--------------
-
-Timestamp : 2026-11-08T22:52:41
+Timestamp : 2026-11-27T15:27
 ID : 197
 Message : 
 Context : Mapping.ts/getCustomStatusOptionsForDropdown

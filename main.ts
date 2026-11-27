@@ -89,13 +89,20 @@ import {
 import { migrateSettings } from "./src/settings/SettingSynchronizer.js";
 import { TaskBoardSettingTab } from "./src/settings/TaskBoardSettingTab.js";
 import { TaskBoardApi } from "./src/core/taskboardAPIs.js";
+import { AdvancedFilterer } from "./src/core/algorithms/AdvancedFilterer.js";
 import { getCurrentLocalDateTimeString } from "./src/utils/DateTimeCalculations.js";
 import { loadTranslationsOnStartup } from "./src/utils/lang/helper.js";
 import { type Board, DEFAULT_BOARD } from "./src/interfaces/BoardConfigs.js";
 import { generateRandomStringId } from "./src/utils/TaskItemUtils.js";
 import { TaskBoardEmbedComponent } from "./src/ui/components/TaskBoardEmbedComponent.js";
 import { getHideClassForProperty } from "./src/utils/UIHelpers.js";
-import { openBoardsExplorerModal, openAddNewTaskModal, openAddNewTaskNoteModal, openAddNewTaskInCurrentFileModal, openScanVaultModal } from "./src/ui/modals/OpenModals.js";
+import {
+	openBoardsExplorerModal,
+	openAddNewTaskModal,
+	openAddNewTaskNoteModal,
+	openAddNewTaskInCurrentFileModal,
+	openScanVaultModal,
+} from "./src/ui/modals/OpenModals.js";
 
 /**
  * The entry-point of this project.
@@ -105,6 +112,7 @@ export default class TaskBoard extends Plugin {
 	// plugin: TaskBoard;
 	// view: TaskBoardView | null;
 	settings: PluginDataJson = DEFAULT_SETTINGS;
+	advancedFilterer: AdvancedFilterer;
 	vaultScanner: VaultScanner;
 	realTimeScanner: RealTimeScanner;
 	taskBoardFileManager: TaskBoardFileManager;
@@ -151,12 +159,9 @@ export default class TaskBoard extends Plugin {
 		// this.plugin.app = app;
 		// this.view = null;
 		this.settings = DEFAULT_SETTINGS;
-		this.vaultScanner = new VaultScanner(this.app, this);
-		this.realTimeScanner = new RealTimeScanner(
-			this.app,
-			this,
-			this.vaultScanner,
-		);
+		this.advancedFilterer = new AdvancedFilterer(this);
+		this.vaultScanner = new VaultScanner(this);
+		this.realTimeScanner = new RealTimeScanner(this, this.vaultScanner);
 		this.taskBoardFileManager = new TaskBoardFileManager(this);
 		this.editorModified = false;
 		// this.currentModifiedFile = null;
@@ -168,7 +173,7 @@ export default class TaskBoard extends Plugin {
 	}
 
 	get api(): ReturnType<typeof TaskBoardApi.GetApi> {
-		return TaskBoardApi.GetApi(this.app, this);
+		return TaskBoardApi.GetApi(this);
 	}
 
 	async onload() {
@@ -189,7 +194,9 @@ export default class TaskBoard extends Plugin {
 		if (!this.v2MigrationsRequired) await this.runOnPluginUpdate();
 		this.addSettingTab(new TaskBoardSettingTab(this.app, this));
 
+		// Need to initialize few setting after the complete settings has been loaded
 		await this.vaultScanner.initializeTasksCache();
+		await this.taskBoardFileManager.initializeFileRegistry();
 
 		// Register the Kanban view
 		this.registerTaskBoardView();
@@ -352,7 +359,7 @@ export default class TaskBoard extends Plugin {
 		// Create a ribbon icon to open the Kanban board view
 		this.ribbonIconEl = this.addRibbonIcon(
 			TaskBoardIcon,
-			t("open-task-board") ?? "Open task board",
+			t("open-task-board"),
 			(evt: MouseEvent) => {
 				const registry: taskBoardFilesRegistryType =
 					this.settings.data.taskBoardFilesRegistry ?? {};
@@ -438,10 +445,7 @@ export default class TaskBoard extends Plugin {
 				...storedSettings?.data,
 			},
 		};
-		migrateLegacyPropertySettings(
-			this.settings.data,
-			storedSettings?.data,
-		);
+		migrateLegacyPropertySettings(this.settings.data, storedSettings?.data);
 		// this.migrateSettings(DEFAULT_SETTINGS, this.settings);
 		void this.saveSettings();
 	}
@@ -606,8 +610,7 @@ export default class TaskBoard extends Plugin {
 
 		// Register task property hiding extension
 		const hiddenProperties = getHiddenPropertyConfigs(
-			this.settings.data.defaultProperties,
-			this.settings.data.customProperties,
+			this.settings.data.taskProperties,
 		);
 		if (hiddenProperties.length > 0) {
 			this.registerEditorExtension(taskPropertyHidingExtension(this));
@@ -616,12 +619,10 @@ export default class TaskBoard extends Plugin {
 
 	registerReadingModePostProcessor() {
 		const hiddenPropertyConfigs = getHiddenPropertyConfigs(
-			this.settings.data.defaultProperties,
-			this.settings.data.customProperties,
+			this.settings.data.taskProperties,
 		);
 		const hiddenProperties = getPropertiesHiddenInNotes(
-			this.settings.data.defaultProperties,
-			this.settings.data.customProperties,
+			this.settings.data.taskProperties,
 		);
 		this.clearTaskPropertyVisibilityStyles();
 		if (hiddenPropertyConfigs.length === 0) {
@@ -658,13 +659,12 @@ export default class TaskBoard extends Plugin {
 					document.body.classList.add(hideClass);
 				}
 			});
-			const customProperties =
-				hiddenPropertyConfigs.filter(
-					(property) =>
-						!Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
-							property.key as DEFAULT_TASK_CACHE_KEYS,
-						),
-				);
+			const customProperties = hiddenPropertyConfigs.filter(
+				(property) =>
+					!Object.values(DEFAULT_TASK_CACHE_KEYS).includes(
+						property.key as DEFAULT_TASK_CACHE_KEYS,
+					),
+			);
 			if (customProperties.length > 0) {
 				this.registerMarkdownPostProcessor((element) => {
 					element.querySelectorAll("li").forEach((listItem) => {
@@ -811,7 +811,7 @@ export default class TaskBoard extends Plugin {
 			id: "add-new-task-note",
 			name: t("add-new-task-note"),
 			callback: () => {
-				openAddNewTaskNoteModal(this.app, this);
+				openAddNewTaskNoteModal(this);
 			},
 		});
 		this.addCommand({
@@ -823,7 +823,6 @@ export default class TaskBoard extends Plugin {
 
 				if (activeEditor && activeFile) {
 					openAddNewTaskInCurrentFileModal(
-						this.app,
 						this,
 						activeFile,
 						activeEditor?.getCursor(),
@@ -1099,72 +1098,89 @@ export default class TaskBoard extends Plugin {
 		if (this.deleteQueue.length === 0) {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
+			this.deleteProcessingTimer = null;
 			return;
 		}
 
-		let allowedFiles = this.deleteQueue.filter(
-			(file: TFile) =>
-				fileTypeAllowedForScanning(this.settings.data, file) ||
-				file.extension === TASKBOARD_FILE_EXTENSION,
-		);
-		const totalFilesLength = allowedFiles.length;
+		const queuedFiles = this.deleteQueue.splice(0);
+		try {
+			let allowedFiles = queuedFiles.filter(
+				(file: TFile) =>
+					fileTypeAllowedForScanning(this.settings.data, file) ||
+					file.extension === TASKBOARD_FILE_EXTENSION,
+			);
+			const totalFilesLength = allowedFiles.length;
 
-		if (allowedFiles.length > 0) {
-			if (allowedFiles.length > 20) {
-				// Show progress notice
-				this.currentProgressNotice = new Notice(
-					`Processing deleted files: 0/${totalFilesLength}`,
-					0,
-				);
-			}
-
-			let processed = 0;
-			while (allowedFiles.length > 0) {
-				const file = allowedFiles.shift()!;
-
-				if (file.extension === TASKBOARD_FILE_EXTENSION) {
-					await this.taskBoardFileManager.onBoardFileDelete(
-						file.path,
+			if (allowedFiles.length > 0) {
+				if (allowedFiles.length > 20) {
+					// Show progress notice
+					this.currentProgressNotice = new Notice(
+						`Processing deleted files: 0/${totalFilesLength}`,
+						0,
 					);
-					continue;
 				}
 
-				try {
-					this.realTimeScanner.onFileDeleted(file);
-					processed++;
+				let processed = 0;
+				while (allowedFiles.length > 0) {
+					const file = allowedFiles.shift()!;
 
-					if (this.currentProgressNotice) {
-						// Update progress notice
-						this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFilesLength}`;
+					if (file.extension === TASKBOARD_FILE_EXTENSION) {
+						await this.taskBoardFileManager.onBoardFileDelete(
+							file.path,
+						);
+						continue;
 					}
-				} catch (error) {
-					this.currentProgressNotice?.hide();
-					// this.currentProgressNotice = null;
-					bugReporterManagerInsatance.addToLogs(
-						163,
-						String(error),
-						"main.ts/processDeleteQueue",
-					);
-				}
 
-				// Add delay between processing each file to prevent blocking UI
-				if (allowedFiles.length > 0) {
-					await new Promise((resolve) =>
-						window.setTimeout(resolve, this.PROCESSING_INTERVAL),
+					try {
+						this.realTimeScanner.onFileDeleted(file);
+						processed++;
+
+						if (this.currentProgressNotice) {
+							// Update progress notice
+							this.currentProgressNotice.messageEl.textContent = `Task Board : Processing deleted files: ${processed}/${totalFilesLength}`;
+						}
+					} catch (error) {
+						this.currentProgressNotice?.hide();
+						// this.currentProgressNotice = null;
+						bugReporterManagerInsatance.addToLogs(
+							163,
+							String(error),
+							"main.ts/processDeleteQueue",
+						);
+					}
+
+					// Add delay between processing each file to prevent blocking UI
+					if (allowedFiles.length > 0) {
+						await new Promise((resolve) =>
+							window.setTimeout(
+								resolve,
+								this.PROCESSING_INTERVAL,
+							),
+						);
+					}
+				}
+				// Hide progress notice after completion
+				this.currentProgressNotice?.hide();
+				this.currentProgressNotice = null;
+
+				await this.vaultScanner.saveTasksToJsonCache();
+				eventEmitter.emit("SOFT_REFRESH");
+
+				if (processed > 20) {
+					new Notice(
+						`✓ Task Board : Finished processing ${totalFilesLength} deleted file(s)`,
 					);
 				}
 			}
-			// Hide progress notice after completion
-			this.currentProgressNotice?.hide();
-			this.currentProgressNotice = null;
-
-			await this.vaultScanner.saveTasksToJsonCache();
-			eventEmitter.emit("SOFT_REFRESH");
-
-			if (processed > 20) {
-				new Notice(
-					`✓ Task Board : Finished processing ${totalFilesLength} deleted file(s)`,
-				);
+		} finally {
+			if (this.deleteProcessingTimer) {
+				window.clearTimeout(this.deleteProcessingTimer);
+			}
+			this.deleteProcessingTimer = null;
+			if (this.deleteQueue.length > 0) {
+				this.deleteProcessingTimer = window.setTimeout(() => {
+					void this.processDeleteQueue();
+				}, this.QUEUE_DELAY);
 			}
 		}
 	}
@@ -1195,64 +1211,78 @@ export default class TaskBoard extends Plugin {
 		if (this.createQueue.length === 0) {
 			this.currentProgressNotice?.hide();
 			this.currentProgressNotice = null;
+			this.createProcessingTimer = null;
 			return;
 		}
 
-		let allowedFiles = this.createQueue.filter((file: TFile) =>
-			fileTypeAllowedForScanning(this.settings.data, file),
-		);
-		// console.log(
-		// 	"Will be processing following created files : ",
-		// 	allowedFiles,
-		// );
-		const totalFilesLength = allowedFiles.length;
-
-		// this.plugin.vaultScanner.refreshTasksFromFiles(allowedFiles, false);
-
-		// Show progress notice only if the files are more than 10
-		if (totalFilesLength > 20) {
-			this.currentProgressNotice = new Notice(
-				`Task Board : Processing created files: 0/${totalFilesLength}`,
-				0,
+		const queuedFiles = this.createQueue.splice(0);
+		try {
+			let allowedFiles = queuedFiles.filter((file: TFile) =>
+				fileTypeAllowedForScanning(this.settings.data, file),
 			);
-		}
+			// console.log(
+			// 	"Will be processing following created files : ",
+			// 	allowedFiles,
+			// );
+			const totalFilesLength = allowedFiles.length;
 
-		let processed = 0;
-		while (allowedFiles.length > 0) {
-			const file = allowedFiles.shift()!;
+			// this.plugin.vaultScanner.extractTasksFromFiles(allowedFiles, false);
 
-			try {
-				await this.realTimeScanner.processAllUpdatedFiles(file);
-				processed++;
-
-				// Update progress notice
-				if (this.currentProgressNotice)
-					this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
-			} catch (error) {
-				this.currentProgressNotice?.hide();
-				// this.currentProgressNotice = null;
-				bugReporterManagerInsatance.addToLogs(
-					164,
-					String(error),
-					"main.ts/processCreateQueue",
+			// Show progress notice only if the files are more than 10
+			if (totalFilesLength > 20) {
+				this.currentProgressNotice = new Notice(
+					`Task Board : Processing created files: 0/${totalFilesLength}`,
+					0,
 				);
 			}
 
-			// Add delay between processing each file to prevent blocking UI
-			if (allowedFiles.length > 0) {
-				await new Promise((resolve) =>
-					window.setTimeout(resolve, this.PROCESSING_INTERVAL),
+			let processed = 0;
+			while (allowedFiles.length > 0) {
+				const file = allowedFiles.shift()!;
+
+				try {
+					await this.realTimeScanner.processAllUpdatedFiles(file);
+					processed++;
+
+					// Update progress notice
+					if (this.currentProgressNotice)
+						this.currentProgressNotice.messageEl.textContent = `Task Board : Processing created files: ${processed}/${totalFilesLength}`;
+				} catch (error) {
+					this.currentProgressNotice?.hide();
+					// this.currentProgressNotice = null;
+					bugReporterManagerInsatance.addToLogs(
+						164,
+						String(error),
+						"main.ts/processCreateQueue",
+					);
+				}
+
+				// Add delay between processing each file to prevent blocking UI
+				if (allowedFiles.length > 0) {
+					await new Promise((resolve) =>
+						window.setTimeout(resolve, this.PROCESSING_INTERVAL),
+					);
+				}
+			}
+
+			// Hide progress notice after completion
+			this.currentProgressNotice?.hide();
+			this.currentProgressNotice = null;
+			if (processed > 20) {
+				new Notice(
+					`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
 				);
 			}
-		}
-
-		// Hide progress notice after completion
-		this.currentProgressNotice?.hide();
-		this.currentProgressNotice = null;
-		if (processed > 20) {
-			new Notice(
-				`✓ Task Board : Finished processing ${totalFilesLength} created file(s)`,
-			);
+		} finally {
+			if (this.createProcessingTimer) {
+				window.clearTimeout(this.createProcessingTimer);
+			}
+			this.createProcessingTimer = null;
+			if (this.createQueue.length > 0) {
+				this.createProcessingTimer = window.setTimeout(() => {
+					void this.processCreateQueue();
+				}, this.QUEUE_DELAY);
+			}
 		}
 	}
 
@@ -1324,7 +1354,7 @@ export default class TaskBoard extends Plugin {
 			if (totalFilesLength > 0) {
 				const scanAllModifiedFiles = () => {
 					void this.vaultScanner
-						.refreshTasksFromFiles(changed_files, false)
+						.extractTasksFromFiles(changed_files, false)
 						.then(async () => {
 							if (deletedFilesList.length > 0) {
 								await this.vaultScanner.deleteCacheForFiles(
@@ -1450,7 +1480,7 @@ export default class TaskBoard extends Plugin {
 							this.settings.data.scanMode ===
 							scanModeOptions.REAL_TIME
 						) {
-							void this.vaultScanner.refreshTasksFromFiles(
+							void this.vaultScanner.extractTasksFromFiles(
 								[file],
 								false,
 							);
@@ -1559,7 +1589,7 @@ export default class TaskBoard extends Plugin {
 										file,
 									)
 								) {
-									void this.vaultScanner.refreshTasksFromFiles(
+									void this.vaultScanner.extractTasksFromFiles(
 										[file],
 										true,
 									);

@@ -33,7 +33,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ plugin, parentComponent, curr
 			return columns
 				.filter((column) => column.active)
 				.map((column: ColumnData) =>
-					columnSegregator(plugin.settings, currentView, column, filteredAndSearchedTasks, (updatedViewData: TaskBoardViewType) => {
+					columnSegregator(plugin.settings, plugin.advancedFilterer, currentView, column, filteredAndSearchedTasks, (updatedViewData: TaskBoardViewType) => {
 						let updatedBoardData = { ...currentBoardData };
 						if (updatedBoardData.views) {
 							updatedBoardData.views[currentViewIndex] = updatedViewData;
