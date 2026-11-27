@@ -11,10 +11,10 @@
 - **Snippets enabled**: 0
 - **Plugins installed**: 57
 - **Plugins enabled**: 
+  - Task Board v2.0.0-beta-5
   - Advanced Debug Mode v1.9.1
   - Plugin Reloader v0.0.3
   - Tasks v7.22.0
-  - Task Board v2.0.0-beta-5
 
 ## Recent Bug Reports
 
@@ -27,4 +27,30 @@ Version : 2.0.0-beta-6
 #### Bug Content
 ```log
 ERROR: Same id is present on two tasks
+```
+
+-------------
+
+Timestamp : 2026-11-27T11:39:25
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
+```
+
+-------------
+
+Timestamp : 2026-11-27T15:27
+ID : 197
+Message : 
+Context : Mapping.ts/getCustomStatusOptionsForDropdown
+Version : 2.0.0-beta-6
+
+#### Bug Content
+```log
+No valid statuses after filtering
 ```

@@ -1,7 +1,96 @@
 {
     "VaultName": "TemplateToDevelopPlugin",
-    "Modified_at": "2026-11-26T13:05:44",
+    "Modified_at": "2026-11-27T15:45",
     "Pending": {
+        "A new file added-renamed.md": [
+            {
+                "priority": 3,
+                "id": "615",
+                "scheduledDate": 1772107200000,
+                "dueDate": 1793448000000,
+                "assignee": "Jerry",
+                "legacyId": "615",
+                "status": " ",
+                "title": "- [ ] Watch the following Unix Sessions, lets edit this and see how it works. 🔼 #OfflineVideo [scheduled:: 2026-02-26] [id:: 615] 📅 2026-10-31 🧑 Jerry",
+                "body": [
+                    "\t- [x] I think I havent done this yet. Update this. NOT that.",
+                    "\tThis is an indented line, hence this is a description, I can explain anything about this task. Still need to see, if this works or not.",
+                    "\tA new line inside the description.",
+                    "\tI can also embed images, update this, so updating this should not cause any harm correct. : ",
+                    "\t![[Pasted image 20260415234710.png]]"
+                ],
+                "tags": [
+                    "OfflineVideo"
+                ],
+                "filePath": "A new file added-renamed.md",
+                "taskLocation": {
+                    "startLine": 11,
+                    "startCharIndex": 0,
+                    "endLine": 16,
+                    "endCharIndex": 37
+                }
+            },
+            {
+                "time": "12:19 - 13:19",
+                "id": "2282",
+                "startDate": 1793275200000,
+                "dueDate": 1795521600000,
+                "legacyId": "2282",
+                "status": "<",
+                "title": "> - [<] This is a task inside a blockquote. 📅 2026-11-24 🆔 2282 Lets update this. 🛫 2026-10-29 ⏰ 12:19 - 13:19",
+                "filePath": "A new file added-renamed.md",
+                "taskLocation": {
+                    "startLine": 47,
+                    "startCharIndex": 0,
+                    "endLine": 47,
+                    "endCharIndex": 113
+                }
+            }
+        ],
+        "Meta/Task_Board/Task_Notes/2026-11-27T12_51.md": [
+            {
+                "title": "A task which we all should ponder about ",
+                "status": " ",
+                "priority": 3,
+                "tags": [
+                    "taskNote",
+                    "test"
+                ],
+                "time": "12:51:08 - 13:51:08",
+                "dueDate": 1795780800000,
+                "filePath": "Meta/Task_Board/Task_Notes/2026-11-27T12_51.md",
+                "id": "1299027513",
+                "legacyId": "",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 13,
+                    "endCharIndex": 0
+                }
+            }
+        ],
+        "TaskBoard/Development/Time and Duration.md": [
+            {
+                "id": "327617482",
+                "legacyId": "",
+                "status": " ",
+                "title": "- [ ] Add a new cache field called `duration`.",
+                "body": [
+                    "\t- User can configure this in the Task Editor.",
+                    "\t- Options user can enter : #mins, #hrs, #days",
+                    "\t- Add a new setting, where user can select either of the below options on how the value should be stored inside the task : ",
+                    "\t\t- [Start date-time] and [Duration] - In this case, the \"Start time\" and \"End time\" fields will not be shown to the user in Task Editor and also will not be written in the task.",
+                    "\t\t- [Start Time] - [End Time] - In this case, the \"Duration\" field will not be shown in Task Editor and will not be written in the task."
+                ],
+                "filePath": "TaskBoard/Development/Time and Duration.md",
+                "taskLocation": {
+                    "startLine": 1,
+                    "startCharIndex": 0,
+                    "endLine": 6,
+                    "endCharIndex": 136
+                }
+            }
+        ],
         "TaskBoard/Testing/Ticket-796.md": [
             {
                 "dependsOn": [
@@ -75,51 +164,6 @@
                     "startCharIndex": 0,
                     "endLine": 2,
                     "endCharIndex": 69
-                }
-            }
-        ],
-        "A new file added-renamed.md": [
-            {
-                "priority": 3,
-                "id": "615",
-                "scheduledDate": 1772107200000,
-                "dueDate": 1793448000000,
-                "assignee": "Jerry",
-                "legacyId": "615",
-                "status": " ",
-                "title": "- [ ] Watch the following Unix Sessions, lets edit this and see how it works. 🔼 #OfflineVideo [scheduled:: 2026-02-26] [id:: 615] 📅 2026-10-31 🧑 Jerry",
-                "body": [
-                    "\t- [x] I think I havent done this yet. Update this. NOT that.",
-                    "\tThis is an indented line, hence this is a description, I can explain anything about this task. Still need to see, if this works or not.",
-                    "\tA new line inside the description.",
-                    "\tI can also embed images, update this, so updating this should not cause any harm correct. : ",
-                    "\t![[Pasted image 20260415234710.png]]"
-                ],
-                "tags": [
-                    "OfflineVideo"
-                ],
-                "filePath": "A new file added-renamed.md",
-                "taskLocation": {
-                    "startLine": 11,
-                    "startCharIndex": 0,
-                    "endLine": 16,
-                    "endCharIndex": 37
-                }
-            },
-            {
-                "time": "12:19 - 13:19",
-                "id": "2282",
-                "startDate": 1793275200000,
-                "dueDate": 1795521600000,
-                "legacyId": "2282",
-                "status": "<",
-                "title": "> - [<] This is a task inside a blockquote. 📅 2026-11-24 🆔 2282 Lets update this. 🛫 2026-10-29 ⏰ 12:19 - 13:19",
-                "filePath": "A new file added-renamed.md",
-                "taskLocation": {
-                    "startLine": 47,
-                    "startCharIndex": 0,
-                    "endLine": 47,
-                    "endCharIndex": 113
                 }
             }
         ],
@@ -3322,25 +3366,6 @@
                 }
             }
         ],
-        "TaskBoard/Development/Time and Duration.md": [
-            {
-                "id": "4064003862",
-                "legacyId": "",
-                "status": " ",
-                "title": "- [ ] Add a new cache field called `duration`.",
-                "body": [
-                    "\t- User can configure this in the Task Editor.",
-                    "\t- Options user can enter : #mins, #hrs, #days"
-                ],
-                "filePath": "TaskBoard/Development/Time and Duration.md",
-                "taskLocation": {
-                    "startLine": 1,
-                    "startCharIndex": 0,
-                    "endLine": 3,
-                    "endCharIndex": 46
-                }
-            }
-        ],
         "TaskBoard/Development/Some CSS for small screens.md": [
             {
                 "id": "631",
@@ -4050,7 +4075,6 @@
         "TaskBoard/Tickets/696.md": [],
         "TaskBoard/Issues Found.md": [],
         "TaskBoard/Development Todo.md": [],
-        "TaskBoard/Pending.md": [],
         "Styles for modal.md": [],
         "Task source 2.md": [],
         "Task/Sometask-renamed.md": [],
@@ -4297,9 +4321,7 @@
         "TaskBoard/Tickets/696.md": [],
         "TaskBoard/Issues Found.md": [],
         "TaskBoard/Development Todo.md": [],
-        "TaskBoard/Pending.md": [],
         "TaskBoard/Development/Some CSS for small screens.md": [],
-        "TaskBoard/Development/Time and Duration.md": [],
         "Styles for modal.md": [],
         "Task source 2.md": [
             {

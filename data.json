@@ -27,7 +27,7 @@
     "taskPropertyFormat": "2",
     "dailyNotesPluginComp": false,
     "dateFormat": "yyyy-MM-dd",
-    "dateTimeFormat": "yyyy-MM-dd'T'HH:mm:ss",
+    "dateTimeFormat": "yyyy-MM-dd'T'HH:mm",
     "defaultStartTime": "",
     "taskCompletionInLocalTime": true,
     "taskCompletionShowUtcOffset": false,
@@ -284,7 +284,7 @@
         "emoji": "🔼",
         "icon": "flag-triangle-right",
         "hidePropertyInNotesForInlineTasks": false,
-        "defaultValue": "",
+        "defaultValue": 3,
         "rank": 4
       },
       {
@@ -297,7 +297,9 @@
         "emoji": "",
         "icon": "hash",
         "hidePropertyInNotesForInlineTasks": false,
-        "defaultValue": "",
+        "defaultValue": [
+          "#test"
+        ],
         "rank": 5
       },
       {
@@ -310,7 +312,7 @@
         "emoji": "⏰",
         "icon": "clock",
         "hidePropertyInNotesForInlineTasks": false,
-        "defaultValue": "",
+        "defaultValue": "{{time}} - {{time + 1h}}",
         "rank": 6
       },
       {
@@ -377,7 +379,8 @@
         "icon": "calendar-clock",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 11
+        "rank": 11,
+        "color": "rgb(220, 38, 38)"
       },
       {
         "default": true,
@@ -385,12 +388,13 @@
         "id": "completionDate",
         "name": "Completed date",
         "desc": "A date-time value when the task will be marked as finished/completed.",
-        "type": "date",
+        "type": "date-time",
         "emoji": "✅",
         "icon": "calendar-check",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 12
+        "rank": 12,
+        "color": "rgb(22, 163, 74)"
       },
       {
         "default": true,
@@ -398,12 +402,13 @@
         "id": "cancelledDate",
         "name": "Cancelled date",
         "desc": "A date-time value when the task will be marked as cancelled.",
-        "type": "date",
+        "type": "date-time",
         "emoji": "❌",
         "icon": "calendar-x",
         "hidePropertyInNotesForInlineTasks": false,
         "defaultValue": "",
-        "rank": 13
+        "rank": 13,
+        "color": "rgb(121, 14, 43)"
       },
       {
         "default": true,
